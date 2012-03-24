@@ -1,0 +1,19 @@
+﻿$bg-color: #7AC0DA
+$caption-color: #FFFFFF
+
+@mixin rounded-corners($radius)
+	border-radius: $radius
+	-webkit-border-radius: $radius
+	-moz-border-radius: $radius
+
+.translators #sass
+	float: left
+	display: block
+	padding: 0.2em 0.5em 0.2em 0.5em
+	background-color: $bg-color
+	color: $caption-color
+	font-weight: bold
+	border: 1px solid $bg-color
+	@include rounded-corners(5px)
+
+@import "TestSassImport.sass"

@@ -1,0 +1,51 @@
+﻿.translators
+{
+	margin-bottom: 1.0em;
+	overflow: hidden;
+}
+
+.translators DIV
+{
+	display: none;
+	margin: 0 5px 0 0;
+}
+
+.translators DIV A,
+.translators DIV A:link,
+.translators DIV A:visited,
+.translators DIV A:hover,
+.translators DIV A:active
+{
+	display: block;
+	background-color: transparent;
+	color: #fff;
+	text-decoration: none;
+}
+
+.translators #coffee {
+  float: left;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  background-color: #7ac0da;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+}
+
+.translators #coffee.enabled
+{
+	background-color: #ffffff;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #888888;
+}
+
+.translators #coffee.enabled A,
+.translators #coffee.enabled A:link,
+.translators #coffee.enabled A:visited,
+.translators #coffee.enabled A:hover,
+.translators #coffee.enabled A:active
+{
+	color: #0f0f1e;
+}
