@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <version>1.0.0-beta</version>
+    <authors>Andrey Taritsyn</authors>
+    <owners>Andrey Taritsyn</owners>
+    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+    <iconUrl>http://www.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=358412</iconUrl>
+    <dependencies>
+      <dependency id="BundleTransformer.Core" version="[1.0.0-beta]" />
+	  <dependency id="AjaxMin" version="4.47.4452.34008" />
+    </dependencies>
+    <references>
+      <reference file="BundleTransformer.MicrosoftAjax.dll" />
+    </references>
+    <id>BundleTransformer.MicrosoftAjax</id>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BundleTransformer.MicrosoftAjax contains 2 minifier-adapters: MicrosoftAjaxCssMinifier (for minification of CSS-code) and MicrosoftAjaxJsMinifier (for minification of JS-code). These adapters perform minification using the Microsoft Ajax Minifier (http://ajaxmin.codeplex.com).
+
+Attention! After you install this library, you must modify Web.config file. In defaultMinifier attribute of element \configuration\bundleTransformer\core\css must be set value equal to MicrosoftAjaxCssMinifier, and in same attribute of element \configuration\bundleTransformer\core\js - MicrosoftAjaxJsMinifier.</description>
+    <summary>BundleTransformer.MicrosoftAjax contains 2 minifier-adapters: MicrosoftAjaxCssMinifier (for minification of CSS-code) and MicrosoftAjaxJsMinifier (for minification of JS-code). These adapters perform minification using the Microsoft Ajax Minifier.</summary>
+	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+    <language>en-US</language>
+    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript Microsoft Ajax Minifier</tags>
+  </metadata>
+  <files>
+    <file src="..\..\BundleTransformer.MicrosoftAjax\bin\Release\BundleTransformer.MicrosoftAjax.dll" target="lib\net40" />
+	<file src="..\..\BundleTransformer.MicrosoftAjax\bin\Release\**\BundleTransformer.MicrosoftAjax.resources.dll" target="lib\net40" />
+	<file src="content\web.config.transform" target="content" />
+  </files>
+</package>

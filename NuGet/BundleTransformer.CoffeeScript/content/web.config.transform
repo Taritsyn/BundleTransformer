@@ -1,0 +1,11 @@
+<configuration>
+	<bundleTransformer>
+		<core>
+			<js>
+				<translators>
+					<add name="CoffeeScriptTranslator" type="BundleTransformer.CoffeeScript.Translators.CoffeeScriptTranslator, BundleTransformer.CoffeeScript" enabled="true" />
+				</translators>
+			</js>
+		</core>
+	</bundleTransformer>
+</configuration>

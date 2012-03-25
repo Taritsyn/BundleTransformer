@@ -1,0 +1,17 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="less" type="BundleTransformer.Less.Configuration.LessSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer>
+		<core>
+			<css>
+				<translators>
+					<add name="LessTranslator" type="BundleTransformer.Less.Translators.LessTranslator, BundleTransformer.Less" enabled="true" />
+				</translators>
+			</css>
+		</core>
+		<less useNativeMinification="false" />
+	</bundleTransformer>
+</configuration>

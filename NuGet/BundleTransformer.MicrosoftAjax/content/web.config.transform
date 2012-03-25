@@ -1,0 +1,34 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="microsoftAjax" type="BundleTransformer.MicrosoftAjax.Configuration.MicrosoftAjaxSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer>
+		<core>
+			<css>
+				<minifiers>
+					<add name="MicrosoftAjaxCssMinifier" type="BundleTransformer.MicrosoftAjax.Minifiers.MicrosoftAjaxCssMinifier, BundleTransformer.MicrosoftAjax" />
+				</minifiers>
+			</css>
+			<js>
+				<minifiers>
+					<add name="MicrosoftAjaxJsMinifier" type="BundleTransformer.MicrosoftAjax.Minifiers.MicrosoftAjaxJsMinifier, BundleTransformer.MicrosoftAjax" />
+				</minifiers>
+			</js>
+		</core>
+		<microsoftAjax>
+			<css allowEmbeddedAspNetBlocks="false" colorNames="Strict" commentMode="Important" 
+				ignoreErrorList="" indentSize="4" minifyExpressions="true" outputMode="SingleLine" 
+				preprocessorDefineList="" termSemicolons="false" severity="4" />
+			<js allowEmbeddedAspNetBlocks="false" collapseToLiteral="true" combineDuplicateLiterals="false"
+				debugLookupList="Debug,$Debug,WAssert,Msn.Debug,Web.Debug" evalTreatment="Ignore" 
+				ignoreConditionalCompilation="false" ignoreErrorList="" indentSize="4" 
+				inlineSafeStrings="true" knownGlobalNamesList="" localRenaming="CrunchAll" 
+				macSafariQuirks="true" minifyCode="true" noAutoRenameList="$super"
+				outputMode="SingleLine" preprocessorDefineList="" preserveFunctionNames="false"
+				preserveImportantComments="true" removeFunctionExpressionNames="true" removeUnneededCode="true" 
+				renamePairs="" strictMode="false" stripDebugStatements="true" termSemicolons="false" severity="0" />
+		</microsoftAjax>
+	</bundleTransformer>
+</configuration>

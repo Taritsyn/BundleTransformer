@@ -1,0 +1,27 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="core" type="BundleTransformer.Core.Configuration.CoreSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer>
+		<core enableTracing="false" jsFilesWithMicrosoftStyleExtensions="MicrosoftAjax.js;MicrosoftMvcAjax.js;MicrosoftMvcValidation.js;knockout-2.0.0.js">
+			<css defaultMinifier="NullMinifier">
+				<minifiers>
+					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
+				</minifiers>
+				<translators>
+					<add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
+				</translators>
+			</css>
+			<js defaultMinifier="NullMinifier">
+				<minifiers>
+					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
+				</minifiers>
+				<translators>
+					<add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
+				</translators>
+			</js>
+		</core>
+	</bundleTransformer>
+</configuration>

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <version>1.0.0-beta</version>
+    <authors>Andrey Taritsyn</authors>
+    <owners>Andrey Taritsyn</owners>
+    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+    <iconUrl>http://www.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=358408</iconUrl>
+    <dependencies>
+      <dependency id="Microsoft.Web.Optimization" version="[1.0.0-beta]" />
+    </dependencies>
+    <references>
+      <reference file="BundleTransformer.Core.dll" />
+    </references>
+    <id>BundleTransformer.Core</id>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Bundle Transformer - a modular extension for System.Web.Optimization. Classes CssTransformer and JsTransformer, included in the core of Bundle Transformer, implement interface IBundleTransform. They are intended to replace the standard classes CssMinify and JsMinify.
+
+The main differences classes CssTransformer and JsTransformer from standard implementations: support for debugging (in debug mode disabled code minification), automatic removal of duplicate assets, ability to exclude unnecessary assets when adding assets from a directory, support processing of JS-files with *.debug.js extension, automatic transformation of relative paths to absolute in CSS-code (for CssTransformer), etc. These classes do not produce the minification of code in runtime, but this feature can be added by installing of minifier-adapter. In addition, you can also install translator-adapters that implement the translation of code on intermediate languages (LESS, Sass, SCSS and CoffeeScript).</description>
+    <summary>Bundle Transformer - a modular extension for System.Web.Optimization. Classes CssTransformer and JsTransformer, included in the core of Bundle Transformer, implement interface IBundleTransform. They are intended to replace the standard classes CssMinify and JsMinify.</summary>
+	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+    <language>en-US</language>
+    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript Pre-minified Combine</tags>
+  </metadata>
+  <files>
+    <file src="..\..\BundleTransformer.Core\bin\Release\BundleTransformer.Core.dll" target="lib\net40" />
+	<file src="..\..\BundleTransformer.Core\bin\Release\**\BundleTransformer.Core.resources.dll" target="lib\net40" />
+	<file src="content\web.config.transform" target="content" />
+  </files>
+</package>
