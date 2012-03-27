@@ -13,22 +13,23 @@
 	[TestFixture]
 	public class JsFileExtensionsFilterTests
 	{
-		private const string APPLICATION_ROOT_PATH 
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string SCRIPTS_DIRECTORY_PATH 
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
+		private const string SCRIPTS_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
 
 		private readonly string[] _jsFilesWithMicrosoftStyleExtensions =
 			new[] { "MicrosoftAjax.js", "MicrosoftMvcAjax.js", 
 				"MicrosoftMvcValidation.js", "knockout-2.0.0.js" };
+		private HttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 		private IList<IAsset> _testAssets;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
-			var fileSystemMock = new Mock<IFileSystemWrapper>();
+			_applicationInfo = new HttpApplicationInfo("/", 
+				@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
 
+			var fileSystemMock = new Mock<IFileSystemWrapper>();
 			fileSystemMock
 				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.debug.js")))
 				.Returns(false)
@@ -95,15 +96,15 @@
 				;
 
 			var jqueryAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 			var jqueryUiAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.min.js"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 			var microsoftAjaxAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 			var knockoutAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 			var modernizrAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var testAssets = new List<IAsset>
 			{
@@ -189,6 +190,7 @@
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
+			_applicationInfo = null;
 			_fileSystemWrapper = null;
 		}
 	}

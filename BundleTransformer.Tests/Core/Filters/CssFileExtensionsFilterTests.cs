@@ -13,19 +13,21 @@
 	[TestFixture]
 	public class CssFileExtensionsFilterTests
 	{
-		private const string APPLICATION_ROOT_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string STYLES_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
-		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
+		private const string STYLES_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
+		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
 
+		private HttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 		private IList<IAsset> _testAssets;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
+			_applicationInfo = new HttpApplicationInfo("/", 
+				@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
+
 			var fileSystemMock = new Mock<IFileSystemWrapper>();
 
 			fileSystemMock
@@ -60,11 +62,11 @@
 				;
 
 			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 			var jqueryUiAccordionAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
-				@"\themes\base\jquery.ui.accordion.min.css"), APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				@"\themes\base\jquery.ui.accordion.min.css"), _applicationInfo, _fileSystemWrapper);
 			var testCssComponentsPathsAsset = new Asset(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH,
-				@"\css\TestCssComponentsPaths.css"), APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				@"\css\TestCssComponentsPaths.css"), _applicationInfo, _fileSystemWrapper);
 
 			var testAssets = new List<IAsset>
 			{
@@ -139,6 +141,7 @@
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
+			_applicationInfo = null;
 			_fileSystemWrapper = null;
 		}
 	}

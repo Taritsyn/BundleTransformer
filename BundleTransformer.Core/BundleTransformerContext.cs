@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Configuration;
+	using System.Web;
 
 	using Configuration;
 	using FileSystem;
@@ -16,6 +17,13 @@
 		/// </summary>
 		private static readonly Lazy<BundleTransformerContext> _instance = 
 			new Lazy<BundleTransformerContext>(() => new BundleTransformerContext());
+
+		/// <summary>
+		/// Information about web application
+		/// </summary>
+		private static readonly Lazy<HttpApplicationInfo> _applicationInfo =
+			new Lazy<HttpApplicationInfo>(() => new HttpApplicationInfo(
+				VirtualPathUtility.ToAbsolute("~/"), HttpContext.Current.Server.MapPath("~/")));
 
 		/// <summary>
 		/// File system wrapper 
@@ -51,6 +59,15 @@
 		private BundleTransformerContext()
 		{ }
 
+
+		/// <summary>
+		/// Gets instance of the web application info
+		/// </summary>
+		/// <returns>Information about web application</returns>
+		public HttpApplicationInfo GetApplicationInfo()
+		{
+			return _applicationInfo.Value;
+		}
 
 		/// <summary>
 		/// Gets instance of the file system wrapper

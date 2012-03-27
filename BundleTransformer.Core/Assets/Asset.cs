@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Core.Assets
 {
 	using System.Text.RegularExpressions;
-	using System.Web;
 
 	using FileSystem;
 
@@ -24,6 +23,11 @@
 		/// Regular expression for web application root path
 		/// </summary>
 		private readonly Regex _applicationRootPathRegex;
+
+		/// <summary>
+		/// URL of web application root
+		/// </summary>
+		private readonly string _applicationRootUrl;
 
 		/// <summary>
 		/// File system wrapper
@@ -110,7 +114,7 @@
 			get
 			{
 				string url = _applicationRootPathRegex
-					.Replace(Path, @"/")
+					.Replace(Path, _applicationRootUrl)
 					.Replace(@"\", @"/")
 					;
 
@@ -189,7 +193,7 @@
 		/// Constructs instance of Asset
 		/// </summary>
 		/// <param name="path">Path to asset file</param>
-		public Asset(string path) : this(path, HttpContext.Current.Server.MapPath("~/"),
+		public Asset(string path) : this(path, BundleTransformerContext.Current.GetApplicationInfo(),
 			BundleTransformerContext.Current.GetFileSystemWrapper())
 		{ }
 
@@ -197,12 +201,13 @@
 		/// Constructs instance of Asset
 		/// </summary>
 		/// <param name="path">Path to asset file</param>
-		/// <param name="applicationRootPath">Web application root path</param>
+		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="fileSystemWrapper">File system wrapper</param>
-		public Asset(string path, string applicationRootPath, IFileSystemWrapper fileSystemWrapper)
+		public Asset(string path, HttpApplicationInfo applicationInfo, IFileSystemWrapper fileSystemWrapper)
 		{
-			_applicationRootPathRegex = new Regex("^" + applicationRootPath.Replace(@"\", @"\\"), 
+			_applicationRootPathRegex = new Regex("^" + applicationInfo.RootPath.Replace(@"\", @"\\"), 
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			_applicationRootUrl = applicationInfo.RootUrl;
 			_fileSystemWrapper = fileSystemWrapper;
 
 			Path = path;

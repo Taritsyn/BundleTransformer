@@ -15,29 +15,29 @@
 	[TestFixture]
 	public class CssUnnecessaryAssetsFilterTests
 	{
-		private const string APPLICATION_ROOT_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string STYLES_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
-		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
+		private const string STYLES_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
+		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
 
 		[Test]
 		public void UnneededCssAssetsRemovedIsCorrect()
 		{
 			// Arrange
+			var applicationInfo = new HttpApplicationInfo("/", 
+				@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
 			var fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
 
 			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var jqueryUiAccordionAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
-				@"\themes\base\jquery.ui.accordion.css"), APPLICATION_ROOT_PATH, fileSystemWrapper);
-			var jqueryUiAllAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, 
-				@"\themes\base\jquery.ui.all.css"), APPLICATION_ROOT_PATH, fileSystemWrapper);
+				@"\themes\base\jquery.ui.accordion.css"), applicationInfo, fileSystemWrapper);
+			var jqueryUiAllAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
+				@"\themes\base\jquery.ui.all.css"), applicationInfo, fileSystemWrapper);
 			var testCssComponentsPathsAsset = new Asset(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH,
-				@"\css\TestCssComponentsPaths.css"), APPLICATION_ROOT_PATH, fileSystemWrapper);
-			var jqueryUiBaseMinAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, 
-				@"\themes\base\jquery.ui.base.min.css"), APPLICATION_ROOT_PATH, fileSystemWrapper);
+				@"\css\TestCssComponentsPaths.css"), applicationInfo, fileSystemWrapper);
+			var jqueryUiBaseMinAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
+				@"\themes\base\jquery.ui.base.min.css"), applicationInfo, fileSystemWrapper);
 
 			var assets = new List<IAsset>
 			{

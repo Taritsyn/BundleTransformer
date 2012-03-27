@@ -14,18 +14,20 @@
 	[TestFixture]
 	public class CssAssetTypesValidatorTests
 	{
-		private const string APPLICATION_ROOT_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string STYLES_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
-		private const string SCRIPTS_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
+		private const string APPLICATION_ROOT_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
+		private const string STYLES_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
+		private const string SCRIPTS_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
 
+		private HttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
+			_applicationInfo = new HttpApplicationInfo("/", APPLICATION_ROOT_PATH);
 			_fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
 		}
 
@@ -35,23 +37,23 @@
 			// Arrange
 			var siteCssAsset = new Asset(
 				Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var jqueryJsAsset = new Asset(
 				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"jquery-1.6.2.js"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var testLessAsset = new Asset(
 				Path.Combine(STYLES_DIRECTORY_PATH, @"TestLess.less"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var testCoffeeAsset = new Asset(
 				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScript.coffee"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var testPlainTextAsset = new Asset(
 				Path.Combine(APPLICATION_ROOT_PATH, @"TestPlainText.txt"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var assets = new List<IAsset>
 			{
@@ -96,11 +98,11 @@
 			// Arrange
 			var siteCssAsset = new Asset(
 				Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var testLessAsset = new Asset(
 				Path.Combine(STYLES_DIRECTORY_PATH, @"TestLess.less"),
-				APPLICATION_ROOT_PATH, _fileSystemWrapper);
+				_applicationInfo, _fileSystemWrapper);
 
 			var assets = new List<IAsset>
 			{
@@ -129,6 +131,7 @@
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
+			_applicationInfo = null;
 			_fileSystemWrapper = null;
 		}
 	}

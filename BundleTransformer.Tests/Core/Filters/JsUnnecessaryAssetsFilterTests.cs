@@ -15,35 +15,34 @@
 	[TestFixture]
 	public class JsUnnecessaryAssetsFilterTests
 	{
-		private const string APPLICATION_ROOT_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string SCRIPTS_DIRECTORY_PATH
-			= @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
+		private const string SCRIPTS_DIRECTORY_PATH = 
+			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
 
 		[Test]
 		public void UnneededJsAssetsRemovedIsCorrect()
 		{
 			// Arrange
+			var applicationInfo = new HttpApplicationInfo("/", @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
 			var fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
 
 			var ajaxLoginAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "AjaxLogin.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var jqueryMinAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.min.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var jqueryVsDocAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2-vsdoc.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var jqueryValidateVsDocMinAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.validate-vsdoc.min.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var microsoftAjaxDebugAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var telerikAllMinAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "telerik.all.min.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var knockoutAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var modernizrAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 			var referencesAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "_references.js"),
-				APPLICATION_ROOT_PATH, fileSystemWrapper);
+				applicationInfo, fileSystemWrapper);
 
 			var assets = new List<IAsset>
 			{
