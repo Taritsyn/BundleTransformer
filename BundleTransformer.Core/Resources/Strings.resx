@@ -126,6 +126,9 @@
   <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>These assets are not scripts: {0}.</value>
   </data>
+  <data name="Common_EnumValueConversionFailed" xml:space="preserve">
+    <value>Can not convert value '{0}' of enumeration type '{1}' to value of enumeration type '{2}'.</value>
+  </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>File {0} not exist.</value>
   </data>

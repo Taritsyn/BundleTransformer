@@ -61,15 +61,6 @@ namespace BundleTransformer.MicrosoftAjax.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can not convert value &apos;{0}&apos; of enumeration type &apos;{1}&apos; to value of enumeration type &apos;{2}&apos;..
-        /// </summary>
-        public static string EnumConverter_EnumValueConversionFailed {
-            get {
-                return ResourceManager.GetString("EnumConverter_EnumValueConversionFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to End column.
         /// </summary>
         public static string ErrorDetails_EndColumn {

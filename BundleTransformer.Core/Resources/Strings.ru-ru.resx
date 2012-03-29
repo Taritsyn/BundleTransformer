@@ -126,6 +126,9 @@
   <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>Перечисленные ресурсы не являются скриптами: {0}!</value>
   </data>
+  <data name="Common_EnumValueConversionFailed" xml:space="preserve">
+    <value>Невозможно преобразовать значение "{0}" перечислимого типа "{1}" в значение перечислимого типа "{2}"!</value>
+  </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>Файл {0} не существует!</value>
   </data>

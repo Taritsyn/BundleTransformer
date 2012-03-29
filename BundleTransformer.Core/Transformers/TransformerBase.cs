@@ -153,10 +153,27 @@
 		/// Combines code of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
-		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="enableTracing">Enables tracing</param>
-		protected abstract void Combine(IList<IAsset> assets, BundleResponse bundleResponse,
+		protected abstract string Combine(IList<IAsset> assets,
 			bool enableTracing);
+
+		/// <summary>
+		/// Configures bundle response
+		/// </summary>
+		/// <param name="assets">Set of assets</param>
+		/// <param name="bundleResponse">Object BundleResponse</param>
+		/// <param name="httpContext">Object HttpContext</param>
+		protected virtual void ConfigureBundleResponse(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext)
+		{
+			var assetFiles = new List<FileInfo>();
+
+			foreach (var asset in assets)
+			{
+				assetFiles.Add(new FileInfo(asset.Path));
+			}
+
+			bundleResponse.Files = assetFiles;
+		}
 
 		/// <summary>
 		/// Switchs transformer into debug mode

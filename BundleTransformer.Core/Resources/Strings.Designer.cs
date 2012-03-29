@@ -88,6 +88,15 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not convert value &apos;{0}&apos; of enumeration type &apos;{1}&apos; to value of enumeration type &apos;{2}&apos;..
+        /// </summary>
+        public static string Common_EnumValueConversionFailed {
+            get {
+                return ResourceManager.GetString("Common_EnumValueConversionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File {0} not exist..
         /// </summary>
         public static string Common_FileNotExist {

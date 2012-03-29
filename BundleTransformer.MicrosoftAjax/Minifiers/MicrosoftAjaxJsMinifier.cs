@@ -425,14 +425,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax JS Minifier
+		/// Constructs instance of Microsoft Ajax JS-minifier
 		/// </summary>
 		public MicrosoftAjaxJsMinifier() 
 			: this(BundleTransformerContext.Current.GetMicrosoftAjaxConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax JS Minifier
+		/// Constructs instance of Microsoft Ajax JS-minifier
 		/// </summary>
 		/// <param name="microsoftAjaxConfiguration">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxJsMinifier(MicrosoftAjaxSettings microsoftAjaxConfiguration)
@@ -469,7 +469,7 @@
 		}
 
 		/// <summary>
-		/// Destructs instance of Microsoft Ajax JS Minifier
+		/// Destructs instance of Microsoft Ajax JS-minifier
 		/// </summary>
 		~MicrosoftAjaxJsMinifier()
 		{

@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.SassAndSc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.MicrosoftAjax", "BundleTransformer.MicrosoftAjax\BundleTransformer.MicrosoftAjax.csproj", "{72A5E68C-6919-4DD7-9D30-E07A857806D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Yui", "BundleTransformer.Yui\BundleTransformer.Yui.csproj", "{760C2730-48D6-4DC9-A08E-B0E47322155A}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BundleTransformer.vsmdi
@@ -59,6 +61,10 @@ Global
 		{72A5E68C-6919-4DD7-9D30-E07A857806D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72A5E68C-6919-4DD7-9D30-E07A857806D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72A5E68C-6919-4DD7-9D30-E07A857806D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{760C2730-48D6-4DC9-A08E-B0E47322155A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{760C2730-48D6-4DC9-A08E-B0E47322155A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{760C2730-48D6-4DC9-A08E-B0E47322155A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{760C2730-48D6-4DC9-A08E-B0E47322155A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

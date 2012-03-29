@@ -60,7 +60,6 @@
 			commonStylesBundle.Orderer = nullOrderer;
 
 			BundleTable.Bundles.Add(commonStylesBundle);
-
 			var modernizrBundle = new Bundle("~/Modernizr", jsTransformer);
 			modernizrBundle.AddFile("~/Scripts/modernizr-2.0.6-development-only.js");
 			modernizrBundle.Orderer = nullOrderer;
@@ -81,13 +80,13 @@
 
 			BundleTable.Bundles.Add(commonScriptsBundle);
 
-			var jqueryUiStylesDirectoryBundle = new Bundle("~/JqueryUiStylesDirectoryTrace", new CssTransformer(
+			var jqueryUiStylesDirectoryBundle = new Bundle("~/JqueryUiStylesDirectory", new CssTransformer(
 				new[] { "*.all.css", "jquery.ui.base.css" }));
 			jqueryUiStylesDirectoryBundle.AddDirectory("~/Content/themes/base/", "*.css");
 
 			BundleTable.Bundles.Add(jqueryUiStylesDirectoryBundle);
 
-			var scriptsDirectoryBundle = new Bundle("~/ScriptsDirectoryTrace", new JsTransformer(
+			var scriptsDirectoryBundle = new Bundle("~/ScriptsDirectory", new JsTransformer(
 				new[] { "*-vsdoc.js", "*.all.js", "_references.js" }));
 			scriptsDirectoryBundle.AddDirectory("~/Scripts/", "*.js");
 

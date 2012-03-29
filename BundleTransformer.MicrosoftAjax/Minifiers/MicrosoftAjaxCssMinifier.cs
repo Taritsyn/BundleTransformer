@@ -188,14 +188,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax CSS Minifier
+		/// Constructs instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		public MicrosoftAjaxCssMinifier()
 			: this(BundleTransformerContext.Current.GetMicrosoftAjaxConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax CSS Minifier
+		/// Constructs instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		/// <param name="microsoftAjaxConfiguration">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfiguration)
@@ -220,7 +220,7 @@
 		}
 
 		/// <summary>
-		/// Destructs instance of Microsoft Ajax CSS Minifier
+		/// Destructs instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		~MicrosoftAjaxCssMinifier()
 		{

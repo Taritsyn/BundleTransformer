@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>1.0.0-beta</version>
+    <version>1.1.0-beta</version>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://www.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=358410</iconUrl>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.0.0-beta]" />
+      <dependency id="BundleTransformer.Core" version="[1.1.0-beta]" />
 	  <dependency id="SassAndCoffee.Ruby" version="2.0.2.0" />
     </dependencies>
     <references>
@@ -20,7 +20,7 @@
     <summary>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code.</summary>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
-    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Sass SCSS</tags>
+    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
   </metadata>
   <files>
     <file src="..\..\BundleTransformer.SassAndScss\bin\Release\BundleTransformer.SassAndScss.dll" target="lib\net40" />

@@ -1,0 +1,27 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="yui" type="BundleTransformer.Yui.Configuration.YuiSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer>
+		<core>
+			<css>
+				<minifiers>
+					<add name="YuiCssMinifier" type="BundleTransformer.Yui.Minifiers.YuiCssMinifier, BundleTransformer.Yui" />
+				</minifiers>
+			</css>
+			<js>
+				<minifiers>
+					<add name="YuiJsMinifier" type="BundleTransformer.Yui.Minifiers.YuiJsMinifier, BundleTransformer.Yui" />
+				</minifiers>
+			</js>
+		</core>
+		<yui>
+			<css compressionType="StockYuiCompressor" removeComments="true" lineBreakPosition="-1" />
+			<js compressionType="YuiStockCompression" isVerboseLogging="true" isObfuscateJavascript="true"
+				preserveAllSemicolons="false" disableOptimizations="false" isEvalIgnored="false"
+				lineBreakPosition="-1" />
+		</yui>
+	</bundleTransformer>
+</configuration>

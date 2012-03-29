@@ -8,12 +8,13 @@
 	using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
 	using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
 
+	using Core.Resources;
+
 	using BtCssColor = CssColor;
 	using BtCssComment = CssComment;
 	using BtOutputMode = OutputMode;
 	using BtEvalTreatment = EvalTreatment;
 	using BtLocalRenaming = LocalRenaming;
-	using Resources;
 
 	internal static class EnumConverter
 	{
@@ -34,7 +35,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							btCssColor, typeof(BtCssColor), typeof(MsCssColor))
 					);
 			}
@@ -59,7 +60,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							msCssColor, typeof(MsCssColor), typeof(BtCssColor))
 					);
 			}
@@ -87,7 +88,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							btCssComment, typeof(BtCssComment), typeof(MsCssComment))
 					);
 			}
@@ -115,7 +116,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							msCssComment, typeof(MsCssComment), typeof(BtCssComment))
 					);
 			}
@@ -137,7 +138,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							btOutputMode, typeof(BtOutputMode), typeof(MsOutputMode))
 					);
 			}
@@ -159,7 +160,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							msOutputMode, typeof(MsOutputMode), typeof(BtOutputMode))
 					);
 			}
@@ -184,7 +185,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							btEvalTreatment, typeof(BtEvalTreatment), typeof(MsEvalTreatment))
 					);
 			}
@@ -209,7 +210,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							msEvalTreatment, typeof(MsEvalTreatment), typeof(BtEvalTreatment))
 					);
 			}
@@ -234,7 +235,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							msLocalRenaming, typeof(MsLocalRenaming), typeof(BtLocalRenaming))
 					);
 			}
@@ -259,7 +260,7 @@
 					break;
 				default:
 					throw new InvalidCastException(
-						String.Format(Strings.EnumConverter_EnumValueConversionFailed,
+						String.Format(Strings.Common_EnumValueConversionFailed,
 							btLocalRenaming, typeof(BtLocalRenaming), typeof(MsLocalRenaming))
 					);
 			}

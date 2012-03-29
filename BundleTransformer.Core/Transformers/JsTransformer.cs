@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Configuration;
-	using System.IO;
 	using System.Text;
 	using System.Web;
 	using System.Web.Optimization;
@@ -190,8 +189,9 @@
 			{
 				assets = Minify(assets);
 			}
-			Combine(assets, bundleResponse, _coreConfiguration.EnableTracing);
 
+			bundleResponse.Content = Combine(assets, _coreConfiguration.EnableTracing);
+			ConfigureBundleResponse(assets, bundleResponse, httpContext);
 			bundleResponse.ContentType = @"application/x-javascript";
 		}
 
@@ -253,12 +253,9 @@
 		/// Combines code of JS-assets
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="enableTracing">Enables tracing</param>
-		protected override void Combine(IList<IAsset> assets, BundleResponse bundleResponse,
-			bool enableTracing)
+		protected override string Combine(IList<IAsset> assets, bool enableTracing)
 		{
-			var assetFiles = new List<FileInfo>();
 			var content = new StringBuilder();
 
 			foreach (var asset in assets)
@@ -273,12 +270,9 @@
 					content.AppendLine("//#endregion");
 				}
 				content.AppendLine();
-
-				assetFiles.Add(new FileInfo(asset.Path));
 			}
 
-			bundleResponse.Content = content.ToString();
-			bundleResponse.Files = assetFiles;
+			return content.ToString();
 		}
 
 		/// <summary>

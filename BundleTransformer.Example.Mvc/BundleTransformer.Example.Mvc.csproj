@@ -261,6 +261,10 @@
       <Project>{E708475F-094D-4065-B432-473D76B739E0}</Project>
       <Name>BundleTransformer.SassAndScss</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.Yui\BundleTransformer.Yui.csproj">
+      <Project>{760C2730-48D6-4DC9-A08E-B0E47322155A}</Project>
+      <Name>BundleTransformer.Yui</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
