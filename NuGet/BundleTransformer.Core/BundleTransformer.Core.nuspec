@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>1.1.0-beta</version>
+    <version>1.2.0-beta</version>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
@@ -21,6 +21,7 @@ The main differences classes CssTransformer and JsTransformer from standard impl
 
 This extension will help your web applications successfully pass a most part of the tests in YSlow.</description>
     <summary>Bundle Transformer - a modular extension for System.Web.Optimization. Classes CssTransformer and JsTransformer, included in the core of Bundle Transformer, implement interface IBundleTransform. They are intended to replace the standard classes CssMinify and JsMinify.</summary>
+	<releaseNotes>Added support of dynamic folder bundles.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Performance Optimization YSlow Speed Pre-minified Combine Compression</tags>

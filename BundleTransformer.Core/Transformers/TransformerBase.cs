@@ -10,6 +10,7 @@
 	using Assets;
 	using Configuration;
 	using Minifiers;
+	using Resources;
 	using Translators;
 
 	/// <summary>
@@ -66,24 +67,27 @@
 		/// <param name="response">Object BundleResponse</param>
 		public void Process(BundleContext context, BundleResponse response)
 		{
-			string currentBundlePath = context.BundleVirtualPath;
-			Bundle currentBundle = context.BundleCollection.SingleOrDefault(b => b.Path == currentBundlePath);
-			if (currentBundle != null)
+			if (context == null)
+			{
+				throw new ArgumentNullException("context", Strings.Common_ValueIsNull);
+			}
+
+			if (response == null)
+			{
+				throw new ArgumentNullException("response", Strings.Common_ValueIsNull);
+			}
+
+			if (!context.EnableInstrumentation)
 			{
 				var assets = new List<IAsset>();
-				IEnumerable<FileInfo> assetFiles = currentBundle.EnumerateFiles(context);
-				IBundleOrderer currentBundleOrderer = currentBundle.Orderer;
-				if (currentBundleOrderer != null)
-				{
-					assetFiles = currentBundleOrderer.OrderFiles(context, assetFiles);
-				}
+				IEnumerable<FileInfo> assetFiles = response.Files;
 
 				foreach (var assetFile in assetFiles)
 				{
 					assets.Add(new Asset(assetFile.FullName));
 				}
 
-				Transform(assets, currentBundle, response, context.HttpContext);
+				Transform(assets, response, context.HttpContext);
 			}
 		}
 
@@ -91,10 +95,9 @@
 		/// Transforms assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
-		/// <param name="bundle">Object Bundle</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="httpContext">Object HttpContext</param>
-		protected abstract void Transform(IList<IAsset> assets, Bundle bundle, BundleResponse bundleResponse, HttpContextBase httpContext);
+		protected abstract void Transform(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext);
 
 		/// <summary>
 		/// Validates assets for compliance with a valid types

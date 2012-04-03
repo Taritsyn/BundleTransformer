@@ -63,6 +63,7 @@
     <Compile Include="Configuration\MinifierRegistrationList.cs" />
     <Compile Include="Configuration\TranslatorRegistration.cs" />
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="FileSystem\FileSystemWrapper.cs" />
     <Compile Include="FileSystem\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IFileSystemWrapper.cs" />

@@ -52,7 +52,6 @@
     <Compile Include="Configuration\MinifierSettingsBase.cs" />
     <Compile Include="CssColor.cs" />
     <Compile Include="CssComment.cs" />
-    <Compile Include="EnumConverter.cs" />
     <Compile Include="EvalTreatment.cs" />
     <Compile Include="LocalRenaming.cs" />
     <Compile Include="MicrosoftAjaxParsingException.cs" />

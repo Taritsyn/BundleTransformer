@@ -10,7 +10,7 @@
 		/// <summary>
 		/// Gets or sets name of default minifier
 		/// </summary>
-		[ConfigurationProperty("defaultMinifier", IsRequired = true)]
+		[ConfigurationProperty("defaultMinifier", DefaultValue = Constants.NullMinifierName)]
 		public string DefaultMinifier
 		{
 			get { return (string)this["defaultMinifier"]; }

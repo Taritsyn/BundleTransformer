@@ -7,6 +7,7 @@
 	using System.Text;
 
 	using Yahoo.Yui.Compressor;
+	using YuiJsCompressionType = Yahoo.Yui.Compressor.JavaScriptCompressionType;
 
 	using Core;
 	using Core.Assets;
@@ -152,7 +153,7 @@
 					    PreserveAllSemicolons, DisableOptimizations, LineBreakPosition,
 					    Encoding.UTF8, CultureInfo.InvariantCulture,
 					    IsEvalIgnored,
-					    EnumConverter.ConvertBtJsCompressionTypeToYuiJsCompressionType(CompressionType));
+						Utils.GetEnumFromOtherEnum<BtJsCompressionType, YuiJsCompressionType>(CompressionType));
 				}
 				catch(Exception e)
 				{

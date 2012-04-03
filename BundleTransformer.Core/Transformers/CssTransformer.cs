@@ -21,9 +21,34 @@
 	public sealed class CssTransformer : TransformerBase
 	{
 		/// <summary>
+		/// Pool of minifiers
+		/// </summary>
+		private static readonly Dictionary<string, IMinifier> _minifiersPool = new Dictionary<string, IMinifier>();
+
+		/// <summary>
+		/// Synchronizer of minifiers pool
+		/// </summary>
+		private static readonly object _minifiersPoolSynchronizer = new object();
+
+		/// <summary>
+		/// Pool of translators
+		/// </summary>
+		private static Dictionary<string, ITranslator> _translatorsPool = new Dictionary<string, ITranslator>();
+
+		/// <summary>
+		/// Synchronizer of translators pool
+		/// </summary>
+		private static readonly object _translatorsPoolSynchronizer = new object();
+
+		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
+
+		/// <summary>
+		/// CSS content type
+		/// </summary>
+		internal static string CssContentType = "text/css";
 
 
 		/// <summary>
@@ -131,15 +156,36 @@
 					String.Format(Strings.Configuration_DefaultMinifierNotSpecified, "CSS"));
 			}
 
-			MinifierRegistration minifierRegistration = _coreConfiguration.Css.Minifiers[defaultMinifierName];
-			if (minifierRegistration == null)
-			{
-				throw new ConfigurationErrorsException(
-					String.Format(Strings.Configuration_MinifierNotRegistered, "CSS", defaultMinifierName));
-			}
+			IMinifier defaultMinifier;
 
-			string defaultMinifierFullTypeName = minifierRegistration.Type;
-			IMinifier defaultMinifier = Utils.CreateInstanceByFullTypeName<IMinifier>(defaultMinifierFullTypeName);
+			lock (_minifiersPoolSynchronizer)
+			{
+				if (_minifiersPool.ContainsKey(defaultMinifierName))
+				{
+					defaultMinifier = _minifiersPool[defaultMinifierName];
+				}
+				else
+				{
+					if (defaultMinifierName == Constants.NullMinifierName)
+					{
+						defaultMinifier = new NullMinifier();
+					}
+					else
+					{
+						MinifierRegistration minifierRegistration = _coreConfiguration.Css.Minifiers[defaultMinifierName];
+						if (minifierRegistration == null)
+						{
+							throw new ConfigurationErrorsException(
+								String.Format(Strings.Configuration_MinifierNotRegistered, "CSS", defaultMinifierName));
+						}
+
+						string defaultMinifierFullTypeName = minifierRegistration.Type;
+						defaultMinifier = Utils.CreateInstanceByFullTypeName<IMinifier>(defaultMinifierFullTypeName);
+					}
+
+					_minifiersPool.Add(defaultMinifierName, defaultMinifier);
+				}
+			}
 
 			return defaultMinifier;
 		}
@@ -157,10 +203,24 @@
 			{
 				if (translatorRegistration.Enabled)
 				{
+					string defaultTranslatorName = translatorRegistration.Name;
 					string defaultTranslatorFullTypeName = translatorRegistration.Type;
 
-					var defaultTranslator = Utils.CreateInstanceByFullTypeName<ITranslator>(
-						defaultTranslatorFullTypeName);
+					ITranslator defaultTranslator;
+
+					lock (_translatorsPoolSynchronizer)
+					{
+						if (_translatorsPool.ContainsKey(defaultTranslatorName))
+						{
+							defaultTranslator = _translatorsPool[defaultTranslatorName];
+						}
+						else
+						{
+							defaultTranslator = Utils.CreateInstanceByFullTypeName<ITranslator>(
+								defaultTranslatorFullTypeName);
+							_translatorsPool.Add(defaultTranslatorName, defaultTranslator);
+						}
+					}
 
 					defaultTranslators.Add(defaultTranslator);
 				}
@@ -173,19 +233,14 @@
 		/// Transforms CSS-assets
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
-		/// <param name="bundle">Object Bundle</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="httpContext">Object HttpContext</param>
-		protected override void Transform(IList<IAsset> assets, Bundle bundle, 
-			BundleResponse bundleResponse, HttpContextBase httpContext)
+		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext)
 		{
 			ValidateAssetTypes(assets);
 			assets = RemoveDuplicateAssets(assets);
 			assets = RemoveUnnecessaryAssets(assets);
-			if (bundle.EnableFileExtensionReplacements)
-			{
-				assets = ReplaceFileExtensions(assets);
-			}
+			assets = ReplaceFileExtensions(assets);
 			assets = Translate(assets);
 			if (!_isDebugMode)
 			{
@@ -195,7 +250,7 @@
 
 			bundleResponse.Content = Combine(assets, _coreConfiguration.EnableTracing);
 			ConfigureBundleResponse(assets, bundleResponse, httpContext);
-			bundleResponse.ContentType = @"text/css";
+			bundleResponse.ContentType = CssContentType;
 		}
 
 		/// <summary>

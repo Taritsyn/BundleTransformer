@@ -5,6 +5,9 @@
 	using System.Linq;
 
 	using Microsoft.Ajax.Utilities;
+	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
+	using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
+	using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
 
 	using Core;
 	using Core.Assets;
@@ -110,11 +113,11 @@
 		{
 			get
 			{
-				return EnumConverter.ConvertMsEvalTreatmentToBtEvalTreatment(_jsParserConfiguration.EvalTreatment);
+				return Utils.GetEnumFromOtherEnum<MsEvalTreatment, BtEvalTreatment>(_jsParserConfiguration.EvalTreatment);
 			}
 			set
 			{
-				_jsParserConfiguration.EvalTreatment = EnumConverter.ConvertBtEvalTreatmentToMsEvalTreatment(value);
+				_jsParserConfiguration.EvalTreatment = Utils.GetEnumFromOtherEnum<BtEvalTreatment, MsEvalTreatment>(value);
 			}
 		}
 
@@ -208,11 +211,11 @@
 		{
 			get
 			{
-				return EnumConverter.ConvertMsLocalRenamingToBtLocalRenaming(_jsParserConfiguration.LocalRenaming);
+				return Utils.GetEnumFromOtherEnum<MsLocalRenaming, BtLocalRenaming>(_jsParserConfiguration.LocalRenaming);
 			}
 			set
 			{
-				_jsParserConfiguration.LocalRenaming = EnumConverter.ConvertBtLocalRenamingToMsLocalRenaming(value);
+				_jsParserConfiguration.LocalRenaming = Utils.GetEnumFromOtherEnum<BtLocalRenaming, MsLocalRenaming>(value);
 			}
 		}
 
@@ -275,11 +278,11 @@
 		{
 			get
 			{
-				return EnumConverter.ConvertMsOutputModeToBtOutputMode(_jsParserConfiguration.OutputMode);
+				return Utils.GetEnumFromOtherEnum<MsOutputMode, BtOutputMode>(_jsParserConfiguration.OutputMode);
 			}
 			set
 			{
-				_jsParserConfiguration.OutputMode = EnumConverter.ConvertBtOutputModeToMsOutputMode(value);
+				_jsParserConfiguration.OutputMode = Utils.GetEnumFromOtherEnum<BtOutputMode, MsOutputMode>(value);
 			}
 		}
 

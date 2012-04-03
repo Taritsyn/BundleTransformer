@@ -9,3 +9,5 @@ BundleTransformer.Less/obj/Release/ru-ru/BundleTransformer.Less.resources.dll
 BundleTransformer.MicrosoftAjax/obj/Release/ru-ru/BundleTransformer.MicrosoftAjax.resources.dll
 BundleTransformer.SassAndScss/obj/Release/ru-ru/BundleTransformer.SassAndScss.resources.dll
 BundleTransformer.Tests/obj/Release/DesignTimeResolveAssemblyReferencesInput.cache
+BundleTransformer.Yui/obj/Release/ru-ru/BundleTransformer.Yui.resources.dll
+BundleTransformer.Yui/obj/Release/TempPE/Resources.Strings.ru-ru.Designer.cs.dll

@@ -5,6 +5,9 @@
 	using System.Linq;
 
 	using Microsoft.Ajax.Utilities;
+	using MsCssColor = Microsoft.Ajax.Utilities.CssColor;
+	using MsCssComment = Microsoft.Ajax.Utilities.CssComment;
+	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
 
 	using Core;
 	using Core.Assets;
@@ -66,11 +69,11 @@
 		{
 			get
 			{
-				return EnumConverter.ConvertMsCssColorToBtCssColor(_cssParserConfiguration.ColorNames);
+				return Utils.GetEnumFromOtherEnum<MsCssColor, BtCssColor>(_cssParserConfiguration.ColorNames);
 			}
 			set
 			{
-				_cssParserConfiguration.ColorNames = EnumConverter.ConvertBtCssColorToMsCssColor(value);
+				_cssParserConfiguration.ColorNames = Utils.GetEnumFromOtherEnum<BtCssColor, MsCssColor>(value);
 			}
 		}
 
@@ -81,11 +84,11 @@
 		{
 			get
 			{
-				return EnumConverter.ConvertMsCssCommentToBtCssComment(_cssParserConfiguration.CommentMode);
+				return Utils.GetEnumFromOtherEnum<MsCssComment, BtCssComment>(_cssParserConfiguration.CommentMode);
 			}
 			set
 			{
-				_cssParserConfiguration.CommentMode = EnumConverter.ConvertBtCssCommentToMsCssComment(value);
+				_cssParserConfiguration.CommentMode = Utils.GetEnumFromOtherEnum<BtCssComment, MsCssComment>(value);
 			}
 		}
 
@@ -146,11 +149,11 @@
 		{
 			get
 			{
-				return EnumConverter.ConvertMsOutputModeToBtOutputMode(_cssParserConfiguration.OutputMode);
+				return Utils.GetEnumFromOtherEnum<MsOutputMode, BtOutputMode>(_cssParserConfiguration.OutputMode);
 			}
 			set
 			{
-				_cssParserConfiguration.OutputMode = EnumConverter.ConvertBtOutputModeToMsOutputMode(value);
+				_cssParserConfiguration.OutputMode = Utils.GetEnumFromOtherEnum<BtOutputMode, MsOutputMode>(value);
 			}
 		}
 

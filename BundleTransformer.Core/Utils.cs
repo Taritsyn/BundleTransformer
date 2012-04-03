@@ -9,7 +9,7 @@
 
 	using Resources;
 
-	internal static class Utils
+	public static class Utils
 	{
 		/// <summary>
 		/// Regular expression to find first slash
@@ -210,6 +210,32 @@
 			}
 
 			return (T)instance;
+		}
+
+		/// <summary>
+		/// Converts value of source enumeration type to value of destination enumeration type
+		/// </summary>
+		/// <typeparam name="TSource">Source enumeration type</typeparam>
+		/// <typeparam name="TDest">Destination enumeration type</typeparam>
+		/// <param name="value">Value of source enumeration type</param>
+		/// <returns>Value of destination enumeration type</returns>
+		public static TDest GetEnumFromOtherEnum<TSource, TDest>(TSource value)
+		{
+			string name = value.ToString();
+			var destEnumValues = (TDest[])Enum.GetValues(typeof(TDest));
+
+			foreach (var destEnum in destEnumValues)
+			{
+				if (String.Equals(destEnum.ToString(), name, StringComparison.OrdinalIgnoreCase))
+				{
+					return destEnum;
+				}
+			}
+
+			throw new InvalidCastException(
+				String.Format(Strings.Common_EnumValueConversionFailed,
+					name, typeof(TSource), typeof(TDest))
+			);
 		}
 	}
 }

@@ -54,7 +54,6 @@
     <Compile Include="Configuration\MinifierSettingsBase.cs" />
     <Compile Include="Configuration\YuiSettings.cs" />
     <Compile Include="CssCompressionType.cs" />
-    <Compile Include="EnumConverter.cs" />
     <Compile Include="JavaScriptCompressionType.cs" />
     <Compile Include="Minifiers\YuiCssMinifier.cs" />
     <Compile Include="Minifiers\YuiJsMinifier.cs" />

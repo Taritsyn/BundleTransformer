@@ -5,6 +5,7 @@
 	using System.Linq;
 
 	using Yahoo.Yui.Compressor;
+	using YuiCssCompressionType = Yahoo.Yui.Compressor.CssCompressionType;
 
 	using Core;
 	using Core.Assets;
@@ -106,7 +107,7 @@
 				try
 				{
 					newContent = CssCompressor.Compress(asset.Content, LineBreakPosition,
-						EnumConverter.ConvertBtCssCompressionTypeToYuiCssCompressionType(CompressionType),
+						Utils.GetEnumFromOtherEnum<BtCssCompressionType, YuiCssCompressionType>(CompressionType),
 						RemoveComments);
 				}
 				catch(Exception e)

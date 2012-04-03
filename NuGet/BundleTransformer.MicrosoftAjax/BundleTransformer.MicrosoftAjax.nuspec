@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>1.1.0-beta</version>
+    <version>1.2.0-beta</version>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://www.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=358412</iconUrl>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.1.0-beta]" />
+      <dependency id="BundleTransformer.Core" version="[1.2.0-beta]" />
 	  <dependency id="AjaxMin" version="4.47.4452.34008" />
     </dependencies>
     <references>
