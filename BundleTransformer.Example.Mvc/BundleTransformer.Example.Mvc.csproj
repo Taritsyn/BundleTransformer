@@ -137,13 +137,25 @@
     <Content Include="AlternativeContent\images\icons\bug.png" />
     <Content Include="AlternativeContent\images\icons\cactus.png" />
     <Content Include="AlternativeContent\images\icons\disc.png" />
+    <Content Include="Content\BundleTransformer.css" />
     <Content Include="Content\images\0.gif" />
+    <Content Include="Content\images\bundle_transformer_logo.png" />
     <Content Include="Content\images\icons\envelope.png" />
+    <None Include="BundleTransformer.Configuration.xsc">
+      <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
+    </None>
+    <None Include="BundleTransformer.Configuration.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="BundleTransformer.Configuration.xss">
+      <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
+    </None>
     <None Include="Content\TestScssImport.scss" />
     <None Include="Content\TestSassImport.sass" />
     <None Include="Content\TestLess.less" />
     <None Include="Content\TestLessImport.less" />
     <None Include="Content\TestSass.sass" />
+    <Content Include="Content\images\linkedin.png" />
     <Content Include="Content\TestTranslators.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -186,8 +198,8 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\knockout-2.0.0.debug.js" />
-    <Content Include="Scripts\knockout-2.0.0.js" />
+    <Content Include="Scripts\knockout-2.1.0beta.debug.js" />
+    <Content Include="Scripts\knockout-2.1.0beta.js" />
     <Content Include="Scripts\MicrosoftAjax.debug.js" />
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
@@ -210,17 +222,12 @@
     <Content Include="Scripts\_references.js" />
     <Content Include="Scripts\AjaxLogin.js" />
     <Content Include="Images\accent.png" />
-    <Content Include="Images\aspNetHome.png" />
     <Content Include="Images\bullet.png" />
-    <Content Include="Images\facebook.png" />
-    <Content Include="Images\findHosting.png" />
     <Content Include="Images\heroAccent.png" />
-    <Content Include="Images\NuGetGallery.png" />
     <Content Include="Images\orderedListOne.png" />
     <Content Include="Images\orderedListTwo.png" />
     <Content Include="Images\orderedListThree.png" />
     <Content Include="Images\twitter.png" />
-    <Content Include="Images\windowsLive.png" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Account\ChangePassword.cshtml" />
     <Content Include="Views\Account\ChangePasswordSuccess.cshtml" />

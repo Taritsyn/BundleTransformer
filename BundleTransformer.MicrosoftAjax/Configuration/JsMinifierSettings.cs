@@ -41,11 +41,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether EvalsAreSafe.
-		/// Deprecated in favor of EvalTreatment, which is an enumeration
-		/// allowing for more options than just true or false.
-		/// True for this property is the equivalent of EvalTreament.Ignore;
-		/// False is the equivalent to EvalTreament.MakeAllSafe
+		/// EvalTreatment setting
 		/// </summary>
 		[ConfigurationProperty("evalTreatment", DefaultValue = EvalTreatment.Ignore)]
 		public EvalTreatment EvalTreatment
@@ -89,8 +85,8 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to how to rename local variables and functions:
-		/// KeepAll - do not rename local variables and functions
-		/// CrunchAll - rename all local variables and functions to shorter names
+		/// KeepAll - do not rename local variables and functions;
+		/// CrunchAll - rename all local variables and functions to shorter names;
 		/// KeepLocalizationVars - rename all local variables and functions that do NOT start with L_
 		/// </summary>
 		[ConfigurationProperty("localRenaming", DefaultValue = LocalRenaming.CrunchAll)]
@@ -182,7 +178,7 @@
 
 		/// <summary>
 		/// Gets or sets a string representation of all the indentifier 
-		/// replacements as a comma-separated list of "source=target" identifiers.
+		/// replacements as a comma-separated list of "source=target" identifiers
 		/// </summary>
 		[ConfigurationProperty("renamePairs", DefaultValue = "")]
 		public string RenamePairs

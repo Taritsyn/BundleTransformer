@@ -142,7 +142,7 @@
 
 		/// <summary>
 		/// Gets or sets a output mode:
-		/// SingleLine - output all code on a single line
+		/// SingleLine - output all code on a single line;
 		/// MultipleLines - break the output into multiple lines to be more human-readable
 		/// </summary>
 		public override BtOutputMode OutputMode

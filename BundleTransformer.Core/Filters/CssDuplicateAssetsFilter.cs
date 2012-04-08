@@ -35,13 +35,12 @@
 			{
 				string newAssetPath = Asset.RemoveAdditionalCssFileExtension(asset.Path);
 				bool assetExist = processedAssets
-				    .Where(a => a.Path.ToUpperInvariant() == newAssetPath.ToUpperInvariant())
+				    .Where(a => 
+						Asset.RemoveAdditionalCssFileExtension(a.Path).ToUpperInvariant() == newAssetPath.ToUpperInvariant())
 				    .Count() > 0;
 
 				if (!assetExist)
 				{
-					asset.Path = newAssetPath;
-
 					processedAssets.Add(asset);
 				}
 			}

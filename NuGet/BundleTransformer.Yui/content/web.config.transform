@@ -4,7 +4,7 @@
 			<section name="yui" type="BundleTransformer.Yui.Configuration.YuiSettings" />
 		</sectionGroup>
 	</configSections>
-	<bundleTransformer>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
 		<core>
 			<css>
 				<minifiers>
@@ -17,11 +17,5 @@
 				</minifiers>
 			</js>
 		</core>
-		<yui>
-			<css compressionType="StockYuiCompressor" removeComments="true" lineBreakPosition="-1" />
-			<js compressionType="YuiStockCompression" isVerboseLogging="true" isObfuscateJavascript="true"
-				preserveAllSemicolons="false" disableOptimizations="false" isEvalIgnored="false"
-				lineBreakPosition="-1" />
-		</yui>
 	</bundleTransformer>
 </configuration>

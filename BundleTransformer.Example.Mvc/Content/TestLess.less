@@ -1,7 +1,12 @@
 ﻿@bg-color: #7AC0DA;
 @caption-color: #FFFFFF;
 
-.rounded-corners (@radius: 5px)
+.visible()
+{
+	display: block;
+}
+
+.rounded-corners(@radius: 5px)
 {
 	border-radius: @radius;
 	-webkit-border-radius: @radius;
@@ -11,7 +16,7 @@
 .translators #less
 {
 	float: left;
-	display: block;
+	.visible();
 	padding: 0.2em 0.5em 0.2em 0.5em;
 	background-color: @bg-color;
 	color: @caption-color;

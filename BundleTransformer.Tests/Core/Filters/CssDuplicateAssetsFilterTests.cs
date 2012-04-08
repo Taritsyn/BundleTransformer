@@ -60,7 +60,7 @@
 
 			// Assert
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"), processedAssets[0].Path);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.css"), 
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"), 
 				processedAssets[1].Path);
 			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
 				processedAssets[2].Path);

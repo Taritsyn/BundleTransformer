@@ -4,9 +4,9 @@
 			<section name="core" type="BundleTransformer.Core.Configuration.CoreSettings" />
 		</sectionGroup>
 	</configSections>
-	<bundleTransformer>
-		<core enableTracing="false" jsFilesWithMicrosoftStyleExtensions="MicrosoftAjax.js;MicrosoftMvcAjax.js;MicrosoftMvcValidation.js;knockout-2.0.0.js">
-			<css defaultMinifier="NullMinifier">
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<css>
 				<minifiers>
 					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
 				</minifiers>
@@ -14,7 +14,7 @@
 					<add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
 				</translators>
 			</css>
-			<js defaultMinifier="NullMinifier">
+			<js>
 				<minifiers>
 					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
 				</minifiers>

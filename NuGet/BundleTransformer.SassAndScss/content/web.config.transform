@@ -4,14 +4,13 @@
 			<section name="sassAndScss" type="BundleTransformer.SassAndScss.Configuration.SassAndScssSettings" />
 		</sectionGroup>
 	</configSections>
-	<bundleTransformer>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
 		<core>
 			<css>
 				<translators>
-					<add name="SassAndScssTranslator" type="BundleTransformer.SassAndScss.Translators.SassAndScssTranslator, BundleTransformer.SassAndScss" enabled="true" />
+					<add name="SassAndScssTranslator" type="BundleTransformer.SassAndScss.Translators.SassAndScssTranslator, BundleTransformer.SassAndScss" />
 				</translators>
 			</css>
 		</core>
-		<sassAndScss useNativeMinification="false" />
 	</bundleTransformer>
 </configuration>

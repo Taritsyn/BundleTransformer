@@ -47,6 +47,7 @@
 
 			var commonStylesBundle = new Bundle("~/CommonStyles", cssTransformer);
 			commonStylesBundle.AddFile("~/Content/Site.css");
+			commonStylesBundle.AddFile("~/Content/BundleTransformer.css");
 			commonStylesBundle.AddFile("~/AlternativeContent/css/TestCssComponentsPaths.css");
 			commonStylesBundle.AddFile("~/Content/themes/base/jquery.ui.core.css");
 			commonStylesBundle.AddFile("~/Content/themes/base/jquery.ui.theme.css");
@@ -73,7 +74,7 @@
 			commonScriptsBundle.AddFile("~/Scripts/jquery.validate.js");
 			commonScriptsBundle.AddFile("~/Scripts/jquery.validate.unobtrusive.js");
 			commonScriptsBundle.AddFile("~/Scripts/jquery.unobtrusive-ajax.js");
-			commonScriptsBundle.AddFile("~/Scripts/knockout-2.0.0.js");
+			commonScriptsBundle.AddFile("~/Scripts/knockout-2.1.0beta.js");
 			commonScriptsBundle.AddFile("~/Scripts/AjaxLogin.js");
 			commonScriptsBundle.AddFile("~/Scripts/TestCoffeeScript.coffee");
 			commonScriptsBundle.Orderer = nullOrderer;
@@ -87,7 +88,7 @@
 			BundleTable.Bundles.Add(jqueryUiStylesDirectoryBundle);
 
 			var scriptsDirectoryBundle = new Bundle("~/ScriptsDirectory", new JsTransformer(
-				new[] { "*-vsdoc.js", "*.all.js", "_references.js" }));
+				new[] { "*.all.js", "_references.js" }));
 			scriptsDirectoryBundle.AddDirectory("~/Scripts/", "*.js");
 
 			BundleTable.Bundles.Add(scriptsDirectoryBundle);

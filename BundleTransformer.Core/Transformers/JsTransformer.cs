@@ -295,7 +295,9 @@
 		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets)
 		{
 			var jsFileExtensionsFilter = new JsFileExtensionsFilter(
-				Utils.ConvertToStringCollection(_coreConfiguration.JsFilesWithMicrosoftStyleExtensions, ';', true))
+				Utils.ConvertToStringCollection(
+					_coreConfiguration.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','), 
+					',', true))
 			{
 			    IsDebugMode = _isDebugMode
 			};

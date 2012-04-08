@@ -1,0 +1,31 @@
+
+
+   ----------------------------------------------------------------------
+             README file for Bundle Transformer YUI 1.2.1 Beta
+ 
+   ----------------------------------------------------------------------
+
+          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+
+   ===========
+   DESCRIPTION
+   ===========
+   BundleTransformer.Yui contains 2 minifier-adapters: YuiCssMinifier 
+   (for minification of CSS-code) and YuiJsMinifier (for minification of 
+   JS-code). These adapters perform minification using the YUI Compressor 
+   for .NET (http://yuicompressor.codeplex.com).
+
+   ====================
+   POST-INSTALL ACTIONS
+   ====================
+   After you install this library, you must modify Web.config file. 
+   In defaultMinifier attribute of element 
+   \configuration\bundleTransformer\core\css must be set value equal 
+   to YuiCssMinifier, and in same attribute of element 
+   \configuration\bundleTransformer\core\js - YuiJsMinifier.
+   
+   =============
+   DOCUMENTATION
+   =============
+   See documentation on CodePlex - 
+   http://bundletransformer.codeplex.com/documentation

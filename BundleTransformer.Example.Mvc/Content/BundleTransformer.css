@@ -1,0 +1,39 @@
+﻿.site-title
+{
+	margin: 20px 0 5px -5px;
+}
+
+.site-title IMG
+{
+	width: 336px;
+	height: 94px;
+	border: none;
+}
+
+A.linkedin
+{
+	float: left;
+	display: block;
+	padding-left: 17px;
+	width: 16px;
+	height: 24px;
+	background: url("../Content/images/linkedin.png") no-repeat;
+	text-indent: -9999px;
+}
+
+CODE
+{
+	font-size: 1.0em;
+	font-family: Courier New;
+}
+
+/********************
+*   Mobile Styles   *
+********************/
+@media only screen and (max-width: 850px) 
+{
+	.site-title
+	{
+		padding-left: 0;
+	}
+}

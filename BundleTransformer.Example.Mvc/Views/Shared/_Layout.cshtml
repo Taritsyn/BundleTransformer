@@ -1,10 +1,10 @@
 @using System.Web.Optimization
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
         <meta charset="utf-8" />
-        <title>@ViewBag.Title - My ASP.NET MVC Application</title>
+        <title>@ViewBag.Title - Bundle Transformer Example MVC Application</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 		<link href="@BundleTable.Bundles.ResolveBundleUrl("~/CommonStyles")" rel="stylesheet" type="text/css" />
         <script src="@BundleTable.Bundles.ResolveBundleUrl("~/Modernizr")"></script>
@@ -14,7 +14,9 @@
         <header>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p class="site-title">@Html.ActionLink("your logo here.", "Index", "Home")</p>
+                    <p class="site-title">
+						<a href="@Url.Action("Index", "Home")"><img src="../../Content/images/bundle_transformer_logo.png" alt="Bundle Transformer Logo" /></a>
+					</p>
                 </div>
                 <div class="float-right">
                     <section id="login">
@@ -39,12 +41,12 @@
         <footer>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p>&copy; @DateTime.Now.Year - My ASP.NET MVC Application</p>
+                    <p>&copy; @DateTime.Now.Year Andrey Taritsyn</p>
                 </div>
                 <div class="float-right">
                     <ul id="social">
-                        <li><a href="http://facebook.com" class="facebook">Facebook</a></li>
-                        <li><a href="http://twitter.com" class="twitter">Twitter</a></li>
+                        <li><a href="http://www.linkedin.com/in/taritsyn" target="_blank" class="linkedin">LinkedIn</a></li>
+                        <li><a href="http://twitter.com/taritsyn" target="_blank" class="twitter">Twitter</a></li>
                     </ul>
                 </div>
             </div>

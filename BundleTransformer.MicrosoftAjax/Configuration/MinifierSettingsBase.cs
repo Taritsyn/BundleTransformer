@@ -42,7 +42,7 @@
 
 		/// <summary>
 		/// Gets or sets a output mode:
-		/// SingleLine - output all code on a single line
+		/// SingleLine - output all code on a single line;
 		/// MultipleLines - break the output into multiple lines to be more human-readable
 		/// </summary>
 		[ConfigurationProperty("outputMode", DefaultValue = OutputMode.SingleLine)]
@@ -75,11 +75,11 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a severity level of errors
-		///		0 - syntax error
-		///		1 - the programmer probably did not intend to do this
-		///		2 - this can lead to problems in the future
-		///		3 - this can lead to performance problems
+		/// Gets or sets a severity level of errors:
+		///		0 - syntax error;
+		///		1 - the programmer probably did not intend to do this;
+		///		2 - this can lead to problems in the future;
+		///		3 - this can lead to performance problems;
 		///		4 - this is just not right
 		/// </summary>
 		[ConfigurationProperty("severity", DefaultValue = 0)]

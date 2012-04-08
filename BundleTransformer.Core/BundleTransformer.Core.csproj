@@ -112,7 +112,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

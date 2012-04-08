@@ -18,7 +18,7 @@
 		}
 
 		/// <summary>
-		/// Processor .NET-type name
+		/// Gets or sets processor .NET-type name
 		/// </summary>
 		[ConfigurationProperty("type", IsRequired = true)]
 		public string Type

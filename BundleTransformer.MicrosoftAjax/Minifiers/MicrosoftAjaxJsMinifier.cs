@@ -106,8 +106,7 @@
 		}
 
 		/// <summary>
-		/// Eval statements are safe and do not access local variables or functions [true]
-		/// Code run by Eval statements may attempt to access local variables and functions [false]
+		/// EvalTreatment setting
 		/// </summary>
 		public BtEvalTreatment EvalTreatment
 		{
@@ -203,8 +202,8 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to how to rename local variables and functions:
-		/// KeepAll - do not rename local variables and functions
-		/// CrunchAll - rename all local variables and functions to shorter names
+		/// KeepAll - do not rename local variables and functions;
+		/// CrunchAll - rename all local variables and functions to shorter names;
 		/// KeepLocalizationVars - rename all local variables and functions that do NOT start with L_
 		/// </summary>
 		public BtLocalRenaming LocalRenaming
@@ -271,7 +270,7 @@
 
 		/// <summary>
 		/// Gets or sets a output mode:
-		/// SingleLine - output all code on a single line
+		/// SingleLine - output all code on a single line;
 		/// MultipleLines - break the output into multiple lines to be more human-readable
 		/// </summary>
 		public override BtOutputMode OutputMode

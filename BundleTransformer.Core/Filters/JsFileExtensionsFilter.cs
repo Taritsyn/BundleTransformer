@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Text.RegularExpressions;
 
 	using Assets;
 	using FileSystem;
@@ -18,9 +19,9 @@
 	public sealed class JsFileExtensionsFilter : FileExtensionsFilterBase
 	{
 		/// <summary>
-		/// List of JS-files with Microsoft-style extensions
+		/// List of regular expressions of JS-files with Microsoft-style extensions
 		/// </summary>
-		private readonly string[] _jsFilesWithMicrosoftStyleExtensions;
+		private readonly List<Regex> _jsFilesWithMsStyleExtensionsRegExps;
 
 		/// <summary>
 		/// Extensions of JS-files for debug mode (standard style)
@@ -59,7 +60,31 @@
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions, 
 			IFileSystemWrapper fileSystemWrapper) : base(fileSystemWrapper)
 		{
-			_jsFilesWithMicrosoftStyleExtensions = jsFilesWithMsStyleExtensions;
+			var jsFileRegExps = new List<Regex>();
+			if (jsFilesWithMsStyleExtensions.Length > 0)
+			{
+				foreach (var jsFileName in jsFilesWithMsStyleExtensions)
+				{
+					if (!String.IsNullOrWhiteSpace(jsFileName))
+					{
+						string jsFileNamePattern = jsFileName
+							.Trim()
+							.Replace(@".", @"\.")
+							;
+
+						if (jsFileNamePattern.IndexOf("$version$") != -1)
+						{
+							jsFileNamePattern = jsFileNamePattern.Replace("$version$", @"((\d+\.)*\d+(alpha|beta|rc)?)");
+						}
+						jsFileNamePattern = "^" + jsFileNamePattern + "$";
+
+						jsFileRegExps.Add(new Regex(jsFileNamePattern,
+							RegexOptions.IgnoreCase | RegexOptions.Compiled));
+					}
+				}
+			}
+
+			_jsFilesWithMsStyleExtensionsRegExps = jsFileRegExps;
 		}
 
 
@@ -145,9 +170,16 @@
 		{
 			string assetName = Path.GetFileName(assetPath);
 			string newAssetName = Asset.RemoveAdditionalJsFileExtension(assetName);
-			bool isJsFileWithMsStyleExtension = (_jsFilesWithMicrosoftStyleExtensions
-				.Where(f => f.ToUpperInvariant() == newAssetName.ToUpperInvariant())
-				.Count() > 0);
+			bool isJsFileWithMsStyleExtension = false;
+
+			foreach (var jsFileWithMsStyleExtensionRegExp in _jsFilesWithMsStyleExtensionsRegExps)
+			{
+				if (jsFileWithMsStyleExtensionRegExp.IsMatch(newAssetName))
+				{
+					isJsFileWithMsStyleExtension = true;
+					break;
+				}
+			}
 
 			return isJsFileWithMsStyleExtension;
 		}

@@ -1,6 +1,11 @@
 ﻿$bg-color: #7AC0DA;
 $caption-color: #FFFFFF;
 
+@mixin visible
+{
+	display: block;
+}
+
 @mixin rounded-corners ($radius: 5px)
 {
 	border-radius: $radius;
@@ -11,7 +16,7 @@ $caption-color: #FFFFFF;
 .translators #scss
 {
 	float: left;
-	display: block;
+	@include visible;
 	padding: 0.2em 0.5em 0.2em 0.5em;
 	background-color: $bg-color;
 	color: $caption-color;

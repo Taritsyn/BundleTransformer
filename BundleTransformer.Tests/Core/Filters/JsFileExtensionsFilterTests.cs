@@ -18,7 +18,7 @@
 
 		private readonly string[] _jsFilesWithMicrosoftStyleExtensions =
 			new[] { "MicrosoftAjax.js", "MicrosoftMvcAjax.js", 
-				"MicrosoftMvcValidation.js", "knockout-2.0.0.js" };
+				"MicrosoftMvcValidation.js", "knockout-$version$.js" };
 		private HttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 		private IList<IAsset> _testAssets;
@@ -70,15 +70,15 @@
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.debug.js")))
+				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.debug.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js")))
+				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.min.js")))
+				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.min.js")))
 				.Returns(false)
 				;
 
@@ -101,7 +101,7 @@
 				_applicationInfo, _fileSystemWrapper);
 			var microsoftAjaxAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js"),
 				_applicationInfo, _fileSystemWrapper);
-			var knockoutAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js"),
+			var knockoutAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.js"),
 				_applicationInfo, _fileSystemWrapper);
 			var modernizrAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"),
 				_applicationInfo, _fileSystemWrapper);
@@ -142,7 +142,7 @@
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"), jqueryAsset.Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.js"), jqueryUiAsset.Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js"), microsoftAjaxAsset.Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.debug.js"), knockoutAsset.Path);
+			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.debug.js"), knockoutAsset.Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"), modernizrAsset.Path);
 			Assert.AreNotEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.debug.js"), modernizrAsset.Path);
 
@@ -176,7 +176,7 @@
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.min.js"), jqueryAsset.Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.min.js"), jqueryUiAsset.Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.js"), microsoftAjaxAsset.Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js"), knockoutAsset.Path);
+			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.js"), knockoutAsset.Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"), modernizrAsset.Path);
 			Assert.AreNotEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.min.js"), modernizrAsset.Path);
 

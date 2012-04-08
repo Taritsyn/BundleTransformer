@@ -20,7 +20,7 @@
 		/// <summary>
 		/// Gets or sets list of JS-files with Microsoft-style extensions
 		/// </summary>
-		[ConfigurationProperty("jsFilesWithMicrosoftStyleExtensions", DefaultValue = "")]
+		[ConfigurationProperty("jsFilesWithMicrosoftStyleExtensions", DefaultValue = "MicrosoftAjax.js,MicrosoftMvcAjax.js,MicrosoftMvcValidation.js,knockout-$version$.js")]
 		public string JsFilesWithMicrosoftStyleExtensions
 		{
 			get { return (string)this["jsFilesWithMicrosoftStyleExtensions"]; }

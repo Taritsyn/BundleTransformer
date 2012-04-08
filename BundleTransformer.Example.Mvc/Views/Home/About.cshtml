@@ -1,59 +1,29 @@
 ﻿@{
-    ViewBag.Title = "About";
+	ViewBag.Title = "About Bundle Transformer";
 }
 
 <hgroup class="title">
-    <h1>@ViewBag.Title.</h1>
-    <h2>@ViewBag.Message</h2>
+    <h1>@ViewBag.Title</h1>
 </hgroup>
 
 <article>
-    <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin luctus tincidunt justo nec tempor. 
-        Aliquam erat volutpat. Fusce facilisis ullamcorper consequat. Vestibulum non sapien lectus. Nam 
-        mi augue, posuere at tempus vel, dignissim vitae nulla. Nullam at quam eu sapien mattis ultrices. 
-        Quisque quis leo mi, at lobortis dolor. Nullam scelerisque facilisis placerat. Fusce a augue 
-        erat, malesuada euismod dui. Duis iaculis risus id felis volutpat elementum. Fusce blandit iaculis 
-        quam a cursus. Cras varius tincidunt cursus. Morbi justo eros, adipiscing ac placerat sed, posuere 
-        et mi. Suspendisse vulputate viverra aliquet. Duis non enim a nibh consequat mollis ac tempor 
-        lorem. Phasellus elit leo, semper eu luctus et, suscipit at lacus. In hac habitasse platea 
-        dictumst. Duis dignissim justo sit amet nulla pulvinar sodales.
-    </p>
-
-    <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin luctus tincidunt justo nec tempor. 
-        Aliquam erat volutpat. Fusce facilisis ullamcorper consequat. Vestibulum non sapien lectus. Nam 
-        mi augue, posuere at tempus vel, dignissim vitae nulla. Nullam at quam eu sapien mattis ultrices. 
-        Quisque quis leo mi, at lobortis dolor. Nullam scelerisque facilisis placerat. Fusce a augue 
-        erat, malesuada euismod dui. Duis iaculis risus id felis volutpat elementum. Fusce blandit iaculis 
-        quam a cursus. Cras varius tincidunt cursus. Morbi justo eros, adipiscing ac placerat sed, posuere 
-        et mi. Suspendisse vulputate viverra aliquet. Duis non enim a nibh consequat mollis ac tempor 
-        lorem. Phasellus elit leo, semper eu luctus et, suscipit at lacus. In hac habitasse platea 
-        dictumst. Duis dignissim justo sit amet nulla pulvinar sodales.
-    </p>
-
-    <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin luctus tincidunt justo nec tempor. 
-        Aliquam erat volutpat. Fusce facilisis ullamcorper consequat. Vestibulum non sapien lectus. Nam 
-        mi augue, posuere at tempus vel, dignissim vitae nulla. Nullam at quam eu sapien mattis ultrices. 
-        Quisque quis leo mi, at lobortis dolor. Nullam scelerisque facilisis placerat. Fusce a augue 
-        erat, malesuada euismod dui. Duis iaculis risus id felis volutpat elementum. Fusce blandit iaculis 
-        quam a cursus. Cras varius tincidunt cursus. Morbi justo eros, adipiscing ac placerat sed, posuere 
-        et mi. Suspendisse vulputate viverra aliquet. Duis non enim a nibh consequat mollis ac tempor 
-        lorem. Phasellus elit leo, semper eu luctus et, suscipit at lacus. In hac habitasse platea 
-        dictumst. Duis dignissim justo sit amet nulla pulvinar sodales.
-    </p>
+<p>Bundle Transformer - a modular extension for <a href="http://nuget.org/packages/microsoft.web.optimization" target="_blank"> System.Web.Optimization</a> (also known as the ASP.NET Bundling and Minification). Classes <code>CssTransformer</code> and <code>JsTransformer</code>, included in the core of Bundle Transformer, implement interface <code>IBundleTransform</code>. They are intended to replace the standard classes <code>CssMinify</code> and <code>JsMinify</code>.</p>
+<p>The main differences classes <code>CssTransformer</code> and <code>JsTransformer</code> from standard implementations: support for debugging (in debug mode disabled code minification), automatic removal of duplicate assets, ability to exclude unnecessary assets when adding assets from  a directory, support processing of JS-files with <code>*.debug.js</code> extensions, does not produce the re-minification of code of pre-minified assets, support automatic transformation of relative paths to absolute in CSS-code  (for <code>CssTransformer</code>), etc. These classes do not produce the minification of code in runtime, but this feature can be added by installing of minifier-adapter (now available adapters based on <a href="http://ajaxmin.codeplex.com/" target="_blank">Microsoft Ajax Minifier </a> and <a href="http://yuicompressor.codeplex.com/" target="_blank">YUI Compressor for .NET</a>). In addition, you can also install translator-adapters that implement the translation of code on intermediate languages (<a href="http://lesscss.org/" target="_blank">LESS</a>, <a href="http://sass-lang.com/" target="_blank">Sass</a>, <a href="http://sass-lang.com/" target="_blank"> SCSS</a> and <a href="http://jashkenas.github.com/coffee-script/" target="_blank"> CoffeeScript</a>).</p>
+<p>This extension will help your web applications successfully pass a most part of the tests in <a href="http://developer.yahoo.com/yslow/" target="_blank">YSlow</a>.</p>
+<h2>NuGet Packages</h2>
+<h3>Core</h3>
+<ul>
+<li><a href="http://nuget.org/packages/BundleTransformer.Core/" target="_blank">Bundle Transformer Core</a> </li>
+</ul>
+<h3>Translators</h3>
+<ul>
+<li><a href="http://nuget.org/packages/BundleTransformer.Less/" target="_blank">Bundle Transformer LESS</a> </li>
+<li><a href="http://nuget.org/packages/BundleTransformer.SassAndScss/" target="_blank">Bundle Transformer Sass and SCSS</a> </li>
+<li><a href="http://nuget.org/packages/BundleTransformer.CoffeeScript/" target="_blank">Bundle Transformer CoffeeScript</a> </li>
+</ul>
+<h3>Minifiers</h3>
+<ul>
+<li><a href="http://nuget.org/packages/BundleTransformer.MicrosoftAjax/" target="_blank">Bundle Transformer Microsoft Ajax</a> </li>
+<li><a href="http://nuget.org/packages/BundleTransformer.Yui" target="_blank">Bundle Transformer YUI</a> </li>
+</ul>
 </article>
-
-<aside>
-    <h3>Aside Title</h3>
-    <p>
-        Fusce facilisis ullamcorper consequat. Vestibulum non sapien lectus. Nam 
-        mi augue, posuere at tempus vel, dignissim vitae nulla.
-    </p>
-    <ul>
-        <li>@Html.ActionLink("Home", "Index", "Home")</li>
-        <li>@Html.ActionLink("About", "About", "Home")</li>
-        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-    </ul>
-</aside>
