@@ -74,7 +74,7 @@
 			commonScriptsBundle.AddFile("~/Scripts/jquery.validate.js");
 			commonScriptsBundle.AddFile("~/Scripts/jquery.validate.unobtrusive.js");
 			commonScriptsBundle.AddFile("~/Scripts/jquery.unobtrusive-ajax.js");
-			commonScriptsBundle.AddFile("~/Scripts/knockout-2.1.0beta.js");
+			commonScriptsBundle.AddFile("~/Scripts/knockout-2.1.0rc.js");
 			commonScriptsBundle.AddFile("~/Scripts/AjaxLogin.js");
 			commonScriptsBundle.AddFile("~/Scripts/TestCoffeeScript.coffee");
 			commonScriptsBundle.Orderer = nullOrderer;

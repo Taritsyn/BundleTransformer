@@ -198,8 +198,8 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\knockout-2.1.0beta.debug.js" />
-    <Content Include="Scripts\knockout-2.1.0beta.js" />
+    <Content Include="Scripts\knockout-2.1.0rc.debug.js" />
+    <Content Include="Scripts\knockout-2.1.0rc.js" />
     <Content Include="Scripts\MicrosoftAjax.debug.js" />
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
