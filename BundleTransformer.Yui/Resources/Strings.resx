@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Minifiers_YuiMinificationFailed" xml:space="preserve">
-    <value>During minification of {0}-code by YUI Minifier, readed from the file {1}, error has occurred.</value>
+    <value>During minification of {0}-code, readed from the file {1}, by YUI Minifier error has occurred.</value>
   </data>
 </root>

@@ -20,11 +20,6 @@
 	public sealed class CoffeeScriptTranslator : ITranslator
 	{
 		/// <summary>
-		/// CoffeeScript-compiler
-		/// </summary>
-		private CoffeeScriptCompiler _coffeeScriptCompiler;
-
-		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
@@ -44,8 +39,6 @@
 		/// </summary>
 		public CoffeeScriptTranslator()
 		{
-			_coffeeScriptCompiler = new CoffeeScriptCompiler(new InstanceProvider<IJavaScriptRuntime>(
-				() => new IEJavaScriptRuntime()));
 		}
 
 		/// <summary>
@@ -78,14 +71,18 @@
 			{
 				string newContent = String.Empty;
 
-				try
+				using (var coffeeScriptCompiler = new CoffeeScriptCompiler(new InstanceProvider<IJavaScriptRuntime>(
+					() => new IEJavaScriptRuntime())))
 				{
-					newContent = _coffeeScriptCompiler.Compile(asset.Content);
-				}
-				catch (Exception e)
-				{
-					throw new AssetTranslationException(
-						String.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed, asset.Path), e);
+					try
+					{
+						newContent = coffeeScriptCompiler.Compile(asset.Content);
+					}
+					catch (Exception e)
+					{
+						throw new AssetTranslationException(
+							String.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed, asset.Path), e);
+					}
 				}
 
 				asset.Content = newContent;
@@ -113,12 +110,6 @@
 			if (!_disposed)
 			{
 				_disposed = true;
-
-				if (_coffeeScriptCompiler != null)
-				{
-					_coffeeScriptCompiler.Dispose();
-					_coffeeScriptCompiler = null;
-				}
 			}
 		}
 	}

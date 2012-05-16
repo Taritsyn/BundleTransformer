@@ -1,11 +1,12 @@
 
 
    ----------------------------------------------------------------------
-        README file for Bundle Transformer Microsoft Ajax 1.2.2 Beta
+        README file for Bundle Transformer: Microsoft Ajax 1.3.0 Beta
  
    ----------------------------------------------------------------------
 
           Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+		  
 
    ===========
    DESCRIPTION
@@ -19,12 +20,14 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Microsoft Ajax Minifier 4.48.
+   Added support of Microsoft Ajax Minifier 4.52.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
-   After you install this library, you must modify Web.config file.
+   To make MicrosoftAjaxCssMinifier is the default CSS-minifier and 
+   MicrosoftAjaxJsMinifier is the default JS-minifier, you need to make
+   changes to the Web.config file. 
    In defaultMinifier attribute of element 
    \configuration\bundleTransformer\core\css must be set value equal to 
    MicrosoftAjaxCssMinifier, and in same attribute of element 

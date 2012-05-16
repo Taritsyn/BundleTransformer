@@ -31,32 +31,32 @@
 			var fileSystemMock = new Mock<IFileSystemWrapper>();
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css")))
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(STYLES_DIRECTORY_PATH, "Site.min.css")))
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "Site.min.css")))
 				.Returns(false)
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(STYLES_DIRECTORY_PATH, 
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, 
 					@"\themes\base\jquery.ui.accordion.css")))
 				.Returns(false)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(STYLES_DIRECTORY_PATH, 
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, 
 					@"\themes\base\jquery.ui.accordion.min.css")))
 				.Returns(true)
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 
+				.Setup(fs => fs.FileExists(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 
 					@"\css\TestCssComponentsPaths.css")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 
+				.Setup(fs => fs.FileExists(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 
 					@"\css\TestCssComponentsPaths.min.css")))
 				.Returns(true)
 				;

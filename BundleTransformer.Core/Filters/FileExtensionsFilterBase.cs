@@ -74,7 +74,7 @@
 			foreach (string extension in extensions)
 			{
 				changedFilePath = Path.ChangeExtension(assetPath, extension);
-				if (_fileSystemWrapper.FileExist(changedFilePath))
+				if (_fileSystemWrapper.FileExists(changedFilePath))
 				{
 					return changedFilePath;
 				}

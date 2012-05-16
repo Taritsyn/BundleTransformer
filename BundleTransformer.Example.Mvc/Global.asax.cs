@@ -62,7 +62,7 @@
 
 			BundleTable.Bundles.Add(commonStylesBundle);
 			var modernizrBundle = new Bundle("~/Modernizr", jsTransformer);
-			modernizrBundle.AddFile("~/Scripts/modernizr-2.0.6-development-only.js");
+			modernizrBundle.AddFile("~/Scripts/modernizr-2.5.3.js");
 			modernizrBundle.Orderer = nullOrderer;
 
 			BundleTable.Bundles.Add(modernizrBundle);
@@ -74,7 +74,7 @@
 			commonScriptsBundle.AddFile("~/Scripts/jquery.validate.js");
 			commonScriptsBundle.AddFile("~/Scripts/jquery.validate.unobtrusive.js");
 			commonScriptsBundle.AddFile("~/Scripts/jquery.unobtrusive-ajax.js");
-			commonScriptsBundle.AddFile("~/Scripts/knockout-2.1.0rc.js");
+			commonScriptsBundle.AddFile("~/Scripts/knockout-2.1.0.js");
 			commonScriptsBundle.AddFile("~/Scripts/AjaxLogin.js");
 			commonScriptsBundle.AddFile("~/Scripts/TestCoffeeScript.coffee");
 			commonScriptsBundle.Orderer = nullOrderer;

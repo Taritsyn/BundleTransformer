@@ -17,6 +17,7 @@
 				<xs:element name="sassAndScss" type="SassAndScssSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="microsoftAjax" type="MicrosoftAjaxSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="yui" type="YuiSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="closure" type="ClosureSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 			</xs:all> 
 		</xs:complexType>
 	</xs:element>
@@ -378,7 +379,7 @@ Leave debug statements [false].</xs:documentation>
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:complexType name="MicrosoftAjaxMinifierSettingsBase_SchemaType">
+	<xs:complexType name="MicrosoftAjaxMinifierSettingsBase_SchemaType" abstract="true">
 		<xs:attribute name="allowEmbeddedAspNetBlocks" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Embedded ASP.NET blocks (&lt;% %&gt;) should be recognized and output as is</xs:documentation>
@@ -522,7 +523,7 @@ MultipleLines - break the output into multiple lines to be more human-readable</
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:complexType name="YuiMinifierSettingsBase_SchemaType">
+	<xs:complexType name="YuiMinifierSettingsBase_SchemaType" abstract="true">
 		<xs:attribute name="lineBreakPosition" type="xs:int" use="optional" default="-1">
 			<xs:annotation>
 				<xs:documentation>Column number, after which must be inserted a line break.
@@ -532,4 +533,128 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /YUI settings -->
+	
+	<!-- Closure settings -->
+	<xs:complexType name="ClosureSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Closure Minifier</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="js" type="ClosureJsSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="ClosureJsSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of minification JS-assets</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="remote" type="ClosureRemoteJsMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="local" type="ClosureLocalJsMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="ClosureRemoteJsMinifierSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Closure remote JS-minifier</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ClosureJsMinifierSettingsBase_SchemaType">
+				<xs:attribute name="closureCompilerServiceApiUrl" type="xs:string" use="optional" default="http://closure-compiler.appspot.com/compile">
+					<xs:annotation>
+						<xs:documentation>URL of Google Closure Compiler Service API</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="excludeDefaultExterns" type="Boolean_SchemaType" use="optional" default="false">
+					<xs:annotation>
+						<xs:documentation>Flag for whether to exclude common externs such as document and all its methods</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="ClosureLocalJsMinifierSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Closure local JS-minifier</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ClosureJsMinifierSettingsBase_SchemaType">
+				<xs:attribute name="javaVirtualMachinePath" type="xs:string" use="optional" default="">
+					<xs:annotation>
+						<xs:documentation>Path to Java Virtual Machine</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="closureCompilerApplicationPath" type="xs:string" use="optional" default="">
+					<xs:annotation>
+						<xs:documentation>Path to Google Closure Compiler Application</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="languageSpec" use="optional" default="EcmaScript3">
+					<xs:annotation>
+						<xs:documentation>Language spec that input sources conform</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="EcmaScript3" />
+							<xs:enumeration value="EcmaScript5" />
+							<xs:enumeration value="EcmaScript5Strict" />
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="thirdParty" type="Boolean_SchemaType" use="optional" default="true">
+					<xs:annotation>
+						<xs:documentation>Flag for whether to check source validity but do not enforce 
+Closure style rules and conventions
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="ClosureJsMinifierSettingsBase_SchemaType" abstract="true">
+		<xs:attribute name="compilationLevel" use="optional" default="Simple">
+			<xs:annotation>
+				<xs:documentation>Degree of compression and optimization to apply to your JavaScript.
+There are 3 possible compilation levels:
+WhitespaceOnly - just removes whitespace and comments from your JavaScript;
+Simple - performs compression and optimization that does not interfere with
+the interaction between the compiled JavaScript and other JavaScript.
+This level renames only local variables;
+Advanced - achieves the highest level of compression by renaming symbols in your
+JavaScript. When using this type of compilation you must perform extra steps
+to preserve references to external symbols.
+				</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="WhitespaceOnly" />
+					<xs:enumeration value="Simple" />
+					<xs:enumeration value="Advanced" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="prettyPrint" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to add line breaks and indentation to its output code to make the code easier for humans to read</xs:documentation>
+			</xs:annotation>			
+		</xs:attribute>
+		<xs:attribute name="severity" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>Severity level of errors
+0 - only syntax error messages;
+1 - only syntax error messages and warnings generated by the optimization;
+2 - in addition to syntax errors and warnings generated by optimization passes, outputs warnings generated by selected code-checking passes;
+3 - in addition to syntax errors and warnings generated by optimization passes, outputs warnings generated by all code-checking passes.</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="0" />
+					<xs:maxInclusive value="3" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /Closure settings -->
 </xs:schema>

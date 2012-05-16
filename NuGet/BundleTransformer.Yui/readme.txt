@@ -1,11 +1,12 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer YUI 1.2.1 Beta
+             README file for Bundle Transformer: YUI 1.3.0 Beta
  
    ----------------------------------------------------------------------
 
           Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+		  
 
    ===========
    DESCRIPTION
@@ -18,7 +19,9 @@
    ====================
    POST-INSTALL ACTIONS
    ====================
-   After you install this library, you must modify Web.config file. 
+   To make YuiCssMinifier is the default CSS-minifier and YuiJsMinifier 
+   is the default JS-minifier, you need to make changes to the 
+   Web.config file. 
    In defaultMinifier attribute of element 
    \configuration\bundleTransformer\core\css must be set value equal 
    to YuiCssMinifier, and in same attribute of element 

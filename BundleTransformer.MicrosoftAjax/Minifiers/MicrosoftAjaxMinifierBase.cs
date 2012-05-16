@@ -9,6 +9,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using CoreStrings = Core.Resources.Strings;
 
 	using BtOutputMode = OutputMode;
 	using Resources;
@@ -82,22 +83,22 @@
 		internal static string FormatContextError(ContextError error)
 		{
 			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_Message, error.Message);
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_ErrorCode, error.ErrorCode);
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_Severity, error.Severity);
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_Subcategory, error.Subcategory);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, error.Message);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, error.ErrorCode);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, error.Severity);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, error.Subcategory);
 			if (!String.IsNullOrWhiteSpace(error.HelpKeyword))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_HelpKeyword, error.HelpKeyword);
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword, error.HelpKeyword);
 			}
 			if (!String.IsNullOrWhiteSpace(error.File))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_File, error.File);
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, error.File);
 			}
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_StartLine, error.StartLine);
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_StartColumn, error.StartColumn);
-			errorMessage.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_EndLine, error.EndLine);
-			errorMessage.AppendFormat("{0}: {1}", Strings.ErrorDetails_EndColumn, error.EndColumn);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartLine, error.StartLine);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn, error.StartColumn);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndLine, error.EndLine);
+			errorMessage.AppendFormat("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, error.EndColumn);
 
 			return errorMessage.ToString();
 		}

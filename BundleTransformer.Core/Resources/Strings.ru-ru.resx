@@ -129,6 +129,9 @@
   <data name="Common_EnumValueConversionFailed" xml:space="preserve">
     <value>Невозможно преобразовать значение "{0}" перечислимого типа "{1}" в значение перечислимого типа "{2}"!</value>
   </data>
+  <data name="Common_EnumValueToCodeConversionFailed" xml:space="preserve">
+    <value>Не удается найти строковый код, соответствующий значению {0} перечислимого типа {1}!</value>
+  </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>Файл {0} не существует!</value>
   </data>
@@ -149,5 +152,44 @@
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>Минимизатор {0}-кода с именем "{1}" не зарегистрирован в конфигурационном файле!</value>
+  </data>
+  <data name="ErrorDetails_ColumnNumber" xml:space="preserve">
+    <value>Номер столбца</value>
+  </data>
+  <data name="ErrorDetails_EndColumn" xml:space="preserve">
+    <value>Конечный символ</value>
+  </data>
+  <data name="ErrorDetails_EndLine" xml:space="preserve">
+    <value>Конечная строка</value>
+  </data>
+  <data name="ErrorDetails_ErrorCode" xml:space="preserve">
+    <value>Код ошибки</value>
+  </data>
+  <data name="ErrorDetails_File" xml:space="preserve">
+    <value>Файл</value>
+  </data>
+  <data name="ErrorDetails_HelpKeyword" xml:space="preserve">
+    <value>Ключевые слова из справки</value>
+  </data>
+  <data name="ErrorDetails_LineNumber" xml:space="preserve">
+    <value>Номер строки</value>
+  </data>
+  <data name="ErrorDetails_Message" xml:space="preserve">
+    <value>Сообщение об ошибке</value>
+  </data>
+  <data name="ErrorDetails_Severity" xml:space="preserve">
+    <value>Серьезность</value>
+  </data>
+  <data name="ErrorDetails_SourceError" xml:space="preserve">
+    <value>Источник ошибки</value>
+  </data>
+  <data name="ErrorDetails_StartColumn" xml:space="preserve">
+    <value>Начальный символ</value>
+  </data>
+  <data name="ErrorDetails_StartLine" xml:space="preserve">
+    <value>Начальная строка</value>
+  </data>
+  <data name="ErrorDetails_Subcategory" xml:space="preserve">
+    <value>Подкатегория</value>
   </data>
 </root>

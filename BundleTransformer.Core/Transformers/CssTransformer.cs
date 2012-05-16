@@ -365,6 +365,8 @@
 			{
 				_disposed = true;
 
+				_coreConfiguration = null;
+
 				if (_translators != null)
 				{
 					_translators.Clear();

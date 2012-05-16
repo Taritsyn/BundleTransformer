@@ -10,8 +10,8 @@
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
-	using CoreStrings = Core.Resources.Strings;
 	using Core.Translators;
+	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
 	using LessStrings = Resources.Strings;
@@ -24,12 +24,12 @@
 		/// <summary>
 		/// CSS relative path resolver
 		/// </summary>
-		private readonly ICssRelativePathResolver _cssRelativePathResolver;
+		private ICssRelativePathResolver _cssRelativePathResolver;
 
 		/// <summary>
 		/// Configuration settings of LESS-translator
 		/// </summary>
-		private readonly LessSettings _lessConfiguration;
+		private LessSettings _lessConfiguration;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -91,11 +91,12 @@
 		private ILessEngine CreateLessEngine(bool enableNativeMinification)
 		{
 			DotlessConfiguration lessEngineConfig = DotlessConfiguration.GetDefault();
-			lessEngineConfig.MapPathsToWeb = true;
+			lessEngineConfig.MapPathsToWeb = false;
 			lessEngineConfig.CacheEnabled = false;
 			lessEngineConfig.DisableUrlRewriting = true;
-			lessEngineConfig.Web = true;
+			lessEngineConfig.Web = false;
 			lessEngineConfig.MinifyOutput = enableNativeMinification;
+			lessEngineConfig.LessSource = typeof(VirtualFileReader);
 
 			var lessEngineFactory = new EngineFactory(lessEngineConfig);
 			ILessEngine lessEngine = lessEngineFactory.GetEngine();
@@ -130,7 +131,7 @@
 				try
 				{
 					newContent = lessEngine.TransformToCss(
-						_cssRelativePathResolver.ResolveImportsRelativePaths(asset.Content, asset.Url), 
+						_cssRelativePathResolver.ResolveImportsRelativePaths(asset.Content, asset.Url),
 						null);
 				}
 				catch (Exception e)
@@ -165,6 +166,9 @@
 			if (!_disposed)
 			{
 				_disposed = true;
+
+				_cssRelativePathResolver = null;
+				_lessConfiguration = null;
 			}
 		}
 	}

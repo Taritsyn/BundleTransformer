@@ -117,38 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ErrorDetails_EndColumn" xml:space="preserve">
-    <value>End column</value>
-  </data>
-  <data name="ErrorDetails_EndLine" xml:space="preserve">
-    <value>End line</value>
-  </data>
-  <data name="ErrorDetails_ErrorCode" xml:space="preserve">
-    <value>Error code</value>
-  </data>
-  <data name="ErrorDetails_File" xml:space="preserve">
-    <value>File</value>
-  </data>
-  <data name="ErrorDetails_HelpKeyword" xml:space="preserve">
-    <value>Help keyword</value>
-  </data>
-  <data name="ErrorDetails_Message" xml:space="preserve">
-    <value>Message</value>
-  </data>
-  <data name="ErrorDetails_Severity" xml:space="preserve">
-    <value>Severity</value>
-  </data>
-  <data name="ErrorDetails_StartColumn" xml:space="preserve">
-    <value>Start column</value>
-  </data>
-  <data name="ErrorDetails_StartLine" xml:space="preserve">
-    <value>Start line</value>
-  </data>
-  <data name="ErrorDetails_Subcategory" xml:space="preserve">
-    <value>Subcategory</value>
-  </data>
   <data name="Minifiers_MicrosoftAjaxMinificationFailed" xml:space="preserve">
-    <value>During minification of {0}-code by Microsoft Ajax Minifier, readed from the file {1}, error has occurred.</value>
+    <value>During minification of {0}-code, readed from the file {1}, by Microsoft Ajax Minifier error has occurred.</value>
   </data>
   <data name="Minifiers_MicrosoftAjaxMinificationSyntaxError" xml:space="preserve">
     <value>During minification of {0}-code by Microsoft Ajax Minifier syntax error has occurred. 

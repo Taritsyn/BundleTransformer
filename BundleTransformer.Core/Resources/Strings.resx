@@ -129,6 +129,9 @@
   <data name="Common_EnumValueConversionFailed" xml:space="preserve">
     <value>Can not convert value '{0}' of enumeration type '{1}' to value of enumeration type '{2}'.</value>
   </data>
+  <data name="Common_EnumValueToCodeConversionFailed" xml:space="preserve">
+    <value>Can't find string code corresponding to the value {0} of enumeration type {1}.</value>
+  </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>File {0} not exist.</value>
   </data>
@@ -149,5 +152,44 @@
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>{0}-minifier with name '{1}' is not registered in configuration file.</value>
+  </data>
+  <data name="ErrorDetails_ColumnNumber" xml:space="preserve">
+    <value>Column number</value>
+  </data>
+  <data name="ErrorDetails_EndColumn" xml:space="preserve">
+    <value>End column</value>
+  </data>
+  <data name="ErrorDetails_EndLine" xml:space="preserve">
+    <value>End line</value>
+  </data>
+  <data name="ErrorDetails_ErrorCode" xml:space="preserve">
+    <value>Error code</value>
+  </data>
+  <data name="ErrorDetails_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="ErrorDetails_HelpKeyword" xml:space="preserve">
+    <value>Help keyword</value>
+  </data>
+  <data name="ErrorDetails_LineNumber" xml:space="preserve">
+    <value>Line number</value>
+  </data>
+  <data name="ErrorDetails_Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="ErrorDetails_Severity" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+  <data name="ErrorDetails_SourceError" xml:space="preserve">
+    <value>Source error</value>
+  </data>
+  <data name="ErrorDetails_StartColumn" xml:space="preserve">
+    <value>Start column</value>
+  </data>
+  <data name="ErrorDetails_StartLine" xml:space="preserve">
+    <value>Start line</value>
+  </data>
+  <data name="ErrorDetails_Subcategory" xml:space="preserve">
+    <value>Subcategory</value>
   </data>
 </root>

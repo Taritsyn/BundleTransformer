@@ -29,7 +29,7 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private readonly MicrosoftAjaxSettings _microsoftAjaxConfiguration;
+		private MicrosoftAjaxSettings _microsoftAjaxConfiguration;
 
 		/// <summary>
 		/// CSS-parser
@@ -314,6 +314,8 @@
 			if (!_disposed)
 			{
 				_disposed = true;
+
+				_microsoftAjaxConfiguration = null;
 
 				if (_cssParser != null)
 				{

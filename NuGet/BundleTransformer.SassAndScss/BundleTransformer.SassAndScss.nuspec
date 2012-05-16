@@ -1,26 +1,27 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>1.2.1-beta</version>
+    <id>BundleTransformer.SassAndScss</id>
+    <version>1.3.0-beta</version>
+	<title>Bundle Transformer: Sass and SCSS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://www.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=358410</iconUrl>
-    <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.2.1-beta]" />
-	  <dependency id="SassAndCoffee.Ruby" version="2.0.2.0" />
-    </dependencies>
-    <references>
-      <reference file="BundleTransformer.SassAndScss.dll" />
-    </references>
-    <id>BundleTransformer.SassAndScss</id>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code.</description>
     <summary>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code.</summary>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
+    <dependencies>
+      <dependency id="BundleTransformer.Core" version="[1.3.0-beta]" />
+	  <dependency id="SassAndCoffee.Ruby" version="2.0.2.0" />
+    </dependencies>
+    <references>
+      <reference file="BundleTransformer.SassAndScss.dll" />
+    </references>
   </metadata>
   <files>
     <file src="..\..\BundleTransformer.SassAndScss\bin\Release\BundleTransformer.SassAndScss.dll" target="lib\net40" />

@@ -1,11 +1,12 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer CoffeeScript 1.2.1 Beta
+         README file for Bundle Transformer: CoffeeScript 1.3.0 Beta
 
    ----------------------------------------------------------------------
 
           Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+		  
 
    ===========
    DESCRIPTION

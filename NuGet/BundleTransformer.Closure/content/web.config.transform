@@ -1,0 +1,17 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="closure" type="BundleTransformer.Closure.Configuration.ClosureSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<js>
+				<minifiers>
+					<add name="ClosureRemoteJsMinifier" type="BundleTransformer.Closure.Minifiers.ClosureRemoteJsMinifier, BundleTransformer.Closure" />
+					<add name="ClosureLocalJsMinifier" type="BundleTransformer.Closure.Minifiers.ClosureLocalJsMinifier, BundleTransformer.Closure" />
+				</minifiers>
+			</js>
+		</core>
+	</bundleTransformer>
+</configuration>

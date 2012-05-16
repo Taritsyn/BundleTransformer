@@ -31,67 +31,67 @@
 
 			var fileSystemMock = new Mock<IFileSystemWrapper>();
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.debug.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.debug.js")))
 				.Returns(false)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.min.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.min.js")))
 				.Returns(true)
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.debug.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.debug.js")))
 				.Returns(false)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.min.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-ui-1.8.11.min.js")))
 				.Returns(true)
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.min.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.min.js")))
 				.Returns(false)
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.debug.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.debug.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.min.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.1.0beta.min.js")))
 				.Returns(false)
 				;
 
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.debug.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.debug.js")))
 				.Returns(false)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExist(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.min.js")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.min.js")))
 				.Returns(false)
 				;
 

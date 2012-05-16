@@ -22,7 +22,7 @@
 		/// <summary>
 		/// Configuration settings of Sass- and SCSS-translator
 		/// </summary>
-		private readonly SassAndScssSettings _sassAndScssConfiguration;
+		private SassAndScssSettings _sassAndScssConfiguration;
 
 		/// <summary>
 		/// Sass- and SCSS-compiler
@@ -133,6 +133,8 @@
 			if (!_disposed)
 			{
 				_disposed = true;
+
+				_sassAndScssConfiguration = null;
 
 				if (_sassCompiler != null)
 				{

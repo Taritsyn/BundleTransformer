@@ -198,17 +198,18 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\knockout-2.1.0rc.debug.js" />
-    <Content Include="Scripts\knockout-2.1.0rc.js" />
+    <Content Include="Scripts\knockout-2.1.0.debug.js" />
+    <Content Include="Scripts\knockout-2.1.0.js" />
     <Content Include="Scripts\MicrosoftAjax.debug.js" />
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.js" />
     <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
     <Content Include="Scripts\MicrosoftMvcValidation.js" />
-    <Content Include="Scripts\modernizr-2.0.6-development-only.js" />
     <None Include="Content\TestScss.scss" />
     <None Include="Scripts\TestCoffeeScript.coffee" />
+    <Content Include="Scripts\modernizr-2.5.3.js" />
+    <Content Include="Scripts\modernizr-2.5.3.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -239,7 +240,9 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -248,6 +251,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BundleTransformer.Closure\BundleTransformer.Closure.csproj">
+      <Project>{C0CA5EE5-832E-4090-A749-CDC0479A35C7}</Project>
+      <Name>BundleTransformer.Closure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj">
       <Project>{0648FFE9-2A1A-4E17-AF5D-AE0048378617}</Project>
       <Name>BundleTransformer.CoffeeScript</Name>
@@ -255,6 +262,10 @@
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
       <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
       <Name>BundleTransformer.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj">
+      <Project>{141FCB8B-27E9-459F-9057-F411107D6E48}</Project>
+      <Name>BundleTransformer.JsMin</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Less\BundleTransformer.Less.csproj">
       <Project>{037761EE-3499-4D8E-95D9-9A71D471B102}</Project>

@@ -29,7 +29,7 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private readonly MicrosoftAjaxSettings _microsoftAjaxConfiguration;
+		private MicrosoftAjaxSettings _microsoftAjaxConfiguration;
 
 		/// <summary>
 		/// Configuration settings of JS-parser
@@ -572,6 +572,7 @@
 			{
 				_disposed = true;
 
+				_microsoftAjaxConfiguration = null;
 				_jsParserConfiguration = null;
 			}
 		}

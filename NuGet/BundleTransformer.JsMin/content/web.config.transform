@@ -1,0 +1,11 @@
+<configuration>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<js>
+				<minifiers>
+					<add name="CrockfordJsMinifier" type="BundleTransformer.JsMin.Minifiers.CrockfordJsMinifier, BundleTransformer.JsMin" />
+				</minifiers>
+			</js>
+		</core>
+	</bundleTransformer>
+</configuration>
