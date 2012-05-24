@@ -1,0 +1,16 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="less" type="BundleTransformer.LessLite.Configuration.LessLiteSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<css>
+				<translators>
+					<add name="LessTranslator" type="BundleTransformer.LessLite.Translators.LessTranslator, BundleTransformer.LessLite" />
+				</translators>
+			</css>
+		</core>
+	</bundleTransformer>
+</configuration>

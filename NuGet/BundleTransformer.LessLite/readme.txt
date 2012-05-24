@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: LESS 1.3.1 Beta
+             README file for Bundle Transformer: LESS Lite 1.0.0 Beta
 
    ----------------------------------------------------------------------
 
@@ -11,10 +11,10 @@
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.Less contains translator-adapter LessTranslator. 
+   BundleTransformer.LessLite contains translator-adapter LessTranslator. 
    This adapter makes translation of LESS-code to CSS-code.
-
-   Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
+   
+   Uses NuGet-package the DotlessClientOnly (http://nuget.org/packages/DotlessClientOnly).
    
    =============
    DOCUMENTATION

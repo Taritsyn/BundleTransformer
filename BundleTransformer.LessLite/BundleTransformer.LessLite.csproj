@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{037761EE-3499-4D8E-95D9-9A71D471B102}</ProjectGuid>
+    <ProjectGuid>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BundleTransformer.Less</RootNamespace>
-    <AssemblyName>BundleTransformer.Less</AssemblyName>
+    <RootNamespace>BundleTransformer.LessLite</RootNamespace>
+    <AssemblyName>BundleTransformer.LessLite</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -32,8 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="dotless.Core">
-      <HintPath>..\packages\dotless.1.3.0.3\lib\dotless.Core.dll</HintPath>
+    <Reference Include="dotless.ClientOnly">
+      <HintPath>..\packages\DotlessClientOnly.1.3.0.3\lib\dotless.ClientOnly.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -47,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
-    <Compile Include="Configuration\LessSettings.cs" />
+    <Compile Include="Configuration\LessLiteSettings.cs" />
     <Compile Include="VirtualFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Strings.ru-ru.Designer.cs">
