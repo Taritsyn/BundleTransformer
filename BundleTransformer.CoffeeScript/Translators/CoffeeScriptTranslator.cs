@@ -10,6 +10,7 @@
 
 	using Core.Assets;
 	using CoreStrings = Core.Resources.Strings;
+	using Core.Resources;
 	using Core.Translators;
 
 	using CoffeeStrings = Resources.Strings;
@@ -51,6 +52,23 @@
 
 
 		/// <summary>
+		/// Translates code of asset written on CoffeeScript to JS-code
+		/// </summary>
+		/// <param name="asset">Asset with code written on CoffeeScript</param>
+		/// <returns>Asset with translated code</returns>
+		public IAsset Translate(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+			}
+
+			InnerTranslate(asset);
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Translates code of assets written on CoffeeScript to JS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on CoffeeScript</param>
@@ -69,26 +87,31 @@
 
 			foreach (var asset in assets.Where(a => a.AssetType == AssetType.CoffeeScript))
 			{
-				string newContent = String.Empty;
-
-				using (var coffeeScriptCompiler = new CoffeeScriptCompiler(new InstanceProvider<IJavaScriptRuntime>(
-					() => new IEJavaScriptRuntime())))
-				{
-					try
-					{
-						newContent = coffeeScriptCompiler.Compile(asset.Content);
-					}
-					catch (Exception e)
-					{
-						throw new AssetTranslationException(
-							String.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed, asset.Path), e);
-					}
-				}
-
-				asset.Content = newContent;
+				InnerTranslate(asset);
 			}
 
 			return assets;
+		}
+
+		private void InnerTranslate(IAsset asset)
+		{
+			string newContent = string.Empty;
+
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(new InstanceProvider<IJavaScriptRuntime>(
+				() => new IEJavaScriptRuntime())))
+			{
+				try
+				{
+					newContent = coffeeScriptCompiler.Compile(asset.Content);
+				}
+				catch (Exception e)
+				{
+					throw new AssetTranslationException(
+						string.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed, asset.Path), e);
+				}
+			}
+
+			asset.Content = newContent;
 		}
 
 		/// <summary>

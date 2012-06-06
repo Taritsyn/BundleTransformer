@@ -65,7 +65,7 @@
 			{
 				foreach (var jsFileName in jsFilesWithMsStyleExtensions)
 				{
-					if (!String.IsNullOrWhiteSpace(jsFileName))
+					if (!string.IsNullOrWhiteSpace(jsFileName))
 					{
 						string jsFileNamePattern = jsFileName
 							.Trim()

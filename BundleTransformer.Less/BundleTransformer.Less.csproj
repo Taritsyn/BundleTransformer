@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
     <Compile Include="Configuration\LessSettings.cs" />
+    <Compile Include="HttpHandlers\LessAssetHandler.cs" />
     <Compile Include="VirtualFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Strings.ru-ru.Designer.cs">

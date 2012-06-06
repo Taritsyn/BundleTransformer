@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-        README file for Bundle Transformer: Sass and SCSS 1.3.0 Beta
+       README file for Bundle Transformer: Sass and SCSS 1.4.0 Beta 2
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,15 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
    SassAndScssTranslator. This adapter makes translation of Sass- and 
-   SCSS-code to CSS-code.
+   SCSS-code to CSS-code. Also contains HTTP-handler 
+   SassAndScssAssetHandler, which is responsible for text output of 
+   translated Sass- or SCSS-asset.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added HTTP-handler SassAndScssAssetHandler, which is responsible for text 
+   output of translated Sass- or SCSS-asset.
    
    =============
    DOCUMENTATION

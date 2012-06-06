@@ -14,7 +14,7 @@
 		/// <summary>
 		/// Configuration settings of LESS-translator
 		/// </summary>
-		private static readonly Lazy<LessSettings> _lessConfiguration =
+		private static readonly Lazy<LessSettings> _lessConfig =
 			new Lazy<LessSettings>(() => (LessSettings)ConfigurationManager.GetSection("bundleTransformer/less"));
 
 		/// <summary>
@@ -24,7 +24,7 @@
 		/// <returns>Configuration settings of LESS-translator</returns>
 		public static LessSettings GetLessConfiguration(this BundleTransformerContext context)
 		{
-			return _lessConfiguration.Value;
+			return _lessConfig.Value;
 		}
 	}
 }

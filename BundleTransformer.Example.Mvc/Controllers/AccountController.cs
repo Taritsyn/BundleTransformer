@@ -1,48 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web.Mvc;
-using System.Web.Security;
-using BundleTransformer.Example.Mvc.Models;
-
-namespace BundleTransformer.Example.Mvc.Controllers
+﻿namespace BundleTransformer.Example.Mvc.Controllers
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Web.Mvc;
+	using System.Web.Security;
+
+	using Models;
 
 	[Authorize]
 	public class AccountController : Controller
 	{
-
 		//
 		// GET: /Account/Login
 
 		[AllowAnonymous]
-		public ActionResult Login()
+		public ActionResult Login(string returnUrl)
 		{
-			return ContextDependentView();
-		}
-
-		//
-		// POST: /Account/JsonLogin
-
-		[AllowAnonymous]
-		[HttpPost]
-		public JsonResult JsonLogin(LoginModel model, string returnUrl)
-		{
-			if (ModelState.IsValid)
-			{
-				if (Membership.ValidateUser(model.UserName, model.Password))
-				{
-					FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
-					return Json(new { success = true, redirect = returnUrl });
-				}
-				else
-				{
-					ModelState.AddModelError("", "The user name or password provided is incorrect.");
-				}
-			}
-
-			// If we got this far, something failed
-			return Json(new { errors = GetErrorsFromModelState() });
+			ViewBag.ReturnUrl = returnUrl;
+			return View();
 		}
 
 		//
@@ -92,35 +68,7 @@ namespace BundleTransformer.Example.Mvc.Controllers
 		[AllowAnonymous]
 		public ActionResult Register()
 		{
-			return ContextDependentView();
-		}
-
-		//
-		// POST: /Account/JsonRegister
-
-		[AllowAnonymous]
-		[HttpPost]
-		public ActionResult JsonRegister(RegisterModel model)
-		{
-			if (ModelState.IsValid)
-			{
-				// Attempt to register the user
-				MembershipCreateStatus createStatus;
-				Membership.CreateUser(model.UserName, model.Password, model.Email, passwordQuestion: null, passwordAnswer: null, isApproved: true, providerUserKey: null, status: out createStatus);
-
-				if (createStatus == MembershipCreateStatus.Success)
-				{
-					FormsAuthentication.SetAuthCookie(model.UserName, createPersistentCookie: false);
-					return Json(new { success = true });
-				}
-				else
-				{
-					ModelState.AddModelError("", ErrorCodeToString(createStatus));
-				}
-			}
-
-			// If we got this far, something failed
-			return Json(new { errors = GetErrorsFromModelState() });
+			return View();
 		}
 
 		//
@@ -201,21 +149,6 @@ namespace BundleTransformer.Example.Mvc.Controllers
 		public ActionResult ChangePasswordSuccess()
 		{
 			return View();
-		}
-
-		private ActionResult ContextDependentView()
-		{
-			string actionName = ControllerContext.RouteData.GetRequiredString("action");
-			if (Request.QueryString["content"] != null)
-			{
-				ViewBag.FormAction = "Json" + actionName;
-				return PartialView();
-			}
-			else
-			{
-				ViewBag.FormAction = actionName;
-				return View();
-			}
 		}
 
 		private IEnumerable<string> GetErrorsFromModelState()

@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.3.1.7705, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebGrease.1.0.0\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -40,16 +43,23 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Optimization">
-      <HintPath>..\packages\Microsoft.Web.Optimization.1.0.0-beta\lib\net40\System.Web.Optimization.dll</HintPath>
+    <Reference Include="System.Web.Optimization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.0.0-beta2\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WebGrease, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebGrease.1.0.0\lib\WebGrease.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\AssetHandlerSettings.cs" />
+    <Compile Include="Constants\ContentType.cs" />
+    <Compile Include="Constants\MinifierName.cs" />
+    <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="EmptyValueException.cs" />
     <Compile Include="Assets\Asset.cs" />
     <Compile Include="Assets\AssetType.cs" />
@@ -64,7 +74,7 @@
     <Compile Include="Configuration\MinifierRegistrationList.cs" />
     <Compile Include="Configuration\TranslatorRegistration.cs" />
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
-    <Compile Include="Constants.cs" />
+    <Compile Include="Constants\Common.cs" />
     <Compile Include="FileSystem\FileSystemWrapper.cs" />
     <Compile Include="FileSystem\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IFileSystemWrapper.cs" />
@@ -78,8 +88,10 @@
     <Compile Include="Filters\JsFileExtensionsFilter.cs" />
     <Compile Include="Filters\JsUnnecessaryAssetsFilter.cs" />
     <Compile Include="Filters\UnnecessaryAssetsFilterBase.cs" />
+    <Compile Include="HttpHandlers\AssetHandlerBase.cs" />
     <Compile Include="Minifiers\AssetMinificationException.cs" />
     <Compile Include="Minifiers\IMinifier.cs" />
+    <Compile Include="Minifiers\MinifierNotFoundException.cs" />
     <Compile Include="Minifiers\NullMinifier.cs" />
     <Compile Include="Orderers\NullOrderer.cs" />
     <Compile Include="Filters\CssRelativePathFilter.cs" />
@@ -103,15 +115,13 @@
     <Compile Include="Translators\ITranslator.cs" />
     <Compile Include="Translators\NullTranslator.cs" />
     <Compile Include="Translators\AssetTranslationException.cs" />
+    <Compile Include="Translators\TranslatorNotFoundException.cs" />
     <Compile Include="Translators\TranslatorWithNativeMinificationBase.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Validators\CssAssetTypesValidator.cs" />
     <Compile Include="Validators\InvalidAssetTypesException.cs" />
     <Compile Include="Validators\IValidator.cs" />
     <Compile Include="Validators\JsAssetTypesValidator.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
@@ -122,6 +132,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

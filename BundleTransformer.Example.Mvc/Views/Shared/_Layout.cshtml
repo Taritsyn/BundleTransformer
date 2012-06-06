@@ -1,20 +1,18 @@
-@using System.Web.Optimization
-
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <title>@ViewBag.Title - Bundle Transformer Example MVC Application</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-		<link href="@BundleTable.Bundles.ResolveBundleUrl("~/CommonStyles")" rel="stylesheet" type="text/css" />
-        <script src="@BundleTable.Bundles.ResolveBundleUrl("~/Modernizr")"></script>
         <meta name="viewport" content="width=device-width" />
+		@Styles.Render("~/CommonStyles")
+		@Scripts.Render("~/Modernizr")
     </head>
     <body>
         <header>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p class="site-title">
+					<p class="site-title">
 						<a href="@Url.Action("Index", "Home")"><img src="../../Content/images/bundle_transformer_logo.png" alt="Bundle Transformer Logo" /></a>
 					</p>
                 </div>
@@ -51,6 +49,8 @@
                 </div>
             </div>
         </footer>
-		<script src="@BundleTable.Bundles.ResolveBundleUrl("~/CommonScripts")"></script>
+
+		@Scripts.Render("~/CommonScripts")
+        @RenderSection("scripts", required: false)
     </body>
 </html>

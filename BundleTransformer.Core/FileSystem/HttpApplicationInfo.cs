@@ -21,7 +21,7 @@
 		/// <summary>
 		/// Constructs instance of HttpApplicationInfo
 		/// </summary>
-		public HttpApplicationInfo() : this(String.Empty, String.Empty)
+		public HttpApplicationInfo() : this(string.Empty, string.Empty)
 		{ }
 
 		/// <summary>

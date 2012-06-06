@@ -21,34 +21,9 @@
 	public sealed class CssTransformer : TransformerBase
 	{
 		/// <summary>
-		/// Pool of minifiers
-		/// </summary>
-		private static readonly Dictionary<string, IMinifier> _minifiersPool = new Dictionary<string, IMinifier>();
-
-		/// <summary>
-		/// Synchronizer of minifiers pool
-		/// </summary>
-		private static readonly object _minifiersPoolSynchronizer = new object();
-
-		/// <summary>
-		/// Pool of translators
-		/// </summary>
-		private static Dictionary<string, ITranslator> _translatorsPool = new Dictionary<string, ITranslator>();
-
-		/// <summary>
-		/// Synchronizer of translators pool
-		/// </summary>
-		private static readonly object _translatorsPoolSynchronizer = new object();
-
-		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
-
-		/// <summary>
-		/// CSS content type
-		/// </summary>
-		internal static string CssContentType = "text/css";
 
 
 		/// <summary>
@@ -101,7 +76,7 @@
 		/// should be ignored when processing</param>
 		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns)
 			: this(minifier, translators, ignorePatterns, 
-				HttpContext.Current.IsDebuggingEnabled)
+				BundleTransformerContext.Current.IsDebugMode)
 		{ }
 
 		/// <summary>
@@ -125,10 +100,10 @@
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		/// <param name="coreConfiguration">Configuration settings of core</param>
+		/// <param name="coreConfig">Configuration settings of core</param>
 		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, 
-			string[] ignorePatterns, bool isDebugMode, CoreSettings coreConfiguration)
-				: base(ignorePatterns, isDebugMode, coreConfiguration)
+			string[] ignorePatterns, bool isDebugMode, CoreSettings coreConfig)
+				: base(ignorePatterns, isDebugMode, coreConfig)
 		{
 			_minifier = minifier ?? CreateDefaultMinifier();
 			_translators = translators ?? CreateDefaultTranslators();
@@ -149,43 +124,15 @@
 		/// <returns>Default CSS-minifier</returns>
 		private IMinifier CreateDefaultMinifier()
 		{
-			string defaultMinifierName = _coreConfiguration.Css.DefaultMinifier;
-			if (String.IsNullOrWhiteSpace(defaultMinifierName))
+			string defaultMinifierName = _coreConfig.Css.DefaultMinifier;
+			if (string.IsNullOrWhiteSpace(defaultMinifierName))
 			{
 				throw new ConfigurationErrorsException(
-					String.Format(Strings.Configuration_DefaultMinifierNotSpecified, "CSS"));
+					string.Format(Strings.Configuration_DefaultMinifierNotSpecified, "CSS"));
 			}
 
-			IMinifier defaultMinifier;
-
-			lock (_minifiersPoolSynchronizer)
-			{
-				if (_minifiersPool.ContainsKey(defaultMinifierName))
-				{
-					defaultMinifier = _minifiersPool[defaultMinifierName];
-				}
-				else
-				{
-					if (defaultMinifierName == Constants.NullMinifierName)
-					{
-						defaultMinifier = new NullMinifier();
-					}
-					else
-					{
-						MinifierRegistration minifierRegistration = _coreConfiguration.Css.Minifiers[defaultMinifierName];
-						if (minifierRegistration == null)
-						{
-							throw new ConfigurationErrorsException(
-								String.Format(Strings.Configuration_MinifierNotRegistered, "CSS", defaultMinifierName));
-						}
-
-						string defaultMinifierFullTypeName = minifierRegistration.Type;
-						defaultMinifier = Utils.CreateInstanceByFullTypeName<IMinifier>(defaultMinifierFullTypeName);
-					}
-
-					_minifiersPool.Add(defaultMinifierName, defaultMinifier);
-				}
-			}
+			IMinifier defaultMinifier = 
+				BundleTransformerContext.Current.GetCssMinifierInstance(defaultMinifierName);
 
 			return defaultMinifier;
 		}
@@ -197,30 +144,15 @@
 		private IList<ITranslator> CreateDefaultTranslators()
 		{
 			var defaultTranslators = new List<ITranslator>();
-			TranslatorRegistrationList translatorRegistrations = _coreConfiguration.Css.Translators;
+			TranslatorRegistrationList translatorRegistrations = _coreConfig.Css.Translators;
 
 			foreach (TranslatorRegistration translatorRegistration in translatorRegistrations)
 			{
 				if (translatorRegistration.Enabled)
 				{
 					string defaultTranslatorName = translatorRegistration.Name;
-					string defaultTranslatorFullTypeName = translatorRegistration.Type;
-
-					ITranslator defaultTranslator;
-
-					lock (_translatorsPoolSynchronizer)
-					{
-						if (_translatorsPool.ContainsKey(defaultTranslatorName))
-						{
-							defaultTranslator = _translatorsPool[defaultTranslatorName];
-						}
-						else
-						{
-							defaultTranslator = Utils.CreateInstanceByFullTypeName<ITranslator>(
-								defaultTranslatorFullTypeName);
-							_translatorsPool.Add(defaultTranslatorName, defaultTranslator);
-						}
-					}
+					ITranslator defaultTranslator = 
+						BundleTransformerContext.Current.GetCssTranslatorInstance(defaultTranslatorName);
 
 					defaultTranslators.Add(defaultTranslator);
 				}
@@ -248,9 +180,9 @@
 			}
 			assets = ResolveRelativePaths(assets);
 
-			bundleResponse.Content = Combine(assets, _coreConfiguration.EnableTracing);
+			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
 			ConfigureBundleResponse(assets, bundleResponse, httpContext);
-			bundleResponse.ContentType = CssContentType;
+			bundleResponse.ContentType = Constants.ContentType.Css;
 		}
 
 		/// <summary>
@@ -365,7 +297,7 @@
 			{
 				_disposed = true;
 
-				_coreConfiguration = null;
+				_coreConfig = null;
 
 				if (_translators != null)
 				{

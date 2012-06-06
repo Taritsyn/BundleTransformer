@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
     <Compile Include="Configuration\LessLiteSettings.cs" />
+    <Compile Include="HttpHandlers\LessAssetHandler.cs" />
     <Compile Include="VirtualFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Strings.ru-ru.Designer.cs">
@@ -81,6 +82,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

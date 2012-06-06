@@ -9,6 +9,7 @@
 	using Core;
 	using Core.Assets;
 	using CoreStrings = Core.Resources.Strings;
+	using Core.Resources;
 	using Core.Translators;
 
 	using Configuration;
@@ -22,7 +23,7 @@
 		/// <summary>
 		/// Configuration settings of Sass- and SCSS-translator
 		/// </summary>
-		private SassAndScssSettings _sassAndScssConfiguration;
+		private SassAndScssSettings _sassAndScssConfig;
 
 		/// <summary>
 		/// Sass- and SCSS-compiler
@@ -44,13 +45,13 @@
 		/// <summary>
 		/// Constructs instance of Sass- and SCSS-translator
 		/// </summary>
-		/// <param name="sassAndScssConfiguration">Configuration settings of Sass- and SCSS-translator</param>
-		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfiguration)
+		/// <param name="sassAndScssConfig">Configuration settings of Sass- and SCSS-translator</param>
+		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfig)
 		{
-			_sassAndScssConfiguration = sassAndScssConfiguration;
+			_sassAndScssConfig = sassAndScssConfig;
 			_sassCompiler = new SassCompiler();
 
-			UseNativeMinification = _sassAndScssConfiguration.UseNativeMinification;
+			UseNativeMinification = _sassAndScssConfig.UseNativeMinification;
 		}
 
 		/// <summary>
@@ -61,6 +62,23 @@
 			Dispose(false /* disposing */);
 		}
 
+
+		/// <summary>
+		/// Translates code of asset written on Sass or SCSS to CSS-code
+		/// </summary>
+		/// <param name="asset">Asset with code written on Sass or SCSS</param>
+		/// <returns>Asset with translated code</returns>
+		public override IAsset Translate(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+			}
+
+			InnerTranslate(asset, NativeMinificationEnabled);
+
+			return asset;
+		}
 
 		/// <summary>
 		/// Translates code of assets written on Sass or SCSS to CSS-code
@@ -84,34 +102,39 @@
 			foreach (var asset in assets.Where(a => a.AssetType == AssetType.Sass
 				|| a.AssetType == AssetType.Scss))
 			{
-				string assetTypeName = (asset.AssetType == AssetType.Scss) ? "SCSS" : "Sass";
-				string newContent = String.Empty;
-
-				try
-				{
-					newContent = _sassCompiler.Compile(asset.Path, enableNativeMinification, new List<string>());
-				}
-				catch (Exception e)
-				{
-					if (e.Message == "Sass::SyntaxError")
-					{
-						throw new AssetTranslationException(
-							String.Format(SassAndScssStrings.Translators_SassAndScssTranslationSyntaxError, 
-								asset.Path, assetTypeName), e);
-					}
-					else
-					{
-						throw new AssetTranslationException(
-							String.Format(SassAndScssStrings.Translators_SassAndScssTranslationFailed, 
-								asset.Path, assetTypeName), e);
-					}
-				}
-
-				asset.Content = newContent;
-				asset.Minified = enableNativeMinification;
+				InnerTranslate(asset, enableNativeMinification);
 			}
 
 			return assets;
+		}
+
+		private void InnerTranslate(IAsset asset, bool enableNativeMinification)
+		{
+			string assetTypeName = (asset.AssetType == AssetType.Scss) ? "SCSS" : "Sass";
+			string newContent = string.Empty;
+
+			try
+			{
+				newContent = _sassCompiler.Compile(asset.Path, enableNativeMinification, new List<string>());
+			}
+			catch (Exception e)
+			{
+				if (e.Message == "Sass::SyntaxError")
+				{
+					throw new AssetTranslationException(
+						string.Format(SassAndScssStrings.Translators_SassAndScssTranslationSyntaxError,
+							asset.Path, assetTypeName), e);
+				}
+				else
+				{
+					throw new AssetTranslationException(
+						string.Format(SassAndScssStrings.Translators_SassAndScssTranslationFailed,
+							asset.Path, assetTypeName), e);
+				}
+			}
+
+			asset.Content = newContent;
+			asset.Minified = enableNativeMinification;
 		}
 
 		/// <summary>
@@ -134,7 +157,7 @@
 			{
 				_disposed = true;
 
-				_sassAndScssConfiguration = null;
+				_sassAndScssConfig = null;
 
 				if (_sassCompiler != null)
 				{

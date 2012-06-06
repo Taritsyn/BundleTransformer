@@ -1,5 +1,6 @@
 ﻿namespace BundleTransformer.Core.Assets
 {
+	using System;
 	using System.Text.RegularExpressions;
 
 	using FileSystem;
@@ -140,6 +141,15 @@
 			set;
 		}
 
+		private DateTime _lastModifyDateTimeUtc;
+		/// <summary>
+		/// Gets date and time, in coordinated universal time (UTC), of the last modification of asset
+		/// </summary>
+		public DateTime LastModifyDateTimeUtc
+		{
+			get { return _lastModifyDateTimeUtc; }
+		}
+
 		private string _content;
 		/// <summary>
 		/// Gets or sets text content of asset 
@@ -222,6 +232,7 @@
 		/// </summary>
 		public void RefreshContent()
 		{
+			_lastModifyDateTimeUtc = _fileSystemWrapper.GetFileLastWriteTimeUtc(Path);
 			_content = _fileSystemWrapper.GetFileTextContent(Path);
 		}
 

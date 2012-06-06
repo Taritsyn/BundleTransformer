@@ -28,6 +28,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets flag, which makes the debug mode is dependent on 
+		/// the value of the BundleTable.EnableOptimizations property
+		/// </summary>
+		[ConfigurationProperty("useEnableOptimizationsProperty", DefaultValue = true)]
+		public bool UseEnableOptimizationsProperty
+		{
+			get { return (bool)this["useEnableOptimizationsProperty"]; }
+			set { this["useEnableOptimizationsProperty"] = value; }
+		}
+
+		/// <summary>
 		/// Gets configuration settings of processing CSS-assets
 		/// </summary>
 		[ConfigurationProperty("css")]
@@ -43,6 +54,16 @@
 		public JsSettings Js
 		{
 			get { return this["js"] as JsSettings; }
+		}
+
+		/// <summary>
+		/// Gets configuration settings of HTTP-handler, that responsible 
+		/// for text output of processed asset
+		/// </summary>
+		[ConfigurationProperty("assetHandler")]
+		public AssetHandlerSettings AssetHandler
+		{
+			get { return this["assetHandler"] as AssetHandlerSettings; }
 		}
 	}
 }

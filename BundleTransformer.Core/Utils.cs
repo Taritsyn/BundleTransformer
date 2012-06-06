@@ -37,7 +37,7 @@
 		/// <returns>Processed URL</returns>
 		internal static string ProcessBackSlashesInUrl(string url)
 		{
-			if (String.IsNullOrWhiteSpace(url))
+			if (string.IsNullOrWhiteSpace(url))
 			{
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
 			}
@@ -54,12 +54,12 @@
 		/// <returns>URL without the first slash</returns>
 		internal static string RemoveFirstSlashFromUrl(string url)
 		{
-			if (String.IsNullOrWhiteSpace(url))
+			if (string.IsNullOrWhiteSpace(url))
 			{
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
 			}
 
-			string result = _firstSlashRegExp.Replace(url.Trim(), String.Empty);
+			string result = _firstSlashRegExp.Replace(url.Trim(), string.Empty);
 
 			return result;
 		}
@@ -71,12 +71,12 @@
 		/// <returns>URL without the last slash</returns>
 		internal static string RemoveLastSlashFromUrl(string url)
 		{
-			if (String.IsNullOrWhiteSpace(url))
+			if (string.IsNullOrWhiteSpace(url))
 			{
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
 			}
 
-			string result = _lastSlashRegExp.Replace(url.Trim(), String.Empty);
+			string result = _lastSlashRegExp.Replace(url.Trim(), string.Empty);
 
 			return result;
 		}
@@ -102,12 +102,12 @@
 		/// <returns>The absolute URL</returns>
 		internal static string TransformRelativeUrlToAbsolute(string baseUrl, string relativeUrl)
 		{
-			if (String.IsNullOrWhiteSpace(baseUrl))
+			if (string.IsNullOrWhiteSpace(baseUrl))
 			{
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "baseUrl");
 			}
 
-			if (String.IsNullOrWhiteSpace(relativeUrl))
+			if (string.IsNullOrWhiteSpace(relativeUrl))
 			{
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "relativeUrl");
 			}
@@ -156,7 +156,7 @@
 		{
 			var result = new List<string>();
 
-			if (!String.IsNullOrWhiteSpace(value))
+			if (!string.IsNullOrWhiteSpace(value))
 			{
 				string[] itemList = value
 					.Trim()
@@ -185,7 +185,7 @@
 		/// <returns>Instance of type</returns>
 		internal static T CreateInstanceByFullTypeName<T>(string fullTypeName) where T : class
 		{
-			if (String.IsNullOrWhiteSpace(fullTypeName))
+			if (string.IsNullOrWhiteSpace(fullTypeName))
 			{
 				throw new ArgumentNullException(Strings.Common_ValueIsEmpty);
 			}
@@ -206,7 +206,7 @@
 			object instance = assembly.CreateInstance(typeName);
 			if (instance == null)
 			{
-				throw new NullReferenceException(String.Format(Strings.Common_InstanceCreationFailed, typeName));
+				throw new NullReferenceException(string.Format(Strings.Common_InstanceCreationFailed, typeName));
 			}
 
 			return (T)instance;
@@ -226,14 +226,14 @@
 
 			foreach (var destEnum in destEnumValues)
 			{
-				if (String.Equals(destEnum.ToString(), name, StringComparison.OrdinalIgnoreCase))
+				if (string.Equals(destEnum.ToString(), name, StringComparison.OrdinalIgnoreCase))
 				{
 					return destEnum;
 				}
 			}
 
 			throw new InvalidCastException(
-				String.Format(Strings.Common_EnumValueConversionFailed,
+				string.Format(Strings.Common_EnumValueConversionFailed,
 					name, typeof(TSource), typeof(TDest))
 			);
 		}

@@ -10,6 +10,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
+	using Core.Resources;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
@@ -29,7 +30,7 @@
 		/// <summary>
 		/// Configuration settings of LESS-translator
 		/// </summary>
-		private LessSettings _lessConfiguration;
+		private LessSettings _lessConfig;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -65,13 +66,13 @@
 		/// Constructs instance of LESS-translator
 		/// </summary>
 		/// <param name="cssRelativePathResolver">CSS relative path resolver</param>
-		/// <param name="lessConfiguration">Configuration settings of LESS-translator</param>
-		public LessTranslator(ICssRelativePathResolver cssRelativePathResolver, LessSettings lessConfiguration)
+		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
+		public LessTranslator(ICssRelativePathResolver cssRelativePathResolver, LessSettings lessConfig)
 		{
 			_cssRelativePathResolver = cssRelativePathResolver;
-			_lessConfiguration = lessConfiguration;
+			_lessConfig = lessConfig;
 
-			UseNativeMinification = _lessConfiguration.UseNativeMinification;
+			UseNativeMinification = _lessConfig.UseNativeMinification;
 		}
 
 		/// <summary>
@@ -105,6 +106,26 @@
 		}
 
 		/// <summary>
+		/// Translates code of asset written on LESS to CSS-code
+		/// </summary>
+		/// <param name="asset">Asset with code written on LESS</param>
+		/// <returns>Asset with translated code</returns>
+		public override IAsset Translate(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+			}
+
+			bool enableNativeMinification = NativeMinificationEnabled;
+			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification);
+
+			InnerTranslate(asset, lessEngine, enableNativeMinification);
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Translates code of assets written on LESS to CSS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on LESS</param>
@@ -126,25 +147,36 @@
 
 			foreach (var asset in assets.Where(a => a.AssetType == AssetType.Less))
 			{
-				string newContent = String.Empty;
-
-				try
-				{
-					newContent = lessEngine.TransformToCss(
-						_cssRelativePathResolver.ResolveImportsRelativePaths(asset.Content, asset.Url),
-						null);
-				}
-				catch (Exception e)
-				{
-					throw new AssetTranslationException(
-						String.Format(LessStrings.Translators_LessTranslationFailed, asset.Path), e);
-				}
-
-				asset.Content = newContent;
-				asset.Minified = enableNativeMinification;
+				InnerTranslate(asset, lessEngine, enableNativeMinification);
 			}
 
 			return assets;
+		}
+
+		private void InnerTranslate(IAsset asset, ILessEngine lessEngine, bool enableNativeMinification)
+		{
+			string newContent = string.Empty;
+
+			try
+			{
+				newContent = lessEngine.TransformToCss(
+					_cssRelativePathResolver.ResolveImportsRelativePaths(asset.Content, asset.Url),
+					null);
+			}
+			catch (Exception e)
+			{
+				throw new AssetTranslationException(
+					string.Format(LessStrings.Translators_LessTranslationFailed, asset.Path), e);
+			}
+
+			if (string.IsNullOrEmpty(newContent))
+			{
+				throw new AssetTranslationException(
+					string.Format(LessStrings.Translators_LessTranslationFailed, asset.Path));
+			}
+
+			asset.Content = newContent;
+			asset.Minified = enableNativeMinification;
 		}
 
 		/// <summary>
@@ -168,7 +200,7 @@
 				_disposed = true;
 
 				_cssRelativePathResolver = null;
-				_lessConfiguration = null;
+				_lessConfig = null;
 			}
 		}
 	}

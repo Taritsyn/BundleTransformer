@@ -2,25 +2,26 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Less</id>
-    <version>1.3.1-beta</version>
+    <version>1.4.0-beta2</version>
 	<title>Bundle Transformer: LESS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://www.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=358409</iconUrl>
+    <iconUrl>http://download.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=386674</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Less contains translator-adapter LessTranslator. This adapter makes translation of LESS-code to CSS-code.
+    <description>BundleTransformer.Less contains translator-adapter LessTranslator. This adapter makes translation of LESS-code to CSS-code. Also contains HTTP-handler LessAssetHandler, which is responsible for text output of translated LESS-asset.
 	
 Uses NuGet-package the dotless (http://nuget.org/packages/dotless).</description>
-    <summary>BundleTransformer.Less contains translator-adapter LessTranslator. This adapter makes translation of LESS-code to CSS-code.
+    <summary>BundleTransformer.Less contains translator-adapter LessTranslator. This adapter makes translation of LESS-code to CSS-code. Also contains HTTP-handler LessAssetHandler, which is responsible for text output of translated LESS-asset.
 	
 Uses NuGet-package the dotless.</summary>
+	<releaseNotes>Added HTTP-handler LessAssetHandler, which is responsible for text output of translated LESS-asset.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling LESS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.3.0-beta]" />
+      <dependency id="BundleTransformer.Core" version="[1.4.0-beta2]" />
 	  <dependency id="dotless" version="1.3.0.3" />
     </dependencies>
     <references>

@@ -87,11 +87,11 @@
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, error.ErrorCode);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, error.Severity);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, error.Subcategory);
-			if (!String.IsNullOrWhiteSpace(error.HelpKeyword))
+			if (!string.IsNullOrWhiteSpace(error.HelpKeyword))
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword, error.HelpKeyword);
 			}
-			if (!String.IsNullOrWhiteSpace(error.File))
+			if (!string.IsNullOrWhiteSpace(error.File))
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, error.File);
 			}

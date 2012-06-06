@@ -59,6 +59,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -68,6 +69,7 @@
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
+    <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
     <Compile Include="Resources\Strings.ru-ru.Designer.cs">
       <DependentUpon>Strings.ru-ru.resx</DependentUpon>
       <AutoGen>True</AutoGen>

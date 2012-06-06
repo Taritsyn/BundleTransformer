@@ -14,7 +14,7 @@
 		/// <summary>
 		/// Configuration settings of Closure Minifier
 		/// </summary>
-		private static readonly Lazy<ClosureSettings> _closureConfiguration =
+		private static readonly Lazy<ClosureSettings> _closureConfig =
 			new Lazy<ClosureSettings>(() => (ClosureSettings)ConfigurationManager.GetSection("bundleTransformer/closure"));
 
 		/// <summary>
@@ -24,7 +24,7 @@
 		/// <returns>Configuration settings of Closure Minifier</returns>
 		public static ClosureSettings GetClosureConfiguration(this BundleTransformerContext context)
 		{
-			return _closureConfiguration.Value;
+			return _closureConfig.Value;
 		}
 	}
 }

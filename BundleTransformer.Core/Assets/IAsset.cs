@@ -1,5 +1,7 @@
 ﻿namespace BundleTransformer.Core.Assets
 {
+	using System;
+
 	/// <summary>
 	/// Defines the interface of asset
 	/// </summary>
@@ -24,6 +26,11 @@
 		/// Gets or sets a flag indicating what text content of asset is minified
 		/// </summary>
 		bool Minified { get; set; }
+
+		/// <summary>
+		/// Gets date and time, in coordinated universal time (UTC), of the last modification of asset
+		/// </summary>
+		DateTime LastModifyDateTimeUtc { get; }
 
 		/// <summary>
 		/// Gets or sets text content of asset 

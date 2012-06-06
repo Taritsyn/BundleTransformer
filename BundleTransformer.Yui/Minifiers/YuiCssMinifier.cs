@@ -25,7 +25,7 @@
 		/// <summary>
 		/// Configuration settings of YUI Minifier
 		/// </summary>
-		private YuiSettings _yuiConfiguration;
+		private YuiSettings _yuiConfig;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -62,15 +62,15 @@
 		/// <summary>
 		/// Constructs instance of YUI CSS-minifier
 		/// </summary>
-		/// <param name="yuiConfiguration">Configuration settings of YUI Minifier</param>
-		public YuiCssMinifier(YuiSettings yuiConfiguration)
+		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
+		public YuiCssMinifier(YuiSettings yuiConfig)
 		{
-			_yuiConfiguration = yuiConfiguration;
-			CssMinifierSettings cssMinifierConfiguration = _yuiConfiguration.CssMinifier;
+			_yuiConfig = yuiConfig;
+			CssMinifierSettings cssMinifierConfig = _yuiConfig.CssMinifier;
 
-			CompressionType = cssMinifierConfiguration.CompressionType;
-			RemoveComments = cssMinifierConfiguration.RemoveComments;
-			LineBreakPosition = cssMinifierConfiguration.LineBreakPosition;
+			CompressionType = cssMinifierConfig.CompressionType;
+			RemoveComments = cssMinifierConfig.RemoveComments;
+			LineBreakPosition = cssMinifierConfig.LineBreakPosition;
 		}
 
 		/// <summary>
@@ -101,7 +101,7 @@
 			
 			foreach (var asset in assets.Where(a => a.IsStylesheet && !a.Minified))
 			{
-				string newContent = String.Empty;
+				string newContent = string.Empty;
 				string assetPath = asset.Path;
 
 				try
@@ -113,7 +113,7 @@
 				catch(Exception e)
 				{
 					throw new AssetMinificationException(
-						String.Format(YuiStrings.Minifiers_YuiMinificationFailed, "CSS", assetPath, e));
+						string.Format(YuiStrings.Minifiers_YuiMinificationFailed, "CSS", assetPath, e));
 				}
 
 				asset.Content = newContent;
@@ -143,7 +143,7 @@
 			{
 				_disposed = true;
 
-				_yuiConfiguration = null;
+				_yuiConfig = null;
 			}
 		}
 	}

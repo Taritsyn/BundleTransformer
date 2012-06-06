@@ -29,7 +29,7 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private MicrosoftAjaxSettings _microsoftAjaxConfiguration;
+		private MicrosoftAjaxSettings _microsoftAjaxConfig;
 
 		/// <summary>
 		/// Configuration settings of JS-parser
@@ -436,13 +436,13 @@
 		/// <summary>
 		/// Constructs instance of Microsoft Ajax JS-minifier
 		/// </summary>
-		/// <param name="microsoftAjaxConfiguration">Configuration settings of Microsoft Ajax Minifier</param>
-		public MicrosoftAjaxJsMinifier(MicrosoftAjaxSettings microsoftAjaxConfiguration)
+		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
+		public MicrosoftAjaxJsMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
 		{
-			_microsoftAjaxConfiguration = microsoftAjaxConfiguration;
+			_microsoftAjaxConfig = microsoftAjaxConfig;
 			_jsParserConfiguration = new CodeSettings();
 
-			JsMinifierSettings jsMinifierConfiguration = _microsoftAjaxConfiguration.JsMinifier;
+			JsMinifierSettings jsMinifierConfiguration = _microsoftAjaxConfig.JsMinifier;
 			AllowEmbeddedAspNetBlocks = jsMinifierConfiguration.AllowEmbeddedAspNetBlocks;
 			CollapseToLiteral = jsMinifierConfiguration.CollapseToLiteral;
 			CombineDuplicateLiterals = jsMinifierConfiguration.CombineDuplicateLiterals;
@@ -498,7 +498,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
 			{
-				string newContent = String.Empty;
+				string newContent = string.Empty;
 				string assetPath = asset.Path;
 
 				var jsParser = new JSParser(asset.Content)
@@ -518,7 +518,7 @@
 				catch (Exception e)
 				{
 				    throw new AssetMinificationException(
-				        String.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationFailed, 
+				        string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationFailed, 
 							"JS", assetPath), e);
 				}
 				finally
@@ -547,7 +547,7 @@
 			if (error.Severity <= Severity)
 			{
 				throw new MicrosoftAjaxParsingException(
-					String.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
+					string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
 						"JS", error.File, FormatContextError(error)), args.Exception);
 			}
 		}
@@ -572,7 +572,7 @@
 			{
 				_disposed = true;
 
-				_microsoftAjaxConfiguration = null;
+				_microsoftAjaxConfig = null;
 				_jsParserConfiguration = null;
 			}
 		}

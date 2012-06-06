@@ -14,7 +14,7 @@
 		/// <summary>
 		/// Configuration settings of Sass- and SCSS-translator
 		/// </summary>
-		private static readonly Lazy<SassAndScssSettings> _sassAndScssConfiguration =
+		private static readonly Lazy<SassAndScssSettings> _sassAndScssConfig =
 			new Lazy<SassAndScssSettings>(() => (SassAndScssSettings)ConfigurationManager.GetSection("bundleTransformer/sassAndScss"));
 
 		/// <summary>
@@ -24,7 +24,7 @@
 		/// <returns>Configuration settings of Sass- and SCSS-translator</returns>
 		public static SassAndScssSettings GetSassAndScssConfiguration(this BundleTransformerContext context)
 		{
-			return _sassAndScssConfiguration.Value;
+			return _sassAndScssConfig.Value;
 		}
 	}
 }

@@ -1,46 +1,18 @@
 /*!
-* Note: While Microsoft is not the author of this script file, Microsoft
-* grants you the right to use this file for the sole purpose of either: 
-* (i) interacting through your browser with the Microsoft website, subject 
-* to the website's terms of use; or (ii) using the files as included with a
-* Microsoft product subject to the Microsoft Software License Terms for that
-* Microsoft product. Microsoft reserves all other rights to the files not 
-* expressly granted by Microsoft, whether by implication, estoppel or
-* otherwise. The notices and licenses below are for informational purposes 
-* only.
-*
-* Provided for Informational Purposes Only
-* MIT License
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-* and/or sell copies of the Software, and to permit persons to whom the 
-* Software is furnished to do so, subject to the following conditions:
-*
-* The copyright notice and this permission notice shall be included in all 
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-* jQuery JavaScript Library v1.6.2
-* http://jquery.com/
-*
-* Copyright 2011, John Resig
-*
-* Includes Sizzle.js
-* http://sizzlejs.com/
-* Copyright 2011, The Dojo Foundation
-*
-* Date: Thu Jun 30 14:16:56 2011 -0400
-*/
+ * jQuery JavaScript Library v1.6.2
+ * http://jquery.com/
+ *
+ * Copyright 2011, John Resig
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * Includes Sizzle.js
+ * http://sizzlejs.com/
+ * Copyright 2011, The Dojo Foundation
+ * Released under the MIT, BSD, and GPL Licenses.
+ *
+ * Date: Thu Jun 30 14:16:56 2011 -0400
+ */
 (function( window, undefined ) {
 
 // Use the correct document accordingly with window argument (sandbox)
@@ -3760,6 +3732,8 @@ jQuery.each( ("blur focus focusin focusout load resize scroll unload click dblcl
 /*!
  * Sizzle CSS Selector Engine
  *  Copyright 2011, The Dojo Foundation
+ *  Released under the MIT, BSD, and GPL Licenses.
+ *  More information: http://sizzlejs.com/
  */
 (function(){
 

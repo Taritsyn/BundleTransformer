@@ -29,7 +29,7 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private MicrosoftAjaxSettings _microsoftAjaxConfiguration;
+		private MicrosoftAjaxSettings _microsoftAjaxConfig;
 
 		/// <summary>
 		/// CSS-parser
@@ -200,26 +200,26 @@
 		/// <summary>
 		/// Constructs instance of Microsoft Ajax CSS-minifier
 		/// </summary>
-		/// <param name="microsoftAjaxConfiguration">Configuration settings of Microsoft Ajax Minifier</param>
-		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfiguration)
+		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
+		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
 		{
-			_microsoftAjaxConfiguration = microsoftAjaxConfiguration;
+			_microsoftAjaxConfig = microsoftAjaxConfig;
 			_cssParser = new CssParser();
 			_cssParser.CssError += ParserErrorHandler;
 
 			_cssParserConfiguration = _cssParser.Settings;
 
-			CssMinifierSettings cssMinifierConfiguration = _microsoftAjaxConfiguration.CssMinifier;
-			AllowEmbeddedAspNetBlocks = cssMinifierConfiguration.AllowEmbeddedAspNetBlocks;
-			ColorNames = cssMinifierConfiguration.ColorNames;
-			CommentMode = cssMinifierConfiguration.CommentMode;
-			IgnoreErrorList = cssMinifierConfiguration.IgnoreErrorList;
-			IndentSize = cssMinifierConfiguration.IndentSize;
-			MinifyExpressions = cssMinifierConfiguration.MinifyExpressions;
-			OutputMode = cssMinifierConfiguration.OutputMode;
-			PreprocessorDefineList = cssMinifierConfiguration.PreprocessorDefineList;
-			TermSemicolons = cssMinifierConfiguration.TermSemicolons;
-			Severity = cssMinifierConfiguration.Severity;
+			CssMinifierSettings cssMinifierConfig = _microsoftAjaxConfig.CssMinifier;
+			AllowEmbeddedAspNetBlocks = cssMinifierConfig.AllowEmbeddedAspNetBlocks;
+			ColorNames = cssMinifierConfig.ColorNames;
+			CommentMode = cssMinifierConfig.CommentMode;
+			IgnoreErrorList = cssMinifierConfig.IgnoreErrorList;
+			IndentSize = cssMinifierConfig.IndentSize;
+			MinifyExpressions = cssMinifierConfig.MinifyExpressions;
+			OutputMode = cssMinifierConfig.OutputMode;
+			PreprocessorDefineList = cssMinifierConfig.PreprocessorDefineList;
+			TermSemicolons = cssMinifierConfig.TermSemicolons;
+			Severity = cssMinifierConfig.Severity;
 		}
 
 		/// <summary>
@@ -250,7 +250,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsStylesheet && !a.Minified))
 			{
-				string newContent = String.Empty;
+				string newContent = string.Empty;
 				string assetPath = asset.Path;
 
 				_cssParser.FileContext = assetPath;
@@ -262,7 +262,7 @@
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						String.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationFailed,
+						string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationFailed,
 							"CSS", assetPath), e);
 				}
 				finally
@@ -290,7 +290,7 @@
 			if (error.Severity <= Severity)
 			{
 				throw new MicrosoftAjaxParsingException(
-					String.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
+					string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
 						"CSS", error.File, FormatContextError(error)), args.Exception);
 			}
 		}
@@ -315,7 +315,7 @@
 			{
 				_disposed = true;
 
-				_microsoftAjaxConfiguration = null;
+				_microsoftAjaxConfig = null;
 
 				if (_cssParser != null)
 				{

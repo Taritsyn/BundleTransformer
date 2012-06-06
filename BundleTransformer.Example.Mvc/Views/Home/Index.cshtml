@@ -1,4 +1,4 @@
-@{
+﻿@{
 	ViewBag.Title = "Home Page";
 }
 
@@ -7,7 +7,7 @@
     <div class="content-wrapper">
         <hgroup class="title">
             <h1>Bundle Transformer</h1>
-            <h2> - a modular extension for ASP.NET Bundling and Minification</h2>
+            <h2> - a modular extension for Microsoft ASP.NET Web Optimization Framework</h2>
         </hgroup>
         <p>
             To learn more about Bundle Transformer visit <a href="http://bundletransformer.codeplex.com/" target="_blank" title="Bundle Transformer Website on CodePlex">http://bundletransformer.codeplex.com</a>. 
@@ -39,8 +39,8 @@
 
 <ol class="round">
     <li class="one">
-        <h5>Register assets in the Global.asax file</h5>
-		In code of the <code>Global.asax</code> file you will see examples of how you can register the assets with help of methods <code>AddFile</code> and <code>AddDirectory</code> of class <code>Bundle</code>.
+        <h5>Register assets in the BundleConfig.cs file</h5>
+		In code of the <code>BundleConfig.cs</code> file, which is located in the folder <code>App_Start</code> you will see examples of how you can register the assets with help of methods <code>Include</code> and <code>IncludeDirectory</code> of class <code>Bundle</code>.
     </li>
     <li class="two">
         <h5>Configure Bundle Transformer and its separate modules</h5>

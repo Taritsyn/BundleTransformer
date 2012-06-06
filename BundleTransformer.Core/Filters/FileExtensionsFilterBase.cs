@@ -69,7 +69,7 @@
 		/// <returns>Asset file path with modified extension</returns>
 		protected string ProbeAssetFilePath(string assetPath, string[] extensions)
 		{
-			string changedFilePath = String.Empty;
+			string changedFilePath = string.Empty;
 
 			foreach (string extension in extensions)
 			{
@@ -80,7 +80,7 @@
 				}
 			}
 
-			throw new FileNotFoundException(String.Format(Strings.Common_FileNotExist, changedFilePath));
+			throw new FileNotFoundException(string.Format(Strings.Common_FileNotExist, changedFilePath));
 		}
 	}
 }

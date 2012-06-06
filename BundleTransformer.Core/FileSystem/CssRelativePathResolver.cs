@@ -39,7 +39,7 @@
 					string urlValue = m.Groups["url"].Value;
 					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : "";
 
-					result = String.Format("url({0}{1}{2})",
+					result = string.Format("url({0}{1}{2})",
 						quoteValue,
 						Utils.TransformRelativeUrlToAbsolute(path, urlValue),
 						quoteValue);
@@ -66,7 +66,7 @@
 					string urlValue = m.Groups["url"].Value;
 					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : "";
 
-					result = String.Format("@import {0}{1}{2}",
+					result = string.Format("@import {0}{1}{2}",
 						quoteValue,
 						Utils.TransformRelativeUrlToAbsolute(path, urlValue),
 						quoteValue);

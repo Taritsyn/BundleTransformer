@@ -117,6 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AssetHandler_MinificationError" xml:space="preserve">
+    <value>During the output text content of minified asset an error has occurred.
+See more details:
+{0}</value>
+  </data>
+  <data name="AssetHandler_TranslationError" xml:space="preserve">
+    <value>During the output text content of translated asset an error has occurred.
+See more details:
+{0}</value>
+  </data>
+  <data name="AssetHandler_UnknownError" xml:space="preserve">
+    <value>During the output text content of processed asset an unknown error has occurred.
+See more details:
+{0}</value>
+  </data>
   <data name="Assets_CssAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>These assets are not style sheets: {0}.</value>
   </data>
@@ -152,6 +167,9 @@
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>{0}-minifier with name '{1}' is not registered in configuration file.</value>
+  </data>
+  <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
+    <value>Translator, which compiles the code on intermediate language to {0}, and has the name '{1}' is not registered in  configuration file.</value>
   </data>
   <data name="ErrorDetails_ColumnNumber" xml:space="preserve">
     <value>Column number</value>

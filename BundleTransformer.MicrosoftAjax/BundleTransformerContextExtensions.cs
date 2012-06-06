@@ -14,7 +14,7 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private static readonly Lazy<MicrosoftAjaxSettings> _microsoftAjaxConfiguration =
+		private static readonly Lazy<MicrosoftAjaxSettings> _microsoftAjaxConfig =
 			new Lazy<MicrosoftAjaxSettings>(() => (MicrosoftAjaxSettings)ConfigurationManager.GetSection("bundleTransformer/microsoftAjax"));
 
 		/// <summary>
@@ -24,7 +24,7 @@
 		/// <returns>Configuration settings of Microsoft Ajax Minifier</returns>
 		public static MicrosoftAjaxSettings GetMicrosoftAjaxConfiguration(this BundleTransformerContext context)
 		{
-			return _microsoftAjaxConfiguration.Value;
+			return _microsoftAjaxConfig.Value;
 		}
 	}
 }

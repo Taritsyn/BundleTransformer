@@ -31,7 +31,7 @@
 		/// <summary>
 		/// Configuration settings of Closure Minifier
 		/// </summary>
-		private ClosureSettings _closureConfiguration;
+		private ClosureSettings _closureConfig;
 
 		/// <summary>
 		/// File system wrapper
@@ -91,34 +91,34 @@
 		/// <summary>
 		/// Constructs instance of Closure local JS-minifier
 		/// </summary>
-		/// <param name="closureConfiguration">Configuration settings of Closure Minifier</param>
-		public ClosureLocalJsMinifier(ClosureSettings closureConfiguration)
-			: this(closureConfiguration,
+		/// <param name="_closureConfig">Configuration settings of Closure Minifier</param>
+		public ClosureLocalJsMinifier(ClosureSettings _closureConfig)
+			: this(_closureConfig,
 				BundleTransformerContext.Current.GetFileSystemWrapper(), 
-				HttpContext.Current.Server.MapPath(Constants.TempFilesDirectoryPath))
+				HttpContext.Current.Server.MapPath(Core.Constants.Common.TempFilesDirectoryPath))
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Closure local JS-minifier
 		/// </summary>
-		/// <param name="closureConfiguration">Configuration settings of Closure Minifier</param>
+		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		/// <param name="fileSystemWrapper">File system wrapper</param>
 		/// <param name="tempFilesDirectoryPath">Absolute path to directory that contains temporary files</param>
-		public ClosureLocalJsMinifier(ClosureSettings closureConfiguration, 
+		public ClosureLocalJsMinifier(ClosureSettings closureConfig, 
 			IFileSystemWrapper fileSystemWrapper, string tempFilesDirectoryPath)
 		{
-			_closureConfiguration = closureConfiguration;
+			_closureConfig = closureConfig;
 			_fileSystemWrapper = fileSystemWrapper;
 			_tempFilesDirectoryPath = tempFilesDirectoryPath;
 
-			LocalJsMinifierSettings localJsMinifierConfiguration = _closureConfiguration.Js.Local;
-			JavaVirtualMachinePath = localJsMinifierConfiguration.JavaVirtualMachinePath;
-			ClosureCompilerApplicationPath = localJsMinifierConfiguration.ClosureCompilerApplicationPath;
-			CompilationLevel = localJsMinifierConfiguration.CompilationLevel;
-			PrettyPrint = localJsMinifierConfiguration.PrettyPrint;
-			LanguageSpec = localJsMinifierConfiguration.LanguageSpec;
-			ThirdParty = localJsMinifierConfiguration.ThirdParty;
-			Severity = localJsMinifierConfiguration.Severity;
+			LocalJsMinifierSettings localJsMinifierConfig = _closureConfig.Js.Local;
+			JavaVirtualMachinePath = localJsMinifierConfig.JavaVirtualMachinePath;
+			ClosureCompilerApplicationPath = localJsMinifierConfig.ClosureCompilerApplicationPath;
+			CompilationLevel = localJsMinifierConfig.CompilationLevel;
+			PrettyPrint = localJsMinifierConfig.PrettyPrint;
+			LanguageSpec = localJsMinifierConfig.LanguageSpec;
+			ThirdParty = localJsMinifierConfig.ThirdParty;
+			Severity = localJsMinifierConfig.Severity;
 		}
 
 		/// <summary>
@@ -148,25 +148,25 @@
 			}
 
 			string javaVirtualMachinePath = JavaVirtualMachinePath;
-			if (String.IsNullOrWhiteSpace(javaVirtualMachinePath))
+			if (string.IsNullOrWhiteSpace(javaVirtualMachinePath))
 			{
 				throw new EmptyValueException(Strings.Minifiers_JavaVirtualMachinePathNotSpecified);
 			}
 			if (!_fileSystemWrapper.FileExists(javaVirtualMachinePath))
 			{
 				throw new FileNotFoundException(
-					String.Format(Strings.Minifiers_JavaVirtualMachineNotFound, javaVirtualMachinePath));
+					string.Format(Strings.Minifiers_JavaVirtualMachineNotFound, javaVirtualMachinePath));
 			}
 
 			string closureCompilerApplicationPath = ClosureCompilerApplicationPath;
-			if (String.IsNullOrWhiteSpace(closureCompilerApplicationPath))
+			if (string.IsNullOrWhiteSpace(closureCompilerApplicationPath))
 			{
 				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerApplicationPathNotSpecified);
 			}
 			if (!_fileSystemWrapper.FileExists(closureCompilerApplicationPath))
 			{
 				throw new FileNotFoundException(
-					String.Format(Strings.Minifiers_ClosureCompilerApplicationNotFound, closureCompilerApplicationPath));
+					string.Format(Strings.Minifiers_ClosureCompilerApplicationNotFound, closureCompilerApplicationPath));
 			}
 
 			if (!_fileSystemWrapper.DirectoryExists(_tempFilesDirectoryPath))
@@ -193,7 +193,7 @@
 		/// <returns>Minified text content of JS-asset</returns>
 		private string Compile(string content, string assetPath)
 		{
-			string newContent = String.Empty;
+			string newContent = string.Empty;
 			string uniqueId = Guid.NewGuid().ToString();
 			string inputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + ".tmp");
 			string outputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + "-min.tmp");
@@ -286,7 +286,7 @@
 					}
 				}
 
-				if (!String.IsNullOrWhiteSpace(errorDetails))
+				if (!string.IsNullOrWhiteSpace(errorDetails))
 				{
 					throw new ClosureCompilingException(errorDetails);
 				}
@@ -296,12 +296,12 @@
 			catch (ClosureCompilingException e)
 			{
 				throw new AssetMinificationException(
-					String.Format(Strings.Minifiers_ClosureLocalMinificationSyntaxError, assetPath, e.Message));
+					string.Format(Strings.Minifiers_ClosureLocalMinificationSyntaxError, assetPath, e.Message));
 			}
 			catch (Exception)
 			{
 				throw new AssetMinificationException(
-					String.Format(Strings.Minifiers_ClosureLocalMinificationFailed, assetPath));
+					string.Format(Strings.Minifiers_ClosureLocalMinificationFailed, assetPath));
 			}
 			finally
 			{
@@ -333,7 +333,7 @@
 					code = "ECMASCRIPT5_STRICT";
 					break;
 				default:
-					throw new InvalidCastException(String.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
+					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
 						languageSpec.ToString(), typeof(LanguageSpec)));
 			}
 
@@ -360,7 +360,7 @@
 			{
 				_disposed = true;
 
-				_closureConfiguration = null;
+				_closureConfig = null;
 				_fileSystemWrapper = null;
 			}
 		}

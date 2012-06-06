@@ -30,7 +30,7 @@
 		/// <summary>
 		/// Configuration settings of Closure Minifier
 		/// </summary>
-		private ClosureSettings _closureConfiguration;
+		private ClosureSettings _closureConfig;
 
 		/// <summary>
 		/// Gets or sets a URL of Google Closure Compiler Service API
@@ -62,17 +62,17 @@
 		/// <summary>
 		/// Constructs instance of Closure remote JS-minifier
 		/// </summary>
-		/// <param name="closureConfiguration">Configuration settings of Closure Minifier</param>
-		public ClosureRemoteJsMinifier(ClosureSettings closureConfiguration)
+		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
+		public ClosureRemoteJsMinifier(ClosureSettings closureConfig)
 		{
-			_closureConfiguration = closureConfiguration;
+			_closureConfig = closureConfig;
 
-			RemoteJsMinifierSettings remoteJsMinifierConfiguration = _closureConfiguration.Js.Remote;
-			ClosureCompilerServiceApiUrl = remoteJsMinifierConfiguration.ClosureCompilerServiceApiUrl;
-			CompilationLevel = remoteJsMinifierConfiguration.CompilationLevel;
-			PrettyPrint = remoteJsMinifierConfiguration.PrettyPrint;
-			ExcludeDefaultExterns = remoteJsMinifierConfiguration.ExcludeDefaultExterns;
-			Severity = remoteJsMinifierConfiguration.Severity;
+			RemoteJsMinifierSettings remoteJsMinifierConfig = _closureConfig.Js.Remote;
+			ClosureCompilerServiceApiUrl = remoteJsMinifierConfig.ClosureCompilerServiceApiUrl;
+			CompilationLevel = remoteJsMinifierConfig.CompilationLevel;
+			PrettyPrint = remoteJsMinifierConfig.PrettyPrint;
+			ExcludeDefaultExterns = remoteJsMinifierConfig.ExcludeDefaultExterns;
+			Severity = remoteJsMinifierConfig.Severity;
 		}
 
 		/// <summary>
@@ -101,7 +101,7 @@
 				return assets;
 			}
 
-			if (String.IsNullOrWhiteSpace(ClosureCompilerServiceApiUrl))
+			if (string.IsNullOrWhiteSpace(ClosureCompilerServiceApiUrl))
 			{
 				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerServiceApiUrlNotSpecified);
 			}
@@ -125,7 +125,7 @@
 		/// <returns>Minified text content of JS-asset</returns>
 		private string Compile(string content, string assetPath)
 		{
-			string newContent = String.Empty;
+			string newContent = string.Empty;
 			string serviceUrl = ClosureCompilerServiceApiUrl;
 			int severity = Severity;
 			
@@ -173,7 +173,7 @@
 				catch(Exception)
 				{
 					throw new AssetMinificationException(
-						String.Format(Strings.Minifiers_ClosureRemoteMinificationHttpRequestError, serviceUrl));
+						string.Format(Strings.Minifiers_ClosureRemoteMinificationHttpRequestError, serviceUrl));
 				}
 
 				if (response.IsSuccessStatusCode)
@@ -186,7 +186,7 @@
 					if (serverErrors != null && serverErrors.Count > 0)
 					{
 						throw new AssetMinificationException(
-							String.Format(Strings.Minifiers_ClosureRemoteMinificationFailed,
+							string.Format(Strings.Minifiers_ClosureRemoteMinificationFailed,
 								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetPath)));
 					}
 
@@ -195,7 +195,7 @@
 					if (errors != null && errors.Count > 0)
 					{
 						throw new AssetMinificationException(
-							String.Format(Strings.Minifiers_ClosureRemoteMinificationSyntaxError,
+							string.Format(Strings.Minifiers_ClosureRemoteMinificationSyntaxError,
 								FormatErrorDetails(errors[0], ErrorType.Error, assetPath)));
 					}
 
@@ -206,7 +206,7 @@
 						if (warnings != null && warnings.Count > 0)
 						{
 							throw new AssetMinificationException(
-								String.Format(Strings.Minifiers_ClosureRemoteMinificationSyntaxError,
+								string.Format(Strings.Minifiers_ClosureRemoteMinificationSyntaxError,
 									FormatErrorDetails(warnings[0], ErrorType.Warning, assetPath)));
 						}
 					}
@@ -216,7 +216,7 @@
 				else
 				{
 					throw new AssetMinificationException(
-						String.Format(Strings.Minifiers_ClosureRemoteMinificationInvalidHttpStatus, 
+						string.Format(Strings.Minifiers_ClosureRemoteMinificationInvalidHttpStatus, 
 							response.StatusCode));
 				}
 			}
@@ -283,7 +283,7 @@
 		{
 			if (!_disposed)
 			{
-				_closureConfiguration = null;
+				_closureConfig = null;
 				_disposed = true;
 			}
 		}

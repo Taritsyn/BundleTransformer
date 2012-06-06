@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: YUI 1.3.0 Beta
+            README file for Bundle Transformer: YUI 1.4.0 Beta 2
  
    ----------------------------------------------------------------------
 

@@ -27,7 +27,7 @@
 		/// <summary>
 		/// Configuration settings of YUI Minifier
 		/// </summary>
-		private YuiSettings _yuiConfiguration;
+		private YuiSettings _yuiConfig;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -101,19 +101,19 @@
 		/// <summary>
 		/// Constructs instance of YUI JS-minifier
 		/// </summary>
-		/// <param name="yuiConfiguration">Configuration settings of YUI Minifier</param>
-		public YuiJsMinifier(YuiSettings yuiConfiguration)
+		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
+		public YuiJsMinifier(YuiSettings yuiConfig)
 		{
-			_yuiConfiguration = yuiConfiguration;
-			JsMinifierSettings jsMinifierConfiguration = _yuiConfiguration.JsMinifier;
+			_yuiConfig = yuiConfig;
+			JsMinifierSettings jsMinifierConfig = _yuiConfig.JsMinifier;
 
-			CompressionType = jsMinifierConfiguration.CompressionType;
-			IsVerboseLogging = jsMinifierConfiguration.IsVerboseLogging;
-			IsObfuscateJavascript = jsMinifierConfiguration.IsObfuscateJavascript;
-			PreserveAllSemicolons = jsMinifierConfiguration.PreserveAllSemicolons;
-			DisableOptimizations = jsMinifierConfiguration.DisableOptimizations;
-			IsEvalIgnored = jsMinifierConfiguration.IsEvalIgnored;
-			LineBreakPosition = jsMinifierConfiguration.LineBreakPosition;
+			CompressionType = jsMinifierConfig.CompressionType;
+			IsVerboseLogging = jsMinifierConfig.IsVerboseLogging;
+			IsObfuscateJavascript = jsMinifierConfig.IsObfuscateJavascript;
+			PreserveAllSemicolons = jsMinifierConfig.PreserveAllSemicolons;
+			DisableOptimizations = jsMinifierConfig.DisableOptimizations;
+			IsEvalIgnored = jsMinifierConfig.IsEvalIgnored;
+			LineBreakPosition = jsMinifierConfig.LineBreakPosition;
 		}
 
 		/// <summary>
@@ -144,7 +144,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
 			{
-				string newContent = String.Empty;
+				string newContent = string.Empty;
 				string assetPath = asset.Path;
 
 				try
@@ -158,7 +158,7 @@
 				catch(Exception e)
 				{
 					throw new AssetMinificationException(
-						String.Format(YuiStrings.Minifiers_YuiMinificationFailed, "JS", assetPath, e));
+						string.Format(YuiStrings.Minifiers_YuiMinificationFailed, "JS", assetPath, e));
 				}
 
 				asset.Content = newContent;
@@ -188,7 +188,7 @@
 			{
 				_disposed = true;
 
-				_yuiConfiguration = null;
+				_yuiConfig = null;
 			}
 		}
 	}

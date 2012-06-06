@@ -84,7 +84,7 @@
 					code = "ADVANCED_OPTIMIZATIONS";
 					break;
 				default:
-					throw new InvalidCastException(String.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
+					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
 						compilationLevel.ToString(), typeof(CompilationLevel)));
 			}
 

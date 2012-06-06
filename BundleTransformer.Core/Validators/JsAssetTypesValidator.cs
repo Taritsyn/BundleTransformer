@@ -37,8 +37,8 @@
 					.ToArray()
 					;
 
-				throw new InvalidAssetTypesException(String.Format(Strings.Assets_JsAssetsContainAssetsWithInvalidTypes, 
-					String.Join(", ", invalidAssetsUrls)),
+				throw new InvalidAssetTypesException(string.Format(Strings.Assets_JsAssetsContainAssetsWithInvalidTypes, 
+					string.Join(", ", invalidAssetsUrls)),
 					invalidAssetsUrls);
 			}
 		}

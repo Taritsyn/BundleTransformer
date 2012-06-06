@@ -54,7 +54,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
 			{
-				string newContent = String.Empty;
+				string newContent = string.Empty;
 				string assetPath = asset.Path;
 				
 				try
@@ -64,7 +64,7 @@
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						String.Format(Strings.Minifiers_JsMinMinificationFailed, assetPath, e.Message));
+						string.Format(Strings.Minifiers_JsMinMinificationFailed, assetPath, e.Message));
 				}
 
 				asset.Content = newContent;

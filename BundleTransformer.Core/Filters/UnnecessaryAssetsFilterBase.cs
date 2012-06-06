@@ -37,7 +37,7 @@
 
 			foreach(var ignorePattern in ignorePatterns)
 			{
-				if (!String.IsNullOrWhiteSpace(ignorePattern))
+				if (!string.IsNullOrWhiteSpace(ignorePattern))
 				{
 					string processedIgnorePattern = ignorePattern.Trim();
 					if (processedIgnorePattern == "*" || processedIgnorePattern == "*.*")

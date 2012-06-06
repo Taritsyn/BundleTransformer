@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Linq;
 	using System.Web;
 	using System.Web.Optimization;
 
@@ -32,7 +31,7 @@
 		/// <summary>
 		/// Configuration settings of core
 		/// </summary>
-		protected CoreSettings _coreConfiguration;
+		protected CoreSettings _coreConfig;
 
 		/// <summary>
 		/// List of translators (LESS, Sass, SCSS and CoffeeScript)
@@ -51,12 +50,12 @@
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		/// <param name="coreConfiguration">Configuration settings of core</param>
-		protected TransformerBase(string[] ignorePatterns, bool isDebugMode, CoreSettings coreConfiguration)
+		/// <param name="coreConfig">Configuration settings of core</param>
+		protected TransformerBase(string[] ignorePatterns, bool isDebugMode, CoreSettings coreConfig)
 		{
 			_ignorePatterns = ignorePatterns;
 			_isDebugMode = isDebugMode;
-			_coreConfiguration = coreConfiguration;
+			_coreConfig = coreConfig;
 		}
 
 
@@ -176,22 +175,6 @@
 			}
 
 			bundleResponse.Files = assetFiles;
-		}
-
-		/// <summary>
-		/// Switchs transformer into debug mode
-		/// </summary>
-		public void ForceDebugMode()
-		{
-			_isDebugMode = true;
-		}
-
-		/// <summary>
-		/// Switchs transformer into release mode
-		/// </summary>
-		public void ForceReleaseMode()
-		{
-			_isDebugMode = false;
 		}
 
 		/// <summary>
