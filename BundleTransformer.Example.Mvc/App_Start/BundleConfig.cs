@@ -17,7 +17,7 @@
 			var jsTransformer = new JsTransformer();
 			var nullOrderer = new NullOrderer();
 
-			var commonStylesBundle = new StyleBundle("~/CommonStyles");
+			var commonStylesBundle = new Bundle("~/CommonStyles");
 			commonStylesBundle.Include(
 				"~/Content/Site.css",
 				"~/Content/BundleTransformer.css",
@@ -36,14 +36,14 @@
 
 			bundles.Add(commonStylesBundle);
 
-			var modernizrBundle = new ScriptBundle("~/Modernizr");
+			var modernizrBundle = new Bundle("~/Modernizr");
 			modernizrBundle.Include("~/Scripts/modernizr-2.5.3.js");
 			modernizrBundle.Transforms.Add(jsTransformer);
 			modernizrBundle.Orderer = nullOrderer;
 
 			bundles.Add(modernizrBundle);
 
-			var commonScriptsBundle = new ScriptBundle("~/CommonScripts");
+			var commonScriptsBundle = new Bundle("~/CommonScripts");
 			commonScriptsBundle.Include("~/Scripts/MicrosoftAjax.js",
 				"~/Scripts/jquery-1.6.2.js",
 				"~/Scripts/jquery-ui-1.8.11.js",
@@ -57,14 +57,14 @@
 
 			bundles.Add(commonScriptsBundle);
 
-			var jqueryUiStylesDirectoryBundle = new StyleBundle("~/JqueryUiStylesDirectory");
+			var jqueryUiStylesDirectoryBundle = new Bundle("~/JqueryUiStylesDirectory");
 			jqueryUiStylesDirectoryBundle.IncludeDirectory("~/Content/themes/base/", "*.css");
 			jqueryUiStylesDirectoryBundle.Transforms.Add(new CssTransformer(
 				new[] { "*.all.css", "jquery.ui.base.css" }));
 
 			bundles.Add(jqueryUiStylesDirectoryBundle);
 
-			var scriptsDirectoryBundle = new ScriptBundle("~/ScriptsDirectory");
+			var scriptsDirectoryBundle = new Bundle("~/ScriptsDirectory");
 			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js");
 			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
 				new[] { "*.all.js", "_references.js" }));
