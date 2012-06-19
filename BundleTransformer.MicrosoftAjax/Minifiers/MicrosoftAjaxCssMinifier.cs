@@ -29,17 +29,17 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private MicrosoftAjaxSettings _microsoftAjaxConfig;
+		private readonly MicrosoftAjaxSettings _microsoftAjaxConfig;
 
 		/// <summary>
 		/// CSS-parser
 		/// </summary>
-		private CssParser _cssParser;
+		private readonly CssParser _cssParser;
 
 		/// <summary>
 		/// Configuration settings of CSS-parser
 		/// </summary>
-		private CssSettings _cssParserConfiguration;
+		private readonly CssSettings _cssParserConfiguration;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -315,15 +315,10 @@
 			{
 				_disposed = true;
 
-				_microsoftAjaxConfig = null;
-
 				if (_cssParser != null)
 				{
 					_cssParser.CssError -= ParserErrorHandler;
-					_cssParser = null;
 				}
-
-				_cssParserConfiguration = null;
 			}
 		}
 	}

@@ -25,7 +25,7 @@
 		/// <summary>
 		/// Configuration settings of YUI Minifier
 		/// </summary>
-		private YuiSettings _yuiConfig;
+		private readonly YuiSettings _yuiConfig;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -142,8 +142,6 @@
 			if (!_disposed)
 			{
 				_disposed = true;
-
-				_yuiConfig = null;
 			}
 		}
 	}

@@ -35,7 +35,7 @@
 		/// </summary>
 		/// <param name="url">URL</param>
 		/// <returns>Processed URL</returns>
-		internal static string ProcessBackSlashesInUrl(string url)
+		public static string ProcessBackSlashesInUrl(string url)
 		{
 			if (string.IsNullOrWhiteSpace(url))
 			{
@@ -52,7 +52,7 @@
 		/// </summary>
 		/// <param name="url">URL</param>
 		/// <returns>URL without the first slash</returns>
-		internal static string RemoveFirstSlashFromUrl(string url)
+		public static string RemoveFirstSlashFromUrl(string url)
 		{
 			if (string.IsNullOrWhiteSpace(url))
 			{
@@ -69,7 +69,7 @@
 		/// </summary>
 		/// <param name="url">URL</param>
 		/// <returns>URL without the last slash</returns>
-		internal static string RemoveLastSlashFromUrl(string url)
+		public static string RemoveLastSlashFromUrl(string url)
 		{
 			if (string.IsNullOrWhiteSpace(url))
 			{
@@ -87,7 +87,7 @@
 		/// <param name="baseUrl">The base URL</param>
 		/// <param name="relativeUrl">The relative URL to add to the base URL</param>
 		/// <returns>The absolute URL</returns>
-		internal static string CombineUrls(string baseUrl, string relativeUrl)
+		public static string CombineUrls(string baseUrl, string relativeUrl)
 		{
 			string result = RemoveLastSlashFromUrl(baseUrl) + "/" + RemoveFirstSlashFromUrl(relativeUrl);
 
@@ -151,7 +151,7 @@
 		/// <param name="delimiter">Delimiter</param>
 		/// <param name="removeEmptyEntries">Allow removal of empty items from collection</param>
 		/// <returns>String collection</returns>
-		internal static string[] ConvertToStringCollection(string value, char delimiter, 
+		public static string[] ConvertToStringCollection(string value, char delimiter, 
 			bool removeEmptyEntries = false)
 		{
 			var result = new List<string>();

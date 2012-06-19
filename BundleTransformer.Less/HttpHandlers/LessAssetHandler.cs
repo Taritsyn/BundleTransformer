@@ -9,6 +9,7 @@
 	using Core.FileSystem;
 	using Core.HttpHandlers;
 	using Core.Translators;
+	using Core.Web;
 
 	/// <summary>
 	/// HTTP-handler, which is responsible for text output 
@@ -32,7 +33,7 @@
 			: this(HttpContext.Current.Cache, 
 				BundleTransformerContext.Current.GetFileSystemWrapper(), 
 				BundleTransformerContext.Current.GetCoreConfiguration().AssetHandler,
-				BundleTransformerContext.Current.IsDebugMode)
+				BundleTransformerContext.Current.GetApplicationInfo())
 		{ }
 
 		/// <summary>
@@ -42,10 +43,10 @@
 		/// <param name="fileSystemWrapper">File system wrapper</param>
 		/// <param name="assetHandlerConfig">Configuration settings of HTTP-handler that responsible 
 		/// for text output of processed asset</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		public LessAssetHandler(Cache cache, IFileSystemWrapper fileSystemWrapper, 
-			AssetHandlerSettings assetHandlerConfig, bool isDebugMode) 
-				: base(cache, fileSystemWrapper, assetHandlerConfig, isDebugMode)
+		/// <param name="applicationInfo">Information about web application</param>
+		public LessAssetHandler(Cache cache, IFileSystemWrapper fileSystemWrapper,
+			AssetHandlerSettings assetHandlerConfig, IHttpApplicationInfo applicationInfo)
+			: base(cache, fileSystemWrapper, assetHandlerConfig, applicationInfo)
 		{ }
 
 
@@ -58,7 +59,7 @@
 		{
 			ITranslator lessTranslator = BundleTransformerContext.Current.GetCssTranslatorInstance(
 				Core.Constants.TranslatorName.LessTranslator);
-			lessTranslator.IsDebugMode = _isDebugMode;
+			lessTranslator.IsDebugMode = _applicationInfo.IsDebugMode;
 
 			IAsset processedAsset = lessTranslator.Translate(asset);
 

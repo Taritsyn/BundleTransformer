@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Core.Assets
 {
 	using System;
+	using System.Collections.Generic;
 
 	/// <summary>
 	/// Defines the interface of asset
@@ -11,6 +12,15 @@
 		/// Gets or sets path to asset file
 		/// </summary>
 		string Path { get; set; }
+
+		/// <summary>
+		/// Gets or sets paths to the required asset files
+		/// </summary>
+		IList<string> RequiredFilePaths
+		{
+			get;
+			set;
+		}
 
 		/// <summary>
 		/// Gets URL of asset file

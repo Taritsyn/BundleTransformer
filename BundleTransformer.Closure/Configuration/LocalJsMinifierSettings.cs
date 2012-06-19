@@ -47,5 +47,27 @@
 			get { return (bool)this["thirdParty"]; }
 			set { this["thirdParty"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to process built-ins from 
+		/// the jQuery library, such as jQuery.fn and jQuery.extend()
+		/// </summary>
+		[ConfigurationProperty("processJqueryPrimitives", DefaultValue = false)]
+		public bool ProcessJqueryPrimitives
+		{
+			get { return (bool)this["processJqueryPrimitives"]; }
+			set { this["processJqueryPrimitives"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to process built-ins from 
+		/// the Closure library, such as goog.require(), goog.provide() and goog.exportSymbol()
+		/// </summary>
+		[ConfigurationProperty("processClosurePrimitives", DefaultValue = false)]
+		public bool ProcessClosurePrimitives
+		{
+			get { return (bool)this["processClosurePrimitives"]; }
+			set { this["processClosurePrimitives"] = value; }
+		}
 	}
 }

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.SassAndScss</id>
-    <version>1.4.0-beta2</version>
+    <version>1.4.1-beta3</version>
 	<title>Bundle Transformer: Sass and SCSS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,12 +12,12 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</description>
     <summary>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
-	<releaseNotes>Added HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</releaseNotes>
+	<releaseNotes>Added support of the file cache dependencies based on the list of Sass- and SCSS-files, that were added to a Sass- or SCSS-asset by using the @import directive.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.4.0-beta2]" />
+      <dependency id="BundleTransformer.Core" version="[1.4.1-beta3]" />
 	  <dependency id="SassAndCoffee.Ruby" version="2.0.2.0" />
     </dependencies>
     <references>

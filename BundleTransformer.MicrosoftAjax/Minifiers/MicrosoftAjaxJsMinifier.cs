@@ -29,12 +29,12 @@
 		/// <summary>
 		/// Configuration settings of Microsoft Ajax Minifier
 		/// </summary>
-		private MicrosoftAjaxSettings _microsoftAjaxConfig;
+		private readonly MicrosoftAjaxSettings _microsoftAjaxConfig;
 
 		/// <summary>
 		/// Configuration settings of JS-parser
 		/// </summary>
-		private CodeSettings _jsParserConfiguration;
+		private readonly CodeSettings _jsParserConfiguration;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -571,9 +571,6 @@
 			if (!_disposed)
 			{
 				_disposed = true;
-
-				_microsoftAjaxConfig = null;
-				_jsParserConfiguration = null;
 			}
 		}
 	}

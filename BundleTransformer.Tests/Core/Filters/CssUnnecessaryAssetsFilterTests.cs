@@ -11,6 +11,7 @@
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
+	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class CssUnnecessaryAssetsFilterTests

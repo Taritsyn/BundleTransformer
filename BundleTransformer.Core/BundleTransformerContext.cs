@@ -11,17 +11,13 @@
 	using Minifiers;
 	using Resources;
 	using Translators;
+	using Web;
 
 	/// <summary>
 	/// Bundle transformer context
 	/// </summary>
-	public sealed class BundleTransformerContext : IDisposable
+	public sealed class BundleTransformerContext
 	{
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
 		/// <summary>
 		/// Instance of bundle transformer context
 		/// </summary>
@@ -31,33 +27,32 @@
 		/// <summary>
 		/// Information about web application
 		/// </summary>
-		private Lazy<HttpApplicationInfo> _applicationInfo =
-			new Lazy<HttpApplicationInfo>(() => new HttpApplicationInfo(
-				VirtualPathUtility.ToAbsolute("~/"), HttpContext.Current.Server.MapPath("~/")));
+		private readonly Lazy<HttpApplicationInfo> _applicationInfo =
+			new Lazy<HttpApplicationInfo>(() => new HttpApplicationInfo());
 
 		/// <summary>
 		/// File system wrapper 
 		/// </summary>
-		private Lazy<FileSystemWrapper> _fileSystemWrapper
+		private readonly Lazy<FileSystemWrapper> _fileSystemWrapper
 			= new Lazy<FileSystemWrapper>();
 
 		/// <summary>
 		/// CSS relative path resolver
 		/// </summary>
-		private Lazy<CssRelativePathResolver> _cssRelativePathResolver
+		private readonly Lazy<CssRelativePathResolver> _cssRelativePathResolver
 			= new Lazy<CssRelativePathResolver>();
 
 		/// <summary>
 		/// Configuration settings of core
 		/// </summary>
-		private Lazy<CoreSettings> _coreConfig =
+		private readonly Lazy<CoreSettings> _coreConfig =
 			new Lazy<CoreSettings>(() =>
 				(CoreSettings) ConfigurationManager.GetSection("bundleTransformer/core"));
 
 		/// <summary>
 		/// Pool of CSS-translators
 		/// </summary>
-		private Dictionary<string, ITranslator> _cssTranslatorsPool = new Dictionary<string, ITranslator>();
+		private readonly Dictionary<string, ITranslator> _cssTranslatorsPool = new Dictionary<string, ITranslator>();
 
 		/// <summary>
 		/// Synchronizer of CSS-translators pool
@@ -67,7 +62,7 @@
 		/// <summary>
 		/// Pool of CSS-minifiers
 		/// </summary>
-		private Dictionary<string, IMinifier> _cssMinifiersPool = new Dictionary<string, IMinifier>();
+		private readonly Dictionary<string, IMinifier> _cssMinifiersPool = new Dictionary<string, IMinifier>();
 
 		/// <summary>
 		/// Synchronizer of CSS-minifiers pool
@@ -77,7 +72,7 @@
 		/// <summary>
 		/// Pool of JS-translators
 		/// </summary>
-		private Dictionary<string, ITranslator> _jsTranslatorsPool = new Dictionary<string, ITranslator>();
+		private readonly Dictionary<string, ITranslator> _jsTranslatorsPool = new Dictionary<string, ITranslator>();
 
 		/// <summary>
 		/// Synchronizer of JS-translators pool
@@ -87,7 +82,7 @@
 		/// <summary>
 		/// Pool of JS-minifiers
 		/// </summary>
-		private Dictionary<string, IMinifier> _jsMinifiersPool = new Dictionary<string, IMinifier>();
+		private readonly Dictionary<string, IMinifier> _jsMinifiersPool = new Dictionary<string, IMinifier>();
 
 		/// <summary>
 		/// Synchronizer of JS-minifiers pool
@@ -129,20 +124,12 @@
 		private BundleTransformerContext()
 		{ }
 
-		/// <summary>
-		/// Destructs instance of Bundle Transformer Context
-		/// </summary>
-		~BundleTransformerContext()
-		{
-			Dispose(false /* disposing */);
-		}
-
 
 		/// <summary>
 		/// Gets instance of the web application info
 		/// </summary>
 		/// <returns>Information about web application</returns>
-		public HttpApplicationInfo GetApplicationInfo()
+		public IHttpApplicationInfo GetApplicationInfo()
 		{
 			return _applicationInfo.Value;
 		}
@@ -343,57 +330,6 @@
 			}
 
 			return jsMinifier;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-
-				_applicationInfo = null;
-				_fileSystemWrapper = null;
-				_cssRelativePathResolver = null;
-				_coreConfig = null;
-
-				if (_cssTranslatorsPool != null)
-				{
-					_cssTranslatorsPool.Clear();
-					_cssTranslatorsPool = null;
-				}
-
-				if (_cssMinifiersPool != null)
-				{
-					_cssMinifiersPool.Clear();
-					_cssMinifiersPool = null;
-				}
-
-				if (_jsTranslatorsPool != null)
-				{
-					_jsTranslatorsPool.Clear();
-					_jsTranslatorsPool = null;
-				}
-
-				if (_jsMinifiersPool != null)
-				{
-					_jsMinifiersPool.Clear();
-					_jsMinifiersPool = null;
-				}
-			}
 		}
 	}
 }

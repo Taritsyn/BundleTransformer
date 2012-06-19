@@ -9,6 +9,7 @@
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
+	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class CssDuplicateAssetsFilterTests
@@ -18,7 +19,7 @@
 		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH = 
 			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
 
-		private HttpApplicationInfo _applicationInfo;
+		private IHttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 
 		[TestFixtureSetUp]

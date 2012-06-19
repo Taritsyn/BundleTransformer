@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.Core.Transformers
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Configuration;
 	using System.Text;
@@ -14,18 +13,13 @@
 	using Resources;
 	using Translators;
 	using Validators;
+	using Web;
 
 	/// <summary>
 	/// Transformer that responsible for processing CSS-assets
 	/// </summary>
 	public sealed class CssTransformer : TransformerBase
 	{
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-
 		/// <summary>
 		/// Constructs instance of CSS-transformer
 		/// </summary>
@@ -76,7 +70,7 @@
 		/// should be ignored when processing</param>
 		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns)
 			: this(minifier, translators, ignorePatterns, 
-				BundleTransformerContext.Current.IsDebugMode)
+				BundleTransformerContext.Current.GetApplicationInfo())
 		{ }
 
 		/// <summary>
@@ -86,9 +80,10 @@
 		/// <param name="translators">List of translators</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns, bool isDebugMode) 
-			: this(minifier, translators, ignorePatterns, isDebugMode, 
+		/// <param name="applicationInfo">Information about web application</param>
+		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns, 
+			IHttpApplicationInfo applicationInfo)
+			: this(minifier, translators, ignorePatterns, applicationInfo, 
 				BundleTransformerContext.Current.GetCoreConfiguration())
 		{ }
 
@@ -99,22 +94,14 @@
 		/// <param name="translators">List of translators</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
+		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
-		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, 
-			string[] ignorePatterns, bool isDebugMode, CoreSettings coreConfig)
-				: base(ignorePatterns, isDebugMode, coreConfig)
+		public CssTransformer(IMinifier minifier, IList<ITranslator> translators,
+			string[] ignorePatterns, IHttpApplicationInfo applicationInfo, CoreSettings coreConfig)
+			: base(ignorePatterns, applicationInfo, coreConfig)
 		{
 			_minifier = minifier ?? CreateDefaultMinifier();
 			_translators = translators ?? CreateDefaultTranslators();
-		}
-
-		/// <summary>
-		/// Destructs instance of CSS-transformer
-		/// </summary>
-		~CssTransformer()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -174,7 +161,7 @@
 			assets = RemoveUnnecessaryAssets(assets);
 			assets = ReplaceFileExtensions(assets);
 			assets = Translate(assets);
-			if (!_isDebugMode)
+			if (!_applicationInfo.IsDebugMode)
 			{
 				assets = Minify(assets);
 			}
@@ -230,7 +217,7 @@
 		{
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter
 			{
-			    IsDebugMode = _isDebugMode
+			    IsDebugMode = _applicationInfo.IsDebugMode
 			};
 
 			IList<IAsset> processedAssets = cssFileExtensionsFilter.Transform(assets);
@@ -275,38 +262,6 @@
 			}
 
 			return content.ToString();
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-
-				_coreConfig = null;
-
-				if (_translators != null)
-				{
-					_translators.Clear();
-					_translators = null;
-				}
-
-				_minifier = null;
-			}
 		}
 	}
 }

@@ -7,6 +7,13 @@
 
 	internal sealed class VirtualFileReader : IFileReader
 	{
+		public byte[] GetBinaryFileContents(string fileName)
+		{
+			fileName = GetFullPath(fileName);
+
+			return File.ReadAllBytes(fileName);
+		}
+
 		public string GetFileContents(string fileName)
 		{
 			fileName = GetFullPath(fileName);

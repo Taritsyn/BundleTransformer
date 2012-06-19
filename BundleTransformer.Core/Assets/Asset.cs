@@ -1,9 +1,11 @@
 ﻿namespace BundleTransformer.Core.Assets
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 
 	using FileSystem;
+	using Web;
 
 	/// <summary>
 	/// Asset
@@ -102,6 +104,15 @@
 		/// Gets or sets path to asset file
 		/// </summary>
 		public string Path
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets paths to the required asset files
+		/// </summary>
+		public IList<string> RequiredFilePaths
 		{
 			get;
 			set;
@@ -213,7 +224,7 @@
 		/// <param name="path">Path to asset file</param>
 		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="fileSystemWrapper">File system wrapper</param>
-		public Asset(string path, HttpApplicationInfo applicationInfo, IFileSystemWrapper fileSystemWrapper)
+		public Asset(string path, IHttpApplicationInfo applicationInfo, IFileSystemWrapper fileSystemWrapper)
 		{
 			_applicationRootPathRegex = new Regex("^" + applicationInfo.RootPath.Replace(@"\", @"\\"), 
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -221,6 +232,7 @@
 			_fileSystemWrapper = fileSystemWrapper;
 
 			Path = path;
+			RequiredFilePaths = new List<string>();
 			Minified = false;
 			Content = null;
 			AssetType = GetAssetType(Path);

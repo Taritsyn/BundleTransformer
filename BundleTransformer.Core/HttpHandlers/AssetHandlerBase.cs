@@ -4,6 +4,7 @@ using System.Text;
 namespace BundleTransformer.Core.HttpHandlers
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Web;
@@ -15,22 +16,18 @@ namespace BundleTransformer.Core.HttpHandlers
 	using Minifiers;
 	using Resources;
 	using Translators;
+	using Web;
 
 	/// <summary>
 	/// HTTP-handler, which is responsible for text output 
 	/// of processed asset
 	/// </summary>
-	public abstract class AssetHandlerBase : IHttpHandler, IDisposable
+	public abstract class AssetHandlerBase : IHttpHandler
 	{
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
 		/// <summary>
 		/// Server cache
 		/// </summary>
-		protected Cache _cache;
+		protected readonly Cache _cache;
 
 		/// <summary>
 		/// Synchronizer of requests to server cache
@@ -40,18 +37,18 @@ namespace BundleTransformer.Core.HttpHandlers
 		/// <summary>
 		/// File system wrapper
 		/// </summary>
-		protected IFileSystemWrapper _fileSystemWrapper;
+		protected readonly IFileSystemWrapper _fileSystemWrapper;
 
 		/// <summary>
 		/// Configuration settings of HTTP-handler that responsible 
 		/// for text output of processed asset
 		/// </summary>
-		protected AssetHandlerSettings _assetHandlerConfig;
+		protected readonly AssetHandlerSettings _assetHandlerConfig;
 
 		/// <summary>
-		/// Flag that web application is in debug mode
+		/// Information about web application
 		/// </summary>
-		protected readonly bool _isDebugMode;
+		protected readonly IHttpApplicationInfo _applicationInfo;
 
 		/// <summary>
 		/// Asset content type
@@ -74,22 +71,14 @@ namespace BundleTransformer.Core.HttpHandlers
 		/// <param name="fileSystemWrapper">File system wrapper</param>
 		/// <param name="assetHandlerConfig">Configuration settings of HTTP-handler that responsible 
 		/// for text output of processed asset</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		protected AssetHandlerBase(Cache cache, IFileSystemWrapper fileSystemWrapper, 
-			AssetHandlerSettings assetHandlerConfig, bool isDebugMode)
+		/// <param name="applicationInfo">Information about web application</param>
+		protected AssetHandlerBase(Cache cache, IFileSystemWrapper fileSystemWrapper,
+			AssetHandlerSettings assetHandlerConfig, IHttpApplicationInfo applicationInfo)
 		{
 			_cache = cache;
 			_fileSystemWrapper = fileSystemWrapper;
 			_assetHandlerConfig = assetHandlerConfig;
-			_isDebugMode = isDebugMode;
-		}
-
-		/// <summary>
-		/// Destructs instance of asset handler
-		/// </summary>
-		~AssetHandlerBase()
-		{
-			Dispose(false /* disposing */);
+			_applicationInfo = applicationInfo;
 		}
 
 
@@ -178,7 +167,7 @@ namespace BundleTransformer.Core.HttpHandlers
 			// asset caching in browsers
 			var clientCache = response.Cache;
 
-			if (_isDebugMode && _assetHandlerConfig.DisableClientCacheInDebugMode)
+			if (_applicationInfo.IsDebugMode && _assetHandlerConfig.DisableClientCacheInDebugMode)
 			{
 				clientCache.SetCacheability(HttpCacheability.NoCache);
 				clientCache.SetExpires(DateTime.UtcNow.AddDays(-1));
@@ -209,7 +198,7 @@ namespace BundleTransformer.Core.HttpHandlers
 			}
 
 			if (_assetHandlerConfig.EnableCompression
-				&& (!_isDebugMode || !_assetHandlerConfig.DisableCompressionInDebugMode))
+				&& (!_applicationInfo.IsDebugMode || !_assetHandlerConfig.DisableCompressionInDebugMode))
 			{
 				// Compress asset by GZIP/Deflate
 				TryCompressAsset(context);
@@ -304,7 +293,10 @@ namespace BundleTransformer.Core.HttpHandlers
 					obj[0] = lastModifyTime;
 					obj[1] = content;
 
-					var cacheDep = new CacheDependency(processedAsset.Path);
+					var fileDependencies = new List<string> { processedAsset.Path };
+					fileDependencies.AddRange(processedAsset.RequiredFilePaths);
+
+					var cacheDep = new CacheDependency(fileDependencies.ToArray());
 
 					_cache.Insert(cacheItemKey, obj, cacheDep, 
 						absoluteExpiration, slidingExpiration, CacheItemPriority.Low, null);
@@ -450,32 +442,6 @@ namespace BundleTransformer.Core.HttpHandlers
 			response.StatusCode = 500;
 			response.Write(string.Format("/*{0}{1}{0}*/", Environment.NewLine, errorMessage));
 			response.End();
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-
-				_cache = null;
-				_fileSystemWrapper = null;
-				_assetHandlerConfig = null;
-			}
 		}
 	}
 }

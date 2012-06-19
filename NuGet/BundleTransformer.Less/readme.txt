@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS 1.4.0 Beta 2
+            README file for Bundle Transformer: LESS 1.4.1 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -21,8 +21,10 @@
    =============
    RELEASE NOTES
    =============
-   Added HTTP-handler LessAssetHandler, which is responsible for text 
-   output of translated LESS-asset.
+   1. Added support of dotless 1.3.0.4
+   2. Added support of the file cache dependencies based on the list of 
+      LESS-files, that were added to a LESS-asset by using the @import 
+      directive
 
    ====================
    POST-INSTALL ACTIONS

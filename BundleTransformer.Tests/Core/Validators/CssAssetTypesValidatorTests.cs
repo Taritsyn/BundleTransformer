@@ -10,6 +10,7 @@
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Validators;
+	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class CssAssetTypesValidatorTests
@@ -21,7 +22,7 @@
 		private const string SCRIPTS_DIRECTORY_PATH = 
 			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
 
-		private HttpApplicationInfo _applicationInfo;
+		private IHttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 
 		[TestFixtureSetUp]

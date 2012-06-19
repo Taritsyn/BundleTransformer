@@ -11,27 +11,28 @@
 	using Minifiers;
 	using Resources;
 	using Translators;
+	using Web;
 
 	/// <summary>
 	/// Base class of transformer is responsible for processing assets
 	/// </summary>
-	public abstract class TransformerBase : IBundleTransform, IDisposable
+	public abstract class TransformerBase : IBundleTransform
 	{
 		/// <summary>
 		/// List of patterns of files and directories that 
 		/// should be ignored when processing
 		/// </summary>
-		protected string[] _ignorePatterns;
+		protected readonly string[] _ignorePatterns;
 
 		/// <summary>
-		/// Flag that web application is in debug mode
+		/// Information about web application
 		/// </summary>
-		protected bool _isDebugMode;
+		protected readonly IHttpApplicationInfo _applicationInfo;
 
 		/// <summary>
 		/// Configuration settings of core
 		/// </summary>
-		protected CoreSettings _coreConfig;
+		protected readonly CoreSettings _coreConfig;
 
 		/// <summary>
 		/// List of translators (LESS, Sass, SCSS and CoffeeScript)
@@ -49,12 +50,12 @@
 		/// </summary>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
+		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
-		protected TransformerBase(string[] ignorePatterns, bool isDebugMode, CoreSettings coreConfig)
+		protected TransformerBase(string[] ignorePatterns, IHttpApplicationInfo applicationInfo, CoreSettings coreConfig)
 		{
 			_ignorePatterns = ignorePatterns;
-			_isDebugMode = isDebugMode;
+			_applicationInfo = applicationInfo;
 			_coreConfig = coreConfig;
 		}
 
@@ -124,7 +125,7 @@
 
 			foreach (var translator in _translators)
 			{
-				translator.IsDebugMode = _isDebugMode;
+				translator.IsDebugMode = _applicationInfo.IsDebugMode;
 
 				processedAssets = translator.Translate(processedAssets);
 			}
@@ -172,14 +173,16 @@
 			foreach (var asset in assets)
 			{
 				assetFiles.Add(new FileInfo(asset.Path));
+				if (_applicationInfo.IsOptimizationsEnabled && asset.RequiredFilePaths.Count > 0)
+				{
+					foreach (var assetFilePath in asset.RequiredFilePaths)
+					{
+						assetFiles.Add(new FileInfo(assetFilePath));
+					}
+				}
 			}
 
 			bundleResponse.Files = assetFiles;
 		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public abstract void Dispose();
 	}
 }

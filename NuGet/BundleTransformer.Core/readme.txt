@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Core 1.4.0 Beta 2
+            README file for Bundle Transformer: Core 1.4.1 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -37,7 +37,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Microsoft ASP.NET Web Optimization Framework 1.0.0 Beta 2.
+   Added support of Microsoft ASP.NET Web Optimization Framework 1.0.0 Beta 3.
    
    =============
    DOCUMENTATION

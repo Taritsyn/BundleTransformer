@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-        README file for Bundle Transformer: CoffeeScript 1.4.0 Beta 2
+        README file for Bundle Transformer: CoffeeScript 1.4.1 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -16,12 +16,6 @@
    CoffeeScript-code to JS-code. Also contains HTTP-handler 
    CoffeeScriptAssetHandler, which is responsible for text output of 
    translated CoffeeScript-asset.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added HTTP-handler CoffeeScriptAssetHandler, which is responsible 
-   for text output of translated CoffeeScript-asset.
 
    =============
    DOCUMENTATION

@@ -30,7 +30,7 @@
 		/// <summary>
 		/// Configuration settings of Closure Minifier
 		/// </summary>
-		private ClosureSettings _closureConfig;
+		private readonly ClosureSettings _closureConfig;
 
 		/// <summary>
 		/// Gets or sets a URL of Google Closure Compiler Service API
@@ -283,7 +283,6 @@
 		{
 			if (!_disposed)
 			{
-				_closureConfig = null;
 				_disposed = true;
 			}
 		}

@@ -5,8 +5,8 @@
         <title>@ViewBag.Title - Bundle Transformer Example MVC Application</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
-		@Styles.Render("~/CommonStyles")
-		@Scripts.Render("~/Modernizr")
+		@Styles.Render("~/Bundles/CommonStyles")
+		@Scripts.Render("~/Bundles/Modernizr")
     </head>
     <body>
         <header>
@@ -50,7 +50,7 @@
             </div>
         </footer>
 
-		@Scripts.Render("~/CommonScripts")
+		@Scripts.Render("~/Bundles/CommonScripts")
         @RenderSection("scripts", required: false)
     </body>
 </html>

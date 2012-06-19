@@ -676,7 +676,17 @@ Closure style rules and conventions
 						</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
-			</xs:extension>
+				<xs:attribute name="processJqueryPrimitives" type="Boolean_SchemaType" use="optional" default="false">
+					<xs:annotation>
+						<xs:documentation>Flag for whether to process built-ins from the jQuery library, such as jQuery.fn and jQuery.extend()</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="processClosurePrimitives" type="Boolean_SchemaType" use="optional" default="false">
+					<xs:annotation>
+						<xs:documentation>Flag for whether to process built-ins from the Closure library, such as goog.require(), goog.provide() and goog.exportSymbol()</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+ 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 

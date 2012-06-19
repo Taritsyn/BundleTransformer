@@ -43,7 +43,9 @@
       <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -51,16 +53,19 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Assets\Asset.cs" />
+    <Compile Include="Core\Assets\AssetTests.cs" />
     <Compile Include="Core\Filters\CssDuplicateAssetsFilterTests.cs" />
     <Compile Include="Core\Filters\CssFileExtensionsFilterTests.cs" />
     <Compile Include="Core\Filters\CssUnnecessaryAssetsFilterTests.cs" />
     <Compile Include="Core\Filters\JsDuplicateAssetsFilterTests.cs" />
     <Compile Include="Core\Filters\JsFileExtensionsFilterTests.cs" />
     <Compile Include="Core\Filters\JsUnnecessaryAssetsFilterTests.cs" />
+    <Compile Include="LessLite\Translators\LessTranslatorTests.cs" />
+    <Compile Include="Less\Translators\LessTranslatorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\Validators\CssAssetTypesValidatorTests.cs" />
     <Compile Include="Core\Validators\JsAssetTypesValidatorTests.cs" />
+    <Compile Include="SassAndScss\Translators\SassAndScssTranslatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -69,6 +74,18 @@
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
       <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
       <Name>BundleTransformer.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.LessLite\BundleTransformer.LessLite.csproj">
+      <Project>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</Project>
+      <Name>BundleTransformer.LessLite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.Less\BundleTransformer.Less.csproj">
+      <Project>{037761EE-3499-4D8E-95D9-9A71D471B102}</Project>
+      <Name>BundleTransformer.Less</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj">
+      <Project>{E708475F-094D-4065-B432-473D76B739E0}</Project>
+      <Name>BundleTransformer.SassAndScss</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

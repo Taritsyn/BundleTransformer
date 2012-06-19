@@ -36,13 +36,6 @@
 
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript-translator
-		/// </summary>
-		public CoffeeScriptTranslator()
-		{
-		}
-
-		/// <summary>
 		/// Destructs instance of CoffeeScript-translator
 		/// </summary>
 		~CoffeeScriptTranslator()

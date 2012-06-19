@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.Core.FileSystem
 {
-	using System;
 	using System.Text.RegularExpressions;
 
 	/// <summary>
@@ -12,14 +11,14 @@
 		/// Regular expression for working with paths of components in CSS-code
 		/// </summary>
 		private static readonly Regex _urlStylesheetRuleRegex =
-			new Regex(@"url\((?<quote>'?""?)(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)""?'?\)",
+			new Regex(@"url\((?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)('|"")\)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with paths of imported stylesheets in CSS-code
 		/// </summary>
 		private static readonly Regex _importStylesheetRuleRegex =
-			new Regex(@"@import\s(?<quote>'?""?)(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)""?'?",
+			new Regex(@"@import\s(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)('|"")?",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
@@ -74,6 +73,16 @@
 
 				return result;
 			});
+		}
+
+		/// <summary>
+		/// Transforms relative path to absolute
+		/// </summary>
+		/// <param name="basePath">The base path</param>
+		/// <param name="relativePath">The relative path</param>
+		public string ResolveRelativePath(string basePath, string relativePath)
+		{
+			return Utils.TransformRelativeUrlToAbsolute(basePath, relativePath);
 		}
 	}
 }

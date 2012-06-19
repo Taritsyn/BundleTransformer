@@ -31,12 +31,12 @@
 		/// <summary>
 		/// Configuration settings of Closure Minifier
 		/// </summary>
-		private ClosureSettings _closureConfig;
+		private readonly ClosureSettings _closureConfig;
 
 		/// <summary>
 		/// File system wrapper
 		/// </summary>
-		private IFileSystemWrapper _fileSystemWrapper;
+		private readonly IFileSystemWrapper _fileSystemWrapper;
 
 		/// <summary>
 		/// Absolute path to directory that contains temporary files
@@ -80,6 +80,26 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to process built-ins from 
+		/// the jQuery library, such as jQuery.fn and jQuery.extend()
+		/// </summary>
+		public bool ProcessJqueryPrimitives
+		{
+			get;
+			set; 
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to process built-ins from 
+		/// the Closure library, such as goog.require(), goog.provide() and goog.exportSymbol()
+		/// </summary>
+		public bool ProcessClosurePrimitives
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of Closure local JS-minifier
@@ -118,6 +138,8 @@
 			PrettyPrint = localJsMinifierConfig.PrettyPrint;
 			LanguageSpec = localJsMinifierConfig.LanguageSpec;
 			ThirdParty = localJsMinifierConfig.ThirdParty;
+			ProcessJqueryPrimitives = localJsMinifierConfig.ProcessJqueryPrimitives;
+			ProcessClosurePrimitives = localJsMinifierConfig.ProcessClosurePrimitives;
 			Severity = localJsMinifierConfig.Severity;
 		}
 
@@ -214,6 +236,14 @@
 			if (ThirdParty)
 			{
 				args.AppendFormat("--third_party ");
+			}
+			if (ProcessJqueryPrimitives)
+			{
+				args.AppendFormat("--process_jquery_primitives ");
+			}
+			if (ProcessClosurePrimitives)
+			{
+				args.AppendFormat("--process_closure_primitives ");
 			}
 			if (severity > 0)
 			{
@@ -359,9 +389,6 @@
 			if (!_disposed)
 			{
 				_disposed = true;
-
-				_closureConfig = null;
-				_fileSystemWrapper = null;
 			}
 		}
 	}

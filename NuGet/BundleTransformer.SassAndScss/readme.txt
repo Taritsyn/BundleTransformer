@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Sass and SCSS 1.4.0 Beta 2
+       README file for Bundle Transformer: Sass and SCSS 1.4.1 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -20,8 +20,9 @@
    =============
    RELEASE NOTES
    =============
-   Added HTTP-handler SassAndScssAssetHandler, which is responsible for text 
-   output of translated Sass- or SCSS-asset.
+   Added support of the file cache dependencies based on the list of 
+   Sass- and SCSS-files, that were added to a Sass- or SCSS-asset by 
+   using the @import directive.
    
    =============
    DOCUMENTATION

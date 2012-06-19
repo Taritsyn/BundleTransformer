@@ -9,6 +9,7 @@
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
+	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class JsFileExtensionsFilterTests
@@ -19,7 +20,7 @@
 		private readonly string[] _jsFilesWithMicrosoftStyleExtensions =
 			new[] { "MicrosoftAjax.js", "MicrosoftMvcAjax.js", 
 				"MicrosoftMvcValidation.js", "knockout-$version$.js" };
-		private HttpApplicationInfo _applicationInfo;
+		private IHttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
 		private IList<IAsset> _testAssets;
 
