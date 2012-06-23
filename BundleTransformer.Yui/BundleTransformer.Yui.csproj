@@ -32,8 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EcmaScript.NET.modified">
-      <HintPath>..\packages\YUICompressor.NET.1.7.1.0\lib\net35\EcmaScript.NET.modified.dll</HintPath>
+    <Reference Include="EcmaScript.NET">
+      <HintPath>..\packages\YUICompressor.NET.2.0.0.0\lib\NET20\EcmaScript.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\packages\YUICompressor.NET.2.0.0.0\lib\NET20\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -43,8 +46,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Yahoo.Yui.Compressor">
-      <HintPath>..\packages\YUICompressor.NET.1.7.1.0\lib\net35\Yahoo.Yui.Compressor.dll</HintPath>
+    <Reference Include="Yahoo.Yui.Compressor, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\YUICompressor.NET.2.0.0.0\lib\NET20\Yahoo.Yui.Compressor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -53,8 +57,7 @@
     <Compile Include="Configuration\JsMinifierSettings.cs" />
     <Compile Include="Configuration\MinifierSettingsBase.cs" />
     <Compile Include="Configuration\YuiSettings.cs" />
-    <Compile Include="CssCompressionType.cs" />
-    <Compile Include="JavaScriptCompressionType.cs" />
+    <Compile Include="CompressionType.cs" />
     <Compile Include="Minifiers\YuiCssMinifier.cs" />
     <Compile Include="Minifiers\YuiJsMinifier.cs" />
     <Compile Include="Minifiers\YuiMinifierBase.cs" />
@@ -69,6 +72,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
+    <Compile Include="YuiCompressingException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">

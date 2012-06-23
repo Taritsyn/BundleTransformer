@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS 1.4.1 Beta 3
+            README file for Bundle Transformer: LESS 1.4.2 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -17,14 +17,6 @@
    of translated LESS-asset.
 
    Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of dotless 1.3.0.4
-   2. Added support of the file cache dependencies based on the list of 
-      LESS-files, that were added to a LESS-asset by using the @import 
-      directive
 
    ====================
    POST-INSTALL ACTIONS

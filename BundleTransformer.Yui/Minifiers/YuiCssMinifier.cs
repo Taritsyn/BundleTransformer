@@ -5,7 +5,7 @@
 	using System.Linq;
 
 	using Yahoo.Yui.Compressor;
-	using YuiCssCompressionType = Yahoo.Yui.Compressor.CssCompressionType;
+	using YuiCompressionType = Yahoo.Yui.Compressor.CompressionType;
 
 	using Core;
 	using Core.Assets;
@@ -13,7 +13,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
-	using BtCssCompressionType = CssCompressionType;
+	using BtCompressionType = CompressionType;
 	using YuiStrings = Resources.Strings;
 
 	/// <summary>
@@ -28,17 +28,28 @@
 		private readonly YuiSettings _yuiConfig;
 
 		/// <summary>
+		/// CSS-compressor
+		/// </summary>
+		private readonly CssCompressor _cssCompressor;
+
+		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
 
 		/// <summary>
-		/// Gets or sets a type of compression CSS-code
+		/// Gets or sets a code compression type
 		/// </summary>
-		public BtCssCompressionType CompressionType
+		public override BtCompressionType CompressionType
 		{
-			get;
-			set;
+			get
+			{
+				return Utils.GetEnumFromOtherEnum<YuiCompressionType, BtCompressionType>(_cssCompressor.CompressionType);
+			}
+			set
+			{
+				_cssCompressor.CompressionType = Utils.GetEnumFromOtherEnum<BtCompressionType, YuiCompressionType>(value);
+			}
 		}
 
 		/// <summary>
@@ -47,8 +58,18 @@
 		/// </summary>
 		public bool RemoveComments
 		{
-			get;
-			set;
+			get { return _cssCompressor.RemoveComments; }
+			set { _cssCompressor.RemoveComments = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a column number, after which must be inserted a line break.
+		/// Specify 0 to get a line break after each rule in CSS.
+		/// </summary>
+		public override int LineBreakPosition
+		{
+			get { return _cssCompressor.LineBreakPosition; }
+			set { _cssCompressor.LineBreakPosition = value; }
 		}
 
 
@@ -66,8 +87,9 @@
 		public YuiCssMinifier(YuiSettings yuiConfig)
 		{
 			_yuiConfig = yuiConfig;
-			CssMinifierSettings cssMinifierConfig = _yuiConfig.CssMinifier;
+			_cssCompressor = new CssCompressor();
 
+			CssMinifierSettings cssMinifierConfig = _yuiConfig.CssMinifier;
 			CompressionType = cssMinifierConfig.CompressionType;
 			RemoveComments = cssMinifierConfig.RemoveComments;
 			LineBreakPosition = cssMinifierConfig.LineBreakPosition;
@@ -106,9 +128,7 @@
 
 				try
 				{
-					newContent = CssCompressor.Compress(asset.Content, LineBreakPosition,
-						Utils.GetEnumFromOtherEnum<BtCssCompressionType, YuiCssCompressionType>(CompressionType),
-						RemoveComments);
+					newContent = _cssCompressor.Compress(asset.Content);
 				}
 				catch(Exception e)
 				{

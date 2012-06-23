@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.CoffeeScript</id>
-    <version>1.4.1-beta3</version>
+    <version>1.4.2-beta3</version>
 	<title>Bundle Transformer: CoffeeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,7 +16,7 @@
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling CoffeeScript Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.4.1-beta3]" />
+      <dependency id="BundleTransformer.Core" version="[1.4.2-beta3]" />
 	  <dependency id="SassAndCoffee.JavaScript" version="2.0.2.0" />
     </dependencies>
     <references>

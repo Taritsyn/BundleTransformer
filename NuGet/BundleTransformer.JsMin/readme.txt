@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: JSMin 1.4.1 Beta 3
+           README file for Bundle Transformer: JSMin 1.4.2 Beta 3
  
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.JsMin contains one minifier-adapter for minification 
    of JS-code - CrockfordJsMinifier. CrockfordJsMinifier is based on 
-   the C# port of Douglas Crockford JSMin 
+   the C# port of Douglas Crockford's JSMin 
    (http://www.crockford.com/javascript/jsmin.html).
 
    ====================

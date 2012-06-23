@@ -8,33 +8,13 @@
 	public sealed class JsMinifierSettings : MinifierSettingsBase
 	{
 		/// <summary>
-		/// Gets or sets a type of compression JavaScript-code
-		/// </summary>
-		[ConfigurationProperty("compressionType", DefaultValue = JavaScriptCompressionType.YuiStockCompression)]
-		public JavaScriptCompressionType CompressionType
-		{
-			get { return (JavaScriptCompressionType)this["compressionType"]; }
-			set { this["compressionType"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow display informational messages and warnings
-		/// </summary>
-		[ConfigurationProperty("isVerboseLogging", DefaultValue = true)]
-		public bool IsVerboseLogging
-		{
-			get { return (bool) this["isVerboseLogging"]; }
-			set { this["isVerboseLogging"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to allow obfuscation of code
 		/// </summary>
-		[ConfigurationProperty("isObfuscateJavascript", DefaultValue = true)]
-		public bool IsObfuscateJavascript
+		[ConfigurationProperty("obfuscateJavascript", DefaultValue = true)]
+		public bool ObfuscateJavascript
 		{
-			get { return (bool)this["isObfuscateJavascript"]; }
-			set { this["isObfuscateJavascript"] = value; }
+			get { return (bool)this["obfuscateJavascript"]; }
+			set { this["obfuscateJavascript"] = value; }
 		}
 
 		/// <summary>
@@ -62,11 +42,24 @@
 		/// Gets or sets a flag for whether to ignore when processing code, that 
 		/// executed in eval operator
 		/// </summary>
-		[ConfigurationProperty("isEvalIgnored", DefaultValue = false)]
-		public bool IsEvalIgnored
+		[ConfigurationProperty("ignoreEval", DefaultValue = false)]
+		public bool IgnoreEval
 		{
-			get { return (bool)this["isEvalIgnored"]; }
-			set { this["isEvalIgnored"] = value; }
+			get { return (bool)this["ignoreEval"]; }
+			set { this["ignoreEval"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only syntax error messages;
+		///		1 - only syntax error messages and warnings.
+		/// </summary>
+		[ConfigurationProperty("severity", DefaultValue = 0)]
+		[IntegerValidator(MinValue = 0, MaxValue = 1, ExcludeRange = false)]
+		public int Severity
+		{
+			get { return (int)this["severity"]; }
+			set { this["severity"] = value; }
 		}
 	}
 }

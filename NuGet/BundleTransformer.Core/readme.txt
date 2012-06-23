@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Core 1.4.1 Beta 3
+            README file for Bundle Transformer: Core 1.4.2 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -27,18 +27,13 @@
    the minification of code in runtime, but this feature can be added 
    by installing of minifier-adapter (now available adapters based on 
    Microsoft Ajax Minifier, YUI Compressor for .NET, Google Closure 
-   Compiler and Douglas Crockford JSMin). In addition, you can also 
+   Compiler and Douglas Crockford's JSMin). In addition, you can also 
    install translator-adapters that implement the translation of code 
    on intermediate languages (LESS, Sass, SCSS and CoffeeScript).
 
    This extension will help your web applications successfully pass a most 
    part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Microsoft ASP.NET Web Optimization Framework 1.0.0 Beta 3.
-   
+
    =============
    DOCUMENTATION
    =============
