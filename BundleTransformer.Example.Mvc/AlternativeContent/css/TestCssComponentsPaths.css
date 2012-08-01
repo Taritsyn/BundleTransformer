@@ -45,10 +45,10 @@
 
 .envelope
 {
-	background: transparent url('../../Content/images/icons/envelope.png') no-repeat !important;
+	background: transparent url("../../Content/images/icons/envelope.png") no-repeat !important;
 }
 
 .feed
 {
-	background: transparent url('images/icons/feed.png') no-repeat !important;
+	background: transparent url(images/icons/feed.png) no-repeat !important;
 }

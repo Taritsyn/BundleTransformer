@@ -11,14 +11,14 @@
 		/// Regular expression for working with paths of components in CSS-code
 		/// </summary>
 		private static readonly Regex _urlStylesheetRuleRegex =
-			new Regex(@"url\((?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)('|"")\)",
+			new Regex(@"url\((?<quote>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)?\)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with paths of imported stylesheets in CSS-code
 		/// </summary>
 		private static readonly Regex _importStylesheetRuleRegex =
-			new Regex(@"@import\s(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)('|"")?",
+			new Regex(@"@import\s*(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
@@ -36,12 +36,11 @@
 				if (m.Groups["url"].Success)
 				{
 					string urlValue = m.Groups["url"].Value;
-					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : "";
+					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : @"""";
 
-					result = string.Format("url({0}{1}{2})",
+					result = string.Format("url({0}{1}{0})",
 						quoteValue,
-						Utils.TransformRelativeUrlToAbsolute(path, urlValue),
-						quoteValue);
+						Utils.TransformRelativeUrlToAbsolute(path, urlValue));
 				}
 
 				return result;
@@ -63,12 +62,11 @@
 				if (m.Groups["url"].Success)
 				{
 					string urlValue = m.Groups["url"].Value;
-					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : "";
+					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : @"""";
 
-					result = string.Format("@import {0}{1}{2}",
+					result = string.Format("@import {0}{1}{0}",
 						quoteValue,
-						Utils.TransformRelativeUrlToAbsolute(path, urlValue),
-						quoteValue);
+						Utils.TransformRelativeUrlToAbsolute(path, urlValue));
 				}
 
 				return result;

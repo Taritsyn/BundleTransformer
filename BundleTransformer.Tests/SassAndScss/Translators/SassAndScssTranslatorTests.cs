@@ -58,8 +58,8 @@
 	background-color: $alt-bg-color
 	border-color: $alt-bg-color
 
-@import ""TestSassImport.Sub1.sass"", 'TestSassImport.Sub2'
-@import ""TestSassImport.Sub3""")
+@import ""TestSassImport.Sub1.sass"", 'TestSassImport.Sub2', TestSassImport.Sub3
+@import ""TestSassImport.Sub4""")
 				;
 			fileSystemMock
 				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.scss")))
@@ -96,18 +96,33 @@
 				.Returns(false)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.scss")))
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.sass")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.scss")))
+				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.sass")))
+				.Returns(@"$font-style: italic
+
+.translators #sass
+	font-style: $font-style")
+				;
+			fileSystemMock
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.scss")))
+				.Returns(false)
+				;
+			fileSystemMock
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub4.scss")))
+				.Returns(true)
+				;
+			fileSystemMock
+				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub4.scss")))
 				.Returns(@".translators #sass
 {
 	border-style: dashed;
 }")
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.sass")))
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub4.sass")))
 				.Returns(false)
 				;
 
@@ -145,11 +160,12 @@ $caption-color: #FFFFFF
 			sassAndScssTranslator.FillImportedFilePaths(assetContent, assetUrl, importedFilePaths);
 
 			// Assert
-			Assert.AreEqual(4, importedFilePaths.Count);
+			Assert.AreEqual(5, importedFilePaths.Count);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.sass"), importedFilePaths[0]);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub1.sass"), importedFilePaths[1]);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub2.sass"), importedFilePaths[2]);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.scss"), importedFilePaths[3]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub3.sass"), importedFilePaths[3]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestSassImport.Sub4.scss"), importedFilePaths[4]);
 		}
 
 		[Test]
@@ -171,7 +187,8 @@ $caption-color: #FFFFFF
 	border-color: $alt-bg-color;
 }
 
-@import ""TestScssImport.Sub1.scss"", 'TestScssImport.Sub2', ""TestScssImport.Sub3.sass"";")
+@import""TestScssImport.Sub1.scss"", 'TestScssImport.Sub2',""TestScssImport.Sub3.scss"";
+@import ""TestScssImport.Sub4.sass"";")
 				;
 			fileSystemMock
 				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.sass")))
@@ -212,16 +229,33 @@ $caption-color: #FFFFFF
 				.Returns(false)
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.sass")))
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.scss")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.sass")))
+				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.scss")))
+				.Returns(@"$text-decoration: underline;
+
+.translators #scss
+{
+	text-decoration: $text-decoration;
+}")
+				;
+			fileSystemMock
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.sass")))
+				.Returns(false)
+				;
+			fileSystemMock
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub4.sass")))
+				.Returns(true)
+				;
+			fileSystemMock
+				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub4.sass")))
 				.Returns(@".translators #scss
 	border-style: dotted")
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.scss")))
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub4.scss")))
 				.Returns(false)
 				;
 
@@ -265,11 +299,12 @@ $caption-color: #FFFFFF;
 			sassAndScssTranslator.FillImportedFilePaths(assetContent, assetUrl, importedFilePaths);
 
 			// Assert
-			Assert.AreEqual(4, importedFilePaths.Count);
+			Assert.AreEqual(5, importedFilePaths.Count);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.scss"), importedFilePaths[0]);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub1.scss"), importedFilePaths[1]);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub2.scss"), importedFilePaths[2]);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.sass"), importedFilePaths[3]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub3.scss"), importedFilePaths[3]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestScssImport.Sub4.sass"), importedFilePaths[4]);
 		}
 
 		[TestFixtureTearDown]

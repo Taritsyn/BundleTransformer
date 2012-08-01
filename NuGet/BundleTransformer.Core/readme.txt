@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Core 1.4.2 Beta 3
+            README file for Bundle Transformer: Core 1.4.3 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -33,6 +33,13 @@
 
    This extension will help your web applications successfully pass a most 
    part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed a bug that occurred when transforming relative paths of 
+   components to absolute in CSS-code (if the url directive contains the 
+   path without quotes).
 
    =============
    DOCUMENTATION

@@ -40,10 +40,17 @@
 		private const string SCSS_FILE_EXTENSION = ".scss";
 
 		/// <summary>
-		/// Regular expression for working with paths of imported Sass and SCSS-files
+		/// Regular expression for working with paths of imported Sass-files
 		/// </summary>
-		private static readonly Regex _importSassAndScssFilesRuleRegex =
-			new Regex(@"@import\s(?<urlList>('|"")([a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)('|"")(,\s?('|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)('|""))*)",
+		private static readonly Regex _importSassFilesRuleRegex =
+			new Regex(@"@import\s+(?<urlList>(?<quote>'|"")?([a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)?(,\s+?(?<quote>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)?)*)",
+				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
+		/// Regular expression for working with paths of imported SCSS-files
+		/// </summary>
+		private static readonly Regex _importScssFilesRuleRegex =
+			new Regex(@"@import\s*(?<urlList>(?<quote>'|"")([a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)(,\s*?(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>))*)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
@@ -219,7 +226,16 @@
 				assetExtension = SASS_FILE_EXTENSION;
 			}
 
-			MatchCollection matches = _importSassAndScssFilesRuleRegex.Matches(assetContent);
+			MatchCollection matches;
+			if (string.Equals(assetExtension, SASS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase))
+			{
+				matches = _importSassFilesRuleRegex.Matches(assetContent);
+			}
+			else
+			{
+				matches = _importScssFilesRuleRegex.Matches(assetContent);
+			}
+			
 			foreach (Match match in matches)
 			{
 				if (match.Groups["urlList"].Success)

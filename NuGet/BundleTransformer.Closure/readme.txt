@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Closure 1.4.2 Beta 3
+          README file for Bundle Transformer: Closure 1.4.3 Beta 3
  
    ----------------------------------------------------------------------
 
