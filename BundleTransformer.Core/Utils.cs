@@ -237,5 +237,17 @@
 					name, typeof(TSource), typeof(TDest))
 			);
 		}
+
+		public static string GetResourceAsString(string resourceName, Type type)
+		{
+			Assembly assembly = type.Assembly;
+			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+			{
+				using (var reader = new StreamReader(stream))
+				{
+					return reader.ReadToEnd();
+				}
+			}
+		}
 	}
 }

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Core 1.4.3 Beta 3
+               README file for Bundle Transformer: Core 1.5.0
 
    ----------------------------------------------------------------------
 
@@ -37,9 +37,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a bug that occurred when transforming relative paths of 
-   components to absolute in CSS-code (if the url directive contains the 
-   path without quotes).
+   Added support of Microsoft ASP.NET Web Optimization Framework 1.0.0.
 
    =============
    DOCUMENTATION

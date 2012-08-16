@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Closure 1.4.3 Beta 3
+             README file for Bundle Transformer: Closure 1.5.0
  
    ----------------------------------------------------------------------
 
@@ -22,6 +22,12 @@
    ClosureLocalJsMinifier is based on the Google Closure Compiler Application 
    (https://developers.google.com/closure/compiler/docs/gettingstarted_app) 
    and for their work requires the latest version of file compiler.jar.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of Microsoft .NET Framework 4 HTTP Client Libraries 
+   2.0.20710.0.
 
    ====================
    POST-INSTALL ACTIONS
