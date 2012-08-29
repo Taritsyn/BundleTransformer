@@ -90,10 +90,5 @@
 
 			return code;
 		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public abstract void Dispose();
 	}
 }

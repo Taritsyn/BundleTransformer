@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.Core.Translators
 {
-	using System;
 	using System.Collections.Generic;
 
 	using Assets;
@@ -10,7 +9,7 @@
 	/// translators of code written on intermediate languages 
 	/// (LESS, Sass, SCSS, CoffeeScript and etc) to CSS- or JS-code
 	/// </summary>
-	public interface ITranslator : IDisposable
+	public interface ITranslator
 	{
 		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode

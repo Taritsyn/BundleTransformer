@@ -41,10 +41,5 @@
 		/// <param name="assets">Set of assets</param>
 		/// <returns>Set of assets with minified text content</returns>
 		public abstract IList<IAsset> Minify(IList<IAsset> assets);
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public abstract void Dispose();
 	}
 }

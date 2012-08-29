@@ -110,10 +110,8 @@
 				{
 					return !BundleTable.EnableOptimizations;
 				}
-				else
-				{
-					return HttpContext.Current.IsDebuggingEnabled;
-				}
+
+				return HttpContext.Current.IsDebuggingEnabled;
 			}
 		}
 

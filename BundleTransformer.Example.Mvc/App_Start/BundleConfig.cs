@@ -7,6 +7,7 @@ namespace BundleTransformer.Example.Mvc
 {
 	public class BundleConfig
 	{
+		// For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
 		public static void RegisterBundles(BundleCollection bundles)
 		{
 			var cssTransformer = new CssTransformer();
@@ -41,8 +42,8 @@ namespace BundleTransformer.Example.Mvc
 
 			var commonScriptsBundle = new Bundle("~/Bundles/CommonScripts");
 			commonScriptsBundle.Include("~/Scripts/MicrosoftAjax.js",
-				"~/Scripts/jquery-1.*",
-				"~/Scripts/jquery-ui-1.*",
+				"~/Scripts/jquery-{version}.js",
+				"~/Scripts/jquery-ui-{version}.js",
 				"~/Scripts/jquery.validate.js",
 				"~/Scripts/jquery.validate.unobtrusive.js",
 				"~/Scripts/jquery.unobtrusive-ajax.js",

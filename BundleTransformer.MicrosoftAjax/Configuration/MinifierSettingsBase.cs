@@ -53,6 +53,19 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
+		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
+		/// set to MultipleLines.
+		/// </summary>
+		[ConfigurationProperty("blocksStartOnSameLine", DefaultValue = BlockStart.NewLine)]
+		public BlockStart BlocksStartOnSameLine
+		{
+			get { return (BlockStart)this["blocksStartOnSameLine"]; }
+			set { this["blocksStartOnSameLine"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a string representation of the list 
 		/// of names defined for the preprocessor, comma-separated
 		/// </summary>

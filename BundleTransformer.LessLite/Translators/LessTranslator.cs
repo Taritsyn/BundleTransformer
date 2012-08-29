@@ -57,16 +57,6 @@
 		/// </summary>
 		private readonly ICssRelativePathResolver _cssRelativePathResolver;
 
-		/// <summary>
-		/// Configuration settings of LESS-translator
-		/// </summary>
-		private readonly LessLiteSettings _lessConfig;
-
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
 
 		/// <summary>
 		/// Constructs instance of LESS-translator
@@ -91,17 +81,8 @@
 			_httpContext = httpContext;
 			_fileSystemWrapper = fileSystemWrapper;
 			_cssRelativePathResolver = cssRelativePathResolver;
-			_lessConfig = lessConfig;
 
-			UseNativeMinification = _lessConfig.UseNativeMinification;
-		}
-
-		/// <summary>
-		/// Destructs instance of LESS-translator
-		/// </summary>
-		~LessTranslator()
-		{
-			Dispose(false /* disposing */);
+			UseNativeMinification = lessConfig.UseNativeMinification;
 		}
 
 
@@ -176,7 +157,7 @@
 
 		private void InnerTranslate(IAsset asset, ILessEngine lessEngine, bool enableNativeMinification)
 		{
-			string newContent = string.Empty;
+			string newContent;
 			string assetPath = asset.Path;
 			var importedFilePaths = new List<string>();
 
@@ -273,28 +254,6 @@
 						}
 					}
 				}
-			}
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
 			}
 		}
 	}

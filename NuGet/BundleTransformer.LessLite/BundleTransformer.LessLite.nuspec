@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.LessLite</id>
-    <version>1.5.0</version>
+    <version>1.5.5</version>
 	<title>Bundle Transformer: LESS Lite</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=386675</iconUrl>
+    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476847</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.LessLite contains translator-adapter LessTranslator. This adapter makes translation of LESS-code to CSS-code. Also contains HTTP-handler LessAssetHandler, which is responsible for text output of translated LESS-asset.
 	
@@ -20,7 +20,7 @@ Uses NuGet-package the DotlessClientOnly.</summary>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling LESS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.5.0]" />
+      <dependency id="BundleTransformer.Core" version="[1.5.5]" />
 	  <dependency id="DotlessClientOnly" version="1.3.0.5" />
     </dependencies>
     <references>

@@ -69,11 +69,6 @@
 		private readonly ICssRelativePathResolver _cssRelativePathResolver;
 
 		/// <summary>
-		/// Configuration settings of Sass- and SCSS-translator
-		/// </summary>
-		private readonly SassAndScssSettings _sassAndScssConfig;
-
-		/// <summary>
 		/// Sass- and SCSS-compiler
 		/// </summary>
 		private readonly SassCompiler _sassCompiler;
@@ -107,10 +102,9 @@
 			_httpContext = httpContext;
 			_fileSystemWrapper = fileSystemWrapper;
 			_cssRelativePathResolver = cssRelativePathResolver;
-			_sassAndScssConfig = sassAndScssConfig;
 			_sassCompiler = new SassCompiler();
 
-			UseNativeMinification = _sassAndScssConfig.UseNativeMinification;
+			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 		}
 
 		/// <summary>
@@ -170,7 +164,7 @@
 		private void InnerTranslate(IAsset asset, bool enableNativeMinification)
 		{
 			string assetTypeName = (asset.AssetType == AssetType.Scss) ? "SCSS" : "Sass";
-			string newContent = string.Empty;
+			string newContent;
 			string assetPath = asset.Path;
 			var importedFilePaths = new List<string>();
 
@@ -193,12 +187,10 @@
 						string.Format(SassAndScssStrings.Translators_SassAndScssTranslationSyntaxError,
 							assetPath, assetTypeName), e);
 				}
-				else
-				{
-					throw new AssetTranslationException(
-						string.Format(SassAndScssStrings.Translators_SassAndScssTranslationFailed,
-							assetPath, assetTypeName), e);
-				}
+
+				throw new AssetTranslationException(
+					string.Format(SassAndScssStrings.Translators_SassAndScssTranslationFailed,
+					              assetPath, assetTypeName), e);
 			}
 
 			asset.Content = newContent;
@@ -314,7 +306,7 @@
 		/// <summary>
 		/// Destroys object
 		/// </summary>
-		public override void Dispose()
+		public void Dispose()
 		{
 			Dispose(true /* disposing */);
 			GC.SuppressFinalize(this);

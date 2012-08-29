@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.5.0
+          README file for Bundle Transformer: Sass and SCSS 1.5.5
 
    ----------------------------------------------------------------------
 
@@ -12,10 +12,11 @@
    DESCRIPTION
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
-   SassAndScssTranslator. This adapter makes translation of Sass- and 
-   SCSS-code to CSS-code. Also contains HTTP-handler 
-   SassAndScssAssetHandler, which is responsible for text output of 
-   translated Sass- or SCSS-asset.
+   SassAndScssTranslator, which produces translation of Sass- and 
+   SCSS-code to CSS-code by using the SassAndCoffee.Ruby library
+   (https://github.com/xpaulbettsx/SassAndCoffee).
+   Also contains HTTP-handler SassAndScssAssetHandler, which is 
+   responsible for text output of translated Sass- or SCSS-asset.
    
    =============
    DOCUMENTATION

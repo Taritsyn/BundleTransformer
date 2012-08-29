@@ -34,16 +34,14 @@ namespace BundleTransformer.Core
 		/// <param name="format">A composite format string</param>
 		/// <param name="args">An array of objects to format</param>
 		/// <returns>Object StringBuilder</returns>
-		public static StringBuilder AppendFormatLine(this StringBuilder sb, string format, params object[] args)  
+		public static StringBuilder AppendFormatLine(this StringBuilder sb, string format, params object[] args)
 		{
 			if (_formatPlaceholderRegExp.IsMatch(format))
 			{
 				return sb.AppendFormat(format, args).AppendLine();
 			}
-			else
-			{
-				return sb.AppendLine(format.Replace("{{", "{").Replace("}}", "}"));
-			}
+
+			return sb.AppendLine(format.Replace("{{", "{").Replace("}}", "}"));
 		}
 	}
 }

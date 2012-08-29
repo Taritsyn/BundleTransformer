@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Closure 1.5.0
+             README file for Bundle Transformer: Closure 1.5.5
  
    ----------------------------------------------------------------------
 
@@ -26,8 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Microsoft .NET Framework 4 HTTP Client Libraries 
-   2.0.20710.0.
+   To working with the Google Closure Compiler Service API is now used 
+   the James Newton-King's Json.NET library (instead of System.Json).
 
    ====================
    POST-INSTALL ACTIONS

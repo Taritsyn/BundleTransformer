@@ -195,7 +195,7 @@
 			if (fullTypeNameParts.Length != 2)
 			{
 			    throw new ArgumentException(
-			        Strings.Common_InvalidFullTypeName, 
+			        string.Format(Strings.Common_InvalidFullTypeName, fullTypeName), 
 			        "fullTypeName");
 			}
 
@@ -236,18 +236,6 @@
 				string.Format(Strings.Common_EnumValueConversionFailed,
 					name, typeof(TSource), typeof(TDest))
 			);
-		}
-
-		public static string GetResourceAsString(string resourceName, Type type)
-		{
-			Assembly assembly = type.Assembly;
-			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-			{
-				using (var reader = new StreamReader(stream))
-				{
-					return reader.ReadToEnd();
-				}
-			}
 		}
 	}
 }

@@ -154,7 +154,7 @@
     <value>При создании экземпляра объекта типа "{0}" произошла ошибка!</value>
   </data>
   <data name="Common_InvalidFullTypeName" xml:space="preserve">
-    <value>Некорректное полное имя типа. Формат строки должен соответствовать шаблону "ПространствоИмен.НазваниеКласса, ИмяСборки"!</value>
+    <value>Некорректное полное имя типа "{0}". Формат строки должен соответствовать шаблону "ПространствоИмен.НазваниеКласса, ИмяСборки"!</value>
   </data>
   <data name="Common_ValueIsEmpty" xml:space="preserve">
     <value>Значение не должно быть пустым!</value>
@@ -182,6 +182,9 @@
   </data>
   <data name="ErrorDetails_ErrorCode" xml:space="preserve">
     <value>Код ошибки</value>
+  </data>
+  <data name="ErrorDetails_ErrorWCode" xml:space="preserve">
+    <value>WCode</value>
   </data>
   <data name="ErrorDetails_File" xml:space="preserve">
     <value>Файл</value>

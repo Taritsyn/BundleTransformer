@@ -1,0 +1,16 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="uglify" type="BundleTransformer.UglifyJs.Configuration.UglifySettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<js>
+				<minifiers>
+					<add name="UglifyJsMinifier" type="BundleTransformer.UglifyJs.Minifiers.UglifyJsMinifier, BundleTransformer.UglifyJs" />
+				</minifiers>
+			</js>
+		</core>
+	</bundleTransformer>
+</configuration>

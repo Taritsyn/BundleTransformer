@@ -24,16 +24,6 @@
 	public sealed class ClosureLocalJsMinifier : ClosureJsMinifierBase
 	{
 		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-		/// <summary>
-		/// Configuration settings of Closure Minifier
-		/// </summary>
-		private readonly ClosureSettings _closureConfig;
-
-		/// <summary>
 		/// File system wrapper
 		/// </summary>
 		private readonly IFileSystemWrapper _fileSystemWrapper;
@@ -111,9 +101,9 @@
 		/// <summary>
 		/// Constructs instance of Closure local JS-minifier
 		/// </summary>
-		/// <param name="_closureConfig">Configuration settings of Closure Minifier</param>
-		public ClosureLocalJsMinifier(ClosureSettings _closureConfig)
-			: this(_closureConfig,
+		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
+		public ClosureLocalJsMinifier(ClosureSettings closureConfig)
+			: this(closureConfig,
 				BundleTransformerContext.Current.GetFileSystemWrapper(), 
 				HttpContext.Current.Server.MapPath(Core.Constants.Common.TempFilesDirectoryPath))
 		{ }
@@ -127,11 +117,10 @@
 		public ClosureLocalJsMinifier(ClosureSettings closureConfig, 
 			IFileSystemWrapper fileSystemWrapper, string tempFilesDirectoryPath)
 		{
-			_closureConfig = closureConfig;
 			_fileSystemWrapper = fileSystemWrapper;
 			_tempFilesDirectoryPath = tempFilesDirectoryPath;
 
-			LocalJsMinifierSettings localJsMinifierConfig = _closureConfig.Js.Local;
+			LocalJsMinifierSettings localJsMinifierConfig = closureConfig.Js.Local;
 			JavaVirtualMachinePath = localJsMinifierConfig.JavaVirtualMachinePath;
 			ClosureCompilerApplicationPath = localJsMinifierConfig.ClosureCompilerApplicationPath;
 			CompilationLevel = localJsMinifierConfig.CompilationLevel;
@@ -141,14 +130,6 @@
 			ProcessJqueryPrimitives = localJsMinifierConfig.ProcessJqueryPrimitives;
 			ProcessClosurePrimitives = localJsMinifierConfig.ProcessClosurePrimitives;
 			Severity = localJsMinifierConfig.Severity;
-		}
-
-		/// <summary>
-		/// Destructs instance of Closure local JS-minifier
-		/// </summary>
-		~ClosureLocalJsMinifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -215,7 +196,7 @@
 		/// <returns>Minified text content of JS-asset</returns>
 		private string Compile(string content, string assetPath)
 		{
-			string newContent = string.Empty;
+			string newContent;
 			string uniqueId = Guid.NewGuid().ToString();
 			string inputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + ".tmp");
 			string outputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + "-min.tmp");
@@ -368,28 +349,6 @@
 			}
 
 			return code;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

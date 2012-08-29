@@ -8,6 +8,7 @@
 	using MsCssColor = Microsoft.Ajax.Utilities.CssColor;
 	using MsCssComment = Microsoft.Ajax.Utilities.CssComment;
 	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
+	using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
 
 	using Core;
 	using Core.Assets;
@@ -18,6 +19,7 @@
 	using BtCssColor = CssColor;
 	using BtCssComment = CssComment;
 	using BtOutputMode = OutputMode;
+	using BtBlockStart = BlockStart;
 	using MicrosoftAjaxStrings = Resources.Strings;
 
 	/// <summary>
@@ -27,11 +29,6 @@
 	public sealed class MicrosoftAjaxCssMinifier : MicrosoftAjaxMinifierBase
 	{
 		/// <summary>
-		/// Configuration settings of Microsoft Ajax Minifier
-		/// </summary>
-		private readonly MicrosoftAjaxSettings _microsoftAjaxConfig;
-
-		/// <summary>
 		/// CSS-parser
 		/// </summary>
 		private readonly CssParser _cssParser;
@@ -40,11 +37,6 @@
 		/// Configuration settings of CSS-parser
 		/// </summary>
 		private readonly CssSettings _cssParserConfiguration;
-
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
 
 		/// <summary>
 		/// Gets or sets whether embedded ASP.NET blocks (&lt;% %gt;) 
@@ -158,6 +150,24 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
+		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
+		/// set to MultipleLines.
+		/// </summary>
+		public override BtBlockStart BlocksStartOnSameLine
+		{
+			get
+			{
+				return Utils.GetEnumFromOtherEnum<MsBlockStart, BtBlockStart>(_cssParserConfiguration.BlocksStartOnSameLine);
+			}
+			set 
+			{ 
+				_cssParserConfiguration.BlocksStartOnSameLine = Utils.GetEnumFromOtherEnum<BtBlockStart, MsBlockStart>(value);
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets string representation of the list 
 		/// of names defined for the preprocessor, comma-separated
 		/// </summary>
@@ -203,13 +213,12 @@
 		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
 		{
-			_microsoftAjaxConfig = microsoftAjaxConfig;
 			_cssParser = new CssParser();
 			_cssParser.CssError += ParserErrorHandler;
 
 			_cssParserConfiguration = _cssParser.Settings;
 
-			CssMinifierSettings cssMinifierConfig = _microsoftAjaxConfig.CssMinifier;
+			CssMinifierSettings cssMinifierConfig = microsoftAjaxConfig.CssMinifier;
 			AllowEmbeddedAspNetBlocks = cssMinifierConfig.AllowEmbeddedAspNetBlocks;
 			ColorNames = cssMinifierConfig.ColorNames;
 			CommentMode = cssMinifierConfig.CommentMode;
@@ -217,17 +226,10 @@
 			IndentSize = cssMinifierConfig.IndentSize;
 			MinifyExpressions = cssMinifierConfig.MinifyExpressions;
 			OutputMode = cssMinifierConfig.OutputMode;
+			BlocksStartOnSameLine = cssMinifierConfig.BlocksStartOnSameLine;
 			PreprocessorDefineList = cssMinifierConfig.PreprocessorDefineList;
 			TermSemicolons = cssMinifierConfig.TermSemicolons;
 			Severity = cssMinifierConfig.Severity;
-		}
-
-		/// <summary>
-		/// Destructs instance of Microsoft Ajax CSS-minifier
-		/// </summary>
-		~MicrosoftAjaxCssMinifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -250,7 +252,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsStylesheet && !a.Minified))
 			{
-				string newContent = string.Empty;
+				string newContent;
 				string assetPath = asset.Path;
 
 				_cssParser.FileContext = assetPath;
@@ -292,33 +294,6 @@
 				throw new MicrosoftAjaxParsingException(
 					string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
 						"CSS", error.File, FormatContextError(error)), args.Exception);
-			}
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-
-				if (_cssParser != null)
-				{
-					_cssParser.CssError -= ParserErrorHandler;
-				}
 			}
 		}
 	}

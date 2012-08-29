@@ -26,19 +26,9 @@
 	public sealed class YuiJsMinifier : YuiMinifierBase
 	{
 		/// <summary>
-		/// Configuration settings of YUI Minifier
-		/// </summary>
-		private readonly YuiSettings _yuiConfig;
-
-		/// <summary>
 		/// JS-compressor
 		/// </summary>
 		private readonly JavaScriptCompressor _jsCompressor;
-
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
 
 		/// <summary>
 		/// Gets or sets a code compression type
@@ -120,6 +110,27 @@
 			set { _jsCompressor.LineBreakPosition = value; }
 		}
 
+		/// <summary>
+		/// Gets or sets the type of Encoding.
+		/// Eg. ASCII, BigEndianUnicode, Unicode, UTF32, UTF7, UTF8.
+		/// </summary>
+		public Encoding Encoding
+		{
+			get { return _jsCompressor.Encoding; }
+			set { _jsCompressor.Encoding = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets the culture you want the thread to run under. 
+		/// This affects the treatment of numbers etc - e.g. 9.00 could be output as 9,00
+		/// (this is mainly for non English OS's)/
+		/// </summary>
+		public CultureInfo ThreadCulture
+		{
+			get { return _jsCompressor.ThreadCulture; }
+			set { _jsCompressor.ThreadCulture = value; }
+		}
+
 
 		/// <summary>
 		/// Constructs instance of YUI JS-minifier
@@ -134,29 +145,18 @@
 		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
 		public YuiJsMinifier(YuiSettings yuiConfig)
 		{
-			_yuiConfig = yuiConfig;
-			_jsCompressor = new JavaScriptCompressor
-			{
-				Encoding = Encoding.UTF8,
-				ThreadCulture = CultureInfo.InvariantCulture
-			};
+			_jsCompressor = new JavaScriptCompressor();
 
-			JsMinifierSettings jsMinifierConfig = _yuiConfig.JsMinifier;
+			JsMinifierSettings jsMinifierConfig = yuiConfig.JsMinifier;
 			CompressionType = jsMinifierConfig.CompressionType;
 			ObfuscateJavascript = jsMinifierConfig.ObfuscateJavascript;
 			PreserveAllSemicolons = jsMinifierConfig.PreserveAllSemicolons;
 			DisableOptimizations = jsMinifierConfig.DisableOptimizations;
 			IgnoreEval = jsMinifierConfig.IgnoreEval;
 			LineBreakPosition = jsMinifierConfig.LineBreakPosition;
+			Encoding = ParseEncoding(jsMinifierConfig.Encoding);
+			ThreadCulture = ParseThreadCulture(jsMinifierConfig.ThreadCulture);
 			Severity = jsMinifierConfig.Severity;
-		}
-
-		/// <summary>
-		/// Destructs instance of YUI JS-minifier
-		/// </summary>
-		~YuiJsMinifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -179,7 +179,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
 			{
-				string newContent = string.Empty;
+				string newContent;
 				string assetPath = asset.Path;
 
 				try
@@ -230,25 +230,95 @@
 		}
 
 		/// <summary>
-		/// Destroys object
+		/// Parses a encoding type
 		/// </summary>
-		public override void Dispose()
+		/// <param name="encoding">String representation of the encoding type</param>
+		/// <returns>Encoding type</returns>
+		private static Encoding ParseEncoding(string encoding)
 		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
+			if (string.IsNullOrWhiteSpace(encoding))
+			{
+				return Encoding.Default;
+			}
+
+			Encoding convertedEncoding;
+
+			switch (encoding.ToLowerInvariant())
+			{
+				case "ascii":
+					convertedEncoding = Encoding.ASCII;
+					break;
+				case "bigendianunicode":
+					convertedEncoding = Encoding.BigEndianUnicode;
+					break;
+				case "unicode":
+					convertedEncoding = Encoding.Unicode;
+					break;
+				case "utf32":
+				case "utf-32":
+					convertedEncoding = Encoding.UTF32;
+					break;
+				case "utf7":
+				case "utf-7":
+					convertedEncoding = Encoding.UTF7;
+					break;
+				case "utf8":
+				case "utf-8":
+					convertedEncoding = Encoding.UTF8;
+					break;
+				case "default":
+					convertedEncoding = Encoding.Default;
+					break;
+				default:
+					throw new ArgumentException(
+						string.Format(YuiStrings.Minifiers_InvalidEncoding, encoding), "encoding");
+			}
+
+			return convertedEncoding;
 		}
 
 		/// <summary>
-		/// Destroys object
+		/// Parses a thread culture
 		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
+		/// <param name="threadCulture">String representation of the thread culture</param>
+		/// <returns>Thread culture</returns>
+		private static CultureInfo ParseThreadCulture(string threadCulture)
 		{
-			if (!_disposed)
+			if (string.IsNullOrWhiteSpace(threadCulture))
 			{
-				_disposed = true;
+				return CultureInfo.InvariantCulture;
 			}
+
+			CultureInfo convertedThreadCulture;
+
+			try
+			{
+				switch (threadCulture.ToLowerInvariant())
+				{
+					case "iv":
+					case "ivl":
+					case "invariantculture":
+					case "invariant culture":
+					case "invariant language":
+					case "invariant language (invariant country)":
+					{
+						convertedThreadCulture = CultureInfo.InvariantCulture;
+						break;
+					}
+					default:
+					{
+						convertedThreadCulture = CultureInfo.CreateSpecificCulture(threadCulture);
+						break;
+					}
+				}
+			}
+			catch
+			{
+				throw new ArgumentException(
+					string.Format(YuiStrings.Minifiers_InvalidThreadCulture, threadCulture), "threadCulture");
+			}
+
+			return convertedThreadCulture;
 		}
 	}
 }

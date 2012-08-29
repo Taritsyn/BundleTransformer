@@ -74,7 +74,7 @@
 
 						if (jsFileNamePattern.IndexOf("$version$") != -1)
 						{
-							jsFileNamePattern = jsFileNamePattern.Replace("$version$", @"((\d+\.)*\d+(alpha|beta|rc)?)");
+							jsFileNamePattern = jsFileNamePattern.Replace("$version$", @"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
 						}
 						jsFileNamePattern = "^" + jsFileNamePattern + "$";
 

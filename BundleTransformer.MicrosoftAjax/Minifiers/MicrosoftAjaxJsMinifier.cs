@@ -8,6 +8,7 @@
 	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
 	using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
 	using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
+	using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
 
 	using Core;
 	using Core.Assets;
@@ -18,6 +19,7 @@
 	using BtOutputMode = OutputMode;
 	using BtEvalTreatment = EvalTreatment;
 	using BtLocalRenaming = LocalRenaming;
+	using BtBlockStart = BlockStart;
 	using MicrosoftAjaxStrings = Resources.Strings;
 
 	/// <summary>
@@ -27,19 +29,9 @@
 	public sealed class MicrosoftAjaxJsMinifier : MicrosoftAjaxMinifierBase
 	{
 		/// <summary>
-		/// Configuration settings of Microsoft Ajax Minifier
-		/// </summary>
-		private readonly MicrosoftAjaxSettings _microsoftAjaxConfig;
-
-		/// <summary>
 		/// Configuration settings of JS-parser
 		/// </summary>
 		private readonly CodeSettings _jsParserConfiguration;
-
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
 
 		/// <summary>
 		/// Gets or sets whether embedded ASP.NET blocks (&lt;% %&gt;) 
@@ -286,6 +278,24 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
+		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
+		/// set to MultipleLines.
+		/// </summary>
+		public override BtBlockStart BlocksStartOnSameLine
+		{
+			get
+			{
+				return Utils.GetEnumFromOtherEnum<MsBlockStart, BtBlockStart>(_jsParserConfiguration.BlocksStartOnSameLine);
+			}
+			set
+			{
+				_jsParserConfiguration.BlocksStartOnSameLine = Utils.GetEnumFromOtherEnum<BtBlockStart, MsBlockStart>(value);
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets string representation of the list 
 		/// of names defined for the preprocessor, comma-separated
 		/// </summary>
@@ -439,10 +449,9 @@
 		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxJsMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
 		{
-			_microsoftAjaxConfig = microsoftAjaxConfig;
 			_jsParserConfiguration = new CodeSettings();
 
-			JsMinifierSettings jsMinifierConfiguration = _microsoftAjaxConfig.JsMinifier;
+			JsMinifierSettings jsMinifierConfiguration = microsoftAjaxConfig.JsMinifier;
 			AllowEmbeddedAspNetBlocks = jsMinifierConfiguration.AllowEmbeddedAspNetBlocks;
 			CollapseToLiteral = jsMinifierConfiguration.CollapseToLiteral;
 			CombineDuplicateLiterals = jsMinifierConfiguration.CombineDuplicateLiterals;
@@ -458,6 +467,7 @@
 			MinifyCode = jsMinifierConfiguration.MinifyCode;
 			NoAutoRenameList = jsMinifierConfiguration.NoAutoRenameList;
 			OutputMode = jsMinifierConfiguration.OutputMode;
+			BlocksStartOnSameLine = jsMinifierConfiguration.BlocksStartOnSameLine;
 			PreprocessorDefineList = jsMinifierConfiguration.PreprocessorDefineList;
 			PreserveFunctionNames = jsMinifierConfiguration.PreserveFunctionNames;
 			PreserveImportantComments = jsMinifierConfiguration.PreserveImportantComments;
@@ -468,14 +478,6 @@
 			StripDebugStatements = jsMinifierConfiguration.StripDebugStatements;
 			TermSemicolons = jsMinifierConfiguration.TermSemicolons;
 			Severity = jsMinifierConfiguration.Severity;
-		}
-
-		/// <summary>
-		/// Destructs instance of Microsoft Ajax JS-minifier
-		/// </summary>
-		~MicrosoftAjaxJsMinifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -549,28 +551,6 @@
 				throw new MicrosoftAjaxParsingException(
 					string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
 						"JS", error.File, FormatContextError(error)), args.Exception);
-			}
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
 			}
 		}
 	}

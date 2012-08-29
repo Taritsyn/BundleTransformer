@@ -4,15 +4,11 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	using SassAndCoffee.Core;
-	using SassAndCoffee.JavaScript;
-	using SassAndCoffee.JavaScript.CoffeeScript;
-
 	using Core.Assets;
-	using CoreStrings = Core.Resources.Strings;
-	using Core.Resources;
 	using Core.Translators;
+	using CoreStrings = Core.Resources.Strings;
 
+	using Compilers;
 	using CoffeeStrings = Resources.Strings;
 
 	/// <summary>
@@ -21,26 +17,12 @@
 	public sealed class CoffeeScriptTranslator : ITranslator
 	{
 		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode
 		/// </summary>
 		public bool IsDebugMode
 		{
 			get;
 			set;
-		}
-
-
-		/// <summary>
-		/// Destructs instance of CoffeeScript-translator
-		/// </summary>
-		~CoffeeScriptTranslator()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -53,10 +35,13 @@
 		{
 			if (asset == null)
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			InnerTranslate(asset);
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler())
+			{
+				InnerTranslate(asset, coffeeScriptCompiler);
+			}
 
 			return asset;
 		}
@@ -78,55 +63,40 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.AssetType == AssetType.CoffeeScript))
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler())
 			{
-				InnerTranslate(asset);
+				foreach (var asset in assets.Where(a => a.AssetType == AssetType.CoffeeScript))
+				{
+					InnerTranslate(asset, coffeeScriptCompiler);
+				}
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset)
+		private void InnerTranslate(IAsset asset, CoffeeScriptCompiler coffeeScriptCompiler)
 		{
-			string newContent = string.Empty;
+			string newContent;
+			string assetPath = asset.Path;
 
-			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(new InstanceProvider<IJavaScriptRuntime>(
-				() => new IEJavaScriptRuntime())))
+			try
 			{
-				try
-				{
-					newContent = coffeeScriptCompiler.Compile(asset.Content);
-				}
-				catch (Exception e)
-				{
-					throw new AssetTranslationException(
-						string.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed, asset.Path), e);
-				}
+				newContent = coffeeScriptCompiler.Compile(asset.Content, assetPath);
+			}
+			catch (CoffeeScriptCompilingException e)
+			{
+				throw new AssetTranslationException(
+					string.Format(CoffeeStrings.Translators_CoffeeScriptTranslationSyntaxError, 
+						assetPath, e.Message));
+			}
+			catch (Exception e)
+			{
+				throw new AssetTranslationException(
+					string.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed,
+						assetPath, e.Message));
 			}
 
 			asset.Content = newContent;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

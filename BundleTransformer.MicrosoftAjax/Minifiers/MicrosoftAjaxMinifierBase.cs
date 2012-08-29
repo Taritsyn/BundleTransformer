@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.MicrosoftAjax.Minifiers
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Text;
 
@@ -12,7 +11,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using BtOutputMode = OutputMode;
-	using Resources;
+	using BtBlockStart = BlockStart;
 
 	/// <summary>
 	/// Base class of minifier, which produces minifiction of code 
@@ -44,6 +43,14 @@
 		/// MultipleLines - break the output into multiple lines to be more human-readable
 		/// </summary>
 		public abstract BtOutputMode OutputMode { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
+		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
+		/// set to MultipleLines.
+		/// </summary>
+		public abstract BtBlockStart BlocksStartOnSameLine { get; set; }
 
 		/// <summary>
 		/// Gets or sets a string representation of the list 
@@ -102,10 +109,5 @@
 
 			return errorMessage.ToString();
 		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public abstract void Dispose();
 	}
 }

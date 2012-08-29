@@ -10,22 +10,43 @@
 	border: none;
 }
 
-A.linkedin
-{
-	float: left;
-	display: block;
-	padding-left: 17px;
-	width: 16px;
-	height: 24px;
-	background: url("../Content/images/linkedin.png") no-repeat;
-	text-indent: -9999px;
-}
-
 CODE
 {
 	font-size: 1.0em;
 	font-family: Courier New;
 }
+
+UL#social LI
+{
+    display: inline;
+    list-style: none;
+}
+
+    UL#social LI A
+    {
+        color: #999;
+        text-decoration: none;
+    }
+
+    A.twitter, A.linkedin
+    {
+        display: block;
+        float: left;
+        height: 24px;
+        padding-left: 17px;
+        text-indent: -9999px;
+        width: 16px;
+    }
+
+    A.twitter 
+    {
+        background: url("../Images/twitter.png") no-repeat;
+    }
+    
+	A.linkedin
+	{
+		background: url("../Content/images/linkedin.png") no-repeat;
+	}
 
 /********************
 *   Mobile Styles   *

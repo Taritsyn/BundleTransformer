@@ -12,11 +12,6 @@
 	public sealed class NullMinifier : IMinifier
 	{
 		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-		/// <summary>
 		/// Do not performs operations with assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
@@ -29,17 +24,6 @@
 			}
 
 			return assets;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

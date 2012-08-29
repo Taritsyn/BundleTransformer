@@ -2,21 +2,21 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.SassAndScss</id>
-    <version>1.5.0</version>
+    <version>1.5.5</version>
 	<title>Bundle Transformer: Sass and SCSS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
     <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download.codeplex.com/Download?ProjectName=bundletransformer&amp;DownloadId=386676</iconUrl>
+    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476849</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</description>
-    <summary>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator. This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
+    <description>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator, which produces translation of Sass- and SCSS-code to CSS-code by using the SassAndCoffee.Ruby library (https://github.com/xpaulbettsx/SassAndCoffee). Also contains HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</description>
+    <summary>BundleTransformer.SassAndScss contains translator-adapter SassAndScssTranslator, which produces translation of Sass- and SCSS-code to CSS-code by using the SassAndCoffee.Ruby library. Also contains HTTP-handler SassAndScssAssetHandler, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.5.0]" />
+      <dependency id="BundleTransformer.Core" version="[1.5.5]" />
 	  <dependency id="SassAndCoffee.Ruby" version="2.0.2.0" />
     </dependencies>
     <references>

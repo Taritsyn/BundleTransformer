@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.Core.Minifiers
 {
-	using System;
 	using System.Collections.Generic;
 
 	using Assets;
@@ -8,7 +7,7 @@
 	/// <summary>
 	/// Defines interface of asset minifier
 	/// </summary>
-	public interface IMinifier : IDisposable
+	public interface IMinifier
 	{
 		/// <summary>
 		/// Minify text content of assets

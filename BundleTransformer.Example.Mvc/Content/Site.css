@@ -85,6 +85,11 @@ h5, h6 {
     font-size: 1em;
 }
 
+    h5 a:link, h5 a:visited, h5 a:active {
+        padding: 0;
+        text-decoration: none;
+    }
+
 
 /* main layout
 ----------------------------------------------------------*/
@@ -109,6 +114,10 @@ h5, h6 {
         background: url("../Images/heroAccent.png") no-repeat;
     }
 
+header .content-wrapper {
+    padding-top: 20px; 
+}
+
 footer {
     clear: both;
     background-color: #e2e2e2;
@@ -123,7 +132,7 @@ footer {
     color: #c8c8c8;
     font-family: Rockwell, Consolas, "Courier New", Courier, monospace;
     font-size: 2.3em;
-    margin: 20px 0;
+    margin: 0;
 }
 
 .site-title a, .site-title a:hover, .site-title a:active {
@@ -139,7 +148,7 @@ footer {
 #login {
     display: block;
     font-size: .85em;
-    margin: 20px 0 12px;
+    margin: 0 0 10px;
     text-align: right;
 }
 
@@ -153,7 +162,8 @@ footer {
 
     #login a.username {
         background: none;
-        margin-left: 0px;
+        margin: 0;
+        padding: 0;
         text-decoration: underline;
     }
 
@@ -172,7 +182,8 @@ footer {
 ul#menu {
     font-size: 1.3em;
     font-weight: 600;
-    margin: 0;
+    margin: 0 0 5px;
+    padding: 0;
     text-align: right;
 }
 
@@ -321,7 +332,7 @@ aside {
 #loginForm {
     border-right: solid 2px #c8c8c8;
     float: left;
-    width: 45%;
+    width: 55%;
 }
 
     #loginForm .validation-error {
@@ -329,10 +340,44 @@ aside {
         margin-left: 15px;
     }
 
+    #loginForm .validation-summary-errors ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    #loginForm .validation-summary-errors li {
+        display: inline;
+        list-style: none;
+        margin: 0;
+    }
+
+    #loginForm input {
+        width: 250px;
+    }
+
+    #loginForm input[type="checkbox"],
+    #loginForm input[type="submit"],
+    #loginForm input[type="button"],
+    #loginForm button {
+        width: auto;
+    }
+
 #socialLoginForm {
     margin-left: 40px;
     float: left;
-    width: 50%;
+    width: 40%;
+}
+
+    #socialLoginForm h2 {
+        margin-bottom:  5px;
+    }
+
+#socialLoginList button {
+    margin-bottom: 12px;
+}
+
+#logoutForm {
+    display: inline;
 }
 
 /* contact */
@@ -359,7 +404,7 @@ fieldset {
     fieldset legend {
         display: none;
     }
-    
+
     fieldset ol {
         padding: 0;
         list-style: none;
@@ -369,81 +414,60 @@ fieldset {
             padding-bottom: 5px;
         }
 
-    fieldset label {
-        display: block;
-        font-size: 1.2em;
-        font-weight: 600;
+label {
+    display: block;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+label.checkbox {
+    display: inline;
+}
+
+input, textarea {
+    border: 1px solid #e2e2e2;
+    background: #fff;
+    color: #333;
+    font-size: 1.2em;
+    margin: 5px 0 6px 0;
+    padding: 5px;
+    width: 300px;
+}
+
+textarea {
+    font-family: inherit;
+    width: 500px;
+}
+
+    input:focus, textarea:focus {
+        border: 1px solid #7ac0da;
     }
 
-    fieldset label.checkbox {
-        display: inline;
+    input[type="checkbox"] {
+        background: transparent;
+        border: inherit;
+        width: auto;
     }
 
-    fieldset input[type="text"],
-    fieldset input[type="password"] {
-        border: 1px solid #e2e2e2;
-        color: #333;
-        font-size: 1.2em;
-        margin: 5px 0 6px 0;
-        padding: 5px;
-        width: 300px;
-    }
-
-        fieldset input[type="text"]:focus,
-        fieldset input[type="password"]:focus {
-            border: 1px solid #7ac0da;
-        }
-
-    fieldset input[type="submit"] {
+    input[type="submit"],
+    input[type="button"],
+    button {
         background-color: #d3dce0;
         border: 1px solid #787878;
         cursor: pointer;
         font-size: 1.2em;
         font-weight: 600;
         padding: 7px;
+        margin-right: 8px;
+        width: auto;
     }
 
-/* ajax login/registration dialog */
-.ui-dialog {
-    font-family: inherit;
-    font-size: 1.0em;
-    -moz-border-radius: 0;
-    -webkit-border-radius: 0;
-    border-radius: 0;
-    border: 0 none;
-}
-
-    .ui-dialog input {
-        font-family: inherit;
-        font-size: 1.25em;
-    }
-
-.ui-dialog-titlebar {
-    color: inherit;
-    font-weight: inherit;
-    border: 0 none;
-    background: none;
-    float: right;    
-}
-
-.ui-dialog-titlebar-close {
-    -moz-border-radius: 0;
-    -webkit-border-radius: 0;
-    border-radius: 0;
-}
-
-.ui-widget-header {   
-    border: 0 none;
-    background: none;  
-}
-
-.modal-popup {
-    
-}
-
-    .modal-popup input[type="text"],
-    .modal-popup input[type="password"] {
-        width: 90%;
+    td input[type="submit"],
+    td input[type="button"],
+    td button {
+        font-size: 1em;
+        padding: 4px;
+        margin-right: 4px;
     }
 
 /* info and errors */
@@ -482,9 +506,12 @@ fieldset {
     display: none;
 }
 
-input[type="text"].input-validation-error,
-input[type="password"].input-validation-error {
+input.input-validation-error {
     border: 1px solid #e80c4d;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
 }
 
 .validation-summary-errors {
@@ -497,32 +524,6 @@ input[type="password"].input-validation-error {
     display: none;
 }
 
-ul#social li {
-    display: inline;
-    list-style: none;
-}
-
-    ul#social li a {
-        color: #999;
-        text-decoration: none;
-    }
-
-    a.facebook, a.twitter {
-        display: block;
-        float: left;
-        height: 24px;
-        padding-left: 17px;
-        text-indent: -9999px;
-        width: 16px;
-    }
-
-    a.facebook {
-        background: url("../Images/facebook.png") no-repeat;
-    }
-
-    a.twitter {
-        background: url("../Images/twitter.png") no-repeat;
-    }
 
 /* tables
 ----------------------------------------------------------*/
@@ -534,7 +535,7 @@ table {
 }
 
 th {
-	font-size: 1.2em;
+    font-size: 1.2em;
     text-align: left;
     border: none 0px;
     padding-left: 0;
@@ -543,39 +544,38 @@ th {
     th a {
         display: block;
         position: relative;
-        
     }
 
-	th a:link, th a:visited, th a:active, th a:hover {
-		color: #333;
-		font-weight: 600;
-		text-decoration: none;
+    th a:link, th a:visited, th a:active, th a:hover {
+        color: #333;
+        font-weight: 600;
+        text-decoration: none;
         padding: 0;
-	}
+    }
 
-	th a:hover {
-		color: #000;
-	}
+    th a:hover {
+        color: #000;
+    }
 
     th.asc a, th.desc a {
         margin-right: .75em;
     }
-    
+
     th.asc a:after, th.desc a:after {
-		display: block;
+        display: block;
         position: absolute;
         right: 0em;
         top: 0;
         font-size: 0.75em;
-	}
+    }
 
-	th.asc a:after {
-		content: '▲';
-	}
+    th.asc a:after {
+        content: '▲';
+    }
 
-	th.desc a:after {
-		content: '▼';
-	}
+    th.desc a:after {
+        content: '▼';
+    }
 
 td {
     padding: 0.25em 2em 0.25em 0em;
@@ -714,8 +714,7 @@ tr.pager td {
         }
 
     /* forms */
-    fieldset input[type="text"],
-    fieldset input[type="password"] {
+    input {
         width: 90%;
     }
 
@@ -737,6 +736,7 @@ tr.pager td {
         width: auto;
     }
 
+
     /* footer
     ----------------------------------------------------------*/
     footer .float-left,
@@ -752,18 +752,5 @@ tr.pager td {
 
         footer p {
             margin: 0;
-        }
-
-        ul#social {
-            padding: 0;
-            margin: 0;
-        }
-
-        a.facebook, a.twitter {
-            background: none;
-            display: inline;
-            float: none;
-            padding-left: 0;
-            text-indent: 0;
         }
 }

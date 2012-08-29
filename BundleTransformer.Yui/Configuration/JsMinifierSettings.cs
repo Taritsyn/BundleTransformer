@@ -50,6 +50,29 @@
 		}
 
 		/// <summary>
+		/// Gets or sets the type of Encoding.
+		/// Eg. ASCII, BigEndianUnicode, Unicode, UTF32, UTF7, UTF8.
+		/// </summary>
+		[ConfigurationProperty("encoding", DefaultValue = "UTF8")]
+		public string Encoding
+		{
+			get { return (string)this["encoding"]; }
+			set { this["encoding"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets the culture you want the thread to run under. 
+		/// This affects the treatment of numbers etc - e.g. 9.00 could be output as 9,00
+		/// (this is mainly for non English OS's).
+		/// </summary>
+		[ConfigurationProperty("threadCulture", DefaultValue = "InvariantCulture")]
+		public string ThreadCulture
+		{
+			get { return (string)this["threadCulture"]; }
+			set { this["threadCulture"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a severity level of errors:
 		///		0 - only syntax error messages;
 		///		1 - only syntax error messages and warnings.

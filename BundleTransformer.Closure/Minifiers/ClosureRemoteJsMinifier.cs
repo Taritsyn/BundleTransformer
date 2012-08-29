@@ -2,10 +2,11 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Json;
 	using System.Linq;
 	using System.Net.Http;
 	using System.Text;
+
+	using Newtonsoft.Json.Linq;
 
 	using Core;
 	using Core.Assets;
@@ -22,16 +23,6 @@
 	/// </summary>
 	public sealed class ClosureRemoteJsMinifier : ClosureJsMinifierBase
 	{
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-		/// <summary>
-		/// Configuration settings of Closure Minifier
-		/// </summary>
-		private readonly ClosureSettings _closureConfig;
-
 		/// <summary>
 		/// Gets or sets a URL of Google Closure Compiler Service API
 		/// </summary>
@@ -65,22 +56,12 @@
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		public ClosureRemoteJsMinifier(ClosureSettings closureConfig)
 		{
-			_closureConfig = closureConfig;
-
-			RemoteJsMinifierSettings remoteJsMinifierConfig = _closureConfig.Js.Remote;
+			RemoteJsMinifierSettings remoteJsMinifierConfig = closureConfig.Js.Remote;
 			ClosureCompilerServiceApiUrl = remoteJsMinifierConfig.ClosureCompilerServiceApiUrl;
 			CompilationLevel = remoteJsMinifierConfig.CompilationLevel;
 			PrettyPrint = remoteJsMinifierConfig.PrettyPrint;
 			ExcludeDefaultExterns = remoteJsMinifierConfig.ExcludeDefaultExterns;
 			Severity = remoteJsMinifierConfig.Severity;
-		}
-
-		/// <summary>
-		/// Destructs instance of Closure remote JS-minifier
-		/// </summary>
-		~ClosureRemoteJsMinifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -125,7 +106,7 @@
 		/// <returns>Minified text content of JS-asset</returns>
 		private string Compile(string content, string assetPath)
 		{
-			string newContent = string.Empty;
+			string newContent;
 			string serviceUrl = ClosureCompilerServiceApiUrl;
 			int severity = Severity;
 			
@@ -179,10 +160,9 @@
 				if (response.IsSuccessStatusCode)
 				{
 					var result = response.Content.ReadAsStringAsync().Result;
-					var json = JsonValue.Parse(result);
+					var json = JObject.Parse(result);
 
-					var serverErrors = json.ContainsKey("serverErrors") ? 
-						json["serverErrors"] as JsonArray : null;
+					var serverErrors = json["serverErrors"] != null ? json["serverErrors"] as JArray : null;
 					if (serverErrors != null && serverErrors.Count > 0)
 					{
 						throw new AssetMinificationException(
@@ -190,8 +170,7 @@
 								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetPath)));
 					}
 
-					var errors = json.ContainsKey("errors") ? 
-						json["errors"] as JsonArray : null;
+					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
 						throw new AssetMinificationException(
@@ -201,8 +180,7 @@
 
 					if (severity > 0)
 					{
-						var warnings = json.ContainsKey("warnings") ? 
-							json["warnings"] as JsonArray : null;
+						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
 						if (warnings != null && warnings.Count > 0)
 						{
 							throw new AssetMinificationException(
@@ -211,7 +189,7 @@
 						}
 					}
 
-					newContent = json["compiledCode"].ReadAs<string>();
+					newContent = json.Value<string>("compiledCode");
 				}
 				else
 				{
@@ -231,60 +209,38 @@
 		/// <param name="errorType">Error type</param>
 		/// <param name="filePath">File path</param>
 		/// <returns>Detailed error message</returns>
-		internal static string FormatErrorDetails(JsonValue errorDetails, ErrorType errorType, string filePath)
+		internal static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string filePath)
 		{
 			var errorMessage = new StringBuilder();
 			if (errorType == ErrorType.ServerError || errorType == ErrorType.Error)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, 
-					errorDetails["error"].ReadAs<string>());
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
+					errorDetails.Value<string>("error"));
 			}
 			else if (errorType == ErrorType.Warning)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, 
-					errorDetails["warning"].ReadAs<string>());
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
+					errorDetails.Value<string>("warning"));
 			}
-			if (errorDetails.ContainsKey("code"))
+			if (errorDetails["code"] != null)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, 
-					errorDetails["code"].ReadAs<string>());
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode,
+					errorDetails.Value<string>("code"));
 			}
-			if (errorDetails.ContainsKey("type"))
+			if (errorDetails["type"] != null)
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, 
-					errorDetails["type"].ReadAs<string>());
+					errorDetails.Value<string>("type"));
 			}
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber, 
-				errorDetails["lineno"].ReadAs<int>().ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber, 
-				errorDetails["charno"].ReadAs<int>().ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+				errorDetails.Value<int>("lineno").ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+				errorDetails.Value<int>("charno").ToString());
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError,
-				errorDetails["line"].ReadAs<string>());
+				errorDetails.Value<string>("line"));
 
 			return errorMessage.ToString();
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

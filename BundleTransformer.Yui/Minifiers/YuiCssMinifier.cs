@@ -23,19 +23,9 @@
 	public sealed class YuiCssMinifier : YuiMinifierBase
 	{
 		/// <summary>
-		/// Configuration settings of YUI Minifier
-		/// </summary>
-		private readonly YuiSettings _yuiConfig;
-
-		/// <summary>
 		/// CSS-compressor
 		/// </summary>
 		private readonly CssCompressor _cssCompressor;
-
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
 
 		/// <summary>
 		/// Gets or sets a code compression type
@@ -86,21 +76,12 @@
 		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
 		public YuiCssMinifier(YuiSettings yuiConfig)
 		{
-			_yuiConfig = yuiConfig;
 			_cssCompressor = new CssCompressor();
 
-			CssMinifierSettings cssMinifierConfig = _yuiConfig.CssMinifier;
+			CssMinifierSettings cssMinifierConfig = yuiConfig.CssMinifier;
 			CompressionType = cssMinifierConfig.CompressionType;
 			RemoveComments = cssMinifierConfig.RemoveComments;
 			LineBreakPosition = cssMinifierConfig.LineBreakPosition;
-		}
-
-		/// <summary>
-		/// Destructs instance of YUI CSS-minifier
-		/// </summary>
-		~YuiCssMinifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -123,7 +104,7 @@
 			
 			foreach (var asset in assets.Where(a => a.IsStylesheet && !a.Minified))
 			{
-				string newContent = string.Empty;
+				string newContent;
 				string assetPath = asset.Path;
 
 				try
@@ -141,28 +122,6 @@
 			}
 
 			return assets;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public override void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Microsoft Ajax 1.5.0
+          README file for Bundle Transformer: Microsoft Ajax 1.5.5
  
    ----------------------------------------------------------------------
 
@@ -20,7 +20,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Microsoft Ajax Minifier 4.60.
+   Added support of Microsoft Ajax Minifier 4.62 and BlocksStartOnSameLine 
+   configuration property.
 
    ====================
    POST-INSTALL ACTIONS

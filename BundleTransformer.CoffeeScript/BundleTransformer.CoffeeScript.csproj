@@ -32,11 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SassAndCoffee.Core">
-      <HintPath>..\packages\SassAndCoffee.Core.2.0.2.0\lib\net40-Client\SassAndCoffee.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SassAndCoffee.JavaScript">
-      <HintPath>..\packages\SassAndCoffee.JavaScript.2.0.2.0\lib\net40-Client\SassAndCoffee.JavaScript.dll</HintPath>
+    <Reference Include="MsieJavaScriptEngine, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MsieJavaScriptEngine.1.0.5\lib\net40\MsieJavaScriptEngine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -49,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compilers\CoffeeScriptCompilingException.cs" />
+    <Compile Include="Compilers\CoffeeScriptCompiler.cs" />
     <Compile Include="HttpHandlers\CoffeeScriptAssetHandler.cs" />
     <Compile Include="Resources\Strings.ru-ru.Designer.cs">
       <DependentUpon>Strings.ru-ru.resx</DependentUpon>
@@ -70,9 +70,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.ru-ru.Designer.cs</LastGenOutput>
@@ -82,7 +79,19 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\coffeescript-combined.js" />
+    <EmbeddedResource Include="Resources\coffeescript-combined.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\MicrosoftAjaxMinifier\"
+
+ajaxmin.exe "$(ProjectDir)Resources\coffeescript-combined.js" –out "$(ProjectDir)Resources\coffeescript-combined.min.js" –clobber</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

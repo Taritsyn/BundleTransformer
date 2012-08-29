@@ -18,21 +18,6 @@
 	public sealed class CrockfordJsMinifier : IMinifier
 	{
 		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-
-		/// <summary>
-		/// Destructs instance of JSMin JS-minifier
-		/// </summary>
-		~CrockfordJsMinifier()
-		{
-			Dispose(false /* disposing */);
-		}
-
-
-		/// <summary>
 		/// Produces code minifiction of JS-assets by using C# port of 
 		/// Douglas Crockford's JSMin (version of May 22 2007)
 		/// </summary>
@@ -54,7 +39,7 @@
 
 			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
 			{
-				string newContent = string.Empty;
+				string newContent;
 				string assetPath = asset.Path;
 				
 				try
@@ -72,28 +57,6 @@
 			}
 
 			return assets;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

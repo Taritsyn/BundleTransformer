@@ -12,11 +12,6 @@
 	public sealed class NullTranslator : ITranslator
 	{
 		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
-
-		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode
 		/// </summary>
 		public bool IsDebugMode
@@ -55,17 +50,6 @@
 			}
 
 			return assets;
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-			}
 		}
 	}
 }

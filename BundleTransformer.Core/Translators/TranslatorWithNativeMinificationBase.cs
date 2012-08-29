@@ -52,10 +52,5 @@
 		/// <param name="assets">Set of assets with code written on intermediate languages</param>
 		/// <returns>Set of assets with translated code</returns>
 		public abstract IList<IAsset> Translate(IList<IAsset> assets);
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public abstract void Dispose();
 	}
 }

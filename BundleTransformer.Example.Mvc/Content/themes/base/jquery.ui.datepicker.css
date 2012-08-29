@@ -1,14 +1,9 @@
-/*
- * Note: While Microsoft is not the author of this file, Microsoft is
- * offering you a license subject to the terms of the Microsoft Software
- * License Terms for Microsoft ASP.NET Model View Controller 4 Developer Preview.
- * Microsoft reserves all other rights. The notices below are provided
- * for informational purposes only and are not the license terms under
- * which Microsoft distributed this file.
+/*!
+ * jQuery UI Datepicker 1.8.23
  *
- * jQuery UI Datepicker 1.8.11
- *
- * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
+ * Licensed under the MIT license.
+ * http://jquery.org/license
  *
  * http://docs.jquery.com/UI/Datepicker#theming
  */
@@ -44,7 +39,7 @@
 .ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header { border-left-width:0; }
 .ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header { border-left-width:0; }
 .ui-datepicker-multi .ui-datepicker-buttonpane { clear:left; }
-.ui-datepicker-row-break { clear:both; width:100%; }
+.ui-datepicker-row-break { clear:both; width:100%; font-size:0em; }
 
 /* RTL support */
 .ui-datepicker-rtl { direction: rtl; }
@@ -61,8 +56,6 @@
 
 /* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
 .ui-datepicker-cover {
-    display: none; /*sorry for IE5*/
-    display/**/: block; /*sorry for IE5*/
     position: absolute; /*must have*/
     z-index: -1; /*must have*/
     filter: mask(); /*must have*/
