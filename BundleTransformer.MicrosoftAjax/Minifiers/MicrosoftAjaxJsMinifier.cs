@@ -69,17 +69,17 @@
 		/// Gets or sets a flag for whether to combine duplicate literals 
 		/// within function scopes to local variables [true] or leave them as-is [false]
 		/// </summary>
-		public bool CombineDuplicateLiterals
-		{
-			get
-			{
-				return _jsParserConfiguration.CombineDuplicateLiterals;
-			}
-			set
-			{
-				_jsParserConfiguration.CombineDuplicateLiterals = value;
-			}
-		}
+		//public bool CombineDuplicateLiterals
+		//{
+		//    get
+		//    {
+		//        return _jsParserConfiguration.CombineDuplicateLiterals;
+		//    }
+		//    set
+		//    {
+		//        _jsParserConfiguration.CombineDuplicateLiterals = value;
+		//    }
+		//}
 
 		/// <summary>
 		/// Gets or sets a string representation of the list of debug 
@@ -454,7 +454,7 @@
 			JsMinifierSettings jsMinifierConfiguration = microsoftAjaxConfig.JsMinifier;
 			AllowEmbeddedAspNetBlocks = jsMinifierConfiguration.AllowEmbeddedAspNetBlocks;
 			CollapseToLiteral = jsMinifierConfiguration.CollapseToLiteral;
-			CombineDuplicateLiterals = jsMinifierConfiguration.CombineDuplicateLiterals;
+			//CombineDuplicateLiterals = jsMinifierConfiguration.CombineDuplicateLiterals;
 			DebugLookupList = jsMinifierConfiguration.DebugLookupList;
 			EvalTreatment = jsMinifierConfiguration.EvalTreatment;
 			IgnoreConditionalCompilation = jsMinifierConfiguration.IgnoreConditionalCompilation;

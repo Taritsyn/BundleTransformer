@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AjaxMinLibrary">
-      <HintPath>..\packages\AjaxMin.4.62.4618.15628\lib\net40\AjaxMinLibrary.dll</HintPath>
+    <Reference Include="AjaxMinLibrary, Version=4.64.4630.17920, Culture=neutral, PublicKeyToken=21ef50ce11b5d80f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AjaxMin.4.64.4630.17932\lib\net40\AjaxMinLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

@@ -64,7 +64,7 @@ namespace BundleTransformer.Example.Mvc
 			var scriptsDirectoryBundle = new Bundle("~/Bundles/ScriptsDirectory");
 			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js");
 			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
-				new[] { "*.all.js", "_references.js" }));
+				new[] { "*.all.js", "references.js" }));
 
 			bundles.Add(scriptsDirectoryBundle);
 		}

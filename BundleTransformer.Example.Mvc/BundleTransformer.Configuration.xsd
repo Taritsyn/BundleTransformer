@@ -335,11 +335,11 @@
 						<xs:documentation>Flag for whether to collapse new Array() to [] and new Object() to {} [true] or leave as-is [false]</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
-				<xs:attribute name="combineDuplicateLiterals" type="Boolean_SchemaType" use="optional" default="false">
+				<!--<xs:attribute name="combineDuplicateLiterals" type="Boolean_SchemaType" use="optional" default="false">
 					<xs:annotation>
 						<xs:documentation>Flag for whether to combine duplicate literals within function scopes to local variables [true] or leave them as-is [false]</xs:documentation>
 					</xs:annotation>
-				</xs:attribute>
+				</xs:attribute>-->
 				<xs:attribute name="debugLookupList" type="xs:string" use="optional" default="Debug,$Debug,WAssert,Msn.Debug,Web.Debug">
 					<xs:annotation>
 						<xs:documentation>String representation of the list of debug lookups, comma-separated</xs:documentation>

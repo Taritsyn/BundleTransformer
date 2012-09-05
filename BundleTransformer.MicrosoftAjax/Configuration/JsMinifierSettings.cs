@@ -22,12 +22,12 @@
 		/// Gets or sets a flag for whether to combine duplicate literals 
 		/// within function scopes to local variables [true] or leave them as-is [false]
 		/// </summary>
-		[ConfigurationProperty("combineDuplicateLiterals", DefaultValue = false)]
-		public bool CombineDuplicateLiterals
-		{
-			get { return (bool)this["combineDuplicateLiterals"]; }
-			set { this["combineDuplicateLiterals"] = value; }
-		}
+		//[ConfigurationProperty("combineDuplicateLiterals", DefaultValue = false)]
+		//public bool CombineDuplicateLiterals
+		//{
+		//    get { return (bool)this["combineDuplicateLiterals"]; }
+		//    set { this["combineDuplicateLiterals"] = value; }
+		//}
 
 		/// <summary>
 		/// Gets or sets a string representation of the list of debug 
