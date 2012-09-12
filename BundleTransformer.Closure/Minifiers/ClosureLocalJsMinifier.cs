@@ -24,6 +24,16 @@
 	public sealed class ClosureLocalJsMinifier : ClosureJsMinifierBase
 	{
 		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "Closure Local JS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "JS";
+
+		/// <summary>
 		/// File system wrapper
 		/// </summary>
 		private readonly IFileSystemWrapper _fileSystemWrapper;
@@ -92,14 +102,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Closure local JS-minifier
+		/// Constructs instance of Closure Local JS-minifier
 		/// </summary>
 		public ClosureLocalJsMinifier()
 			: this(BundleTransformerContext.Current.GetClosureConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Closure local JS-minifier
+		/// Constructs instance of Closure Local JS-minifier
 		/// </summary>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		public ClosureLocalJsMinifier(ClosureSettings closureConfig)
@@ -109,7 +119,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Closure local JS-minifier
+		/// Constructs instance of Closure Local JS-minifier
 		/// </summary>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		/// <param name="fileSystemWrapper">File system wrapper</param>
@@ -150,6 +160,12 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			string javaVirtualMachinePath = JavaVirtualMachinePath;
 			if (string.IsNullOrWhiteSpace(javaVirtualMachinePath))
 			{
@@ -177,7 +193,7 @@
 				_fileSystemWrapper.CreateDirectory(_tempFilesDirectoryPath);
 			}
 
-			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent = Compile(asset.Content, asset.Path);
 
@@ -307,12 +323,14 @@
 			catch (ClosureCompilingException e)
 			{
 				throw new AssetMinificationException(
-					string.Format(Strings.Minifiers_ClosureLocalMinificationSyntaxError, assetPath, e.Message));
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
+						CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
 				throw new AssetMinificationException(
-					string.Format(Strings.Minifiers_ClosureLocalMinificationFailed, assetPath));
+					string.Format(CoreStrings.Minifiers_MinificationFailed, 
+						CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 			}
 			finally
 			{

@@ -17,13 +17,17 @@
 	using Core.Translators;
 
 	using Configuration;
-	using SassAndScssStrings = Resources.Strings;
 
 	/// <summary>
 	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
 	/// </summary>
 	public sealed class SassAndScssTranslator : TranslatorWithNativeMinificationBase
 	{
+		/// <summary>
+		/// Name of output code type
+		/// </summary>
+		const string OUTPUT_CODE_TYPE = "CSS";
+
 		/// <summary>
 		/// CSS-file extension
 		/// </summary>
@@ -150,10 +154,16 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.Sass 
+				|| a.AssetType == AssetType.Scss).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			bool enableNativeMinification = NativeMinificationEnabled;
 
-			foreach (var asset in assets.Where(a => a.AssetType == AssetType.Sass
-				|| a.AssetType == AssetType.Scss))
+			foreach (var asset in assetsToProcessing)
 			{
 				InnerTranslate(asset, enableNativeMinification);
 			}
@@ -181,16 +191,16 @@
 			}
 			catch (Exception e)
 			{
-				if (e.Message == "Sass::SyntaxError")
+				if (e.InnerException != null && e.InnerException.Message == "Sass::SyntaxError")
 				{
 					throw new AssetTranslationException(
-						string.Format(SassAndScssStrings.Translators_SassAndScssTranslationSyntaxError,
-							assetPath, assetTypeName), e);
+						string.Format(CoreStrings.Translators_TranslationSyntaxError,
+							assetTypeName, OUTPUT_CODE_TYPE, assetPath, e.Message));
 				}
 
 				throw new AssetTranslationException(
-					string.Format(SassAndScssStrings.Translators_SassAndScssTranslationFailed,
-					              assetPath, assetTypeName), e);
+					string.Format(CoreStrings.Translators_TranslationFailed,
+						assetTypeName, OUTPUT_CODE_TYPE, assetPath, e.Message), e);
 			}
 
 			asset.Content = newContent;

@@ -156,6 +156,9 @@
   <data name="Common_InvalidFullTypeName" xml:space="preserve">
     <value>Некорректное полное имя типа "{0}". Формат строки должен соответствовать шаблону "ПространствоИмен.НазваниеКласса, ИмяСборки"!</value>
   </data>
+  <data name="Common_UnknownError" xml:space="preserve">
+    <value>Неизвестная ошибка.</value>
+  </data>
   <data name="Common_ValueIsEmpty" xml:space="preserve">
     <value>Значение не должно быть пустым!</value>
   </data>
@@ -183,9 +186,6 @@
   <data name="ErrorDetails_ErrorCode" xml:space="preserve">
     <value>Код ошибки</value>
   </data>
-  <data name="ErrorDetails_ErrorWCode" xml:space="preserve">
-    <value>WCode</value>
-  </data>
   <data name="ErrorDetails_File" xml:space="preserve">
     <value>Файл</value>
   </data>
@@ -195,14 +195,26 @@
   <data name="ErrorDetails_LineNumber" xml:space="preserve">
     <value>Номер строки</value>
   </data>
+  <data name="ErrorDetails_LineSource" xml:space="preserve">
+    <value>Содержимое строки</value>
+  </data>
   <data name="ErrorDetails_Message" xml:space="preserve">
     <value>Сообщение об ошибке</value>
+  </data>
+  <data name="ErrorDetails_Name" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="ErrorDetails_ScriptStackTrace" xml:space="preserve">
+    <value>Трассировки стека скрипта</value>
   </data>
   <data name="ErrorDetails_Severity" xml:space="preserve">
     <value>Серьезность</value>
   </data>
   <data name="ErrorDetails_SourceError" xml:space="preserve">
     <value>Источник ошибки</value>
+  </data>
+  <data name="ErrorDetails_SourceName" xml:space="preserve">
+    <value>Имя источника ошибки</value>
   </data>
   <data name="ErrorDetails_StartColumn" xml:space="preserve">
     <value>Начальный символ</value>
@@ -212,5 +224,29 @@
   </data>
   <data name="ErrorDetails_Subcategory" xml:space="preserve">
     <value>Подкатегория</value>
+  </data>
+  <data name="Minifiers_MinificationFailed" xml:space="preserve">
+    <value>Во время минимизации {0}-кода, считанного из файла {1}, с помощью {2} произошла ошибка!	
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
+  <data name="Minifiers_MinificationSyntaxError" xml:space="preserve">
+    <value>Во время минимизации {0}-кода, считанного из файла {1}, с помощью {2} произошла синтаксическая ошибка!
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
+  <data name="Translators_TranslationFailed" xml:space="preserve">
+    <value>Во время трансляции {0}-кода, считанного из файла {2}, в {1}-код произошла ошибка!
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
+  <data name="Translators_TranslationSyntaxError" xml:space="preserve">
+    <value>Во время трансляции {0}-кода, считанного из файла {2}, в {1}-код произошла синтаксическая ошибка!
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
   </data>
 </root>

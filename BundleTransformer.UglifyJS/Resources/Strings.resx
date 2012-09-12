@@ -129,16 +129,4 @@
   <data name="DefinesParsing_SymbolNameIsForbidden" xml:space="preserve">
     <value>Forbidden to specify the name of symbol, which coincides with the name of built-in constant of JavaScript language: '{0}'.</value>
   </data>
-  <data name="Minifiers_UglifyJsMinificationFailed" xml:space="preserve">
-    <value>During minification of JS-code, readed from the file {0}, by Uglify JS-minifier error has occurred.	
-See more details:
-
-{1}</value>
-  </data>
-  <data name="Minifiers_UglifyJsMinificationSyntaxError" xml:space="preserve">
-    <value>During minification of JS-code, readed from the file {0}, by Uglify JS-minifier syntax error has occurred. 
-See more details:
-
-{1}</value>
-  </data>
 </root>

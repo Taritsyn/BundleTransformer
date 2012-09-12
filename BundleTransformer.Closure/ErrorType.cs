@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Error types
 	/// </summary>
-	public enum ErrorType
+	internal enum ErrorType
 	{
 		ServerError,
 		Error,

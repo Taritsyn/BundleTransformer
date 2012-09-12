@@ -123,13 +123,4 @@
   <data name="Minifiers_InvalidThreadCulture" xml:space="preserve">
     <value>Thread Culture '{0}' is invalid.</value>
   </data>
-  <data name="Minifiers_YuiMinificationFailed" xml:space="preserve">
-    <value>During minification of {0}-code, readed from the file {1}, by YUI Minifier error has occurred.</value>
-  </data>
-  <data name="Minifiers_YuiMinificationSyntaxError" xml:space="preserve">
-    <value>During minification of {0}-code, readed from the file {1}, by YUI Minifier syntax error has occurred. 
-See more details:
-
-{2}</value>
-  </data>
 </root>

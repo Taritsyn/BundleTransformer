@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.5.5
+           README file for Bundle Transformer: CoffeeScript 1.6.0
 
    ----------------------------------------------------------------------
 
@@ -20,9 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   1. The SassAndCoffee.JavaScript library was replaced by my own 
-      implementation of the CoffeeScript-compiler;
-   2. Is now supported CoffeeScript version 1.3.3.
+   Added support of CoffeeScript version 1.3.3-40.
 
    =============
    DOCUMENTATION

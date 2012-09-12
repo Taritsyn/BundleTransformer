@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.5.5
+               README file for Bundle Transformer: Core 1.6.0
 
    ----------------------------------------------------------------------
 
@@ -27,13 +27,14 @@
    the minification of code in runtime, but this feature can be added 
    by installing of minifier-adapter (now available adapters based on 
    Microsoft Ajax Minifier, YUI Compressor for .NET, Google Closure 
-   Compiler, Douglas Crockford's JSMin and Mihai Bazon's UglifyJS). In 
-   addition, you can also install translator-adapters that implement the 
-   translation of code on intermediate languages (LESS, Sass, SCSS and 
-   CoffeeScript).
+   Compiler, Douglas Crockford's JSMin, Mihai Bazon's UglifyJS, Dean 
+   Edwards' Packer, Sergey Kryzhanovsky's CSSO (CSS Optimizer) and 
+   WebGrease). In addition, you can also install translator-adapters 
+   that implement the translation of code on intermediate languages 
+   (LESS, Sass, SCSS and CoffeeScript).
 
-   This extension will help your web applications successfully pass a most 
-   part of the tests in YSlow.
+   This extension will help your web applications successfully pass a 
+   most part of the tests in YSlow.
 
    =============
    DOCUMENTATION

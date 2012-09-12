@@ -32,9 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MsieJavaScriptEngine, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MsieJavaScriptEngine, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MsieJavaScriptEngine.1.0.5\lib\net40\MsieJavaScriptEngine.dll</HintPath>
+      <HintPath>..\packages\MsieJavaScriptEngine.1.0.7\lib\net40\MsieJavaScriptEngine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -50,16 +50,6 @@
     <Compile Include="Compilers\CoffeeScriptCompilingException.cs" />
     <Compile Include="Compilers\CoffeeScriptCompiler.cs" />
     <Compile Include="HttpHandlers\CoffeeScriptAssetHandler.cs" />
-    <Compile Include="Resources\Strings.ru-ru.Designer.cs">
-      <DependentUpon>Strings.ru-ru.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
     <Compile Include="Translators\CoffeeScriptTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -70,17 +60,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.ru-ru.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Resources\coffeescript-combined.js" />
+    <Content Include="Resources\LICENSE.txt" />
     <EmbeddedResource Include="Resources\coffeescript-combined.min.js" />
   </ItemGroup>
   <ItemGroup>
@@ -88,9 +69,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\MicrosoftAjaxMinifier\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
-ajaxmin.exe "$(ProjectDir)Resources\coffeescript-combined.js" –out "$(ProjectDir)Resources\coffeescript-combined.min.js" –clobber</PreBuildEvent>
+wg.exe -m -in:"$(ProjectDir)Resources\coffeescript-combined.js" -out:"$(ProjectDir)Resources\coffeescript-combined.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

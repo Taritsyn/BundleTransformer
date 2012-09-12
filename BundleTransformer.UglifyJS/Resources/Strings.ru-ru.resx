@@ -129,16 +129,4 @@
   <data name="DefinesParsing_SymbolNameIsForbidden" xml:space="preserve">
     <value>Запрещено задавать имя символа, которое совпадает с именем встроенной константы JavaScript: "{0}"!</value>
   </data>
-  <data name="Minifiers_UglifyJsMinificationFailed" xml:space="preserve">
-    <value>Во время минимизации JS-кода, считанного из файла {0}, с помощью Uglify JS-minifier произошла ошибка!	
-Смотрите более подробную информацию об ошибке:
-
-{1}</value>
-  </data>
-  <data name="Minifiers_UglifyJsMinificationSyntaxError" xml:space="preserve">
-    <value>Во время минимизации JS-кода, считанного из файла {0}, с помощью Uglify JS-minifier произошла синтаксическая ошибка!
-Смотрите более подробную информацию об ошибке:
-
-{1}</value>
-  </data>
 </root>

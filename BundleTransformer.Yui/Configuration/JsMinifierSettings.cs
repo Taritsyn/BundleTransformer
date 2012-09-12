@@ -3,7 +3,7 @@
 	using System.Configuration;
 
 	/// <summary>
-	/// Configuration settings of YUI JS-Minifier
+	/// Configuration settings of YUI JS-minifier
 	/// </summary>
 	public sealed class JsMinifierSettings : MinifierSettingsBase
 	{

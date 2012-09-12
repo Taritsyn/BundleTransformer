@@ -16,10 +16,20 @@
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code 
-	/// by using Uglify JS-Minifier
+	/// by using Uglify JS-minifier
 	/// </summary>
 	public sealed class UglifyJsMinifier : IMinifier
 	{
+		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "Uglify JS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "JS";
+
 		/// <summary>
 		/// Regular expression for working with strings of the form SYMBOL[=value]
 		/// </summary>
@@ -94,14 +104,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Uglify JS-Minifier
+		/// Constructs instance of Uglify JS-minifier
 		/// </summary>
 		public UglifyJsMinifier() 
 			: this(BundleTransformerContext.Current.GetUglifyJsConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Uglify JS-Minifier
+		/// Constructs instance of Uglify JS-minifier
 		/// </summary>
 		/// <param name="uglifyConfig">Configuration settings of Uglify Minifier</param>
 		public UglifyJsMinifier(UglifySettings uglifyConfig)
@@ -144,7 +154,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using Uglify JS-Minifier
+		/// Produces code minifiction of JS-assets by using Uglify JS-minifier
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>
@@ -160,11 +170,17 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			var options = GenerateUglifyJsOptions();
 
 			using (var jsUglifier = new JsUglifier(options))
 			{
-				foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
+				foreach (var asset in assetsToProcessing)
 				{
 					string newContent;
 					string assetPath = asset.Path;
@@ -176,14 +192,14 @@
 					catch (JsUglifyingException e)
 					{
 						throw new AssetMinificationException(
-							string.Format(UglifyStrings.Minifiers_UglifyJsMinificationSyntaxError, 
-								assetPath, e.Message));
+							string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
+								CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 					}
 					catch (Exception e)
 					{
 						throw new AssetMinificationException(
-							string.Format(UglifyStrings.Minifiers_UglifyJsMinificationFailed,
-								assetPath, e.Message));
+							string.Format(CoreStrings.Minifiers_MinificationFailed,
+								CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 					}
 
 					asset.Content = newContent;

@@ -8,7 +8,7 @@
 	public sealed class JsSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Get a configuration settings of local JS-minifier
+		/// Get a configuration settings of Local JS-minifier
 		/// </summary>
 		[ConfigurationProperty("local")]
 		public LocalJsMinifierSettings Local
@@ -17,7 +17,7 @@
 		}
 
 		/// <summary>
-		/// Get a configuration settings of remote JS-minifier
+		/// Get a configuration settings of Remote JS-minifier
 		/// </summary>
 		[ConfigurationProperty("remote")]
 		public RemoteJsMinifierSettings Remote

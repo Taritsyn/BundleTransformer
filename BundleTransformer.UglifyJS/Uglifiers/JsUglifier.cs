@@ -1,13 +1,11 @@
 ﻿namespace BundleTransformer.UglifyJs.Uglifiers
 {
 	using System;
-	using System.Text;
 	using System.Web.Script.Serialization;
 
 	using MsieJavaScriptEngine;
 	using MsieJavaScriptEngine.ActiveScript;
 
-	using Core;
 	using CoreStrings = Core.Resources.Strings;
 	
 	/// <summary>
@@ -110,50 +108,12 @@
 				}
 				catch (ActiveScriptException e)
 				{
-					throw new JsUglifyingException(FormatErrorDetails(e, assetPath));
+					throw new JsUglifyingException(
+						ActiveScriptErrorFormatter.Format(e, assetPath));
 				}
 			}
 
 			return newContent;
-		}
-
-		/// <summary>
-		/// Generates a detailed error message
-		/// </summary>
-		/// <param name="activeScriptException">Active script exception</param>
-		/// <param name="filePath">File path</param>
-		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(ActiveScriptException activeScriptException, string filePath)
-		{
-			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
-				activeScriptException.Message);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode,
-				activeScriptException.ErrorCode);
-			if (activeScriptException.ErrorWCode != 0)
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorWCode,
-					activeScriptException.ErrorWCode);
-			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory,
-				activeScriptException.Subcategory);
-			if (!string.IsNullOrWhiteSpace(activeScriptException.HelpLink))
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword,
-					activeScriptException.HelpLink);
-			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				activeScriptException.LineNumber);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				activeScriptException.ColumnNumber);
-			if (!string.IsNullOrWhiteSpace(activeScriptException.SourceError))
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError,
-					activeScriptException.SourceError);
-			}
-
-			return errorMessage.ToString();
 		}
 
 		/// <summary>

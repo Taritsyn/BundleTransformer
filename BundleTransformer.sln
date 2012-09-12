@@ -32,6 +32,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.UglifyJs"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Example.Mvc", "BundleTransformer.Example.Mvc\BundleTransformer.Example.Mvc.csproj", "{22433A9D-93D7-4C11-8540-A79A05BDCF63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.WG", "BundleTransformer.WG\BundleTransformer.WG.csproj", "{43801A25-27D6-42C6-B56C-BAD8172226F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Packer", "BundleTransformer.Packer\BundleTransformer.Packer.csproj", "{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Csso", "BundleTransformer.CSSO\BundleTransformer.Csso.csproj", "{E70F938E-7498-4904-8E89-445DE42D974B}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BundleTransformer.vsmdi
@@ -165,6 +171,36 @@ Global
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63}.Release|x86.ActiveCfg = Release|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{43801A25-27D6-42C6-B56C-BAD8172226F6}.Release|x86.ActiveCfg = Release|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}.Release|x86.ActiveCfg = Release|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

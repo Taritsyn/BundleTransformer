@@ -24,6 +24,16 @@
 	public sealed class ClosureRemoteJsMinifier : ClosureJsMinifierBase
 	{
 		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "Closure Remote JS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "JS";
+
+		/// <summary>
 		/// Gets or sets a URL of Google Closure Compiler Service API
 		/// </summary>
 		public string ClosureCompilerServiceApiUrl
@@ -44,14 +54,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Closure remote JS-minifier
+		/// Constructs instance of Closure Remote JS-minifier
 		/// </summary>
 		public ClosureRemoteJsMinifier()
 			: this(BundleTransformerContext.Current.GetClosureConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Closure remote JS-minifier
+		/// Constructs instance of Closure Remote JS-minifier
 		/// </summary>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		public ClosureRemoteJsMinifier(ClosureSettings closureConfig)
@@ -82,12 +92,18 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			if (string.IsNullOrWhiteSpace(ClosureCompilerServiceApiUrl))
 			{
 				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerServiceApiUrlNotSpecified);
 			}
 
-			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent = Compile(asset.Content, asset.Path);
 
@@ -166,16 +182,16 @@
 					if (serverErrors != null && serverErrors.Count > 0)
 					{
 						throw new AssetMinificationException(
-							string.Format(Strings.Minifiers_ClosureRemoteMinificationFailed,
-								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetPath)));
+							string.Format(CoreStrings.Minifiers_MinificationFailed,
+								CODE_TYPE, assetPath, MINIFIER_NAME, FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetPath)));
 					}
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
 						throw new AssetMinificationException(
-							string.Format(Strings.Minifiers_ClosureRemoteMinificationSyntaxError,
-								FormatErrorDetails(errors[0], ErrorType.Error, assetPath)));
+							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+								CODE_TYPE, assetPath, MINIFIER_NAME, FormatErrorDetails(errors[0], ErrorType.Error, assetPath)));
 					}
 
 					if (severity > 0)
@@ -184,8 +200,8 @@
 						if (warnings != null && warnings.Count > 0)
 						{
 							throw new AssetMinificationException(
-								string.Format(Strings.Minifiers_ClosureRemoteMinificationSyntaxError,
-									FormatErrorDetails(warnings[0], ErrorType.Warning, assetPath)));
+								string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+									CODE_TYPE, assetPath, MINIFIER_NAME, FormatErrorDetails(warnings[0], ErrorType.Warning, assetPath)));
 						}
 					}
 
@@ -237,7 +253,7 @@
 				errorDetails.Value<int>("lineno").ToString());
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
 				errorDetails.Value<int>("charno").ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError,
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineSource,
 				errorDetails.Value<string>("line"));
 
 			return errorMessage.ToString();

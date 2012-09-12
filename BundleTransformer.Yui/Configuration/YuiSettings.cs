@@ -8,7 +8,7 @@
 	public sealed class YuiSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of YUI CSS-Minifier
+		/// Gets a configuration settings of YUI CSS-minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings CssMinifier
@@ -17,7 +17,7 @@
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of YUI JS-Minifier
+		/// Gets a configuration settings of YUI JS-minifier
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public JsMinifierSettings JsMinifier

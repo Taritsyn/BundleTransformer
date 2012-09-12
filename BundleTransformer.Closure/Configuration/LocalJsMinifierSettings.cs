@@ -3,7 +3,7 @@
 	using System.Configuration;
 
 	/// <summary>
-	/// Configuration settings of Closure local JS-minifier
+	/// Configuration settings of Closure Local JS-minifier
 	/// </summary>
 	public sealed class LocalJsMinifierSettings : JsMinifierSettingsBase
 	{

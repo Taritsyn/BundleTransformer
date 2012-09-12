@@ -18,13 +18,22 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
-	using LessStrings = Resources.Strings;
 
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
 	/// </summary>
 	public sealed class LessTranslator : TranslatorWithNativeMinificationBase
 	{
+		/// <summary>
+		/// Name of input code type
+		/// </summary>
+		const string INPUT_CODE_TYPE = "LESS";
+
+		/// <summary>
+		/// Name of output code type
+		/// </summary>
+		const string OUTPUT_CODE_TYPE = "CSS";
+
 		/// <summary>
 		/// CSS-file extension
 		/// </summary>
@@ -144,10 +153,16 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.Less).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			bool enableNativeMinification = NativeMinificationEnabled;
 			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification);
 
-			foreach (var asset in assets.Where(a => a.AssetType == AssetType.Less))
+			foreach (var asset in assetsToProcessing)
 			{
 				InnerTranslate(asset, lessEngine, enableNativeMinification);
 			}
@@ -175,13 +190,15 @@
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
-					string.Format(LessStrings.Translators_LessTranslationFailed, assetPath), e);
+					string.Format(CoreStrings.Translators_TranslationFailed, 
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message), e);
 			}
 
 			if (string.IsNullOrEmpty(newContent))
 			{
 				throw new AssetTranslationException(
-					string.Format(LessStrings.Translators_LessTranslationFailed, assetPath));
+					string.Format(CoreStrings.Translators_TranslationFailed, 
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, CoreStrings.Common_UnknownError));
 			}
 
 			asset.Content = newContent;

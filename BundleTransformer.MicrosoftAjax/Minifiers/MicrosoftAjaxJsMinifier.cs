@@ -20,7 +20,6 @@
 	using BtEvalTreatment = EvalTreatment;
 	using BtLocalRenaming = LocalRenaming;
 	using BtBlockStart = BlockStart;
-	using MicrosoftAjaxStrings = Resources.Strings;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code 
@@ -28,6 +27,16 @@
 	/// </summary>
 	public sealed class MicrosoftAjaxJsMinifier : MicrosoftAjaxMinifierBase
 	{
+		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "Microsoft Ajax JS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "JS";
+
 		/// <summary>
 		/// Configuration settings of JS-parser
 		/// </summary>
@@ -498,7 +507,13 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
+			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent = string.Empty;
 				string assetPath = asset.Path;
@@ -520,8 +535,8 @@
 				catch (Exception e)
 				{
 				    throw new AssetMinificationException(
-				        string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationFailed, 
-							"JS", assetPath), e);
+				        string.Format(CoreStrings.Minifiers_MinificationFailed, 
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 				finally
 				{
@@ -549,8 +564,8 @@
 			if (error.Severity <= Severity)
 			{
 				throw new MicrosoftAjaxParsingException(
-					string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
-						"JS", error.File, FormatContextError(error)), args.Exception);
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, error.File, MINIFIER_NAME, FormatContextError(error)), args.Exception);
 			}
 		}
 	}

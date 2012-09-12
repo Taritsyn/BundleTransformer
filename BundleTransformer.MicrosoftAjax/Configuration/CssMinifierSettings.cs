@@ -3,7 +3,7 @@
 	using System.Configuration;
 
 	/// <summary>
-	/// Configuration settings of Microsoft Ajax CSS-Minifier
+	/// Configuration settings of Microsoft Ajax CSS-minifier
 	/// </summary>
 	public sealed class CssMinifierSettings : MinifierSettingsBase
 	{

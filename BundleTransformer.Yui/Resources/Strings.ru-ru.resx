@@ -123,13 +123,4 @@
   <data name="Minifiers_InvalidThreadCulture" xml:space="preserve">
     <value>Thread Culture с именем "{0}" не может быть использована!</value>
   </data>
-  <data name="Minifiers_YuiMinificationFailed" xml:space="preserve">
-    <value>Во время минимизации {0}-кода, считанного из файла {1}, с помощью YUI Minifier произошла ошибка!</value>
-  </data>
-  <data name="Minifiers_YuiMinificationSyntaxError" xml:space="preserve">
-    <value>Во время минимизации {0}-кода, считанного из файла {1}, с помощью YUI Minifier произошла синтаксическая ошибка!
-Смотрите более подробную информацию об ошибке:
-
-{2}</value>
-  </data>
 </root>

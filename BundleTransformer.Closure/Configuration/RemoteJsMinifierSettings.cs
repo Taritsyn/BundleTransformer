@@ -3,7 +3,7 @@
 	using System.Configuration;
 	
 	/// <summary>
-	/// Configuration settings of Closure remote JS-minifier
+	/// Configuration settings of Closure Remote JS-minifier
 	/// </summary>
 	public sealed class RemoteJsMinifierSettings : JsMinifierSettingsBase
 	{

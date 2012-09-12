@@ -9,7 +9,6 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using DouglasCrockford;
-	using Resources;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code 
@@ -17,6 +16,16 @@
 	/// </summary>
 	public sealed class CrockfordJsMinifier : IMinifier
 	{
+		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "JSMin Minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "JS";
+
 		/// <summary>
 		/// Produces code minifiction of JS-assets by using C# port of 
 		/// Douglas Crockford's JSMin (version of May 22 2007)
@@ -35,9 +44,15 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			var jsMin = new JavaScriptMinifier();
 
-			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
 				string assetPath = asset.Path;
@@ -49,7 +64,8 @@
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(Strings.Minifiers_JsMinMinificationFailed, assetPath, e.Message));
+						string.Format(CoreStrings.Minifiers_MinificationFailed, 
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 				}
 
 				asset.Content = newContent;

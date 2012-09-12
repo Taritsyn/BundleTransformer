@@ -126,32 +126,11 @@
   <data name="Minifiers_ClosureCompilerServiceApiUrlNotSpecified" xml:space="preserve">
     <value>Вы не задали URL Google Closure Compiler Service API!</value>
   </data>
-  <data name="Minifiers_ClosureLocalMinificationFailed" xml:space="preserve">
-    <value>Во время минимизации JS-кода, считанного из файла {0}, с помощью Closure Local Minifier произошла ошибка!</value>
-  </data>
-  <data name="Minifiers_ClosureLocalMinificationSyntaxError" xml:space="preserve">
-    <value>Во время минимизации JS-кода, считанного из файла {0}, с помощью Closure Local Minifier произошла синтаксическая ошибка!
-Смотрите более подробную информацию об ошибке:
-
-{1}</value>
-  </data>
-  <data name="Minifiers_ClosureRemoteMinificationFailed" xml:space="preserve">
-    <value>Во время минимизации JS-кода с помощью Closure Remote Minifier произошла ошибка!
-Смотрите более подробную информацию об ошибке:
-
-{0}</value>
-  </data>
   <data name="Minifiers_ClosureRemoteMinificationHttpRequestError" xml:space="preserve">
     <value>Не удается подключиться к {0}! Проверьте правильность указанного URL и наличие подключения к Интернету.</value>
   </data>
   <data name="Minifiers_ClosureRemoteMinificationInvalidHttpStatus" xml:space="preserve">
     <value>При обращении к Google Closure Compiler Service API произошла ошибка с кодом HTTP-статуса "{0}"!</value>
-  </data>
-  <data name="Minifiers_ClosureRemoteMinificationSyntaxError" xml:space="preserve">
-    <value>Во время минимизации JS-кода с помощью Closure Remote Minifier произошла синтаксическая ошибка!
-Смотрите более подробную информацию об ошибке:
-
-{0}</value>
   </data>
   <data name="Minifiers_JavaVirtualMachineNotFound" xml:space="preserve">
     <value>Исполняемый файл виртуальной машины Java не найден по указанному пути – {0}!</value>

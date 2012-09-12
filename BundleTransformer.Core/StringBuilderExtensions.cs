@@ -1,8 +1,8 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
-
-namespace BundleTransformer.Core
+﻿namespace BundleTransformer.Core
 {
+	using System.Text;
+	using System.Text.RegularExpressions;
+
 	/// <summary>
 	/// Extensions for StringBuilder
 	/// </summary>

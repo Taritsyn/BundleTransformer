@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v1.3.3
+ * UglifyJS v1.3.3-4
  * http://github.com/mishoo/UglifyJS
  *
  * Copyright 2012, Mihai Bazon
@@ -2946,7 +2946,8 @@ var UglifyJS = (function(){
 					if (next &&
 						((is_identifier_char(last_char(a[i])) && (is_identifier_char(first_char(next))
 																  || first_char(next) == "\\")) ||
-						 (/[\+\-]$/.test(a[i].toString()) && /^[\+\-]/.test(next.toString())))) {
+						 (/[\+\-]$/.test(a[i].toString()) && /^[\+\-]/.test(next.toString()) ||
+						 last_char(a[i]) == "/" && first_char(next) == "/"))) {
 						b.push(" ");
 					}
 				}
@@ -3498,11 +3499,7 @@ var UglifyJS = (function(){
 		exports.split_lines = split_lines;
 		exports.MAP = MAP;
 
-		// keep this last!
-		exports.ast_squeeze_more = require("./squeeze-more"); 
-
 		return exports;
-
 		// Local variables:
 		// js-indent-level: 4
 		// End:
@@ -3586,6 +3583,10 @@ var UglifyJS = (function(){
 
 		var exports = {};
 		exports.ast_squeeze_more = ast_squeeze_more;
+		
+		/* -----[ Moved from ./process ]----- */
+		// keep this last!
+		jsp.ast_squeeze_more = ast_squeeze_more;
 
 		return exports;
 
@@ -3594,7 +3595,7 @@ var UglifyJS = (function(){
 		// End:
 	})();
 	//#endregion
-
+	
 	//#region URL: ./consolidator
 	/**
 	 * @preserve Copyright 2012 Robert Gust-Bardon <http://robert.gust-bardon.org/>.

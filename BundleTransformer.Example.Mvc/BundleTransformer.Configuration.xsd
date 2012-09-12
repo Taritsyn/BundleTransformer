@@ -19,6 +19,8 @@
 				<xs:element name="yui" type="YuiSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="closure" type="ClosureSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="uglify" type="UglifySettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="packer" type="PackerSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="csso" type="CssoSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 			</xs:all>
 		</xs:complexType>
 	</xs:element>
@@ -286,7 +288,7 @@
 
 	<xs:complexType name="MicrosoftAjaxCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Microsoft Ajax CSS-Minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Microsoft Ajax CSS-minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="MicrosoftAjaxMinifierSettingsBase_SchemaType">
@@ -326,7 +328,7 @@
 
 	<xs:complexType name="MicrosoftAjaxJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Microsoft Ajax JS-Minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Microsoft Ajax JS-minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="MicrosoftAjaxMinifierSettingsBase_SchemaType">
@@ -567,7 +569,7 @@ depending on how it was specified in the sources</xs:documentation>
 
 	<xs:complexType name="YuiCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of YUI CSS-Minifier</xs:documentation>
+			<xs:documentation>Configuration settings of YUI CSS-minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="YuiMinifierSettingsBase_SchemaType">
@@ -582,7 +584,7 @@ depending on how it was specified in the sources</xs:documentation>
 
 	<xs:complexType name="YuiJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of YUI JS-Minifier</xs:documentation>
+			<xs:documentation>Configuration settings of YUI JS-minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="YuiMinifierSettingsBase_SchemaType">
@@ -931,4 +933,53 @@ For example, to keep names require and $super intact you’d specify "require,$s
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /UglifyJs settings -->
+
+	<!-- Packer settings -->
+	<xs:complexType name="PackerSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Dean Edwards' Minifier</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="js" type="PackerJsMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="PackerJsMinifierSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Dean Edwards' JS-minifier</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="shrinkVariables" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to shrink variables</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="base62Encode" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to Base62 encode</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /Packer settings -->
+
+	<!-- CSSO settings -->
+	<xs:complexType name="CssoSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Sergey Kryzhanovsky's Minifier</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="css" type="CssoCssMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="CssoCssMinifierSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Sergey Kryzhanovsky's CSS-minifier</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="disableRestructuring" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disable structure minification</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /CSSO settings -->
 </xs:schema>

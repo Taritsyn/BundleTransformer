@@ -20,7 +20,6 @@
 	using BtCssComment = CssComment;
 	using BtOutputMode = OutputMode;
 	using BtBlockStart = BlockStart;
-	using MicrosoftAjaxStrings = Resources.Strings;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code 
@@ -28,6 +27,16 @@
 	/// </summary>
 	public sealed class MicrosoftAjaxCssMinifier : MicrosoftAjaxMinifierBase
 	{
+		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "Microsoft Ajax CSS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "CSS";
+
 		/// <summary>
 		/// CSS-parser
 		/// </summary>
@@ -250,7 +259,13 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.IsStylesheet && !a.Minified))
+			var assetsToProcessing = assets.Where(a => a.IsStylesheet && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
 				string assetPath = asset.Path;
@@ -264,8 +279,8 @@
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationFailed,
-							"CSS", assetPath), e);
+						string.Format(CoreStrings.Minifiers_MinificationFailed, 
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 				finally
 				{
@@ -292,8 +307,8 @@
 			if (error.Severity <= Severity)
 			{
 				throw new MicrosoftAjaxParsingException(
-					string.Format(MicrosoftAjaxStrings.Minifiers_MicrosoftAjaxMinificationSyntaxError,
-						"CSS", error.File, FormatContextError(error)), args.Exception);
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
+						CODE_TYPE, error.File, MINIFIER_NAME, FormatContextError(error)), args.Exception);
 			}
 		}
 	}

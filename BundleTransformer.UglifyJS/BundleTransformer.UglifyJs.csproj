@@ -31,9 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MsieJavaScriptEngine, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MsieJavaScriptEngine, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MsieJavaScriptEngine.1.0.5\lib\net40\MsieJavaScriptEngine.dll</HintPath>
+      <HintPath>..\packages\MsieJavaScriptEngine.1.0.7\lib\net40\MsieJavaScriptEngine.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -88,6 +88,7 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\uglify-combined.min.js" />
+    <Content Include="Resources\LICENSE.txt" />
     <Content Include="Resources\uglify-combined.js" />
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +96,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\MicrosoftAjaxMinifier\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
-ajaxmin.exe "$(ProjectDir)Resources\uglify-combined.js" –out "$(ProjectDir)Resources\uglify-combined.min.js" –clobber</PreBuildEvent>
+wg.exe -m -in:"$(ProjectDir)Resources\uglify-combined.js" -out:"$(ProjectDir)Resources\uglify-combined.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -14,7 +14,6 @@
 
 	using Configuration;
 	using BtCompressionType = CompressionType;
-	using YuiStrings = Resources.Strings;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code 
@@ -22,6 +21,16 @@
 	/// </summary>
 	public sealed class YuiCssMinifier : YuiMinifierBase
 	{
+		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "YUI CSS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "CSS";
+
 		/// <summary>
 		/// CSS-compressor
 		/// </summary>
@@ -101,8 +110,14 @@
 			{
 				return assets;
 			}
-			
-			foreach (var asset in assets.Where(a => a.IsStylesheet && !a.Minified))
+
+			var assetsToProcessing = assets.Where(a => a.IsStylesheet && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
 				string assetPath = asset.Path;
@@ -114,7 +129,8 @@
 				catch(Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(YuiStrings.Minifiers_YuiMinificationFailed, "CSS", assetPath, e));
+						string.Format(CoreStrings.Minifiers_MinificationFailed, 
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 
 				asset.Content = newContent;

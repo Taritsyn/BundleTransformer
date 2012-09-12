@@ -8,7 +8,7 @@
 	public sealed class MicrosoftAjaxSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of Microsoft Ajax CSS-Minifier
+		/// Gets a configuration settings of Microsoft Ajax CSS-minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings CssMinifier
@@ -17,7 +17,7 @@
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of Microsoft Ajax JS-Minifier
+		/// Gets a configuration settings of Microsoft Ajax JS-minifier
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public JsMinifierSettings JsMinifier

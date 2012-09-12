@@ -9,13 +9,22 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Compilers;
-	using CoffeeStrings = Resources.Strings;
 
 	/// <summary>
 	/// Translator that responsible for translation of CoffeeScript-code to JS-code
 	/// </summary>
 	public sealed class CoffeeScriptTranslator : ITranslator
 	{
+		/// <summary>
+		/// Name of input code type
+		/// </summary>
+		const string INPUT_CODE_TYPE = "CoffeeScript";
+
+		/// <summary>
+		/// Name of output code type
+		/// </summary>
+		const string OUTPUT_CODE_TYPE = "JS";
+
 		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode
 		/// </summary>
@@ -63,9 +72,15 @@
 				return assets;
 			}
 
+			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.CoffeeScript).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
 			using (var coffeeScriptCompiler = new CoffeeScriptCompiler())
 			{
-				foreach (var asset in assets.Where(a => a.AssetType == AssetType.CoffeeScript))
+				foreach (var asset in assetsToProcessing)
 				{
 					InnerTranslate(asset, coffeeScriptCompiler);
 				}
@@ -86,14 +101,14 @@
 			catch (CoffeeScriptCompilingException e)
 			{
 				throw new AssetTranslationException(
-					string.Format(CoffeeStrings.Translators_CoffeeScriptTranslationSyntaxError, 
-						assetPath, e.Message));
+					string.Format(CoreStrings.Translators_TranslationSyntaxError, 
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
-					string.Format(CoffeeStrings.Translators_CoffeeScriptTranslationFailed,
-						assetPath, e.Message));
+					string.Format(CoreStrings.Translators_TranslationFailed,
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message));
 			}
 
 			asset.Content = newContent;

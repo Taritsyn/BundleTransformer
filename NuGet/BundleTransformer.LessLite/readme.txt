@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.5.5
+            README file for Bundle Transformer: LESS Lite 1.6.0
 
    ----------------------------------------------------------------------
 
@@ -16,7 +16,8 @@
    HTTP-handler LessAssetHandler, which is responsible for text output 
    of translated LESS-asset.
    
-   Uses NuGet-package the DotlessClientOnly (http://nuget.org/packages/DotlessClientOnly).
+   Uses NuGet-package the DotlessClientOnly 
+   (http://nuget.org/packages/DotlessClientOnly).
    
    =============
    DOCUMENTATION

@@ -26,6 +26,16 @@
 	public sealed class YuiJsMinifier : YuiMinifierBase
 	{
 		/// <summary>
+		/// Name of minifier
+		/// </summary>
+		const string MINIFIER_NAME = "YUI JS-minifier";
+
+		/// <summary>
+		/// Name of code type
+		/// </summary>
+		const string CODE_TYPE = "JS";
+
+		/// <summary>
 		/// JS-compressor
 		/// </summary>
 		private readonly JavaScriptCompressor _jsCompressor;
@@ -177,7 +187,13 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.IsScript && !a.Minified))
+			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
+			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
 				string assetPath = asset.Path;
@@ -204,22 +220,26 @@
 				catch (EcmaScriptRuntimeException e)
 				{
 					throw new AssetMinificationException(
-						string.Format(YuiStrings.Minifiers_YuiMinificationSyntaxError, "JS", assetPath, e.Message), e);
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 				catch (EcmaScriptException e)
 				{
 					throw new AssetMinificationException(
-						string.Format(YuiStrings.Minifiers_YuiMinificationSyntaxError, "JS", assetPath, e.Message), e);
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 				catch (YuiCompressingException e)
 				{
 					throw new AssetMinificationException(
-						string.Format(YuiStrings.Minifiers_YuiMinificationSyntaxError, "JS", assetPath, e.Message), e);
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(YuiStrings.Minifiers_YuiMinificationFailed, "JS", assetPath, e));
+						string.Format(CoreStrings.Minifiers_MinificationFailed, 
+							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 
 				asset.Content = newContent;
