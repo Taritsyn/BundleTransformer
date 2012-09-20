@@ -130,7 +130,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t find string code corresponding to the value {0} of enumeration type {1}..
+        ///   Looks up a localized string similar to Can&apos;t find string code that corresponding to the value {0} of enumeration type {1}..
         /// </summary>
         public static string Common_EnumValueToCodeConversionFailed {
             get {
@@ -162,6 +162,15 @@ namespace BundleTransformer.Core.Resources {
         public static string Common_InvalidFullTypeName {
             get {
                 return ResourceManager.GetString("Common_InvalidFullTypeName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t find a value of enumeration type {0} that corresponding to the severity level {1}..
+        /// </summary>
+        public static string Common_SeverityLevelToEnumValueConversionFailed {
+            get {
+                return ResourceManager.GetString("Common_SeverityLevelToEnumValueConversionFailed", resourceCulture);
             }
         }
         

@@ -156,6 +156,9 @@
   <data name="Common_InvalidFullTypeName" xml:space="preserve">
     <value>Некорректное полное имя типа "{0}". Формат строки должен соответствовать шаблону "ПространствоИмен.НазваниеКласса, ИмяСборки"!</value>
   </data>
+  <data name="Common_SeverityLevelToEnumValueConversionFailed" xml:space="preserve">
+    <value>Не удается найти значениe перечислимого типа {0}, соответствующее коду серьезности ошибки {1}!</value>
+  </data>
   <data name="Common_UnknownError" xml:space="preserve">
     <value>Неизвестная ошибка.</value>
   </data>

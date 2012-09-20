@@ -5,7 +5,7 @@
 	using System.Reflection;
 	using System.Text;
 
-	using EcmaScript.NET;
+	using Noesis.Javascript;
 
 	using Core;
 	using CoreStrings = Core.Resources.Strings;
@@ -18,29 +18,19 @@
 	internal sealed class CssOptimizer : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a ECMAScript 5 Polyfill
-		/// </summary>
-		const string ES5_POLYFILL_RESOURCE_NAME = "BundleTransformer.Csso.Resources.ES5.min.js";
-
-		/// <summary>
 		/// Name of resource, which contains a Sergey Kryzhanovsky's CSSO-library
 		/// </summary>
 		const string CSSO_LIBRARY_RESOURCE_NAME = "BundleTransformer.Csso.Resources.csso.web.min.js";
 
 		/// <summary>
+		/// Name of function, which is responsible for CSS-optimization
+		/// </summary>
+		const string OPTIMIZATION_FUNCTION_NAME = "cssoJustDoIt";
+
+		/// <summary>
 		/// JS context
 		/// </summary>
-		private readonly Context _jsContext;
-
-		/// <summary>
-		/// JS scope
-		/// </summary>
-		private readonly IScriptable _jsScope;
-
-		/// <summary>
-		/// Function, which is responsible for optimization
-		/// </summary>
-		private readonly IFunction _jsFunction;
+		private readonly JavascriptContext _jsContext;
 
 		/// <summary>
 		/// Synchronizer of optimization
@@ -58,24 +48,15 @@
 		/// </summary>
 		public CssOptimizer()
 		{
-			_jsContext = Context.Enter();
-			_jsScope = _jsContext.InitStandardObjects();
-
-			IScript es5Polyfill = _jsContext.CompileString(
-				GetResourceAsString(ES5_POLYFILL_RESOURCE_NAME, GetType()), "ES5.js", 1, null);
-			es5Polyfill.Exec(_jsContext, _jsScope);
-
-			IScript cssoLibrary = _jsContext.CompileString(
-				GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, GetType()), "csso.web.js", 1, null);
-			cssoLibrary.Exec(_jsContext, _jsScope);
-
-			_jsFunction = _jsContext.CompileFunction(_jsScope, @"function cssoOptimize(code, disableRestructuring) {
+			_jsContext = new JavascriptContext();
+			_jsContext.Run(GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, GetType()));
+			_jsContext.Run(string.Format(@"function {0}(code, disableRestructuring) {{
 	var parser = new CSSOParser(),
 		compressor = new CSSOCompressor(),
 		translator = new CSSOTranslator();
 
 	return translator.translate(cleanInfo(compressor.compress(parser.parse(code, 'stylesheet'), disableRestructuring)));
-}", "cssoHelper", 1, null);
+}}", OPTIMIZATION_FUNCTION_NAME));
 		}
 
 		/// <summary>
@@ -91,10 +72,9 @@
 		/// "Optimizes" CSS-code by using Sergey Kryzhanovsky's CSSO
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>
-		/// <param name="assetPath">Path to CSS-asset file</param>
 		/// <param name="disableRestructuring">Flag for whether to disable structure minification</param>
 		/// <returns>Minified text content of CSS-asset</returns>
-		public string Optimize(string content, string assetPath, bool disableRestructuring = false)
+		public string Optimize(string content, bool disableRestructuring = false)
 		{
 			string newContent;
 
@@ -102,23 +82,16 @@
 			{
 				try
 				{
-					newContent = (string)_jsFunction.Call(_jsContext, _jsScope, null, new object[] {content, disableRestructuring});
+					_jsContext.SetParameter("code", content);
+					_jsContext.SetParameter("disableRestructuring", disableRestructuring);
+					_jsContext.Run(string.Format(
+						"var result = {0}(code, disableRestructuring);", OPTIMIZATION_FUNCTION_NAME));
+
+					newContent = (string)_jsContext.GetParameter("result");
 				}
-				catch (EcmaScriptError e)
+				catch (JavascriptException e)
 				{
-					throw new CssOptimizingException(FormatErrorDetails(e, assetPath));
-				}
-				catch (EcmaScriptRuntimeException e)
-				{
-					throw new CssOptimizingException(FormatErrorDetails(e, assetPath));
-				}
-				catch (EcmaScriptThrow e)
-				{
-					throw new CssOptimizingException(FormatErrorDetails(e, assetPath));
-				}
-				catch (EcmaScriptException e)
-				{
-					throw new CssOptimizingException(FormatErrorDetails(e, assetPath));
+					throw new CssOptimizingException(FormatErrorDetails(e));
 				}
 			}
 
@@ -153,46 +126,28 @@
 		/// <summary>
 		/// Generates a detailed error message
 		/// </summary>
-		/// <param name="ecmaScriptException">ECMAScript exception</param>
-		/// <param name="filePath">File path</param>
+		/// <param name="javascriptException">JavaScript exception</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(EcmaScriptException ecmaScriptException, string filePath)
+		private static string FormatErrorDetails(JavascriptException javascriptException)
 		{
 			var errorMessage = new StringBuilder();
-			if (ecmaScriptException is EcmaScriptError)
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Name,
-					((EcmaScriptError)ecmaScriptException).Name);
-			}
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
-				ecmaScriptException.Message);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory,
-				(ecmaScriptException is EcmaScriptRuntimeException) ? "ECMAScript runtime error" : "ECMAScript error");
-
-			if (!string.IsNullOrWhiteSpace(ecmaScriptException.HelpLink))
+				javascriptException.Message);
+			if (!string.IsNullOrWhiteSpace(javascriptException.HelpLink))
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword,
-					ecmaScriptException.HelpLink);
+					javascriptException.HelpLink);
 			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				ecmaScriptException.LineNumber);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				ecmaScriptException.ColumnNumber);
-			if (!string.IsNullOrWhiteSpace(ecmaScriptException.LineSource))
+				javascriptException.Line.ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn,
+				javascriptException.StartColumn.ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndColumn,
+				javascriptException.EndColumn.ToString());
+			if (!string.IsNullOrWhiteSpace(javascriptException.Source))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineSource,
-					ecmaScriptException.LineSource);
-			}
-			if (!string.IsNullOrWhiteSpace(ecmaScriptException.SourceName))
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceName,
-					ecmaScriptException.SourceName);
-			}
-			if (!string.IsNullOrWhiteSpace(ecmaScriptException.ScriptStackTrace))
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ScriptStackTrace,
-					ecmaScriptException.ScriptStackTrace);
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError,
+					javascriptException.Source);
 			}
 
 			return errorMessage.ToString();
@@ -218,7 +173,10 @@
 			{
 				_disposed = true;
 
-				Context.Exit();
+				if (_jsContext != null)
+				{
+					_jsContext.Dispose();
+				}
 			}
 		}
 	}

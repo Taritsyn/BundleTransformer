@@ -9,15 +9,16 @@
 
 	using dotless.Core;
 	using dotless.Core.configuration;
+	using LessLogLevel = dotless.Core.Loggers.LogLevel;
 
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
-	using Core.Resources;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
+	using BtLessLogger = Loggers.LessLogger;
 
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
@@ -66,14 +67,21 @@
 		/// </summary>
 		private readonly ICssRelativePathResolver _cssRelativePathResolver;
 
+		/// <summary>
+		/// Gets or sets a severity level of errors
+		///		0 - only syntax error messages;
+		///		1 - only syntax error messages and warnings.
+		/// </summary>
+		public int Severity { get; set; }
+
 
 		/// <summary>
 		/// Constructs instance of LESS-translator
 		/// </summary>
 		public LessTranslator()
-			: this(new HttpContextWrapper(HttpContext.Current), 
+			: this(new HttpContextWrapper(HttpContext.Current),
 				BundleTransformerContext.Current.GetFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCssRelativePathResolver(), 
+				BundleTransformerContext.Current.GetCssRelativePathResolver(),
 				BundleTransformerContext.Current.GetLessConfiguration())
 		{ }
 
@@ -84,7 +92,7 @@
 		/// <param name="fileSystemWrapper">File system wrapper</param>
 		/// <param name="cssRelativePathResolver">CSS relative path resolver</param>
 		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
-		public LessTranslator(HttpContextBase httpContext, IFileSystemWrapper fileSystemWrapper, 
+		public LessTranslator(HttpContextBase httpContext, IFileSystemWrapper fileSystemWrapper,
 			ICssRelativePathResolver cssRelativePathResolver, LessSettings lessConfig)
 		{
 			_httpContext = httpContext;
@@ -92,6 +100,7 @@
 			_cssRelativePathResolver = cssRelativePathResolver;
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
+			Severity = lessConfig.Severity;
 		}
 
 
@@ -99,8 +108,9 @@
 		/// Creates instance of LESS-engine
 		/// </summary>
 		/// <param name="enableNativeMinification">Enables native minification</param>
+		/// <param name="severity">Severity level</param>
 		/// <returns>LESS-engine</returns>
-		private ILessEngine CreateLessEngine(bool enableNativeMinification)
+		private ILessEngine CreateLessEngine(bool enableNativeMinification, int severity)
 		{
 			DotlessConfiguration lessEngineConfig = DotlessConfiguration.GetDefault();
 			lessEngineConfig.MapPathsToWeb = false;
@@ -109,6 +119,8 @@
 			lessEngineConfig.Web = false;
 			lessEngineConfig.MinifyOutput = enableNativeMinification;
 			lessEngineConfig.LessSource = typeof(VirtualFileReader);
+			lessEngineConfig.LogLevel = ConvertSeverityLevelToLessLogLevelEnumValue(severity);
+			lessEngineConfig.Logger = typeof(BtLessLogger);
 
 			var lessEngineFactory = new EngineFactory(lessEngineConfig);
 			ILessEngine lessEngine = lessEngineFactory.GetEngine();
@@ -125,11 +137,11 @@
 		{
 			if (asset == null)
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
 			bool enableNativeMinification = NativeMinificationEnabled;
-			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification);
+			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification, Severity);
 
 			InnerTranslate(asset, lessEngine, enableNativeMinification);
 
@@ -160,7 +172,8 @@
 			}
 
 			bool enableNativeMinification = NativeMinificationEnabled;
-			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification);
+
+			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification, Severity);
 
 			foreach (var asset in assetsToProcessing)
 			{
@@ -187,18 +200,17 @@
 			{
 				throw;
 			}
+			catch (LessCompilingException e)
+			{
+				throw new AssetTranslationException(
+					string.Format(CoreStrings.Translators_TranslationSyntaxError,
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message));
+			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
-					string.Format(CoreStrings.Translators_TranslationFailed, 
+					string.Format(CoreStrings.Translators_TranslationFailed,
 						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message), e);
-			}
-
-			if (string.IsNullOrEmpty(newContent))
-			{
-				throw new AssetTranslationException(
-					string.Format(CoreStrings.Translators_TranslationFailed, 
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, CoreStrings.Common_UnknownError));
 			}
 
 			asset.Content = newContent;
@@ -231,7 +243,7 @@
 						}
 						string importedAssetExtension = Path.GetExtension(importedAssetUrl);
 
-						if (string.Equals(importedAssetExtension, LESS_FILE_EXTENSION, 
+						if (string.Equals(importedAssetExtension, LESS_FILE_EXTENSION,
 							StringComparison.InvariantCultureIgnoreCase))
 						{
 							string importedAssetPath = _httpContext.Server.MapPath(importedAssetUrl);
@@ -246,10 +258,10 @@
 							else
 							{
 								throw new FileNotFoundException(
-									string.Format(Strings.Common_FileNotExist, importedAssetPath));
+									string.Format(CoreStrings.Common_FileNotExist, importedAssetPath));
 							}
 						}
-						else if (!string.Equals(importedAssetExtension, CSS_FILE_EXTENSION, 
+						else if (!string.Equals(importedAssetExtension, CSS_FILE_EXTENSION,
 							StringComparison.InvariantCultureIgnoreCase))
 						{
 							importedAssetUrl += LESS_FILE_EXTENSION;
@@ -266,12 +278,37 @@
 							else
 							{
 								throw new FileNotFoundException(
-									string.Format(Strings.Common_FileNotExist, importedAssetPath));
+									string.Format(CoreStrings.Common_FileNotExist, importedAssetPath));
 							}
 						}
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Convert severity level to LESS log level enum value
+		/// </summary>
+		/// <param name="severity">Severity level</param>
+		/// <returns>LESS log level</returns>
+		private static LessLogLevel ConvertSeverityLevelToLessLogLevelEnumValue(int severity)
+		{
+			LessLogLevel logLevel;
+
+			switch (severity)
+			{
+				case 0:
+					logLevel = LessLogLevel.Error;
+					break;
+				case 1:
+					logLevel = LessLogLevel.Warn;
+					break;
+				default:
+					throw new InvalidCastException(string.Format(CoreStrings.Common_SeverityLevelToEnumValueConversionFailed,
+						typeof(LessLogLevel), severity.ToString()));
+			}
+
+			return logLevel;
 		}
 	}
 }

@@ -145,7 +145,7 @@ See more details:
     <value>Can not convert value '{0}' of enumeration type '{1}' to value of enumeration type '{2}'.</value>
   </data>
   <data name="Common_EnumValueToCodeConversionFailed" xml:space="preserve">
-    <value>Can't find string code corresponding to the value {0} of enumeration type {1}.</value>
+    <value>Can't find string code that corresponding to the value {0} of enumeration type {1}.</value>
   </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>File {0} not exist.</value>
@@ -155,6 +155,9 @@ See more details:
   </data>
   <data name="Common_InvalidFullTypeName" xml:space="preserve">
     <value>Invalid full type name '{0}'. Format the string like 'Namespace.ClassName, AssemblyName'.</value>
+  </data>
+  <data name="Common_SeverityLevelToEnumValueConversionFailed" xml:space="preserve">
+    <value>Can't find a value of enumeration type {0} that corresponding to the severity level {1}.</value>
   </data>
   <data name="Common_UnknownError" xml:space="preserve">
     <value>Unknown error.</value>

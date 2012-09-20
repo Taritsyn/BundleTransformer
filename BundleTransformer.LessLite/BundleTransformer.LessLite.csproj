@@ -50,6 +50,8 @@
     <Compile Include="BundleTransformerContextExtensions.cs" />
     <Compile Include="Configuration\LessLiteSettings.cs" />
     <Compile Include="HttpHandlers\LessAssetHandler.cs" />
+    <Compile Include="LessCompilingException.cs" />
+    <Compile Include="Loggers\LessLogger.cs" />
     <Compile Include="VirtualFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translators\LessTranslator.cs" />

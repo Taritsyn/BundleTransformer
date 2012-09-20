@@ -66,11 +66,10 @@
 		/// "Packs" JS-code by using Dean Edwards' Packer
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="assetPath">Path to JS-asset file</param>
 		/// <param name="base62Encode">Flag for whether to Base62 encode</param>
 		/// <param name="shrinkVariables">Flag for whether to shrink variables</param>
 		/// <returns>Minified text content of JS-asset</returns>
-		public string Pack(string content, string assetPath, bool base62Encode = false, bool shrinkVariables = false)
+		public string Pack(string content, bool base62Encode = false, bool shrinkVariables = false)
 		{
 			string newContent;
 
@@ -84,7 +83,7 @@
 				catch (ActiveScriptException e)
 				{
 					throw new JsPackingException(
-						ActiveScriptErrorFormatter.Format(e, assetPath));
+						ActiveScriptErrorFormatter.Format(e));
 				}
 			}
 

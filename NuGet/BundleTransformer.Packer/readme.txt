@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Packer 1.0.0
+              README file for Bundle Transformer: Packer 1.6.1
  
    ----------------------------------------------------------------------
 

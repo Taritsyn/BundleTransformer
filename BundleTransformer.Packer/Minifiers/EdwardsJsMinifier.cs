@@ -101,7 +101,7 @@
 
 					try
 					{
-						newContent = jsPacker.Pack(asset.Content, assetPath, base62Encode, shrinkVariables);
+						newContent = jsPacker.Pack(asset.Content, base62Encode, shrinkVariables);
 					}
 					catch (JsPackingException e)
 					{

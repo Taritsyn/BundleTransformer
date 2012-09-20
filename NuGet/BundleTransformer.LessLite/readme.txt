@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.0
+            README file for Bundle Transformer: LESS Lite 1.6.1
 
    ----------------------------------------------------------------------
 
@@ -18,6 +18,11 @@
    
    Uses NuGet-package the DotlessClientOnly 
    (http://nuget.org/packages/DotlessClientOnly).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added ability to display the errors of LESS-code compilation.
    
    =============
    DOCUMENTATION

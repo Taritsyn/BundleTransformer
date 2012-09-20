@@ -10,6 +10,12 @@
 	border: none;
 }
 
+A
+{
+    padding-left: 0;
+    padding-right: 0;
+}
+
 CODE
 {
 	font-size: 1.0em;

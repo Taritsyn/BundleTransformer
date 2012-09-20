@@ -82,10 +82,9 @@
 		/// "Uglifies" JS-code by using UglifyJS
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="assetPath">Path to JS-asset file</param>
 		/// <param name="options">UglifyJS options</param>
 		/// <returns>Minified text content of JS-asset</returns>
-		public string Uglify(string content, string assetPath, object options = null)
+		public string Uglify(string content, object options = null)
 		{
 			string newContent;
 			string optionsString;
@@ -109,7 +108,7 @@
 				catch (ActiveScriptException e)
 				{
 					throw new JsUglifyingException(
-						ActiveScriptErrorFormatter.Format(e, assetPath));
+						ActiveScriptErrorFormatter.Format(e));
 				}
 			}
 

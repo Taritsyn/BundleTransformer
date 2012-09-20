@@ -65,9 +65,8 @@
 		/// "Compiles" CoffeeScript-code to JS-code
 		/// </summary>
 		/// <param name="content">Text content written on CoffeeScript</param>
-		/// <param name="assetPath">Path to CoffeeScript-file</param>
 		/// <returns>Translated CoffeeScript-code</returns>
-		public string Compile(string content, string assetPath)
+		public string Compile(string content)
 		{
 			string newContent;
 
@@ -80,7 +79,7 @@
 				catch (ActiveScriptException e)
 				{
 					throw new CoffeeScriptCompilingException(
-						ActiveScriptErrorFormatter.Format(e, assetPath));
+						ActiveScriptErrorFormatter.Format(e));
 				}
 			}
 

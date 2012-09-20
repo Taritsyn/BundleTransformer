@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>BundleTransformer.Csso.x64</id>
+    <version>1.6.1</version>
+	<title>Bundle Transformer: CSSO (x64)</title>
+    <authors>Andrey Taritsyn</authors>
+    <owners>Andrey Taritsyn</owners>
+    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=484303</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BundleTransformer.Csso.x64 contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.2.18.
+   
+As a JS-engine is used the Noesis Javascript .NET (http://javascriptdotnet.codeplex.com). For correct working of the Noesis Javascript .NET require assemblies msvcp100.dll and msvcr100.dll from the Microsoft Visual C++ 2010.</description>
+    <summary>BundleTransformer.Csso.x64 contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.2.18.</summary>
+	<releaseNotes>1. Added support of CSSO version 1.2.18;
+2. Fixed a bug, that occurred when processing of large CSS-files, by replacing the EcmaScript.Net on the Noesis Javascript. NET;
+3. BundleTransformer.Csso was divided into 2 libraries: BundleTransformer.Csso.x86 and BundleTransformer.Csso.x64.</releaseNotes>
+	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+    <language>en-US</language>
+    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
+    <dependencies>
+      <dependency id="BundleTransformer.Core" version="[1.6.1]" />
+    </dependencies>
+    <references>
+      <reference file="BundleTransformer.Csso.dll" />
+	  <reference file="Noesis.Javascript.dll" />
+    </references>
+  </metadata>
+  <files>
+    <file src="..\..\BundleTransformer.Csso\bin\x64\Release\BundleTransformer.Csso.dll" target="lib\net40" />
+	<file src="..\..\BundleTransformer.Csso\bin\x64\Release\**\BundleTransformer.Csso.resources.dll" target="lib\net40" />
+	<file src="..\..\BundleTransformer.Csso\bin\x64\Release\Noesis.Javascript.dll" target="lib\net40" />
+	<file src="content\web.config.transform" target="content" />
+	<file src="readme.txt" />
+	<file src="..\..\Licenses\javascript-net-license.txt" />
+  </files>
+</package>

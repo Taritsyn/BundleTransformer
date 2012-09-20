@@ -187,7 +187,7 @@
 
 					try
 					{
-						newContent = jsUglifier.Uglify(asset.Content, assetPath);
+						newContent = jsUglifier.Uglify(asset.Content);
 					}
 					catch (JsUglifyingException e)
 					{

@@ -89,13 +89,13 @@
 
 					try
 					{	
-						newContent = cssOptimizer.Optimize(asset.Content, assetPath, disableRestructuring);
+						newContent = cssOptimizer.Optimize(asset.Content, disableRestructuring);
 					}
 					catch (CssOptimizingException e)
 					{
 					    throw new AssetMinificationException(
 					        string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-					            CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
+					            CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 					}
 					catch (Exception e)
 					{

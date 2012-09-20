@@ -259,6 +259,19 @@
 				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
 			</xs:annotation>			
 		</xs:attribute>
+		<xs:attribute name="severity" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>Severity level of errors:
+ 0 - only syntax error messages;
+ 1 - only syntax error messages and warnings</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="0" />
+					<xs:maxInclusive value="1" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /LESS settings -->
 

@@ -146,6 +146,11 @@
 				throw new NotImplementedException();
 			}
 
+			public string ResolveAllRelativePaths(string content, string path)
+			{
+				throw new NotImplementedException();
+			}
+
 			public string ResolveRelativePath(string basePath, string relativePath)
 			{
 				return Utils.CombineUrls(STYLES_DIRECTORY_URL, relativePath);

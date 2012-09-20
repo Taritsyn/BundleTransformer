@@ -56,9 +56,7 @@
 			foreach (var asset in assets)
 			{
 				string url = asset.Url;
-				string content = asset.Content;
-				content = _cssRelativePathResolver.ResolveImportsRelativePaths(content, url);
-				content = _cssRelativePathResolver.ResolveComponentsRelativePaths(content, url);
+				string content = _cssRelativePathResolver.ResolveAllRelativePaths(asset.Content, url);
 
 				asset.Content = content;
 			}

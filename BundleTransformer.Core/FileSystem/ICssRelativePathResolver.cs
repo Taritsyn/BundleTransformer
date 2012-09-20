@@ -22,6 +22,14 @@
 		string ResolveImportsRelativePaths(string content, string path);
 
 		/// <summary>
+		/// Transforms all relative paths to absolute in CSS-code
+		/// </summary>
+		/// <param name="content">Text content of CSS-asset</param>
+		/// <param name="path">CSS-file path</param>
+		/// <returns>Processed text content of CSS-asset</returns>
+		string ResolveAllRelativePaths(string content, string path);
+
+		/// <summary>
 		/// Transforms relative path to absolute
 		/// </summary>
 		/// <param name="basePath">The base path</param>

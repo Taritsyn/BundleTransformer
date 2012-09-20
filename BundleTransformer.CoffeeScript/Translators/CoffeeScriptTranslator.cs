@@ -96,7 +96,7 @@
 
 			try
 			{
-				newContent = coffeeScriptCompiler.Compile(asset.Content, assetPath);
+				newContent = coffeeScriptCompiler.Compile(asset.Content);
 			}
 			catch (CoffeeScriptCompilingException e)
 			{
