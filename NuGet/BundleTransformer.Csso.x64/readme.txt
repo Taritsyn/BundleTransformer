@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: CSSO 1.6.1 (x64)
+             README file for Bundle Transformer: CSSO 1.6.2 (x64)
  
    ----------------------------------------------------------------------
 
@@ -24,11 +24,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of CSSO version 1.2.18;
-   2. Fixed a bug, that occurred when processing of large CSS-files, 
-      by replacing the EcmaScript.Net on the Noesis Javascript. NET;
-   3. BundleTransformer.Csso was divided into 2 libraries: 
-      BundleTransformer.Csso.x86 and BundleTransformer.Csso.x64.
+   Updated readme.txt file.
    
    ====================
    POST-INSTALL ACTIONS
@@ -37,6 +33,11 @@
    then download and install the Microsoft Visual C++ 2010 
    Redistributable Package (x64), which is available at the following 
    link - http://www.microsoft.com/en-us/download/details.aspx?id=14632.
+
+   To make KryzhanovskyCssMinifier is the default CSS-minifier, you need to 
+   make changes to the Web.config file. In the defaultMinifier attribute 
+   of the \configuration\bundleTransformer\core\css element must be set 
+   value equal to KryzhanovskyCssMinifier.
    
    =============
    DOCUMENTATION
