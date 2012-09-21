@@ -322,6 +322,10 @@
       <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
       <Name>BundleTransformer.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.Csso\BundleTransformer.Csso.x64.csproj">
+      <Project>{E70F938E-7498-4904-8E89-445DE42D974B}</Project>
+      <Name>BundleTransformer.Csso.x64</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj">
       <Project>{141FCB8B-27E9-459F-9057-F411107D6E48}</Project>
       <Name>BundleTransformer.JsMin</Name>
@@ -365,8 +369,9 @@
     <None Include="BundleTransformer.Configuration.xss">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
+    <None Include="Content\folder\subfolder\TestLessSubImport.less" />
     <None Include="Content\TestLess.less" />
-    <None Include="Content\TestLessImport.less" />
+    <None Include="Content\folder\TestLessImport.less" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

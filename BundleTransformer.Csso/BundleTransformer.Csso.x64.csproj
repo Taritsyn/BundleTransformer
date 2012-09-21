@@ -85,9 +85,6 @@
     <EmbeddedResource Include="Resources\Strings.ru-ru.resx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
       <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
       <Name>BundleTransformer.Core</Name>

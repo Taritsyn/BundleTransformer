@@ -49,7 +49,7 @@
 	border-color: @alt-bg-color;
 }
 
-@import ""TestLessImport.Sub1.less"";
+@import url(""TestLessImport.Sub1.less"");
 @import 'TestLessImport.Sub2';")
 				;
 			fileSystemMock

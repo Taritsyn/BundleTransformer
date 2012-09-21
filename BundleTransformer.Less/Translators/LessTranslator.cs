@@ -49,7 +49,7 @@
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _importLessFilesRuleRegex =
-			new Regex(@"@import\s(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)",
+			new Regex(@"@import\s(((?<quote1>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote1>))|(url\((?<quote1>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote1>)?\)))",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
@@ -191,7 +191,7 @@
 
 			try
 			{
-				newContent = _cssRelativePathResolver.ResolveImportsRelativePaths(asset.Content, asset.Url);
+				newContent = _cssRelativePathResolver.ResolveAllRelativePaths(asset.Content, asset.Url);
 				FillImportedFilePaths(newContent, null, importedFilePaths);
 
 				newContent = lessEngine.TransformToCss(newContent, null);

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.1
+            README file for Bundle Transformer: LESS Lite 1.6.2
 
    ----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@
    =============
    RELEASE NOTES
    =============
-   Added ability to display the errors of LESS-code compilation.
+   Added support of import-directives of the form: @import url(style.less);.
    
    =============
    DOCUMENTATION
