@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.6.2
+               README file for Bundle Transformer: LESS 1.6.3
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of import-directives of the form: @import url(style.less);.
+   Added support of dotless 1.3.1.0.
  
    ====================
    POST-INSTALL ACTIONS
