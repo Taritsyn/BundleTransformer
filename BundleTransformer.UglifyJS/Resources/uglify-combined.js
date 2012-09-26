@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v1.3.3-4
+ * UglifyJS v1.3.3-6
  * http://github.com/mishoo/UglifyJS
  *
  * Copyright 2012, Mihai Bazon
@@ -294,7 +294,7 @@ var UglifyJS = (function(){
 		function tokenizer($TEXT) {
 
 			var S = {
-				text            : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/^\uFEFF/, ''),
+				text            : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/\uFEFF/g, ''),
 				pos             : 0,
 				tokpos          : 0,
 				line            : 0,
@@ -467,6 +467,7 @@ var UglifyJS = (function(){
 							else ch = read_escaped_char(true);
 						}
 						else if (ch == quote) break;
+						else if (ch == "\n") throw EX_EOF;
 						ret += ch;
 					}
 					return token("string", ret);
