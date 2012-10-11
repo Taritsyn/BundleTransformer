@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: CSSO 1.6.2 (x86)
+             README file for Bundle Transformer: CSSO 1.6.5 (x86)
  
    ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
    BundleTransformer.Csso.x86 contains one minifier-adapter for 
    minification of CSS-code - KryzhanovskyCssMinifier. 
    KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's 
-   CSSO (http://github.com/css/csso) version 1.2.18.
+   CSSO (http://github.com/css/csso) version 1.3.4.
    
    As a JS-engine is used the Noesis Javascript .NET 
    (http://javascriptdotnet.codeplex.com). For correct working of the 
@@ -24,7 +24,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated readme.txt file.
+   Added support of CSSO version 1.3.4.
    
    ====================
    POST-INSTALL ACTIONS

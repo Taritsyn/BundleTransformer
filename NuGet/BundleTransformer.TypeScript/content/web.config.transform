@@ -1,0 +1,26 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="typeScript" type="BundleTransformer.TypeScript.Configuration.TypeScriptSettings" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<js>
+				<translators>
+					<add name="TypeScriptTranslator" type="BundleTransformer.TypeScript.Translators.TypeScriptTranslator, BundleTransformer.TypeScript" enabled="true" />
+				</translators>
+			</js>
+		</core>
+	</bundleTransformer>
+	<system.web>
+		<httpHandlers>
+			<add path="*.ts" verb="GET" type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" />
+		</httpHandlers>
+	</system.web>
+	<system.webServer>
+		<handlers>
+			<add name="TypeScriptAssetHandler" path="*.ts" verb="GET" type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" resourceType="File" preCondition="" />
+		</handlers>
+	</system.webServer>
+</configuration>

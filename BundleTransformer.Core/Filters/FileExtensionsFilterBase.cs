@@ -29,6 +29,26 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to allow usage of pre-minified files
+		/// </summary>
+		public bool UsePreMinifiedFiles
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets a flag that indicating to use of pre-minified files
+		/// </summary>
+		public bool UsageOfPreMinifiedFilesEnabled
+		{
+			get
+			{
+				return UsePreMinifiedFiles && !IsDebugMode;
+			}
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the file extensions filter

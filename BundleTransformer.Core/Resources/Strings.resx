@@ -240,6 +240,9 @@ See more details:
 
 {3}</value>
   </data>
+  <data name="Resources_ResourceIsNull" xml:space="preserve">
+    <value>Resource with name '{0}' is null.</value>
+  </data>
   <data name="Translators_TranslationFailed" xml:space="preserve">
     <value>During translation of {0}-code, readed from the file {2}, to {1}-code error has occurred.
 See more details:

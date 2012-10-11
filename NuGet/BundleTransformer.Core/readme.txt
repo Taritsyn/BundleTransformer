@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.1
+               README file for Bundle Transformer: Core 1.6.5
 
    ----------------------------------------------------------------------
 
@@ -31,10 +31,17 @@
    Edwards' Packer, Sergey Kryzhanovsky's CSSO (CSS Optimizer) and 
    WebGrease). In addition, you can also install translator-adapters 
    that implement the translation of code on intermediate languages 
-   (LESS, Sass, SCSS and CoffeeScript).
+   (LESS, Sass, SCSS, CoffeeScript and TypeScript).
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   In the configuration elements css and js added attribute 
+   usePreMinifiedFiles, which enables/disables usage of pre-minified 
+   files.
 
    =============
    DOCUMENTATION

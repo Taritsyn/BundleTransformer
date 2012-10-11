@@ -72,6 +72,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Dependency.cs" />
     <Compile Include="Configuration\AssetHandlerSettings.cs" />
     <Compile Include="Constants\ContentType.cs" />
     <Compile Include="Constants\MinifierName.cs" />
@@ -91,7 +92,13 @@
     <Compile Include="Configuration\TranslatorRegistration.cs" />
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
     <Compile Include="Constants\Common.cs" />
+    <Compile Include="ErrorMessageHelpers\ErrorSourceInfo.cs" />
     <Compile Include="FileSystem\FileSystemWrapper.cs" />
+    <Compile Include="FileSystem\IJsRelativePathResolver.cs" />
+    <Compile Include="FileSystem\IRelativePathResolver.cs" />
+    <Compile Include="FileSystem\JsRelativePathResolver.cs" />
+    <Compile Include="FileSystem\RelativePathResolverBase.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="Web\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IFileSystemWrapper.cs" />
     <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
@@ -155,6 +162,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

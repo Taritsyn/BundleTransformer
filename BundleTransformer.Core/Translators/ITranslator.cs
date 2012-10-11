@@ -7,7 +7,7 @@
 	/// <summary>
 	/// This interface used in implementation of containers for 
 	/// translators of code written on intermediate languages 
-	/// (LESS, Sass, SCSS, CoffeeScript and etc) to CSS- or JS-code
+	/// (LESS, Sass, SCSS, CoffeeScript, TypeScript and etc) to CSS- or JS-code
 	/// </summary>
 	public interface ITranslator
 	{

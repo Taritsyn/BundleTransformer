@@ -24,5 +24,10 @@
 		/// Name (key) of CoffeeScript-translator
 		/// </summary>
 		public const string CoffeeScriptTranslator = "CoffeeScriptTranslator";
+
+		/// <summary>
+		/// Name (key) of TypeScript-translator
+		/// </summary>
+		public const string TypeScriptTranslator = "TypeScriptTranslator";
 	}
 }

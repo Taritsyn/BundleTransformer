@@ -240,6 +240,9 @@
 
 {3}</value>
   </data>
+  <data name="Resources_ResourceIsNull" xml:space="preserve">
+    <value>Ресурс с именем "{0}" содержит значение равное null!</value>
+  </data>
   <data name="Translators_TranslationFailed" xml:space="preserve">
     <value>Во время трансляции {0}-кода, считанного из файла {2}, в {1}-код произошла ошибка!
 Смотрите более подробную информацию об ошибке:

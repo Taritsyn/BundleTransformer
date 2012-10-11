@@ -5,7 +5,7 @@
 	/// <summary>
 	/// CSS relative path resolver
 	/// </summary>
-	public sealed class CssRelativePathResolver : ICssRelativePathResolver
+	public sealed class CssRelativePathResolver : RelativePathResolverBase, ICssRelativePathResolver
 	{
 		/// <summary>
 		/// Regular expression for working with paths of components in CSS-code
@@ -85,16 +85,6 @@
 			result = ResolveComponentsRelativePaths(result, path);
 
 			return result;
-		}
-
-		/// <summary>
-		/// Transforms relative path to absolute
-		/// </summary>
-		/// <param name="basePath">The base path</param>
-		/// <param name="relativePath">The relative path</param>
-		public string ResolveRelativePath(string basePath, string relativePath)
-		{
-			return Utils.TransformRelativeUrlToAbsolute(basePath, relativePath);
 		}
 	}
 }

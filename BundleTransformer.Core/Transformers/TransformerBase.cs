@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
 	using System.Web;
 	using System.Web.Optimization;
 
@@ -168,20 +169,20 @@
 		/// <param name="httpContext">Object HttpContext</param>
 		protected virtual void ConfigureBundleResponse(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext)
 		{
-			var assetFiles = new List<FileInfo>();
+			var assetFilePaths = new List<string>();
 
 			foreach (var asset in assets)
 			{
-				assetFiles.Add(new FileInfo(asset.Path));
+				assetFilePaths.Add(asset.Path);
 				if (_applicationInfo.IsOptimizationsEnabled && asset.RequiredFilePaths.Count > 0)
 				{
-					foreach (var assetFilePath in asset.RequiredFilePaths)
-					{
-						assetFiles.Add(new FileInfo(assetFilePath));
-					}
+					assetFilePaths.AddRange(asset.RequiredFilePaths);
 				}
 			}
 
+			assetFilePaths = assetFilePaths.Distinct().ToList();
+
+			var assetFiles = assetFilePaths.Select(assetFilePath => new FileInfo(assetFilePath)).ToList();
 			bundleResponse.Files = assetFiles;
 		}
 	}

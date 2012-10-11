@@ -75,6 +75,10 @@
 				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScript.coffee"),
 				_applicationInfo, _fileSystemWrapper);
 
+			var testTsAsset = new Asset(
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestTypeScript.ts"),
+				_applicationInfo, _fileSystemWrapper);
+
 			var testPlainTextAsset = new Asset(
 				Path.Combine(APPLICATION_ROOT_PATH, @"TestPlainText.txt"),
 					_applicationInfo, _fileSystemWrapper);
@@ -86,6 +90,7 @@
 			Assert.AreEqual(AssetType.Sass, testSassAsset.AssetType);
 			Assert.AreEqual(AssetType.Scss, testScssAsset.AssetType);
 			Assert.AreEqual(AssetType.CoffeeScript, testCoffeeAsset.AssetType);
+			Assert.AreEqual(AssetType.TypeScript, testTsAsset.AssetType);
 			Assert.AreEqual(AssetType.Unknown, testPlainTextAsset.AssetType);
 
 			Assert.AreEqual(siteCssAsset.IsStylesheet, true);
@@ -100,6 +105,8 @@
 			Assert.AreEqual(testScssAsset.IsScript, false);
 			Assert.AreEqual(testCoffeeAsset.IsStylesheet, false);
 			Assert.AreEqual(testCoffeeAsset.IsScript, true);
+			Assert.AreEqual(testTsAsset.IsStylesheet, false);
+			Assert.AreEqual(testTsAsset.IsScript, true);
 			Assert.AreEqual(testPlainTextAsset.IsStylesheet, false);
 			Assert.AreEqual(testPlainTextAsset.IsScript, false);
 		}

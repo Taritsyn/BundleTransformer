@@ -217,7 +217,8 @@
 		{
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter
 			{
-			    IsDebugMode = _applicationInfo.IsDebugMode
+			    IsDebugMode = _applicationInfo.IsDebugMode,
+				UsePreMinifiedFiles = _coreConfig.Css.UsePreMinifiedFiles
 			};
 
 			IList<IAsset> processedAssets = cssFileExtensionsFilter.Transform(assets);

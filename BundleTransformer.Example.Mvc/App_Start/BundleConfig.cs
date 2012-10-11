@@ -48,7 +48,10 @@ namespace BundleTransformer.Example.Mvc
 				"~/Scripts/jquery.validate.unobtrusive.js",
 				"~/Scripts/jquery.unobtrusive-ajax.js",
 				"~/Scripts/knockout-2.*",
-				"~/Scripts/TestCoffeeScript.coffee");
+				"~/Scripts/TestCoffeeScript.coffee",
+				"~/Scripts/TranslatorBadge.ts",
+				"~/Scripts/ColoredTranslatorBadge.ts",
+				"~/Scripts/TestTypeScript.ts");
 			commonScriptsBundle.Transforms.Add(jsTransformer);
 			commonScriptsBundle.Orderer = nullOrderer;
 

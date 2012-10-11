@@ -11,6 +11,7 @@
 		Less,
 		Sass,
 		Scss,
-		CoffeeScript
+		CoffeeScript,
+		TypeScript
 	}
 }

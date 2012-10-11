@@ -43,6 +43,12 @@
 			= new Lazy<CssRelativePathResolver>();
 
 		/// <summary>
+		/// JS relative path resolver
+		/// </summary>
+		private readonly Lazy<JsRelativePathResolver> _jsRelativePathResolver
+			= new Lazy<JsRelativePathResolver>();
+
+		/// <summary>
 		/// Configuration settings of core
 		/// </summary>
 		private readonly Lazy<CoreSettings> _coreConfig =
@@ -148,6 +154,15 @@
 		public CssRelativePathResolver GetCssRelativePathResolver()
 		{
 			return _cssRelativePathResolver.Value;
+		}
+
+		/// <summary>
+		/// Gets instance of the JS relative path resolver
+		/// </summary>
+		/// <returns>Script relative path resolver</returns>
+		public JsRelativePathResolver GetJsRelativePathResolver()
+		{
+			return _jsRelativePathResolver.Value;
 		}
 
 		/// <summary>

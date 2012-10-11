@@ -40,7 +40,7 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.9\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.4.5.10\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -242,11 +242,14 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
+    <Content Include="Scripts\ColoredTranslatorBadge.ts" />
+    <Content Include="Scripts\ITranslatorBadge.ts" />
     <Content Include="Scripts\jquery-1.8.1-vsdoc.js" />
     <Content Include="Scripts\jquery-1.8.1.js" />
     <Content Include="Scripts\jquery-1.8.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.8.23.js" />
     <Content Include="Scripts\jquery-ui-1.8.23.min.js" />
+    <Content Include="Scripts\jquery.d.ts" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate-vsdoc.js" />
@@ -261,6 +264,8 @@
     <Content Include="Scripts\modernizr-2.5.3.js" />
     <Content Include="Scripts\modernizr-2.5.3.min.js" />
     <Content Include="Scripts\TestCoffeeScript.coffee" />
+    <Content Include="Scripts\TranslatorBadge.ts" />
+    <Content Include="Scripts\TestTypeScript.ts" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -301,7 +306,9 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -345,6 +352,10 @@
     <ProjectReference Include="..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj">
       <Project>{E708475F-094D-4065-B432-473D76B739E0}</Project>
       <Name>BundleTransformer.SassAndScss</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.TypeScript\BundleTransformer.TypeScript.csproj">
+      <Project>{0866BE97-464C-4A68-B26E-1E73484A2C98}</Project>
+      <Name>BundleTransformer.TypeScript</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.UglifyJS\BundleTransformer.UglifyJs.csproj">
       <Project>{3EB2ABE8-90D6-4EB7-A66B-F871EFCD6FF6}</Project>

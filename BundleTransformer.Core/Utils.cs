@@ -237,5 +237,41 @@
 					name, typeof(TSource), typeof(TDest))
 			);
 		}
+
+		/// <summary>
+		/// Gets a content of the embedded resource as string
+		/// </summary>
+		/// <param name="resourceName">Resource name</param>
+		/// <param name="type">Type from assembly that containing an embedded resource</param>
+		/// <returns>Сontent of the embedded resource as string</returns>
+		public static string GetResourceAsString(string resourceName, Type type)
+		{
+			Assembly assembly = type.Assembly;
+
+			return GetResourceAsString(resourceName, assembly);
+		}
+
+		/// <summary>
+		/// Gets a content of the embedded resource as string
+		/// </summary>
+		/// <param name="resourceName">Resource name</param>
+		/// <param name="assembly">Assembly that containing an embedded resource</param>
+		/// <returns>Сontent of the embedded resource as string</returns>
+		public static string GetResourceAsString(string resourceName, Assembly assembly)
+		{
+			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+			{
+				if (stream == null)
+				{
+					throw new NullReferenceException(
+						string.Format(Strings.Resources_ResourceIsNull, resourceName));
+				}
+
+				using (var reader = new StreamReader(stream))
+				{
+					return reader.ReadToEnd();
+				}
+			}
+		}
 	}
 }

@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Defines interface of CSS relative path resolver
 	/// </summary>
-	public interface ICssRelativePathResolver
+	public interface ICssRelativePathResolver : IRelativePathResolver
 	{
 		/// <summary>
 		/// Transforms relative paths of components to absolute in CSS-code
@@ -28,12 +28,5 @@
 		/// <param name="path">CSS-file path</param>
 		/// <returns>Processed text content of CSS-asset</returns>
 		string ResolveAllRelativePaths(string content, string path);
-
-		/// <summary>
-		/// Transforms relative path to absolute
-		/// </summary>
-		/// <param name="basePath">The base path</param>
-		/// <param name="relativePath">The relative path</param>
-		string ResolveRelativePath(string basePath, string relativePath);
 	}
 }

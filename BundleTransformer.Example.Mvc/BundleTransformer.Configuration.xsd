@@ -15,6 +15,7 @@
 				<xs:element name="core" type="CoreSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="less" type="LessSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="sassAndScss" type="SassAndScssSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="typeScript" type="TypeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="microsoftAjax" type="MicrosoftAjaxSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="yui" type="YuiSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="closure" type="ClosureSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -84,6 +85,11 @@
 		<xs:attribute name="defaultMinifier" type="xs:string" use="optional" default="NullMinifier">
 			<xs:annotation>
 				<xs:documentation>Name of default minifier</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="usePreMinifiedFiles" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow usage of pre-minified files</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -287,6 +293,134 @@
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /Sass and SCSS settings -->
+
+	<!-- TypeScript settings -->
+	<xs:complexType name="TypeScriptSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of TypeScript-translator</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="style" type="TypeScriptStyleSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+		<xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="useDefaultLib" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to include a default lib.d.ts with global declarations</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="propagateConstants" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to propagate constants to emitted code</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="errorOnWith" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disallow with statements</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="inferPropertiesFromThisAssignment" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to infer class properties from top-level assignments to 'this'</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="codeGenTarget" use="optional" default="EcmaScript3">
+			<xs:annotation>
+				<xs:documentation>ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="EcmaScript3" />
+					<xs:enumeration value="EcmaScript5" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="TypeScriptStyleSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of code stylization</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="bitwise" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow bitwise operations</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="blockInCompoundStatement" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disallow non-block statements as bodies of compound statements</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="eqEqEq" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disallow == and !=</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="forIn" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to require body of for in loop to start with a filter</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="emptyBlocks" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to permit empty blocks</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="newMustBeUsed" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to require result of new expression to be used (no new just for side-effects)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="requireSemicolons" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to require semicolons to terminate statements</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="assignmentInConditions" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disallow top-level assignment in conditionals if (a=b) { ...</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="eqNull" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disallow == null or != null</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="evalOk" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to permit eval</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="innerScopeDeclarationsEscape" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to permit var use if declaration in inner scope as in if (c) { var v=10; } v=11;</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="functionsInLoops" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to permit functions in loops</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="reDeclareLocal" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to permit re-declaration of local variable</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="literalSubscript" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to permit obj['x'] in addition to obj.x</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="implicitAny" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to implicit 'any'</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /TypeScript settings -->
 
 	<!-- Microsoft Ajax settings -->
 	<xs:complexType name="MicrosoftAjaxSettings_SchemaType">

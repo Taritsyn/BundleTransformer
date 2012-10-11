@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.6.1
+           README file for Bundle Transformer: CoffeeScript 1.6.5
 
    ----------------------------------------------------------------------
 

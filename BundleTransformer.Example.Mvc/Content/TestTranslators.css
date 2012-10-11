@@ -49,3 +49,24 @@
 {
 	color: #0f0f1e;
 }
+
+.translators #ts {
+	float: left;
+	display: block;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	border : 1px solid #808080;
+	background-color: #ffffff;
+	font-weight: bold;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+.translators #ts A,
+.translators #ts A:link,
+.translators #ts A:visited,
+.translators #ts A:hover,
+.translators #ts A:active
+{
+	color: #000;
+}

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Csso.x86</id>
-    <version>1.6.2</version>
+    <version>1.6.5</version>
 	<title>Bundle Transformer: CSSO (x86)</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,16 +10,16 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=484303</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Csso.x86 contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.2.18.
+    <description>BundleTransformer.Csso.x86 contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.4.
    
 As a JS-engine is used the Noesis Javascript .NET (http://javascriptdotnet.codeplex.com). For correct working of the Noesis Javascript .NET require assemblies msvcp100.dll and msvcr100.dll from the Microsoft Visual C++ 2010.</description>
-    <summary>BundleTransformer.Csso.x86 contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.2.18.</summary>
-	<releaseNotes>Updated readme.txt file.</releaseNotes>
+    <summary>BundleTransformer.Csso.x86 contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.4.</summary>
+	<releaseNotes>Added support of CSSO version 1.3.4.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.6.1]" />
+      <dependency id="BundleTransformer.Core" version="[1.6.5]" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.Csso.dll" />

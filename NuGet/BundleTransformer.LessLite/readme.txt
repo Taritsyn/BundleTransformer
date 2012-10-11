@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.3
+            README file for Bundle Transformer: LESS Lite 1.6.5
 
    ----------------------------------------------------------------------
 
@@ -18,11 +18,6 @@
    
    Uses NuGet-package the DotlessClientOnly 
    (http://nuget.org/packages/DotlessClientOnly).
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of dotless 1.3.1.0.
    
    =============
    DOCUMENTATION

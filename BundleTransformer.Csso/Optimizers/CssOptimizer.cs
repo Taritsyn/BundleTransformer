@@ -51,11 +51,10 @@
 			_jsContext = new JavascriptContext();
 			_jsContext.Run(GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, GetType()));
 			_jsContext.Run(string.Format(@"function {0}(code, disableRestructuring) {{
-	var parser = new CSSOParser(),
-		compressor = new CSSOCompressor(),
+	var compressor = new CSSOCompressor(),
 		translator = new CSSOTranslator();
 
-	return translator.translate(cleanInfo(compressor.compress(parser.parse(code, 'stylesheet'), disableRestructuring)));
+	return translator.translate(cleanInfo(compressor.compress(srcToCSSP(code, 'stylesheet', true), disableRestructuring)));
 }}", OPTIMIZATION_FUNCTION_NAME));
 		}
 

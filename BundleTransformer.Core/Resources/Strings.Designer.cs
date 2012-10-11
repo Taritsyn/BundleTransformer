@@ -406,6 +406,15 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Resource with name &apos;{0}&apos; is null..
+        /// </summary>
+        public static string Resources_ResourceIsNull {
+            get {
+                return ResourceManager.GetString("Resources_ResourceIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to During translation of {0}-code, readed from the file {2}, to {1}-code error has occurred.
         ///See more details:
         ///

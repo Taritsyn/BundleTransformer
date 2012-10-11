@@ -80,6 +80,13 @@
 			RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
+		/// Regular expression to determine whether
+		/// asset is TypeScript-file based on its extension
+		/// </summary>
+		private static readonly Regex _tsFileExtensionRegex = new Regex(@"\.ts$",
+			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
 		/// Regular expression to determine whether asset is 
 		/// minified version of CSS-file with *.min.css extension
 		/// </summary>
@@ -205,7 +212,8 @@
 				AssetType assetType = AssetType;
 
 				return (assetType == AssetType.JavaScript
-					|| assetType == AssetType.CoffeeScript);
+					|| assetType == AssetType.CoffeeScript
+					|| assetType == AssetType.TypeScript);
 			}
 		}
 
@@ -280,6 +288,10 @@
 			else if (_coffeeFileExtensionRegex.IsMatch(assetPath))
 			{
 				assetType = AssetType.CoffeeScript;
+			}
+			else if (_tsFileExtensionRegex.IsMatch(assetPath))
+			{
+				assetType = AssetType.TypeScript;
 			}
 
 			return assetType;

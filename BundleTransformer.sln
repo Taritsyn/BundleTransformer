@@ -38,6 +38,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Packer", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Csso.x64", "BundleTransformer.Csso\BundleTransformer.Csso.x64.csproj", "{E70F938E-7498-4904-8E89-445DE42D974B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.TypeScript", "BundleTransformer.TypeScript\BundleTransformer.TypeScript.csproj", "{0866BE97-464C-4A68-B26E-1E73484A2C98}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BundleTransformer.vsmdi
@@ -239,6 +241,18 @@ Global
 		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x64.Build.0 = Release|x64
 		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x86.ActiveCfg = Release|x86
 		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x86.Build.0 = Release|x86
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|x64.ActiveCfg = Release|Any CPU
+		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -218,7 +218,8 @@
 					_coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','), 
 					',', true))
 			{
-			    IsDebugMode = _applicationInfo.IsDebugMode
+			    IsDebugMode = _applicationInfo.IsDebugMode,
+				UsePreMinifiedFiles = _coreConfig.Js.UsePreMinifiedFiles
 			};
 
 			IList<IAsset> processedAssets = jsFileExtensionsFilter.Transform(assets);

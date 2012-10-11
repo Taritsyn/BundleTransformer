@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Yui</id>
-    <version>1.6.1</version>
+    <version>1.6.5</version>
 	<title>Bundle Transformer: YUI</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,12 +12,14 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.Yui contains 2 minifier-adapters: YuiCssMinifier (for minification of CSS-code) and YuiJsMinifier (for minification of JS-code). These adapters perform minification using the YUI Compressor for .NET (http://yuicompressor.codeplex.com).</description>
     <summary>BundleTransformer.Yui contains 2 minifier-adapters: YuiCssMinifier (for minification of CSS-code) and YuiJsMinifier (for minification of JS-code). These adapters perform minification using the YUI Compressor for .NET.</summary>
+	<releaseNotes>Added support of YUI Compressor for .NET 2.1.0.0.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation YUICompressor</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.6.1]" />
-	  <dependency id="YUICompressor.NET" version="2.0.0.0" />
+      <dependency id="BundleTransformer.Core" version="[1.6.5]" />
+	  <dependency id="YUICompressor.NET" version="2.1.0.0" />
+	  <dependency id="EcmaScript.Net" version="1.0.1.0" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.Yui.dll" />

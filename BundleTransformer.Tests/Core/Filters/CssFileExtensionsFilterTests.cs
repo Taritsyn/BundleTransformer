@@ -21,7 +21,6 @@
 
 		private IHttpApplicationInfo _applicationInfo;
 		private IFileSystemWrapper _fileSystemWrapper;
-		private IList<IAsset> _testAssets;
 
 		[TestFixtureSetUp]
 		public void SetUp()
@@ -62,6 +61,11 @@
 				.Returns(true)
 				;
 
+			_fileSystemWrapper = fileSystemMock.Object;
+		}
+
+		private IList<IAsset> GetTestAssets()
+		{
 			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
 				_applicationInfo, _fileSystemWrapper);
 			var jqueryUiAccordionAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
@@ -76,18 +80,18 @@
 				testCssComponentsPathsAsset
 			};
 
-			_fileSystemWrapper = fileSystemMock.Object;
-			_testAssets = testAssets;
+			return testAssets;
 		}
 
 		[Test]
-		public void ReplacementOfFileExtensionsInDebugModeIsCorrect()
+		public void ReplacementOfFileExtensionsInDebugModeAndUsageOfPreMinifiedFilesAllowedIsCorrect()
 		{
 			// Arrange
-			IList<IAsset> assets = _testAssets;
+			IList<IAsset> assets = GetTestAssets();
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
 			{
-			    IsDebugMode = true
+			    IsDebugMode = true,
+				UsePreMinifiedFiles = true
 			};
 
 			// Act
@@ -111,13 +115,45 @@
 		}
 
 		[Test]
-		public void ReplacementOfFileExtensionsInReleaseModeIsCorrect()
+		public void ReplacementOfFileExtensionsInDebugModeAndUsageOfPreMinifiedFilesDisallowedIsCorrect()
 		{
 			// Arrange
-			IList<IAsset> assets = _testAssets;
+			IList<IAsset> assets = GetTestAssets();
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
 			{
-			    IsDebugMode = false
+				IsDebugMode = true,
+				UsePreMinifiedFiles = false
+			};
+
+			// Act
+			IList<IAsset> processedAssets = cssFileExtensionsFilter.Transform(assets);
+			IAsset siteAsset = processedAssets[0];
+			IAsset jqueryUiAccordionAsset = processedAssets[1];
+			IAsset testCssComponentsPathsAsset = processedAssets[2];
+
+			// Assert
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), siteAsset.Path);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"),
+				jqueryUiAccordionAsset.Path);
+			Assert.AreNotEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.css"),
+				jqueryUiAccordionAsset.Path);
+			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
+				testCssComponentsPathsAsset.Path);
+
+			Assert.AreEqual(false, siteAsset.Minified);
+			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
+			Assert.AreEqual(false, testCssComponentsPathsAsset.Minified);
+		}
+
+		[Test]
+		public void ReplacementOfFileExtensionsInReleaseModeAndUsageOfPreMinifiedFilesAllowedIsCorrect()
+		{
+			// Arrange
+			IList<IAsset> assets = GetTestAssets();
+			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
+			{
+			    IsDebugMode = false,
+				UsePreMinifiedFiles = true
 			};
 
 			// Act
@@ -137,6 +173,35 @@
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
 			Assert.AreEqual(true, testCssComponentsPathsAsset.Minified);
+		}
+
+		[Test]
+		public void ReplacementOfFileExtensionsInReleaseModeAndUsageOfPreMinifiedFilesDisallowedIsCorrect()
+		{
+			// Arrange
+			IList<IAsset> assets = GetTestAssets();
+			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
+			{
+				IsDebugMode = false,
+				UsePreMinifiedFiles = false
+			};
+
+			// Act
+			IList<IAsset> processedAssets = cssFileExtensionsFilter.Transform(assets);
+			IAsset siteAsset = processedAssets[0];
+			IAsset jqueryUiAccordionAsset = processedAssets[1];
+			IAsset testCssComponentsPathsAsset = processedAssets[2];
+
+			// Assert
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), siteAsset.Path);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"),
+				jqueryUiAccordionAsset.Path);
+			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
+				testCssComponentsPathsAsset.Path);
+
+			Assert.AreEqual(false, siteAsset.Minified);
+			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
+			Assert.AreEqual(false, testCssComponentsPathsAsset.Minified);
 		}
 
 		[TestFixtureTearDown]

@@ -66,6 +66,7 @@
     <Compile Include="Core\Validators\CssAssetTypesValidatorTests.cs" />
     <Compile Include="Core\Validators\JsAssetTypesValidatorTests.cs" />
     <Compile Include="SassAndScss\Translators\SassAndScssTranslatorTests.cs" />
+    <Compile Include="TypeScript\Translators\TypeScriptTranslatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -86,6 +87,10 @@
     <ProjectReference Include="..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj">
       <Project>{E708475F-094D-4065-B432-473D76B739E0}</Project>
       <Name>BundleTransformer.SassAndScss</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.TypeScript\BundleTransformer.TypeScript.csproj">
+      <Project>{0866BE97-464C-4A68-B26E-1E73484A2C98}</Project>
+      <Name>BundleTransformer.TypeScript</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

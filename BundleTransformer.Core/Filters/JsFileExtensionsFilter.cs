@@ -143,15 +143,15 @@
 				
 				if (IsJsFileWithMicrosoftStyleExtension(appropriateAssetPath))
 				{
-					appropriateFileExtensions = IsDebugMode ? 
-						_debugJsExtensionsForMicrosoftStyle : _releaseJsExtensionsForMicrosoftStyle;
+					appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ? 
+						_releaseJsExtensionsForMicrosoftStyle : _debugJsExtensionsForMicrosoftStyle;
 					appropriateAssetPath = ProbeAssetFilePath(appropriateAssetPath, appropriateFileExtensions);
 					isMinified = !Asset.IsJsFileWithDebugExtension(appropriateAssetPath);
 				}
 				else
 				{
-					appropriateFileExtensions = IsDebugMode ?
-						_debugJsExtensionsForStandardStyle : _releaseJsExtensionsForStandardStyle;
+					appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ?
+						_releaseJsExtensionsForStandardStyle : _debugJsExtensionsForStandardStyle;
 					appropriateAssetPath = ProbeAssetFilePath(appropriateAssetPath, appropriateFileExtensions);
 					isMinified = Asset.IsJsFileWithMinExtension(appropriateAssetPath);
 				}

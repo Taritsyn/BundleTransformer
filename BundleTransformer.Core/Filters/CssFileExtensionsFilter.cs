@@ -93,8 +93,8 @@
 			{
 				// Fill list of file extensions, sorted in order 
 				// of relevance to current mode of web application
-				string[] appropriateFileExtensions = IsDebugMode ? 
-					_debugCssExtensions : _releaseCssExtensions;
+				string[] appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ?
+					_releaseCssExtensions : _debugCssExtensions;
 
 				appropriateAssetPath = ProbeAssetFilePath(
 					Asset.RemoveAdditionalCssFileExtension(appropriateAssetPath), appropriateFileExtensions);

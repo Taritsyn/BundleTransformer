@@ -18,6 +18,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to allow usage of pre-minified files
+		/// </summary>
+		[ConfigurationProperty("usePreMinifiedFiles", DefaultValue = true)]
+		public bool UsePreMinifiedFiles
+		{
+			get { return (bool)this["usePreMinifiedFiles"]; }
+			set { this["usePreMinifiedFiles"] = value; }
+		}
+
+		/// <summary>
 		/// Gets list of registered minifiers
 		/// </summary>
 		[ConfigurationProperty("minifiers", IsRequired = true)]
