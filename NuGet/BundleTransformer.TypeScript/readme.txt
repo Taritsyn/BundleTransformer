@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.0.0
+           README file for Bundle Transformer: TypeScript 1.6.6
 
    ----------------------------------------------------------------------
 
@@ -17,6 +17,11 @@
    translation of TypeScript-code to JS-code. Also contains HTTP-handler 
    TypeScriptAssetHandler, which is responsible for text output of 
    translated TypeScript-asset.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Assembly BundleTransformer.TypeScript.dll is now signed.
 
    =============
    DOCUMENTATION

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.5
+               README file for Bundle Transformer: Core 1.6.6
 
    ----------------------------------------------------------------------
 
@@ -39,9 +39,7 @@
    =============
    RELEASE NOTES
    =============
-   In the configuration elements css and js added attribute 
-   usePreMinifiedFiles, which enables/disables usage of pre-minified 
-   files.
+   Assembly BundleTransformer.Core.dll is now signed.
 
    =============
    DOCUMENTATION

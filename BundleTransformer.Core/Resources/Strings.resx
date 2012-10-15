@@ -141,6 +141,9 @@ See more details:
   <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>These assets are not scripts: {0}.</value>
   </data>
+  <data name="Common_AssemblyNameIsEmpty" xml:space="preserve">
+    <value>You do not specified a name of assembly.</value>
+  </data>
   <data name="Common_EnumValueConversionFailed" xml:space="preserve">
     <value>Can not convert value '{0}' of enumeration type '{1}' to value of enumeration type '{2}'.</value>
   </data>
@@ -151,13 +154,13 @@ See more details:
     <value>File {0} not exist.</value>
   </data>
   <data name="Common_InstanceCreationFailed" xml:space="preserve">
-    <value>During instantiate an object of type '{0}' error occurred.</value>
-  </data>
-  <data name="Common_InvalidFullTypeName" xml:space="preserve">
-    <value>Invalid full type name '{0}'. Format the string like 'Namespace.ClassName, AssemblyName'.</value>
+    <value>During instantiate an object of type '{0}' from assembly '{1}' error occurred.</value>
   </data>
   <data name="Common_SeverityLevelToEnumValueConversionFailed" xml:space="preserve">
     <value>Can't find a value of enumeration type {0} that corresponding to the severity level {1}.</value>
+  </data>
+  <data name="Common_TypeNameIsEmpty" xml:space="preserve">
+    <value>You do not specified a type name.</value>
   </data>
   <data name="Common_UnknownError" xml:space="preserve">
     <value>Unknown error.</value>

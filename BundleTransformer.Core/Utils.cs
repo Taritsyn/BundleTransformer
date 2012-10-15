@@ -190,23 +190,40 @@
 				throw new ArgumentNullException(Strings.Common_ValueIsEmpty);
 			}
 
-			string[] fullTypeNameParts = ConvertToStringCollection(fullTypeName, ',', true);
+			string typeName;
+			string assemblyName;
+			Assembly assembly;
+			int commaPosition = fullTypeName.IndexOf(',');
 
-			if (fullTypeNameParts.Length != 2)
+			if (commaPosition != -1)
 			{
-			    throw new ArgumentException(
-			        string.Format(Strings.Common_InvalidFullTypeName, fullTypeName), 
-			        "fullTypeName");
+				typeName = fullTypeName.Substring(0, commaPosition).Trim();
+				if (string.IsNullOrEmpty(typeName))
+				{
+					throw new EmptyValueException(Strings.Common_TypeNameIsEmpty);
+				}
+
+				assemblyName = fullTypeName.Substring(commaPosition + 1,
+					fullTypeName.Length - (commaPosition + 1)).Trim();
+				if (string.IsNullOrEmpty(assemblyName))
+				{
+					throw new EmptyValueException(Strings.Common_AssemblyNameIsEmpty);
+				}
+
+				assembly = Assembly.Load(assemblyName);
+			}
+			else
+			{
+				typeName = fullTypeName;
+				assembly = typeof(Utils).Assembly;
+				assemblyName = assembly.FullName;
 			}
 
-			string assemblyName = fullTypeNameParts[1].Trim();
-			string typeName = fullTypeNameParts[0].Trim();
-
-			Assembly assembly = Assembly.Load(assemblyName);
 			object instance = assembly.CreateInstance(typeName);
 			if (instance == null)
 			{
-				throw new NullReferenceException(string.Format(Strings.Common_InstanceCreationFailed, typeName));
+				throw new NullReferenceException(string.Format(Strings.Common_InstanceCreationFailed, 
+					typeName, assemblyName));
 			}
 
 			return (T)instance;

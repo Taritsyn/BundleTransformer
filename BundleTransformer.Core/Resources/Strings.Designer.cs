@@ -121,6 +121,15 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You do not specified a name of assembly..
+        /// </summary>
+        public static string Common_AssemblyNameIsEmpty {
+            get {
+                return ResourceManager.GetString("Common_AssemblyNameIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not convert value &apos;{0}&apos; of enumeration type &apos;{1}&apos; to value of enumeration type &apos;{2}&apos;..
         /// </summary>
         public static string Common_EnumValueConversionFailed {
@@ -148,20 +157,11 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During instantiate an object of type &apos;{0}&apos; error occurred..
+        ///   Looks up a localized string similar to During instantiate an object of type &apos;{0}&apos; from assembly &apos;{1}&apos; error occurred..
         /// </summary>
         public static string Common_InstanceCreationFailed {
             get {
                 return ResourceManager.GetString("Common_InstanceCreationFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid full type name &apos;{0}&apos;. Format the string like &apos;Namespace.ClassName, AssemblyName&apos;..
-        /// </summary>
-        public static string Common_InvalidFullTypeName {
-            get {
-                return ResourceManager.GetString("Common_InvalidFullTypeName", resourceCulture);
             }
         }
         
@@ -171,6 +171,15 @@ namespace BundleTransformer.Core.Resources {
         public static string Common_SeverityLevelToEnumValueConversionFailed {
             get {
                 return ResourceManager.GetString("Common_SeverityLevelToEnumValueConversionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You do not specified a type name..
+        /// </summary>
+        public static string Common_TypeNameIsEmpty {
+            get {
+                return ResourceManager.GetString("Common_TypeNameIsEmpty", resourceCulture);
             }
         }
         

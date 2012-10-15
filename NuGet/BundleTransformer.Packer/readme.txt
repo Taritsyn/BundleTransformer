@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Packer 1.6.5
+              README file for Bundle Transformer: Packer 1.6.6
  
    ----------------------------------------------------------------------
 
@@ -15,6 +15,11 @@
    minification of JS-code - EdwardsJsMinifier. EdwardsJsMinifier is 
    based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) 
    version 3.0.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Assembly BundleTransformer.Packer.dll is now signed.
    
    ====================
    POST-INSTALL ACTIONS

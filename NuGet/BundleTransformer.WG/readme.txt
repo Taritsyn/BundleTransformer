@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.6.5 Alpha
+         README file for Bundle Transformer: WebGrease 1.6.6 Alpha
  
    ----------------------------------------------------------------------
 
@@ -15,6 +15,11 @@
    of CSS-code - WgCssMinifier. WgCssMinifier is based on 
    the WebGrease Semantic CSS-minifier 
    (http://nuget.org/packages/WebGrease).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Assembly BundleTransformer.WG.dll is now signed.
 
    ====================
    POST-INSTALL ACTIONS

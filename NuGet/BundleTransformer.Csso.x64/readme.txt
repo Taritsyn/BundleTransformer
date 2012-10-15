@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: CSSO 1.6.5 (x64)
+             README file for Bundle Transformer: CSSO 1.6.6 (x64)
  
    ----------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CSSO version 1.3.4.
+   Assembly BundleTransformer.Csso.dll is now signed.
    
    ====================
    POST-INSTALL ACTIONS
