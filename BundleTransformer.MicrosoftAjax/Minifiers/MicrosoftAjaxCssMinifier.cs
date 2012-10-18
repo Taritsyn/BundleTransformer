@@ -38,11 +38,6 @@
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// CSS-parser
-		/// </summary>
-		private readonly CssParser _cssParser;
-
-		/// <summary>
 		/// Configuration settings of CSS-parser
 		/// </summary>
 		private readonly CssSettings _cssParserConfiguration;
@@ -222,10 +217,7 @@
 		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
 		{
-			_cssParser = new CssParser();
-			_cssParser.CssError += ParserErrorHandler;
-
-			_cssParserConfiguration = _cssParser.Settings;
+			_cssParserConfiguration = new CssSettings();
 
 			CssMinifierSettings cssMinifierConfig = microsoftAjaxConfig.CssMinifier;
 			AllowEmbeddedAspNetBlocks = cssMinifierConfig.AllowEmbeddedAspNetBlocks;
@@ -265,16 +257,22 @@
 				return assets;
 			}
 
+			var cssParser = new CssParser
+			{
+			    Settings = _cssParserConfiguration
+			};
+			
 			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
 				string assetPath = asset.Path;
 
-				_cssParser.FileContext = assetPath;
+				cssParser.FileContext = assetPath;
+				cssParser.CssError += ParserErrorHandler;
 
 				try
 				{
-					newContent = _cssParser.Parse(asset.Content);
+					newContent = cssParser.Parse(asset.Content);
 				}
 				catch (Exception e)
 				{
@@ -284,7 +282,8 @@
 				}
 				finally
 				{
-					_cssParser.FileContext = null;
+					cssParser.CssError -= ParserErrorHandler;
+					cssParser.FileContext = null;
 				}
 
 				asset.Content = newContent;
