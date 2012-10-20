@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v1.3.3-6
+ * UglifyJS v1.3.4
  * http://github.com/mishoo/UglifyJS
  *
  * Copyright 2012, Mihai Bazon
@@ -203,7 +203,7 @@ var UglifyJS = (function(){
 			"||"
 		]);
 
-		var WHITESPACE_CHARS = array_to_hash(characters(" \u00a0\n\r\t\f\u000b\u200b\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"));
+		var WHITESPACE_CHARS = array_to_hash(characters(" \u00a0\n\r\t\f\u000b\u200b\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\uFEFF"));
 
 		var PUNC_BEFORE_EXPRESSION = array_to_hash(characters("[{(,.;:"));
 
@@ -294,7 +294,7 @@ var UglifyJS = (function(){
 		function tokenizer($TEXT) {
 
 			var S = {
-				text            : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/\uFEFF/g, ''),
+				text            : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/^\uFEFF/, ''),
 				pos             : 0,
 				tokpos          : 0,
 				line            : 0,
@@ -1378,7 +1378,7 @@ var UglifyJS = (function(){
 		exports.set_logger = function(logger) {
 			warn = logger;
 		};
-
+		
 		return exports;
 
 		// Local variables:
