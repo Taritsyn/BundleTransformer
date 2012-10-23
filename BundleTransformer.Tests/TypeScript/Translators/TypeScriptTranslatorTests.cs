@@ -49,7 +49,8 @@
 				;
 			fileSystemMock
 				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts")))
-				.Returns(@"interface ITranslatorBadge {
+				.Returns(@"/// <reference path=""TranslatorBadge.ts"" />
+interface ITranslatorBadge {
     getText(): string;
     setText(text: string): void;
     show(): void;
@@ -138,7 +139,7 @@ tsBadge.setBorderColor(TS_BADGE_COLOR);";
 			var dependencies = new List<Dependency>();
 
 			// Act
-			tsTranslator.FillDependencies(assetContent, assetUrl, dependencies);
+			tsTranslator.FillDependencies(assetUrl, assetContent, assetUrl, dependencies);
 
 			// Assert
 			Assert.AreEqual(4, dependencies.Count);

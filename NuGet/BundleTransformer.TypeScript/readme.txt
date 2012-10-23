@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.6.6
+           README file for Bundle Transformer: TypeScript 1.6.7
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Assembly BundleTransformer.TypeScript.dll is now signed.
+   Solved the problem with cyclic references.
 
    =============
    DOCUMENTATION

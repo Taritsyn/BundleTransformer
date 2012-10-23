@@ -253,13 +253,14 @@
 		private void InnerTranslate(IAsset asset, TypeScriptCompiler typeScriptCompiler, bool enableNativeMinification)
 		{
 			string newContent;
+			string assetUrl = asset.Url;
 			string assetPath = asset.Path;
 			var dependencies = new List<Dependency>();
 
 			try
 			{
-				string content = GetAssetFileTextContent(asset.Path);
-				FillDependencies(content, asset.Url, dependencies);
+				string content = GetAssetFileTextContent(assetPath);
+				FillDependencies(assetUrl, content, assetUrl, dependencies);
 
 				newContent = typeScriptCompiler.Compile(content, dependencies);
 				newContent = RemoveReferenceComments(newContent);
@@ -328,13 +329,19 @@
 		/// Fills the list of TypeScript-files, references to which have been added to a TypeScript-asset 
 		/// by using the "reference" comments
 		/// </summary>
-		/// <param name="assetContent">Text content of TypeScript-asset</param>
-		/// <param name="assetUrl">URL of TypeScript-asset file</param>
+		/// <param name="rootAssetUrl">URL of root TypeScript-asset file</param>
+		/// <param name="parentAssetContent">Text content of parent TypeScript-asset</param>
+		/// <param name="parentAssetUrl">URL of parent TypeScript-asset file</param>
 		/// <param name="dependencies">List of TypeScript-files, references to which have been 
 		/// added to a TypeScript-asset by using the "reference" comments</param>
-		public void FillDependencies(string assetContent, string assetUrl, IList<Dependency> dependencies)
+		public void FillDependencies(string rootAssetUrl, string parentAssetContent, string parentAssetUrl, 
+			IList<Dependency> dependencies)
 		{
-			MatchCollection matches = _referenceCommentsRegex.Matches(assetContent);
+			var parentDependency = GetDependencyByUrl(dependencies, parentAssetUrl);
+			int parentDependencyIndex = parentDependency != null ? dependencies.IndexOf(parentDependency) : 0;
+			int dependencyIndex = parentDependencyIndex;
+
+			MatchCollection matches = _referenceCommentsRegex.Matches(parentAssetContent);
 			foreach (Match match in matches)
 			{
 				if (match.Groups["url"].Success)
@@ -343,39 +350,70 @@
 					if (!string.IsNullOrWhiteSpace(dependencyAssetUrl))
 					{
 						dependencyAssetUrl = _jsRelativePathResolver.ResolveRelativePath(
-							assetUrl, dependencyAssetUrl.Trim());
-						string dependencyAssetExtension = Path.GetExtension(dependencyAssetUrl);
+							parentAssetUrl, dependencyAssetUrl.Trim());
+						if (string.Equals(dependencyAssetUrl, rootAssetUrl, StringComparison.InvariantCultureIgnoreCase))
+						{
+							continue;
+						}
 
+						string dependencyAssetExtension = Path.GetExtension(dependencyAssetUrl);
 						if (string.Equals(dependencyAssetExtension, TS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase)
 							|| string.Equals(dependencyAssetExtension, JS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase))
 						{
-							string dependencyAssetPath = _httpContext.Server.MapPath(dependencyAssetUrl);
-							if (AssetFileExists(dependencyAssetPath))
+							var duplicateDependency = GetDependencyByUrl(dependencies, dependencyAssetUrl);
+							if (duplicateDependency == null)
 							{
-								string dependencyAssetContent = GetAssetFileTextContent(dependencyAssetPath);
-								FillDependencies(dependencyAssetContent, dependencyAssetUrl, dependencies);
-
-								if (dependencies.Count(d => 
-									d.Path.ToUpperInvariant() == dependencyAssetPath.ToUpperInvariant()) == 0)
+								string dependencyAssetPath = _httpContext.Server.MapPath(dependencyAssetUrl);
+								if (AssetFileExists(dependencyAssetPath))
 								{
+									string dependencyAssetContent = GetAssetFileTextContent(dependencyAssetPath);
 									var dependency = new Dependency
 									{
-									    Url = dependencyAssetUrl,
-									    Path = dependencyAssetPath,
-									    Content = dependencyAssetContent
+										Url = dependencyAssetUrl,
+										Path = dependencyAssetPath,
+										Content = dependencyAssetContent
 									};
-									dependencies.Add(dependency);
+									dependencies.Insert(dependencyIndex, dependency);
+
+									FillDependencies(rootAssetUrl, dependencyAssetContent, dependencyAssetUrl, 
+										dependencies);
+
+									dependencyIndex = dependencies.IndexOf(dependency) + 1;
+								}
+								else
+								{
+									throw new FileNotFoundException(
+										string.Format(CoreStrings.Common_FileNotExist, dependencyAssetPath));
 								}
 							}
 							else
 							{
-								throw new FileNotFoundException(
-									string.Format(CoreStrings.Common_FileNotExist, dependencyAssetPath));
+								dependencies.Remove(duplicateDependency);
+								dependencies.Insert(dependencyIndex, duplicateDependency);
+
+								dependencyIndex++;
 							}
 						}
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Gets a dependency by URL
+		/// </summary>
+		/// <param name="dependencies">List of dependencies</param>
+		/// <param name="url">URL of dependency</param>
+		/// <returns>Dependency</returns>
+		private static Dependency GetDependencyByUrl(IEnumerable<Dependency> dependencies, string url)
+		{
+			var urlInUpperCase = url.ToUpperInvariant();
+			var dependency = dependencies
+				.Where(d => d.Url.ToUpperInvariant() == urlInUpperCase)
+				.SingleOrDefault()
+				;
+
+			return dependency;
 		}
 
 		/// <summary>
