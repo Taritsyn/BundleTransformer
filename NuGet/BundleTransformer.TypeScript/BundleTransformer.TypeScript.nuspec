@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.TypeScript</id>
-    <version>1.6.7</version>
+    <version>1.6.8</version>
 	<title>Bundle Transformer: TypeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,7 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.TypeScript contains translator-adapter TypeScriptTranslator (supports TypeScript (http://www.typescriptlang.org) version 0.8.0). This adapter makes translation of TypeScript-code to JS-code. Also contains HTTP-handler TypeScriptAssetHandler, which is responsible for text output of translated TypeScript-asset.</description>
     <summary>BundleTransformer.TypeScript contains translator-adapter TypeScriptTranslator (supports TypeScript version 0.8.0). This adapter makes translation of TypeScript-code to JS-code. Also contains HTTP-handler TypeScriptAssetHandler, which is responsible for text output of translated TypeScript-asset.</summary>
-	<releaseNotes>Solved the problem with cyclic references.</releaseNotes>
+	<releaseNotes>Solved the problem with sorting of references.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling TypeScript Translation Translator Compilation Compiler</tags>

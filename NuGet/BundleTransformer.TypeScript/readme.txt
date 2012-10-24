@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.6.7
+           README file for Bundle Transformer: TypeScript 1.6.8
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Solved the problem with cyclic references.
+   Solved the problem with sorting of references.
 
    =============
    DOCUMENTATION

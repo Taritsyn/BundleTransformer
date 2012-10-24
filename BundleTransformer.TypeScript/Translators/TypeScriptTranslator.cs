@@ -388,10 +388,13 @@
 							}
 							else
 							{
-								dependencies.Remove(duplicateDependency);
-								dependencies.Insert(dependencyIndex, duplicateDependency);
+								if (dependencies.IndexOf(duplicateDependency) > dependencyIndex)
+								{
+									dependencies.Remove(duplicateDependency);
+									dependencies.Insert(dependencyIndex, duplicateDependency);
 
-								dependencyIndex++;
+									dependencyIndex++;
+								}
 							}
 						}
 					}

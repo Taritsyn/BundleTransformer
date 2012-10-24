@@ -49,8 +49,7 @@
 				;
 			fileSystemMock
 				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts")))
-				.Returns(@"/// <reference path=""TranslatorBadge.ts"" />
-interface ITranslatorBadge {
+				.Returns(@"interface ITranslatorBadge {
     getText(): string;
     setText(text: string): void;
     show(): void;
@@ -145,12 +144,12 @@ tsBadge.setBorderColor(TS_BADGE_COLOR);";
 			Assert.AreEqual(4, dependencies.Count);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts"),
 				dependencies[0].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts"), 
+			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts"),
 				dependencies[1].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts"),
+			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts"), 
 				dependencies[2].Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ColoredTranslatorBadge.ts"),
-	dependencies[3].Path);
+				dependencies[3].Path);
 		}
 
 		private class MockHttpServerUtility : HttpServerUtilityBase

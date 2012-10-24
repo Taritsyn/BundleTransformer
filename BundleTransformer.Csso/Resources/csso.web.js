@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.3.4
+* CSSO (CSS Optimizer) v1.3.5
 * http://github.com/css/csso
 *
 * Copyright 2012, Sergey Kryzhanovsky
