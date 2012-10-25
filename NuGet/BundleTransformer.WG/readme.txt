@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.6.6 Alpha
+         README file for Bundle Transformer: WebGrease 1.6.8 Alpha
  
    ----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Assembly BundleTransformer.WG.dll is now signed.
+   Added support of the WebGrease 1.3.0.
 
    ====================
    POST-INSTALL ACTIONS
