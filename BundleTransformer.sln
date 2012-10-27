@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Core", "BundleTransformer.Core\BundleTransformer.Core.csproj", "{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Tests", "BundleTransformer.Tests\BundleTransformer.Tests.csproj", "{30920DFA-8814-4413-AF0E-5C38601F6682}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{74692653-A10A-44E4-B59C-44F3A260A0DB}"
 	ProjectSection(SolutionItems) = preProject
 		BundleTransformer.vsmdi = BundleTransformer.vsmdi
@@ -15,8 +13,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.CoffeeScript", "BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj", "{0648FFE9-2A1A-4E17-AF5D-AE0048378617}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Less", "BundleTransformer.Less\BundleTransformer.Less.csproj", "{037761EE-3499-4D8E-95D9-9A71D471B102}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.SassAndScss", "BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj", "{E708475F-094D-4065-B432-473D76B739E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.MicrosoftAjax", "BundleTransformer.MicrosoftAjax\BundleTransformer.MicrosoftAjax.csproj", "{72A5E68C-6919-4DD7-9D30-E07A857806D4}"
 EndProject
@@ -39,6 +35,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Csso.x64", "BundleTransformer.Csso\BundleTransformer.Csso.x64.csproj", "{E70F938E-7498-4904-8E89-445DE42D974B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.TypeScript", "BundleTransformer.TypeScript\BundleTransformer.TypeScript.csproj", "{0866BE97-464C-4A68-B26E-1E73484A2C98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Tests", "BundleTransformer.Tests\BundleTransformer.Tests.csproj", "{30920DFA-8814-4413-AF0E-5C38601F6682}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.SassAndScss", "BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj", "{E708475F-094D-4065-B432-473D76B739E0}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -69,18 +69,6 @@ Global
 		{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}.Release|x64.ActiveCfg = Release|x64
 		{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}.Release|x64.Build.0 = Release|x64
 		{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}.Release|x86.ActiveCfg = Release|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Any CPU.Build.0 = Release|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|x64.ActiveCfg = Release|Any CPU
-		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|x86.ActiveCfg = Release|Any CPU
 		{0648FFE9-2A1A-4E17-AF5D-AE0048378617}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0648FFE9-2A1A-4E17-AF5D-AE0048378617}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0648FFE9-2A1A-4E17-AF5D-AE0048378617}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -105,18 +93,6 @@ Global
 		{037761EE-3499-4D8E-95D9-9A71D471B102}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{037761EE-3499-4D8E-95D9-9A71D471B102}.Release|x64.ActiveCfg = Release|Any CPU
 		{037761EE-3499-4D8E-95D9-9A71D471B102}.Release|x86.ActiveCfg = Release|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Release|x64.ActiveCfg = Release|Any CPU
-		{E708475F-094D-4065-B432-473D76B739E0}.Release|x86.ActiveCfg = Release|Any CPU
 		{72A5E68C-6919-4DD7-9D30-E07A857806D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{72A5E68C-6919-4DD7-9D30-E07A857806D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72A5E68C-6919-4DD7-9D30-E07A857806D4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -253,6 +229,30 @@ Global
 		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|x64.ActiveCfg = Release|Any CPU
 		{0866BE97-464C-4A68-B26E-1E73484A2C98}.Release|x86.ActiveCfg = Release|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|x64.ActiveCfg = Release|Any CPU
+		{30920DFA-8814-4413-AF0E-5C38601F6682}.Release|x86.ActiveCfg = Release|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Release|x64.ActiveCfg = Release|Any CPU
+		{E708475F-094D-4065-B432-473D76B739E0}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,8 +7,6 @@
 	using System.Text.RegularExpressions;
 	using System.Web;
 
-	using SassAndCoffee.Ruby.Sass;
-
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
@@ -16,8 +14,9 @@
 	using Core.Resources;
 	using Core.Translators;
 
+	using Compilers;
 	using Configuration;
-
+	
 	/// <summary>
 	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
 	/// </summary>
@@ -75,12 +74,7 @@
 		/// <summary>
 		/// Sass- and SCSS-compiler
 		/// </summary>
-		private readonly SassCompiler _sassCompiler;
-
-		/// <summary>
-		/// Flag that object is destroyed
-		/// </summary>
-		private bool _disposed;
+		private readonly SassAndScssCompiler _sassAndScssCompiler;
 
 
 		/// <summary>
@@ -106,20 +100,12 @@
 			_httpContext = httpContext;
 			_fileSystemWrapper = fileSystemWrapper;
 			_cssRelativePathResolver = cssRelativePathResolver;
-			_sassCompiler = new SassCompiler();
+			_sassAndScssCompiler = new SassAndScssCompiler();
 
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 		}
 
-		/// <summary>
-		/// Destructs instance of Sass- and SCSS-translator
-		/// </summary>
-		~SassAndScssTranslator()
-		{
-			Dispose(false /* disposing */);
-		}
-
-
+		
 		/// <summary>
 		/// Translates code of asset written on Sass or SCSS to CSS-code
 		/// </summary>
@@ -183,21 +169,20 @@
 				newContent = asset.Content;
 				FillImportedFilePaths(newContent, asset.Url, importedFilePaths);
 
-				newContent = _sassCompiler.Compile(assetPath, enableNativeMinification, new List<string>());
+				newContent = _sassAndScssCompiler.Compile(newContent, assetPath, enableNativeMinification);
 			}
 			catch (FileNotFoundException)
 			{
 				throw;
 			}
+			catch (SassAndScssCompilingException e)
+			{
+				throw new AssetTranslationException(
+					string.Format(CoreStrings.Translators_TranslationSyntaxError,
+						assetTypeName, OUTPUT_CODE_TYPE, assetPath, e.Message));
+			}
 			catch (Exception e)
 			{
-				if (e.InnerException != null && e.InnerException.Message == "Sass::SyntaxError")
-				{
-					throw new AssetTranslationException(
-						string.Format(CoreStrings.Translators_TranslationSyntaxError,
-							assetTypeName, OUTPUT_CODE_TYPE, assetPath, e.Message));
-				}
-
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
 						assetTypeName, OUTPUT_CODE_TYPE, assetPath, e.Message), e);
@@ -309,33 +294,6 @@
 							}	
 						}
 					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				_disposed = true;
-
-				if (_sassCompiler != null)
-				{
-					_sassCompiler.Dispose();
 				}
 			}
 		}

@@ -32,11 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IronRuby, Version=1.1.3.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
@@ -57,12 +56,6 @@
     <Reference Include="Microsoft.Scripting.Metadata, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\IronRuby.1.1.3\Lib\Microsoft.Scripting.Metadata.dll</HintPath>
     </Reference>
-    <Reference Include="SassAndCoffee.Core">
-      <HintPath>..\packages\SassAndCoffee.Core.2.0.2.0\lib\net40-Client\SassAndCoffee.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SassAndCoffee.Ruby, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SassAndCoffee.Ruby.2.0.2.0\lib\net40-Client\SassAndCoffee.Ruby.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -75,8 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
+    <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />
+    <Compile Include="Compilers\SassAndScssCompiler.cs" />
+    <Compile Include="Compilers\SassAndScssCompilerScriptHost.cs" />
     <Compile Include="Translators\SassAndScssTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -87,6 +84,31 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ironruby\digest.rb" />
+    <EmbeddedResource Include="Resources\ironruby\digest\md5.rb" />
+    <EmbeddedResource Include="Resources\ironruby\digest\sha1.rb" />
+    <EmbeddedResource Include="Resources\ironruby\enumerator.rb" />
+    <EmbeddedResource Include="Resources\ironruby\etc.rb" />
+    <EmbeddedResource Include="Resources\ironruby\rbconfig.rb" />
+    <EmbeddedResource Include="Resources\ironruby\stringio.rb" />
+    <EmbeddedResource Include="Resources\ironruby\strscan.rb" />
+    <EmbeddedResource Include="Resources\ironruby\zlib.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\fileutils.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\pathname.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\set.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\common.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ftp.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\generic.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\http.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\https.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldap.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldaps.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\mailto.rb" />
+    <EmbeddedResource Include="Resources\sass_in_one.rb" />
+    <None Include="..\BundleTransformer.snk">
+      <Link>BundleTransformer.snk</Link>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
