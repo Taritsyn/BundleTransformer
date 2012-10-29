@@ -225,7 +225,7 @@
 		/// <param name="errorType">Error type</param>
 		/// <param name="filePath">File path</param>
 		/// <returns>Detailed error message</returns>
-		internal static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string filePath)
+		private static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string filePath)
 		{
 			var errorMessage = new StringBuilder();
 			if (errorType == ErrorType.ServerError || errorType == ErrorType.Error)

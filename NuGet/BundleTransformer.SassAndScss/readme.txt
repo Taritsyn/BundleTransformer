@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.6.8
+          README file for Bundle Transformer: Sass and SCSS 1.6.9
 
    ----------------------------------------------------------------------
 
@@ -20,9 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   1. SassAndCoffee.Ruby library was replaced by my own implementation 
-      of the Sass- and SCSS-compiler;
-   2. Assembly BundleTransformer.SassAndScss.dll is now signed.
+   Changed the architecture of SassAndScssTranslator.
    
    =============
    DOCUMENTATION

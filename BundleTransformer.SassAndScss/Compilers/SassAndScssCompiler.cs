@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Reflection;
 	using System.Text;
 
 	using IronRuby;
@@ -54,90 +55,99 @@
 		/// <summary>
 		/// Script engine
 		/// </summary>
-		private readonly ScriptEngine _scriptEngine;
+		private ScriptEngine _scriptEngine;
 
 		/// <summary>
 		/// Script scope
 		/// </summary>
-		private readonly ScriptScope _scriptScope;
+		private ScriptScope _scriptScope;
 
 		/// <summary>
 		/// Resource redirection platform adaptation layer
 		/// </summary>
-		private readonly ResourceRedirectionPlatformAdaptationLayer _platformAdaptationLayer;
+		private ResourceRedirectionPlatformAdaptationLayer _platformAdaptationLayer;
 
 		/// <summary>
 		/// Sass-engine
 		/// </summary>
-		private readonly dynamic _sassEngine;
+		private dynamic _sassEngine;
 
 		/// <summary>
 		/// Sass-compilation options
 		/// </summary>
-		private readonly dynamic _sassOptions;
+		private dynamic _sassOptions;
 
 		/// <summary>
 		/// Sass-compilation options with minification
 		/// </summary>
-		private readonly dynamic _sassOptionsWithMinification;
+		private dynamic _sassOptionsWithMinification;
 
 		/// <summary>
 		/// SCSS-compilation options
 		/// </summary>
-		private readonly dynamic _scssOptions;
+		private dynamic _scssOptions;
 
 		/// <summary>
 		/// SCSS-compilation options with minification
 		/// </summary>
-		private readonly dynamic _scssOptionsWithMinification;
+		private dynamic _scssOptionsWithMinification;
 
 		/// <summary>
 		/// Synchronizer of compilation
 		/// </summary>
 		private readonly object _compilationSynchronizer = new object();
 
+		/// <summary>
+		/// Flag that object is initialized
+		/// </summary>
+		private bool _initialized;
+
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-compiler
+		/// Initializes compiler
 		/// </summary>
-		public SassAndScssCompiler()
+		private void Initialize()
 		{
-			_platformAdaptationLayer = new ResourceRedirectionPlatformAdaptationLayer(
-				RESOURCES_NAMESPACE);
-
-			var scriptRuntimeSetup = new ScriptRuntimeSetup
+			if (!_initialized)
 			{
-				HostType = typeof(SassAndScssCompilerScriptHost),
-				HostArguments = new List<object> { _platformAdaptationLayer },
-			};
-			scriptRuntimeSetup.AddRubySetup();
+				_platformAdaptationLayer = new ResourceRedirectionPlatformAdaptationLayer(
+					RESOURCES_NAMESPACE);
 
-			var scriptRuntime = Ruby.CreateRuntime(scriptRuntimeSetup);
+				var scriptRuntimeSetup = new ScriptRuntimeSetup
+				{
+					HostType = typeof(SassAndScssCompilerScriptHost),
+					HostArguments = new List<object> { _platformAdaptationLayer },
+				};
+				scriptRuntimeSetup.AddRubySetup();
 
-			_scriptEngine = scriptRuntime.GetRubyEngine();
-			_scriptEngine.SetSearchPaths(new List<string>
-			{ 
-				Path.Combine(@"R:\", IRONRUBY_FOLDER_NAME),
-				Path.Combine(@"R:\", RUBY_FOLDER_NAME)
-			});
+				var scriptRuntime = Ruby.CreateRuntime(scriptRuntimeSetup);
 
-			var sassLibrary = _scriptEngine.CreateScriptSourceFromString(
-				Utils.GetResourceAsString(RESOURCES_NAMESPACE + "." + SASS_LIBRARY_FILE_NAME,
-					GetType()),
-				SourceCodeKind.File);
+				_scriptEngine = scriptRuntime.GetRubyEngine();
+				_scriptEngine.SetSearchPaths(new List<string>
+				{ 
+					Path.Combine(@"R:\", IRONRUBY_FOLDER_NAME),
+					Path.Combine(@"R:\", RUBY_FOLDER_NAME)
+				});
 
-			_scriptScope = _scriptEngine.CreateScope();
-			sassLibrary.Execute(_scriptScope);
+				var sassLibrary = _scriptEngine.CreateScriptSourceFromString(
+					Utils.GetResourceAsString(RESOURCES_NAMESPACE + "." + SASS_LIBRARY_FILE_NAME,
+						Assembly.GetExecutingAssembly()),
+					SourceCodeKind.File);
 
-			_sassEngine = _scriptScope.Engine.Runtime.Globals.GetVariable("Sass");
-			_sassOptions = _scriptEngine.Execute("{:cache => false, :syntax => :sass}");
-			_sassOptionsWithMinification = _scriptEngine.Execute(
-				"{:cache => false, :syntax => :sass, :style => :compressed}");
-			_scssOptions = _scriptEngine.Execute("{:cache => false, :syntax => :scss}");
-			_scssOptionsWithMinification = _scriptEngine.Execute(
-				"{:cache => false, :syntax => :scss, :style => :compressed}");
+				_scriptScope = _scriptEngine.CreateScope();
+				sassLibrary.Execute(_scriptScope);
+
+				_sassEngine = _scriptScope.Engine.Runtime.Globals.GetVariable("Sass");
+				_sassOptions = _scriptEngine.Execute("{:cache => false, :syntax => :sass}");
+				_sassOptionsWithMinification = _scriptEngine.Execute(
+					"{:cache => false, :syntax => :sass, :style => :compressed}");
+				_scssOptions = _scriptEngine.Execute("{:cache => false, :syntax => :scss}");
+				_scssOptionsWithMinification = _scriptEngine.Execute(
+					"{:cache => false, :syntax => :scss, :style => :compressed}");
+
+				_initialized = true;
+			}
 		}
-
 
 		/// <summary>
 		/// "Compiles" Sass- or SCSS-code to CSS-code
@@ -163,6 +173,8 @@
 
 			lock (_compilationSynchronizer)
 			{
+				Initialize();
+
 				dynamic compilerOptions;
 				string fileExtension = Path.GetExtension(filePath);
 
@@ -236,7 +248,7 @@
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="filePath">File path</param>
 		/// <returns>Detailed error message</returns>
-		internal static string FormatErrorDetails(dynamic errorDetails, string filePath)
+		private static string FormatErrorDetails(dynamic errorDetails, string filePath)
 		{
 			var message = (string)errorDetails.to_s();
 			var path = (string)errorDetails.sass_filename() ?? filePath;

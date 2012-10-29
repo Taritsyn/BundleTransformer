@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.3.5
+* CSSO (CSS Optimizer) v1.3.6
 * http://github.com/css/csso
 *
 * Copyright 2012, Sergey Kryzhanovsky
@@ -316,6 +316,7 @@ function getCSSPAST(_tokens, rule, _needInfo) {
     var tokens,
         pos,
         failLN = 0,
+        currentBlockLN = 0,
         needInfo = false;
 
     var CSSPNodeType,
@@ -429,8 +430,10 @@ function getCSSPAST(_tokens, rule, _needInfo) {
         if (token && token.ln > failLN) failLN = token.ln;
     }
 
-    function throwError(message) {
-        throw message;
+    function throwError() {
+        console.error('Please check the validity of the CSS block starting from the line #' + currentBlockLN);
+        if (process) process.exit(1);
+        throw new Error();
     }
 
     function _getAST(_tokens, rule, _needInfo) {
@@ -785,7 +788,7 @@ function getCSSPAST(_tokens, rule, _needInfo) {
 
         while (pos < end) {
             if (checkBlockdecl(pos)) block = block.concat(getBlockdecl());
-            else throwError('Error in line #' + failLN);
+            else throwError();
         }
 
         pos = end + 1;
@@ -1903,10 +1906,13 @@ function getCSSPAST(_tokens, rule, _needInfo) {
 
         while (_i < tokens.length) {
             if (l = checkSC(_i)) _i += l;
-            else if (l = checkAtrule(_i)) _i += l;
-            else if (l = checkRuleset(_i)) _i += l;
-            else if (l = checkUnknown(_i)) _i += l;
-            else throwError('Error in line #' + failLN);
+            else {
+                currentBlockLN = tokens[_i].ln;
+                if (l = checkAtrule(_i)) _i += l;
+                else if (l = checkRuleset(_i)) _i += l;
+                else if (l = checkUnknown(_i)) _i += l;
+                else throwError();
+            }
         }
 
         return _i - start;
@@ -1918,10 +1924,13 @@ function getCSSPAST(_tokens, rule, _needInfo) {
 
         while (pos < tokens.length) {
             if (checkSC(pos)) stylesheet = stylesheet.concat(getSC());
-            else if (checkRuleset(pos)) stylesheet.push(getRuleset());
-            else if (checkAtrule(pos)) stylesheet.push(getAtrule());
-            else if (checkUnknown(pos)) stylesheet.push(getUnknown());
-            else throwError('Error in line #' + failLN);
+            else {
+                currentBlockLN = tokens[pos].ln;
+                if (checkRuleset(pos)) stylesheet.push(getRuleset());
+                else if (checkAtrule(pos)) stylesheet.push(getAtrule());
+                else if (checkUnknown(pos)) stylesheet.push(getUnknown());
+                else throwError();
+            }
         }
 
         return stylesheet;
@@ -2684,12 +2693,14 @@ CSSOCompressor.prototype.process = function(rules, token, container, i, path) {
 };
 
 CSSOCompressor.prototype.compress = function(tree, ro) {
+    tree = tree || ['stylesheet'];
     this.init();
     this.info = true;
 
     var x = (typeof tree[0] !== 'string') ? tree : this.injectInfo([tree])[0],
         l0, l1 = 100000000000, ls,
-        x0, x1, xs;
+        x0, x1, xs,
+        protectedComment = this.findProtectedComment(tree);
 
     // compression without restructure
     x = this.walk(this.ccrules, x, '/0');
@@ -2720,7 +2731,18 @@ CSSOCompressor.prototype.compress = function(tree, ro) {
 
     x = this.walk(this.frules, x, '/0');
 
-    return this.info ? x : cleanInfo(x);
+    if (protectedComment) x.splice(2, 0, protectedComment);
+
+    return x;
+};
+
+CSSOCompressor.prototype.findProtectedComment = function(tree) {
+    var token;
+    for (var i = 2; i < tree.length; i++) {
+        token = tree[i];
+        if (token[1] === 'comment' && token[2].length > 0 && token[2].charAt(0) === '!') return token;
+        if (token[1] !== 's') return;
+    }
 };
 
 CSSOCompressor.prototype.injectInfo = function(token) {
@@ -3116,7 +3138,11 @@ CSSOCompressor.prototype.compressFunctionColor = function(token) {
 CSSOCompressor.prototype.compressDimension = function(token) {
     var declaration;
     if (token[2][2] === '0') {
-        if (token[3][2] === 's' && (declaration = this.findDeclaration(token)) && declaration[2][2][2] === '-moz-transition') return;
+        if (token[3][2] === 's' && (declaration = this.findDeclaration(token))) {
+            var declName = declaration[2][2][2];
+            if  (declName === '-moz-transition') return; // https://github.com/css/csso/issues/82
+            if  (declName === '-moz-animation' || declName === 'animation') return; // https://github.com/css/csso/issues/100
+        }
         return token[2];
     }
 };

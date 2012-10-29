@@ -30,7 +30,7 @@
 		/// <summary>
 		/// JS context
 		/// </summary>
-		private readonly JavascriptContext _jsContext;
+		private JavascriptContext _jsContext;
 
 		/// <summary>
 		/// Synchronizer of optimization
@@ -38,25 +38,15 @@
 		private readonly object _optimizationSynchronizer = new object();
 
 		/// <summary>
+		/// Flag that object is initialized
+		/// </summary>
+		private bool _initialized;
+
+		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
 
-
-		/// <summary>
-		/// Constructs instance of CSS-optimizer
-		/// </summary>
-		public CssOptimizer()
-		{
-			_jsContext = new JavascriptContext();
-			_jsContext.Run(GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, GetType()));
-			_jsContext.Run(string.Format(@"function {0}(code, disableRestructuring) {{
-	var compressor = new CSSOCompressor(),
-		translator = new CSSOTranslator();
-
-	return translator.translate(cleanInfo(compressor.compress(srcToCSSP(code, 'stylesheet', true), disableRestructuring)));
-}}", OPTIMIZATION_FUNCTION_NAME));
-		}
 
 		/// <summary>
 		/// Destructs instance of CSS-optimizer
@@ -66,6 +56,27 @@
 			Dispose(false /* disposing */);
 		}
 
+
+		/// <summary>
+		/// Initializes compiler
+		/// </summary>
+		private void Initialize()
+		{
+			if (!_initialized)
+			{
+				_jsContext = new JavascriptContext();
+				_jsContext.Run(Utils.GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, 
+					Assembly.GetExecutingAssembly()));
+				_jsContext.Run(string.Format(@"function {0}(code, disableRestructuring) {{
+	var compressor = new CSSOCompressor(),
+		translator = new CSSOTranslator();
+
+	return translator.translate(cleanInfo(compressor.compress(srcToCSSP(code, 'stylesheet', true), disableRestructuring)));
+}}", OPTIMIZATION_FUNCTION_NAME));
+
+				_initialized = true;
+			}
+		}
 
 		/// <summary>
 		/// "Optimizes" CSS-code by using Sergey Kryzhanovsky's CSSO
@@ -79,6 +90,8 @@
 
 			lock (_optimizationSynchronizer)
 			{
+				Initialize();
+
 				try
 				{
 					_jsContext.SetParameter("code", content);
@@ -95,31 +108,6 @@
 			}
 
 			return newContent;
-		}
-
-		/// <summary>
-		/// Gets a content of the embedded resource as string
-		/// </summary>
-		/// <param name="resourceName">Resource name</param>
-		/// <param name="type">Type from assembly that containing an embedded resource</param>
-		/// <returns>Сontent of the embedded resource as string</returns>
-		public static string GetResourceAsString(string resourceName, Type type)
-		{
-			Assembly assembly = type.Assembly;
-
-			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-			{
-				if (stream == null)
-				{
-					throw new NullReferenceException(
-						string.Format(CssoStrings.Resources_ResourceIsNull, resourceName));
-				}
-
-				using (var reader = new StreamReader(stream))
-				{
-					return reader.ReadToEnd();
-				}
-			}
 		}
 
 		/// <summary>

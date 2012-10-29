@@ -188,7 +188,7 @@
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
 		/// <returns>Detailed error message</returns>
-		internal static string FormatErrorDetails(JToken errorDetails, string sourceCode)
+		private static string FormatErrorDetails(JToken errorDetails, string sourceCode)
 		{
 			var startIndex = errorDetails.Value<int>("startIndex");
 			var message = errorDetails.Value<string>("message");
