@@ -1,6 +1,9 @@
 var typeScriptHelper = {};
 
 ;(function (typeScriptHelper, undefined) {
+	var CUTTING_LINE_BEGIN_TOKEN = '"bundle_transformer_begin_unneeded_code_cut";';
+	var CUTTING_LINE_END_TOKEN = '"bundle_transformer_end_unneeded_code_cut";';
+	
 	var StringBuilder = (function () {
 		var _buffer = [];
 
@@ -103,6 +106,23 @@ var typeScriptHelper = {};
 		return codeGenTarget;
 	}
 	
+	function getTargetCompiledCode(code, minWhitespace) {
+		var targetCode = "";
+		var cuttingLineBeginPosition = code.indexOf(CUTTING_LINE_BEGIN_TOKEN);
+		var cuttingLineEndPosition = code.indexOf(CUTTING_LINE_END_TOKEN);
+		
+		if (cuttingLineBeginPosition !== -1 && cuttingLineEndPosition !== -1) {
+			var targetBeginCode = code.substring(0, cuttingLineBeginPosition);
+			var targetEndCodePosition = cuttingLineEndPosition + CUTTING_LINE_END_TOKEN.length + 1;
+			var targetEndCode = code.substring(targetEndCodePosition);
+
+			targetCode = targetBeginCode.trim() + (minWhitespace ? "" : "\n") + targetEndCode.trim();
+			targetCode = targetCode.replace(/;(\s*;)+/gm , ";");
+		}
+		
+		return targetCode;
+	}
+	
 	function extendDeep(parent, child) {
 		var propertyName, 
 		    toStr = Object.prototype.toString
@@ -148,9 +168,21 @@ var typeScriptHelper = {};
 		if (dependencies) {
 			var dependencyCount = dependencies.length;
 
-			for (var dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
-				var dependency = dependencies[dependencyIndex];
-				compiler.addUnit(dependency.content, dependency.url, true);
+			if (dependencyCount > 0) {
+				var dependenciesCodeBuilder = new StringBuilder();
+				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_BEGIN_TOKEN);
+
+				for (var dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
+					var dependency = dependencies[dependencyIndex];
+					dependenciesCodeBuilder.WriteLine(dependency.content);
+				}
+
+				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_END_TOKEN);
+
+				var dependenciesCode = dependenciesCodeBuilder.ToString();
+				dependenciesCodeBuilder.Close();
+
+				compiler.addUnit(dependenciesCode, "dependencies.ts", false);
 			}
 		}
 		compiler.typeCheck();
@@ -163,7 +195,8 @@ var typeScriptHelper = {};
 		});
 
 		var result = {};
-		result.compiledCode = codeBuilder.ToString();
+		result.compiledCode = getTargetCompiledCode(codeBuilder.ToString(), 
+			compilationSettings.minWhitespace);
 		if (parseErrors.length > 0) {
 			result.errors = parseErrors;
 		}

@@ -44,11 +44,11 @@
 				.Returns(@"")
 				;
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts")))
+				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts")))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts")))
+				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts")))
 				.Returns(@"interface ITranslatorBadge {
     getText(): string;
     setText(text: string): void;
@@ -63,7 +63,7 @@
 			fileSystemMock
 				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts")))
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
-/// <reference path=""ITranslatorBadge.ts"" />
+/// <reference path=""ITranslatorBadge.d.ts"" />
 
 class TranslatorBadge implements ITranslatorBadge {
     public $badgeElem: any;
@@ -144,7 +144,7 @@ tsBadge.setBorderColor(TS_BADGE_COLOR);";
 			Assert.AreEqual(4, dependencies.Count);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts"),
 				dependencies[0].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.ts"),
+			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts"),
 				dependencies[1].Path);
 			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts"), 
 				dependencies[2].Path);

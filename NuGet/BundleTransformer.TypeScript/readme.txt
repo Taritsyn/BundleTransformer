@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.6.8
+           README file for Bundle Transformer: TypeScript 1.6.9
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Solved the problem with sorting of references.
+   Fixed bug #13 “TypeScript breaks when using modules”.
 
    =============
    DOCUMENTATION

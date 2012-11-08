@@ -52,7 +52,7 @@
 
 .translators #ts {
 	float: left;
-	display: block;
+	display: none;
 	padding: 0.2em 0.5em 0.2em 0.5em;
 	border : 1px solid #808080;
 	background-color: #ffffff;

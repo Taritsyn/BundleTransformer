@@ -180,10 +180,10 @@
     <Content Include="Content\images\bundle_transformer_logo.png" />
     <Content Include="Content\images\icons\envelope.png" />
     <Content Include="Content\images\linkedin.png" />
-    <Content Include="Content\TestSass.sass" />
-    <Content Include="Content\TestSassImport.sass" />
-    <Content Include="Content\TestScss.scss" />
-    <Content Include="Content\TestScssImport.scss" />
+    <Content Include="Content\sass\TestSass.sass" />
+    <Content Include="Content\sass\TestSassImport.sass" />
+    <Content Include="Content\scss\TestScss.scss" />
+    <Content Include="Content\scss\TestScssImport.scss" />
     <Content Include="Content\TestTranslators.css" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -248,14 +248,12 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
-    <Content Include="Scripts\ColoredTranslatorBadge.ts" />
-    <Content Include="Scripts\ITranslatorBadge.ts" />
+    <Content Include="Scripts\BadScript.js" />
     <Content Include="Scripts\jquery-1.8.2-vsdoc.js" />
     <Content Include="Scripts\jquery-1.8.2.js" />
     <Content Include="Scripts\jquery-1.8.2.min.js" />
     <Content Include="Scripts\jquery-ui-1.9.0.js" />
     <Content Include="Scripts\jquery-ui-1.9.0.min.js" />
-    <Content Include="Scripts\jquery.d.ts" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate-vsdoc.js" />
@@ -269,9 +267,13 @@
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\modernizr-2.6.2.min.js" />
-    <Content Include="Scripts\TestCoffeeScript.coffee" />
-    <Content Include="Scripts\TranslatorBadge.ts" />
-    <Content Include="Scripts\TestTypeScript.ts" />
+    <Content Include="Scripts\coffee\TestCoffeeScript.coffee" />
+    <Content Include="Scripts\ts\ColoredTranslatorBadge.ts" />
+    <Content Include="Scripts\ts\IColoredTranslatorBadge.d.ts" />
+    <Content Include="Scripts\ts\ITranslatorBadge.d.ts" />
+    <Content Include="Scripts\ts\jquery.d.ts" />
+    <Content Include="Scripts\ts\TestTypeScript.ts" />
+    <Content Include="Scripts\ts\TranslatorBadge.ts" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -386,9 +388,9 @@
     <None Include="BundleTransformer.Configuration.xss">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
-    <None Include="Content\folder\subfolder\TestLessSubImport.less" />
-    <None Include="Content\TestLess.less" />
-    <None Include="Content\folder\TestLessImport.less" />
+    <None Include="Content\less\folder\subfolder\TestLessSubImport.less" />
+    <None Include="Content\less\TestLess.less" />
+    <None Include="Content\less\folder\TestLessImport.less" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

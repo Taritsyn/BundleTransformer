@@ -25,9 +25,9 @@ namespace BundleTransformer.Example.Mvc
 				"~/Content/themes/base/jquery.ui.button.css",
 				"~/Content/themes/base/jquery.ui.dialog.css",
 				"~/Content/TestTranslators.css",
-				"~/Content/TestLess.less",
-				"~/Content/TestSass.sass",
-				"~/Content/TestScss.scss");
+				"~/Content/less/TestLess.less",
+				"~/Content/sass/TestSass.sass",
+				"~/Content/scss/TestScss.scss");
 			commonStylesBundle.Transforms.Add(cssTransformer);
 			commonStylesBundle.Orderer = nullOrderer;
 
@@ -48,10 +48,10 @@ namespace BundleTransformer.Example.Mvc
 				"~/Scripts/jquery.validate.unobtrusive.js",
 				"~/Scripts/jquery.unobtrusive-ajax.js",
 				"~/Scripts/knockout-2.*",
-				"~/Scripts/TestCoffeeScript.coffee",
-				"~/Scripts/TranslatorBadge.ts",
-				"~/Scripts/ColoredTranslatorBadge.ts",
-				"~/Scripts/TestTypeScript.ts");
+				"~/Scripts/coffee/TestCoffeeScript.coffee",
+				"~/Scripts/ts/TranslatorBadge.ts",
+				"~/Scripts/ts/ColoredTranslatorBadge.ts",
+				"~/Scripts/ts/TestTypeScript.ts");
 			commonScriptsBundle.Transforms.Add(jsTransformer);
 			commonScriptsBundle.Orderer = nullOrderer;
 
