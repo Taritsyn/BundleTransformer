@@ -32,7 +32,7 @@
 		/// <summary>
 		/// MSIE JS engine
 		/// </summary>
-		private readonly MsieJsEngine _jsEngine;
+		private MsieJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of uglification
@@ -43,6 +43,11 @@
 		/// JS-serializer
 		/// </summary>
 		private readonly JavaScriptSerializer _jsSerializer;
+
+		/// <summary>
+		/// Flag that JS-uglifier is initialized
+		/// </summary>
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -64,9 +69,6 @@
 		{
 			_jsSerializer = new JavaScriptSerializer();
 			_defaultOptionsString = _jsSerializer.Serialize(defaultOptions);
-
-			_jsEngine = new MsieJsEngine(true);
-			_jsEngine.ExecuteResource(UGLIFY_JS_LIBRARY_RESOURCE_NAME, GetType());
 		}
 
 		/// <summary>
@@ -77,6 +79,20 @@
 			Dispose(false /* disposing */);
 		}
 
+
+		/// <summary>
+		/// Initializes JS-uglifier
+		/// </summary>
+		private void Initialize()
+		{
+			if (!_initialized)
+			{
+				_jsEngine = new MsieJsEngine(true);
+				_jsEngine.ExecuteResource(UGLIFY_JS_LIBRARY_RESOURCE_NAME, GetType());
+
+				_initialized = true;
+			}
+		}
 
 		/// <summary>
 		/// "Uglifies" JS-code by using UglifyJS
@@ -99,6 +115,8 @@
 
 			lock (_uglificationSynchronizer)
 			{
+				Initialize();
+
 				try
 				{
 					newContent = _jsEngine.Evaluate<string>(

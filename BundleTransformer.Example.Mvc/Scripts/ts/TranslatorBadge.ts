@@ -1,7 +1,7 @@
-/// <reference path="jquery.d.ts" />
-/// <reference path="ITranslatorBadge.d.ts" />
+/// <reference path="./jquery.d.ts" />
+/// <reference path="./ITranslatorBadge.d.ts" />
 
-;module TranslatorBadges {
+module TranslatorBadges {
     /// <summary>
     /// Creates badge for translator
     /// </summary>

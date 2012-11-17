@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: CSSO 1.6.9 (x64)
+             README file for Bundle Transformer: CSSO 1.6.10
  
    ----------------------------------------------------------------------
 
@@ -11,7 +11,7 @@
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.Csso.x64 contains one minifier-adapter for 
+   BundleTransformer.Csso contains one minifier-adapter for 
    minification of CSS-code - KryzhanovskyCssMinifier. 
    KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's 
    CSSO (http://github.com/css/csso) version 1.3.6.
@@ -24,16 +24,20 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of CSSO version 1.3.6;
-   2. Changed the architecture of KryzhanovskyCssMinifier.
+   Packages the BundleTransformer.Csso.x86 and the 
+   BundleTransformer.Csso.x64 were combined into one package - 
+   BundleTransformer.Csso. Now the library BundleTransformer.Csso in 
+   runtime itself switches to correct version of the Noesis 
+   Javascript .NET.
    
    ====================
    POST-INSTALL ACTIONS
    ====================
    If in your system does not assemblies msvcp100.dll and msvcr100.dll, 
    then download and install the Microsoft Visual C++ 2010 
-   Redistributable Package (x64), which is available at the following 
-   link - http://www.microsoft.com/en-us/download/details.aspx?id=14632.
+   Redistributable Package 
+   (x86 - http://www.microsoft.com/en-us/download/details.aspx?id=5555,
+   x64 - http://www.microsoft.com/en-us/download/details.aspx?id=14632).
 
    To make KryzhanovskyCssMinifier is the default CSS-minifier, you need to 
    make changes to the Web.config file. In the defaultMinifier attribute 

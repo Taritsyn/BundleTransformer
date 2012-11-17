@@ -58,12 +58,17 @@
 		/// <summary>
 		/// MSIE JS engine
 		/// </summary>
-		private readonly MsieJsEngine _jsEngine;
+		private MsieJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of compilation
 		/// </summary>
 		private readonly object _compilationSynchronizer = new object();
+
+		/// <summary>
+		/// Flag that compiler is initialized
+		/// </summary>
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -95,19 +100,13 @@
 		/// <param name="defaultOptions">TypeScript-compiler default options</param>
 		public TypeScriptCompiler(bool useDefaultLib, object defaultOptions)
 		{
-			Type type = GetType();
-
 			_useDefaultLib = useDefaultLib;
 			_defaultOptionsString = JsonConvert.SerializeObject(defaultOptions);
 			if (_useDefaultLib)
 			{
 				_commonTypesDefinitions = Utils.GetResourceAsString(
-					DEFAULT_LIBRARY_RESOURCE_NAME, type);
+					DEFAULT_LIBRARY_RESOURCE_NAME, GetType());
 			}
-
-			_jsEngine = new MsieJsEngine(true, true);
-			_jsEngine.ExecuteResource(TYPESCRIPT_LIBRARY_RESOURCE_NAME, type);
-			_jsEngine.ExecuteResource(TSC_HELPER_RESOURCE_NAME, type);
 		}
 
 		/// <summary>
@@ -118,6 +117,23 @@
 			Dispose(false /* disposing */);
 		}
 
+
+		/// <summary>
+		/// Initializes compiler
+		/// </summary>
+		private void Initialize()
+		{
+			if (!_initialized)
+			{
+				Type type = GetType();
+
+				_jsEngine = new MsieJsEngine(true, true);
+				_jsEngine.ExecuteResource(TYPESCRIPT_LIBRARY_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(TSC_HELPER_RESOURCE_NAME, type);
+
+				_initialized = true;
+			}
+		}
 
 		/// <summary>
 		/// "Compiles" TypeScript-code to JS-code
@@ -154,6 +170,8 @@
 
 			lock (_compilationSynchronizer)
 			{
+				Initialize();
+
 				try
 				{
 					var result = _jsEngine.Evaluate<string>(

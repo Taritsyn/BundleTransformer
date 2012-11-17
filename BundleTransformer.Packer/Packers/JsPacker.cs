@@ -25,7 +25,7 @@
 		/// <summary>
 		/// MSIE JS engine
 		/// </summary>
-		private readonly MsieJsEngine _jsEngine;
+		private MsieJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of packing
@@ -33,25 +33,15 @@
 		private readonly object _packingSynchronizer = new object();
 
 		/// <summary>
+		/// Flag that JS-packer is initialized
+		/// </summary>
+		private bool _initialized;
+
+		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
 
-
-		/// <summary>
-		/// Constructs instance of JS-packer
-		/// </summary>
-		public JsPacker()
-		{
-			_jsEngine = new MsieJsEngine(false);
-			_jsEngine.ExecuteResource(PACKER_LIBRARY_RESOURCE_NAME, GetType());
-			_jsEngine.Execute(
-				string.Format(@"var {0} = function(code, base62Encode, shrinkVariables) {{
-	var packer = new Packer();	
- 
-	return packer.pack(code, base62Encode, shrinkVariables);
-}}", PACKING_FUNCTION_NAME));
-		}
 
 		/// <summary>
 		/// Destructs instance of JS-packer
@@ -61,6 +51,26 @@
 			Dispose(false /* disposing */);
 		}
 
+
+		/// <summary>
+		/// Initializes JS-packer
+		/// </summary>
+		private void Initialize()
+		{
+			if (!_initialized)
+			{
+				_jsEngine = new MsieJsEngine(false);
+				_jsEngine.ExecuteResource(PACKER_LIBRARY_RESOURCE_NAME, GetType());
+				_jsEngine.Execute(
+					string.Format(@"var {0} = function(code, base62Encode, shrinkVariables) {{
+	var packer = new Packer();	
+ 
+	return packer.pack(code, base62Encode, shrinkVariables);
+}}", PACKING_FUNCTION_NAME));
+
+				_initialized = true;
+			}
+		}
 
 		/// <summary>
 		/// "Packs" JS-code by using Dean Edwards' Packer
@@ -75,6 +85,8 @@
 
 			lock (_packingSynchronizer)
 			{
+				Initialize();
+
 				try
 				{
 					newContent = _jsEngine.CallFunction<string>(PACKING_FUNCTION_NAME,

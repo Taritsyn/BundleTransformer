@@ -1,4 +1,4 @@
-;module TranslatorBadges {
+module TranslatorBadges {
     export interface ITranslatorBadge {
         getText(): string;
         setText(text: string): void;

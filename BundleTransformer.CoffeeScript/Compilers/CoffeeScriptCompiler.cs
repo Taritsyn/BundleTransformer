@@ -26,7 +26,7 @@
 		/// <summary>
 		/// MSIE JS engine
 		/// </summary>
-		private readonly MsieJsEngine _jsEngine;
+		private MsieJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of compilation
@@ -34,23 +34,15 @@
 		private readonly object _compilationSynchronizer = new object();
 
 		/// <summary>
+		/// Flag that compiler is initialized
+		/// </summary>
+		private bool _initialized;
+
+		/// <summary>
 		/// Flag that object is destroyed
 		/// </summary>
 		private bool _disposed;
 
-
-		/// <summary>
-		/// Constructs instance of CoffeeScript-compiler
-		/// </summary>
-		public CoffeeScriptCompiler()
-		{
-			_jsEngine = new MsieJsEngine(true);
-			_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, GetType());
-			_jsEngine.Execute(
-				string.Format(@"var {0} = function(code) {{ 
-	return CoffeeScript.compile(code, {{ bare: true }});
-}}", COMPILATION_FUNCTION_NAME));
-		}
 
 		/// <summary>
 		/// Destructs instance of CoffeeScript-compiler
@@ -60,6 +52,24 @@
 			Dispose(false /* disposing */);
 		}
 
+
+		/// <summary>
+		/// Initializes compiler
+		/// </summary>
+		private void Initialize()
+		{
+			if (!_initialized)
+			{
+				_jsEngine = new MsieJsEngine(true);
+				_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, GetType());
+				_jsEngine.Execute(
+					string.Format(@"var {0} = function(code) {{ 
+	return CoffeeScript.compile(code, {{ bare: true }});
+}}", COMPILATION_FUNCTION_NAME));
+
+				_initialized = true;
+			}
+		}
 
 		/// <summary>
 		/// "Compiles" CoffeeScript-code to JS-code
@@ -72,6 +82,8 @@
 
 			lock (_compilationSynchronizer)
 			{
+				Initialize();
+
 				try
 				{
 					newContent = _jsEngine.CallFunction<string>(COMPILATION_FUNCTION_NAME, content);

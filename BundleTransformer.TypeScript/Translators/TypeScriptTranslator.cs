@@ -46,7 +46,7 @@
 		/// Regular expression for working with "reference" comments
 		/// </summary>
 		private static readonly Regex _referenceCommentsRegex =
-			new Regex(@"\/\/\/\s*<reference\s+path=(?<quote1>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote1>)\s*\/>",
+			new Regex(@"\/\/\/\s*<reference\s+path=(?<quote1>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~()]+)(\k<quote1>)\s*\/>",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>

@@ -1,11 +1,8 @@
 ﻿namespace BundleTransformer.Csso.Optimizers
 {
 	using System;
-	using System.IO;
 	using System.Reflection;
 	using System.Text;
-
-	using Noesis.Javascript;
 
 	using Core;
 	using CoreStrings = Core.Resources.Strings;
@@ -28,9 +25,9 @@
 		const string OPTIMIZATION_FUNCTION_NAME = "cssoJustDoIt";
 
 		/// <summary>
-		/// JS context
+		/// JS engine
 		/// </summary>
-		private JavascriptContext _jsContext;
+		private JavascriptEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of optimization
@@ -38,7 +35,7 @@
 		private readonly object _optimizationSynchronizer = new object();
 
 		/// <summary>
-		/// Flag that object is initialized
+		/// Flag that optimizer is initialized
 		/// </summary>
 		private bool _initialized;
 
@@ -58,16 +55,16 @@
 
 
 		/// <summary>
-		/// Initializes compiler
+		/// Initializes optimizer
 		/// </summary>
 		private void Initialize()
 		{
 			if (!_initialized)
 			{
-				_jsContext = new JavascriptContext();
-				_jsContext.Run(Utils.GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, 
+				_jsEngine = new JavascriptEngine();
+				_jsEngine.Run(Utils.GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, 
 					Assembly.GetExecutingAssembly()));
-				_jsContext.Run(string.Format(@"function {0}(code, disableRestructuring) {{
+				_jsEngine.Run(string.Format(@"function {0}(code, disableRestructuring) {{
 	var compressor = new CSSOCompressor(),
 		translator = new CSSOTranslator();
 
@@ -94,14 +91,14 @@
 
 				try
 				{
-					_jsContext.SetParameter("code", content);
-					_jsContext.SetParameter("disableRestructuring", disableRestructuring);
-					_jsContext.Run(string.Format(
+					_jsEngine.SetParameter("code", content);
+					_jsEngine.SetParameter("disableRestructuring", disableRestructuring);
+					_jsEngine.Run(string.Format(
 						"var result = {0}(code, disableRestructuring);", OPTIMIZATION_FUNCTION_NAME));
 
-					newContent = (string)_jsContext.GetParameter("result");
+					newContent = (string)_jsEngine.GetParameter("result");
 				}
-				catch (JavascriptException e)
+				catch (Exception e)
 				{
 					throw new CssOptimizingException(FormatErrorDetails(e));
 				}
@@ -115,26 +112,27 @@
 		/// </summary>
 		/// <param name="javascriptException">JavaScript exception</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JavascriptException javascriptException)
+		private static string FormatErrorDetails(dynamic javascriptException)
 		{
+			var message = (string)javascriptException.Message;
+			var helpLink = (string)javascriptException.HelpLink;
+			var line = (int)javascriptException.Line;
+			var startColumn = (int)javascriptException.StartColumn;
+			var endColumn = (int)javascriptException.EndColumn;
+			var source = (string)javascriptException.Source;
+
 			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
-				javascriptException.Message);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(javascriptException.HelpLink))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword,
-					javascriptException.HelpLink);
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword, helpLink);
 			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				javascriptException.Line.ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn,
-				javascriptException.StartColumn.ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndColumn,
-				javascriptException.EndColumn.ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber, line.ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn, startColumn.ToString());
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, endColumn.ToString());
 			if (!string.IsNullOrWhiteSpace(javascriptException.Source))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError,
-					javascriptException.Source);
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError, source);
 			}
 
 			return errorMessage.ToString();
@@ -160,9 +158,9 @@
 			{
 				_disposed = true;
 
-				if (_jsContext != null)
+				if (_jsEngine != null)
 				{
-					_jsContext.Dispose();
+					_jsEngine.Dispose();
 				}
 			}
 		}

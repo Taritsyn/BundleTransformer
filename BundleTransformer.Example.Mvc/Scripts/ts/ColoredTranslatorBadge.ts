@@ -1,8 +1,8 @@
-/// <reference path="jquery.d.ts" />
-/// <reference path="IColoredTranslatorBadge.d.ts" />
-/// <reference path="TranslatorBadge.ts" />
+/// <reference path="./jquery.d.ts" />
+/// <reference path="./IColoredTranslatorBadge.d.ts" />
+/// <reference path="./TranslatorBadge.ts" />
 
-;module TranslatorBadges {
+module TranslatorBadges {
     /// <summary>
     /// Creates colored badge for translator
     /// </summary>

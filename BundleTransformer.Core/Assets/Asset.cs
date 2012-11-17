@@ -234,7 +234,7 @@
 		/// <param name="fileSystemWrapper">File system wrapper</param>
 		public Asset(string path, IHttpApplicationInfo applicationInfo, IFileSystemWrapper fileSystemWrapper)
 		{
-			_applicationRootPathRegex = new Regex("^" + applicationInfo.RootPath.Replace(@"\", @"\\"), 
+			_applicationRootPathRegex = new Regex("^" + Regex.Escape(applicationInfo.RootPath), 
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			_applicationRootUrl = applicationInfo.RootUrl;
 			_fileSystemWrapper = fileSystemWrapper;

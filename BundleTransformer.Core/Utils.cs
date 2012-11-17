@@ -128,7 +128,7 @@
 			string newBaseUrl = ProcessBackSlashesInUrl(
 				VirtualPathUtility.ToAbsolute(Path.GetDirectoryName(baseUrl)) + @"/");
 
-			if (newRelativeUrl.StartsWith("../"))
+			if (newRelativeUrl.StartsWith("../") || newRelativeUrl.StartsWith("./"))
 			{
 				const string fakeSiteUrl = "http://bundletransformer.codeplex.com/";
 				var baseUri = new Uri(CombineUrls(fakeSiteUrl, newBaseUrl), UriKind.Absolute);

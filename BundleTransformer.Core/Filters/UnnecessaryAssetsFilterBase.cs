@@ -45,21 +45,17 @@
 						throw new ArgumentException(Strings.Assets_InvalidIgnorePattern, "ignorePatterns");
 					}
 
-					processedIgnorePattern = ignorePattern
-						.Replace(@"/", @"\")
-						.Replace(@".", @"\.")
-						;
+					string newIgnorePattern = Regex.Escape(processedIgnorePattern);
 					if (processedIgnorePattern.IndexOf("*") != -1)
 					{
-						processedIgnorePattern = "^" + ignorePattern
-							.Replace("*", @"(.*)") + "$";
+						newIgnorePattern = "^" + newIgnorePattern.Replace(@"\*", @"(.*)") + "$";
 					}
 					else
 					{
-						processedIgnorePattern = ignorePattern + "$";
+						newIgnorePattern = newIgnorePattern + "$";
 					}
 
-					ignoreRegExps.Add(new Regex(processedIgnorePattern, 
+					ignoreRegExps.Add(new Regex(newIgnorePattern, 
 						RegexOptions.IgnoreCase | RegexOptions.Compiled));
 				}
 			}

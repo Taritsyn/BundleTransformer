@@ -76,7 +76,7 @@ declare var Object: {
 interface Function {
     apply(thisArg: any, ...argArray: any[]): any;
     call(thisArg: any, ...argArray: any[]): any;
-    bind(thisArg: any, ...argArray: any[]): Function; 
+    bind(thisArg: any, ...argArray: any[]): any; 
     prototype: any;
     length: number;
 }
@@ -254,7 +254,7 @@ interface RegExpExecArray {
     concat(...items: string[][]): string[];
     join(seperator?: string): string;
     pop(): string;
-    push(...items: string[]): void;
+    push(...items: string[]): number;
     reverse(): string[];
     shift(): string;
     slice(start: number, end?: number): string[];
@@ -282,7 +282,7 @@ interface RegExp {
     global: bool;
     ignoreCase: bool;
     multiline: bool;
-    lastIndex: bool;
+    lastIndex: number;
 }
 declare var RegExp: {
     new (pattern: string, flags?: string): RegExp;
@@ -312,7 +312,7 @@ interface RangeError extends Error {
 declare var RangeError: {
     new (message?: string): RangeError;
     (message?: string): RangeError;
-    protoype: RangeError;
+    prototype: RangeError;
 }
 
 interface ReferenceError extends Error {
@@ -320,7 +320,7 @@ interface ReferenceError extends Error {
 declare var ReferenceError: {
     new (message?: string): ReferenceError;
     (message?: string): ReferenceError;
-    protoype: ReferenceError;
+    prototype: ReferenceError;
 }
 
 interface SyntaxError extends Error {
@@ -328,7 +328,7 @@ interface SyntaxError extends Error {
 declare var SyntaxError: {
     new (message?: string): SyntaxError;
     (message?: string): SyntaxError;
-    protoype: SyntaxError;
+    prototype: SyntaxError;
 }
 
 interface TypeError extends Error {
@@ -336,7 +336,7 @@ interface TypeError extends Error {
 declare var TypeError: {
     new (message?: string): TypeError;
     (message?: string): TypeError;
-    protoype: TypeError;
+    prototype: TypeError;
 }
 
 interface URIError extends Error {
@@ -344,7 +344,7 @@ interface URIError extends Error {
 declare var URIError: {
     new (message?: string): URIError;
     (message?: string): URIError;
-    protoype: URIError;
+    prototype: URIError;
 }
 
 interface JSON {
@@ -367,7 +367,7 @@ interface Array {
     concat(...items: _element[][]): _element[];
     join(seperator?: string): string;
     pop(): _element;
-    push(...items: _element[]): void;
+    push(...items: _element[]): number;
     reverse(): _element[];
     shift(): _element;
     slice(start: number, end?: number): _element[];
@@ -2522,7 +2522,7 @@ interface XMLHttpRequest extends EventTarget, MSXMLHttpRequestExtensions {
     onload: (ev: Event) => any;
     readyState: number;
     responseText: string;
-    responseXML: Object;
+    responseXML: Document;
     statusText: string;
     open(method: string, url: string, async?: bool, user?: string, password?: string): void;
     send(data?: any): void;
@@ -6350,8 +6350,8 @@ interface IDBCursor {
     key: any;
     primaryKey: any;
     advance(count: number): void;
-    delet(): IDBRequest;
-    continu(key?: any): void;
+    delete(): IDBRequest;
+    continue(key?: any): void;
     update(value: any): IDBRequest;
 }
 declare var IDBCursor: {

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.6
+               README file for Bundle Transformer: Core 1.6.10
 
    ----------------------------------------------------------------------
 
@@ -39,7 +39,10 @@
    =============
    RELEASE NOTES
    =============
-   Assembly BundleTransformer.Core.dll is now signed.
+   1. Improved AppPath Regex escaping (special thanks to Duckaroy for 
+      this update);
+   2. Fixed error, occured when transforming relative paths of the form 
+      "./images/icons/game.png" to absolute.
 
    =============
    DOCUMENTATION

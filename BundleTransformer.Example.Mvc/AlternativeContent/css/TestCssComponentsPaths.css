@@ -2,7 +2,7 @@
 * This stylesheet is used to validate the processing of relative paths 
 * in the CSS-code
 *
-* Includes Fugue Icons 3.3.1
+* Includes Fugue Icons 3.5
 * http://p.yusukekamiyamane.com/
 * Copyright 2012, Yusuke Kamiyamane
 */
@@ -51,4 +51,9 @@
 .feed
 {
 	background: transparent url(images/icons/feed.png) no-repeat !important;
+}
+
+.game
+{
+	background: transparent url(./images/icons/game.png) no-repeat !important;
 }

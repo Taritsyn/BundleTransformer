@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v1.3.4
+ * UglifyJS v1.3.4-1
  * http://github.com/mishoo/UglifyJS
  *
  * Copyright 2012, Mihai Bazon
@@ -1447,7 +1447,6 @@ var UglifyJS = (function(){
 		SUCH DAMAGE.
 
 	 ***********************************************************************/
-
 	require["./process"] = (function(){
 		var jsp = require("./parse-js"),
 			curry = jsp.curry,
@@ -3124,7 +3123,10 @@ var UglifyJS = (function(){
 				},
 				"call": function(func, args) {
 					var f = make(func);
-					if (f.charAt(0) != "(" && needs_parens(func))
+					// cannot simply test the first and/or the last characters in the genetic case,
+					// because the called expression might look like e.g. `(x || y) && (u || v)`.
+					var already_wrapped = (func[0] == "function" && f.charAt(0) == "(");
+					if (!already_wrapped && needs_parens(func))
 						f = "(" + f + ")";
 					return f + "(" + add_commas(MAP(args, function(expr){
 						return parenthesize(expr, "seq");

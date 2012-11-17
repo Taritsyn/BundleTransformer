@@ -19,6 +19,11 @@
 	public sealed class JsFileExtensionsFilter : FileExtensionsFilterBase
 	{
 		/// <summary>
+		/// Version number placeholder
+		/// </summary>
+		private const string VERSION_NUMBER_PLACEHOLDER = @"$version$";
+
+		/// <summary>
 		/// List of regular expressions of JS-files with Microsoft-style extensions
 		/// </summary>
 		private readonly List<Regex> _jsFilesWithMsStyleExtensionsRegExps;
@@ -63,18 +68,17 @@
 			var jsFileRegExps = new List<Regex>();
 			if (jsFilesWithMsStyleExtensions.Length > 0)
 			{
+				string versionNumberPlaceholder = VERSION_NUMBER_PLACEHOLDER.Replace("$", @"\$");
+
 				foreach (var jsFileName in jsFilesWithMsStyleExtensions)
 				{
 					if (!string.IsNullOrWhiteSpace(jsFileName))
 					{
-						string jsFileNamePattern = jsFileName
-							.Trim()
-							.Replace(@".", @"\.")
-							;
+						string jsFileNamePattern = Regex.Escape(jsFileName.Trim());
 
-						if (jsFileNamePattern.IndexOf("$version$") != -1)
+						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder) != -1)
 						{
-							jsFileNamePattern = jsFileNamePattern.Replace("$version$", @"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
+							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder, @"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
 						}
 						jsFileNamePattern = "^" + jsFileNamePattern + "$";
 

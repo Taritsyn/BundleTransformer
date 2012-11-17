@@ -5,28 +5,31 @@ var typeScriptHelper = {};
 	var CUTTING_LINE_END_TOKEN = '"bundle_transformer_end_unneeded_code_cut";';
 	
 	var StringBuilder = (function () {
-		var _buffer = [];
-
-		function StringBuilder() { };
+		function StringBuilder() {
+			this._buffer = [];
+		};
 
 		StringBuilder.prototype.Write = function (s) {
-			_buffer.push(s);
+			this._buffer.push(s);
 		};
 
 		StringBuilder.prototype.WriteLine = function (s) {
-			_buffer.push(s + "\n");
+			this._buffer.push(s + "\n");
 		};
 
 		StringBuilder.prototype.Clear = function () {
-			_buffer = [];
+			this._buffer = [];
 		};
 
 		StringBuilder.prototype.ToString = function () {
-			return _buffer.join("");
+			return this._buffer.join("");
+		};
+		
+		StringBuilder.prototype.Dispose = function () {
+			this._buffer = null;
 		};
 
 		StringBuilder.prototype.Close = function () {
-			_buffer = [];
 		};
 
 		return StringBuilder;
@@ -150,13 +153,14 @@ var typeScriptHelper = {};
 		var errorBuilder = {
 			Write: function(s) { },
 			WriteLine: function(s) { },
+			Dispose: function() { },
 			Close: function() { }
 		};
 		var logger = new TypeScript.NullLogger();
 		var compilationSettings = getCompilationSettings(options);
 		var parseErrors = [];
 
-		var compiler = new TypeScript.TypeScriptCompiler(codeBuilder, errorBuilder, logger, compilationSettings);
+		var compiler = new TypeScript.TypeScriptCompiler(errorBuilder, logger, compilationSettings);
 		compiler.setErrorCallback(function(minChar, charLen, message) {
 			parseErrors.push({
 				startIndex: minChar,
@@ -180,7 +184,7 @@ var typeScriptHelper = {};
 				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_END_TOKEN);
 
 				var dependenciesCode = dependenciesCodeBuilder.ToString();
-				dependenciesCodeBuilder.Close();
+				dependenciesCodeBuilder.Dispose();
 
 				compiler.addUnit(dependenciesCode, "dependencies.ts", false);
 			}
@@ -190,7 +194,7 @@ var typeScriptHelper = {};
 
 		parseErrors = [];
 		compiler.reTypeCheck();
-		compiler.emit(false, function createFile(fileName) {
+		compiler.emit(function createFile(fileName) {
 			return codeBuilder;
 		});
 
@@ -201,8 +205,8 @@ var typeScriptHelper = {};
 			result.errors = parseErrors;
 		}
 
-		codeBuilder.Close();
-		errorBuilder.Close();
+		codeBuilder.Dispose();
+		errorBuilder.Dispose();
 
 		return JSON.stringify(result);
 	};

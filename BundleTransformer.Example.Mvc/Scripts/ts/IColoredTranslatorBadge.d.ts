@@ -1,6 +1,6 @@
-/// <reference path="ITranslatorBadge.d.ts" />
+/// <reference path="./ITranslatorBadge.d.ts" />
 
-;module TranslatorBadges {
+module TranslatorBadges {
     export interface IColoredTranslatorBadge extends ITranslatorBadge {
         getTextColor(): string;
         setTextColor(color: string): void;

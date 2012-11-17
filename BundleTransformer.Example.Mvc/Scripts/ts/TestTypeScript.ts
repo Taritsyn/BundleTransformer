@@ -1,6 +1,6 @@
-/// <reference path="ColoredTranslatorBadge.ts" />
+/// <reference path="./ColoredTranslatorBadge.ts" />
 
-;module TranslatorBadges {
+module TranslatorBadges {
 	var TS_BADGE_TEXT = "TypeScript";
 	var TS_BADGE_COLOR = "#0074C1";
 

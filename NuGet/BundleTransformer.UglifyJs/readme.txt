@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.6.7
+             README file for Bundle Transformer: UglifyJS 1.6.10
  
    ----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of UglifyJS version 1.3.4.
+   Added support of UglifyJS version 1.3.4-1.
    
    ====================
    POST-INSTALL ACTIONS

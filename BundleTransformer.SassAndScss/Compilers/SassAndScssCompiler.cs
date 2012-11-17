@@ -98,7 +98,7 @@
 		private readonly object _compilationSynchronizer = new object();
 
 		/// <summary>
-		/// Flag that object is initialized
+		/// Flag that compiler is initialized
 		/// </summary>
 		private bool _initialized;
 

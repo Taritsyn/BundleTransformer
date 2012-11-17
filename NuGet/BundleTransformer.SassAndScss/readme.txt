@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.6.9
+          README file for Bundle Transformer: Sass and SCSS 1.6.10
 
    ----------------------------------------------------------------------
 
@@ -16,11 +16,6 @@
    SCSS-code to CSS-code.
    Also contains HTTP-handler SassAndScssAssetHandler, which is 
    responsible for text output of translated Sass- or SCSS-asset.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Changed the architecture of SassAndScssTranslator.
    
    =============
    DOCUMENTATION

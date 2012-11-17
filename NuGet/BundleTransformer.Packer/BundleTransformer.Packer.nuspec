@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Packer</id>
-    <version>1.6.6</version>
+    <version>1.6.10</version>
 	<title>Bundle Transformer: Packer</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,12 +12,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - EdwardsJsMinifier. EdwardsJsMinifier is based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) version 3.0.</description>
     <summary>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - EdwardsJsMinifier. EdwardsJsMinifier is based on the Dean Edwards' Packer version 3.0.</summary>
-	<releaseNotes>Assembly BundleTransformer.Packer.dll is now signed.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Dean Edwards Packer</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.6.6]" />
+      <dependency id="BundleTransformer.Core" version="[1.6.10]" />
 	  <dependency id="MsieJavaScriptEngine" version="1.1.1" />
     </dependencies>
     <references>

@@ -34,7 +34,7 @@ interface JQueryAjaxSettings {
     dataType?: string;
     error?(jqXHR: JQueryXHR, textStatus: string, errorThrow: string): any;
     global?: bool;
-    headers?: { [key: any]: any; };
+    headers?: { [key: string]: any; };
     ifModified?: bool;
     isLocal?: bool;
     jsonp?: string;
@@ -43,7 +43,7 @@ interface JQueryAjaxSettings {
     password?: string;
     processData?: bool;
     scriptCharset?: string;
-    statusCode?: { [key: any]: any; };
+    statusCode?: { [key: string]: any; };
     success?(data: any, textStatus: string, jqXHR: JQueryXHR);
     timeout?: number;
     traditional?: bool;
@@ -51,7 +51,7 @@ interface JQueryAjaxSettings {
     url?: string;
     username?: string;
     xhr?: any;
-    xhrFields?: { [key: any]: any; };
+    xhrFields?: { [key: string]: any; };
 }
 
 /*
@@ -167,6 +167,7 @@ interface JQueryStatic {
     /****
      AJAX
     *****/
+    ajax(settings: JQueryAjaxSettings);
     ajax(url: string, settings: JQueryAjaxSettings);
 
     ajaxPrefilter(dataTypes: string, handler: (opts: any, originalOpts: any, jqXHR: JQueryXHR) => any): any;
@@ -210,7 +211,7 @@ interface JQueryStatic {
     ****/
     css(e: any, propertyName: string, value?: any);
     css(e: any, propertyName: any, value?: any);
-    cssHooks: { [key: any]: any; };
+    cssHooks: { [key: string]: any; };
 
     /****
      DATA
@@ -234,7 +235,8 @@ interface JQueryStatic {
     /******
      EVENTS
     *******/
-    proxy(context: any, name: any): any;
+    proxy(func: Function, context: any): any;
+    proxy(context: any, name: string): any;
 
     /*********
      INTERNALS
@@ -288,7 +290,7 @@ interface JQueryStatic {
 
     now(): number;
 
-    parseJSON(json: string): Object;
+    parseJSON(json: string): any;
 
     //FIXME: This should return an XMLDocument
     parseXML(data: string): any;
@@ -329,7 +331,7 @@ interface JQuery {
 
     attr(attributeName: string): string;
     attr(attributeName: string, value: any): JQuery;
-    attr(map: { [key: any]: any; }): JQuery;
+    attr(map: { [key: string]: any; }): JQuery;
     attr(attributeName: string, func: (index: any, attr: any) => any): JQuery;
 
     hasClass(className: string): bool;
@@ -371,7 +373,7 @@ interface JQuery {
     innerHeight(): number;
     innerWidth(): number;
 
-    offset(): Object;
+    offset(): { top: number; left: number; };
     offset(coordinates: any): JQuery;
     offset(func: (index: any, coords: any) => any): JQuery;
 
@@ -498,6 +500,9 @@ interface JQuery {
 
     mouseevent(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseevent(handler: (eventObject: JQueryEventObject) => any): JQuery;
+
+    mouseenter(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseenter(handler: (eventObject: JQueryEventObject) => any): JQuery;
 
     mouseleave(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseleave(handler: (eventObject: JQueryEventObject) => any): JQuery;

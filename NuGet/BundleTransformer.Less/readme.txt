@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.6.6
+               README file for Bundle Transformer: LESS 1.6.10
 
    ----------------------------------------------------------------------
 
@@ -17,11 +17,6 @@
    of translated LESS-asset.
 
    Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
-   
-   =============
-   RELEASE NOTES
-   =============
-   Assembly BundleTransformer.Less.dll is now signed.
  
    ====================
    POST-INSTALL ACTIONS
