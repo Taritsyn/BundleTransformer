@@ -25,7 +25,7 @@
 
 .abacus
 {
-	background: transparent url('/AlternativeContent/images/icons/abacus.png') no-repeat !important;
+	background: transparent url(/AlternativeContent/images/icons/abacus.png) no-repeat !important;
 }
 
 .bug

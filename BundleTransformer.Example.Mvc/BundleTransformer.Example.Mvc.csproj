@@ -67,7 +67,7 @@
       <HintPath>..\packages\DotNetOpenAuth.OpenId.Core.4.1.3.12303\lib\net40-full\Mono.Math.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.10\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Org.Mentalis.Security.Cryptography">
       <HintPath>..\packages\DotNetOpenAuth.OpenId.Core.4.1.3.12303\lib\net40-full\Org.Mentalis.Security.Cryptography.dll</HintPath>

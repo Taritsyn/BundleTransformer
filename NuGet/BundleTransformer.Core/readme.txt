@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.10
+               README file for Bundle Transformer: Core 1.6.11
 
    ----------------------------------------------------------------------
 
@@ -18,12 +18,11 @@
    to replace the standard classes CssMinify and JsMinify.
 
    The main differences classes CssTransformer and JsTransformer from 
-   standard implementations: automatic removal of duplicate assets, 
-   ability to exclude unnecessary assets when adding assets from a 
-   directory, support processing of JS-files with *.debug.js extensions, 
-   does not produce the re-minification of code of pre-minified assets, 
-   support automatic transformation of relative paths to absolute in 
-   CSS-code (for CssTransformer), etc. These classes do not produce 
+   standard implementations: ability to exclude unnecessary assets when 
+   adding assets from a directory, does not produce the re-minification 
+   of code of pre-minified assets, support automatic transformation of 
+   relative paths to absolute in CSS-code (for CssTransformer), etc. 
+   These classes do not produce 
    the minification of code in runtime, but this feature can be added 
    by installing of minifier-adapter (now available adapters based on 
    Microsoft Ajax Minifier, YUI Compressor for .NET, Google Closure 
@@ -39,10 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   1. Improved AppPath Regex escaping (special thanks to Duckaroy for 
-      this update);
-   2. Fixed error, occured when transforming relative paths of the form 
-      "./images/icons/game.png" to absolute.
+   Fixed error, occured when automatic transformation of relative paths 
+   to absolute in CSS-code.
 
    =============
    DOCUMENTATION
