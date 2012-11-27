@@ -1,3 +1,5 @@
+"use strict";
+
 var typeScriptHelper = {};
 
 ;(function (typeScriptHelper, undefined) {
