@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: CSSO 1.6.12
+             README file for Bundle Transformer: CSSO 1.6.13
  
    ----------------------------------------------------------------------
 
@@ -20,11 +20,6 @@
    (http://javascriptdotnet.codeplex.com). For correct working of the 
    Noesis Javascript .NET require assemblies msvcp100.dll and 
    msvcr100.dll from the Microsoft Visual C++ 2010.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of CSSO version 1.3.7.
    
    ====================
    POST-INSTALL ACTIONS

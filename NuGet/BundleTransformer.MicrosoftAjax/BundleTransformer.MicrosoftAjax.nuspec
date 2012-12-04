@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.MicrosoftAjax</id>
-    <version>1.6.12</version>
+    <version>1.6.13</version>
 	<title>Bundle Transformer: Microsoft Ajax</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,13 +12,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.MicrosoftAjax contains 2 minifier-adapters: MicrosoftAjaxCssMinifier (for minification of CSS-code) and MicrosoftAjaxJsMinifier (for minification of JS-code). These adapters perform minification using the Microsoft Ajax Minifier (http://ajaxmin.codeplex.com).</description>
     <summary>BundleTransformer.MicrosoftAjax contains 2 minifier-adapters: MicrosoftAjaxCssMinifier (for minification of CSS-code) and MicrosoftAjaxJsMinifier (for minification of JS-code). These adapters perform minification using the Microsoft Ajax Minifier.</summary>
-    <releaseNotes>Added support of the Microsoft Ajax Minifier 4.75.</releaseNotes>
+    <releaseNotes>Added support of the Microsoft Ajax Minifier 4.76.</releaseNotes>
 	<copyright>Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation Microsoft AjaxMin</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="[1.6.11]" />
-	  <dependency id="AjaxMin" version="4.75.4713.17606" />
+      <dependency id="BundleTransformer.Core" version="1.6.13" />
+	  <dependency id="AjaxMin" version="4.76.4714.20550" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.MicrosoftAjax.dll" />

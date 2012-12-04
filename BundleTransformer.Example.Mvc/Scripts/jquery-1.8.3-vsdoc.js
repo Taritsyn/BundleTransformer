@@ -1,14 +1,14 @@
-﻿/*
+/*
 * This file has been generated to support Visual Studio IntelliSense.
 * You should not use this file at runtime inside the browser--it is only
 * intended to be used only for design-time IntelliSense.  Please use the
-* standard jQuery library for all production use.
+* standard jQuery library for all runtime use.
 *
-* Comment version: 1.8.2
+* Comment version: 1.8.3
 */
 
 /*!
-* jQuery JavaScript Library v1.8.2
+* jQuery JavaScript Library v1.8.3
 * http://jquery.com/
 *
 * Distributed in whole under the terms of the MIT
@@ -80,7 +80,9 @@
             tick = function () {
                 var currentTime = fxNow || createFxNow(),
                     remaining = Math.max(0, animation.startTime + animation.duration - currentTime),
-                    percent = 1 - (remaining / animation.duration || 0),
+                    // archaic crash bug won't allow us to use 1 - ( 0.5 || 0 ) (#12497)
+                    temp = remaining / animation.duration || 0,
+                    percent = 1 - temp,
                     index = 0,
                     length = animation.tweens.length;
 
@@ -231,8 +233,10 @@
                         (function add(args) {
                             jQuery.each(args, function (_, arg) {
                                 var type = jQuery.type(arg);
-                                if (type === "function" && (!options.unique || !self.has(arg))) {
-                                    list.push(arg);
+                                if (type === "function") {
+                                    if (!options.unique || !self.has(arg)) {
+                                        list.push(arg);
+                                    }
                                 } else if (arg && arg.length && type !== "string") {
                                     // Inspect recursively
                                     add(arg);
@@ -782,9 +786,12 @@
 
         // A cross-domain request is in order when we have a protocol:host:port mismatch
         if (s.crossDomain == null) {
-            parts = rurl.exec(s.url.toLowerCase()) || false;
-            s.crossDomain = parts && (parts.join(":") + (parts[3] ? "" : parts[1] === "http:" ? 80 : 443)) !==
-				(ajaxLocParts.join(":") + (ajaxLocParts[3] ? "" : ajaxLocParts[1] === "http:" ? 80 : 443));
+            parts = rurl.exec(s.url.toLowerCase());
+            s.crossDomain = !!(parts &&
+				(parts[1] !== ajaxLocParts[1] || parts[2] !== ajaxLocParts[2] ||
+					(parts[3] || (parts[1] === "http:" ? 80 : 443)) !=
+						(ajaxLocParts[3] || (ajaxLocParts[1] === "http:" ? 80 : 443)))
+			);
         }
 
         // Convert data if not already a string
@@ -1081,9 +1088,8 @@
         "value": {}
     };
     jQuery.browser = {
-        "chrome": true,
-        "version": '21.0.1180.89',
-        "webkit": true
+        "msie": true,
+        "version": '10.0'
     };
     jQuery.buildFragment = function (args, context, scripts) {
 
@@ -1434,9 +1440,7 @@
         "width": {},
         "margin": {},
         "padding": {},
-        "borderWidth": {},
-        "top": {},
-        "left": {}
+        "borderWidth": {}
     };
     jQuery.cssNumber = {
         "fillOpacity": true,
@@ -1863,7 +1867,7 @@
     };
     jQuery.fn = {
         "selector": '',
-        "jquery": '1.8.2',
+        "jquery": '1.8.3',
         "length": 0
     };
     jQuery.fragments = {};
@@ -2504,7 +2508,10 @@
         "frameborder": 'frameBorder',
         "contenteditable": 'contentEditable'
     };
-    jQuery.propHooks = { "tabIndex": {} };
+    jQuery.propHooks = {
+        "tabIndex": {},
+        "selected": {}
+    };
     jQuery.proxy = function (fn, context) {
         /// <summary>
         ///     Takes a function and returns a new one that will always have a particular context.
@@ -2873,24 +2880,24 @@
         "opacity": true,
         "cssFloat": true,
         "checkOn": true,
-        "optSelected": true,
+        "optSelected": false,
         "getSetAttribute": true,
         "enctype": true,
         "html5Clone": true,
         "boxModel": true,
         "submitBubbles": true,
         "changeBubbles": true,
-        "focusinBubbles": false,
+        "focusinBubbles": true,
         "deleteExpando": true,
         "noCloneEvent": true,
         "inlineBlockNeedsLayout": false,
         "shrinkWrapBlocks": false,
         "reliableMarginRight": true,
-        "boxSizingReliable": true,
-        "pixelPosition": false,
-        "noCloneChecked": true,
+        "boxSizingReliable": false,
+        "pixelPosition": true,
+        "noCloneChecked": false,
         "optDisabled": true,
-        "radioValue": true,
+        "radioValue": false,
         "checkClone": true,
         "appendChecked": true,
         "ajax": true,
@@ -3004,7 +3011,9 @@
         /// <returns type="Array" />
 
         var elem,
-            i = 1;
+            duplicates = [],
+            i = 1,
+            j = 0;
 
         hasDuplicate = baseHasDuplicate;
         results.sort(sortOrder);
@@ -3012,8 +3021,11 @@
         if (hasDuplicate) {
             for (; (elem = results[i]) ; i++) {
                 if (elem === results[i - 1]) {
-                    results.splice(i--, 1);
+                    j = duplicates.push(i);
                 }
+            }
+            while (j--) {
+                results.splice(duplicates[j], 1);
             }
         }
 

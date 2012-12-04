@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.11
+               README file for Bundle Transformer: Core 1.6.13
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed error, occured when automatic transformation of relative paths 
-   to absolute in CSS-code.
+   Now, during combining of JS-code at the end of each file added semicolon
+   (fixed bug #15 "Missing semicolon in pre-minified files").
 
    =============
    DOCUMENTATION

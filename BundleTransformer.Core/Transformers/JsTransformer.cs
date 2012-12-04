@@ -238,11 +238,21 @@
 
 			foreach (var asset in assets)
 			{
+				string assetContent = asset.Content.Trim();
+
 				if (enableTracing)
 				{
 					content.AppendFormatLine("//#region URL: {0}", asset.Url);
 				}
-				content.AppendLine(asset.Content);
+				content.Append(assetContent);
+				if (assetContent.EndsWith(";"))
+				{
+					content.AppendLine();
+				}
+				else
+				{
+					content.AppendLine(";");
+				}
 				if (enableTracing)
 				{
 					content.AppendLine("//#endregion");

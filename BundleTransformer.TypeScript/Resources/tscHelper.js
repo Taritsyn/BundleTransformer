@@ -1,15 +1,18 @@
-"use strict";
-
 var typeScriptHelper = {};
 
-;(function (typeScriptHelper, undefined) {
-	var CUTTING_LINE_BEGIN_TOKEN = '"bundle_transformer_begin_unneeded_code_cut";';
-	var CUTTING_LINE_END_TOKEN = '"bundle_transformer_end_unneeded_code_cut";';
+;(function (typeScriptHelper, typeScript, undefined) {
+	"use strict";
 	
-	var StringBuilder = (function () {
+	var CUTTING_LINE_BEGIN_TOKEN = '"bundle_transformer_begin_unneeded_code_cut";',
+		CUTTING_LINE_END_TOKEN = '"bundle_transformer_end_unneeded_code_cut";',
+		StringBuilder,
+		defaultOptions
+		;
+	
+	StringBuilder = (function () {
 		function StringBuilder() {
 			this._buffer = [];
-		};
+		}
 
 		StringBuilder.prototype.Write = function (s) {
 			this._buffer.push(s);
@@ -37,7 +40,7 @@ var typeScriptHelper = {};
 		return StringBuilder;
 	})();
 
-	var defaultOptions = {
+	defaultOptions = {
 		styleSettings: {
 			bitwise: false,
 			blockInCompoundStmt: false,
@@ -72,8 +75,8 @@ var typeScriptHelper = {};
 		canCallDefinitionSignature: false,
 		inferPropertiesFromThisAssignment: false,
 		useDefaultLib: false,
-		codeGenTarget: TypeScript.CodeGenTarget.ES3,
-        moduleGenTarget: TypeScript.ModuleGenTarget.Synchronous,
+		codeGenTarget: typeScript.CodeGenTarget.ES3,
+        moduleGenTarget: typeScript.ModuleGenTarget.Synchronous,
         outputFileName: "",
         errorFileName: "",
         mapSourceFiles: false,
@@ -82,24 +85,27 @@ var typeScriptHelper = {};
 	};
 	
 	function getCompilationSettings(options) {
+		var compilationSettings;
+		
 		options = options || {};
 		if (typeof options.codeGenTarget === "string") {
 			options.codeGenTarget = parseCodeGenTarget(options.codeGenTarget);
 		}
 		
-		var compilationSettings = extendDeep(options, extendDeep(defaultOptions, {}));
+		compilationSettings = extendDeep(options, extendDeep(defaultOptions, {}));
 
 		return compilationSettings;
-	};
+	}
 	
 	function parseCodeGenTarget(code) {
 		var codeGenTarget;
+		
 		switch (code) {
 			case "EcmaScript3":
-				codeGenTarget = TypeScript.CodeGenTarget.ES3;
+				codeGenTarget = typeScript.CodeGenTarget.ES3;
 				break;
 			case "EcmaScript5":
-				codeGenTarget = TypeScript.CodeGenTarget.ES5;
+				codeGenTarget = typeScript.CodeGenTarget.ES5;
 				break;
 			default:
 				throw {
@@ -111,15 +117,55 @@ var typeScriptHelper = {};
 		return codeGenTarget;
 	}
 	
+	function getDependenciesCode(dependencies) {
+		var dependencyCount,
+			dependenciesCodeBuilder,
+			dependencyIndex,
+			dependency,
+			dependenciesCode
+			;
+
+		dependenciesCode = "";
+		
+		if (dependencies) {
+			dependencyCount = dependencies.length;
+
+			if (dependencyCount > 0) {
+				dependenciesCodeBuilder = new StringBuilder();
+				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_BEGIN_TOKEN);
+
+				for (dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
+					dependency = dependencies[dependencyIndex];
+					dependenciesCodeBuilder.WriteLine(dependency.content);
+				}
+
+				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_END_TOKEN);
+
+				dependenciesCode = dependenciesCodeBuilder.ToString();
+				dependenciesCodeBuilder.Dispose();
+			}
+		}
+
+		return dependenciesCode;
+	}
+	
 	function getTargetCompiledCode(code, minWhitespace) {
-		var targetCode = "";
-		var cuttingLineBeginPosition = code.indexOf(CUTTING_LINE_BEGIN_TOKEN);
-		var cuttingLineEndPosition = code.indexOf(CUTTING_LINE_END_TOKEN);
+		var targetCode,
+			cuttingLineBeginPosition,
+			cuttingLineEndPosition,
+			targetBeginCode,
+			targetEndCodePosition,
+			targetEndCode
+			;
+
+		targetCode = "";
+		cuttingLineBeginPosition = code.indexOf(CUTTING_LINE_BEGIN_TOKEN);
+		cuttingLineEndPosition = code.indexOf(CUTTING_LINE_END_TOKEN);
 		
 		if (cuttingLineBeginPosition !== -1 && cuttingLineEndPosition !== -1) {
-			var targetBeginCode = code.substring(0, cuttingLineBeginPosition);
-			var targetEndCodePosition = cuttingLineEndPosition + CUTTING_LINE_END_TOKEN.length + 1;
-			var targetEndCode = code.substring(targetEndCodePosition);
+			targetBeginCode = code.substring(0, cuttingLineBeginPosition);
+			targetEndCodePosition = cuttingLineEndPosition + CUTTING_LINE_END_TOKEN.length + 1;
+			targetEndCode = code.substring(targetEndCodePosition);
 
 			targetCode = targetBeginCode.trim() + (minWhitespace ? "" : "\n") + targetEndCode.trim();
 			targetCode = targetCode.replace(/;(\s*;)+/gm , ";");
@@ -130,7 +176,7 @@ var typeScriptHelper = {};
 	
 	function extendDeep(parent, child) {
 		var propertyName, 
-		    toStr = Object.prototype.toString
+			toStr = Object.prototype.toString
 			;
 
 		child = child || {};
@@ -148,21 +194,32 @@ var typeScriptHelper = {};
 		}
 
 		return child;
-	};
+	}
 
 	typeScriptHelper.compile = function(code, dependencies, options) {
-		var codeBuilder = new StringBuilder();
-		var errorBuilder = {
-			Write: function(s) { },
-			WriteLine: function(s) { },
+		var codeBuilder,
+			errorBuilder,
+			logger,
+			compilationSettings,
+			parseErrors,
+			compiler,
+			dependenciesCode,
+			result
+			;
+
+		codeBuilder = new StringBuilder();
+		logger = new typeScript.NullLogger();
+		errorBuilder = {
+			Write: function() { },
+			WriteLine: function() { },
 			Dispose: function() { },
 			Close: function() { }
 		};
-		var logger = new TypeScript.NullLogger();
-		var compilationSettings = getCompilationSettings(options);
-		var parseErrors = [];
+		compilationSettings = getCompilationSettings(options);
+		parseErrors = [];
+		dependenciesCode = getDependenciesCode(dependencies);
 
-		var compiler = new TypeScript.TypeScriptCompiler(errorBuilder, logger, compilationSettings);
+		compiler = new typeScript.TypeScriptCompiler(errorBuilder, logger, compilationSettings);
 		compiler.setErrorCallback(function(minChar, charLen, message) {
 			parseErrors.push({
 				startIndex: minChar,
@@ -171,36 +228,19 @@ var typeScriptHelper = {};
 			});
 		});
 		compiler.parser.errorRecovery = compilationSettings.errorRecovery;
-		if (dependencies) {
-			var dependencyCount = dependencies.length;
-
-			if (dependencyCount > 0) {
-				var dependenciesCodeBuilder = new StringBuilder();
-				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_BEGIN_TOKEN);
-
-				for (var dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
-					var dependency = dependencies[dependencyIndex];
-					dependenciesCodeBuilder.WriteLine(dependency.content);
-				}
-
-				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_END_TOKEN);
-
-				var dependenciesCode = dependenciesCodeBuilder.ToString();
-				dependenciesCodeBuilder.Dispose();
-
-				compiler.addUnit(dependenciesCode, "dependencies.ts", false);
-			}
+		if (dependenciesCode) {
+			compiler.addUnit(dependenciesCode, "dependencies.ts", false);
 		}
 		compiler.typeCheck();
 		compiler.addUnit(code, "output.ts");
 
 		parseErrors = [];
 		compiler.reTypeCheck();
-		compiler.emit(function createFile(fileName) {
+		compiler.emit(function createFile() {
 			return codeBuilder;
 		});
 
-		var result = {};
+		result = {};
 		result.compiledCode = getTargetCompiledCode(codeBuilder.ToString(), 
 			compilationSettings.minWhitespace);
 		if (parseErrors.length > 0) {
@@ -212,4 +252,4 @@ var typeScriptHelper = {};
 
 		return JSON.stringify(result);
 	};
-}(typeScriptHelper));
+}(typeScriptHelper, TypeScript));
