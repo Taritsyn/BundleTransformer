@@ -122,6 +122,7 @@ var typeScriptHelper = {};
 			dependenciesCodeBuilder,
 			dependencyIndex,
 			dependency,
+		    dependencyContent,
 			dependenciesCode
 			;
 
@@ -136,7 +137,15 @@ var typeScriptHelper = {};
 
 				for (dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
 					dependency = dependencies[dependencyIndex];
-					dependenciesCodeBuilder.WriteLine(dependency.content);
+					dependencyContent = dependency.content.trim();
+
+					dependenciesCodeBuilder.Write(dependencyContent);
+					if (/;\s*$/.test(dependencyContent)) {
+						dependenciesCodeBuilder.WriteLine("");
+					}
+					else {
+						dependenciesCodeBuilder.WriteLine(";");
+					}
 				}
 
 				dependenciesCodeBuilder.WriteLine(CUTTING_LINE_END_TOKEN);
