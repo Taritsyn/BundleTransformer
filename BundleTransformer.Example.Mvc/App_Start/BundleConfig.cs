@@ -16,6 +16,7 @@ namespace BundleTransformer.Example.Mvc
 
 			var commonStylesBundle = new Bundle("~/Bundles/CommonStyles");
 			commonStylesBundle.Include(
+				"~/Content/Fonts.css",
 				"~/Content/Site.css",
 				"~/Content/BundleTransformer.css",
 				"~/AlternativeContent/css/TestCssComponentsPaths.css",

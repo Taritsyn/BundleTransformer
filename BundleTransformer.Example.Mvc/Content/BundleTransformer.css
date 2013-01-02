@@ -10,6 +10,16 @@
 	border: none;
 }
 
+.main-content H1,
+.main-content H2 {
+	font-family: "Bitstream Vera Sans Bold";
+	font-weight: normal;
+}
+
+.main-content H2 {
+	font-size: 1.5em;
+}
+
 A
 {
     padding-left: 0;
@@ -22,13 +32,13 @@ CODE
 	font-family: Courier New;
 }
 
-UL#social LI
+#social LI
 {
     display: inline;
     list-style: none;
 }
 
-    UL#social LI A
+    #social LI A
     {
         color: #999;
         text-decoration: none;

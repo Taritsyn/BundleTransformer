@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.13
+               README file for Bundle Transformer: Core 1.6.14
 
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 		  
    ===========
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Now, during combining of JS-code at the end of each file added semicolon
-   (fixed bug #15 "Missing semicolon in pre-minified files").
+   Fixed error, occured when transforming relative paths with hash (e.g. 
+   "fonts/vera-bold-webfont.svg#bitstream_vera_sansbold") to absolute.
 
    =============
    DOCUMENTATION

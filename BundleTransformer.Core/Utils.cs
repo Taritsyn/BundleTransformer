@@ -130,11 +130,23 @@
 
 			if (newRelativeUrl.StartsWith("../") || newRelativeUrl.StartsWith("./"))
 			{
+				string hash = string.Empty;
+				int hashPosition = newRelativeUrl.IndexOf('#');
+				if (hashPosition != -1)
+				{
+					hash = newRelativeUrl.Substring(hashPosition + 1);
+					newRelativeUrl = newRelativeUrl.Substring(0, hashPosition);
+				}
+
 				const string fakeSiteUrl = "http://bundletransformer.codeplex.com/";
 				var baseUri = new Uri(CombineUrls(fakeSiteUrl, newBaseUrl), UriKind.Absolute);
 
 				var absoluteUri = new Uri(baseUri, newRelativeUrl);
 				absoluteUrl = absoluteUri.PathAndQuery;
+				if (hash.Length > 0)
+				{
+					absoluteUrl += "#" + hash;
+				}
 			}
 			else
 			{

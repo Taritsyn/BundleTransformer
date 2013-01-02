@@ -185,6 +185,8 @@
     <Content Include="App_Data\Noesis.Javascript\x64\Noesis.Javascript.dll" />
     <Content Include="App_Data\Noesis.Javascript\x86\Noesis.Javascript.dll" />
     <Content Include="Content\BundleTransformer.css" />
+    <Content Include="Content\Fonts.css" />
+    <Content Include="Content\fonts\bitstream-vera-sans-bold\vera-bold-webfont.svg" />
     <Content Include="Content\images\0.gif" />
     <Content Include="Content\images\bundle_transformer_logo.png" />
     <Content Include="Content\images\icons\envelope.png" />
@@ -394,6 +396,9 @@
     <None Include="BundleTransformer.Configuration.xss">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
+    <None Include="Content\fonts\bitstream-vera-sans-bold\vera-bold-webfont.eot" />
+    <None Include="Content\fonts\bitstream-vera-sans-bold\vera-bold-webfont.ttf" />
+    <None Include="Content\fonts\bitstream-vera-sans-bold\vera-bold-webfont.woff" />
     <None Include="Content\less\folder\subfolder\TestLessSubImport.less" />
     <None Include="Content\less\TestLess.less" />
     <None Include="Content\less\folder\TestLessImport.less" />

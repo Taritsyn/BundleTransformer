@@ -11,14 +11,14 @@
 		/// Regular expression for working with paths of components in CSS-code
 		/// </summary>
 		private static readonly Regex _urlStylesheetRuleRegex =
-			new Regex(@"url\((?<quote>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)?\)",
+			new Regex(@"url\((?<quote>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~#]+)(\k<quote>)?\)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with paths of imported stylesheets in CSS-code
 		/// </summary>
 		private static readonly Regex _importStylesheetRuleRegex =
-			new Regex(@"@import\s*(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote>)",
+			new Regex(@"@import\s*(?<quote>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~#]+)(\k<quote>)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
