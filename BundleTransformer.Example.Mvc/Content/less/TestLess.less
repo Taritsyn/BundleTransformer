@@ -1,17 +1,7 @@
-﻿@bg-color: #7AC0DA;
+﻿@import-once "Mixins.less";
+
+@bg-color: #7AC0DA;
 @caption-color: #FFFFFF; 
-
-.visible()
-{
-	display: block;
-}
-
-.rounded-corners(@radius: 5px)
-{
-	border-radius: @radius;
-	-webkit-border-radius: @radius;
-	-moz-border-radius: @radius;
-}
 
 .translators #less
 {
@@ -22,7 +12,7 @@
 	color: @caption-color;
 	font-weight: bold;
 	border: 1px solid @bg-color;
-	.rounded-corners(5px);
+	.border-radius(5px);
 }
 
 @import url(folder/TestLessImport.less);

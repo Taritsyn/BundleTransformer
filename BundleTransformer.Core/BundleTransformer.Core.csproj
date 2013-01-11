@@ -100,6 +100,7 @@
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
     <Compile Include="Constants\Common.cs" />
     <Compile Include="ErrorMessageHelpers\ErrorSourceInfo.cs" />
+    <Compile Include="FileSystem\CssRelativePathResolver.cs" />
     <Compile Include="FileSystem\FileSystemWrapper.cs" />
     <Compile Include="FileSystem\IJsRelativePathResolver.cs" />
     <Compile Include="FileSystem\IRelativePathResolver.cs" />
@@ -109,7 +110,6 @@
     <Compile Include="Web\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IFileSystemWrapper.cs" />
     <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
-    <Compile Include="FileSystem\CssRelativePathResolver.cs" />
     <Compile Include="Filters\CssUnnecessaryAssetsFilter.cs" />
     <Compile Include="Filters\CssDuplicateAssetsFilter.cs" />
     <Compile Include="Filters\CssFileExtensionsFilter.cs" />

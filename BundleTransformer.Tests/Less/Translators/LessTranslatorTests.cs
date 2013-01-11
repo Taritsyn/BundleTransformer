@@ -36,6 +36,25 @@
 
 			var fileSystemMock = new Mock<IFileSystemWrapper>();
 			fileSystemMock
+				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "Mixins.less")))
+				.Returns(true)
+				;
+			fileSystemMock
+				.Setup(fs => fs.GetFileTextContent(Path.Combine(STYLES_DIRECTORY_PATH, "Mixins.less")))
+				.Returns(@"// Border Radius
+.border-radius(@radius) {
+  -webkit-border-radius: @radius;
+     -moz-border-radius: @radius;
+          border-radius: @radius;
+}
+
+// Visible
+.visible()
+{
+	display: block;
+}")
+				;
+			fileSystemMock
 				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.less")))
 				.Returns(true)
 				;
@@ -86,20 +105,10 @@
 			var lessTranslator = new LessTranslator(httpContext, fileSystemWrapper, 
 				cssRelativePathResolver, lessConfig);
 
-			const string assetContent = @"@bg-color: #7AC0DA;
+			const string assetContent = @"@import-once ""/Content/Mixins.less"";
+
+@bg-color: #7AC0DA;
 @caption-color: #FFFFFF; 
-
-.visible()
-{
-	display: block;
-}
-
-.rounded-corners(@radius: 5px)
-{
-	border-radius: @radius;
-	-webkit-border-radius: @radius;
-	-moz-border-radius: @radius;
-}
 
 .translators #less
 {
@@ -110,7 +119,7 @@
 	color: @caption-color;
 	font-weight: bold;
 	border: 1px solid @bg-color;
-	.rounded-corners(5px);
+	.border-radius(5px);
 }
 
 @import ""/Content/TestLessImport.less"";";
@@ -120,10 +129,11 @@
 			lessTranslator.FillImportedFilePaths(assetContent, null, importedFilePaths);
 
 			// Assert
-			Assert.AreEqual(3, importedFilePaths.Count);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.less"), importedFilePaths[0]);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.Sub1.less"), importedFilePaths[1]);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.Sub2.less"), importedFilePaths[2]);
+			Assert.AreEqual(4, importedFilePaths.Count);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Mixins.less"), importedFilePaths[0]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.less"), importedFilePaths[1]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.Sub1.less"), importedFilePaths[2]);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "TestLessImport.Sub2.less"), importedFilePaths[3]);
 		}
 
 		private class MockHttpServerUtility : HttpServerUtilityBase

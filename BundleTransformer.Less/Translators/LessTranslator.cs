@@ -49,7 +49,7 @@
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _importLessFilesRuleRegex =
-			new Regex(@"@import\s(((?<quote1>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote1>))|(url\((?<quote1>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~]+)(\k<quote1>)?\)))",
+			new Regex(@"@import(?:-once)?\s(((?<quote1>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~#]+)(\k<quote1>))|(url\((?<quote1>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~#]+)(\k<quote1>)?\)))",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
@@ -187,11 +187,13 @@
 		{
 			string newContent;
 			string assetPath = asset.Path;
+			string assetUrl = asset.Url;
 			var importedFilePaths = new List<string>();
 
 			try
 			{
-				newContent = _cssRelativePathResolver.ResolveAllRelativePaths(asset.Content, asset.Url);
+				newContent = _cssRelativePathResolver.ResolveComponentsRelativePaths(asset.Content, assetUrl);
+				newContent = ResolveImportsRelativePaths(newContent, assetUrl);
 				FillImportedFilePaths(newContent, null, importedFilePaths);
 
 				newContent = lessEngine.TransformToCss(newContent, null);
@@ -216,6 +218,32 @@
 			asset.Content = newContent;
 			asset.Minified = enableNativeMinification;
 			asset.RequiredFilePaths = importedFilePaths;
+		}
+
+		/// <summary>
+		/// Transforms relative paths of imported stylesheets to absolute in LESS-code
+		/// </summary>
+		/// <param name="content">Text content of LESS-asset</param>
+		/// <param name="path">LESS-file path</param>
+		/// <returns>Processed text content of LESS-asset</returns>
+		private string ResolveImportsRelativePaths(string content, string path)
+		{
+			return _importLessFilesRuleRegex.Replace(content, m =>
+			{
+				string result = m.Groups[0].Value;
+
+				if (m.Groups["url"].Success)
+				{
+					string urlValue = m.Groups["url"].Value;
+					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : @"""";
+
+					result = string.Format("@import {0}{1}{0}",
+						quoteValue,
+						_cssRelativePathResolver.ResolveRelativePath(path, urlValue));
+				}
+
+				return result;
+			});
 		}
 
 		/// <summary>

@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.13
+            README file for Bundle Transformer: LESS Lite 1.6.14
 
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -18,6 +18,11 @@
    
    Uses NuGet-package the DotlessClientOnly 
    (http://nuget.org/packages/DotlessClientOnly).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed bug #18 "@import-once does not work".
    
    =============
    DOCUMENTATION

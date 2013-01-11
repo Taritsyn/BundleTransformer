@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.6.13
+               README file for Bundle Transformer: LESS 1.6.14
 
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -17,6 +17,11 @@
    of translated LESS-asset.
 
    Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed bug #18 "@import-once does not work".
  
    ====================
    POST-INSTALL ACTIONS
