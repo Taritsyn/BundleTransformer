@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Microsoft Ajax 1.6.14
+          README file for Bundle Transformer: Microsoft Ajax 1.6.15
  
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -20,7 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Microsoft Ajax Minifier 4.78.
+   Added support of the Microsoft Ajax Minifier 4.80.
    
    ====================
    POST-INSTALL ACTIONS

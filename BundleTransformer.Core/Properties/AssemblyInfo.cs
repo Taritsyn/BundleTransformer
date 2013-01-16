@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundle Transformer: Core")]
-[assembly: AssemblyCopyright("Copyright © Andrey Taritsyn 2012")]
+[assembly: AssemblyCopyright("Copyright © Andrey Taritsyn 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
