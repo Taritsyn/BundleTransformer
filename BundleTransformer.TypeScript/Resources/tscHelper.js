@@ -61,7 +61,6 @@ var typeScriptHelper = {};
 		propagateConstants: false,
 		minWhitespace: false,
 		parseOnly: false,
-		outputMany: true,
 		errorRecovery: true,
 		emitComments: true,
 		watch: false,
@@ -77,7 +76,7 @@ var typeScriptHelper = {};
 		useDefaultLib: false,
 		codeGenTarget: typeScript.CodeGenTarget.ES3,
         moduleGenTarget: typeScript.ModuleGenTarget.Synchronous,
-        outputFileName: "",
+        outputOption: "",
         errorFileName: "",
         mapSourceFiles: false,
         generateDeclarationFiles: false,
@@ -245,8 +244,11 @@ var typeScriptHelper = {};
 
 		parseErrors = [];
 		compiler.reTypeCheck();
-		compiler.emit(function createFile() {
-			return codeBuilder;
+		compiler.emit({
+			createFile: function(fileName) { return codeBuilder; },
+			fileExists: function (path) { return false; },
+			directoryExists: function (path) { return false; },
+			resolvePath: function (path) { return path; }
 		});
 
 		result = {};
@@ -259,6 +261,6 @@ var typeScriptHelper = {};
 		codeBuilder.Dispose();
 		errorBuilder.Dispose();
 
-		return JSON.stringify(result);
+		return JSON2.stringify(result);
 	};
 }(typeScriptHelper, TypeScript));

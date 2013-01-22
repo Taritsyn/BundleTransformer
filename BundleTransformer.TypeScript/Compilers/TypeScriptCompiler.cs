@@ -127,7 +127,7 @@
 			{
 				Type type = GetType();
 
-				_jsEngine = new MsieJsEngine(true, true);
+				_jsEngine = new MsieJsEngine(true, false);
 				_jsEngine.ExecuteResource(TYPESCRIPT_LIBRARY_RESOURCE_NAME, type);
 				_jsEngine.ExecuteResource(TSC_HELPER_RESOURCE_NAME, type);
 
