@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.14
+               README file for Bundle Transformer: Core 1.6.17
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed error, occured when transforming relative paths with hash (e.g. 
-   "fonts/vera-bold-webfont.svg#bitstream_vera_sansbold") to absolute.
+   Fixed bug #19 "System.OutOfMemoryException caused by 
+   RegexOptions.Compiled flag".
 
    =============
    DOCUMENTATION

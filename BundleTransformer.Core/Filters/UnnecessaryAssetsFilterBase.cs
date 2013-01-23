@@ -55,8 +55,7 @@
 						newIgnorePattern = newIgnorePattern + "$";
 					}
 
-					ignoreRegExps.Add(new Regex(newIgnorePattern, 
-						RegexOptions.IgnoreCase | RegexOptions.Compiled));
+					ignoreRegExps.Add(new Regex(newIgnorePattern, RegexOptions.IgnoreCase));
 				}
 			}
 

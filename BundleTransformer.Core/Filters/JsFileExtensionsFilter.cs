@@ -82,8 +82,7 @@
 						}
 						jsFileNamePattern = "^" + jsFileNamePattern + "$";
 
-						jsFileRegExps.Add(new Regex(jsFileNamePattern,
-							RegexOptions.IgnoreCase | RegexOptions.Compiled));
+						jsFileRegExps.Add(new Regex(jsFileNamePattern, RegexOptions.IgnoreCase));
 					}
 				}
 			}

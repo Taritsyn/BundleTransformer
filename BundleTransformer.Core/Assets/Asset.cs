@@ -235,7 +235,7 @@
 		public Asset(string path, IHttpApplicationInfo applicationInfo, IFileSystemWrapper fileSystemWrapper)
 		{
 			_applicationRootPathRegex = new Regex("^" + Regex.Escape(applicationInfo.RootPath), 
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 			_applicationRootUrl = applicationInfo.RootUrl;
 			_fileSystemWrapper = fileSystemWrapper;
 
