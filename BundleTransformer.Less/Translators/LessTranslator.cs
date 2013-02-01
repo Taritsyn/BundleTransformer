@@ -115,7 +115,7 @@
 			DotlessConfiguration lessEngineConfig = DotlessConfiguration.GetDefault();
 			lessEngineConfig.MapPathsToWeb = false;
 			lessEngineConfig.CacheEnabled = false;
-			lessEngineConfig.DisableUrlRewriting = true;
+			lessEngineConfig.DisableUrlRewriting = false;
 			lessEngineConfig.Web = false;
 			lessEngineConfig.MinifyOutput = enableNativeMinification;
 			lessEngineConfig.LessSource = typeof(VirtualFileReader);

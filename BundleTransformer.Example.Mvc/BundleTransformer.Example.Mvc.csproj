@@ -178,6 +178,7 @@
     <Content Include="Content\images\0.gif" />
     <Content Include="Content\images\bundle_transformer_logo.png" />
     <Content Include="Content\images\icons\envelope.png" />
+    <Content Include="Content\images\icons\headphone.png" />
     <Content Include="Content\images\linkedin.png" />
     <Content Include="Content\sass\TestSass.sass" />
     <Content Include="Content\sass\TestSassImport.sass" />

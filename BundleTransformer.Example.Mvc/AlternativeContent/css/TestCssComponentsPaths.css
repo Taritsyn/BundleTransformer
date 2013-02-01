@@ -57,3 +57,8 @@
 {
 	background: transparent url(./images/icons/game.png) no-repeat !important;
 }
+
+.headphone
+{
+	display: none;
+}

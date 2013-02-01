@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.6.14
+               README file for Bundle Transformer: LESS 1.6.17
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #18 "@import-once does not work".
+   Fixed bug #20 "Relative image references in a .LESS file not resolving correctly".
  
    ====================
    POST-INSTALL ACTIONS
