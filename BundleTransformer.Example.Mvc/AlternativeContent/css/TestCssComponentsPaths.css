@@ -62,3 +62,42 @@
 {
 	display: none;
 }
+
+.inbox
+{
+	background: transparent url("../images/icons/inbox(1).png") no-repeat !important;
+}
+
+.joystick
+{
+	background: transparent url(../images/icons/joystick[2].png) no-repeat !important;
+}
+
+.keyboard
+{
+	background: transparent url(../images/icons/keyboard{3}.png) no-repeat !important;
+}
+
+.license
+{
+	display: none;
+}
+
+.monitor
+{
+	background: transparent url(../images/icons/монитор.png) no-repeat !important;
+}
+
+.network
+{
+	display: none;
+}
+
+.open-source {
+	background: transparent url(../images/icons/open_source.png) no-repeat !important;
+}
+
+.plug
+{
+	display: none;
+}

@@ -49,7 +49,9 @@
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _importLessFilesRuleRegex =
-			new Regex(@"@import(?:-once)?\s(((?<quote1>'|"")(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~#]+)(\k<quote1>))|(url\((?<quote1>'|"")?(?<url>[a-zA-Z0-9а-яА-Я-_\s./?%&:;+=~#]+)(\k<quote1>)?\)))",
+			new Regex(@"@import(?:-once)?\s(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
+				@"|(url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>

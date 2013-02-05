@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.17
+               README file for Bundle Transformer: Core 1.6.18
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #19 "System.OutOfMemoryException caused by 
-   RegexOptions.Compiled flag".
+   Fixed bug #21 "Files that contain @ do net get resolved by 
+   CssRelativePathResolver properly".
 
    =============
    DOCUMENTATION

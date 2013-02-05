@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.6.16
+           README file for Bundle Transformer: TypeScript 1.6.18
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 0.8.2.
+   Fixed bug #21 "Files that contain @ do net get resolved by 
+   CssRelativePathResolver properly".
 
    =============
    DOCUMENTATION

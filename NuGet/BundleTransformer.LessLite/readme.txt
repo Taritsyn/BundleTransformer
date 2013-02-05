@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.17
+            README file for Bundle Transformer: LESS Lite 1.6.18
 
    ----------------------------------------------------------------------
 
@@ -22,7 +22,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #20 "Relative image references in a .LESS file not resolving correctly".
+   Fixed bug #21 "Files that contain @ do net get resolved by 
+   CssRelativePathResolver properly".
    
    =============
    DOCUMENTATION

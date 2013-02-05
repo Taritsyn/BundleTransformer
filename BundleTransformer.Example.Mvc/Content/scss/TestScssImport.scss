@@ -5,3 +5,9 @@
 	background-color: $alt-bg-color;
 	border-color: $alt-bg-color;
 }
+
+.plug
+{
+	display: inline;
+	background: transparent url("$plug.png") no-repeat !important;
+}

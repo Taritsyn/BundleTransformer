@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.6.13
+          README file for Bundle Transformer: Sass and SCSS 1.6.18
 
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -16,6 +16,12 @@
    SCSS-code to CSS-code.
    Also contains HTTP-handler SassAndScssAssetHandler, which is 
    responsible for text output of translated Sass- or SCSS-asset.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed bug #21 "Files that contain @ do net get resolved by 
+   CssRelativePathResolver properly".
    
    =============
    DOCUMENTATION

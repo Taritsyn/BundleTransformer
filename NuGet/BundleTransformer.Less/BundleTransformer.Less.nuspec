@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Less</id>
-    <version>1.6.17</version>
+    <version>1.6.18</version>
 	<title>Bundle Transformer: LESS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,12 +16,12 @@ Uses NuGet-package the dotless (http://nuget.org/packages/dotless).</description
     <summary>BundleTransformer.Less contains translator-adapter LessTranslator. This adapter makes translation of LESS-code to CSS-code. Also contains HTTP-handler LessAssetHandler, which is responsible for text output of translated LESS-asset.
 	
 Uses NuGet-package the dotless.</summary>
-	<releaseNotes>Fixed bug #20 "Relative image references in a .LESS file not resolving correctly".</releaseNotes>
+	<releaseNotes>Fixed bug #21 "Files that contain @ do net get resolved by CssRelativePathResolver properly".</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling LESS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.6.17" />
+      <dependency id="BundleTransformer.Core" version="1.6.18" />
 	  <dependency id="dotless" version="1.3.1.0" />
     </dependencies>
     <references>
