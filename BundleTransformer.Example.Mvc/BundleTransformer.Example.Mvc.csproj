@@ -177,7 +177,7 @@
     <Content Include="AlternativeContent\images\icons\joystick[2].png" />
     <Content Include="AlternativeContent\images\icons\keyboard{3}.png" />
     <Content Include="AlternativeContent\images\icons\open_source.png" />
-    <Content Include="AlternativeContent\images\icons\монитор.png" />
+    <Content Include="AlternativeContent\images\icons\monitor.png" />
     <Content Include="App_Data\Noesis.Javascript\x64\Noesis.Javascript.dll" />
     <Content Include="App_Data\Noesis.Javascript\x86\Noesis.Javascript.dll" />
     <Content Include="Content\BundleTransformer.css" />
