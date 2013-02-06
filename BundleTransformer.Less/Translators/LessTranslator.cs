@@ -36,33 +36,18 @@
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// CSS-file extension
-		/// </summary>
-		private const string CSS_FILE_EXTENSION = ".css";
-
-		/// <summary>
-		/// LESS-file extension
-		/// </summary>
-		private const string LESS_FILE_EXTENSION = ".less";
-
-		/// <summary>
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _importLessFilesRuleRegex =
-			new Regex(@"@import(?:-once)?\s(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
-				@"|(url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" + 
-				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))", 
+			new Regex(@"(?<importDirective>@import(?:-once)?)\s(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
+				@"|(url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// Object HttpContext
 		/// </summary>
 		private readonly HttpContextBase _httpContext;
-
-		/// <summary>
-		/// File system wrapper
-		/// </summary>
-		private readonly IFileSystemWrapper _fileSystemWrapper;
 
 		/// <summary>
 		/// CSS relative path resolver
@@ -82,7 +67,6 @@
 		/// </summary>
 		public LessTranslator()
 			: this(new HttpContextWrapper(HttpContext.Current),
-				BundleTransformerContext.Current.GetFileSystemWrapper(),
 				BundleTransformerContext.Current.GetCssRelativePathResolver(),
 				BundleTransformerContext.Current.GetLessConfiguration())
 		{ }
@@ -91,14 +75,12 @@
 		/// Constructs instance of LESS-translator
 		/// </summary>
 		/// <param name="httpContext">Object HttpContext</param>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
 		/// <param name="cssRelativePathResolver">CSS relative path resolver</param>
 		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
-		public LessTranslator(HttpContextBase httpContext, IFileSystemWrapper fileSystemWrapper,
-			ICssRelativePathResolver cssRelativePathResolver, LessSettings lessConfig)
+		public LessTranslator(HttpContextBase httpContext, ICssRelativePathResolver cssRelativePathResolver,
+			LessSettings lessConfig)
 		{
 			_httpContext = httpContext;
-			_fileSystemWrapper = fileSystemWrapper;
 			_cssRelativePathResolver = cssRelativePathResolver;
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
@@ -190,15 +172,18 @@
 			string newContent;
 			string assetPath = asset.Path;
 			string assetUrl = asset.Url;
-			var importedFilePaths = new List<string>();
+			IList<string> importedFilePaths;
 
 			try
 			{
-				newContent = _cssRelativePathResolver.ResolveComponentsRelativePaths(asset.Content, assetUrl);
-				newContent = ResolveImportsRelativePaths(newContent, assetUrl);
-				FillImportedFilePaths(newContent, null, importedFilePaths);
-
+				newContent = ResolveImportsRelativePaths(asset.Content, assetUrl);
 				newContent = lessEngine.TransformToCss(newContent, null);
+				IEnumerable<string> importedFileUrls = lessEngine.GetImports();
+
+				importedFilePaths = importedFileUrls
+					.Select(u => _httpContext.Server.MapPath(u))
+					.ToList()
+					;
 			}
 			catch (FileNotFoundException)
 			{
@@ -233,87 +218,22 @@
 			return _importLessFilesRuleRegex.Replace(content, m =>
 			{
 				string result = m.Groups[0].Value;
+				GroupCollection groups = m.Groups;
 
-				if (m.Groups["url"].Success)
+				if (groups["url"].Success)
 				{
-					string urlValue = m.Groups["url"].Value;
-					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : @"""";
+					string importDirectiveValue = groups["importDirective"].Value;
+					string urlValue = groups["url"].Value;
+					string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
 
-					result = string.Format("@import {0}{1}{0}",
+					result = string.Format("{0} {1}{2}{1}",
+						importDirectiveValue,
 						quoteValue,
 						_cssRelativePathResolver.ResolveRelativePath(path, urlValue));
 				}
 
 				return result;
 			});
-		}
-
-		/// <summary>
-		/// Fills the list of LESS-files, that were added to a LESS-asset 
-		/// by using the @import directive
-		/// </summary>
-		/// <param name="assetContent">Text content of LESS-asset</param>
-		/// <param name="assetUrl">URL of LESS-asset file</param>
-		/// <param name="importedFilePaths">List of LESS-files, that were added to a 
-		/// LESS-asset by using the @import directive</param>
-		public void FillImportedFilePaths(string assetContent, string assetUrl, IList<string> importedFilePaths)
-		{
-			MatchCollection matches = _importLessFilesRuleRegex.Matches(assetContent);
-			foreach (Match match in matches)
-			{
-				if (match.Groups["url"].Success)
-				{
-					string importedAssetUrl = match.Groups["url"].Value;
-					if (!string.IsNullOrWhiteSpace(importedAssetUrl))
-					{
-						if (assetUrl != null)
-						{
-							importedAssetUrl = _cssRelativePathResolver.ResolveRelativePath(
-								assetUrl, importedAssetUrl.Trim());
-						}
-						string importedAssetExtension = Path.GetExtension(importedAssetUrl);
-
-						if (string.Equals(importedAssetExtension, LESS_FILE_EXTENSION,
-							StringComparison.InvariantCultureIgnoreCase))
-						{
-							string importedAssetPath = _httpContext.Server.MapPath(importedAssetUrl);
-							if (_fileSystemWrapper.FileExists(importedAssetPath))
-							{
-								importedFilePaths.Add(importedAssetPath);
-
-								string importedAssetContent = _fileSystemWrapper.GetFileTextContent(
-									importedAssetPath);
-								FillImportedFilePaths(importedAssetContent, importedAssetUrl, importedFilePaths);
-							}
-							else
-							{
-								throw new FileNotFoundException(
-									string.Format(CoreStrings.Common_FileNotExist, importedAssetPath));
-							}
-						}
-						else if (!string.Equals(importedAssetExtension, CSS_FILE_EXTENSION,
-							StringComparison.InvariantCultureIgnoreCase))
-						{
-							importedAssetUrl += LESS_FILE_EXTENSION;
-
-							string importedAssetPath = _httpContext.Server.MapPath(importedAssetUrl);
-							if (_fileSystemWrapper.FileExists(importedAssetPath))
-							{
-								importedFilePaths.Add(importedAssetPath);
-
-								string importedAssetContent = _fileSystemWrapper.GetFileTextContent(
-									importedAssetPath);
-								FillImportedFilePaths(importedAssetContent, importedAssetUrl, importedFilePaths);
-							}
-							else
-							{
-								throw new FileNotFoundException(
-									string.Format(CoreStrings.Common_FileNotExist, importedAssetPath));
-							}
-						}
-					}
-				}
-			}
 		}
 
 		/// <summary>

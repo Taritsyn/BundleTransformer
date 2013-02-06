@@ -85,7 +85,7 @@
 
 .monitor
 {
-	background: transparent url(../images/icons/monitor.png) no-repeat !important;
+	display: none;
 }
 
 .network

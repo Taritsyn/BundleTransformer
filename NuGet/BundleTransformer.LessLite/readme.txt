@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.18
+            README file for Bundle Transformer: LESS Lite 1.6.19
 
    ----------------------------------------------------------------------
 
@@ -22,8 +22,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #21 "Files that contain @ do net get resolved by 
-   CssRelativePathResolver properly".
+   Fixed bug #22 "Please make lessEngineConfig.DisableUrlRewriting 
+   configurable in web.config".
    
    =============
    DOCUMENTATION
