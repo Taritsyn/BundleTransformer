@@ -1,5 +1,6 @@
 ﻿namespace BundleTransformer.Core.FileSystem
 {
+	using System;
 	using System.Text.RegularExpressions;
 
 	/// <summary>
@@ -31,16 +32,21 @@
 		{
 			return _urlStylesheetRuleRegex.Replace(content, m =>
 			{
-				string result = m.Groups[0].Value;
+				GroupCollection groups = m.Groups;
+				string result = groups[0].Value;
 
-				if (m.Groups["url"].Success)
+				if (groups["url"].Success)
 				{
-					string urlValue = m.Groups["url"].Value;
-					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : @"""";
+					string urlValue = groups["url"].Value.Trim();
+					string quoteValue = groups["quote"].Success ? groups["quote"].Value : string.Empty;
 
-					result = string.Format("url({0}{1}{0})",
-						quoteValue,
-						Utils.TransformRelativeUrlToAbsolute(path, urlValue));
+					string newUrl = urlValue;
+					if (urlValue.IndexOf("data:", StringComparison.OrdinalIgnoreCase) != 0)
+					{
+						newUrl = Utils.TransformRelativeUrlToAbsolute(path, urlValue);
+					}
+
+					result = string.Format("url({0}{1}{0})", quoteValue, newUrl);
 				}
 
 				return result;
@@ -57,12 +63,13 @@
 		{
 			return _importStylesheetRuleRegex.Replace(content, m =>
 			{
-				string result = m.Groups[0].Value;
+				GroupCollection groups = m.Groups;
+				string result = groups[0].Value;
 
-				if (m.Groups["url"].Success)
+				if (groups["url"].Success)
 				{
-					string urlValue = m.Groups["url"].Value;
-					string quoteValue = m.Groups["quote"].Success ? m.Groups["quote"].Value : @"""";
+					string urlValue = groups["url"].Value.Trim();
+					string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
 
 					result = string.Format("@import {0}{1}{0}",
 						quoteValue,

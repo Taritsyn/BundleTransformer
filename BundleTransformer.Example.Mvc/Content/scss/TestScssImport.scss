@@ -6,8 +6,8 @@
 	border-color: $alt-bg-color;
 }
 
-.plug
+.icon-plug
 {
 	display: inline;
-	background: transparent url("$plug.png") no-repeat !important;
+	background-image: url("$plug.png");
 }

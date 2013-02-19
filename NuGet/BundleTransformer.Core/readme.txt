@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.18
+               README file for Bundle Transformer: Core 1.6.21
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #21 "Files that contain @ do net get resolved by 
-   CssRelativePathResolver properly".
+   Fixed bug #23 "CssRelativePathResolver appends relative path to 
+   data uri's".
 
    =============
    DOCUMENTATION
