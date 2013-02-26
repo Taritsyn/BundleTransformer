@@ -11,11 +11,13 @@
 	<system.web>
 		<httpHandlers>
 			<add path="*.coffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
+			<add path="*.litcoffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
 		</httpHandlers>
 	</system.web>
 	<system.webServer>
 		<handlers>
 			<add name="CoffeeScriptAssetHandler" path="*.coffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" resourceType="File" preCondition="" />
+			<add name="LiterateCoffeeScriptAssetHandler" path="*.litcoffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" resourceType="File" preCondition="" />
 		</handlers>
 	</system.webServer>
 </configuration>

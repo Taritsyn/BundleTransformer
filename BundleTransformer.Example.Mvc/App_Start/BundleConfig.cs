@@ -50,6 +50,7 @@ namespace BundleTransformer.Example.Mvc
 				"~/Scripts/jquery.unobtrusive-ajax.js",
 				"~/Scripts/knockout-2.*",
 				"~/Scripts/coffee/TestCoffeeScript.coffee",
+				"~/Scripts/coffee/TestLiterateCoffeeScript.litcoffee",
 				"~/Scripts/ts/TranslatorBadge.ts",
 				"~/Scripts/ts/ColoredTranslatorBadge.ts",
 				"~/Scripts/ts/TestTypeScript.ts");

@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.6.13
+           README file for Bundle Transformer: CoffeeScript 1.6.22
 
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -13,9 +13,15 @@
    ===========
    BundleTransformer.CoffeeScript contains translator-adapter 
    CoffeeScriptTranslator (supports CoffeeScript (http://coffeescript.org) 
-   version 1.4.0). This adapter makes translation of CoffeeScript-code 
+   version 1.5.0). This adapter makes translation of CoffeeScript-code 
    to JS-code. Also contains HTTP-handler CoffeeScriptAssetHandler, which 
    is responsible for text output of translated CoffeeScript-asset.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of CoffeeScript version 1.5.0 (supports Literate 
+   CoffeeScript-files).
 
    =============
    DOCUMENTATION

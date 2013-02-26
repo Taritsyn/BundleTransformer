@@ -81,6 +81,13 @@
 
 		/// <summary>
 		/// Regular expression to determine whether
+		/// asset is Literate CoffeeScript-file based on its extension
+		/// </summary>
+		private static readonly Regex _litcoffeeFileExtensionRegex = new Regex(@"\.litcoffee$",
+			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
+		/// Regular expression to determine whether
 		/// asset is TypeScript-file based on its extension
 		/// </summary>
 		private static readonly Regex _tsFileExtensionRegex = new Regex(@"\.ts$",
@@ -213,6 +220,7 @@
 
 				return (assetType == AssetType.JavaScript
 					|| assetType == AssetType.CoffeeScript
+					|| assetType == AssetType.LiterateCoffeeScript
 					|| assetType == AssetType.TypeScript);
 			}
 		}
@@ -263,7 +271,7 @@
 		/// <returns>Asset type</returns>
 		public static AssetType GetAssetType(string assetPath)
 		{
-			AssetType assetType = AssetType.Unknown;
+			var assetType = AssetType.Unknown;
 
 			if (_cssFileExtensionRegex.IsMatch(assetPath))
 			{
@@ -288,6 +296,10 @@
 			else if (_coffeeFileExtensionRegex.IsMatch(assetPath))
 			{
 				assetType = AssetType.CoffeeScript;
+			}
+			else if (_litcoffeeFileExtensionRegex.IsMatch(assetPath))
+			{
+				assetType = AssetType.LiterateCoffeeScript;
 			}
 			else if (_tsFileExtensionRegex.IsMatch(assetPath))
 			{

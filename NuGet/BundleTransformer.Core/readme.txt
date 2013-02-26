@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.21
+               README file for Bundle Transformer: Core 1.6.22
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #23 "CssRelativePathResolver appends relative path to 
-   data uri's".
+   Added support of *.litcoffee file extension (Literate 
+   CoffeeScript-files).
 
    =============
    DOCUMENTATION

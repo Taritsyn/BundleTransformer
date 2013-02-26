@@ -12,6 +12,7 @@
 		Sass,
 		Scss,
 		CoffeeScript,
-		TypeScript
+		TypeScript,
+		LiterateCoffeeScript
 	}
 }

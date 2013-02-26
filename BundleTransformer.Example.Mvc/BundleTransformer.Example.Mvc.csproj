@@ -160,6 +160,7 @@
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Scripts\coffee\TestLiterateCoffeeScript.litcoffee" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AlternativeContent\css\images\icons\feed.png" />

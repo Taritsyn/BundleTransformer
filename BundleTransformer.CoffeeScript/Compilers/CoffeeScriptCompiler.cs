@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.CoffeeScript.Compilers
 {
 	using System;
+	using System.Web.Script.Serialization;
 
 	using MsieJavaScriptEngine;
 	using MsieJavaScriptEngine.ActiveScript;
@@ -19,9 +20,9 @@
 			= "BundleTransformer.CoffeeScript.Resources.coffeescript-combined.min.js";
 
 		/// <summary>
-		/// Name of function, which is responsible for CoffeeScript-compilation
+		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		const string COMPILATION_FUNCTION_NAME = "coffeeScriptCompile";
+		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"CoffeeScript.compile({0}, {1});";
 
 		/// <summary>
 		/// MSIE JS engine
@@ -34,6 +35,11 @@
 		private readonly object _compilationSynchronizer = new object();
 
 		/// <summary>
+		/// JS-serializer
+		/// </summary>
+		private readonly JavaScriptSerializer _jsSerializer;
+
+		/// <summary>
 		/// Flag that compiler is initialized
 		/// </summary>
 		private bool _initialized;
@@ -43,6 +49,15 @@
 		/// </summary>
 		private bool _disposed;
 
+
+
+		/// <summary>
+		/// Constructs instance of CoffeeScript-compiler
+		/// </summary>
+		public CoffeeScriptCompiler()
+		{
+			_jsSerializer = new JavaScriptSerializer();
+		}
 
 		/// <summary>
 		/// Destructs instance of CoffeeScript-compiler
@@ -62,10 +77,6 @@
 			{
 				_jsEngine = new MsieJsEngine(true);
 				_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, GetType());
-				_jsEngine.Execute(
-					string.Format(@"var {0} = function(code) {{ 
-	return CoffeeScript.compile(code, {{ bare: true }});
-}}", COMPILATION_FUNCTION_NAME));
 
 				_initialized = true;
 			}
@@ -75,10 +86,16 @@
 		/// "Compiles" CoffeeScript-code to JS-code
 		/// </summary>
 		/// <param name="content">Text content written on CoffeeScript</param>
+		/// <param name="isLiterate">Flag for whether to enable "literate" mode</param>
 		/// <returns>Translated CoffeeScript-code</returns>
-		public string Compile(string content)
+		public string Compile(string content, bool isLiterate = false)
 		{
 			string newContent;
+			var options = new
+			{
+				bare = true,
+				literate = isLiterate
+			};
 
 			lock (_compilationSynchronizer)
 			{
@@ -86,7 +103,10 @@
 
 				try
 				{
-					newContent = _jsEngine.CallFunction<string>(COMPILATION_FUNCTION_NAME, content);
+					newContent = _jsEngine.Evaluate<string>(
+						string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
+							_jsSerializer.Serialize(content),
+							_jsSerializer.Serialize(options)));
 				}
 				catch (ActiveScriptException e)
 				{

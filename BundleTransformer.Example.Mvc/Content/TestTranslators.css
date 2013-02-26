@@ -25,20 +25,18 @@
 .translators #coffee {
   float: left;
   padding: 0.2em 0.5em 0.2em 0.5em;
-  background-color: #7ac0da;
-  color: white;
+  background-color: #AAA;
   font-weight: bold;
-  border-radius: 5px;
+  border: 1px solid #AAA;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
+  border-radius: 5px;
 }
 
 .translators #coffee.enabled
 {
-	background-color: #ffffff;
-	border-width: 1px;
-	border-style: solid;
-	border-color: #888888;
+	background-color: #fff;
+	border: 1px solid #888;
 }
 
 .translators #coffee.enabled A,

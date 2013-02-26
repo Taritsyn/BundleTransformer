@@ -72,7 +72,8 @@
 				return assets;
 			}
 
-			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.CoffeeScript).ToList();
+			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.CoffeeScript
+				|| a.AssetType == AssetType.LiterateCoffeeScript).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
@@ -93,10 +94,11 @@
 		{
 			string newContent;
 			string assetPath = asset.Path;
+			bool isLiterate = (asset.AssetType == AssetType.LiterateCoffeeScript);
 
 			try
 			{
-				newContent = coffeeScriptCompiler.Compile(asset.Content);
+				newContent = coffeeScriptCompiler.Compile(asset.Content, isLiterate);
 			}
 			catch (CoffeeScriptCompilingException e)
 			{

@@ -52,6 +52,10 @@
 				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScript.coffee"),
 				_applicationInfo, _fileSystemWrapper);
 
+			var testLitCoffeeAsset = new Asset(
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestLiterateCoffeeScript.litcoffee"),
+				_applicationInfo, _fileSystemWrapper);
+
 			var testPlainTextAsset = new Asset(
 				Path.Combine(APPLICATION_ROOT_PATH, @"TestPlainText.txt"),
 				_applicationInfo, _fileSystemWrapper);
@@ -62,6 +66,7 @@
 				jqueryJsAsset,
 				testLessAsset,
 				testCoffeeAsset,
+				testLitCoffeeAsset,
 				testPlainTextAsset
 			};
 
@@ -87,9 +92,10 @@
 
 			// Assert
 			Assert.IsInstanceOf<InvalidAssetTypesException>(currentException);
-			Assert.AreEqual(3, invalidAssetsUrls.Length);
+			Assert.AreEqual(4, invalidAssetsUrls.Length);
 			Assert.Contains(jqueryJsAsset.Url, invalidAssetsUrls);
 			Assert.Contains(testCoffeeAsset.Url, invalidAssetsUrls);
+			Assert.Contains(testLitCoffeeAsset.Url, invalidAssetsUrls);
 			Assert.Contains(testPlainTextAsset.Url, invalidAssetsUrls);
 		}
 
