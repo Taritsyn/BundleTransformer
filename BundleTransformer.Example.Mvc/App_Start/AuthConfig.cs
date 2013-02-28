@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Web.WebPages.OAuth;
-using BundleTransformer.Example.Mvc.Models;
-
-namespace BundleTransformer.Example.Mvc
+﻿namespace BundleTransformer.Example.Mvc
 {
 	public static class AuthConfig
 	{
