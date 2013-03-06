@@ -51,6 +51,7 @@ namespace BundleTransformer.Example.Mvc
 				"~/Scripts/knockout-2.*",
 				"~/Scripts/coffee/TestCoffeeScript.coffee",
 				"~/Scripts/coffee/TestLiterateCoffeeScript.litcoffee",
+				"~/Scripts/coffee/TestCoffeeScriptMarkdown.coffee.md",
 				"~/Scripts/ts/TranslatorBadge.ts",
 				"~/Scripts/ts/ColoredTranslatorBadge.ts",
 				"~/Scripts/ts/TestTypeScript.ts");

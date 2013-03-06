@@ -73,7 +73,8 @@
 			}
 
 			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.CoffeeScript
-				|| a.AssetType == AssetType.LiterateCoffeeScript).ToList();
+				|| a.AssetType == AssetType.LiterateCoffeeScript
+				|| a.AssetType == AssetType.CoffeeScriptMarkdown).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
@@ -94,7 +95,8 @@
 		{
 			string newContent;
 			string assetPath = asset.Path;
-			bool isLiterate = (asset.AssetType == AssetType.LiterateCoffeeScript);
+			bool isLiterate = (asset.AssetType == AssetType.LiterateCoffeeScript
+				|| asset.AssetType == AssetType.CoffeeScriptMarkdown);
 
 			try
 			{

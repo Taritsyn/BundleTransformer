@@ -88,6 +88,13 @@
 
 		/// <summary>
 		/// Regular expression to determine whether
+		/// asset is CoffeeScript Markdown-file based on its extension
+		/// </summary>
+		private static readonly Regex _coffeeMdFileExtensionRegex = new Regex(@"\.coffee\.md$",
+			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
+		/// Regular expression to determine whether
 		/// asset is TypeScript-file based on its extension
 		/// </summary>
 		private static readonly Regex _tsFileExtensionRegex = new Regex(@"\.ts$",
@@ -221,6 +228,7 @@
 				return (assetType == AssetType.JavaScript
 					|| assetType == AssetType.CoffeeScript
 					|| assetType == AssetType.LiterateCoffeeScript
+					|| assetType == AssetType.CoffeeScriptMarkdown
 					|| assetType == AssetType.TypeScript);
 			}
 		}
@@ -300,6 +308,10 @@
 			else if (_litcoffeeFileExtensionRegex.IsMatch(assetPath))
 			{
 				assetType = AssetType.LiterateCoffeeScript;
+			}
+			else if (_coffeeMdFileExtensionRegex.IsMatch(assetPath))
+			{
+				assetType = AssetType.CoffeeScriptMarkdown;
 			}
 			else if (_tsFileExtensionRegex.IsMatch(assetPath))
 			{

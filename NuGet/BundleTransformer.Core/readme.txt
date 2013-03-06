@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.22
+               README file for Bundle Transformer: Core 1.6.24
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of *.litcoffee file extension (Literate 
-   CoffeeScript-files).
+   Added support of *.coffee.md file extension (CoffeeScript
+   Markdown-files).
 
    =============
    DOCUMENTATION

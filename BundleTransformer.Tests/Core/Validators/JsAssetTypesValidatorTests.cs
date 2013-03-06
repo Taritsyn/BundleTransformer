@@ -56,6 +56,10 @@
 				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestLiterateCoffeeScript.litcoffee"),
 				_applicationInfo, _fileSystemWrapper);
 
+			var testCoffeeMdAsset = new Asset(
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScriptMarkdown.coffee.md"),
+				_applicationInfo, _fileSystemWrapper);
+
 			var testPlainTextAsset = new Asset(
 				Path.Combine(APPLICATION_ROOT_PATH, @"TestPlainText.txt"),
 				_applicationInfo, _fileSystemWrapper);
@@ -67,6 +71,7 @@
 			    testLessAsset,
 			    testCoffeeAsset,
 				testLitCoffeeAsset,
+				testCoffeeMdAsset,
 			    testPlainTextAsset
 			};
 

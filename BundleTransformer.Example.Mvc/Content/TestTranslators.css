@@ -27,7 +27,7 @@
   padding: 0.2em 0.5em 0.2em 0.5em;
   background-color: #AAA;
   font-weight: bold;
-  border: 1px solid #AAA;
+  border: 1px dashed #AAA;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
@@ -36,7 +36,7 @@
 .translators #coffee.enabled
 {
 	background-color: #fff;
-	border: 1px solid #888;
+	border: 1px dashed #888;
 }
 
 .translators #coffee.enabled A,

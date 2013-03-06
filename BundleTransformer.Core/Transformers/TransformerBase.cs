@@ -36,7 +36,7 @@
 		protected readonly CoreSettings _coreConfig;
 
 		/// <summary>
-		/// List of translators (LESS, Sass, SCSS and CoffeeScript)
+		/// List of translators (LESS, Sass, SCSS, CoffeeScript and TypeScript)
 		/// </summary>
 		protected IList<ITranslator> _translators;
 

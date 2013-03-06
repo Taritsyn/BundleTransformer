@@ -13,6 +13,7 @@
 		Scss,
 		CoffeeScript,
 		TypeScript,
-		LiterateCoffeeScript
+		LiterateCoffeeScript,
+		CoffeeScriptMarkdown
 	}
 }
