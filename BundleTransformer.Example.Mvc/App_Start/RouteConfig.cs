@@ -1,8 +1,8 @@
-﻿using System.Web.Mvc;
-using System.Web.Routing;
-
-namespace BundleTransformer.Example.Mvc
+﻿namespace BundleTransformer.Example.Mvc
 {
+	using System.Web.Mvc;
+	using System.Web.Routing;
+
 	public class RouteConfig
 	{
 		public static void RegisterRoutes(RouteCollection routes)
