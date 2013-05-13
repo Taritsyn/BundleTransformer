@@ -1,36 +1,42 @@
 ﻿namespace BundleTransformer.Less
 {
 	using System.IO;
-	using System.Web;
+	using System.Web.Hosting;
 
 	using dotless.Core.Input;
 
 	internal sealed class VirtualFileReader : IFileReader
 	{
-		public byte[] GetBinaryFileContents(string fileName)
+		public bool DoesFileExist(string fileName)
 		{
-			fileName = GetFullPath(fileName);
+			var virtualPathProvider = HostingEnvironment.VirtualPathProvider;
 
-			return File.ReadAllBytes(fileName);
+			return virtualPathProvider.FileExists(fileName);
 		}
 
 		public string GetFileContents(string fileName)
 		{
-			fileName = GetFullPath(fileName);
+			var virtualPathProvider = HostingEnvironment.VirtualPathProvider;
+			var virtualFile = virtualPathProvider.GetFile(fileName);
 
-			return File.ReadAllText(fileName);
+			using (var streamReader = new StreamReader(virtualFile.Open()))
+			{
+				return streamReader.ReadToEnd();
+			}
 		}
 
-		public bool DoesFileExist(string fileName)
+		public byte[] GetBinaryFileContents(string fileName)
 		{
-			fileName = GetFullPath(fileName);
+			var virtualPathProvider = HostingEnvironment.VirtualPathProvider;
+			var virtualFile = virtualPathProvider.GetFile(fileName);
 
-			return File.Exists(fileName);
-		}
+			using (var stream = virtualFile.Open())
+			{
+				var buffer = new byte[stream.Length];
+				stream.Read(buffer, 0, (int)stream.Length);
 
-		private static string GetFullPath(string path)
-		{
-			return HttpContext.Current.Server.MapPath(path);
+				return buffer;
+			}
 		}
 	}
 }

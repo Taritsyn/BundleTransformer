@@ -50,7 +50,7 @@
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
-		/// Object HttpContext
+		/// HTTP context
 		/// </summary>
 		private readonly HttpContextBase _httpContext;
 
@@ -60,9 +60,9 @@
 		private readonly IFileSystemWrapper _fileSystemWrapper;
 
 		/// <summary>
-		/// JS relative path resolver
+		/// Relative path resolver
 		/// </summary>
-		private readonly IJsRelativePathResolver _jsRelativePathResolver;
+		private readonly IRelativePathResolver _relativePathResolver;
 
 		/// <summary>
 		/// Asset content cache
@@ -130,7 +130,7 @@
 		public TypeScriptTranslator()
 			: this(new HttpContextWrapper(HttpContext.Current),
 				BundleTransformerContext.Current.GetFileSystemWrapper(),
-				BundleTransformerContext.Current.GetJsRelativePathResolver(),
+				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
 				BundleTransformerContext.Current.GetTypeScriptConfiguration())
 		{ }
 
@@ -139,14 +139,14 @@
 		/// </summary>
 		/// <param name="httpContext">Object HttpContext</param>
 		/// <param name="fileSystemWrapper">File system wrapper</param>
-		/// <param name="jsRelativePathResolver">JS relative path resolver</param>
+		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="tsConfig">Configuration settings of TypeScript-translator</param>
 		public TypeScriptTranslator(HttpContextBase httpContext, IFileSystemWrapper fileSystemWrapper,
-			IJsRelativePathResolver jsRelativePathResolver, TypeScriptSettings tsConfig)
+			IRelativePathResolver relativePathResolver, TypeScriptSettings tsConfig)
 		{
 			_httpContext = httpContext;
 			_fileSystemWrapper = fileSystemWrapper;
-			_jsRelativePathResolver = jsRelativePathResolver;
+			_relativePathResolver = relativePathResolver;
 			_assetContentCache = new Hashtable();
 
 			StyleSettings styleConfig = tsConfig.Style;
@@ -349,7 +349,7 @@
 					string dependencyAssetUrl = match.Groups["url"].Value;
 					if (!string.IsNullOrWhiteSpace(dependencyAssetUrl))
 					{
-						dependencyAssetUrl = _jsRelativePathResolver.ResolveRelativePath(
+						dependencyAssetUrl = _relativePathResolver.ResolveRelativePath(
 							parentAssetUrl, dependencyAssetUrl.Trim());
 						if (string.Equals(dependencyAssetUrl, rootAssetUrl, StringComparison.InvariantCultureIgnoreCase))
 						{

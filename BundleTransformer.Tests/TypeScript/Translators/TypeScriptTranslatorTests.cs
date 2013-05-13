@@ -20,7 +20,7 @@
 			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
 		private const string SCRIPTS_DIRECTORY_PATH =
 			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
-		private const string SCRIPTS_DIRECTORY_URL = @"/Scripts/";
+		private const string SCRIPTS_DIRECTORY_URL = "/Scripts/";
 
 		[Test]
 		public void FillingOfDependenciesIsCorrect()
@@ -35,20 +35,26 @@
 			HttpContextBase httpContext = httpContextMock.Object;
 
 			var fileSystemMock = new Mock<IFileSystemWrapper>();
+
+
+			string jqueryTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts");
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts")))
+				.Setup(fs => fs.FileExists(jqueryTsAssetPath))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts")))
-				.Returns(@"")
+				.Setup(fs => fs.GetFileTextContent(jqueryTsAssetPath))
+				.Returns("")
 				;
+
+
+			string iTranslatorBadgeTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts");
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts")))
+				.Setup(fs => fs.FileExists(iTranslatorBadgeTsAssetPath))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts")))
+				.Setup(fs => fs.GetFileTextContent(iTranslatorBadgeTsAssetPath))
 				.Returns(@"interface ITranslatorBadge {
     getText(): string;
     setText(text: string): void;
@@ -56,12 +62,15 @@
     hide(): void;
 }")
 				;
+
+
+			string translatorBadgeTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts");
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts")))
+				.Setup(fs => fs.FileExists(translatorBadgeTsAssetPath))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts")))
+				.Setup(fs => fs.GetFileTextContent(translatorBadgeTsAssetPath))
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
 /// <reference path=""ITranslatorBadge.d.ts"" />
 
@@ -91,12 +100,15 @@ class TranslatorBadge implements ITranslatorBadge {
     }
 }")
 				;
+
+
+			string coloredTranslatorBadgeTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "ColoredTranslatorBadge.ts");
 			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ColoredTranslatorBadge.ts")))
+				.Setup(fs => fs.FileExists(coloredTranslatorBadgeTsAssetPath))
 				.Returns(true)
 				;
 			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ColoredTranslatorBadge.ts")))
+				.Setup(fs => fs.GetFileTextContent(coloredTranslatorBadgeTsAssetPath))
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
 /// <reference path=""TranslatorBadge.ts"" />
 
@@ -120,11 +132,11 @@ class ColoredTranslatorBadge extends TranslatorBadge {
 				;
 
 			IFileSystemWrapper fileSystemWrapper = fileSystemMock.Object;
-			var jsRelativePathResolver = new MockJsRelativePathResolver();
+			var relativePathResolver = new MockRelativePathResolver();
 			var tsConfig = new TypeScriptSettings();
 
 			var tsTranslator = new TypeScriptTranslator(httpContext, fileSystemWrapper, 
-				jsRelativePathResolver, tsConfig);
+				relativePathResolver, tsConfig);
 
 			const string assetContent = @"/// <reference path=""ColoredTranslatorBadge.ts"" />
 var TS_BADGE_TEXT = ""TypeScript"";
@@ -142,14 +154,10 @@ tsBadge.setBorderColor(TS_BADGE_COLOR);";
 
 			// Assert
 			Assert.AreEqual(4, dependencies.Count);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts"),
-				dependencies[0].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts"),
-				dependencies[1].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts"), 
-				dependencies[2].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "ColoredTranslatorBadge.ts"),
-				dependencies[3].Path);
+			Assert.AreEqual(jqueryTsAssetPath, dependencies[0].Path);
+			Assert.AreEqual(iTranslatorBadgeTsAssetPath, dependencies[1].Path);
+			Assert.AreEqual(translatorBadgeTsAssetPath, dependencies[2].Path);
+			Assert.AreEqual(coloredTranslatorBadgeTsAssetPath, dependencies[3].Path);
 		}
 
 		private class MockHttpServerUtility : HttpServerUtilityBase
@@ -160,7 +168,7 @@ tsBadge.setBorderColor(TS_BADGE_COLOR);";
 			}
 		}
 
-		private class MockJsRelativePathResolver : IJsRelativePathResolver
+		private class MockRelativePathResolver : IRelativePathResolver
 		{
 			public string ResolveRelativePath(string basePath, string relativePath)
 			{

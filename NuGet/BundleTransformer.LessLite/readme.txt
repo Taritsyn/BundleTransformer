@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.19
+            README file for Bundle Transformer: LESS Lite 1.6.25
 
    ----------------------------------------------------------------------
 
@@ -18,12 +18,6 @@
    
    Uses NuGet-package the DotlessClientOnly 
    (http://nuget.org/packages/DotlessClientOnly).
-   
-   =============
-   RELEASE NOTES
-   =============
-   Fixed bug #22 "Please make lessEngineConfig.DisableUrlRewriting 
-   configurable in web.config".
    
    =============
    DOCUMENTATION

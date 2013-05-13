@@ -2,6 +2,8 @@
 {
 	using System.Web.Optimization;
 
+	using Core.Builders;
+	using Core.Bundles;
 	using Core.Orderers;
 	using Core.Transformers;
 
@@ -10,11 +12,12 @@
 		// For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
 		public static void RegisterBundles(BundleCollection bundles)
 		{
-			var cssTransformer = new CssTransformer();
-			var jsTransformer = new JsTransformer();
+			bundles.UseCdn = true;
+
+			var nullBuilder = new NullBuilder();
 			var nullOrderer = new NullOrderer();
 
-			var commonStylesBundle = new Bundle("~/Bundles/CommonStyles");
+			var commonStylesBundle = new CustomStyleBundle("~/Bundles/CommonStyles");
 			commonStylesBundle.Include(
 				"~/Content/Fonts.css",
 				"~/Content/Site.css",
@@ -29,21 +32,25 @@
 				"~/Content/less/TestLess.less",
 				"~/Content/sass/TestSass.sass",
 				"~/Content/scss/TestScss.scss");
-			commonStylesBundle.Transforms.Add(cssTransformer);
 			commonStylesBundle.Orderer = nullOrderer;
 
 			bundles.Add(commonStylesBundle);
 
-			var modernizrBundle = new Bundle("~/Bundles/Modernizr");
+			var modernizrBundle = new CustomScriptBundle("~/Bundles/Modernizr");
 			modernizrBundle.Include("~/Scripts/modernizr-2.*");
-			modernizrBundle.Transforms.Add(jsTransformer);
 			modernizrBundle.Orderer = nullOrderer;
 
 			bundles.Add(modernizrBundle);
 
-			var commonScriptsBundle = new Bundle("~/Bundles/CommonScripts");
+			var jQueryBundle = new CustomScriptBundle("~/Bundles/Jquery",
+				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js");
+			jQueryBundle.Include("~/Scripts/jquery-{version}.js");
+			jQueryBundle.Orderer = nullOrderer;
+
+			bundles.Add(jQueryBundle);
+
+			var commonScriptsBundle = new CustomScriptBundle("~/Bundles/CommonScripts");
 			commonScriptsBundle.Include("~/Scripts/MicrosoftAjax.js",
-				"~/Scripts/jquery-{version}.js",
 				"~/Scripts/jquery-ui-{version}.js",
 				"~/Scripts/jquery.validate.js",
 				"~/Scripts/jquery.validate.unobtrusive.js",
@@ -55,23 +62,28 @@
 				"~/Scripts/ts/TranslatorBadge.ts",
 				"~/Scripts/ts/ColoredTranslatorBadge.ts",
 				"~/Scripts/ts/TestTypeScript.ts");
-			commonScriptsBundle.Transforms.Add(jsTransformer);
 			commonScriptsBundle.Orderer = nullOrderer;
 
 			bundles.Add(commonScriptsBundle);
 
-			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory");
+
+			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")
+			{
+				Builder = nullBuilder
+			};
 			jqueryUiStylesDirectoryBundle.IncludeDirectory("~/Content/themes/base/", "*.css");
 			jqueryUiStylesDirectoryBundle.Transforms.Add(new CssTransformer(
 				new[] { "*.all.css", "jquery.ui.base.css" }));
-
 			bundles.Add(jqueryUiStylesDirectoryBundle);
 
-			var scriptsDirectoryBundle = new Bundle("~/Bundles/ScriptsDirectory");
-			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js");
+
+			var scriptsDirectoryBundle = new Bundle("~/Bundles/ScriptsDirectory")
+			{
+				Builder = nullBuilder
+			};
+			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js", true);
 			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
 				new[] { "*.all.js", "references.js" }));
-
 			bundles.Add(scriptsDirectoryBundle);
 		}
 	}

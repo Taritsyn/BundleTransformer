@@ -1,17 +1,5 @@
-﻿$bg-color: #7AC0DA;
-$caption-color: #FFFFFF;
-
-@mixin visible
-{
-	display: block;
-}
-
-@mixin rounded-corners ($radius: 5px)
-{
-	border-radius: $radius;
-	-webkit-border-radius: $radius;
-	-moz-border-radius: $radius;
-}
+﻿@import "Colors";
+@import "Mixins.scss";
 
 .translators #scss
 {
@@ -22,7 +10,7 @@ $caption-color: #FFFFFF;
 	color: $caption-color;
 	font-weight: bold;
 	border: 1px solid $bg-color;
-	@include rounded-corners(5px);
+	@include border-radius(5px);
 }
 
 @import "TestScssImport.scss";

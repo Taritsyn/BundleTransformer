@@ -29,7 +29,7 @@
 				@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
 			var fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
 
-			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
+			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
 				applicationInfo, fileSystemWrapper);
 			var jqueryUiAccordionAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
 				@"\themes\base\jquery.ui.accordion.css"), applicationInfo, fileSystemWrapper);
@@ -57,7 +57,7 @@
 
 			// Assert
 			Assert.AreEqual(3, processedAssets.Count);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"), processedAssets[0].Path);
+			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), processedAssets[0].Path);
 			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, 
 				@"\themes\base\jquery.ui.accordion.css"), processedAssets[1].Path);
 			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 

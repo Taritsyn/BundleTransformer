@@ -12,7 +12,7 @@
 
 	using Core;
 	using Core.Assets;
-	using Core.ErrorMessageHelpers;
+	using Core.SourceCodeHelpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -210,16 +210,20 @@
 		{
 			var startIndex = errorDetails.Value<int>("startIndex");
 			var message = errorDetails.Value<string>("message");
-			var errorSourceInfo = ErrorSourceInfo.Create(sourceCode, startIndex);
+			var nodeCoordinates = SourceCodeNavigator.CalculateNodeCoordinates(sourceCode, startIndex);
+			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode, nodeCoordinates);
 
 			var errorMessage = new StringBuilder();
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				errorSourceInfo.LineNumber.ToString());
+				nodeCoordinates.LineNumber.ToString());
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				errorSourceInfo.ColumnNumber.ToString());
-			errorMessage.AppendFormatLine("{0}: {2}{1}", CoreStrings.ErrorDetails_SourceError,
-				errorSourceInfo.SourceError, Environment.NewLine);
+				nodeCoordinates.ColumnNumber.ToString());
+			if (!string.IsNullOrWhiteSpace(sourceFragment))
+			{
+				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					CoreStrings.ErrorDetails_SourceError, sourceFragment);
+			}
 
 			return errorMessage.ToString();
 		}

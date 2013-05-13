@@ -10,7 +10,6 @@
 
 	using Core;
 	using Core.Assets;
-	using Core.FileSystem;
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
 
@@ -32,11 +31,6 @@
 		/// Name of code type
 		/// </summary>
 		const string CODE_TYPE = "JS";
-
-		/// <summary>
-		/// File system wrapper
-		/// </summary>
-		private readonly IFileSystemWrapper _fileSystemWrapper;
 
 		/// <summary>
 		/// Absolute path to directory that contains temporary files
@@ -113,21 +107,16 @@
 		/// </summary>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		public ClosureLocalJsMinifier(ClosureSettings closureConfig)
-			: this(closureConfig,
-				BundleTransformerContext.Current.GetFileSystemWrapper(), 
-				HttpContext.Current.Server.MapPath(Core.Constants.Common.TempFilesDirectoryPath))
+			: this(closureConfig, HttpContext.Current.Server.MapPath(Core.Constants.Common.TempFilesDirectoryPath))
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Closure Local JS-minifier
 		/// </summary>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
 		/// <param name="tempFilesDirectoryPath">Absolute path to directory that contains temporary files</param>
-		public ClosureLocalJsMinifier(ClosureSettings closureConfig, 
-			IFileSystemWrapper fileSystemWrapper, string tempFilesDirectoryPath)
+		public ClosureLocalJsMinifier(ClosureSettings closureConfig, string tempFilesDirectoryPath)
 		{
-			_fileSystemWrapper = fileSystemWrapper;
 			_tempFilesDirectoryPath = tempFilesDirectoryPath;
 
 			LocalJsMinifierSettings localJsMinifierConfig = closureConfig.Js.Local;
@@ -171,7 +160,7 @@
 			{
 				throw new EmptyValueException(Strings.Minifiers_JavaVirtualMachinePathNotSpecified);
 			}
-			if (!_fileSystemWrapper.FileExists(javaVirtualMachinePath))
+			if (!File.Exists(javaVirtualMachinePath))
 			{
 				throw new FileNotFoundException(
 					string.Format(Strings.Minifiers_JavaVirtualMachineNotFound, javaVirtualMachinePath));
@@ -182,15 +171,15 @@
 			{
 				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerApplicationPathNotSpecified);
 			}
-			if (!_fileSystemWrapper.FileExists(closureCompilerApplicationPath))
+			if (!File.Exists(closureCompilerApplicationPath))
 			{
 				throw new FileNotFoundException(
 					string.Format(Strings.Minifiers_ClosureCompilerApplicationNotFound, closureCompilerApplicationPath));
 			}
 
-			if (!_fileSystemWrapper.DirectoryExists(_tempFilesDirectoryPath))
+			if (!Directory.Exists(_tempFilesDirectoryPath))
 			{
-				_fileSystemWrapper.CreateDirectory(_tempFilesDirectoryPath);
+				Directory.CreateDirectory(_tempFilesDirectoryPath);
 			}
 
 			foreach (var asset in assetsToProcessing)
@@ -218,7 +207,10 @@
 			string outputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + "-min.tmp");
 			int severity = Severity;
 
-			_fileSystemWrapper.WriteTextContentToFile(inputFilePath, content);
+			using (var file = new StreamWriter(inputFilePath))
+			{
+				file.Write(content);
+			}
 
 			var args = new StringBuilder();
 			args.AppendFormat(@"-jar ""{0}"" ", ClosureCompilerApplicationPath);
@@ -318,7 +310,10 @@
 					throw new ClosureCompilingException(errorDetails);
 				}
 
-				newContent = _fileSystemWrapper.GetFileTextContent(outputFilePath);
+				using (var file = new StreamReader(outputFilePath))
+				{
+					newContent = file.ReadToEnd();
+				}
 			}
 			catch (ClosureCompilingException e)
 			{
@@ -334,8 +329,8 @@
 			}
 			finally
 			{
-				_fileSystemWrapper.DeleteFile(outputFilePath);
-				_fileSystemWrapper.DeleteFile(inputFilePath);
+				File.Delete(outputFilePath);
+				File.Delete(inputFilePath);
 			}
 
 			return newContent;

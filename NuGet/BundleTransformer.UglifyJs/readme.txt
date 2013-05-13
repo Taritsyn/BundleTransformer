@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.6.13
+             README file for Bundle Transformer: UglifyJS 1.6.25
  
    ----------------------------------------------------------------------
 

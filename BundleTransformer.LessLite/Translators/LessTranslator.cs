@@ -45,14 +45,14 @@
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
-		/// Object HttpContext
+		/// HTTP context
 		/// </summary>
 		private readonly HttpContextBase _httpContext;
 
 		/// <summary>
-		/// CSS relative path resolver
+		/// Relative path resolver
 		/// </summary>
-		private readonly ICssRelativePathResolver _cssRelativePathResolver;
+		private readonly IRelativePathResolver _relativePathResolver;
 
 		/// <summary>
 		/// Gets or sets a severity level of errors
@@ -67,7 +67,7 @@
 		/// </summary>
 		public LessTranslator()
 			: this(new HttpContextWrapper(HttpContext.Current),
-				BundleTransformerContext.Current.GetCssRelativePathResolver(),
+				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
 				BundleTransformerContext.Current.GetLessLiteConfiguration())
 		{ }
 
@@ -75,13 +75,13 @@
 		/// Constructs instance of LESS-translator
 		/// </summary>
 		/// <param name="httpContext">Object HttpContext</param>
-		/// <param name="cssRelativePathResolver">CSS relative path resolver</param>
+		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
-		public LessTranslator(HttpContextBase httpContext, ICssRelativePathResolver cssRelativePathResolver, 
+		public LessTranslator(HttpContextBase httpContext, IRelativePathResolver relativePathResolver, 
 			LessLiteSettings lessConfig)
 		{
 			_httpContext = httpContext;
-			_cssRelativePathResolver = cssRelativePathResolver;
+			_relativePathResolver = relativePathResolver;
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
 			Severity = lessConfig.Severity;
@@ -229,7 +229,7 @@
 					result = string.Format("{0} {1}{2}{1}",
 						importDirectiveValue,
 						quoteValue,
-						_cssRelativePathResolver.ResolveRelativePath(path, urlValue));
+						_relativePathResolver.ResolveRelativePath(path, urlValue));
 				}
 
 				return result;

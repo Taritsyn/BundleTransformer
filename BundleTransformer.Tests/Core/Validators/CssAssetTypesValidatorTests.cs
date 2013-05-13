@@ -37,31 +37,31 @@
 		{
 			// Arrange
 			var siteCssAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var jqueryJsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"jquery-1.6.2.js"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testLessAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"TestLess.less"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "TestLess.less"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScript.coffee"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestCoffeeScript.coffee"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testLitCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestLiterateCoffeeScript.litcoffee"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestLiterateCoffeeScript.litcoffee"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testCoffeeMdAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScriptMarkdown.coffee.md"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestCoffeeScriptMarkdown.coffee.md"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testPlainTextAsset = new Asset(
-				Path.Combine(APPLICATION_ROOT_PATH, @"TestPlainText.txt"),
+				Path.Combine(APPLICATION_ROOT_PATH, "TestPlainText.txt"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var assets = new List<IAsset>
@@ -110,11 +110,11 @@
 		{
 			// Arrange
 			var siteCssAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testLessAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"TestLess.less"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "TestLess.less"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var assets = new List<IAsset>

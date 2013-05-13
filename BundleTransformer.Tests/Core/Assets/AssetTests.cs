@@ -34,7 +34,7 @@
 		{
 			// Arrange
 			var jqueryAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"jquery-1.6.2.js"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"),
 				_applicationInfo,
 				_fileSystemWrapper);
 
@@ -42,7 +42,7 @@
 			string url = jqueryAsset.Url;
 
 			// Assert
-			Assert.AreEqual(@"/Scripts/jquery-1.6.2.js", url);
+			Assert.AreEqual("/Scripts/jquery-1.6.2.js", url);
 		}
 
 		[Test]
@@ -52,43 +52,51 @@
 
 			// Act
 			var siteCssAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"Site.css"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var jqueryJsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"jquery-1.6.2.js"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testLessAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"TestLess.less"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "TestLess.less"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testSassAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"TestSass.sass"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "TestSass.sass"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testScssAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, @"TestScss.scss"),
+				Path.Combine(STYLES_DIRECTORY_PATH, "TestScss.scss"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScript.coffee"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestCoffeeScript.coffee"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testLitCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestLiterateCoffeeScript.litcoffee"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestLiterateCoffeeScript.litcoffee"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testCoffeeMdAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestCoffeeScriptMarkdown.coffee.md"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestCoffeeScriptMarkdown.coffee.md"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testTsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, @"TestTypeScript.ts"),
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestTypeScript.ts"),
+				_applicationInfo, _fileSystemWrapper);
+
+			var testHandlebarsAsset = new Asset(
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestHandlebars.handlebars"),
+				_applicationInfo, _fileSystemWrapper);
+
+			var testShortHandlebarsAsset = new Asset(
+				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestShortHandlebars.hbs"),
 				_applicationInfo, _fileSystemWrapper);
 
 			var testPlainTextAsset = new Asset(
-				Path.Combine(APPLICATION_ROOT_PATH, @"TestPlainText.txt"),
+				Path.Combine(APPLICATION_ROOT_PATH, "TestPlainText.txt"),
 					_applicationInfo, _fileSystemWrapper);
 
 			// Assert
@@ -101,6 +109,8 @@
 			Assert.AreEqual(AssetType.LiterateCoffeeScript, testLitCoffeeAsset.AssetType);
 			Assert.AreEqual(AssetType.CoffeeScriptMarkdown, testCoffeeMdAsset.AssetType);
 			Assert.AreEqual(AssetType.TypeScript, testTsAsset.AssetType);
+			Assert.AreEqual(AssetType.Handlebars, testHandlebarsAsset.AssetType);
+			Assert.AreEqual(AssetType.Handlebars, testShortHandlebarsAsset.AssetType);
 			Assert.AreEqual(AssetType.Unknown, testPlainTextAsset.AssetType);
 
 			Assert.AreEqual(siteCssAsset.IsStylesheet, true);
@@ -121,6 +131,10 @@
 			Assert.AreEqual(testCoffeeMdAsset.IsScript, true);
 			Assert.AreEqual(testTsAsset.IsStylesheet, false);
 			Assert.AreEqual(testTsAsset.IsScript, true);
+			Assert.AreEqual(testHandlebarsAsset.IsStylesheet, false);
+			Assert.AreEqual(testHandlebarsAsset.IsScript, true);
+			Assert.AreEqual(testShortHandlebarsAsset.IsStylesheet, false);
+			Assert.AreEqual(testShortHandlebarsAsset.IsScript, true);
 			Assert.AreEqual(testPlainTextAsset.IsStylesheet, false);
 			Assert.AreEqual(testPlainTextAsset.IsScript, false);
 		}

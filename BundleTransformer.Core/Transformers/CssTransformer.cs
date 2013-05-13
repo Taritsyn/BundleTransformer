@@ -165,7 +165,10 @@
 			{
 				assets = Minify(assets);
 			}
-			assets = ResolveRelativePaths(assets);
+			if (!_coreConfig.Css.DisableNativeCssRelativePathTransformation)
+			{
+				assets = ResolveRelativePaths(assets);
+			}
 
 			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
 			ConfigureBundleResponse(assets, bundleResponse, httpContext);

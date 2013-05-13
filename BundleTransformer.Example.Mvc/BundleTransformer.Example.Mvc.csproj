@@ -110,6 +110,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Content\sass\_Colors.sass" />
+    <None Include="Content\sass\_Mixins.sass" />
+    <None Include="Content\scss\_Colors.scss" />
+    <None Include="Content\scss\_Mixins.scss" />
     <None Include="Scripts\coffee\TestLiterateCoffeeScript.litcoffee" />
     <None Include="Scripts\jquery-1.9.1.min.map" />
   </ItemGroup>
@@ -211,6 +215,7 @@
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
     <None Include="Scripts\coffee\TestCoffeeScriptMarkdown.coffee.md" />
+    <Content Include="Scripts\folder\test.js" />
     <Content Include="Scripts\jquery-1.9.1-vsdoc.js" />
     <Content Include="Scripts\jquery-1.9.1.js" />
     <Content Include="Scripts\jquery-1.9.1.min.js" />

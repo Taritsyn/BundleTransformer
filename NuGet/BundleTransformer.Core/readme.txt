@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.6.24
+               README file for Bundle Transformer: Core 1.6.25
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,16 @@
    =============
    RELEASE NOTES
    =============
-   Added support of *.coffee.md file extension (CoffeeScript
-   Markdown-files).
+   1. Added the NullBuilder class (implements an IBundleBuilder interface)
+      that responsible for prevention of early combining of code;
+   2. Implemented analogs of the StyleBundle and ScriptBundle classes for
+      the Bundle Transformer: CustomStyleBundle (uses CssTransformer as 
+      transformation by default and NullBuilder as builder by default) and
+      CustomScriptBundle (uses JsTransformer as transformation by default 
+     and NullBuilder as builder by default);
+   3. In the css configuration element added the 
+      disableNativeCssRelativePathTransformation attribute, which disables 
+      native transformation of relative paths to absolute in CSS-files.
 
    =============
    DOCUMENTATION

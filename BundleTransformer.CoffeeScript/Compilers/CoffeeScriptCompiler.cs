@@ -1,11 +1,15 @@
 ﻿namespace BundleTransformer.CoffeeScript.Compilers
 {
 	using System;
-	using System.Web.Script.Serialization;
+	using System.Text;
 
 	using MsieJavaScriptEngine;
 	using MsieJavaScriptEngine.ActiveScript;
+	using Newtonsoft.Json;
+	using Newtonsoft.Json.Linq;
 
+	using Core;
+	using Core.SourceCodeHelpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -20,9 +24,14 @@
 			= "BundleTransformer.CoffeeScript.Resources.coffeescript-combined.min.js";
 
 		/// <summary>
+		/// Name of resource, which contains a CoffeeScript-compiler helper
+		/// </summary>
+		const string CSC_HELPER_RESOURCE_NAME = "BundleTransformer.CoffeeScript.Resources.cscHelper.min.js";
+
+		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"CoffeeScript.compile({0}, {1});";
+		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"coffeeScriptHelper.compile({0}, {1});";
 
 		/// <summary>
 		/// MSIE JS engine
@@ -35,11 +44,6 @@
 		private readonly object _compilationSynchronizer = new object();
 
 		/// <summary>
-		/// JS-serializer
-		/// </summary>
-		private readonly JavaScriptSerializer _jsSerializer;
-
-		/// <summary>
 		/// Flag that compiler is initialized
 		/// </summary>
 		private bool _initialized;
@@ -49,15 +53,6 @@
 		/// </summary>
 		private bool _disposed;
 
-
-
-		/// <summary>
-		/// Constructs instance of CoffeeScript-compiler
-		/// </summary>
-		public CoffeeScriptCompiler()
-		{
-			_jsSerializer = new JavaScriptSerializer();
-		}
 
 		/// <summary>
 		/// Destructs instance of CoffeeScript-compiler
@@ -75,8 +70,11 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine = new MsieJsEngine(true);
-				_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, GetType());
+				Type type = GetType();
+
+				_jsEngine = new MsieJsEngine(true, true);
+				_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(CSC_HELPER_RESOURCE_NAME, type);
 
 				_initialized = true;
 			}
@@ -103,10 +101,19 @@
 
 				try
 				{
-					newContent = _jsEngine.Evaluate<string>(
+					var result = _jsEngine.Evaluate<string>(
 						string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
-							_jsSerializer.Serialize(content),
-							_jsSerializer.Serialize(options)));
+							JsonConvert.SerializeObject(content),
+							JsonConvert.SerializeObject(options)));
+					var json = JObject.Parse(result);
+
+					var errors = json["errors"] != null ? json["errors"] as JArray : null;
+					if (errors != null && errors.Count > 0)
+					{
+						throw new CoffeeScriptCompilingException(FormatErrorDetails(errors[0], content));
+					}
+
+					newContent = json.Value<string>("compiledCode");
 				}
 				catch (ActiveScriptException e)
 				{
@@ -116,6 +123,41 @@
 			}
 
 			return newContent;
+		}
+
+		/// <summary>
+		/// Generates a detailed error message
+		/// </summary>
+		/// <param name="errorDetails">Error details</param>
+		/// <param name="sourceCode">Source code</param>
+		/// <returns>Detailed error message</returns>
+		private static string FormatErrorDetails(JToken errorDetails, string sourceCode)
+		{
+			var message = errorDetails.Value<string>("message");
+			var lineNumber = errorDetails.Value<int>("lineNumber");
+			var columnNumber = errorDetails.Value<int>("columnNumber");
+			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode, 
+				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
+
+			var errorMessage = new StringBuilder();
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			if (lineNumber > 0)
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+					lineNumber.ToString());
+			}
+			if (columnNumber > 0)
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+					columnNumber.ToString());
+			}
+			if (!string.IsNullOrWhiteSpace(sourceFragment))
+			{
+				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					CoreStrings.ErrorDetails_SourceError, sourceFragment);
+			}
+
+			return errorMessage.ToString();
 		}
 	
 		/// <summary>

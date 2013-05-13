@@ -41,11 +41,13 @@
     <Reference Include="MsieJavaScriptEngine">
       <HintPath>..\packages\MsieJavaScriptEngine.1.1.1\lib\net40\MsieJavaScriptEngine.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -67,6 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\coffeescript-combined.js" />
+    <Content Include="Resources\cscHelper.js" />
+    <EmbeddedResource Include="Resources\cscHelper.min.js" />
     <Content Include="Resources\LICENSE.txt" />
     <EmbeddedResource Include="Resources\coffeescript-combined.min.js" />
   </ItemGroup>
@@ -80,7 +84,8 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
-wg.exe -m -in:"$(ProjectDir)Resources\coffeescript-combined.js" -out:"$(ProjectDir)Resources\coffeescript-combined.min.js"</PreBuildEvent>
+wg.exe -m -in:"$(ProjectDir)Resources\coffeescript-combined.js" -out:"$(ProjectDir)Resources\coffeescript-combined.min.js"
+wg.exe -m -in:"$(ProjectDir)Resources\cscHelper.js" -out:"$(ProjectDir)Resources\cscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

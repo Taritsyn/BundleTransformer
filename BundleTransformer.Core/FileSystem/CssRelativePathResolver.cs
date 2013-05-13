@@ -6,7 +6,7 @@
 	/// <summary>
 	/// CSS relative path resolver
 	/// </summary>
-	public sealed class CssRelativePathResolver : RelativePathResolverBase, ICssRelativePathResolver
+	public sealed class CssRelativePathResolver : CommonRelativePathResolver, ICssRelativePathResolver
 	{
 		/// <summary>
 		/// Regular expression for working with paths of components in CSS-code
@@ -21,6 +21,7 @@
 		private static readonly Regex _importStylesheetRuleRegex =
 			new Regex(@"@import\s*(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#\$@()\[\]{}]+)(\k<quote>)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
 
 		/// <summary>
 		/// Transforms relative paths of components to absolute in CSS-code
@@ -43,7 +44,7 @@
 					string newUrl = urlValue;
 					if (urlValue.IndexOf("data:", StringComparison.OrdinalIgnoreCase) != 0)
 					{
-						newUrl = Utils.TransformRelativeUrlToAbsolute(path, urlValue);
+						newUrl = ResolveRelativePath(path, urlValue);
 					}
 
 					result = string.Format("url({0}{1}{0})", quoteValue, newUrl);
@@ -73,7 +74,7 @@
 
 					result = string.Format("@import {0}{1}{0}",
 						quoteValue,
-						Utils.TransformRelativeUrlToAbsolute(path, urlValue));
+						ResolveRelativePath(path, urlValue));
 				}
 
 				return result;

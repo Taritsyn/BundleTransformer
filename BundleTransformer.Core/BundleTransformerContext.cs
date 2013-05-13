@@ -10,6 +10,7 @@
 	using FileSystem;
 	using Minifiers;
 	using Resources;
+	using Transformers;
 	using Translators;
 	using Web;
 
@@ -25,6 +26,18 @@
 			new Lazy<BundleTransformerContext>(() => new BundleTransformerContext());
 
 		/// <summary>
+		/// Instance of CSS-transformer
+		/// </summary>
+		private readonly Lazy<CssTransformer> _cssTransformer =
+			new Lazy<CssTransformer>();
+
+		/// <summary>
+		/// Instance of JS-transformer
+		/// </summary>
+		private readonly Lazy<JsTransformer> _jsTransformer =
+			new Lazy<JsTransformer>();
+
+		/// <summary>
 		/// Information about web application
 		/// </summary>
 		private readonly Lazy<HttpApplicationInfo> _applicationInfo =
@@ -37,16 +50,16 @@
 			= new Lazy<FileSystemWrapper>();
 
 		/// <summary>
+		/// Common relative path resolver
+		/// </summary>
+		private readonly Lazy<CommonRelativePathResolver> _commonRelativePathResolver
+			= new Lazy<CommonRelativePathResolver>();
+
+		/// <summary>
 		/// CSS relative path resolver
 		/// </summary>
 		private readonly Lazy<CssRelativePathResolver> _cssRelativePathResolver
 			= new Lazy<CssRelativePathResolver>();
-
-		/// <summary>
-		/// JS relative path resolver
-		/// </summary>
-		private readonly Lazy<JsRelativePathResolver> _jsRelativePathResolver
-			= new Lazy<JsRelativePathResolver>();
 
 		/// <summary>
 		/// Configuration settings of core
@@ -130,6 +143,24 @@
 
 
 		/// <summary>
+		/// Gets instance of CSS-transformer
+		/// </summary>
+		/// <returns>Instance of CSS-transformer</returns>
+		public CssTransformer GetCssTransformerInstance()
+		{
+			return _cssTransformer.Value;
+		}
+
+		/// <summary>
+		/// Gets instance of JS-transformer
+		/// </summary>
+		/// <returns>Instance of JS-transformer</returns>
+		public JsTransformer GetJsTransformerInstance()
+		{
+			return _jsTransformer.Value;
+		}
+
+		/// <summary>
 		/// Gets instance of the web application info
 		/// </summary>
 		/// <returns>Information about web application</returns>
@@ -148,21 +179,21 @@
 		}
 
 		/// <summary>
+		/// Gets instance of the common relative path resolver
+		/// </summary>
+		/// <returns>Common relative path resolver</returns>
+		public CommonRelativePathResolver GetCommonRelativePathResolver()
+		{
+			return _commonRelativePathResolver.Value;
+		}
+
+		/// <summary>
 		/// Gets instance of the CSS relative path resolver
 		/// </summary>
 		/// <returns>Stylesheet relative path resolver</returns>
 		public CssRelativePathResolver GetCssRelativePathResolver()
 		{
 			return _cssRelativePathResolver.Value;
-		}
-
-		/// <summary>
-		/// Gets instance of the JS relative path resolver
-		/// </summary>
-		/// <returns>Script relative path resolver</returns>
-		public JsRelativePathResolver GetJsRelativePathResolver()
-		{
-			return _jsRelativePathResolver.Value;
 		}
 
 		/// <summary>

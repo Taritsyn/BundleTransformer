@@ -63,7 +63,7 @@
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
-		/// Object HttpContext
+		/// HTTP context
 		/// </summary>
 		private readonly HttpContextBase _httpContext;
 
@@ -73,9 +73,9 @@
 		private readonly IFileSystemWrapper _fileSystemWrapper;
 
 		/// <summary>
-		/// CSS relative path resolver
+		/// Relative path resolver
 		/// </summary>
-		private readonly ICssRelativePathResolver _cssRelativePathResolver;
+		private readonly IRelativePathResolver _relativePathResolver;
 
 		/// <summary>
 		/// Sass- and SCSS-compiler
@@ -89,7 +89,7 @@
 		public SassAndScssTranslator()
 			: this(new HttpContextWrapper(HttpContext.Current),
 				BundleTransformerContext.Current.GetFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCssRelativePathResolver(),
+				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
 				BundleTransformerContext.Current.GetSassAndScssConfiguration())
 		{ }
 
@@ -98,14 +98,14 @@
 		/// </summary>
 		/// <param name="httpContext">Object HttpContext</param>
 		/// <param name="fileSystemWrapper">File system wrapper</param>
-		/// <param name="cssRelativePathResolver">CSS relative path resolver</param>
+		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="sassAndScssConfig">Configuration settings of Sass- and SCSS-translator</param>
 		public SassAndScssTranslator(HttpContextBase httpContext, IFileSystemWrapper fileSystemWrapper,
-			ICssRelativePathResolver cssRelativePathResolver, SassAndScssSettings sassAndScssConfig)
+			IRelativePathResolver relativePathResolver, SassAndScssSettings sassAndScssConfig)
 		{
 			_httpContext = httpContext;
 			_fileSystemWrapper = fileSystemWrapper;
-			_cssRelativePathResolver = cssRelativePathResolver;
+			_relativePathResolver = relativePathResolver;
 			_sassAndScssCompiler = new SassAndScssCompiler();
 
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
@@ -168,12 +168,12 @@
 			string assetTypeName = (asset.AssetType == AssetType.Scss) ? "SCSS" : "Sass";
 			string newContent;
 			string assetPath = asset.Path;
-			var importedFilePaths = new List<string>();
+			var pathDependencies = new List<string>();
 
 			try
 			{
 				newContent = asset.Content;
-				FillImportedFilePaths(newContent, asset.Url, importedFilePaths);
+				FillDependencies(newContent, asset.Url, pathDependencies);
 
 				newContent = _sassAndScssCompiler.Compile(newContent, assetPath, enableNativeMinification);
 			}
@@ -196,7 +196,7 @@
 
 			asset.Content = newContent;
 			asset.Minified = enableNativeMinification;
-			asset.RequiredFilePaths = importedFilePaths;
+			asset.RequiredFilePaths = pathDependencies;
 		}
 
 		/// <summary>
@@ -205,9 +205,9 @@
 		/// </summary>
 		/// <param name="assetContent">Text content of Sass- or SCSS-asset</param>
 		/// <param name="assetUrl">URL of Sass- or SCSS-asset file</param>
-		/// <param name="importedFilePaths">List of Sass- and SCSS-files, that were added to a 
+		/// <param name="pathDependencies">List of Sass- and SCSS-files, that were added to a 
 		/// Sass- or SCSS-asset by using the @import directive</param>
-		public void FillImportedFilePaths(string assetContent, string assetUrl, IList<string> importedFilePaths)
+		public void FillDependencies(string assetContent, string assetUrl, IList<string> pathDependencies)
 		{
 			string assetExtension = Path.GetExtension(assetUrl);
 			if (!string.IsNullOrEmpty(assetExtension))
@@ -244,20 +244,36 @@
 						List<string> urlList = Utils.ConvertToStringCollection(urlListString, ',', true).ToList();
 						foreach (string url in urlList)
 						{
-							string importedAssetUrl = _cssRelativePathResolver.ResolveRelativePath(
+							string importedAssetUrl = _relativePathResolver.ResolveRelativePath(
 								assetUrl, url.Trim());
+							string importedAssetPath = _httpContext.Server.MapPath(importedAssetUrl);
 							string importedAssetExtension = Path.GetExtension(importedAssetUrl);
+							bool importedAssetExists;
+							string newImportedAssetUrl;
+							string newImportedAssetPath;
 
 							if (string.Equals(importedAssetExtension, SASS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase)
 								|| string.Equals(importedAssetExtension, SCSS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase))
 							{
-								string importedAssetPath = _httpContext.Server.MapPath(importedAssetUrl);
-								if (_fileSystemWrapper.FileExists(importedAssetPath))
-								{
-									importedFilePaths.Add(importedAssetPath);
+								newImportedAssetUrl = importedAssetUrl;
+								newImportedAssetPath = importedAssetPath;
+								importedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
 
-									string importedAssetContent = _fileSystemWrapper.GetFileTextContent(importedAssetPath);
-									FillImportedFilePaths(importedAssetContent, importedAssetUrl, importedFilePaths);
+								if (!importedAssetExists)
+								{
+									newImportedAssetUrl = GetPartialAssetUrl(newImportedAssetUrl);
+									newImportedAssetPath = _httpContext.Server.MapPath(newImportedAssetUrl);
+									importedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
+								}
+
+								if (importedAssetExists)
+								{
+									pathDependencies.Add(newImportedAssetPath);
+
+									string importedAssetContent = _fileSystemWrapper.GetFileTextContent(
+										newImportedAssetPath);
+									FillDependencies(importedAssetContent, newImportedAssetUrl,
+										pathDependencies);
 								}
 								else
 								{
@@ -265,43 +281,72 @@
 										string.Format(Strings.Common_FileNotExist, importedAssetPath));
 								}
 							}
-							else if (!string.Equals(importedAssetExtension, CSS_FILE_EXTENSION, 
+							else if (!string.Equals(importedAssetExtension, CSS_FILE_EXTENSION,
 								StringComparison.InvariantCultureIgnoreCase))
 							{
-								string importedAssetPath = _httpContext.Server.MapPath(importedAssetUrl);
-
 								string newImportedAssetExtension = assetExtension;
-								string newImportedAssetUrl = importedAssetUrl + newImportedAssetExtension;
-								string newImportedAssetPath = importedAssetPath + newImportedAssetExtension;
-								bool newImportedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
+								newImportedAssetUrl = importedAssetUrl + newImportedAssetExtension;
+								newImportedAssetPath = _httpContext.Server.MapPath(newImportedAssetUrl);
+								importedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
 
-								if (!newImportedAssetExists)
+								if (!importedAssetExists)
 								{
-									newImportedAssetExtension = string.Equals(newImportedAssetExtension, SASS_FILE_EXTENSION,
-										StringComparison.InvariantCultureIgnoreCase) ? SCSS_FILE_EXTENSION : SASS_FILE_EXTENSION;
-									newImportedAssetUrl = importedAssetUrl + newImportedAssetExtension;
-									newImportedAssetPath = importedAssetPath + newImportedAssetExtension;
-
-									newImportedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
+									newImportedAssetUrl = GetPartialAssetUrl(newImportedAssetUrl);
+									newImportedAssetPath = _httpContext.Server.MapPath(newImportedAssetUrl);
+									importedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
 								}
 
-								if (newImportedAssetExists)
+								if (!importedAssetExists)
 								{
-									importedFilePaths.Add(newImportedAssetPath);
+									newImportedAssetExtension = string.Equals(newImportedAssetExtension,
+										SASS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase) ?
+											SCSS_FILE_EXTENSION : SASS_FILE_EXTENSION;
+									newImportedAssetUrl = importedAssetUrl + newImportedAssetExtension;
+									newImportedAssetPath = _httpContext.Server.MapPath(newImportedAssetUrl);
 
-									string importedAssetContent = _fileSystemWrapper.GetFileTextContent(newImportedAssetPath);
-									FillImportedFilePaths(importedAssetContent, newImportedAssetUrl, importedFilePaths);
+									importedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
+								}
+
+								if (!importedAssetExists)
+								{
+									newImportedAssetUrl = GetPartialAssetUrl(newImportedAssetUrl);
+									newImportedAssetPath = _httpContext.Server.MapPath(newImportedAssetUrl);
+									importedAssetExists = _fileSystemWrapper.FileExists(newImportedAssetPath);
+								}
+
+								if (importedAssetExists)
+								{
+									pathDependencies.Add(newImportedAssetPath);
+
+									string importedAssetContent = _fileSystemWrapper.GetFileTextContent(
+										newImportedAssetPath);
+									FillDependencies(importedAssetContent, newImportedAssetUrl, pathDependencies);
 								}
 								else
 								{
 									throw new FileNotFoundException(
-										string.Format(Strings.Common_FileNotExist, newImportedAssetPath));
+										string.Format(Strings.Common_FileNotExist, importedAssetPath));
 								}
-							}	
+							}
 						}
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Gets a partial asset url
+		/// </summary>
+		/// <param name="assetUrl">URL of asset file</param>
+		/// <returns>URL of partial asset file</returns>
+		private static string GetPartialAssetUrl(string assetUrl)
+		{
+			string partialAssetUrl = Utils.CombineUrls(
+				Utils.ProcessBackSlashesInUrl(Path.GetDirectoryName(assetUrl)),
+				"_" + Path.GetFileName(assetUrl)
+			);
+
+			return partialAssetUrl;
 		}
 	}
 }

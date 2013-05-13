@@ -5,7 +5,6 @@
 	using System.IO;
 	using System.Reflection;
 	using System.Text.RegularExpressions;
-	using System.Web;
 
 	using Resources;
 
@@ -21,12 +20,6 @@
 		/// Regular expression to find last slash
 		/// </summary>
 		private static readonly Regex _lastSlashRegExp = new Regex(@"(\/|\\)*$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// Regular expression for determine protocol in URL
-		/// </summary>
-		private static readonly Regex _protocolRegExp = new Regex(@"^(https?|ftp)\://",
 			RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
@@ -92,68 +85,6 @@
 			string result = RemoveLastSlashFromUrl(baseUrl) + "/" + RemoveFirstSlashFromUrl(relativeUrl);
 
 			return result;
-		}
-
-		/// <summary>
-		/// Transforms relative URL to an absolute (relative to web application)
-		/// </summary>
-		/// <param name="baseUrl">The base URL</param>
-		/// <param name="relativeUrl">The relative URL</param>
-		/// <returns>The absolute URL</returns>
-		internal static string TransformRelativeUrlToAbsolute(string baseUrl, string relativeUrl)
-		{
-			if (string.IsNullOrWhiteSpace(baseUrl))
-			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "baseUrl");
-			}
-
-			if (string.IsNullOrWhiteSpace(relativeUrl))
-			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "relativeUrl");
-			}
-
-			string newRelativeUrl = ProcessBackSlashesInUrl(relativeUrl);
-
-			if (newRelativeUrl.StartsWith("/") || _protocolRegExp.IsMatch(newRelativeUrl))
-			{
-				return newRelativeUrl;
-			}
-
-			if (newRelativeUrl.StartsWith("~/"))
-			{
-				return VirtualPathUtility.ToAbsolute(newRelativeUrl);
-			}
-
-			string absoluteUrl;
-			string newBaseUrl = ProcessBackSlashesInUrl(
-				VirtualPathUtility.ToAbsolute(Path.GetDirectoryName(baseUrl)) + @"/");
-
-			if (newRelativeUrl.StartsWith("../") || newRelativeUrl.StartsWith("./"))
-			{
-				string hash = string.Empty;
-				int hashPosition = newRelativeUrl.IndexOf('#');
-				if (hashPosition != -1)
-				{
-					hash = newRelativeUrl.Substring(hashPosition + 1);
-					newRelativeUrl = newRelativeUrl.Substring(0, hashPosition);
-				}
-
-				const string fakeSiteUrl = "http://bundletransformer.codeplex.com/";
-				var baseUri = new Uri(CombineUrls(fakeSiteUrl, newBaseUrl), UriKind.Absolute);
-
-				var absoluteUri = new Uri(baseUri, newRelativeUrl);
-				absoluteUrl = absoluteUri.PathAndQuery;
-				if (hash.Length > 0)
-				{
-					absoluteUrl += "#" + hash;
-				}
-			}
-			else
-			{
-				absoluteUrl = CombineUrls(newBaseUrl, newRelativeUrl);
-			}
-
-			return absoluteUrl;
 		}
 
 		/// <summary>

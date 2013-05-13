@@ -41,12 +41,12 @@
 			<xs:documentation>Configuration settings of core</xs:documentation>
 		</xs:annotation>
 		<xs:all>
-			<xs:element name="css" type="AssetTypeSettings_SchemaType" minOccurs="0" maxOccurs="1">
+			<xs:element name="css" type="CssSettings_SchemaType" minOccurs="0" maxOccurs="1">
 				<xs:annotation>
 					<xs:documentation>Configuration settings of processing CSS-assets</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="js" type="AssetTypeSettings_SchemaType" minOccurs="0" maxOccurs="1">
+			<xs:element name="js" type="JsSettings_SchemaType" minOccurs="0" maxOccurs="1">
 				<xs:annotation>
 					<xs:documentation>Configuration settings of processing JS-assets</xs:documentation>
 				</xs:annotation>
@@ -75,6 +75,24 @@
 				<xs:documentation>Flag, which makes the debug mode is dependent on the value of the BundleTable.EnableOptimizations property</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="CssSettings_SchemaType">
+	  <xs:complexContent>
+		<xs:extension base="AssetTypeSettings_SchemaType">
+		  <xs:attribute name="disableNativeCssRelativePathTransformation" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+			  <xs:documentation>Flag for whether to disable native transformation of relative paths to absolute in CSS-files</xs:documentation>
+			</xs:annotation>
+		  </xs:attribute>
+		</xs:extension>
+	  </xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="JsSettings_SchemaType">
+	  <xs:complexContent>
+		<xs:extension base="AssetTypeSettings_SchemaType" />
+	  </xs:complexContent>
 	</xs:complexType>
 	
 	<xs:complexType name="AssetTypeSettings_SchemaType">

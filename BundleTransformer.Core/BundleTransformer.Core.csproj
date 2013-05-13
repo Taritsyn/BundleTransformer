@@ -80,6 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Dependency.cs" />
+    <Compile Include="Builders\NullBuilder.cs" />
+    <Compile Include="Bundles\CustomScriptBundle.cs" />
+    <Compile Include="Bundles\CustomStyleBundle.cs" />
     <Compile Include="Configuration\AssetHandlerSettings.cs" />
     <Compile Include="Constants\ContentType.cs" />
     <Compile Include="Constants\MinifierName.cs" />
@@ -99,17 +102,16 @@
     <Compile Include="Configuration\TranslatorRegistration.cs" />
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
     <Compile Include="Constants\Common.cs" />
-    <Compile Include="ErrorMessageHelpers\ErrorSourceInfo.cs" />
+    <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
     <Compile Include="FileSystem\CssRelativePathResolver.cs" />
     <Compile Include="FileSystem\FileSystemWrapper.cs" />
-    <Compile Include="FileSystem\IJsRelativePathResolver.cs" />
+    <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
     <Compile Include="FileSystem\IRelativePathResolver.cs" />
-    <Compile Include="FileSystem\JsRelativePathResolver.cs" />
-    <Compile Include="FileSystem\RelativePathResolverBase.cs" />
+    <Compile Include="SourceCodeHelpers\SourceCodeNavigator.cs" />
+    <Compile Include="SourceCodeHelpers\SourceCodeNodeCoordinates.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Web\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IFileSystemWrapper.cs" />
-    <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
     <Compile Include="Filters\CssUnnecessaryAssetsFilter.cs" />
     <Compile Include="Filters\CssDuplicateAssetsFilter.cs" />
     <Compile Include="Filters\CssFileExtensionsFilter.cs" />

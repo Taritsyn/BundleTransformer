@@ -14,6 +14,7 @@
 		CoffeeScript,
 		TypeScript,
 		LiterateCoffeeScript,
-		CoffeeScriptMarkdown
+		CoffeeScriptMarkdown,
+		Handlebars
 	}
 }

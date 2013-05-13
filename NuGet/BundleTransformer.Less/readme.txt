@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.6.19
+               README file for Bundle Transformer: LESS 1.6.25
 
    ----------------------------------------------------------------------
 
@@ -17,12 +17,7 @@
    of translated LESS-asset.
 
    Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
-   
-   =============
-   RELEASE NOTES
-   =============
-   Fixed bug #22 "Please make lessEngineConfig.DisableUrlRewriting 
-   configurable in web.config".
+
  
    ====================
    POST-INSTALL ACTIONS
