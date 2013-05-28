@@ -1,7 +1,7 @@
 <configuration>
 	<configSections>
 		<sectionGroup name="bundleTransformer">
-			<section name="yui" type="BundleTransformer.Yui.Configuration.YuiSettings" />
+			<section name="yui" type="BundleTransformer.Yui.Configuration.YuiSettings, BundleTransformer.Yui" />
 		</sectionGroup>
 	</configSections>
 	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">

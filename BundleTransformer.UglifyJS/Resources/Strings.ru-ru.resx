@@ -117,16 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DefinesParsing_CannotConvertValue" xml:space="preserve">
+  <data name="GlobalDefsParsing_CannotConvertValue" xml:space="preserve">
     <value>Невозможно преобразовать значение "{0}" символа "{1}" к типу {2}!</value>
   </data>
-  <data name="DefinesParsing_CannotParseValue" xml:space="preserve">
+  <data name="GlobalDefsParsing_CannotParseValue" xml:space="preserve">
     <value>Невозможно распознать значение "{0}" символа "{1}"!</value>
   </data>
-  <data name="DefinesParsing_InvalidSymbolValueFormat" xml:space="preserve">
+  <data name="GlobalDefsParsing_InvalidSymbolValueFormat" xml:space="preserve">
     <value>Значение "{0}" не соответствует формату СИМВОЛ[=значение]!</value>
   </data>
-  <data name="DefinesParsing_SymbolNameIsForbidden" xml:space="preserve">
+  <data name="GlobalDefsParsing_SymbolNameIsForbidden" xml:space="preserve">
     <value>Запрещено задавать имя символа, которое совпадает с именем встроенной константы JavaScript: "{0}"!</value>
   </data>
 </root>

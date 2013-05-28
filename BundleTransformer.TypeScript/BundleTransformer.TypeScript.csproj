@@ -41,7 +41,7 @@
       <HintPath>..\packages\MsieJavaScriptEngine.1.1.1\lib\net40\MsieJavaScriptEngine.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.5.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.5.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -56,13 +56,14 @@
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
     <Compile Include="CodeGenTarget.cs" />
+    <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\TypeScriptCompiler.cs" />
     <Compile Include="Compilers\TypeScriptCompilingException.cs" />
     <Compile Include="Configuration\StyleSettings.cs" />
     <Compile Include="Configuration\TypeScriptSettings.cs" />
     <Compile Include="HttpHandlers\TypeScriptAssetHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StyleInstanceSettings.cs" />
+    <Compile Include="StyleOptions.cs" />
     <Compile Include="Translators\TypeScriptTranslator.cs" />
   </ItemGroup>
   <ItemGroup />

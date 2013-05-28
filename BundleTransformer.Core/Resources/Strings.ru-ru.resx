@@ -192,6 +192,9 @@
   <data name="ErrorDetails_ErrorCode" xml:space="preserve">
     <value>Код ошибки</value>
   </data>
+  <data name="ErrorDetails_ErrorType" xml:space="preserve">
+    <value>Тип ошибки</value>
+  </data>
   <data name="ErrorDetails_File" xml:space="preserve">
     <value>Файл</value>
   </data>
@@ -230,6 +233,12 @@
   </data>
   <data name="ErrorDetails_Subcategory" xml:space="preserve">
     <value>Подкатегория</value>
+  </data>
+  <data name="ErrorType_Error" xml:space="preserve">
+    <value>ошибка</value>
+  </data>
+  <data name="ErrorType_Warning" xml:space="preserve">
+    <value>предупреждение</value>
   </data>
   <data name="Minifiers_MinificationFailed" xml:space="preserve">
     <value>Во время минимизации {0}-кода, считанного из файла {1}, с помощью {2} произошла ошибка!	

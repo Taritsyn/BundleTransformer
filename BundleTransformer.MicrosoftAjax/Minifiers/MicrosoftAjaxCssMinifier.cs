@@ -43,7 +43,7 @@
 		private readonly CssSettings _cssParserConfiguration;
 
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (&lt;% %gt;) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %gt;</code>) 
 		/// should be recognized and output as is
 		/// </summary>
 		public override bool AllowEmbeddedAspNetBlocks
@@ -55,6 +55,137 @@
 			set
 			{
 				_cssParserConfiguration.AllowEmbeddedAspNetBlocks = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (<code>NewLine</code>) or on the same line as
+		/// the preceding code (<code>SameLine</code>)
+		/// or taking a hint from the source code position (<code>UseSource</code>).
+		/// Only relevant when OutputMode is set to <code>MultipleLines</code>.
+		/// </summary>
+		public override BtBlockStart BlocksStartOnSameLine
+		{
+			get
+			{
+				return Utils.GetEnumFromOtherEnum<MsBlockStart, BtBlockStart>(_cssParserConfiguration.BlocksStartOnSameLine);
+			}
+			set
+			{
+				_cssParserConfiguration.BlocksStartOnSameLine = Utils.GetEnumFromOtherEnum<BtBlockStart, MsBlockStart>(value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to ignore all errors found in the input code
+		/// </summary>
+		public override bool IgnoreAllErrors
+		{
+			get
+			{
+				return _cssParserConfiguration.IgnoreAllErrors;
+			}
+			set
+			{
+				_cssParserConfiguration.IgnoreAllErrors = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of the list of 
+		/// debug lookups (comma-separated)
+		/// </summary>
+		public override string IgnoreErrorList
+		{
+			get
+			{
+				return _cssParserConfiguration.IgnoreErrorList;
+			}
+			set
+			{
+				_cssParserConfiguration.IgnoreErrorList = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets number of spaces per indent level when in 
+		/// <code>MultipleLines</code> output mode
+		/// </summary>
+		public override int IndentSize
+		{
+			get
+			{
+				return _cssParserConfiguration.IndentSize;
+			}
+			set
+			{
+				_cssParserConfiguration.IndentSize = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a column position at which the line 
+		/// will be broken at the next available opportunity
+		/// </summary>
+		public override int LineBreakThreshold
+		{
+			get
+			{
+				return _cssParserConfiguration.LineBreakThreshold;
+			}
+			set
+			{
+				_cssParserConfiguration.LineBreakThreshold = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a output mode:
+		/// <code>SingleLine</code> - output all code on a single line;
+		/// <code>MultipleLines</code> - break the output into multiple lines to be more human-readable
+		/// </summary>
+		public override BtOutputMode OutputMode
+		{
+			get
+			{
+				return Utils.GetEnumFromOtherEnum<MsOutputMode, BtOutputMode>(_cssParserConfiguration.OutputMode);
+			}
+			set
+			{
+				_cssParserConfiguration.OutputMode = Utils.GetEnumFromOtherEnum<BtOutputMode, MsOutputMode>(value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets string representation of the list 
+		/// of names defined for the preprocessor (comma-separated)
+		/// </summary>
+		public override string PreprocessorDefineList
+		{
+			get
+			{
+				return _cssParserConfiguration.PreprocessorDefineList;
+			}
+			set
+			{
+				_cssParserConfiguration.PreprocessorDefineList = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to add a semicolon 
+		/// at the end of the parsed code
+		/// </summary>
+		public override bool TermSemicolons
+		{
+			get
+			{
+				return _cssParserConfiguration.TermSemicolons;
+			}
+			set
+			{
+				_cssParserConfiguration.TermSemicolons = value;
 			}
 		}
 
@@ -89,38 +220,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of 
-		/// debug lookups, comma-separated
-		/// </summary>
-		public override string IgnoreErrorList
-		{
-			get
-			{
-				return _cssParserConfiguration.IgnoreErrorList;
-			}
-			set
-			{
-				_cssParserConfiguration.IgnoreErrorList = value;
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets number of spaces per indent level when in 
-		/// MultipleLines output mode
-		/// </summary>
-		public override int IndentSize
-		{
-			get
-			{
-				return _cssParserConfiguration.IndentSize;
-			}
-			set
-			{
-				_cssParserConfiguration.IndentSize = value;
-			}
-		}
-
-		/// <summary>
 		/// Gets or sets a value indicating whether to minify the 
 		/// JavaScript within expression functions
 		/// </summary>
@@ -133,73 +232,6 @@
 			set
 			{
 				_cssParserConfiguration.MinifyExpressions = value;
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets a output mode:
-		/// SingleLine - output all code on a single line;
-		/// MultipleLines - break the output into multiple lines to be more human-readable
-		/// </summary>
-		public override BtOutputMode OutputMode
-		{
-			get
-			{
-				return Utils.GetEnumFromOtherEnum<MsOutputMode, BtOutputMode>(_cssParserConfiguration.OutputMode);
-			}
-			set
-			{
-				_cssParserConfiguration.OutputMode = Utils.GetEnumFromOtherEnum<BtOutputMode, MsOutputMode>(value);
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets a value indicating whether the opening curly brace for blocks is
-		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
-		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
-		/// set to MultipleLines.
-		/// </summary>
-		public override BtBlockStart BlocksStartOnSameLine
-		{
-			get
-			{
-				return Utils.GetEnumFromOtherEnum<MsBlockStart, BtBlockStart>(_cssParserConfiguration.BlocksStartOnSameLine);
-			}
-			set 
-			{ 
-				_cssParserConfiguration.BlocksStartOnSameLine = Utils.GetEnumFromOtherEnum<BtBlockStart, MsBlockStart>(value);
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets string representation of the list 
-		/// of names defined for the preprocessor, comma-separated
-		/// </summary>
-		public override string PreprocessorDefineList
-		{
-			get
-			{
-				return _cssParserConfiguration.PreprocessorDefineList;
-			}
-			set
-			{
-				_cssParserConfiguration.PreprocessorDefineList = value;
-			}
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to add a semicolon 
-		/// at the end of the parsed code
-		/// </summary>
-		public override bool TermSemicolons
-		{
-			get
-			{
-				return _cssParserConfiguration.TermSemicolons;
-			}
-			set
-			{
-				_cssParserConfiguration.TermSemicolons = value;
 			}
 		}
 
@@ -220,17 +252,10 @@
 			_cssParserConfiguration = new CssSettings();
 
 			CssMinifierSettings cssMinifierConfig = microsoftAjaxConfig.CssMinifier;
-			AllowEmbeddedAspNetBlocks = cssMinifierConfig.AllowEmbeddedAspNetBlocks;
+			MapCommonSettings(this, cssMinifierConfig);
 			ColorNames = cssMinifierConfig.ColorNames;
 			CommentMode = cssMinifierConfig.CommentMode;
-			IgnoreErrorList = cssMinifierConfig.IgnoreErrorList;
-			IndentSize = cssMinifierConfig.IndentSize;
 			MinifyExpressions = cssMinifierConfig.MinifyExpressions;
-			OutputMode = cssMinifierConfig.OutputMode;
-			BlocksStartOnSameLine = cssMinifierConfig.BlocksStartOnSameLine;
-			PreprocessorDefineList = cssMinifierConfig.PreprocessorDefineList;
-			TermSemicolons = cssMinifierConfig.TermSemicolons;
-			Severity = cssMinifierConfig.Severity;
 		}
 
 
@@ -277,7 +302,7 @@
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed, 
+						string.Format(CoreStrings.Minifiers_MinificationFailed,
 							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
 				}
 				finally

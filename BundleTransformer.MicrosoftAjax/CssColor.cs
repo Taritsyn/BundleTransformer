@@ -15,7 +15,7 @@
 
 		/// <summary>
 		/// Convert known hex values to major-browser color names if shorter; and known major-browser color
-		/// names to hex if shorter.
+		/// names to hex if shorter
 		/// </summary>
 		Major
 	}

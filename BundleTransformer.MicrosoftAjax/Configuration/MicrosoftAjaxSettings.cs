@@ -3,7 +3,7 @@
 	using System.Configuration;
 
 	/// <summary>
-	/// Configuration settings of Microsoft Ajax Minifier
+	/// Common configuration settings of Microsoft Ajax Minifier
 	/// </summary>
 	public sealed class MicrosoftAjaxSettings : ConfigurationSection
 	{

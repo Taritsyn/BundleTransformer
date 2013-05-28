@@ -274,6 +274,15 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error type.
+        /// </summary>
+        public static string ErrorDetails_ErrorType {
+            get {
+                return ResourceManager.GetString("ErrorDetails_ErrorType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File.
         /// </summary>
         public static string ErrorDetails_File {
@@ -387,6 +396,24 @@ namespace BundleTransformer.Core.Resources {
         public static string ErrorDetails_Subcategory {
             get {
                 return ResourceManager.GetString("ErrorDetails_Subcategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to error.
+        /// </summary>
+        public static string ErrorType_Error {
+            get {
+                return ResourceManager.GetString("ErrorType_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to warning.
+        /// </summary>
+        public static string ErrorType_Warning {
+            get {
+                return ResourceManager.GetString("ErrorType_Warning", resourceCulture);
             }
         }
         

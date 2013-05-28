@@ -13,7 +13,7 @@
 		KeepLocalizationVars,
 
 		/// <summary>
-		/// Rename all local variables and functions. (default)
+		/// Rename all local variables and functions
 		/// </summary>
 		CrunchAll
 	}

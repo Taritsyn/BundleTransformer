@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Microsoft Ajax 1.6.25
+          README file for Bundle Transformer: Microsoft Ajax 1.6.26
  
    ----------------------------------------------------------------------
 
@@ -20,7 +20,13 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Microsoft Ajax Minifier version 4.91.
+   1. In configuration settings of CSS- and JS-minifier added 2 new 
+      properties: IgnoreAllErrors and LineBreakThreshold;
+   2. In configuration settings of JS-minifier added 7 new properties: 
+      ConstStatementsMozilla, ErrorIfNotInlineSafe, EvalLiteralExpressions,
+      IgnorePreprocessorDefines, ManualRenamesProperties, 
+      QuoteObjectLiteralProperties and ReorderScopeDeclarations, and 
+      removed one property - MinifyCode.
    
    ====================
    POST-INSTALL ACTIONS

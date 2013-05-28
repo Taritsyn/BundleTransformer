@@ -8,7 +8,7 @@
 	public abstract class MinifierSettingsBase : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (&lt;% %&gt;) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>) 
 		/// should be recognized and output as is
 		/// </summary>
 		[ConfigurationProperty("allowEmbeddedAspNetBlocks", DefaultValue = false)]
@@ -19,8 +19,32 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (<code>NewLine</code>) or on the same line as 
+		/// the preceding code (<code>SameLine</code>)
+		/// or taking a hint from the source code position (<code>UseSource</code>).
+		/// Only relevant when OutputMode is set to <code>MultipleLines</code>.
+		/// </summary>
+		[ConfigurationProperty("blocksStartOnSameLine", DefaultValue = BlockStart.NewLine)]
+		public BlockStart BlocksStartOnSameLine
+		{
+			get { return (BlockStart)this["blocksStartOnSameLine"]; }
+			set { this["blocksStartOnSameLine"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to ignore all errors found in the input code
+		/// </summary>
+		[ConfigurationProperty("ignoreAllErrors", DefaultValue = false)]
+		public bool IgnoreAllErrors
+		{
+			get { return (bool) this["ignoreAllErrors"]; }
+			set { this["ignoreAllErrors"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a string representation of the list of 
-		/// debug lookups, comma-separated
+		/// debug lookups (comma-separated)
 		/// </summary>
 		[ConfigurationProperty("ignoreErrorList", DefaultValue = "")]
 		public string IgnoreErrorList
@@ -31,7 +55,7 @@
 
 		/// <summary>
 		/// Gets or sets a number of spaces per indent level when in 
-		/// MultipleLines output mode
+		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		[ConfigurationProperty("indentSize", DefaultValue = 4)]
 		public int IndentSize
@@ -41,9 +65,20 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a column position at which the line 
+		/// will be broken at the next available opportunity
+		/// </summary>
+		[ConfigurationProperty("lineBreakThreshold", DefaultValue = 2147482647)]
+		public int LineBreakThreshold
+		{
+			get { return (int)this["lineBreakThreshold"]; }
+			set { this["lineBreakThreshold"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a output mode:
-		/// SingleLine - output all code on a single line;
-		/// MultipleLines - break the output into multiple lines to be more human-readable
+		/// <code>SingleLine</code> - output all code on a single line;
+		/// <code>MultipleLines</code> - break the output into multiple lines to be more human-readable
 		/// </summary>
 		[ConfigurationProperty("outputMode", DefaultValue = OutputMode.SingleLine)]
 		public OutputMode OutputMode
@@ -53,21 +88,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether the opening curly brace for blocks is
-		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
-		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
-		/// set to MultipleLines.
-		/// </summary>
-		[ConfigurationProperty("blocksStartOnSameLine", DefaultValue = BlockStart.NewLine)]
-		public BlockStart BlocksStartOnSameLine
-		{
-			get { return (BlockStart)this["blocksStartOnSameLine"]; }
-			set { this["blocksStartOnSameLine"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a string representation of the list 
-		/// of names defined for the preprocessor, comma-separated
+		/// of names defined for the preprocessor (comma-separated)
 		/// </summary>
 		[ConfigurationProperty("preprocessorDefineList", DefaultValue = "")]
 		public string PreprocessorDefineList

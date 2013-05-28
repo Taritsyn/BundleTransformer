@@ -89,11 +89,10 @@
 		public string Compile(string content, bool isLiterate = false)
 		{
 			string newContent;
-			var options = new
-			{
-				bare = true,
-				literate = isLiterate
-			};
+			var options = new JObject(
+				new JProperty("bare", true),
+				new JProperty("literate", isLiterate)
+			);
 
 			lock (_compilationSynchronizer)
 			{
@@ -104,7 +103,7 @@
 					var result = _jsEngine.Evaluate<string>(
 						string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
 							JsonConvert.SerializeObject(content),
-							JsonConvert.SerializeObject(options)));
+							options));
 					var json = JObject.Parse(result);
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;

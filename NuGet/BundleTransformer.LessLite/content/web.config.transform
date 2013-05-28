@@ -1,7 +1,7 @@
 <configuration>
 	<configSections>
 		<sectionGroup name="bundleTransformer">
-			<section name="less" type="BundleTransformer.LessLite.Configuration.LessLiteSettings" />
+			<section name="less" type="BundleTransformer.LessLite.Configuration.LessLiteSettings, BundleTransformer.LessLite" />
 		</sectionGroup>
 	</configSections>
 	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">

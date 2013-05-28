@@ -1,7 +1,7 @@
 <configuration>
 	<configSections>
 		<sectionGroup name="bundleTransformer">
-			<section name="microsoftAjax" type="BundleTransformer.MicrosoftAjax.Configuration.MicrosoftAjaxSettings" />
+			<section name="microsoftAjax" type="BundleTransformer.MicrosoftAjax.Configuration.MicrosoftAjaxSettings, BundleTransformer.MicrosoftAjax" />
 		</sectionGroup>
 	</configSections>
 	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">

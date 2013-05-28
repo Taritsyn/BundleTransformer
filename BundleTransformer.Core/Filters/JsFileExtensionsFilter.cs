@@ -76,8 +76,8 @@
 					{
 						string jsFileNamePattern = Regex.Escape(jsFileName.Trim());
 
-						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder, 
-							StringComparison.InvariantCultureIgnoreCase) != -1)
+						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder,
+							StringComparison.OrdinalIgnoreCase) != -1)
 						{
 							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder, @"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
 						}

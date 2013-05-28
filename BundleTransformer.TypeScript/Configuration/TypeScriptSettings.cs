@@ -27,7 +27,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to include a default lib.d.ts with global declarations
+		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
 		/// </summary>
 		[ConfigurationProperty("useDefaultLib", DefaultValue = true)]
 		public bool UseDefaultLib
@@ -57,7 +57,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to infer class properties from top-level assignments to 'this'
+		/// Gets or sets a flag for whether to infer class properties 
+		/// from top-level assignments to <code>this</code>
 		/// </summary>
 		[ConfigurationProperty("inferPropertiesFromThisAssignment", DefaultValue = false)]
 		public bool InferPropertiesFromThisAssignment

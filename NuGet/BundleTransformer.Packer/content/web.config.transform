@@ -1,7 +1,7 @@
 <configuration>
 	<configSections>
 		<sectionGroup name="bundleTransformer">
-			<section name="packer" type="BundleTransformer.Packer.Configuration.PackerSettings" />
+			<section name="packer" type="BundleTransformer.Packer.Configuration.PackerSettings, BundleTransformer.Packer" />
 		</sectionGroup>
 	</configSections>
 	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">

@@ -3,7 +3,7 @@
 	public enum EvalTreatment
 	{
 		/// <summary>
-		/// Ignore all eval statements (default). This assumes that code that is eval'd will not attempt
+		/// Ignore all eval statements. This assumes that code that is eval'd will not attempt
 		/// to access any local variables or functions, as those variables and function may be renamed.
 		/// </summary>
 		Ignore = 0,

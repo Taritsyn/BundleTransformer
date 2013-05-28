@@ -34,10 +34,11 @@
 			foreach (var asset in assets)
 			{
 				string newAssetPath = Asset.RemoveAdditionalJsFileExtension(asset.Path);
+				string newAssetPathInUppercase = newAssetPath.ToUpperInvariant();
 				bool assetExist = processedAssets
-				    .Where(a => 
-						Asset.RemoveAdditionalJsFileExtension(a.Path).ToUpperInvariant() == newAssetPath.ToUpperInvariant())
-				    .Count() > 0;
+					.Count(
+						a => Asset.RemoveAdditionalJsFileExtension(a.Path).ToUpperInvariant() == newAssetPathInUppercase
+					) > 0;
 
 				if (!assetExist)
 				{

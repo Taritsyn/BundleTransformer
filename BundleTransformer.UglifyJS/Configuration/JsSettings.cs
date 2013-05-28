@@ -8,39 +8,63 @@
 	public sealed class JsSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets a configuration settings of the parser
+		/// Gets a configuration settings of parsing
 		/// </summary>
-		[ConfigurationProperty("parser")]
-		public ParserSettings Parser
+		[ConfigurationProperty("parsing")]
+		public ParsingSettings Parsing
 		{
-			get { return (ParserSettings)this["parser"]; }
+			get { return (ParsingSettings)this["parsing"]; }
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of the mangler
+		/// Gets a configuration settings of compression
 		/// </summary>
-		[ConfigurationProperty("mangler")]
-		public ManglerSettings Mangler
+		[ConfigurationProperty("compression")]
+		public CompressionSettings Compression
 		{
-			get { return (ManglerSettings)this["mangler"]; }
+			get { return (CompressionSettings)this["compression"]; }
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of the squeezer
+		/// Gets a configuration settings of mangling
 		/// </summary>
-		[ConfigurationProperty("squeezer")]
-		public SqueezerSettings Squeezer
+		[ConfigurationProperty("mangling")]
+		public ManglingSettings Mangling
 		{
-			get { return (SqueezerSettings)this["squeezer"]; }
+			get { return (ManglingSettings)this["mangling"]; }
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of the code generator
+		/// Gets a configuration settings of code generation
 		/// </summary>
-		[ConfigurationProperty("codeGenerator")]
-		public CodeGeneratorSettings CodeGenerator
+		[ConfigurationProperty("codeGeneration")]
+		public CodeGenerationSettings CodeGeneration
 		{
-			get { return (CodeGeneratorSettings)this["codeGenerator"]; }
+			get { return (CodeGenerationSettings)this["codeGeneration"]; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full compliance with 
+		/// Internet Explorer 6-8 quirks
+		/// </summary>
+		[ConfigurationProperty("screwIe8", DefaultValue = false)]
+		public bool ScrewIe8
+		{
+			get { return (bool)this["screwIe8"]; }
+			set { this["screwIe8"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		[ConfigurationProperty("severity", DefaultValue = 0)]
+		[IntegerValidator(MinValue = 0, MaxValue = 1, ExcludeRange = false)]
+		public int Severity
+		{
+			get { return (int)this["severity"]; }
+			set { this["severity"] = value; }
 		}
 	}
 }

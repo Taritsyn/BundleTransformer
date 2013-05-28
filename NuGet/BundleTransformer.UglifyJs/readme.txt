@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.6.25
+             README file for Bundle Transformer: UglifyJS 1.6.26
  
    ----------------------------------------------------------------------
 
@@ -13,8 +13,8 @@
    ===========
    BundleTransformer.UglifyJs contains one minifier-adapter for 
    minification of JS-code - UglifyJsMinifier. UglifyJsMinifier is based 
-   on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS) 
-   version 1.3.4.
+   on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) 
+   version 2.3.6.
    
    ====================
    POST-INSTALL ACTIONS
@@ -23,6 +23,11 @@
    make changes to the Web.config file. In the defaultMinifier attribute 
    of the \configuration\bundleTransformer\core\js element must be set 
    value equal to UglifyJsMinifier.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of UglifyJS version 2.3.6.
    
    =============
    DOCUMENTATION

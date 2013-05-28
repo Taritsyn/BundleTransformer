@@ -1,9 +1,8 @@
-var typeScriptHelper = {};
-
-;(function (typeScriptHelper, typeScript, undefined) {
+var typeScriptHelper = (function(typeScript, json2, undefined) {
 	"use strict";
-	
-	var CUTTING_LINE_BEGIN_TOKEN = '"bundle_transformer_begin_unneeded_code_cut";',
+
+	var exports = {},
+		CUTTING_LINE_BEGIN_TOKEN = '"bundle_transformer_begin_unneeded_code_cut";',
 		CUTTING_LINE_END_TOKEN = '"bundle_transformer_end_unneeded_code_cut";',
 		StringBuilder,
 		defaultOptions
@@ -121,7 +120,7 @@ var typeScriptHelper = {};
 			dependenciesCodeBuilder,
 			dependencyIndex,
 			dependency,
-		    dependencyContent,
+			dependencyContent,
 			dependenciesCode
 			;
 
@@ -204,7 +203,7 @@ var typeScriptHelper = {};
 		return child;
 	}
 
-	typeScriptHelper.compile = function(code, dependencies, options) {
+	exports.compile = function (code, dependencies, options) {
 		var codeBuilder,
 			errorBuilder,
 			logger,
@@ -245,9 +244,9 @@ var typeScriptHelper = {};
 		parseErrors = [];
 		compiler.reTypeCheck();
 		compiler.emit({
-			createFile: function(fileName) { return codeBuilder; },
-			fileExists: function (path) { return false; },
-			directoryExists: function (path) { return false; },
+			createFile: function() { return codeBuilder; },
+			fileExists: function () { return false; },
+			directoryExists: function () { return false; },
 			resolvePath: function (path) { return path; }
 		});
 
@@ -261,6 +260,8 @@ var typeScriptHelper = {};
 		codeBuilder.Dispose();
 		errorBuilder.Dispose();
 
-		return JSON2.stringify(result);
+		return json2.stringify(result);
 	};
-}(typeScriptHelper, TypeScript));
+
+	return exports;
+}(TypeScript, JSON2));

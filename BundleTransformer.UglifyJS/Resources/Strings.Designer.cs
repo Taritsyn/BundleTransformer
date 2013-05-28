@@ -63,36 +63,36 @@ namespace BundleTransformer.UglifyJs.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Cannot convert the value &apos;{0}&apos; of symbol &apos;{1}&apos; to type {2}..
         /// </summary>
-        public static string DefinesParsing_CannotConvertValue {
+        public static string GlobalDefsParsing_CannotConvertValue {
             get {
-                return ResourceManager.GetString("DefinesParsing_CannotConvertValue", resourceCulture);
+                return ResourceManager.GetString("GlobalDefsParsing_CannotConvertValue", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Cannot parse the value &apos;{0}&apos; of symbol &apos;{1}&apos;..
         /// </summary>
-        public static string DefinesParsing_CannotParseValue {
+        public static string GlobalDefsParsing_CannotParseValue {
             get {
-                return ResourceManager.GetString("DefinesParsing_CannotParseValue", resourceCulture);
+                return ResourceManager.GetString("GlobalDefsParsing_CannotParseValue", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The value &apos;{0}&apos; does not correspond to the format of SYMBOL[=value]..
         /// </summary>
-        public static string DefinesParsing_InvalidSymbolValueFormat {
+        public static string GlobalDefsParsing_InvalidSymbolValueFormat {
             get {
-                return ResourceManager.GetString("DefinesParsing_InvalidSymbolValueFormat", resourceCulture);
+                return ResourceManager.GetString("GlobalDefsParsing_InvalidSymbolValueFormat", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Forbidden to specify the name of symbol, which coincides with the name of built-in constant of JavaScript language: &apos;{0}&apos;..
         /// </summary>
-        public static string DefinesParsing_SymbolNameIsForbidden {
+        public static string GlobalDefsParsing_SymbolNameIsForbidden {
             get {
-                return ResourceManager.GetString("DefinesParsing_SymbolNameIsForbidden", resourceCulture);
+                return ResourceManager.GetString("GlobalDefsParsing_SymbolNameIsForbidden", resourceCulture);
             }
         }
     }

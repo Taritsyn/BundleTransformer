@@ -10,6 +10,7 @@
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Configuration;
 	using BtOutputMode = OutputMode;
 	using BtBlockStart = BlockStart;
 
@@ -20,41 +21,53 @@
 	public abstract class MicrosoftAjaxMinifierBase : IMinifier
 	{
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (&lt;% %&gt;) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>) 
 		/// should be recognized and output as is
 		/// </summary>
 		public abstract bool AllowEmbeddedAspNetBlocks { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value indicating whether the opening curly brace for blocks is
+		/// on its own line (<code>NewLine</code>) or on the same line as 
+		/// the preceding code (<code>SameLine</code>)
+		/// or taking a hint from the source code position (UseSource).
+		/// Only relevant when OutputMode is set to MultipleLines.
+		/// </summary>
+		public abstract BtBlockStart BlocksStartOnSameLine { get; set; }
+
+		/// <summary>
+		/// Gets or sets a flag for whether to ignore all errors found in the input code
+		/// </summary>
+		public abstract bool IgnoreAllErrors { get; set; }
+
+		/// <summary>
 		/// Gets or sets a string representation of the list of 
-		/// debug lookups, comma-separated
+		/// debug lookups (comma-separated)
 		/// </summary>
 		public abstract string IgnoreErrorList { get; set; }
 
 		/// <summary>
 		/// Gets or sets a number of spaces per indent level when in 
-		/// MultipleLines output mode
+		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		public abstract int IndentSize { get; set; }
 
 		/// <summary>
+		/// Gets or sets the column position at which the line 
+		/// will be broken at the next available opportunity
+		/// </summary>
+		public abstract int LineBreakThreshold { get; set; }
+
+		/// <summary>
 		/// Gets or sets a output mode:
-		/// SingleLine - output all code on a single line;
-		/// MultipleLines - break the output into multiple lines to be more human-readable
+		/// <code>SingleLine</code> - output all code on a single line;
+		/// <code>MultipleLines</code> - break the output into multiple lines to be more human-readable
 		/// </summary>
 		public abstract BtOutputMode OutputMode { get; set; }
 
 		/// <summary>
-		/// Gets or sets a value indicating whether the opening curly brace for blocks is
-		/// on its own line (NewLine, default) or on the same line as the preceding code (SameLine)
-		/// or taking a hint from the source code position (UseSource). Only relevant when OutputMode is 
-		/// set to MultipleLines.
-		/// </summary>
-		public abstract BtBlockStart BlocksStartOnSameLine { get; set; }
-
-		/// <summary>
 		/// Gets or sets a string representation of the list 
-		/// of names defined for the preprocessor, comma-separated
+		/// of names defined for the preprocessor (comma-separated)
 		/// </summary>
 		public abstract string PreprocessorDefineList { get; set; }
 
@@ -108,6 +121,26 @@
 			errorMessage.AppendFormat("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, error.EndColumn);
 
 			return errorMessage.ToString();
+		}
+
+		/// <summary>
+		/// Maps a common settings
+		/// </summary>
+		/// <param name="minifier">Minifier</param>
+		/// <param name="commonMinifierSettings">Common configuration settings of Microsoft Ajax Minifier</param>
+		protected static void MapCommonSettings(MicrosoftAjaxMinifierBase minifier, 
+			MinifierSettingsBase commonMinifierSettings)
+		{
+			minifier.AllowEmbeddedAspNetBlocks = commonMinifierSettings.AllowEmbeddedAspNetBlocks;
+			minifier.BlocksStartOnSameLine = commonMinifierSettings.BlocksStartOnSameLine;
+			minifier.IgnoreAllErrors = commonMinifierSettings.IgnoreAllErrors;
+			minifier.IgnoreErrorList = commonMinifierSettings.IgnoreErrorList;
+			minifier.IndentSize = commonMinifierSettings.IndentSize;
+			minifier.LineBreakThreshold = commonMinifierSettings.LineBreakThreshold;
+			minifier.OutputMode = commonMinifierSettings.OutputMode;
+			minifier.PreprocessorDefineList = commonMinifierSettings.PreprocessorDefineList;
+			minifier.TermSemicolons = commonMinifierSettings.TermSemicolons;
+			minifier.Severity = commonMinifierSettings.Severity;
 		}
 	}
 }

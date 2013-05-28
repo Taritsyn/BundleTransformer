@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.6.25
+          README file for Bundle Transformer: Sass and SCSS 1.6.26
 
    ----------------------------------------------------------------------
 
@@ -17,13 +17,6 @@
    SCSS-code to CSS-code.
    Also contains HTTP-handler SassAndScssAssetHandler, which is 
    responsible for text output of translated Sass- or SCSS-asset.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of Sass version 3.2.5 (I used an Robert 
-      Wintermoose's Update for the SassAndCoffee.Ruby library);
-   2. Fixed an error, that occurred when using the partial imports.
    
    =============
    DOCUMENTATION

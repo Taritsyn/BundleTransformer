@@ -320,8 +320,8 @@
       <Project>{0866BE97-464C-4A68-B26E-1E73484A2C98}</Project>
       <Name>BundleTransformer.TypeScript</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BundleTransformer.UglifyJS\BundleTransformer.UglifyJs.csproj">
-      <Project>{3EB2ABE8-90D6-4EB7-A66B-F871EFCD6FF6}</Project>
+    <ProjectReference Include="..\BundleTransformer.UglifyJs\BundleTransformer.UglifyJs.csproj">
+      <Project>{B8C2B00A-5703-475E-8D80-F353673B60A6}</Project>
       <Name>BundleTransformer.UglifyJs</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.WG\BundleTransformer.WG.csproj">

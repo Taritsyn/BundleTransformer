@@ -23,35 +23,35 @@
 		/// <summary>
 		/// Name of resource, which contains a TypeScript-library
 		/// </summary>
-		const string TYPESCRIPT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.typescript.min.js";
+		private const string TYPESCRIPT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.typescript.min.js";
 
 		/// <summary>
 		/// Name of resource, which contains a TypeScript-compiler helper
 		/// </summary>
-		const string TSC_HELPER_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.tscHelper.min.js";
+		private const string TSC_HELPER_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.tscHelper.min.js";
 
 		/// <summary>
-		/// Name of resource, which contains a default lib.d.ts with global declarations
+		/// Name of resource, which contains a default <code>lib.d.ts</code> with global declarations
 		/// </summary>
-		const string DEFAULT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.lib.d.ts";
+		private const string DEFAULT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.lib.d.ts";
 
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"typeScriptHelper.compile({0}, {1}, {2});";
+		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"typeScriptHelper.compile({0}, {1}, {2});";
 
 		/// <summary>
-		/// Flag for whether to include a default lib.d.ts with global declarations
+		/// Default compilation options
 		/// </summary>
-		private readonly bool _useDefaultLib;
+		private readonly CompilationOptions _defaultOptions;
 
 		/// <summary>
-		/// String representation of the TypeScript-compiler default options
+		/// String representation of the default compilation options
 		/// </summary>
 		private readonly string _defaultOptionsString;
 
 		/// <summary>
-		/// Common types definitions (contents of the file lib.d.ts)
+		/// Common types definitions (contents of the file <code>lib.d.ts</code>)
 		/// </summary>
 		private readonly string _commonTypesDefinitions;
 
@@ -79,34 +79,18 @@
 		/// <summary>
 		/// Constructs instance of TypeScript-compiler
 		/// </summary>
-		public TypeScriptCompiler()
-			: this(true)
+		public TypeScriptCompiler() : this(null) 
 		{ }
 
 		/// <summary>
 		/// Constructs instance of TypeScript-compiler
 		/// </summary>
-		/// <param name="useDefaultLib">Flag for whether to include a default lib.d.ts 
-		/// with global declarations</param>
-		public TypeScriptCompiler(bool useDefaultLib)
-			: this(useDefaultLib, null)
-		{ }
-
-		/// <summary>
-		/// Constructs instance of TypeScript-compiler
-		/// </summary>
-		/// <param name="useDefaultLib">Flag for whether to include a default lib.d.ts 
-		/// with global declarations</param>
-		/// <param name="defaultOptions">TypeScript-compiler default options</param>
-		public TypeScriptCompiler(bool useDefaultLib, object defaultOptions)
+		/// <param name="defaultOptions">Default compilation options</param>
+		public TypeScriptCompiler(CompilationOptions defaultOptions)
 		{
-			_useDefaultLib = useDefaultLib;
-			_defaultOptionsString = JsonConvert.SerializeObject(defaultOptions);
-			if (_useDefaultLib)
-			{
-				_commonTypesDefinitions = Utils.GetResourceAsString(
-					DEFAULT_LIBRARY_RESOURCE_NAME, GetType());
-			}
+			_defaultOptions = defaultOptions;
+			_defaultOptionsString = ConvertCompilationOptionsToJson(defaultOptions).ToString();
+			_commonTypesDefinitions = Utils.GetResourceAsString(DEFAULT_LIBRARY_RESOURCE_NAME, GetType());
 		}
 
 		/// <summary>
@@ -140,28 +124,32 @@
 		/// </summary>
 		/// <param name="content">Text content written on TypeScript</param>
 		/// <param name="dependencies">List of dependencies</param>
-		/// <param name="options">TypeScript-compiler options</param>
+		/// <param name="options">Compilation options</param>
 		/// <returns>Translated TypeScript-code</returns>
-		public string Compile(string content, IList<Dependency> dependencies, object options = null)
+		public string Compile(string content, IList<Dependency> dependencies, CompilationOptions options = null)
 		{
 			string newContent;
-			string optionsString;
+			CompilationOptions currentOptions;
+			string currentOptionsString;
+
 			if (options != null)
 			{
-				optionsString = JsonConvert.SerializeObject(options);
+				currentOptions = options;
+				currentOptionsString = ConvertCompilationOptionsToJson(options).ToString();
 			}
 			else
 			{
-				optionsString = _defaultOptionsString;
+				currentOptions = _defaultOptions;
+				currentOptionsString = _defaultOptionsString;
 			}
 
 			var newDependencies = new List<Dependency>();
-			if (_useDefaultLib)
+			if (currentOptions.UseDefaultLib)
 			{
 				var defaultLibDependency = new Dependency
 				{
-				    Url = "lib.d.ts", 
-					Path = "lib.d.ts", 
+					Url = "lib.d.ts",
+					Path = "lib.d.ts",
 					Content = _commonTypesDefinitions
 				};
 				newDependencies.Add(defaultLibDependency);
@@ -174,12 +162,10 @@
 
 				try
 				{
-					var result = _jsEngine.Evaluate<string>(
-						string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
-							JsonConvert.SerializeObject(content),
-							JsonConvert.SerializeObject(newDependencies.Select(d => 
-								new { url = d.Url, path = d.Path, content = d.Content })), 
-							optionsString));
+					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
+						JsonConvert.SerializeObject(content),
+						ConvertDependenciesToJson(newDependencies),
+						currentOptionsString));
 					var json = JObject.Parse(result);
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
@@ -198,6 +184,58 @@
 			}
 
 			return newContent;
+		}
+
+		/// <summary>
+		/// Converts a list of dependencies to JSON
+		/// </summary>
+		/// <param name="dependencies">List of dependencies</param>
+		/// <returns>List of dependencies in JSON format</returns>
+		private static JArray ConvertDependenciesToJson(IEnumerable<Dependency> dependencies)
+		{
+			var dependenciesJson = new JArray(
+				dependencies.Select(d => new JObject(new JProperty("content", d.Content)))
+			);
+
+			return dependenciesJson;
+		}
+
+		/// <summary>
+		/// Converts a compilation options to JSON
+		/// </summary>
+		/// <param name="options">Compilation options</param>
+		/// <returns>Compilation options in JSON format</returns>
+		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
+		{
+			StyleOptions styleOptions = options.StyleOptions;
+
+			var optionsJson = new JObject(
+				new JProperty("styleSettings", new JObject(
+					new JProperty("bitwise", styleOptions.Bitwise),
+					new JProperty("blockInCompoundStmt", styleOptions.BlockInCompoundStatement),
+					new JProperty("eqeqeq", styleOptions.EqEqEq),
+					new JProperty("forin", styleOptions.ForIn),
+					new JProperty("emptyBlocks", styleOptions.EmptyBlocks),
+					new JProperty("newMustBeUsed", styleOptions.NewMustBeUsed),
+					new JProperty("requireSemi", styleOptions.RequireSemicolons),
+					new JProperty("assignmentInCond", styleOptions.AssignmentInConditions),
+					new JProperty("eqnull", styleOptions.EqNull),
+					new JProperty("evalOK", styleOptions.EvalOk),
+					new JProperty("innerScopeDeclEscape", styleOptions.InnerScopeDeclarationsEscape),
+					new JProperty("funcInLoop", styleOptions.FunctionsInLoops),
+					new JProperty("reDeclareLocal", styleOptions.ReDeclareLocal),
+					new JProperty("literalSubscript", styleOptions.LiteralSubscript),
+					new JProperty("implicitAny", styleOptions.ImplicitAny)
+				)),
+				new JProperty("propagateConstants", options.PropagateConstants),
+				new JProperty("minWhitespace", options.EnableNativeMinification),
+				new JProperty("emitComments", !options.EnableNativeMinification),
+				new JProperty("errorOnWith", options.ErrorOnWith),
+				new JProperty("inferPropertiesFromThisAssignment", options.InferPropertiesFromThisAssignment),
+				new JProperty("codeGenTarget", options.CodeGenTarget.ToString())
+			);
+
+			return optionsJson;
 		}
 
 		/// <summary>

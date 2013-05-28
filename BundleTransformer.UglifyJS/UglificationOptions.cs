@@ -1,0 +1,65 @@
+﻿namespace BundleTransformer.UglifyJs
+{
+	/// <summary>
+	/// Uglification options
+	/// </summary>
+	internal sealed class UglificationOptions
+	{
+		/// <summary>
+		/// Gets or sets a options of parsing
+		/// </summary>
+		public ParsingOptions ParsingOptions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a options of compression
+		/// </summary>
+		public CompressionOptions CompressionOptions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a options of mangling
+		/// </summary>
+		public ManglingOptions ManglingOptions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a options of code generation
+		/// </summary>
+		public CodeGenerationOptions CodeGenerationOptions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full compliance with 
+		/// Internet Explorer 6-8 quirks
+		/// </summary>
+		public bool ScrewIe8
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		public int Severity
+		{
+			get;
+			set;
+		}
+	}
+}

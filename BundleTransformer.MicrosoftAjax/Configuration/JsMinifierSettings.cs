@@ -8,8 +8,9 @@
 	public sealed class JsMinifierSettings : MinifierSettingsBase
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to collapse new Array() to []
-		/// and new Object() to {} [true] or leave as-is [false]
+		/// Gets or sets a flag for whether to collapse <code>new Array()</code>
+		/// to <code>[]</code> and <code>new Object()</code> to <code>{}</code>
+		/// (true) or leave as-is (false)
 		/// </summary>
 		[ConfigurationProperty("collapseToLiteral", DefaultValue = true)]
 		public bool CollapseToLiteral
@@ -19,25 +20,51 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to combine duplicate literals 
-		/// within function scopes to local variables [true] or leave them as-is [false]
+		/// Gets or sets a boolean value indicating whether to use old-style 
+		/// const statements (just var-statements that define unchangeable fields) 
+		/// or new EcmaScript 6 lexical declarations
 		/// </summary>
-		//[ConfigurationProperty("combineDuplicateLiterals", DefaultValue = false)]
-		//public bool CombineDuplicateLiterals
-		//{
-		//    get { return (bool)this["combineDuplicateLiterals"]; }
-		//    set { this["combineDuplicateLiterals"] = value; }
-		//}
+		[ConfigurationProperty("constStatementsMozilla", DefaultValue = false)]
+		public bool ConstStatementsMozilla
+		{
+			get { return (bool) this["constStatementsMozilla"]; }
+			set { this["constStatementsMozilla"] = value; }
+		}
 
 		/// <summary>
 		/// Gets or sets a string representation of the list of debug 
-		/// lookups, comma-separated
+		/// lookups (comma-separated)
 		/// </summary>
 		[ConfigurationProperty("debugLookupList", DefaultValue = "Debug,$Debug,WAssert,Msn.Debug,Web.Debug")]
 		public string DebugLookupList
 		{
 			get { return (string)this["debugLookupList"]; }
 			set { this["debugLookupList"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to throw an error 
+		/// if a source string is not safe for inclusion in an 
+		/// HTML inline script block
+		/// </summary>
+		[ConfigurationProperty("errorIfNotInlineSafe", DefaultValue = false)]
+		public bool ErrorIfNotInlineSafe
+		{
+			get { return (bool)this["errorIfNotInlineSafe"]; }
+			set { this["errorIfNotInlineSafe"] = value; }
+		}
+
+
+		/// <summary>
+		/// Gets or sets a flag for whether to evaluate expressions containing 
+		/// only literal bool, string, numeric, or null values (true).
+		/// Leave literal expressions alone and do not evaluate them (false).
+		/// </summary>
+		[ConfigurationProperty("evalLiteralExpressions", DefaultValue = true)]
+		public bool EvalLiteralExpressions
+		{
+			get { return (bool)this["evalLiteralExpressions"]; }
+			set { this["evalLiteralExpressions"] = value; }
 		}
 
 		/// <summary>
@@ -52,7 +79,7 @@
 
 		/// <summary>
 		/// Gets or sets a flag for whether or not to ignore conditional-compilation 
-		/// comment syntax (true) or to try to retain the comments in the output (false; default)
+		/// comment syntax (true) or to try to retain the comments in the output (false)
 		/// </summary>
 		[ConfigurationProperty("ignoreConditionalCompilation", DefaultValue = false)]
 		public bool IgnoreConditionalCompilation
@@ -62,9 +89,20 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to break up string literals containing &lt;/script&gt; 
-		/// so inline code won't break [true]. 
-		/// Leave string literals as-is [false].
+		/// Gets or sets a boolean value indicating whether or not to ignore preprocessor 
+		/// defines comment syntax (true) or to evaluate them (false)
+		/// </summary>
+		[ConfigurationProperty("ignorePreprocessorDefines", DefaultValue = false)]
+		public bool IgnorePreprocessorDefines
+		{
+			get { return (bool) this["ignorePreprocessorDefines"]; }
+			set { this["ignorePreprocessorDefines"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to break up string literals containing
+		/// <code>&lt;/script&gt;</code> so inline code won't break (true). 
+		/// Leave string literals as-is (false).
 		/// </summary>
 		[ConfigurationProperty("inlineSafeStrings", DefaultValue = true)]
 		public bool InlineSafeStrings
@@ -85,9 +123,9 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to how to rename local variables and functions:
-		/// KeepAll - do not rename local variables and functions;
-		/// CrunchAll - rename all local variables and functions to shorter names;
-		/// KeepLocalizationVars - rename all local variables and functions that do NOT start with L_
+		/// <code>KeepAll</code> - do not rename local variables and functions;
+		/// <code>CrunchAll</code> - rename all local variables and functions to shorter names;
+		/// <code>KeepLocalizationVars</code> - rename all local variables and functions that do NOT start with L_
 		/// </summary>
 		[ConfigurationProperty("localRenaming", DefaultValue = LocalRenaming.CrunchAll)]
 		public LocalRenaming LocalRenaming
@@ -98,8 +136,8 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to add characters to the output 
-		/// to make sure Mac Safari bugs are not generated [true].
-		/// Disregard potential Mac Safari bugs [false].
+		/// to make sure Mac Safari bugs are not generated (true).
+		/// Disregard potential Mac Safari bugs (false).
 		/// </summary>
 		[ConfigurationProperty("macSafariQuirks", DefaultValue = true)]
 		public bool MacSafariQuirks
@@ -109,15 +147,16 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to modify the source code's syntax tree 
-		/// to provide the smallest equivalent output [true].
-		/// Do not modify the syntax tree [false].
+		/// Gets or sets a boolean value indicating whether object property 
+		/// names with the specified "from" names will get renamed to 
+		/// the corresponding "to" names (true) when using 
+		/// the manual-rename feature, or left alone (false)
 		/// </summary>
-		[ConfigurationProperty("minifyCode", DefaultValue = true)]
-		public bool MinifyCode
+		[ConfigurationProperty("manualRenamesProperties", DefaultValue = true)]
+		public bool ManualRenamesProperties
 		{
-			get { return (bool) this["minifyCode"]; }
-			set { this["minifyCode"] = value; }
+			get { return (bool)this["manualRenamesProperties"]; }
+			set { this["manualRenamesProperties"] = value; }
 		}
 
 		/// <summary>
@@ -144,14 +183,23 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to preserve important 
-		/// comments in the output.
-		/// Default is true.
+		/// comments in the output
 		/// </summary>
 		[ConfigurationProperty("preserveImportantComments", DefaultValue = true)]
 		public bool PreserveImportantComments
 		{
 			get { return (bool)this["preserveImportantComments"]; }
 			set { this["preserveImportantComments"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether to always quote object literal property names
+		/// </summary>
+		[ConfigurationProperty("quoteObjectLiteralProperties", DefaultValue = false)]
+		public bool QuoteObjectLiteralProperties
+		{
+			get { return (bool)this["quoteObjectLiteralProperties"]; }
+			set { this["quoteObjectLiteralProperties"] = value; }
 		}
 
 		/// <summary>
@@ -166,8 +214,8 @@
 		}
 
 		/// <summary>
-		/// Remove unneeded code, like uncalled local functions [true].
-		/// Keep all code [false].
+		/// Remove unneeded code, like uncalled local functions (true).
+		/// Keep all code (false).
 		/// </summary>
 		[ConfigurationProperty("removeUnneededCode", DefaultValue = true)]
 		public bool RemoveUnneededCode
@@ -188,6 +236,18 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether or not to reorder function and variable
+		/// declarations within scopes (true), or to leave the order as specified in 
+		/// the original source
+		/// </summary>
+		[ConfigurationProperty("reorderScopeDeclarations", DefaultValue = true)]
+		public bool ReorderScopeDeclarations
+		{
+			get { return (bool)this["reorderScopeDeclarations"]; }
+			set { this["reorderScopeDeclarations"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a boolean value indicating whether or not to force 
 		/// the input code into strict mode (can still specify strict-mode in 
 		/// the sources if this value is false) 
@@ -200,8 +260,8 @@
 		}
 
 		/// <summary>
-		/// Strip debug statements [true].
-		/// Leave debug statements [false].
+		/// Strip debug statements (true).
+		/// Leave debug statements (false).
 		/// </summary>
 		[ConfigurationProperty("stripDebugStatements", DefaultValue = true)]
 		public bool StripDebugStatements

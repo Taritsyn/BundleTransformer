@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.6.25
+           README file for Bundle Transformer: TypeScript 1.6.26
 
    ----------------------------------------------------------------------
 

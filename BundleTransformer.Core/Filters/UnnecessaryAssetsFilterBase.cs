@@ -46,7 +46,7 @@
 					}
 
 					string newIgnorePattern = Regex.Escape(processedIgnorePattern);
-					if (processedIgnorePattern.IndexOf("*", StringComparison.InvariantCultureIgnoreCase) != -1)
+					if (processedIgnorePattern.IndexOf("*", StringComparison.Ordinal) != -1)
 					{
 						newIgnorePattern = "^" + newIgnorePattern.Replace(@"\*", @"(.*)") + "$";
 					}

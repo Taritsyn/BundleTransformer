@@ -29,7 +29,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disallow == and !=
+		/// Gets or sets a flag for whether to disallow <code>==</code> and <code>!=</code>
 		/// </summary>
 		[ConfigurationProperty("eqEqEq", DefaultValue = false)]
 		public bool EqEqEq
@@ -81,7 +81,7 @@
 
 		/// <summary>
 		/// Gets or sets a flag for whether to disallow top-level assignment in 
-		/// conditionals if (a=b) { ...
+		/// conditionals <code>if (a=b) { ...</code>
 		/// </summary>
 		[ConfigurationProperty("assignmentInConditions", DefaultValue = false)]
 		public bool AssignmentInConditions
@@ -91,7 +91,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disallow == null or != null
+		/// Gets or sets a flag for whether to disallow <code>== null</code> or <code>!= null</code>
 		/// </summary>
 		[ConfigurationProperty("eqNull", DefaultValue = false)]
 		public bool EqNull
@@ -101,7 +101,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to permit eval
+		/// Gets or sets a flag for whether to permit <code>eval</code>
 		/// </summary>
 		[ConfigurationProperty("evalOk", DefaultValue = true)]
 		public bool EvalOk
@@ -112,7 +112,7 @@
 
 		/// <summary>
 		/// Gets or sets a flag for whether to permit var use if declaration 
-		/// in inner scope as in if (c) { var v=10; } v=11;
+		/// in inner scope as in <code>if (c) { var v=10; } v=11;</code>
 		/// </summary>
 		[ConfigurationProperty("innerScopeDeclarationsEscape", DefaultValue = true)]
 		public bool InnerScopeDeclarationsEscape
@@ -142,7 +142,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to permit obj['x'] in addition to obj.x
+		/// Gets or sets a flag for whether to permit 
+		/// <code>obj['x']</code> in addition to <code>obj.x</code>
 		/// </summary>
 		[ConfigurationProperty("literalSubscript", DefaultValue = true)]
 		public bool LiteralSubscript

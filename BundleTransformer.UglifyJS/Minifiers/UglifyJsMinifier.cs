@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
 	using System.Linq;
 
 	using Core;
@@ -12,7 +11,6 @@
 
 	using Configuration;
 	using Uglifiers;
-	using UglifyStrings = Resources.Strings;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code 
@@ -31,72 +29,57 @@
 		const string CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Regular expression for working with strings of the form SYMBOL[=value]
+		/// Gets or sets a options of parsing
 		/// </summary>
-		private static readonly Regex _symbolValueRegex =
-			new Regex(@"^(?<symbol>[a-z_\$][a-z_\$0-9]*)(=(?<value>.*))?$", 
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// Regular expression for working with names
-		/// </summary>
-		private static readonly Regex _nameRegex =
-			new Regex(@"^[a-z\$_][a-z\$_0-9]*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// Regular expression for working with string values
-		/// </summary>
-		private static readonly Regex _stringValueRegex =
-			new Regex(@"^(?<quote>'|"")(?<value>.*)(\k<quote>)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// Regular expression for working with integer values
-		/// </summary>
-		private static readonly Regex _integerValueRegex =
-			new Regex(@"^(\+|\-)?[0-9]+$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// Regular expression for working with float values
-		/// </summary>
-		private static readonly Regex _floatValueRegex =
-			new Regex(@"^(\+|\-)?[0-9]*\.[0-9]+(e(\+|\-)?[0-9]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// List of inbuilt constants of JavaScript language
-		/// </summary>
-		private static readonly string[] _jsInbuiltConstants = new[] { "false", "null", "true", "undefined" };
-
-		/// <summary>
-		/// Settings of the parser
-		/// </summary>
-		public ParserInstanceSettings ParserSettings
+		public ParsingOptions ParsingOptions
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Settings of the mangler
+		/// Gets or sets a options of compression
 		/// </summary>
-		public ManglerInstanceSettings ManglerSettings
+		public CompressionOptions CompressionOptions
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Settings of the squeezer
+		/// Gets or sets a options of mangling
 		/// </summary>
-		public SqueezerInstanceSettings SqueezerSettings
+		public ManglingOptions ManglingOptions
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Settings of the code generator
+		/// Gets or sets a options of codeGeneration
 		/// </summary>
-		public CodeGeneratorInstanceSettings CodeGeneratorSettings
+		public CodeGenerationOptions CodeGenerationOptions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full compliance with 
+		/// Internet Explorer 6-8 quirks
+		/// </summary>
+		public bool ScrewIe8
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		public int Severity
 		{
 			get;
 			set;
@@ -116,42 +99,70 @@
 		/// <param name="uglifyConfig">Configuration settings of Uglify Minifier</param>
 		public UglifyJsMinifier(UglifySettings uglifyConfig)
 		{
-			ParserSettings parserConfig = uglifyConfig.Js.Parser;
-			ManglerSettings manglerConfig = uglifyConfig.Js.Mangler;
-			SqueezerSettings squeezerConfig = uglifyConfig.Js.Squeezer;
-			CodeGeneratorSettings codeGeneratorConfig = uglifyConfig.Js.CodeGenerator;
+			JsSettings jsConfig = uglifyConfig.Js;
+			ParsingSettings parsing = jsConfig.Parsing;
+			CompressionSettings compressionConfig = jsConfig.Compression;
+			ManglingSettings manglingConfig = jsConfig.Mangling;
+			CodeGenerationSettings codeGenerationConfig = jsConfig.CodeGeneration;
 
-			ParserSettings = new ParserInstanceSettings
+			ParsingOptions = new ParsingOptions
 			{
-				StrictSemicolons = parserConfig.StrictSemicolons
+				Strict = parsing.Strict
 			};
 
-			ManglerSettings = new ManglerInstanceSettings
+			CompressionOptions = new CompressionOptions
 			{
-				Mangle = manglerConfig.Mangle,
-				TopLevel = manglerConfig.TopLevel,
-				Defines = manglerConfig.Defines,
-				Except = manglerConfig.Except,
-				NoFunctions = manglerConfig.NoFunctions
+				Compress = compressionConfig.Compress,
+				Sequences = compressionConfig.Sequences,
+				PropertiesDotNotation = compressionConfig.PropertiesDotNotation,
+				DeadCode = compressionConfig.DeadCode,
+				DropDebugger = compressionConfig.DropDebugger,
+				Unsafe = compressionConfig.Unsafe,
+				Conditionals = compressionConfig.Conditionals,
+				Comparisons = compressionConfig.Comparisons,
+				Evaluate = compressionConfig.Evaluate,
+				Booleans = compressionConfig.Booleans,
+				Loops = compressionConfig.Loops,
+				Unused = compressionConfig.Unused,
+				HoistFunctions = compressionConfig.HoistFunctions,
+				HoistVars = compressionConfig.HoistVars,
+				IfReturn = compressionConfig.IfReturn,
+				JoinVars = compressionConfig.JoinVars,
+				Cascade = compressionConfig.Cascade,
+				GlobalDefinitions = compressionConfig.GlobalDefinitions
 			};
 
-			SqueezerSettings = new SqueezerInstanceSettings
+			ManglingOptions = new ManglingOptions
 			{
-			    MakeSequences = squeezerConfig.MakeSequences,
-				DeadCode = squeezerConfig.DeadCode,
-				Unsafe = squeezerConfig.Unsafe
+				Mangle = manglingConfig.Mangle,
+				Except = manglingConfig.Except,
+				Eval = manglingConfig.Eval,
+				Sort = manglingConfig.Sort,
+				TopLevel = manglingConfig.TopLevel,
 			};
 
-			CodeGeneratorSettings = new CodeGeneratorInstanceSettings
+			CodeGenerationOptions = new CodeGenerationOptions
 			{
-				Beautify = codeGeneratorConfig.Beautify,
-				IndentStart = codeGeneratorConfig.IndentStart,
-				IndentLevel = codeGeneratorConfig.IndentLevel,
-				QuoteKeys = codeGeneratorConfig.QuoteKeys,
-				SpaceColon = codeGeneratorConfig.SpaceColon,
-				AsciiOnly = codeGeneratorConfig.AsciiOnly
+				Beautify = codeGenerationConfig.Beautify,
+				IndentLevel = codeGenerationConfig.IndentLevel,
+				IndentStart = codeGenerationConfig.IndentStart,
+				QuoteKeys = codeGenerationConfig.QuoteKeys,
+				SpaceColon = codeGenerationConfig.SpaceColon,
+				AsciiOnly = codeGenerationConfig.AsciiOnly,
+				InlineScript = codeGenerationConfig.InlineScript,
+				Width = codeGenerationConfig.Width,
+				MaxLineLength = codeGenerationConfig.MaxLineLength,
+				IeProof = codeGenerationConfig.IeProof,
+				Bracketize = codeGenerationConfig.Bracketize,
+				Semicolons = codeGenerationConfig.Semicolons,
+				Comments = codeGenerationConfig.Comments,
+				PreserveLine = codeGenerationConfig.PreserveLine
 			};
+
+			ScrewIe8 = jsConfig.ScrewIe8;
+			Severity = jsConfig.Severity;
 		}
+
 
 		/// <summary>
 		/// Produces code minifiction of JS-assets by using Uglify JS-minifier
@@ -170,29 +181,30 @@
 				return assets;
 			}
 
+			UglificationOptions options = CreateUglificationOptions();
+
 			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
 			}
 
-			var options = GenerateUglifyJsOptions();
-
 			using (var jsUglifier = new JsUglifier(options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
+					string content = asset.Content;
 					string newContent;
 					string assetPath = asset.Path;
 
 					try
 					{
-						newContent = jsUglifier.Uglify(asset.Content);
+						newContent = jsUglifier.Uglify(content);
 					}
 					catch (JsUglifyingException e)
 					{
 						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
+							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
 								CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
 					}
 					catch (Exception e)
@@ -211,152 +223,22 @@
 		}
 
 		/// <summary>
-		/// Generates a UglifyJS options
+		/// Creates a uglification options
 		/// </summary>
-		/// <returns>UglifyJS options</returns>
-		private object GenerateUglifyJsOptions()
+		/// <returns>Uglification options</returns>
+		private UglificationOptions CreateUglificationOptions()
 		{
-			var options = new
+			var options = new UglificationOptions
 			{
-				strict_semicolons = ParserSettings.StrictSemicolons,
-				mangle_options = new
-				{
-					mangle = ManglerSettings.Mangle,
-					toplevel = ManglerSettings.TopLevel,
-					defines = ParseDefines(ManglerSettings.Defines),
-					except = ParseExcept(ManglerSettings.Except),
-					no_functions = ManglerSettings.NoFunctions
-				},
-				squeeze_options = new
-				{
-					make_seqs = SqueezerSettings.MakeSequences,
-					dead_code = SqueezerSettings.DeadCode,
-					@unsafe = SqueezerSettings.Unsafe,
-				},
-				gen_options = new
-				{
-					beautify = CodeGeneratorSettings.Beautify,
-					indent_start = CodeGeneratorSettings.IndentStart,
-					indent_level = CodeGeneratorSettings.IndentLevel,
-					quote_keys = CodeGeneratorSettings.QuoteKeys,
-					space_colon = CodeGeneratorSettings.SpaceColon,
-					ascii_only = CodeGeneratorSettings.AsciiOnly
-				}
+				ParsingOptions = ParsingOptions,
+				CompressionOptions = CompressionOptions,
+				ManglingOptions = ManglingOptions,
+				CodeGenerationOptions = CodeGenerationOptions,
+				ScrewIe8 = ScrewIe8,
+				Severity = Severity
 			};
 
 			return options;
-		}
-
-		/// <summary>
-		/// Parses a string representation of the "Defines" to dictionary
-		/// </summary>
-		/// <param name="definesString">String representation of the "Defines"</param>
-		/// <returns>"Defines" object as a dictionary</returns>
-		private static Dictionary<string, object> ParseDefines(string definesString)
-		{
-			var defines = new Dictionary<string, object>();
-			var symbolValueList = Utils.ConvertToStringCollection(definesString, ',', true);
-
-			foreach (string symbolValue in symbolValueList)
-			{
-				Match symbolValueMatch = _symbolValueRegex.Match(symbolValue);
-				if (symbolValueMatch.Length == 0)
-				{
-					throw new FormatException(UglifyStrings.DefinesParsing_InvalidSymbolValueFormat);
-				}
-
-				var symbol = symbolValueMatch.Groups["symbol"].Value;
-				if (_jsInbuiltConstants.Contains(symbol))
-				{
-					throw new FormatException(
-						string.Format(UglifyStrings.DefinesParsing_SymbolNameIsForbidden, symbol));
-				}
-
-				string rawValue = string.Empty;
-				if (symbolValueMatch.Groups["value"].Success)
-				{
-					rawValue = symbolValueMatch.Groups["value"].Value;
-				}
-				object value;
-
-				if (rawValue.Length > 0)
-				{
-					if (_stringValueRegex.IsMatch(rawValue))
-					{
-						var match = _stringValueRegex.Match(rawValue);
-						if (match.Groups["value"].Success)
-						{
-							value = new[] { "string", match.Groups["value"].Value };
-						}
-						else
-						{
-							value = new[] { "string", string.Empty };
-						}
-					}
-					else if (_integerValueRegex.IsMatch(rawValue))
-					{
-						int integerValue;
-						if (!Int32.TryParse(rawValue, out integerValue))
-						{
-							throw new InvalidCastException(
-								string.Format(UglifyStrings.DefinesParsing_CannotConvertValue, 
-									rawValue, symbol, typeof(Int32)));
-						}
-
-						value = new object[] { "num", integerValue };
-					}
-					else if (_floatValueRegex.IsMatch(rawValue))
-					{
-						double floatValue;
-						if (!Double.TryParse(rawValue.Replace(".", ","), out floatValue))
-						{
-							throw new InvalidCastException(
-								string.Format(UglifyStrings.DefinesParsing_CannotConvertValue,
-									rawValue, symbol, typeof(Double)));
-						}
-
-						value = new object[] { "num", floatValue };
-					}
-					else if (_nameRegex.IsMatch(rawValue))
-					{
-						value = new[] { "name", rawValue };
-					}
-					else
-					{
-						throw new FormatException(
-							string.Format(UglifyStrings.DefinesParsing_CannotParseValue, rawValue, symbol));
-					}
-				}
-				else
-				{
-					value = new[] { "name", "true" };
-				}
-
-				defines.Add(symbol, value);
-			}
-
-			if (defines.Keys.Count == 0)
-			{
-				defines = null;
-			}
-
-			return defines;
-		}
-
-		/// <summary>
-		/// Parses a string representation of the "Except" (reserved names) to list
-		/// </summary>
-		/// <param name="exceptString">String representation of the "Except"</param>
-		/// <returns>"Except" as a list</returns>
-		private static List<string> ParseExcept(string exceptString)
-		{
-			var except = Utils.ConvertToStringCollection(exceptString, ',', true).ToList();
-			if (except.Count == 0)
-			{
-				except = null;
-			}
-
-			return except;
 		}
 	}
 }
