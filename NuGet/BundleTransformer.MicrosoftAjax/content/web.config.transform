@@ -1,4 +1,4 @@
-<configuration>
+﻿<configuration>
 	<configSections>
 		<sectionGroup name="bundleTransformer">
 			<section name="microsoftAjax" type="BundleTransformer.MicrosoftAjax.Configuration.MicrosoftAjaxSettings, BundleTransformer.MicrosoftAjax" />
