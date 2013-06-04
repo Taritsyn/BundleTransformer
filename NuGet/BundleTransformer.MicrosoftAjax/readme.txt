@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Microsoft Ajax 1.6.27
+          README file for Bundle Transformer: Microsoft Ajax 1.6.28
  
    ----------------------------------------------------------------------
 
@@ -17,11 +17,6 @@
    perform minification using the Microsoft Ajax Minifier 
    (http://ajaxmin.codeplex.com).
    
-   =============
-   RELEASE NOTES
-   =============
-   Added support of the Microsoft Ajax Minifier version 4.92.
-   
    ====================
    POST-INSTALL ACTIONS
    ====================
@@ -32,6 +27,13 @@
    \configuration\bundleTransformer\core\css must be set value equal to 
    MicrosoftAjaxCssMinifier, and in same attribute of element 
    \configuration\bundleTransformer\core\js - MicrosoftAjaxJsMinifier.
+   
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of the Microsoft Ajax Minifier version 4.93;
+   2. In configuration settings of JS-minifier added one new property - 
+      AlwaysEscapeNonAscii.
    
    =============
    DOCUMENTATION

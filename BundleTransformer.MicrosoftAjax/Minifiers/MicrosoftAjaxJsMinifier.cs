@@ -189,6 +189,23 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag indicating whether to always escape non-ASCII characters as <code>\uXXXX</code>
+		/// or to let the output encoding object handle that via the <code>JsEncoderFallback</code> object for the
+		/// specified output encoding format
+		/// </summary>
+		public bool AlwaysEscapeNonAscii
+		{
+			get
+			{
+				return _jsParserConfiguration.AlwaysEscapeNonAscii;
+			}
+			set
+			{
+				_jsParserConfiguration.AlwaysEscapeNonAscii = value;
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to collapse <code>new Array()</code>
 		/// to <code>[]</code> and <code>new Object()</code> to <code>{}</code>
 		/// (true) or leave as-is (false)
@@ -553,6 +570,7 @@
 
 			JsMinifierSettings jsMinifierConfiguration = microsoftAjaxConfig.JsMinifier;
 			MapCommonSettings(this, jsMinifierConfiguration);
+			AlwaysEscapeNonAscii = jsMinifierConfiguration.AlwaysEscapeNonAscii;
 			CollapseToLiteral = jsMinifierConfiguration.CollapseToLiteral;
 			ConstStatementsMozilla = jsMinifierConfiguration.ConstStatementsMozilla;
 			DebugLookupList = jsMinifierConfiguration.DebugLookupList;

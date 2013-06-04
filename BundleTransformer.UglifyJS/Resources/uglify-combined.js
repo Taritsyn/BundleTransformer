@@ -3358,7 +3358,7 @@
 				  case "\u2029": return "\\u2029";
 				  case '"': ++dq; return '"';
 				  case "'": ++sq; return "'";
-				  case "\0": return "\\0";
+				  case "\0": return "\\x00";
 				}
 				return s;
 			});

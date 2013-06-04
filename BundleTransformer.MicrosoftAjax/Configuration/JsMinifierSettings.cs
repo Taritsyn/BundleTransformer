@@ -8,6 +8,18 @@
 	public sealed class JsMinifierSettings : MinifierSettingsBase
 	{
 		/// <summary>
+		/// Gets or sets a flag indicating whether to always escape non-ASCII characters as <code>\uXXXX</code>
+		/// or to let the output encoding object handle that via the <code>JsEncoderFallback</code> object for the
+		/// specified output encoding format
+		/// </summary>
+		[ConfigurationProperty("alwaysEscapeNonAscii", DefaultValue = false)]
+		public bool AlwaysEscapeNonAscii
+		{
+			get { return (bool)this["alwaysEscapeNonAscii"]; }
+			set { this["alwaysEscapeNonAscii"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to collapse <code>new Array()</code>
 		/// to <code>[]</code> and <code>new Object()</code> to <code>{}</code>
 		/// (true) or leave as-is (false)

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.6.26
+             README file for Bundle Transformer: UglifyJS 1.6.28
  
    ----------------------------------------------------------------------
 
@@ -27,7 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of UglifyJS version 2.3.6.
+   Added features from commit "Escape null characters as \x00".
    
    =============
    DOCUMENTATION

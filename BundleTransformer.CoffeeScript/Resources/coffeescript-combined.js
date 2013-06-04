@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.6.2
+ * CoffeeScript Compiler v1.6.3
  * http://coffeescript.org
  *
  * Copyright 2013, Jeremy Ashkenas
@@ -12,8 +12,8 @@ var CoffeeScript = (function(){
 
 	//#region URL: ./helpers
 	require['./helpers'] = (function() {
-	  var buildLocationData, extend, flatten, last, repeat, _ref;
 	  var exports = {};
+	  var buildLocationData, extend, flatten, last, repeat, _ref;
 
 	  exports.starts = function(string, literal, start) {
 		return literal === string.substr(start, literal.length);
@@ -239,12 +239,11 @@ var CoffeeScript = (function(){
 
 	//#region URL: ./rewriter
 	require['./rewriter'] = (function() {
-	  var BALANCED_PAIRS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_BLOCK, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, left, rite, _i, _len, _ref,
+	  var exports = {};
+	  var BALANCED_PAIRS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, left, rite, _i, _len, _ref,
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
 		__slice = [].slice;
 		
-	  var exports = {};
-
 	  generate = function(tag, value) {
 		var tok;
 		tok = [tag, value];
@@ -599,8 +598,8 @@ var CoffeeScript = (function(){
 		  var action, condition, indent, outdent, starter;
 		  starter = indent = outdent = null;
 		  condition = function(token, i) {
-			var _ref;
-			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'ELSE' && (starter !== 'IF' && starter !== 'THEN'));
+			var _ref, _ref1;
+			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((_ref1 = token[0]) === 'CATCH' || _ref1 === 'FINALLY') && (starter === '->' || starter === '=>'));
 		  };
 		  action = function(token, i) {
 			return this.tokens.splice((this.tag(i - 1) === ',' ? i - 1 : i), 0, outdent);
@@ -715,8 +714,6 @@ var CoffeeScript = (function(){
 
 	  IMPLICIT_UNSPACED_CALL = ['+', '-'];
 
-	  IMPLICIT_BLOCK = ['->', '=>', '{', '[', ','];
-
 	  IMPLICIT_END = ['POST_IF', 'FOR', 'WHILE', 'UNTIL', 'WHEN', 'BY', 'LOOP', 'TERMINATOR'];
 
 	  SINGLE_LINERS = ['ELSE', '->', '=>', 'TRY', 'FINALLY', 'THEN'];
@@ -731,15 +728,14 @@ var CoffeeScript = (function(){
 
 	//#region URL: ./lexer
 	require['./lexer'] = (function () {
+	  var exports = {};
 	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HEREDOC, HEREDOC_ILLEGAL, HEREDOC_INDENT, HEREGEX, HEREGEX_OMIT, IDENTIFIER, INDEXABLE, INVERSES, JSTOKEN, JS_FORBIDDEN, JS_KEYWORDS, LINE_BREAK, LINE_CONTINUER, LOGIC, Lexer, MATH, MULTILINER, MULTI_DENT, NOT_REGEX, NOT_SPACED_REGEX, NUMBER, OPERATOR, REGEX, RELATION, RESERVED, Rewriter, SHIFT, SIMPLESTR, STRICT_PROSCRIBED, TRAILING_SPACES, UNARY, WHITESPACE, compact, count, invertLiterate, key, last, locationDataToString, repeat, starts, throwSyntaxError, _ref, _ref1,
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
+		
 	  _ref = require('./rewriter'), Rewriter = _ref.Rewriter, INVERSES = _ref.INVERSES;
 
 	  _ref1 = require('./helpers'), count = _ref1.count, starts = _ref1.starts, compact = _ref1.compact, last = _ref1.last, repeat = _ref1.repeat, invertLiterate = _ref1.invertLiterate, locationDataToString = _ref1.locationDataToString, throwSyntaxError = _ref1.throwSyntaxError;
 
-	  var exports = {};
-	  
 	  exports.Lexer = Lexer = (function() {
 		function Lexer() {}
 
@@ -1625,6 +1621,7 @@ var CoffeeScript = (function(){
 
 	//#region URL: ./parser
 	require['./parser'] = (function(){
+		var exports = {};
 		var parser = (function(){
 		var parser = {trace: function trace() { },
 		yy: {},
@@ -2219,7 +2216,6 @@ var CoffeeScript = (function(){
 		return new Parser;
 		})();
 		
-		var exports = {};
 		exports.parser = parser;
 		exports.Parser = parser.Parser;
 		exports.parse = function () { return parser.parse.apply(parser, arguments); };
@@ -2247,11 +2243,10 @@ var CoffeeScript = (function(){
 
 	//#region URL: ./scope
 	require['./scope'] = (function() {
+	  var exports = {};
 	  var Scope, extend, last, _ref;
 
 	  _ref = require('./helpers'), extend = _ref.extend, last = _ref.last;
-
-	  var exports = {};
 
 	  exports.Scope = Scope = (function() {
 		Scope.root = null;
@@ -2399,6 +2394,7 @@ var CoffeeScript = (function(){
 
 	//#region URL: ./nodes
 	require['./nodes'] = (function() {
+	  var exports = {};
 	  var Access, Arr, Assign, Base, Block, Call, Class, Closure, Code, CodeFragment, Comment, Existence, Extends, For, IDENTIFIER, IDENTIFIER_STR, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, METHOD_DEF, NEGATE, NO, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, last, locationDataToString, merge, multident, some, starts, throwSyntaxError, unfoldSoak, utility, _ref, _ref1, _ref2, _ref3,
 		__hasProp = {}.hasOwnProperty,
 		__extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -2412,9 +2408,7 @@ var CoffeeScript = (function(){
 	  _ref = require('./lexer'), RESERVED = _ref.RESERVED, STRICT_PROSCRIBED = _ref.STRICT_PROSCRIBED;
 
 	  _ref1 = require('./helpers'), compact = _ref1.compact, flatten = _ref1.flatten, extend = _ref1.extend, merge = _ref1.merge, del = _ref1.del, starts = _ref1.starts, ends = _ref1.ends, last = _ref1.last, some = _ref1.some, addLocationDataFn = _ref1.addLocationDataFn, locationDataToString = _ref1.locationDataToString, throwSyntaxError = _ref1.throwSyntaxError;
-
-	  var exports = {};
-	  
+ 
 	  exports.extend = extend;
 
 	  exports.addLocationDataFn = addLocationDataFn;
@@ -5452,7 +5446,8 @@ var CoffeeScript = (function(){
 	
 	//#region URL: ./coffee-script
 	require["./coffee-script"] = (function () {
-	  var Lexer, SourceMap, child_process, compile, ext, fork, formatSourcePosition, fs, helpers, lexer, loadFile, parser, patchStackTrace, patched, path, vm, _i, _len, _ref,
+	  var exports = {};
+	  var Lexer, Module, SourceMap, child_process, compile, ext, findExtension, fork, formatSourcePosition, fs, helpers, lexer, loadFile, parser, patchStackTrace, patched, path, sourceMaps, vm, _i, _len, _ref,
 		__hasProp = {}.hasOwnProperty;
 
 	  //fs = require('fs');
@@ -5470,10 +5465,8 @@ var CoffeeScript = (function(){
 	  helpers = require('./helpers');
 
 	  //SourceMap = require('./sourcemap');
-	  
-	  var exports = {};
 
-	  exports.VERSION = '1.6.2';
+	  exports.VERSION = '1.6.3';
 
 	  exports.helpers = helpers;
 
@@ -5488,12 +5481,12 @@ var CoffeeScript = (function(){
 //		}
 		fragments = parser.parse(lexer.tokenize(code, options)).compileToFragments(options);
 		currentLine = 0;
-		if (options.header) {
-		  currentLine += 1;
-		}
-		if (options.shiftLine) {
-		  currentLine += 1;
-		}
+//		if (options.header) {
+//		  currentLine += 1;
+//		}
+//		if (options.shiftLine) {
+//		  currentLine += 1;
+//		}
 		currentColumn = 0;
 		js = "";
 		for (_i = 0, _len = fragments.length; _i < _len; _i++) {
@@ -5553,7 +5546,7 @@ var CoffeeScript = (function(){
 //		if (!helpers.isCoffee(mainModule.filename) || require.extensions) {
 //		  answer = compile(code, options);
 //		  patchStackTrace();
-//		  mainModule._sourceMaps[mainModule.filename] = answer.sourceMap;
+//		  sourceMaps[mainModule.filename] = answer.sourceMap;
 //		  return mainModule._compile(answer.js, mainModule.filename);
 //		} else {
 //		  return mainModule._compile(code, mainModule.filename);
@@ -5624,13 +5617,16 @@ var CoffeeScript = (function(){
 //	  };
 
 //	  loadFile = function(module, filename) {
-//		var raw, stripped;
+//		var answer, raw, stripped;
 //		raw = fs.readFileSync(filename, 'utf8');
 //		stripped = raw.charCodeAt(0) === 0xFEFF ? raw.substring(1) : raw;
-//		return module._compile(compile(stripped, {
+//		answer = compile(stripped, {
 //		  filename: filename,
+//		  sourceMap: true,
 //		  literate: helpers.isLiterate(filename)
-//		}), filename);
+//		});
+//		sourceMaps[filename] = answer.sourceMap;
+//		return module._compile(answer.js, filename);
 //	  };
 
 //	  if (require.extensions) {
@@ -5639,6 +5635,29 @@ var CoffeeScript = (function(){
 //		  ext = _ref[_i];
 //		  require.extensions[ext] = loadFile;
 //		}
+//		Module = require('module');
+//		findExtension = function(filename) {
+//		  var curExtension, extensions;
+//		  extensions = path.basename(filename).split('.');
+//		  if (extensions[0] === '') {
+//			extensions.shift();
+//		  }
+//		  while (extensions.shift()) {
+//			curExtension = '.' + extensions.join('.');
+//			if (Module._extensions[curExtension]) {
+//			  return curExtension;
+//			}
+//		  }
+//		  return '.js';
+//		};
+//		Module.prototype.load = function(filename) {
+//		  var extension;
+//		  this.filename = filename;
+//		  this.paths = Module._nodeModulePaths(path.dirname(filename));
+//		  extension = findExtension(filename);
+//		  Module._extensions[extension](this, filename);
+//		  return this.loaded = true;
+//		};
 //	  }
 
 //	  if (child_process) {
@@ -5695,6 +5714,8 @@ var CoffeeScript = (function(){
 
 	  patched = false;
 
+	  sourceMaps = {};
+
 	  patchStackTrace = function() {
 		var mainModule;
 		if (patched) {
@@ -5702,13 +5723,12 @@ var CoffeeScript = (function(){
 		}
 		patched = true;
 		mainModule = require.main;
-		mainModule._sourceMaps = {};
 		return Error.prepareStackTrace = function(err, stack) {
 		  var frame, frames, getSourceMapping, sourceFiles, _ref1;
 		  sourceFiles = {};
 		  getSourceMapping = function(filename, line, column) {
 			var answer, sourceMap;
-			sourceMap = mainModule._sourceMaps[filename];
+			sourceMap = sourceMaps[filename];
 			if (sourceMap) {
 			  answer = sourceMap.sourceLocation([line - 1, column - 1]);
 			}
