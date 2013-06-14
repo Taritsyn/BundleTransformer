@@ -399,6 +399,33 @@ module Sass
       #RG arr
     end
 
+    # Returns a sub-array of `minuend` containing only elements that are also in
+    # `subtrahend`. Ensures that the return value has the same order as
+    # `minuend`, even on Rubinius where that's not guaranteed by {Array#-}.
+    #
+    # @param minuend [Array]
+    # @param subtrahend [Array]
+    # @return [Array]
+    def array_minus(minuend, subtrahend)
+      return minuend - subtrahend unless rbx?
+      set = Set.new(minuend) - subtrahend
+      minuend.select {|e| set.include?(e)}
+    end
+
+    # Returns a string description of the character that caused an
+    # `Encoding::UndefinedConversionError`.
+    #
+    # @param [Encoding::UndefinedConversionError]
+    # @return [String]
+    def undefined_conversion_error_char(e)
+      # Rubinius (as of 2.0.0.rc1) pre-quotes the error character.
+      return e.error_char if rbx?
+      # JRuby (as of 1.7.2) doesn't have an error_char field on
+      # Encoding::UndefinedConversionError.
+      return e.error_char.dump unless jruby?
+      e.message[/^"[^"]+"/] #"
+    end
+
     # Asserts that `value` falls within `range` (inclusive), leaving
     # room for slight floating-point errors.
     #
@@ -605,6 +632,27 @@ module Sass
       RUBY_ENGINE == "ironruby"
     end
 
+    # Whether or not this is running on Rubinius.
+    #
+    # @return [Boolean]
+    def rbx?
+      RUBY_ENGINE == "rbx"
+    end
+
+    # Whether or not this is running on JRuby.
+    #
+    # @return [Boolean]
+    def jruby?
+      RUBY_PLATFORM =~ /java/
+    end
+
+    # Returns an array of ints representing the JRuby version number.
+    #
+    # @return [Array<Fixnum>]
+    def jruby_version
+      $jruby_version ||= ::JRUBY_VERSION.split(".").map {|s| s.to_i}
+    end
+
     # Like `Dir.glob`, but works with backslash-separated paths on Windows.
     #
     # @param path [String]
@@ -655,6 +703,11 @@ module Sass
       ruby1_8? && Sass::Util::RUBY_VERSION[2] < 7
     end
 
+    # Wehter or not this is running under JRuby 1.6 or lower.
+    def jruby1_6?
+      jruby? && jruby_version[0] == 1 && jruby_version[1] < 7
+    end
+
     # Whether or not this is running under MacRuby.
     #
     # @return [Boolean]
@@ -691,7 +744,7 @@ module Sass
           line.encode(encoding)
         rescue Encoding::UndefinedConversionError => e
           yield <<MSG.rstrip, i + 1
-Invalid #{encoding.name} character #{e.error_char.dump}
+Invalid #{encoding.name} character #{undefined_conversion_error_char(e)}
 MSG
         end
       end
@@ -1004,21 +1057,42 @@ require 'strscan'
 if Sass::Util.ruby1_8?
   Sass::Util::MultibyteStringScanner = StringScanner
 else
+  if Sass::Util.rbx?
+    # Rubinius's StringScanner class implements some of its methods in terms of
+    # others, which causes us to double-count bytes in some cases if we do
+    # straightforward inheritance. To work around this, we use a delegate class.
+    require 'delegate'
+    class Sass::Util::MultibyteStringScanner < DelegateClass(StringScanner)
+      def initialize(str)
+        super(StringScanner.new(str))
+        @mb_pos = 0
+        @mb_matched_size = nil
+        @mb_last_pos = nil
+      end
+
+      def is_a?(klass)
+        __getobj__.is_a?(klass) || super
+      end
+    end
+  else
+    class Sass::Util::MultibyteStringScanner < StringScanner
+      def initialize(str)
+        super
+        @mb_pos = 0
+        @mb_matched_size = nil
+        @mb_last_pos = nil
+      end
+    end
+  end
+
   # A wrapper of the native StringScanner class that works correctly with
   # multibyte character encodings. The native class deals only in bytes, not
   # characters, for methods like [#pos] and [#matched_size]. This class deals
   # only in characters, instead.
-  class Sass::Util::MultibyteStringScanner < StringScanner
+  class Sass::Util::MultibyteStringScanner
     def self.new(str)
       return StringScanner.new(str) if str.ascii_only?
       super
-    end
-
-    def initialize(str)
-      super
-      @mb_pos = 0
-      @mb_matched_size = nil
-      @mb_last_pos = nil
     end
 
     alias_method :byte_pos, :pos
@@ -1180,7 +1254,7 @@ module Sass
       return @@version if defined?(@@version)
 
 	  #RG numbers = File.read(scope('VERSION')).strip.split('.').
-      numbers = '3.2.5'.strip.split('.').
+      numbers = '3.2.9'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
       #RG name = File.read(scope('VERSION_NAME')).strip
       name = 'Media Mark'.strip
@@ -1418,7 +1492,7 @@ class Sass::Logger::Base
     Kernel::warn(message)
   end
 
-end 
+end
 
 module Sass
 
@@ -1493,6 +1567,7 @@ module Sass
         _store(key, Sass::VERSION, sha, Marshal.dump(root))
       rescue TypeError, LoadError => e
         Sass::Util.sass_warn "Warning. Error encountered while saving cache #{path_to(key)}: #{e}"
+        nil
       end
 
       # Retrieve a {Sass::Tree::RootNode}.
@@ -1505,6 +1580,7 @@ module Sass
         Marshal.load(contents) if contents
       rescue EOFError, TypeError, ArgumentError, LoadError => e
         Sass::Util.sass_warn "Warning. Error encountered while reading cache #{path_to(key)}: #{e}"
+        nil
       end
 
       # Return the key for the sass file.
@@ -1545,7 +1621,6 @@ module Sass
       # @see Base#\_retrieve
       def _retrieve(key, version, sha)
         return unless File.readable?(path_to(key))
-        contents = nil
         File.open(path_to(key), "rb") do |f|
           if f.readline("\n").strip == version && f.readline("\n").strip == sha
             return f.read
@@ -1659,7 +1734,7 @@ module Sass
       def retrieve(key, sha)
         @caches.each_with_index do |c, i|
           next unless obj = c.retrieve(key, sha)
-          @caches[0...i].each {|c| c.store(key, sha, obj)}
+          @caches[0...i].each {|prev| prev.store(key, sha, obj)}
           return obj
         end
         nil
@@ -2094,13 +2169,13 @@ module Sass::Tree
     private
 
     def normalize_indentation(str)
-      pre = str.split("\n").inject(str[/^[ \t]*/].split("")) do |pre, line|
+      ind = str.split("\n").inject(str[/^[ \t]*/].split("")) do |pre, line|
         line[/^[ \t]*/].split("").zip(pre).inject([]) do |arr, (a, b)|
           break arr if a != b
           arr << a
         end
       end.join
-      str.gsub(/^#{pre}/, '')
+      str.gsub(/^#{ind}/, '')
     end
   end
 end
@@ -3050,11 +3125,13 @@ class Sass::Tree::Visitors::Perform < Sass::Tree::Visitors::Base
 
     begin
       unless keywords.empty?
-        unknown_args = keywords.keys - callable.args.map {|var| var.first.underscored_name}
+        unknown_args = Sass::Util.array_minus(keywords.keys,
+          callable.args.map {|var| var.first.underscored_name})
         if callable.splat && unknown_args.include?(callable.splat.underscored_name)
           raise Sass::SyntaxError.new("Argument $#{callable.splat.name} of #{downcase_desc} cannot be used as a named argument.")
         elsif unknown_args.any?
-          raise Sass::SyntaxError.new("#{desc} doesn't have #{unknown_args.length > 1 ? 'the following arguments:' : 'an argument named'} #{unknown_args.map{|name| "$#{name}"}.join ', '}.")
+          description = unknown_args.length > 1 ? 'the following arguments:' : 'an argument named'
+          raise Sass::SyntaxError.new("#{desc} doesn't have #{description} #{unknown_args.map {|name| "$#{name}"}.join ', '}.")
         end
       end
     rescue Sass::SyntaxError => keyword_exception
@@ -3455,7 +3532,7 @@ class Sass::Tree::Visitors::Perform < Sass::Tree::Visitors::Base
       end
     end
 
-    return if mixins.empty?
+    return unless mixins.include?(node.name)
     raise Sass::SyntaxError.new("#{msg} #{node.name} includes itself") if mixins.size == 1
 
     msg << "\n" << Sass::Util.enum_cons(mixins.reverse + [node.name], 2).map do |m1, m2|
@@ -3512,6 +3589,8 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
     end
   end
 
+  MERGEABLE_DIRECTIVES = [Sass::Tree::MediaNode]
+
   # Runs a block of code with the current parent node
   # replaced with the given node.
   #
@@ -3519,11 +3598,18 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
   # @yield A block in which the parent is set to `parent`.
   # @return [Object] The return value of the block.
   def with_parent(parent)
-    @parent_directives.push parent if parent.is_a?(Sass::Tree::DirectiveNode)
+    if parent.is_a?(Sass::Tree::DirectiveNode)
+      if MERGEABLE_DIRECTIVES.any? {|klass| parent.is_a?(klass)}
+        old_parent_directive = @parent_directives.pop
+      end
+      @parent_directives.push parent
+    end
+
     old_parent, @parent = @parent, parent
     yield
   ensure
     @parent_directives.pop if parent.is_a?(Sass::Tree::DirectiveNode)
+    @parent_directives.push old_parent_directive if old_parent_directive
     @parent = old_parent
   end
 
@@ -3550,7 +3636,7 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
       end
       charset_and_index = Sass::Util.ruby1_8? &&
         node.children.each_with_index.find {|c, _| c.is_a?(Sass::Tree::CharsetNode)}
-      if charset_and_index
+      if charset_and_index && charset_and_index.respond_to?(:last)
         index = charset_and_index.last
         node.children = node.children[0..index] + imports + node.children[index+1..-1]
       else
@@ -3963,13 +4049,19 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
   end
 
   def visit_mixin(node)
+    arg_to_sass = lambda do |arg|
+      sass = arg.to_sass(@options)
+      sass = "(#{sass})" if arg.is_a?(Sass::Script::List) && arg.separator == :comma
+      sass
+    end
+
     unless node.args.empty? && node.keywords.empty? && node.splat.nil?
-      args = node.args.map {|a| a.to_sass(@options)}.join(", ")
+      args = node.args.map(&arg_to_sass).join(", ")
       keywords = Sass::Util.hash_to_a(node.keywords).
-        map {|k, v| "$#{dasherize(k)}: #{v.to_sass(@options)}"}.join(', ')
+        map {|k, v| "$#{dasherize(k)}: #{arg_to_sass[v]}"}.join(', ')
       if node.splat
         splat = (args.empty? && keywords.empty?) ? "" : ", "
-        splat = "#{splat}#{node.splat.to_sass(@options)}..."
+        splat = "#{splat}#{arg_to_sass[node.splat]}..."
       end
       arglist = "(#{args}#{', ' unless args.empty? || keywords.empty?}#{keywords}#{splat})"
     end
@@ -5431,8 +5523,7 @@ module Sass
         # separate sequences should limit the quadratic behavior.
         seqses.map do |seqs1|
           seqs1.reject do |seq1|
-            min_spec = 0
-            _sources(seq1).map {|seq| min_spec += seq.specificity}
+            min_spec = _sources(seq1).map {|seq| seq.specificity}.min || 0
             seqses.any? do |seqs2|
               next if seqs1.equal?(seqs2)
               # Second Law of Extend: the specificity of a generated selector
@@ -5589,7 +5680,7 @@ module Sass
           # If A {@extend B} and C {...},
           # seq is A, sels is B, and self is C
 
-          self_without_sel = self.members - sels
+          self_without_sel = Sass::Util.array_minus(self.members, sels)
           group.each {|e, _| e.result = :failed_to_unify unless e.result == :succeeded}
           next unless unified = seq.members.last.unify(self_without_sel, subject?)
           group.each {|e, _| e.result = :succeeded}
@@ -5659,7 +5750,7 @@ module Sass
       def with_more_sources(sources)
         sseq = dup
         sseq.members = members.dup
-        sseq.sources.merge sources
+        sseq.sources = self.sources | sources
         sseq
       end
 
@@ -6540,6 +6631,12 @@ module Sass::Script
   #
   # \{#append append($list1, $val, \[$separator\])}
   # : Appends a single value onto the end of a list.
+  #
+  # \{#zip zip($list1, $list2, ...)}
+  # : Combines several lists into a single multidimensional list.
+  #
+  # \{#index index($list, $value)}
+  # : Returns the position of a value within a list, or false.
   #
   # ## Introspection Functions
   #
@@ -7752,8 +7849,8 @@ module Sass::Script
     declare :append, [:list, :val]
     declare :append, [:list, :val, :separator]
 
-    # Combines several lists into a single comma separated list
-    # space separated lists.
+    # Combines several lists into a single comma separated list, where the nth
+    # value is a space separated list of the source lists' nth values.
     #
     # The length of the resulting list is the length of the
     # shortest list.
@@ -7765,9 +7862,9 @@ module Sass::Script
       length = nil
       values = []
       lists.each do |list|
-        assert_type list, :List
-        values << list.value.dup
-        length = length.nil? ? list.value.length : [length, list.value.length].min
+        array = list.to_a
+        values << array.dup
+        length = length.nil? ? array.length : [length, array.length].min
       end
       values.each do |value|
         value.slice!(length)
@@ -7778,15 +7875,14 @@ module Sass::Script
     declare :zip, [], :var_args => true
 
 
-    # Returns the position of the given value within the given
-    # list. If not found, returns false.
+    # Returns the position of a value within a list. If not found, returns
+    # false.
     #
     # @example
     #   index(1px solid red, solid) => 2
     #   index(1px solid red, dashed) => false
     def index(list, value)
-      assert_type list, :List
-      index = list.value.index {|e| e.eq(value).to_bool }
+      index = list.to_a.index {|e| e.eq(value).to_bool }
       if index
         Number.new(index + 1)
       else
@@ -7811,6 +7907,19 @@ module Sass::Script
       end
     end
     declare :if, [:condition, :if_true, :if_false]
+
+    # This function only exists as a workaround for IE7's [`content:counter`
+    # bug][bug]. It works identically to any other plain-CSS function, except it
+    # avoids adding spaces between the argument commas.
+    #
+    # [bug]: http://jes.st/2013/ie7s-css-breaking-content-counter-bug/
+    #
+    # @example
+    #   counter(item, ".") => counter(item,".")
+    def counter(*args)
+      Sass::Script::String.new("counter(#{args.map {|a| a.to_s(options)}.join(',')})")
+    end
+    declare :counter, [], :var_args => true
 
     private
 
@@ -7890,12 +7999,18 @@ module Sass
 
       # @see Node#to_sass
       def to_sass(opts = {})
-        args = @args.map {|a| a.to_sass(opts)}.join(', ')
+        arg_to_sass = lambda do |arg|
+          sass = arg.to_sass(opts)
+          sass = "(#{sass})" if arg.is_a?(Sass::Script::List) && arg.separator == :comma
+          sass
+        end
+
+        args = @args.map(&arg_to_sass).join(', ')
         keywords = Sass::Util.hash_to_a(@keywords).
-          map {|k, v| "$#{dasherize(k, opts)}: #{v.to_sass(opts)}"}.join(', ')
+          map {|k, v| "$#{dasherize(k, opts)}: #{arg_to_sass[v]}"}.join(', ')
         if self.splat
           splat = (args.empty? && keywords.empty?) ? "" : ", "
-          splat = "#{splat}#{self.splat.inspect}..."
+          splat = "#{splat}#{arg_to_sass[self.splat]}..."
         end
         "#{dasherize(name, opts)}(#{args}#{', ' unless args.empty? || keywords.empty?}#{keywords}#{splat})"
       end
@@ -7942,18 +8057,53 @@ module Sass
           opts(Functions::EvaluationContext.new(environment.options).send(ruby_name, *args))
         end
       rescue ArgumentError => e
+        message = e.message
+
         # If this is a legitimate Ruby-raised argument error, re-raise it.
         # Otherwise, it's an error in the user's stylesheet, so wrap it.
-        if e.message =~ /^wrong number of arguments \(\d+ for \d+\)/ &&
-            e.backtrace[0] !~ /:in `(block in )?#{ruby_name}'$/ &&
-            # JRuby (as of 1.6.7.2) doesn't put the actual method for
-            # which the argument error was thrown in the backtrace, so
-            # we detect whether our send threw an argument error.
-            (RUBY_PLATFORM !~ /java/ || e.backtrace[0] !~ /:in `send'$/ ||
-             e.backtrace[1] !~ /:in `_perform'$/)
+        if Sass::Util.rbx?
+          # Rubinius has a different error report string than vanilla Ruby. It
+          # also doesn't put the actual method for which the argument error was
+          # thrown in the backtrace, nor does it include `send`, so we look for
+          # `_perform`.
+          if e.message =~ /^method '([^']+)': given (\d+), expected (\d+)/
+            error_name, given, expected = $1, $2, $3
+            raise e if error_name != ruby_name || e.backtrace[0] !~ /:in `_perform'$/
+            message = "wrong number of arguments (#{given} for #{expected})"
+          end
+        elsif Sass::Util.jruby?
+          if Sass::Util.jruby1_6?
+            should_maybe_raise = e.message =~ /^wrong number of arguments \((\d+) for (\d+)\)/ &&
+              # The one case where JRuby does include the Ruby name of the function
+              # is manually-thrown ArgumentErrors, which are indistinguishable from
+              # legitimate ArgumentErrors. We treat both of these as
+              # Sass::SyntaxErrors even though it can hide Ruby errors.
+              e.backtrace[0] !~ /:in `(block in )?#{ruby_name}'$/
+          else
+            should_maybe_raise = e.message =~ /^wrong number of arguments calling `[^`]+` \((\d+) for (\d+)\)/
+            given, expected = $1, $2
+          end
+
+          if should_maybe_raise
+            # JRuby 1.7 includes __send__ before send and _perform.
+            trace = e.backtrace.dup
+            raise e if !Sass::Util.jruby1_6? && trace.shift !~ /:in `__send__'$/
+
+            # JRuby (as of 1.7.2) doesn't put the actual method
+            # for which the argument error was thrown in the backtrace, so we
+            # detect whether our send threw an argument error.
+            if !(trace[0] =~ /:in `send'$/ && trace[1] =~ /:in `_perform'$/)
+              raise e
+            elsif !Sass::Util.jruby1_6?
+              # JRuby 1.7 doesn't use standard formatting for its ArgumentErrors.
+              message = "wrong number of arguments (#{given} for #{expected})"
+            end
+          end
+        elsif e.message =~ /^wrong number of arguments \(\d+ for \d+\)/ &&
+            e.backtrace[0] !~ /:in `(block in )?#{ruby_name}'$/
           raise e
         end
-        raise Sass::SyntaxError.new("#{e.message} for `#{name}'")
+        raise Sass::SyntaxError.new("#{message} for `#{name}'")
       end
 
       # This method is factored out from `_perform` so that compass can override
@@ -9134,7 +9284,10 @@ module Sass::Script
     def to_s(opts = {})
       ''
     end
-    alias_method :to_sass, :to_s
+
+    def to_sass(opts = {})
+      'null'
+    end
 
     # Returns a string representing a null value.
     #
@@ -9358,24 +9511,6 @@ MSG
       Sass::Script::Bool.new(!to_bool)
     end
 
-    # The SassScript default operation (e.g. `$a $b`, `"foo" "bar"`).
-    #
-    # @param other [Literal] The right-hand side of the operator
-    # @return [Script::String] A string containing both literals
-    #   separated by a space
-    def space(other)
-      Sass::Script::String.new("#{self.to_s} #{other.to_s}")
-    end
-
-    # The SassScript `,` operation (e.g. `$a, $b`, `"foo", "bar"`).
-    #
-    # @param other [Literal] The right-hand side of the operator
-    # @return [Script::String] A string containing both literals
-    #   separated by `", "`
-    def comma(other)
-      Sass::Script::String.new("#{self.to_s},#{' ' unless options[:style] == :compressed}#{other.to_s}")
-    end
-
     # The SassScript `=` operation
     # (used for proprietary MS syntax like `alpha(opacity=20)`).
     #
@@ -9539,7 +9674,7 @@ module Sass::Script
     # @see Node#to_s
     def to_s(opts = {})
       if @type == :identifier
-        return @value.tr("\n", " ")
+        return @value.gsub(/\n\s*/, " ")
       end
 
       return "\"#{value.gsub('"', "\\\"")}\"" if opts[:quote] == %q{"}
@@ -10030,11 +10165,9 @@ module Sass
       STRING1_NOINTERP = /\"((?:[^\n\r\f\\"#]|#(?!\{)|\\#{NL}|#{ESCAPE})*)\"/
       STRING2_NOINTERP = /\'((?:[^\n\r\f\\'#]|#(?!\{)|\\#{NL}|#{ESCAPE})*)\'/
       STRING_NOINTERP = /#{STRING1_NOINTERP}|#{STRING2_NOINTERP}/
-      # Can't use IDENT here, because it seems to take exponential time on 1.8.
-      # We could use it for 1.9 only, but I don't want to introduce a cross-version
-      # behavior difference.
-      # In any case, almost all CSS idents will be matched by this.
-      STATIC_VALUE = /(-?#{NMSTART}|#{STRING_NOINTERP}|#[a-f0-9]|[,%]|-?#{NUMBER}|\!important)+([;}])/i
+
+      STATIC_COMPONENT = /#{IDENT}|#{STRING_NOINTERP}|#{HEXCOLOR}|[+-]?#{NUMBER}|\!important/i
+      STATIC_VALUE = /#{STATIC_COMPONENT}(\s*[\s,\/]\s*#{STATIC_COMPONENT})*([;}])/i
       STATIC_SELECTOR = /(#{NMCHAR}|[ \t]|[,>+*]|[:#.]#{NMSTART}){0,50}([{])/i
     end
   end
@@ -10285,8 +10418,6 @@ module Sass
       end
 
       def _variable(rx)
-        line = @line
-        offset = @offset
         return unless scan(rx)
 
         [:const, @scanner[2]]
@@ -10631,18 +10762,17 @@ RUBY
       def lexer_class; Lexer; end
 
       def expr
-        interp = try_ops_after_interp([:comma], :expr) and return interp
         line = @lexer.line
         return unless e = interpolation
-        arr = [e]
+        list = node(List.new([e], :comma), line)
         while tok = try_tok(:comma)
-          if interp = try_op_before_interp(tok, e)
+          if interp = try_op_before_interp(tok, list)
             return interp unless other_interp = try_ops_after_interp([:comma], :expr, interp)
             return other_interp
           end
-          arr << assert_expr(:interpolation)
+          list.value << assert_expr(:interpolation)
         end
-        arr.size == 1 ? arr.first : node(List.new(arr, :comma), line)
+        list.value.size == 1 ? list.value.first : list
       end
 
       production :equals, :interpolation, :single_eq
@@ -10735,8 +10865,6 @@ RUBY
         splat = nil
         must_have_default = false
         loop do
-          line = @lexer.line
-          offset = @lexer.offset + 1
           c = assert_tok(:const)
           var = Script::Variable.new(c.value)
           if try_tok(:colon)
@@ -10756,38 +10884,41 @@ RUBY
       end
 
       def fn_arglist
-        arglist(:fn_arglist, :equals)
+        arglist(:equals, "function argument")
       end
 
       def mixin_arglist
-        arglist(:mixin_arglist, :interpolation)
+        arglist(:interpolation, "mixin argument")
       end
 
-      def arglist(type, subexpr)
+      def arglist(subexpr, description)
         return unless e = send(subexpr)
-        if @lexer.peek && @lexer.peek.type == :colon
-          name = e
-          @lexer.expected!("comma") unless name.is_a?(Variable)
-          assert_tok(:colon)
-          keywords = {name.underscored_name => assert_expr(subexpr, EXPR_NAMES[type])}
-        end
 
-        unless try_tok(:comma)
-          return [], keywords if keywords
-          return [], {}, e if try_tok(:splat)
-          return [e], {}
-        end
+        args = []
+        keywords = {}
+        loop do
+          if @lexer.peek && @lexer.peek.type == :colon
+            name = e
+            @lexer.expected!("comma") unless name.is_a?(Variable)
+            assert_tok(:colon)
+            value = assert_expr(subexpr, description)
 
-        other_args, other_keywords, splat = assert_expr(type)
-        if keywords
-          if !other_args.empty? || splat
-            raise SyntaxError.new("Positional arguments must come before keyword arguments.")
-          elsif other_keywords[name.underscored_name]
-            raise SyntaxError.new("Keyword argument \"#{name.to_sass}\" passed more than once")
+            if keywords[name.underscored_name]
+              raise SyntaxError.new("Keyword argument \"#{name.to_sass}\" passed more than once")
+            end
+
+            keywords[name.underscored_name] = value
+          else
+            if !keywords.empty?
+              raise SyntaxError.new("Positional arguments must come before keyword arguments.")
+            end
+
+            return args, keywords, e if try_tok(:splat)
+            args << e
           end
-          return other_args, keywords.merge(other_keywords), splat
-        else
-          return [e, *other_args], other_keywords, splat
+
+          return args, keywords unless try_tok(:comma)
+          e = assert_expr(subexpr, description)
         end
       end
 
@@ -11006,6 +11137,18 @@ module Sass
         ql = media_query_list
         expected("media query list") unless @scanner.eos?
         ql
+      end
+
+      # Parses a supports query condition.
+      #
+      # @return [Sass::Supports::Condition] The parsed condition
+      # @raise [Sass::SyntaxError] if there's a syntax error in the condition,
+      #   or if it doesn't take up the entire input string.
+      def parse_supports_condition
+        init_scanner!
+        condition = supports_condition
+        expected("supports condition") unless @scanner.eos?
+        condition
       end
 
       private
@@ -11942,7 +12085,7 @@ MESSAGE
         line = @line
         @strs.push ""
         throw_error {yield} && @strs.last
-      rescue Sass::SyntaxError => e
+      rescue Sass::SyntaxError
         @scanner.pos = pos
         @line = line
         nil
@@ -12056,7 +12199,7 @@ MESSAGE
       end
 
       def rethrow(err)
-        if @throw_err
+        if @throw_error
           throw :_sass_parser_error, err
         else
           @scanner = Sass::Util::MultibyteStringScanner.new(@scanner.string)
@@ -12672,7 +12815,7 @@ module Sass
 
       # @see Base#mtime
       def mtime(name, options)
-        file, s = Sass::Util.destructure(find_real_file(@root, name, options))
+        file, _ = Sass::Util.destructure(find_real_file(@root, name, options))
         File.mtime(file) if file
       rescue Errno::ENOENT
         nil
@@ -13048,10 +13191,7 @@ module Sass::Media
         type = t1
         mod = m1.empty? ? m2 : m1
       end
-      q = Query.new([], [], other.expressions + expressions)
-      q.type = [type]
-      q.modifier = [mod]
-      return q
+      return Query.new([mod], [type], other.expressions + expressions)
     end
 
     # Returns the CSS for the media query.
@@ -13600,7 +13740,7 @@ module Sass
     # @return [[Sass::Engine]] The dependency documents.
     def dependencies
       _dependencies(Set.new, engines = Set.new)
-      engines - [self]
+      Sass::Util.array_minus(engines, [self])
     end
 
     # Helper for \{#dependencies}.
@@ -14021,6 +14161,12 @@ WARNING
         parser = Sass::SCSS::Parser.new(value, @options[:filename], @line)
         Tree::MediaNode.new(parser.parse_media_query_list.to_a)
       else
+        unprefixed_directive = directive.gsub(/^-[a-z0-9]+-/i, '')
+        if unprefixed_directive == 'supports'
+          parser = Sass::SCSS::Parser.new(value, @options[:filename], @line)
+          return Tree::SupportsNode.new(directive, parser.parse_supports_condition)
+        end
+
         Tree::DirectiveNode.new(
           value.nil? ? ["@#{directive}"] : ["@#{directive} "] + parse_interp(value, offset))
       end
@@ -14927,23 +15073,7 @@ module Sass::Plugin
     def watch(individual_files = [])
       update_stylesheets(individual_files)
 
-      begin
-        require 'listen'
-      rescue LoadError => e
-        dir = Sass::Util.scope("vendor/listen/lib")
-        if $LOAD_PATH.include?(dir)
-          e.message << "\n" <<
-            if File.exists?(scope(".git"))
-              'Run "git submodule update --init" to get the recommended version.'
-            else
-              'Run "gem install listen" to get it.'
-            end
-          raise e
-        else
-          $LOAD_PATH.unshift dir
-          retry
-        end
-      end
+      load_listen!
 
       template_paths = template_locations # cache the locations
       individual_files_hash = individual_files.inject({}) do |h, files|
@@ -15020,6 +15150,41 @@ module Sass::Plugin
     end
 
     private
+
+    def load_listen!
+      if defined?(gem)
+        begin
+          gem 'listen', '~> 0.7'
+          require 'listen'
+        rescue Gem::LoadError
+          dir = Sass::Util.scope("vendor/listen/lib")
+          $LOAD_PATH.unshift dir
+          begin
+          rescue LoadError => e
+            e.message << "\n" <<
+              if File.exists?(scope(".git"))
+                'Run "git submodule update --init" to get the recommended version.'
+              else
+                'Run "gem install listen" to get it.'
+              end
+            raise e
+          end
+        end
+      else
+        begin
+        rescue LoadError => e
+          dir = Sass::Util.scope("vendor/listen/lib")
+          if $LOAD_PATH.include?(dir)
+            raise e unless File.exists?(scope(".git"))
+            e.message << "\n" <<
+              'Run "git submodule update --init" to get the recommended version.'
+          else
+            $LOAD_PATH.unshift dir
+            retry
+          end
+        end
+      end
+    end
 
     def update_stylesheet(filename, css)
       dir = File.dirname(css)
@@ -15365,12 +15530,4 @@ unless defined?(Sass::GENERIC_LOADED)
                               :always_update  => false,
                               :always_check   => true)
 end
-end
-
-# Rails 3.0.0.beta.2+, < 3.1
-if defined?(ActiveSupport) && Sass::Util.has?(:public_method, ActiveSupport, :on_load) &&
-    !Sass::Util.ap_geq?('3.1.0.beta')
-  ActiveSupport.on_load(:before_configuration) do
-    require 'sass'
-  end
 end
