@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Microsoft Ajax 1.6.28
+          README file for Bundle Transformer: Microsoft Ajax 1.6.30
  
    ----------------------------------------------------------------------
 
@@ -31,9 +31,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the Microsoft Ajax Minifier version 4.93;
-   2. In configuration settings of JS-minifier added one new property - 
-      AlwaysEscapeNonAscii.
+   Added support of the Microsoft Ajax Minifier version 4.94.
    
    =============
    DOCUMENTATION
