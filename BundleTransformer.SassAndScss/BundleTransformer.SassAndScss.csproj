@@ -70,6 +70,8 @@
     <Compile Include="BundleTransformerContextExtensions.cs" />
     <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
+    <Compile Include="Constants\FileExtension.cs" />
+    <Compile Include="FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
     <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />
     <Compile Include="Compilers\SassAndScssCompiler.cs" />

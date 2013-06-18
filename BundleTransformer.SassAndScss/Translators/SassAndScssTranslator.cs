@@ -16,6 +16,7 @@
 
 	using Compilers;
 	using Configuration;
+	using Constants;
 	
 	/// <summary>
 	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
@@ -31,16 +32,6 @@
 		/// CSS-file extension
 		/// </summary>
 		private const string CSS_FILE_EXTENSION = ".css";
-
-		/// <summary>
-		/// Sass-file extension
-		/// </summary>
-		private const string SASS_FILE_EXTENSION = ".sass";
-
-		/// <summary>
-		/// SCSS-file extension
-		/// </summary>
-		private const string SCSS_FILE_EXTENSION = ".scss";
 
 		/// <summary>
 		/// Regular expression for working with paths of imported Sass-files
@@ -216,11 +207,11 @@
 			}
 			else
 			{
-				assetExtension = SASS_FILE_EXTENSION;
+				assetExtension = FileExtension.Sass;
 			}
 
 			MatchCollection matches;
-			if (string.Equals(assetExtension, SASS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase))
+			if (FileExtensionHelper.IsSass(assetExtension))
 			{
 				matches = _importSassFilesRuleRegex.Matches(assetContent);
 			}
@@ -252,8 +243,8 @@
 							string newImportedAssetUrl;
 							string newImportedAssetPath;
 
-							if (string.Equals(importedAssetExtension, SASS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase)
-								|| string.Equals(importedAssetExtension, SCSS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase))
+							if (FileExtensionHelper.IsSass(importedAssetExtension)
+								|| FileExtensionHelper.IsScss(importedAssetExtension))
 							{
 								newImportedAssetUrl = importedAssetUrl;
 								newImportedAssetPath = importedAssetPath;
@@ -298,9 +289,8 @@
 
 								if (!importedAssetExists)
 								{
-									newImportedAssetExtension = string.Equals(newImportedAssetExtension,
-										SASS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase) ?
-											SCSS_FILE_EXTENSION : SASS_FILE_EXTENSION;
+									newImportedAssetExtension = FileExtensionHelper.IsSass(newImportedAssetExtension) ?
+											FileExtension.Scss : FileExtension.Sass;
 									newImportedAssetUrl = importedAssetUrl + newImportedAssetExtension;
 									newImportedAssetPath = _httpContext.Server.MapPath(newImportedAssetUrl);
 

@@ -23,16 +23,6 @@
 	internal sealed class SassAndScssCompiler
 	{
 		/// <summary>
-		/// Sass-file extension
-		/// </summary>
-		const string SASS_FILE_EXTENSION = ".sass";
-
-		/// <summary>
-		/// SCSS-file extension
-		/// </summary>
-		const string SCSS_FILE_EXTENSION = ".scss";
-
-		/// <summary>
 		/// Resources namespace
 		/// </summary>
 		const string RESOURCES_NAMESPACE = "BundleTransformer.SassAndScss.Resources";
@@ -164,7 +154,7 @@
 			{
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "filePath");
 			}
-			
+
 			if (!File.Exists(filePath))
 			{
 				throw new FileNotFoundException(
@@ -178,13 +168,11 @@
 				dynamic compilerOptions;
 				string fileExtension = Path.GetExtension(filePath);
 
-				if (string.Equals(fileExtension, SASS_FILE_EXTENSION, 
-					StringComparison.InvariantCultureIgnoreCase))
+				if (FileExtensionHelper.IsSass(fileExtension))
 				{
 					compilerOptions = minifyOutput ? _sassOptionsWithMinification : _sassOptions;
 				}
-				else if (string.Equals(fileExtension, SCSS_FILE_EXTENSION,
-					StringComparison.InvariantCultureIgnoreCase))
+				else if (FileExtensionHelper.IsScss(fileExtension))
 				{
 					compilerOptions = minifyOutput ? _scssOptionsWithMinification : _scssOptions;
 				}
@@ -208,7 +196,7 @@
 				if (dependentFilePaths != null)
 				{
 					dependentFilePaths.Add(filePath);
-					_platformAdaptationLayer.OnOpenInputFileStream = accessedFile => 
+					_platformAdaptationLayer.OnOpenInputFileStream = accessedFile =>
 					{
 						if (!accessedFile.Contains(".sass-cache"))
 						{

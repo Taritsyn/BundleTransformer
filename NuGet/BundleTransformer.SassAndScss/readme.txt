@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.6.29
+          README file for Bundle Transformer: Sass and SCSS 1.6.31
 
    ----------------------------------------------------------------------
 
@@ -21,9 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of Sass version 3.2.9;
-   2. Fixed bug #34 "undefined method `last' for 
-      Sass::Tree::CharsetNode:Sass::Tree::CharsetNode".
+   Fixed bug #35 "SCSS @import with Virtual folder".
    
    =============
    DOCUMENTATION
