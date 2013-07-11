@@ -24,6 +24,22 @@
 
 
 		/// <summary>
+		/// Constructs instance of CSS relative path resolver
+		/// </summary>
+		public CssRelativePathResolver()
+			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+		{ }
+
+		/// <summary>
+		/// Constructs instance of CSS relative path resolver
+		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		public CssRelativePathResolver(IVirtualFileSystemWrapper virtualFileSystemWrapper)
+			: base(virtualFileSystemWrapper)
+		{}
+
+
+		/// <summary>
 		/// Transforms relative paths of components to absolute in CSS-code
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>

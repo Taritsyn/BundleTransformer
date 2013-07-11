@@ -1,4 +1,4 @@
-<configuration>
+﻿<configuration>
 	<configSections>
 		<sectionGroup name="bundleTransformer">
 			<section name="core" type="BundleTransformer.Core.Configuration.CoreSettings, BundleTransformer.Core" />

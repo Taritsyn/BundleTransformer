@@ -31,7 +31,7 @@
 		/// </summary>
 		public CoffeeScriptAssetHandler()
 			: this(HttpContext.Current.Cache, 
-				BundleTransformerContext.Current.GetFileSystemWrapper(), 
+				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(), 
 				BundleTransformerContext.Current.GetCoreConfiguration().AssetHandler,
 				BundleTransformerContext.Current.GetApplicationInfo())
 		{ }
@@ -40,13 +40,13 @@
 		/// Constructs instance of CoffeeScript asset handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="assetHandlerConfig">Configuration settings of HTTP-handler that responsible 
 		/// for text output of processed asset</param>
 		/// <param name="applicationInfo">Information about web application</param>
-		public CoffeeScriptAssetHandler(Cache cache, IFileSystemWrapper fileSystemWrapper,
+		public CoffeeScriptAssetHandler(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig, IHttpApplicationInfo applicationInfo)
-				: base(cache, fileSystemWrapper, assetHandlerConfig, applicationInfo)
+				: base(cache, virtualFileSystemWrapper, assetHandlerConfig, applicationInfo)
 		{ }
 
 

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.TypeScript</id>
-    <version>1.6.26</version>
+    <version>1.7.16</version>
 	<title>Bundle Transformer: TypeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,9 +16,9 @@
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling TypeScript Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.6.26" />
-	  <dependency id="MsieJavaScriptEngine" version="1.1.1" />
-	  <dependency id="Newtonsoft.Json" version="5.0.5" />
+      <dependency id="BundleTransformer.Core" version="1.7.16" />
+	  <dependency id="MsieJavaScriptEngine" version="1.1.2" />
+	  <dependency id="Newtonsoft.Json" version="5.0.6" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.TypeScript.dll" />

@@ -73,15 +73,15 @@
 		/// <summary>
 		/// Checks whether asset is unnecessary
 		/// </summary>
-		/// <param name="assetPath">Asset file path</param>
+		/// <param name="assetVirtualPath">Asset virtual file path</param>
 		/// <returns>Checking result (true - unnecessary; false - necessary)</returns>
-		protected bool IsUnnecessaryAsset(string assetPath)
+		protected bool IsUnnecessaryAsset(string assetVirtualPath)
 		{
 			bool isUnnecessaryAsset = false;
 
 			foreach (var ignoreRegExp in _ignoreRegExps)
 			{
-				if (ignoreRegExp.IsMatch(assetPath))
+				if (ignoreRegExp.IsMatch(assetVirtualPath))
 				{
 					isUnnecessaryAsset = true;
 					break;

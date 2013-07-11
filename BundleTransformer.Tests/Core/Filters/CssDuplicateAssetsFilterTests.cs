@@ -1,49 +1,44 @@
 ﻿namespace BundleTransformer.Tests.Core.Filters
 {
 	using System.Collections.Generic;
-	using System.IO;
 
 	using Moq;
 	using NUnit.Framework;
 
+	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
-	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class CssDuplicateAssetsFilterTests
 	{
-		private const string STYLES_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
-		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
+		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
+		private const string ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH = @"~/AlternativeContent/";
 
-		private IHttpApplicationInfo _applicationInfo;
-		private IFileSystemWrapper _fileSystemWrapper;
+		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
-			_applicationInfo = new HttpApplicationInfo("/", 
-				@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
-			_fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
+			_virtualFileSystemWrapper = (new Mock<IVirtualFileSystemWrapper>()).Object;
 		}
 
 		[Test]
 		public void DuplicateCssAssetsRemovedIsCorrect()
 		{
 			// Arrange
-			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
-				_applicationInfo, _fileSystemWrapper);
-			var jqueryUiAccordionMinAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
-				@"\themes\base\jquery.ui.accordion.min.css"), _applicationInfo, _fileSystemWrapper);
-			var testCssComponentsPathsAsset = new Asset(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH,
-				@"\css\TestCssComponentsPaths.css"), _applicationInfo, _fileSystemWrapper);
-			var testCssComponentsPathsMinAsset = new Asset(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH,
-				@"\css\TestCssComponentsPaths.min.css"), _applicationInfo, _fileSystemWrapper);
-			var siteDuplicateAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, "site.css"),
-				_applicationInfo, _fileSystemWrapper);
+			var siteAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+				_virtualFileSystemWrapper);
+			var jqueryUiAccordionMinAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"\themes\base\jquery.ui.accordion.min.css"), _virtualFileSystemWrapper);
+			var testCssComponentsPathsAsset = new Asset(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"\css\TestCssComponentsPaths.css"), _virtualFileSystemWrapper);
+			var testCssComponentsPathsMinAsset = new Asset(Utils.CombineUrls(
+				ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, @"\css\TestCssComponentsPaths.min.css"), 
+				_virtualFileSystemWrapper);
+			var siteDuplicateAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "site.css"),
+				_virtualFileSystemWrapper);
 
 			IList<IAsset> assets = new List<IAsset>
 			{
@@ -60,18 +55,18 @@
 			IList<IAsset> processedAssets = cssDuplicateFilter.Transform(assets);
 
 			// Assert
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), processedAssets[0].Path);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"), 
-				processedAssets[1].Path);
-			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
-				processedAssets[2].Path);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
+				processedAssets[0].VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.min.css"), processedAssets[1].VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\css\TestCssComponentsPaths.css"), processedAssets[2].VirtualPath);
 		}
 
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
-			_applicationInfo = null;
-			_fileSystemWrapper = null;
+			_virtualFileSystemWrapper = null;
 		}
 	}
 }

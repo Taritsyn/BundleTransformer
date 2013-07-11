@@ -2,9 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Linq;
 	using System.Web;
+	using System.Web.Hosting;
 	using System.Web.Optimization;
 
 	using Assets;
@@ -53,7 +53,8 @@
 		/// should be ignored when processing</param>
 		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
-		protected TransformerBase(string[] ignorePatterns, IHttpApplicationInfo applicationInfo, CoreSettings coreConfig)
+		protected TransformerBase(string[] ignorePatterns, IHttpApplicationInfo applicationInfo, 
+			CoreSettings coreConfig)
 		{
 			_ignorePatterns = ignorePatterns;
 			_applicationInfo = applicationInfo;
@@ -81,14 +82,15 @@
 			if (!context.EnableInstrumentation)
 			{
 				var assets = new List<IAsset>();
-				IEnumerable<FileInfo> assetFiles = response.Files;
+				IEnumerable<BundleFile> bundleFiles = response.Files;
 
-				foreach (var assetFile in assetFiles)
+				foreach (var bundleFile in bundleFiles)
 				{
-					assets.Add(new Asset(assetFile.FullName));
+					assets.Add(new Asset(bundleFile.VirtualFile.VirtualPath, bundleFile.IncludedVirtualPath, 
+						bundleFile.Transforms));
 				}
 
-				Transform(assets, response, context.HttpContext);
+				Transform(assets, response, BundleTable.VirtualPathProvider, context.HttpContext);
 			}
 		}
 
@@ -97,8 +99,10 @@
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
+		/// <param name="virtualPathProvider">Virtual path provider</param>
 		/// <param name="httpContext">Object HttpContext</param>
-		protected abstract void Transform(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext);
+		protected abstract void Transform(IList<IAsset> assets, BundleResponse bundleResponse, 
+			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext);
 
 		/// <summary>
 		/// Validates assets for compliance with a valid types
@@ -166,24 +170,26 @@
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
-		/// <param name="httpContext">Object HttpContext</param>
-		protected virtual void ConfigureBundleResponse(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext)
+		/// <param name="virtualPathProvider">Virtual path provider</param>
+		protected virtual void ConfigureBundleResponse(IList<IAsset> assets, BundleResponse bundleResponse,
+			VirtualPathProvider virtualPathProvider)
 		{
-			var assetFilePaths = new List<string>();
+			var assetVirtualPaths = new List<string>();
 
 			foreach (var asset in assets)
 			{
-				assetFilePaths.Add(asset.Path);
-				if (_applicationInfo.IsOptimizationsEnabled && asset.RequiredFilePaths.Count > 0)
+				assetVirtualPaths.Add(asset.VirtualPath);
+				if (_applicationInfo.IsOptimizationsEnabled && asset.VirtualPathDependencies.Count > 0)
 				{
-					assetFilePaths.AddRange(asset.RequiredFilePaths);
+					assetVirtualPaths.AddRange(asset.VirtualPathDependencies);
 				}
 			}
 
-			assetFilePaths = assetFilePaths.Distinct().ToList();
+			assetVirtualPaths = assetVirtualPaths.Distinct().ToList();
 
-			var assetFiles = assetFilePaths.Select(assetFilePath => new FileInfo(assetFilePath)).ToList();
-			bundleResponse.Files = assetFiles;
+			var bundleFiles = assetVirtualPaths.Select(assetVirtualPath => new BundleFile(assetVirtualPath,
+				virtualPathProvider.GetFile(assetVirtualPath))).ToList();
+			bundleResponse.Files = bundleFiles;
 		}
 	}
 }

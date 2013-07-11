@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.6.26
+            README file for Bundle Transformer: LESS Lite 1.7.16
 
    ----------------------------------------------------------------------
 

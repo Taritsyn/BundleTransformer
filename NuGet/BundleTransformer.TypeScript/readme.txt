@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.6.26
+           README file for Bundle Transformer: TypeScript 1.7.16
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,6 @@
    TypeScriptAssetHandler, which is responsible for text output of 
    translated TypeScript-asset.
 
-   
    =============
    DOCUMENTATION
    =============

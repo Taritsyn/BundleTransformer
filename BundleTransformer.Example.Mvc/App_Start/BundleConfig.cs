@@ -36,6 +36,7 @@
 
 			bundles.Add(commonStylesBundle);
 
+
 			var modernizrBundle = new CustomScriptBundle("~/Bundles/Modernizr");
 			modernizrBundle.Include("~/Scripts/modernizr-2.*");
 			modernizrBundle.Orderer = nullOrderer;
@@ -46,6 +47,7 @@
 				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.0.min.js");
 			jQueryBundle.Include("~/Scripts/jquery-{version}.js");
 			jQueryBundle.Orderer = nullOrderer;
+			jQueryBundle.CdnFallbackExpression = "window.jquery";
 
 			bundles.Add(jQueryBundle);
 
@@ -66,7 +68,7 @@
 
 			bundles.Add(commonScriptsBundle);
 
-
+			
 			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")
 			{
 				Builder = nullBuilder
@@ -75,7 +77,6 @@
 			jqueryUiStylesDirectoryBundle.Transforms.Add(new CssTransformer(
 				new[] { "*.all.css", "jquery.ui.base.css" }));
 			bundles.Add(jqueryUiStylesDirectoryBundle);
-
 
 			var scriptsDirectoryBundle = new Bundle("~/Bundles/ScriptsDirectory")
 			{

@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.Core.Assets
 {
-	using System;
 	using System.Collections.Generic;
 
 	/// <summary>
@@ -9,26 +8,33 @@
 	public interface IAsset
 	{
 		/// <summary>
-		/// Gets or sets path to asset file
+		/// Gets or sets a virtual path to asset file
 		/// </summary>
-		string Path { get; set; }
-
-		/// <summary>
-		/// Gets or sets paths to the required asset files
-		/// </summary>
-		IList<string> RequiredFilePaths
+		string VirtualPath
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets URL of asset file
+		/// Gets a URL of asset file
 		/// </summary>
-		string Url { get; }
+		string Url
+		{
+			get;
+		}
 
 		/// <summary>
-		/// Gets asset type
+		/// Gets or sets a list of virtual paths to other files required by the primary asset
+		/// </summary>
+		IList<string> VirtualPathDependencies
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets a asset type
 		/// </summary>
 		AssetType AssetType { get; }
 
@@ -38,12 +44,7 @@
 		bool Minified { get; set; }
 
 		/// <summary>
-		/// Gets date and time, in coordinated universal time (UTC), of the last modification of asset
-		/// </summary>
-		DateTime LastModifyDateTimeUtc { get; }
-
-		/// <summary>
-		/// Gets or sets text content of asset 
+		/// Gets or sets a text content of asset 
 		/// </summary>
 		string Content { get; set; }
 
@@ -56,10 +57,5 @@
 		/// Gets a flag indicating what asset is a script
 		/// </summary>
 		bool IsScript { get; }
-
-		/// <summary>
-		/// Reads text content from asset file
-		/// </summary>
-		void RefreshContent();
 	}
 }

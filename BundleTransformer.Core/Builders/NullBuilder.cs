@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Core.Builders
 {
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Web.Optimization;
 
 	/// <summary>
@@ -17,7 +16,7 @@
 		/// <param name="context">Object BundleContext</param>
 		/// <param name="files">List of files</param>
 		/// <returns>Empty string</returns>
-		public string BuildBundleContent(Bundle bundle, BundleContext context, IEnumerable<FileInfo> files)
+		public string BuildBundleContent(Bundle bundle, BundleContext context, IEnumerable<BundleFile> files)
 		{
 			return string.Empty;
 		}

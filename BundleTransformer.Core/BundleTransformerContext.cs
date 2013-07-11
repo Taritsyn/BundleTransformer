@@ -41,13 +41,13 @@
 		/// Information about web application
 		/// </summary>
 		private readonly Lazy<HttpApplicationInfo> _applicationInfo =
-			new Lazy<HttpApplicationInfo>(() => new HttpApplicationInfo());
+			new Lazy<HttpApplicationInfo>();
 
 		/// <summary>
-		/// File system wrapper 
+		/// Virtual file system wrapper 
 		/// </summary>
-		private readonly Lazy<FileSystemWrapper> _fileSystemWrapper
-			= new Lazy<FileSystemWrapper>();
+		private readonly Lazy<VirtualFileSystemWrapper> _virtualFileSystemWrapper 
+			= new Lazy<VirtualFileSystemWrapper>();
 
 		/// <summary>
 		/// Common relative path resolver
@@ -170,12 +170,12 @@
 		}
 
 		/// <summary>
-		/// Gets instance of the file system wrapper
+		/// Gets instance of the virtual file system wrapper
 		/// </summary>
-		/// <returns>File system wrapper</returns>
-		public FileSystemWrapper GetFileSystemWrapper()
+		/// <returns>Virtual file system wrapper</returns>
+		public VirtualFileSystemWrapper GetVirtualFileSystemWrapper()
 		{
-			return _fileSystemWrapper.Value;
+			return _virtualFileSystemWrapper.Value;
 		}
 
 		/// <summary>

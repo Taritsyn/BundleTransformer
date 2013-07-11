@@ -105,7 +105,7 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent = Compile(asset.Content, asset.Path);
+				string newContent = Compile(asset.Content, asset.VirtualPath);
 
 				asset.Content = newContent;
 				asset.Minified = true;
@@ -118,9 +118,9 @@
 		/// "Compiles" JS-code by using Google Closure Compiler Service API
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="assetPath">Path to JS-asset file</param>
+		/// <param name="assetVirtualPath">Virtual path to JS-asset file</param>
 		/// <returns>Minified text content of JS-asset</returns>
-		private string Compile(string content, string assetPath)
+		private string Compile(string content, string assetVirtualPath)
 		{
 			string newContent;
 			string serviceUrl = ClosureCompilerServiceApiUrl;
@@ -183,7 +183,8 @@
 					{
 						throw new AssetMinificationException(
 							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetPath, MINIFIER_NAME, FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetPath)));
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME,
+								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetVirtualPath)));
 					}
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
@@ -191,7 +192,8 @@
 					{
 						throw new AssetMinificationException(
 							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetPath, MINIFIER_NAME, FormatErrorDetails(errors[0], ErrorType.Error, assetPath)));
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME,
+								FormatErrorDetails(errors[0], ErrorType.Error, assetVirtualPath)));
 					}
 
 					if (severity > 0)
@@ -201,7 +203,8 @@
 						{
 							throw new AssetMinificationException(
 								string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-									CODE_TYPE, assetPath, MINIFIER_NAME, FormatErrorDetails(warnings[0], ErrorType.Warning, assetPath)));
+									CODE_TYPE, assetVirtualPath, MINIFIER_NAME,
+									FormatErrorDetails(warnings[0], ErrorType.Warning, assetVirtualPath)));
 						}
 					}
 

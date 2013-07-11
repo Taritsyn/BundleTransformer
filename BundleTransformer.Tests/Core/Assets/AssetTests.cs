@@ -1,48 +1,46 @@
 ﻿namespace BundleTransformer.Tests.Core.Assets
 {
-	using System.IO;
-
-	using Moq;
 	using NUnit.Framework;
 
+	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class AssetTests
 	{
-		private const string APPLICATION_ROOT_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string STYLES_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
-		private const string SCRIPTS_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
+		private const string APPLICATION_ROOT_VIRTUAL_PATH = @"~/";
+		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
+		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
-		private IHttpApplicationInfo _applicationInfo;
-		private IFileSystemWrapper _fileSystemWrapper;
+		private const string APPLICATION_ROOT_URL = "/";
+		private const string STYLES_DIRECTORY_URL = "/Content/";
+		private const string SCRIPTS_DIRECTORY_URL = "/Scripts/";
+
+		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
-			_applicationInfo = new HttpApplicationInfo("/", APPLICATION_ROOT_PATH);
-			_fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
+			_virtualFileSystemWrapper = new MockVirtualFileSystemWrapper(APPLICATION_ROOT_URL);
 		}
-		
+
 		[Test]
 		public void UrlCalculationIsCorrect()
 		{
 			// Arrange
-			var jqueryAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"),
-				_applicationInfo,
-				_fileSystemWrapper);
+			var siteCssAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+				_virtualFileSystemWrapper);
+			var jqueryAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+				_virtualFileSystemWrapper);
 
 			// Act
-			string url = jqueryAsset.Url;
+			string siteCssAssetUrl = siteCssAsset.Url;
+			string jqueryAssetUrl = jqueryAsset.Url;
 
 			// Assert
-			Assert.AreEqual("/Scripts/jquery-1.6.2.js", url);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_URL, "Site.css"), siteCssAssetUrl);
+			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_URL, "jquery-1.6.2.js"), jqueryAssetUrl);
 		}
 
 		[Test]
@@ -51,53 +49,44 @@
 			// Arrange
 
 			// Act
-			var siteCssAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
-				_applicationInfo, _fileSystemWrapper);
+			var siteCssAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
+				_virtualFileSystemWrapper);
 
-			var jqueryJsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.js"),
-				_applicationInfo, _fileSystemWrapper);
+			var jqueryJsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+				_virtualFileSystemWrapper);
 
-			var testLessAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, "TestLess.less"),
-				_applicationInfo, _fileSystemWrapper);
+			var testLessAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"), 
+				_virtualFileSystemWrapper);
 
-			var testSassAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, "TestSass.sass"),
-				_applicationInfo, _fileSystemWrapper);
+			var testSassAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "TestSass.sass"), 
+				_virtualFileSystemWrapper);
 
-			var testScssAsset = new Asset(
-				Path.Combine(STYLES_DIRECTORY_PATH, "TestScss.scss"),
-				_applicationInfo, _fileSystemWrapper);
+			var testScssAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "TestScss.scss"), 
+				_virtualFileSystemWrapper);
 
 			var testCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestCoffeeScript.coffee"),
-				_applicationInfo, _fileSystemWrapper);
+				Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScript.coffee"), 
+				_virtualFileSystemWrapper);
 
 			var testLitCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestLiterateCoffeeScript.litcoffee"),
-				_applicationInfo, _fileSystemWrapper);
+				Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestLiterateCoffeeScript.litcoffee"), 
+				_virtualFileSystemWrapper);
 
 			var testCoffeeMdAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestCoffeeScriptMarkdown.coffee.md"),
-				_applicationInfo, _fileSystemWrapper);
+				Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, @"TestCoffeeScriptMarkdown.coffee.md"), 
+				_virtualFileSystemWrapper);
 
-			var testTsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestTypeScript.ts"),
-				_applicationInfo, _fileSystemWrapper);
+			var testTsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestTypeScript.ts"), 
+				_virtualFileSystemWrapper);
 
-			var testHandlebarsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestHandlebars.handlebars"),
-				_applicationInfo, _fileSystemWrapper);
+			var testHandlebarsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestHandlebars.handlebars"),
+				_virtualFileSystemWrapper);
 
-			var testShortHandlebarsAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_PATH, "TestShortHandlebars.hbs"),
-				_applicationInfo, _fileSystemWrapper);
+			var testShortHandlebarsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestShortHandlebars.hbs"),
+				_virtualFileSystemWrapper);
 
-			var testPlainTextAsset = new Asset(
-				Path.Combine(APPLICATION_ROOT_PATH, "TestPlainText.txt"),
-					_applicationInfo, _fileSystemWrapper);
+			var testPlainTextAsset = new Asset(Utils.CombineUrls(APPLICATION_ROOT_VIRTUAL_PATH, "TestPlainText.txt"),
+				_virtualFileSystemWrapper);
 
 			// Assert
 			Assert.AreEqual(AssetType.Css, siteCssAsset.AssetType);
@@ -142,8 +131,7 @@
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
-			_applicationInfo = null;
-			_fileSystemWrapper = null;
+			_virtualFileSystemWrapper = null;
 		}
 	}
 }

@@ -4,6 +4,7 @@
 	using System.Configuration;
 	using System.Text;
 	using System.Web;
+	using System.Web.Hosting;
 	using System.Web.Optimization;
 
 	using Assets;
@@ -152,8 +153,10 @@
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
+		/// <param name="virtualPathProvider">Virtual path provider</param>
 		/// <param name="httpContext">Object HttpContext</param>
-		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse, HttpContextBase httpContext)
+		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
+			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext)
 		{
 			ValidateAssetTypes(assets);
 			assets = RemoveDuplicateAssets(assets);
@@ -166,7 +169,7 @@
 			}
 
 			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
-			ConfigureBundleResponse(assets, bundleResponse, httpContext);
+			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider);
 			bundleResponse.ContentType = Constants.ContentType.Js;
 		}
 

@@ -147,11 +147,11 @@
 			if (currentOptions.UseDefaultLib)
 			{
 				var defaultLibDependency = new Dependency
-				{
-					Url = "lib.d.ts",
-					Path = "lib.d.ts",
-					Content = _commonTypesDefinitions
-				};
+					{
+						Url = "lib.d.ts",
+						VirtualPath = "lib.d.ts",
+						Content = _commonTypesDefinitions
+					};
 				newDependencies.Add(defaultLibDependency);
 			}
 			newDependencies.AddRange(dependencies);

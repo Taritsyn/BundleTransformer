@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.6.26
+              README file for Bundle Transformer: LESS 1.7.16
 
    ----------------------------------------------------------------------
 
@@ -17,7 +17,6 @@
    of translated LESS-asset.
 
    Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
-
  
    ====================
    POST-INSTALL ACTIONS

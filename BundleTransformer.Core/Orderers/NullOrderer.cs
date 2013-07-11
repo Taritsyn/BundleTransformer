@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Core.Orderers
 {
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Web.Optimization;
 
 	/// <summary>
@@ -15,7 +14,7 @@
 		/// <param name="context">Object BundleContext</param>
 		/// <param name="files">List of files</param>
 		/// <returns>Sorted list of files</returns>
-		public IEnumerable<FileInfo> OrderFiles(BundleContext context, IEnumerable<FileInfo> files)
+		public IEnumerable<BundleFile> OrderFiles(BundleContext context, IEnumerable<BundleFile> files)
 		{
 			return files;
 		}

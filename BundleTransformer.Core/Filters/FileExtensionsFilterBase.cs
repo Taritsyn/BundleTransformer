@@ -16,9 +16,9 @@
 	public abstract class FileExtensionsFilterBase : IFilter
 	{
 		/// <summary>
-		/// File system wrapper
+		/// Virtual file system wrapper
 		/// </summary>
-		private readonly IFileSystemWrapper _fileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode
@@ -53,10 +53,10 @@
 		/// <summary>
 		/// Constructs instance of the file extensions filter
 		/// </summary>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
-		protected FileExtensionsFilterBase(IFileSystemWrapper fileSystemWrapper)
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		protected FileExtensionsFilterBase(IVirtualFileSystemWrapper virtualFileSystemWrapper)
 		{
-			_fileSystemWrapper = fileSystemWrapper;
+			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 		}
 
 
@@ -69,37 +69,37 @@
 		public abstract IList<IAsset> Transform(IList<IAsset> assets);
 
 		/// <summary>
-		/// Gets version of file path, most appropriate for 
+		/// Gets version of virtual file path, most appropriate for 
 		/// current mode of web application
 		/// </summary>
-		/// <param name="assetPath">Asset file path</param>
+		/// <param name="assetVirtualPath">Asset virtual file path</param>
 		/// <param name="isMinified">Flag indicating what appropriate 
-		/// file path version of asset is minified</param>
+		/// virtual file path version of asset is minified</param>
 		/// <returns>Path to file, corresponding current mode 
 		/// of web application</returns>
-		protected abstract string GetAppropriateAssetFilePath(string assetPath, out bool isMinified);
+		protected abstract string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified);
 
 		/// <summary>
-		/// Gets appropriate version of asset file path based 
+		/// Gets appropriate version of asset virtual file path based 
 		/// on list of file extensions
 		/// </summary>
-		/// <param name="assetPath">Asset file path</param>
+		/// <param name="assetVirtualPath">Asset virtual file path</param>
 		/// <param name="extensions">List of file extensions</param>
-		/// <returns>Asset file path with modified extension</returns>
-		protected string ProbeAssetFilePath(string assetPath, string[] extensions)
+		/// <returns>Asset virtual file path with modified extension</returns>
+		protected string ProbeAssetFilePath(string assetVirtualPath, string[] extensions)
 		{
-			string changedFilePath = string.Empty;
+			string changedVirtualPath = string.Empty;
 
 			foreach (string extension in extensions)
 			{
-				changedFilePath = Path.ChangeExtension(assetPath, extension);
-				if (_fileSystemWrapper.FileExists(changedFilePath))
+				changedVirtualPath = Path.ChangeExtension(assetVirtualPath, extension);
+				if (_virtualFileSystemWrapper.FileExists(changedVirtualPath))
 				{
-					return changedFilePath;
+					return changedVirtualPath;
 				}
 			}
 
-			throw new FileNotFoundException(string.Format(Strings.Common_FileNotExist, changedFilePath));
+			throw new FileNotFoundException(string.Format(Strings.Common_FileNotExist, changedVirtualPath));
 		}
 	}
 }

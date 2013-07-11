@@ -6,9 +6,9 @@
 	public sealed class Dependency
 	{
 		/// <summary>
-		/// Gets or sets path to dependency file
+		/// Gets or sets virtual path to dependency file
 		/// </summary>
-		public string Path
+		public string VirtualPath
 		{
 			get;
 			set;

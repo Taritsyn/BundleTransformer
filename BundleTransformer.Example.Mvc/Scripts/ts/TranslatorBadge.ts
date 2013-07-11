@@ -17,7 +17,7 @@ module TranslatorBadges {
             /// Id of badge DOM-element
             /// </param>
             this.$badgeElem = jQuery("#" + elementId);
-            this.$linkElem = this.$badgeElem.find("A:first");
+			this.$linkElem = this.$badgeElem.find("A:first");
         }
 
         public getText(): string {

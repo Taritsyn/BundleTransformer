@@ -46,8 +46,8 @@
 
 			foreach (var asset in assets)
 			{
-				string processedAssetPath = Asset.RemoveAdditionalCssFileExtension(asset.Path);
-				if (!IsUnnecessaryAsset(processedAssetPath))
+				string processedAssetVirtualPath = Asset.RemoveAdditionalCssFileExtension(asset.VirtualPath);
+				if (!IsUnnecessaryAsset(processedAssetVirtualPath))
 				{
 					processedAssets.Add(asset);
 				}

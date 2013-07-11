@@ -1,77 +1,70 @@
 ﻿namespace BundleTransformer.Tests.Core.Filters
 {
 	using System.Collections.Generic;
-	using System.IO;
 
 	using Moq;
 	using NUnit.Framework;
 
+	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
-	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class CssFileExtensionsFilterTests
 	{
-		private const string STYLES_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Content\";
-		private const string ALTERNATIVE_STYLES_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\AlternativeContent\";
+		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
+		private const string ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH = "~/AlternativeContent/";
 
-		private IHttpApplicationInfo _applicationInfo;
-		private IFileSystemWrapper _fileSystemWrapper;
+		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
-			_applicationInfo = new HttpApplicationInfo("/", 
-				@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
+			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
 
-			var fileSystemMock = new Mock<IFileSystemWrapper>();
-
-			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css")))
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css")))
 				.Returns(true)
 				;
-			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, "Site.min.css")))
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css")))
 				.Returns(false)
 				;
 
-			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, 
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
 					@"\themes\base\jquery.ui.accordion.css")))
 				.Returns(false)
 				;
-			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(STYLES_DIRECTORY_PATH, 
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
 					@"\themes\base\jquery.ui.accordion.min.css")))
 				.Returns(true)
 				;
 
-			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
 					@"\css\TestCssComponentsPaths.css")))
 				.Returns(true)
 				;
-			fileSystemMock
-				.Setup(fs => fs.FileExists(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, 
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
 					@"\css\TestCssComponentsPaths.min.css")))
 				.Returns(true)
 				;
 
-			_fileSystemWrapper = fileSystemMock.Object;
+			_virtualFileSystemWrapper = virtualFileSystemMock.Object;
 		}
 
 		private IList<IAsset> GetTestAssets()
 		{
-			var siteAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"),
-				_applicationInfo, _fileSystemWrapper);
-			var jqueryUiAccordionAsset = new Asset(Path.Combine(STYLES_DIRECTORY_PATH,
-				@"\themes\base\jquery.ui.accordion.min.css"), _applicationInfo, _fileSystemWrapper);
-			var testCssComponentsPathsAsset = new Asset(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH,
-				@"\css\TestCssComponentsPaths.css"), _applicationInfo, _fileSystemWrapper);
+			var siteAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+				_virtualFileSystemWrapper);
+			var jqueryUiAccordionAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"\themes\base\jquery.ui.accordion.min.css"), _virtualFileSystemWrapper);
+			var testCssComponentsPathsAsset = new Asset(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"\css\TestCssComponentsPaths.css"), _virtualFileSystemWrapper);
 
 			var testAssets = new List<IAsset>
 			{
@@ -88,7 +81,7 @@
 		{
 			// Arrange
 			IList<IAsset> assets = GetTestAssets();
-			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
+			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_virtualFileSystemWrapper)
 			{
 			    IsDebugMode = true,
 				UsePreMinifiedFiles = true
@@ -101,13 +94,13 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), siteAsset.Path);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"),
-				jqueryUiAccordionAsset.Path);
-			Assert.AreNotEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.css"),
-				jqueryUiAccordionAsset.Path);
-			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
-				testCssComponentsPathsAsset.Path);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreNotEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -119,7 +112,7 @@
 		{
 			// Arrange
 			IList<IAsset> assets = GetTestAssets();
-			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
+			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_virtualFileSystemWrapper)
 			{
 				IsDebugMode = true,
 				UsePreMinifiedFiles = false
@@ -132,13 +125,13 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), siteAsset.Path);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"),
-				jqueryUiAccordionAsset.Path);
-			Assert.AreNotEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.css"),
-				jqueryUiAccordionAsset.Path);
-			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
-				testCssComponentsPathsAsset.Path);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreNotEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -150,7 +143,7 @@
 		{
 			// Arrange
 			IList<IAsset> assets = GetTestAssets();
-			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
+			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_virtualFileSystemWrapper)
 			{
 			    IsDebugMode = false,
 				UsePreMinifiedFiles = true
@@ -163,12 +156,12 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), siteAsset.Path);
-			Assert.AreNotEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.min.css"), siteAsset.Path);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"), 
-				jqueryUiAccordionAsset.Path);
-			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.min.css"),
-				testCssComponentsPathsAsset.Path);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreNotEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\css\TestCssComponentsPaths.min.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -180,7 +173,7 @@
 		{
 			// Arrange
 			IList<IAsset> assets = GetTestAssets();
-			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_fileSystemWrapper)
+			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_virtualFileSystemWrapper)
 			{
 				IsDebugMode = false,
 				UsePreMinifiedFiles = false
@@ -193,11 +186,11 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, "Site.css"), siteAsset.Path);
-			Assert.AreEqual(Path.Combine(STYLES_DIRECTORY_PATH, @"\themes\base\jquery.ui.accordion.min.css"),
-				jqueryUiAccordionAsset.Path);
-			Assert.AreEqual(Path.Combine(ALTERNATIVE_STYLES_DIRECTORY_PATH, @"\css\TestCssComponentsPaths.css"),
-				testCssComponentsPathsAsset.Path);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"\css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -207,8 +200,7 @@
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
-			_applicationInfo = null;
-			_fileSystemWrapper = null;
+			_virtualFileSystemWrapper = null;
 		}
 	}
 }

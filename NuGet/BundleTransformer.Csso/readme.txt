@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: CSSO 1.6.26
+              README file for Bundle Transformer: CSSO 1.7.16
  
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

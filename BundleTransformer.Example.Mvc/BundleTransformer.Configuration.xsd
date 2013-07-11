@@ -232,16 +232,6 @@
 				<xs:documentation>Flag for whether to enable GZIP/Deflate-compression of processed asset</xs:documentation>
 			</xs:annotation>			
 		</xs:attribute>
-		<xs:attribute name="useLastModifiedHeader" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable using HTTP-header "Last-Modified" for notify browser about change files of processed asset</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="useETagHeader" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable using HTTP-header "ETag" for notify browser about change files of processed asset</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="serverCacheDurationInMinutes" use="optional" default="15">
 			<xs:annotation>
 				<xs:documentation>Duration of storage the text content of processed asset in server cache (in minutes)</xs:documentation>

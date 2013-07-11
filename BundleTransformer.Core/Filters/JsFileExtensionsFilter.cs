@@ -54,16 +54,16 @@
 		/// </summary>
 		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions)
-			: this(jsFilesWithMsStyleExtensions, BundleTransformerContext.Current.GetFileSystemWrapper())
+			: this(jsFilesWithMsStyleExtensions, BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of JS-file extensions filter
 		/// </summary>
 		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions, 
-			IFileSystemWrapper fileSystemWrapper) : base(fileSystemWrapper)
+			IVirtualFileSystemWrapper virtualFileSystemWrapper) : base(virtualFileSystemWrapper)
 		{
 			var jsFileRegExps = new List<Regex>();
 			if (jsFilesWithMsStyleExtensions.Length > 0)
@@ -76,10 +76,11 @@
 					{
 						string jsFileNamePattern = Regex.Escape(jsFileName.Trim());
 
-						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder,
+						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder, 
 							StringComparison.OrdinalIgnoreCase) != -1)
 						{
-							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder, @"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
+							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder, 
+								@"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
 						}
 						jsFileNamePattern = "^" + jsFileNamePattern + "$";
 
@@ -113,9 +114,9 @@
 			foreach (var asset in assets.Where(a => a.AssetType == AssetType.JavaScript && !a.Minified))
 			{
 				bool isMinified;
-				string newAssetPath = GetAppropriateAssetFilePath(asset.Path, out isMinified);
+				string newAssetVirtualPath = GetAppropriateAssetFilePath(asset.VirtualPath, out isMinified);
 
-				asset.Path = newAssetPath;
+				asset.VirtualPath = newAssetVirtualPath;
 				asset.Minified = isMinified;
 			}
 
@@ -123,56 +124,56 @@
 		}
 
 		/// <summary>
-		/// Gets version of JS-file path, most appropriate for 
+		/// Gets version of JS-file virtual path, most appropriate for 
 		/// current mode of web application
 		/// </summary>
-		/// <param name="assetPath">JS-asset file path</param>
+		/// <param name="assetVirtualPath">JS-asset file virtual path</param>
 		/// <param name="isMinified">Flag indicating what appropriate 
-		/// file path version of JS-asset is minified</param>
-		/// <returns>Path to JS-file, corresponding current mode 
+		/// virtual file path version of JS-asset is minified</param>
+		/// <returns>Virtual path to JS-file, corresponding current mode 
 		/// of web application</returns>
-		protected override string GetAppropriateAssetFilePath(string assetPath, out bool isMinified)
+		protected override string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified)
 		{
-			string processedAssetPath = assetPath.Trim();
-			string appropriateAssetPath = processedAssetPath;
+			string processedAssetVirtualPath = assetVirtualPath.Trim();
+			string appropriateAssetVirtualPath = processedAssetVirtualPath;
 			isMinified = false;
 
-			if (appropriateAssetPath.Length > 0)
+			if (appropriateAssetVirtualPath.Length > 0)
 			{
-				appropriateAssetPath = Asset.RemoveAdditionalJsFileExtension(appropriateAssetPath);
+				appropriateAssetVirtualPath = Asset.RemoveAdditionalJsFileExtension(appropriateAssetVirtualPath);
 
 				// Fill list of file extensions, sorted in order 
 				// of relevance to current mode of web application
 				string[] appropriateFileExtensions;
-				
-				if (IsJsFileWithMicrosoftStyleExtension(appropriateAssetPath))
+
+				if (IsJsFileWithMicrosoftStyleExtension(appropriateAssetVirtualPath))
 				{
 					appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ? 
 						_releaseJsExtensionsForMicrosoftStyle : _debugJsExtensionsForMicrosoftStyle;
-					appropriateAssetPath = ProbeAssetFilePath(appropriateAssetPath, appropriateFileExtensions);
-					isMinified = !Asset.IsJsFileWithDebugExtension(appropriateAssetPath);
+					appropriateAssetVirtualPath = ProbeAssetFilePath(appropriateAssetVirtualPath, appropriateFileExtensions);
+					isMinified = !Asset.IsJsFileWithDebugExtension(appropriateAssetVirtualPath);
 				}
 				else
 				{
 					appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ?
 						_releaseJsExtensionsForStandardStyle : _debugJsExtensionsForStandardStyle;
-					appropriateAssetPath = ProbeAssetFilePath(appropriateAssetPath, appropriateFileExtensions);
-					isMinified = Asset.IsJsFileWithMinExtension(appropriateAssetPath);
+					appropriateAssetVirtualPath = ProbeAssetFilePath(appropriateAssetVirtualPath, appropriateFileExtensions);
+					isMinified = Asset.IsJsFileWithMinExtension(appropriateAssetVirtualPath);
 				}
 			}
 
-			return appropriateAssetPath;
+			return appropriateAssetVirtualPath;
 		}
 
 		/// <summary>
 		/// Checks existance of specified JS-file in list of 
 		/// JS-files that have extensions in Microsoft-style
 		/// </summary>
-		/// <param name="assetPath">JS-asset file path</param>
+		/// <param name="assetVirtualPath">JS-asset virtual file path</param>
 		/// <returns>Checking result (true – exist; false – not exist)</returns>
-		private bool IsJsFileWithMicrosoftStyleExtension(string assetPath)
+		private bool IsJsFileWithMicrosoftStyleExtension(string assetVirtualPath)
 		{
-			string assetName = Path.GetFileName(assetPath);
+			string assetName = Path.GetFileName(assetVirtualPath);
 			string newAssetName = Asset.RemoveAdditionalJsFileExtension(assetName);
 			bool isJsFileWithMsStyleExtension = false;
 

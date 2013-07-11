@@ -196,7 +196,7 @@
 			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
-				string assetPath = asset.Path;
+				string assetVirtualPath = asset.VirtualPath;
 
 				try
 				{
@@ -220,26 +220,26 @@
 				catch (EcmaScriptRuntimeException e)
 				{
 					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
-							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
 				}
 				catch (EcmaScriptException e)
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
 				}
 				catch (YuiCompressingException e)
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
 				}
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed, 
-							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
+						string.Format(CoreStrings.Minifiers_MinificationFailed,
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
 				}
 
 				asset.Content = newContent;

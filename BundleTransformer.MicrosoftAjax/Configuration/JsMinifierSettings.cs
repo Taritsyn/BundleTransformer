@@ -66,7 +66,6 @@
 			set { this["errorIfNotInlineSafe"] = value; }
 		}
 
-
 		/// <summary>
 		/// Gets or sets a flag for whether to evaluate expressions containing 
 		/// only literal bool, string, numeric, or null values (true).

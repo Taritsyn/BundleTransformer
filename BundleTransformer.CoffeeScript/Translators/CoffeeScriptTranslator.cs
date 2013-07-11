@@ -94,7 +94,7 @@
 		private void InnerTranslate(IAsset asset, CoffeeScriptCompiler coffeeScriptCompiler)
 		{
 			string newContent;
-			string assetPath = asset.Path;
+			string assetVirtualPath = asset.VirtualPath;
 			bool isLiterate = (asset.AssetType == AssetType.LiterateCoffeeScript
 				|| asset.AssetType == AssetType.CoffeeScriptMarkdown);
 
@@ -105,14 +105,14 @@
 			catch (CoffeeScriptCompilingException e)
 			{
 				throw new AssetTranslationException(
-					string.Format(CoreStrings.Translators_TranslationSyntaxError, 
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message));
+					string.Format(CoreStrings.Translators_TranslationSyntaxError,
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
 			}
 
 			asset.Content = newContent;

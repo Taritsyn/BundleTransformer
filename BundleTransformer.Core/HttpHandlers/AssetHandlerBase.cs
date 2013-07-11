@@ -1,7 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-
-namespace BundleTransformer.Core.HttpHandlers
+﻿namespace BundleTransformer.Core.HttpHandlers
 {
 	using System;
 	using System.Collections.Generic;
@@ -9,6 +6,7 @@ namespace BundleTransformer.Core.HttpHandlers
 	using System.IO.Compression;
 	using System.Web;
 	using System.Web.Caching;
+	using System.Linq;
 
 	using Assets;
 	using Configuration;
@@ -32,18 +30,18 @@ namespace BundleTransformer.Core.HttpHandlers
 		/// <summary>
 		/// Synchronizer of requests to server cache
 		/// </summary>
-		protected static readonly object _cacheSynchronizer = new object();
+		private static readonly object _cacheSynchronizer = new object();
 
 		/// <summary>
-		/// File system wrapper
+		/// Virtual file system wrapper
 		/// </summary>
-		protected readonly IFileSystemWrapper _fileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		/// <summary>
 		/// Configuration settings of HTTP-handler that responsible 
 		/// for text output of processed asset
 		/// </summary>
-		protected readonly AssetHandlerSettings _assetHandlerConfig;
+		private readonly AssetHandlerSettings _assetHandlerConfig;
 
 		/// <summary>
 		/// Information about web application
@@ -68,15 +66,15 @@ namespace BundleTransformer.Core.HttpHandlers
 		/// Constructs instance of asset handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="assetHandlerConfig">Configuration settings of HTTP-handler that responsible 
 		/// for text output of processed asset</param>
 		/// <param name="applicationInfo">Information about web application</param>
-		protected AssetHandlerBase(Cache cache, IFileSystemWrapper fileSystemWrapper,
+		protected AssetHandlerBase(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig, IHttpApplicationInfo applicationInfo)
 		{
 			_cache = cache;
-			_fileSystemWrapper = fileSystemWrapper;
+			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_assetHandlerConfig = assetHandlerConfig;
 			_applicationInfo = applicationInfo;
 		}
@@ -92,53 +90,14 @@ namespace BundleTransformer.Core.HttpHandlers
 			var request = context.Request; 
 			var response = context.Response;
 
-			bool useLastModified = _assetHandlerConfig.UseLastModifiedHeader;
-			bool useETag = _assetHandlerConfig.UseETagHeader;
-
-			string assetUrl = context.Request.Url.LocalPath;
-			string assetPath = context.Server.MapPath(assetUrl);
-			var asset = new Asset(assetPath);
-
-			// Get date and time, in coordinated universal time (UTC), of 
-			// last modification requested asset
-			DateTime lastModifyTime;
-			try
-			{
-				lastModifyTime = GetProcessedAssetLastModifyTimeUtc(asset);
-			}
-			catch (FileNotFoundException)
-			{
-				ThrowHttpNotFoundError(response);
-				return;
-			}
-
-			// Generate ETag value
-			string eTag = GenerateAssetETag(assetUrl, lastModifyTime);
-
-			// Check whether requested asset has modified
-			bool lastModifiedChanged = !useLastModified || IsLastModifiedHeaderChanged(request, lastModifyTime);
-			bool eTagChanged = !useETag || IsETagHeaderChanged(request, eTag);
-
-			if (!(lastModifiedChanged && eTagChanged))
-			{
-				// Requested asset has not changed, so return 304 HTTP-status
-				response.StatusCode = 304;
-				response.StatusDescription = "Not Modified";
-
-				// Set HTTP-header "Content-Length" is zero, so that 
-				// client did not wait for data, but also kept 
-				// connection open for other requests
-				response.AddHeader("Content-Length", "0");
-
-				response.End();
-
-				return;
-			}
+			string assetUrl = request.Url.LocalPath;
+			string assetVirtualPath = assetUrl;
+			var asset = new Asset(assetVirtualPath);
 
 			string content = string.Empty;
 			try
 			{
-				content = GetProcessedAssetContent(asset, ref lastModifyTime);
+				content = GetProcessedAssetContent(asset);
 			}
 			catch (FileNotFoundException)
 			{
@@ -185,16 +144,6 @@ namespace BundleTransformer.Core.HttpHandlers
 				clientCache.SetNoServerCaching();
 				clientCache.SetMaxAge(cacheDuration);
 				clientCache.AppendCacheExtension("must-revalidate");
-				if (useLastModified)
-				{
-					clientCache.VaryByHeaders["If-Modified-Since"] = true;
-					clientCache.SetLastModified(lastModifyTime);
-				}
-				if (useETag)
-				{
-					clientCache.VaryByHeaders["If-None-Match"] = true;
-					clientCache.SetETag(eTag);
-				}
 			}
 
 			if (_assetHandlerConfig.EnableCompression
@@ -211,70 +160,38 @@ namespace BundleTransformer.Core.HttpHandlers
 		}
 
 		/// <summary>
-		/// Gets date and time, in coordinated universal time (UTC), of 
-		/// last modification of the processed asset
+		/// Returns a cache key to use for the specified virtual path
 		/// </summary>
-		/// <param name="asset">Asset</param>
-		/// <returns>Date and time, in coordinated universal time (UTC), of 
-		/// last modification of the processed asset</returns>
-		private DateTime GetProcessedAssetLastModifyTimeUtc(IAsset asset)
+		/// <param name="assetVirtualPath">The virtual path to the asset</param>
+		/// <returns>A cache key for the specified asset</returns>
+		private string GetCacheKey(string assetVirtualPath)
 		{
-			DateTime lastModifyTime;
-			string cacheItemKey = string.Format(
-				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, asset.Url);
-			string assetPath = asset.Path;
-
-			lock (_cacheSynchronizer)
-			{
-				object cacheItem = _cache.Get(cacheItemKey);
-				if (cacheItem != null)
-				{
-					var obj = (object[])cacheItem;
-					lastModifyTime = (DateTime)obj[0];
-				}
-				else
-				{
-					if (!_fileSystemWrapper.FileExists(assetPath))
-					{
-						throw new FileNotFoundException(
-							string.Format(Strings.Common_FileNotExist, assetPath), assetPath);
-					}
-
-					lastModifyTime = _fileSystemWrapper.GetFileLastWriteTimeUtc(assetPath);
-				}
-			}
-
-			return lastModifyTime;
+			return string.Format(Constants.Common.ProcessedAssetContentCacheItemKeyPattern, assetVirtualPath);
 		}
 
 		/// <summary>
 		/// Gets a processed asset content
 		/// </summary>
 		/// <param name="asset">Asset</param>
-		/// <param name="lastModifyTime">Date and time, in coordinated universal time (UTC), of 
-		/// last modification of the processed asset</param>
 		/// <returns>Asset content</returns>
-		private string GetProcessedAssetContent(IAsset asset, ref DateTime lastModifyTime)
+		private string GetProcessedAssetContent(IAsset asset)
 		{
 			string content;
-			string assetUrl = asset.Url;
-			string cacheItemKey = string.Format(
-				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, assetUrl);
+			string cacheItemKey = GetCacheKey(asset.VirtualPath);
 
 			lock (_cacheSynchronizer)
 			{
 				object cacheItem = _cache.Get(cacheItemKey);
 				if (cacheItem != null)
 				{
-					var obj = (object[])cacheItem;
-					lastModifyTime = (DateTime)obj[0];
-					content = (string)obj[1];
+					content = (string)cacheItem;
 				}
 				else
 				{
 					IAsset processedAsset = ProcessAsset(asset);
 					content = processedAsset.Content;
-					lastModifyTime = processedAsset.LastModifyDateTimeUtc;
+					string assetVirtualPath = processedAsset.VirtualPath;
+					DateTime utcStart = DateTime.UtcNow;
 
 					DateTime absoluteExpiration;
 					TimeSpan slidingExpiration;
@@ -289,16 +206,13 @@ namespace BundleTransformer.Core.HttpHandlers
 						slidingExpiration = Cache.NoSlidingExpiration;
 					}
 
-					var obj = new object[2];
-					obj[0] = lastModifyTime;
-					obj[1] = content;
+					var fileDependencies = new List<string> { assetVirtualPath };
+					fileDependencies.AddRange(processedAsset.VirtualPathDependencies);
 
-					var fileDependencies = new List<string> { processedAsset.Path };
-					fileDependencies.AddRange(processedAsset.RequiredFilePaths);
+					var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(assetVirtualPath,
+						fileDependencies.ToArray(), utcStart);
 
-					var cacheDep = new CacheDependency(fileDependencies.ToArray());
-
-					_cache.Insert(cacheItemKey, obj, cacheDep, 
+					_cache.Insert(cacheItemKey, content, cacheDep,
 						absoluteExpiration, slidingExpiration, CacheItemPriority.Low, null);
 				}
 			}
@@ -312,88 +226,6 @@ namespace BundleTransformer.Core.HttpHandlers
 		/// <param name="asset">Asset</param>
 		/// <returns>Processed asset</returns>
 		protected abstract IAsset ProcessAsset(IAsset asset);
-
-		/// <summary>
-		/// Generates value for HTTP-header "ETag" based on 
-		/// information about processed asset
-		/// </summary>
-		/// <param name="assetUrl">URL of asset file</param>
-		/// <param name="lastModifyTime">Date and time, in coordinated universal time (UTC), of 
-		/// last modification of the processed asset</param>
-		/// <returns>ETag value</returns>
-		private static string GenerateAssetETag(string assetUrl, DateTime lastModifyTime)
-		{
-			string uniqueId = string.Concat(assetUrl, lastModifyTime);
-
-			Encoder stringEncoder = Encoding.UTF8.GetEncoder();
-			int byteCount = stringEncoder.GetByteCount(uniqueId.ToCharArray(), 0, uniqueId.Length, true);
-			var bytes = new Byte[byteCount];
-
-			stringEncoder.GetBytes(uniqueId.ToCharArray(), 0, uniqueId.Length, bytes, 0, true);
-
-			MD5 md5 = MD5.Create();
-			string hash = BitConverter
-				.ToString(md5.ComputeHash(bytes))
-				.Replace("-", string.Empty)
-				.ToLower();
-
-			string eTag = string.Format("\"{0}\"", hash);
-
-			return eTag;
-		}
-
-		/// <summary>
-		/// Checks actuality of data in browser cache using 
-		/// HTTP-header "Last-Modified"
-		/// </summary>
-		/// <param name="request">HttpRequest object</param>
-		/// <param name="lastModifyTime">Date and time of last modification 
-		/// files associated with processed asset</param>
-		/// <returns>Result of checking (true – data has changed; 
-		/// false – has not changed)</returns>
-		private static bool IsLastModifiedHeaderChanged(HttpRequestBase request, DateTime lastModifyTime)
-		{
-			bool fileDateModified = true;
-			DateTime modifiedSince = DateTime.MinValue;
-
-			string ifModifiedSince = request.Headers["If-Modified-Since"];
-			if (!string.IsNullOrWhiteSpace(ifModifiedSince))
-			{
-				if (!DateTime.TryParse(ifModifiedSince, out modifiedSince))
-				{
-					modifiedSince = DateTime.MinValue;
-				}
-			}
-
-			if (modifiedSince != DateTime.MinValue)
-			{
-				TimeSpan modifyDiff = lastModifyTime - modifiedSince;
-				fileDateModified = modifyDiff > TimeSpan.FromSeconds(1);
-			}
-
-			return fileDateModified;
-		}
-
-		/// <summary>
-		/// Checks actuality of data in browser cache using 
-		/// HTTP-header "ETag"
-		/// </summary>
-		/// <param name="request">HttpRequest object</param>
-		/// <param name="eTag">ETag value</param>
-		/// <returns>Result of checking (true – data has changed; 
-		/// false – has not changed)</returns>
-		private static bool IsETagHeaderChanged(HttpRequestBase request, string eTag)
-		{
-			bool eTagChanged = true;
-			string ifNoneMatch = request.Headers["If-None-Match"];
-
-			if (!string.IsNullOrWhiteSpace(ifNoneMatch))
-			{
-				eTagChanged = !string.Equals(ifNoneMatch, eTag, StringComparison.InvariantCulture);
-			}
-
-			return eTagChanged;
-		}
 
 		/// <summary>
 		/// Compresses processed asset, using GZIP or Deflate 

@@ -55,7 +55,7 @@
 			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
-				string assetPath = asset.Path;
+				string assetVirtualPath = asset.VirtualPath;
 				
 				try
 				{
@@ -64,8 +64,8 @@
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed, 
-							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
+						string.Format(CoreStrings.Minifiers_MinificationFailed,
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
 				}
 
 				asset.Content = newContent;

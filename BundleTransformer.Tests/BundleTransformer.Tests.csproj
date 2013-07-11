@@ -54,15 +54,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Assets\AssetTests.cs" />
-    <Compile Include="Core\Filters\CssDuplicateAssetsFilterTests.cs" />
+    <Compile Include="Core\Filters\CssDuplicateAssetsFilterTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Core\Filters\CssFileExtensionsFilterTests.cs" />
     <Compile Include="Core\Filters\CssUnnecessaryAssetsFilterTests.cs" />
-    <Compile Include="Core\Filters\JsDuplicateAssetsFilterTests.cs" />
+    <Compile Include="Core\Filters\JsDuplicateAssetsFilterTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Core\Filters\JsFileExtensionsFilterTests.cs" />
     <Compile Include="Core\Filters\JsUnnecessaryAssetsFilterTests.cs" />
+    <Compile Include="Core\Validators\CssAssetTypesValidatorTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Core\Validators\JsAssetTypesValidatorTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Core\MockVirtualFileSystemWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Core\Validators\CssAssetTypesValidatorTests.cs" />
-    <Compile Include="Core\Validators\JsAssetTypesValidatorTests.cs" />
     <Compile Include="SassAndScss\Translators\SassAndScssTranslatorTests.cs" />
     <Compile Include="TypeScript\Translators\TypeScriptTranslatorTests.cs" />
   </ItemGroup>

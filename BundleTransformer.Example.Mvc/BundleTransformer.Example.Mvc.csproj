@@ -57,8 +57,9 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.30506.0\lib\net40\System.Web.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Optimization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.0.0\lib\net40\System.Web.Optimization.dll</HintPath>
+    <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.0\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -215,7 +216,6 @@
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
     <None Include="Scripts\coffee\TestCoffeeScriptMarkdown.coffee.md" />
-    <Content Include="Scripts\folder\test.js" />
     <Content Include="Scripts\jquery-1.10.0-vsdoc.js" />
     <Content Include="Scripts\jquery-1.10.0.js" />
     <Content Include="Scripts\jquery-1.10.0.min.js" />
@@ -235,6 +235,7 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\modernizr-2.6.2.min.js" />
     <Content Include="Scripts\coffee\TestCoffeeScript.coffee" />
+    <Content Include="Scripts\folder\test.js" />
     <Content Include="Scripts\ts\ColoredTranslatorBadge.ts" />
     <Content Include="Scripts\ts\IColoredTranslatorBadge.d.ts" />
     <Content Include="Scripts\ts\ITranslatorBadge.d.ts" />

@@ -1,4 +1,4 @@
-set packages_directory="C:\Projects\BundleTransformer\NuGet"
+set packages_directory="C:\Projects\BundleTransformer-prerelease\NuGet"
 
 cd %packages_directory%\BundleTransformer.Core
 call build-package.cmd

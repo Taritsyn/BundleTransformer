@@ -113,8 +113,8 @@
     </None>
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\date.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\date\format.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\delegate.rb" />
   </ItemGroup>
   <ItemGroup />

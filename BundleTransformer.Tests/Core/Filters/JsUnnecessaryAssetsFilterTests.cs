@@ -2,48 +2,45 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Linq;
 
 	using Moq;
 	using NUnit.Framework;
 
+	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
-	using BundleTransformer.Core.Web;
 
 	[TestFixture]
 	public class JsUnnecessaryAssetsFilterTests
 	{
-		private const string SCRIPTS_DIRECTORY_PATH = 
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
+		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
 		[Test]
 		public void UnneededJsAssetsRemovedIsCorrect()
 		{
 			// Arrange
-			var applicationInfo = new HttpApplicationInfo("/", @"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\");
-			var fileSystemWrapper = (new Mock<IFileSystemWrapper>()).Object;
+			var virtualFileSystemWrapper = (new Mock<IVirtualFileSystemWrapper>()).Object;
 
-			var ajaxLoginAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "AjaxLogin.js"),
-				applicationInfo, fileSystemWrapper);
-			var jqueryMinAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.min.js"),
-				applicationInfo, fileSystemWrapper);
-			var jqueryVsDocAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2-vsdoc.js"),
-				applicationInfo, fileSystemWrapper);
-			var jqueryValidateVsDocMinAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.validate-vsdoc.min.js"),
-				applicationInfo, fileSystemWrapper);
-			var microsoftAjaxDebugAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js"),
-				applicationInfo, fileSystemWrapper);
-			var telerikAllMinAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "telerik.all.min.js"),
-				applicationInfo, fileSystemWrapper);
-			var knockoutAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js"),
-				applicationInfo, fileSystemWrapper);
-			var modernizrAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"),
-				applicationInfo, fileSystemWrapper);
-			var referencesAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_PATH, "_references.js"),
-				applicationInfo, fileSystemWrapper);
+			var ajaxLoginAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"AjaxLogin.js"), virtualFileSystemWrapper);
+			var jqueryMinAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"jquery-1.6.2.min.js"), virtualFileSystemWrapper);
+			var jqueryVsDocAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"jquery-1.6.2-vsdoc.js"), virtualFileSystemWrapper);
+			var jqueryValidateVsDocMinAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"jquery.validate-vsdoc.min.js"), virtualFileSystemWrapper);
+			var microsoftAjaxDebugAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"MicrosoftAjax.debug.js"), virtualFileSystemWrapper);
+			var telerikAllMinAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"telerik.all.min.js"), virtualFileSystemWrapper);
+			var knockoutAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"knockout-2.0.0.js"), virtualFileSystemWrapper);
+			var modernizrAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"modernizr-2.0.6-development-only.js"), virtualFileSystemWrapper);
+			var referencesAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"_references.js"), virtualFileSystemWrapper);
 
 			var assets = new List<IAsset>
 			{
@@ -66,16 +63,16 @@
 
 			// Assert
 			Assert.AreEqual(5, processedAssets.Count);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "AjaxLogin.js"), 
-				processedAssets[0].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery-1.6.2.min.js"), 
-				processedAssets[1].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "MicrosoftAjax.debug.js"), 
-				processedAssets[2].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "knockout-2.0.0.js"), 
-				processedAssets[3].Path);
-			Assert.AreEqual(Path.Combine(SCRIPTS_DIRECTORY_PATH, "modernizr-2.0.6-development-only.js"), 
-				processedAssets[4].Path);
+			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "AjaxLogin.js"), 
+				processedAssets[0].VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"), 
+				processedAssets[1].VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"), 
+				processedAssets[2].VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.0.0.js"), 
+				processedAssets[3].VirtualPath);
+			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"modernizr-2.0.6-development-only.js"), processedAssets[4].VirtualPath);
 		}
 
 		[Test]

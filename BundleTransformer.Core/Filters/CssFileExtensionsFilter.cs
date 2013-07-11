@@ -31,15 +31,15 @@
 		/// Constructs instance of CSS-file extensions filter
 		/// </summary>
 		public CssFileExtensionsFilter()
-			: this(BundleTransformerContext.Current.GetFileSystemWrapper())
+			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of CSS-file extensions filter
 		/// </summary>
-		/// <param name="fileSystemWrapper">File system wrapper</param>
-		public CssFileExtensionsFilter(IFileSystemWrapper fileSystemWrapper)
-			: base(fileSystemWrapper)
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		public CssFileExtensionsFilter(IVirtualFileSystemWrapper virtualFileSystemWrapper)
+			: base(virtualFileSystemWrapper)
 		{ }
 
 
@@ -65,9 +65,9 @@
 				&& !a.Minified))
 			{
 				bool isMinified;
-				string newAssetPath = GetAppropriateAssetFilePath(asset.Path, out isMinified);
+				string newAssetVirtualPath = GetAppropriateAssetFilePath(asset.VirtualPath, out isMinified);
 
-				asset.Path = newAssetPath;
+				asset.VirtualPath = newAssetVirtualPath;
 				asset.Minified = isMinified;
 			}
 
@@ -75,33 +75,33 @@
 		}
 
 		/// <summary>
-		/// Gets version of CSS-file path, most appropriate for 
+		/// Gets version of CSS-file virtual path, most appropriate for 
 		/// current mode of web application
 		/// </summary>
-		/// <param name="assetPath">CSS-asset file path</param>
+		/// <param name="assetVirtualPath">CSS-asset virtual file path</param>
 		/// <param name="isMinified">Flag indicating what appropriate 
-		/// file path version of CSS-asset is minified</param>
-		/// <returns>Path to CSS-file, corresponding current mode 
+		/// virtual file path version of CSS-asset is minified</param>
+		/// <returns>Virtual path to CSS-file, corresponding current mode 
 		/// of web application</returns>
-		protected override string GetAppropriateAssetFilePath(string assetPath, out bool isMinified)
+		protected override string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified)
 		{
-			string processedAssetPath = assetPath.Trim();
-			string appropriateAssetPath = processedAssetPath;
+			string processedAssetVirtualPath = assetVirtualPath.Trim();
+			string appropriateAssetVirtualPath = processedAssetVirtualPath;
 			isMinified = false;
 
-			if (appropriateAssetPath.Length > 0)
+			if (appropriateAssetVirtualPath.Length > 0)
 			{
 				// Fill list of file extensions, sorted in order 
 				// of relevance to current mode of web application
 				string[] appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ?
 					_releaseCssExtensions : _debugCssExtensions;
 
-				appropriateAssetPath = ProbeAssetFilePath(
-					Asset.RemoveAdditionalCssFileExtension(appropriateAssetPath), appropriateFileExtensions);
-				isMinified = Asset.IsCssFileWithMinExtension(appropriateAssetPath);
+				appropriateAssetVirtualPath = ProbeAssetFilePath(
+					Asset.RemoveAdditionalCssFileExtension(appropriateAssetVirtualPath), appropriateFileExtensions);
+				isMinified = Asset.IsCssFileWithMinExtension(appropriateAssetVirtualPath);
 			}
 
-			return appropriateAssetPath;
+			return appropriateAssetVirtualPath;
 		}
 	}
 }

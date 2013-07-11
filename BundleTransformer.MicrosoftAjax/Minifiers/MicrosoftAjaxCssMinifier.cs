@@ -290,9 +290,9 @@
 			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
-				string assetPath = asset.Path;
+				string assetVirtualPath = asset.VirtualPath;
 
-				cssParser.FileContext = assetPath;
+				cssParser.FileContext = assetVirtualPath;
 				cssParser.CssError += ParserErrorHandler;
 
 				try
@@ -303,7 +303,7 @@
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetPath, MINIFIER_NAME, e.Message), e);
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
 				}
 				finally
 				{

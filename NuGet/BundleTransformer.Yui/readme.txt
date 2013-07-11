@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: YUI 1.6.26
+               README file for Bundle Transformer: YUI 1.7.16
  
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -15,6 +15,11 @@
    (for minification of CSS-code) and YuiJsMinifier (for minification of 
    JS-code). These adapters perform minification using the YUI Compressor 
    for .NET (http://yuicompressor.codeplex.com).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of YUI Compressor for .NET 2.2.1.0.
 
    ====================
    POST-INSTALL ACTIONS

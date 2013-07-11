@@ -65,8 +65,9 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Optimization">
-      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.0.0\lib\net40\System.Web.Optimization.dll</HintPath>
+    <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.0\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -102,16 +103,16 @@
     <Compile Include="Configuration\TranslatorRegistration.cs" />
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
     <Compile Include="Constants\Common.cs" />
-    <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
     <Compile Include="FileSystem\CssRelativePathResolver.cs" />
-    <Compile Include="FileSystem\FileSystemWrapper.cs" />
-    <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
+    <Compile Include="FileSystem\VirtualFileSystemWrapper.cs" />
     <Compile Include="FileSystem\IRelativePathResolver.cs" />
+    <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
     <Compile Include="SourceCodeHelpers\SourceCodeNavigator.cs" />
     <Compile Include="SourceCodeHelpers\SourceCodeNodeCoordinates.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Web\HttpApplicationInfo.cs" />
-    <Compile Include="FileSystem\IFileSystemWrapper.cs" />
+    <Compile Include="FileSystem\IVirtualFileSystemWrapper.cs" />
+    <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
     <Compile Include="Filters\CssUnnecessaryAssetsFilter.cs" />
     <Compile Include="Filters\CssDuplicateAssetsFilter.cs" />
     <Compile Include="Filters\CssFileExtensionsFilter.cs" />

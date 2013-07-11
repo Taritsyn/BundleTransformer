@@ -3,7 +3,6 @@
 	using System;
 	using System.IO;
 	using System.Text.RegularExpressions;
-	using System.Web;
 
 	using Core;
 	using Resources;
@@ -18,6 +17,28 @@
 		/// </summary>
 		private static readonly Regex _protocolRegExp = new Regex(@"^(https?|ftp)\://",
 			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
+		/// Virtual file system wrapper
+		/// </summary>
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+
+
+		/// <summary>
+		/// Constructs instance of common relative path resolver
+		/// </summary>
+		public CommonRelativePathResolver()
+			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+		{ }
+
+		/// <summary>
+		/// Constructs instance of common relative path resolver
+		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		public CommonRelativePathResolver(IVirtualFileSystemWrapper virtualFileSystemWrapper)
+		{
+			_virtualFileSystemWrapper = virtualFileSystemWrapper;
+		}
 
 
 		/// <summary>
@@ -46,12 +67,12 @@
 
 			if (newRelativePath.StartsWith("~/"))
 			{
-				return VirtualPathUtility.ToAbsolute(newRelativePath);
+				return _virtualFileSystemWrapper.ToAbsolutePath(newRelativePath);
 			}
 
 			string absolutePath;
 			string newBasePath = Utils.ProcessBackSlashesInUrl(
-				VirtualPathUtility.ToAbsolute(Path.GetDirectoryName(basePath)) + @"/");
+				_virtualFileSystemWrapper.ToAbsolutePath(Path.GetDirectoryName(basePath)) + @"/");
 
 			if (newRelativePath.StartsWith("../") || newRelativePath.StartsWith("./"))
 			{

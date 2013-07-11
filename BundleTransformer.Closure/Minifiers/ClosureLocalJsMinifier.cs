@@ -184,7 +184,7 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent = Compile(asset.Content, asset.Path);
+				string newContent = Compile(asset.Content, asset.VirtualPath);
 
 				asset.Content = newContent;
 				asset.Minified = true;
@@ -197,9 +197,9 @@
 		/// "Compiles" JS-code by using Google Closure Compiler Application
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="assetPath">Path to JS-asset file</param>
+		/// <param name="assetVirtualPath">Virtual path to JS-asset file</param>
 		/// <returns>Minified text content of JS-asset</returns>
-		private string Compile(string content, string assetPath)
+		private string Compile(string content, string assetVirtualPath)
 		{
 			string newContent;
 			string uniqueId = Guid.NewGuid().ToString();
@@ -318,14 +318,14 @@
 			catch (ClosureCompilingException e)
 			{
 				throw new AssetMinificationException(
-					string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
-						CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetMinificationException(
-					string.Format(CoreStrings.Minifiers_MinificationFailed, 
-						CODE_TYPE, assetPath, MINIFIER_NAME, e.Message));
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
 			}
 			finally
 			{

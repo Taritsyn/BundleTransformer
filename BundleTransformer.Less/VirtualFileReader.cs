@@ -1,42 +1,63 @@
 ﻿namespace BundleTransformer.Less
 {
-	using System.IO;
-	using System.Web.Hosting;
-
 	using dotless.Core.Input;
+
+	using Core;
+	using Core.FileSystem;
 
 	internal sealed class VirtualFileReader : IFileReader
 	{
-		public bool DoesFileExist(string fileName)
-		{
-			var virtualPathProvider = HostingEnvironment.VirtualPathProvider;
+		/// <summary>
+		/// Virtual file system wrapper
+		/// </summary>
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
-			return virtualPathProvider.FileExists(fileName);
+
+		/// <summary>
+		/// Constructs instance of virtual file reader
+		/// </summary>
+		public VirtualFileReader()
+			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+		{ }
+
+		/// <summary>
+		/// Constructs instance of virtual file reader
+		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		public VirtualFileReader(IVirtualFileSystemWrapper virtualFileSystemWrapper)
+		{
+			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 		}
 
-		public string GetFileContents(string fileName)
-		{
-			var virtualPathProvider = HostingEnvironment.VirtualPathProvider;
-			var virtualFile = virtualPathProvider.GetFile(fileName);
 
-			using (var streamReader = new StreamReader(virtualFile.Open()))
-			{
-				return streamReader.ReadToEnd();
-			}
+		/// <summary>
+		/// Gets a value that indicates whether a file exists in the virtual file system
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual file</param>
+		/// <returns>Result of checking (true – exist; false – not exist)</returns>
+		public bool DoesFileExist(string virtualPath)
+		{
+			return _virtualFileSystemWrapper.FileExists(virtualPath);
 		}
 
-		public byte[] GetBinaryFileContents(string fileName)
+		/// <summary>
+		/// Gets text content of the specified file
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual file</param>
+		/// <returns>Text content</returns>
+		public string GetFileContents(string virtualPath)
 		{
-			var virtualPathProvider = HostingEnvironment.VirtualPathProvider;
-			var virtualFile = virtualPathProvider.GetFile(fileName);
+			return _virtualFileSystemWrapper.GetFileTextContent(virtualPath);
+		}
 
-			using (var stream = virtualFile.Open())
-			{
-				var buffer = new byte[stream.Length];
-				stream.Read(buffer, 0, (int)stream.Length);
-
-				return buffer;
-			}
+		/// <summary>
+		/// Gets binary content of the specified file
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual file</param>
+		/// <returns>Binary content</returns>
+		public byte[] GetBinaryFileContents(string virtualPath)
+		{
+			return _virtualFileSystemWrapper.GetFileBinaryContent(virtualPath);
 		}
 	}
 }

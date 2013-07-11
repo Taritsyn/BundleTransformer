@@ -32,14 +32,14 @@
 
 			if (invalidAssets.Count > 0)
 			{
-				string[] invalidAssetsUrls = invalidAssets
-					.Select(a => a.Url)
+				string[] invalidAssetsVirtualPaths = invalidAssets
+					.Select(a => a.VirtualPath)
 					.ToArray()
 					;
 
 				throw new InvalidAssetTypesException(string.Format(Strings.Assets_JsAssetsContainAssetsWithInvalidTypes, 
-					string.Join(", ", invalidAssetsUrls)),
-					invalidAssetsUrls);
+					string.Join(", ", invalidAssetsVirtualPaths)),
+					invalidAssetsVirtualPaths);
 			}
 		}
 	}

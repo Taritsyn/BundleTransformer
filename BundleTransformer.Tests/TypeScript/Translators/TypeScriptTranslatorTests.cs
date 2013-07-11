@@ -1,8 +1,6 @@
 ﻿namespace BundleTransformer.Tests.TypeScript.Translators
 {
 	using System.Collections.Generic;
-	using System.IO;
-	using System.Web;
 
 	using Moq;
 	using NUnit.Framework;
@@ -16,45 +14,36 @@
 	[TestFixture]
 	public class TypeScriptTranslatorTests
 	{
-		private const string APPLICATION_ROOT_PATH =
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\";
-		private const string SCRIPTS_DIRECTORY_PATH =
-			@"D:\Projects\BundleTransformer\BundleTransformer.Example.Mvc\Scripts\";
+		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "/Scripts/";
 		private const string SCRIPTS_DIRECTORY_URL = "/Scripts/";
 
 		[Test]
 		public void FillingOfDependenciesIsCorrect()
 		{
 			// Arrange
-			var httpServerUtility = new MockHttpServerUtility();
-			var httpContextMock = new Mock<HttpContextBase>();
-			httpContextMock
-				.SetupGet(p => p.Server)
-				.Returns(httpServerUtility)
-				;
-			HttpContextBase httpContext = httpContextMock.Object;
-
-			var fileSystemMock = new Mock<IFileSystemWrapper>();
+			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
 
 
-			string jqueryTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "jquery.d.ts");
-			fileSystemMock
-				.Setup(fs => fs.FileExists(jqueryTsAssetPath))
+			string jqueryTsAssetVirtualPath = Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"jquery.d.ts");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(jqueryTsAssetVirtualPath))
 				.Returns(true)
 				;
-			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(jqueryTsAssetPath))
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(jqueryTsAssetVirtualPath))
 				.Returns("")
 				;
 
 
-			string iTranslatorBadgeTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "ITranslatorBadge.d.ts");
-			fileSystemMock
-				.Setup(fs => fs.FileExists(iTranslatorBadgeTsAssetPath))
+			string iTranslatorBadgeTsAssetVirtualPath = Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"ITranslatorBadge.d.ts");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(iTranslatorBadgeTsAssetVirtualPath))
 				.Returns(true)
 				;
-			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(iTranslatorBadgeTsAssetPath))
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(iTranslatorBadgeTsAssetVirtualPath))
 				.Returns(@"interface ITranslatorBadge {
     getText(): string;
     setText(text: string): void;
@@ -64,13 +53,14 @@
 				;
 
 
-			string translatorBadgeTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "TranslatorBadge.ts");
-			fileSystemMock
-				.Setup(fs => fs.FileExists(translatorBadgeTsAssetPath))
+			string translatorBadgeTsAssetVirtualPath = Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				"TranslatorBadge.ts");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(translatorBadgeTsAssetVirtualPath))
 				.Returns(true)
 				;
-			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(translatorBadgeTsAssetPath))
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(translatorBadgeTsAssetVirtualPath))
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
 /// <reference path=""ITranslatorBadge.d.ts"" />
 
@@ -102,13 +92,14 @@ class TranslatorBadge implements ITranslatorBadge {
 				;
 
 
-			string coloredTranslatorBadgeTsAssetPath = Path.Combine(SCRIPTS_DIRECTORY_PATH, "ColoredTranslatorBadge.ts");
-			fileSystemMock
-				.Setup(fs => fs.FileExists(coloredTranslatorBadgeTsAssetPath))
+			string coloredTranslatorBadgeTsAssetVirtualPath = Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"ColoredTranslatorBadge.ts");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(coloredTranslatorBadgeTsAssetVirtualPath))
 				.Returns(true)
 				;
-			fileSystemMock
-				.Setup(fs => fs.GetFileTextContent(coloredTranslatorBadgeTsAssetPath))
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(coloredTranslatorBadgeTsAssetVirtualPath))
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
 /// <reference path=""TranslatorBadge.ts"" />
 
@@ -131,11 +122,12 @@ class ColoredTranslatorBadge extends TranslatorBadge {
 }")
 				;
 
-			IFileSystemWrapper fileSystemWrapper = fileSystemMock.Object;
+
+			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			var relativePathResolver = new MockRelativePathResolver();
 			var tsConfig = new TypeScriptSettings();
 
-			var tsTranslator = new TypeScriptTranslator(httpContext, fileSystemWrapper, 
+			var tsTranslator = new TypeScriptTranslator(virtualFileSystemWrapper, 
 				relativePathResolver, tsConfig);
 
 			const string assetContent = @"/// <reference path=""ColoredTranslatorBadge.ts"" />
@@ -154,18 +146,10 @@ tsBadge.setBorderColor(TS_BADGE_COLOR);";
 
 			// Assert
 			Assert.AreEqual(4, dependencies.Count);
-			Assert.AreEqual(jqueryTsAssetPath, dependencies[0].Path);
-			Assert.AreEqual(iTranslatorBadgeTsAssetPath, dependencies[1].Path);
-			Assert.AreEqual(translatorBadgeTsAssetPath, dependencies[2].Path);
-			Assert.AreEqual(coloredTranslatorBadgeTsAssetPath, dependencies[3].Path);
-		}
-
-		private class MockHttpServerUtility : HttpServerUtilityBase
-		{
-			public override string MapPath(string path)
-			{
-				return Path.Combine(APPLICATION_ROOT_PATH, Utils.RemoveFirstSlashFromUrl(path.Replace("/", @"\")));
-			}
+			Assert.AreEqual(jqueryTsAssetVirtualPath, dependencies[0].VirtualPath);
+			Assert.AreEqual(iTranslatorBadgeTsAssetVirtualPath, dependencies[1].VirtualPath);
+			Assert.AreEqual(translatorBadgeTsAssetVirtualPath, dependencies[2].VirtualPath);
+			Assert.AreEqual(coloredTranslatorBadgeTsAssetVirtualPath, dependencies[3].VirtualPath);
 		}
 
 		private class MockRelativePathResolver : IRelativePathResolver

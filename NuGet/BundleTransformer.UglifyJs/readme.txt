@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.6.28
+            README file for Bundle Transformer: UglifyJS 1.7.16
  
    ----------------------------------------------------------------------
 
-          Copyright 2012 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -23,11 +23,6 @@
    make changes to the Web.config file. In the defaultMinifier attribute 
    of the \configuration\bundleTransformer\core\js element must be set 
    value equal to UglifyJsMinifier.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added features from commit "Escape null characters as \x00".
    
    =============
    DOCUMENTATION

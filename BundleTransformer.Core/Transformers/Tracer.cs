@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Core.Transformers
 {
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Text;
 	using System.Web.Optimization;
 
@@ -23,10 +22,10 @@
 			content.AppendLine("* BUNDLE RESPONSE                                                                   *");
 			content.AppendLine("*************************************************************************************");
 
-			IEnumerable<FileInfo> responseFiles = response.Files;
+			IEnumerable<BundleFile> responseFiles = response.Files;
 			foreach (var responseFile in responseFiles)
 			{
-				content.AppendLine("  " + responseFile.FullName);
+				content.AppendLine("  " + responseFile.IncludedVirtualPath);
 			}
 
 			content.AppendLine();
@@ -39,10 +38,10 @@
 			{
 				content.AppendFormatLine("-= {0} =-", bundle.Path);
 
-				IEnumerable<FileInfo> bundleFiles = bundle.EnumerateFiles(context);
+				IEnumerable<BundleFile> bundleFiles = bundle.EnumerateFiles(context);
 				foreach (var bundleFile in bundleFiles)
 				{
-					content.AppendLine("  " + bundleFile.FullName);
+					content.AppendLine("  " + bundleFile.IncludedVirtualPath);
 				}
 
 				content.AppendLine();

@@ -54,28 +54,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable using HTTP-header "Last-Modified" 
-		/// for notify browser about change files of processed asset
-		/// </summary>
-		[ConfigurationProperty("useLastModifiedHeader", DefaultValue = true)]
-		public bool UseLastModifiedHeader
-		{
-			get { return (bool)this["useLastModifiedHeader"]; }
-			set { this["useLastModifiedHeader"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable using HTTP-header "ETag"
-		/// for notify browser about change files of processed asset
-		/// </summary>
-		[ConfigurationProperty("useETagHeader", DefaultValue = true)]
-		public bool UseETagHeader
-		{
-			get { return (bool)this["useETagHeader"]; }
-			set { this["useETagHeader"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to disable storage text content of 
 		/// processed asset in browser cache during debugging
 		/// </summary>
