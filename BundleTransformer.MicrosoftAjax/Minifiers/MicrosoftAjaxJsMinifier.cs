@@ -672,7 +672,7 @@
 			{
 				throw new MicrosoftAjaxParsingException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, error.File, MINIFIER_NAME, FormatContextError(error)), args.Exception);
+						CODE_TYPE, error.File, MINIFIER_NAME, FormatContextError(error)));
 			}
 		}
 	}

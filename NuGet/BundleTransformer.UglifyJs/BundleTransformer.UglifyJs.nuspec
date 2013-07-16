@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.UglifyJs</id>
-    <version>1.7.16</version>
+    <version>1.7.17</version>
 	<title>Bundle Transformer: UglifyJS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,6 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - UglifyJsMinifier. UglifyJsMinifier is based on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) version 2.3.6.</description>
     <summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - UglifyJsMinifier. UglifyJsMinifier is based on the Mihai Bazon's UglifyJS version 2.3.6.</summary>
+	<releaseNotes>UglifyJS was updated to commit 193049af19.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify UglifyJS</tags>

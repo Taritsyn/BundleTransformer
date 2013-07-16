@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.CoffeeScript</id>
-    <version>1.7.16</version>
+    <version>1.7.17</version>
 	<title>Bundle Transformer: CoffeeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,6 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.CoffeeScript contains translator-adapter CoffeeScriptTranslator (supports CoffeeScript (http://coffeescript.org) version 1.6.3). This adapter makes translation of CoffeeScript-code to JS-code. Also contains HTTP-handler CoffeeScriptAssetHandler, which is responsible for text output of translated CoffeeScript-asset.</description>
     <summary>BundleTransformer.CoffeeScript contains translator-adapter CoffeeScriptTranslator (supports CoffeeScript version 1.6.3). This adapter makes translation of CoffeeScript-code to JS-code. Also contains HTTP-handler CoffeeScriptAssetHandler, which is responsible for text output of translated CoffeeScript-asset.</summary>
+	<releaseNotes>CoffeeScript was updated to commit e581f7d2f0.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling CoffeeScript Translation Translator Compilation Compiler</tags>

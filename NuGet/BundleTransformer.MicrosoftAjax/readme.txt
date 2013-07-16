@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: Microsoft Ajax 1.7.16
+         README file for Bundle Transformer: Microsoft Ajax 1.7.17
  
    ----------------------------------------------------------------------
 
@@ -20,7 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Microsoft Ajax Minifier version 4.95.
+   Added support of the Microsoft Ajax Minifier version 4.96.
    
    ====================
    POST-INSTALL ACTIONS

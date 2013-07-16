@@ -1173,6 +1173,9 @@
 				if (x instanceof type) return x;
 			}
 		},
+		has_directive: function(type) {
+			return this.find_parent(AST_Scope).has_directive(type);
+		},
 		in_boolean_context: function() {
 			var stack = this.stack;
 			var i = stack.length, self = stack[--i];
@@ -1427,7 +1430,7 @@
 		};
 
 		function token(type, value, is_comment) {
-			S.regex_allowed = ((type == "operator" && !UNARY_POSTFIX[value]) ||
+			S.regex_allowed = ((type == "operator" && !UNARY_POSTFIX(value)) ||
 							   (type == "keyword" && KEYWORDS_BEFORE_EXPRESSION(value)) ||
 							   (type == "punc" && PUNC_BEFORE_EXPRESSION(value)));
 			var ret = {
@@ -2703,6 +2706,7 @@
 		});
 
 		_(AST_VarDef, function(self, tw){
+			self.name = self.name.transform(tw);
 			if (self.value) self.value = self.value.transform(tw);
 		});
 
@@ -6220,14 +6224,15 @@
 		var commutativeOperators = makePredicate("== === != !== * & | ^");
 
 		OPT(AST_Binary, function(self, compressor){
-			function reverse(op, force) {
-				if (force || !(self.left.has_side_effects() || self.right.has_side_effects())) {
-					if (op) self.operator = op;
-					var tmp = self.left;
-					self.left = self.right;
-					self.right = tmp;
-				}
-			};
+			var reverse = compressor.has_directive("use asm") ? noop
+				: function(op, force) {
+					if (force || !(self.left.has_side_effects() || self.right.has_side_effects())) {
+						if (op) self.operator = op;
+						var tmp = self.left;
+						self.left = self.right;
+						self.right = tmp;
+					}
+				};
 			if (commutativeOperators(self.operator)) {
 				if (self.right instanceof AST_Constant
 					&& !(self.left instanceof AST_Constant)) {
