@@ -373,8 +373,8 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		return EmitterIoHost;
 	})();
 
-	var BatchCompiler = (function () {
-		function BatchCompiler(ioHost, compilationSettings) {
+	var CustomCompiler = (function () {
+		function CustomCompiler(ioHost, compilationSettings) {
 			this.ioHost = ioHost;
 			this.resolvedEnvironment = null;
 			this.compilationSettings = compilationSettings;
@@ -382,20 +382,10 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			this.errorReporter = new ErrorReporter(this.ioHost, this.compilationEnvironment);
 		}
 
-		BatchCompiler.prototype.batchCompile = function (path) {
-			var codeList = this.compilationEnvironment.code;
-
-			if (this.compilationSettings.useDefaultLib) {
-				codeList.push(new TypeScript.SourceUnit("lib.d.ts", null));
-			}
-			codeList.push(new TypeScript.SourceUnit(path, null));
-
-			this.resolvedEnvironment = this._resolve();
-			this.compile();
-		};
-
-		BatchCompiler.prototype._resolve = function () {
+		CustomCompiler.prototype._resolve = function () {
 			var resolver,
+				compilationEnvironment,
+				errorReporter,
 				commandLineHost,
 				ret,
 				codeList,
@@ -404,11 +394,13 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 				path
 				;
 
-			resolver = new TypeScript.CodeResolver(this.compilationEnvironment);
-			commandLineHost = new CommandLineHost(this.errorReporter);
-			ret = commandLineHost.resolveCompilationEnvironment(this.compilationEnvironment, resolver, true);
+			compilationEnvironment = this.compilationEnvironment;
+			errorReporter = this.errorReporter;
+			resolver = new TypeScript.CodeResolver(compilationEnvironment);
+			commandLineHost = new CommandLineHost(errorReporter);
+			ret = commandLineHost.resolveCompilationEnvironment(compilationEnvironment, resolver, true);
 
-			codeList = this.compilationEnvironment.code;
+			codeList = compilationEnvironment.code;
 			codeCount = codeList.length;
 
 			for (codeIndex = 0; codeIndex < codeCount; codeIndex++) {
@@ -416,10 +408,10 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 
 				if (!commandLineHost.isResolved(path)) {
 					if (!TypeScript.isTSFile(path) && !TypeScript.isDTSFile(path)) {
-						this.errorReporter.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, 269 /* Unknown_extension_for_file___0__Only__ts_and_d_ts_extensions_are_allowed */, [path]));
+						errorReporter.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, 269 /* Unknown_extension_for_file___0__Only__ts_and_d_ts_extensions_are_allowed */, [path]));
 					}
 					else {
-						this.errorReporter.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, 268 /* Could_not_find_file___0_ */, [path]));
+						errorReporter.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, 268 /* Could_not_find_file___0_ */, [path]));
 					}
 				}
 			}
@@ -429,32 +421,16 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			return ret;
 		};
 
-		BatchCompiler.prototype.compile = function () {
-			var that = this,
-				logger,
-				compiler,
-				anySyntacticErrors = false,
-				anySemanticErrors = false,
+		CustomCompiler.prototype._addSourceUnit = function (compiler) {
+			var anySyntacticErrors = false,
 				codeList,
 				codeCount,
 				codeIndex,
 				code,
 				path,
 				fileInfo,
-				syntacticDiagnostics,
-				fileNames,
-				fileNameCount,
-				fileNameIndex,
-				fileName,
-				semanticDiagnostics,
-				emitterIoHost,
-				mapInputToOutput,
-				emitDiagnostics,
-				emitDeclarationsDiagnostics
+				syntacticDiagnostics
 				;
-
-			logger = new TypeScript.NullLogger();
-			compiler = new TypeScript.TypeScriptCompiler(logger, this.compilationSettings, null);
 
 			codeList = this.resolvedEnvironment.code;
 			codeCount = codeList.length;
@@ -482,11 +458,17 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 				}
 			}
 
-			if (anySyntacticErrors) {
-				return true;
-			}
+			return anySyntacticErrors;
+		};
 
-			compiler.pullTypeCheck();
+		CustomCompiler.prototype._diagnoseSemanticErrors = function (compiler) {
+			var anySemanticErrors = false,
+				fileNames,
+				fileNameCount,
+				fileNameIndex,
+				fileName,
+				semanticDiagnostics
+				;
 
 			fileNames = compiler.fileNameToDocument.getAllKeys();
 			fileNameCount = fileNames.length;
@@ -501,6 +483,17 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 				}
 			}
 
+			return anySemanticErrors;
+		};
+
+		CustomCompiler.prototype._emitAll = function (compiler) {
+			var that = this,
+				anyEmitErrors,
+				emitterIoHost,
+				mapInputToOutput,
+				emitDiagnostics
+				;
+
 			emitterIoHost = new EmitterIoHost(this.ioHost);
 			mapInputToOutput = function (inputFile, outputFile) {
 				that.resolvedEnvironment.inputFileNameToOutputFileName.addOrUpdate(inputFile, outputFile);
@@ -509,9 +502,44 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			emitDiagnostics = compiler.emitAll(emitterIoHost, mapInputToOutput);
 			compiler.reportDiagnostics(emitDiagnostics, this.errorReporter);
 
+			anyEmitErrors = (emitDiagnostics.length > 0);
+
 			emitterIoHost.dispose();
 
-			if (emitDiagnostics.length > 0) {
+			return anyEmitErrors;
+		};
+
+		CustomCompiler.prototype.compile = function (path) {
+			var codeList,
+				logger,
+				compiler,
+				anySyntacticErrors,
+				anySemanticErrors,
+				anyEmitErrors
+				;
+
+			codeList = this.compilationEnvironment.code;
+			if (this.compilationSettings.useDefaultLib) {
+				codeList.push(new TypeScript.SourceUnit("lib.d.ts", null));
+			}
+			codeList.push(new TypeScript.SourceUnit(path, null));
+
+			this.resolvedEnvironment = this._resolve();
+
+			logger = new TypeScript.NullLogger();
+			compiler = new TypeScript.TypeScriptCompiler(logger, this.compilationSettings, null);
+
+			anySyntacticErrors = this._addSourceUnit(compiler);
+			if (anySyntacticErrors) {
+				return true;
+			}
+
+			compiler.pullTypeCheck();
+
+			anySemanticErrors = this._diagnoseSemanticErrors(compiler);
+			anyEmitErrors = this._emitAll(compiler);
+
+			if (anyEmitErrors) {
 				return true;
 			}
 
@@ -519,16 +547,10 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 				return true;
 			}
 
-			emitDeclarationsDiagnostics = compiler.emitAllDeclarations();
-			compiler.reportDiagnostics(emitDeclarationsDiagnostics, this.errorReporter);
-			if (emitDeclarationsDiagnostics.length > 0) {
-				return true;
-			}
-
 			return false;
 		};
 
-		BatchCompiler.prototype.dispose = function () {
+		CustomCompiler.prototype.dispose = function () {
 			this.ioHost = null;
 			this.resolvedEnvironment = null;
 			this.compilationSettings = null;
@@ -538,7 +560,7 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			this.errorReporter = null;
 		};
 
-		return BatchCompiler;
+		return CustomCompiler;
 	})();
 
 	exports.compile = function (code, path, dependencies, options) {
@@ -553,10 +575,11 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			dependencyCount,
 			dependencyKey,
 			ioHost,
-			batchCompiler
+			customCompiler,
+			anyCompilationErrors
 			;
 
-		// Fill a file cache
+		// Fill file cache
 		files = {};
 
 		if (dependencies) {
@@ -571,24 +594,25 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		}
 
 		inputFileKey = generateFileCacheItemKey(inputFilePath);
-		files[inputFileKey] = { content: code, path: inputFilePath };
+		files[inputFileKey] = { path: inputFilePath, content: code };
 
+		// Compile code
 		ioHost = new IoHost(files);
 
-		batchCompiler = new BatchCompiler(ioHost, getCompilationSettings(options));
-		batchCompiler.batchCompile(inputFilePath);
+		customCompiler = new CustomCompiler(ioHost, getCompilationSettings(options));
+		anyCompilationErrors = customCompiler.compile(inputFilePath);
 
-		if (!batchCompiler.errorReporter.hasErrors) {
-			outputFileInformation = batchCompiler.ioHost.readFile(outputFilePath);
+		if (!anyCompilationErrors) {
+			outputFileInformation = ioHost.readFile(outputFilePath);
 			if (outputFileInformation) {
 				result.compiledCode = outputFileInformation.contents();
 			}
 		}
 		else {
-			result.errors = batchCompiler.errorReporter.errors;
+			result.errors = customCompiler.errorReporter.errors;
 		}
 
-		batchCompiler.dispose();
+		customCompiler.dispose();
 		ioHost.dispose();
 
 		return JSON.stringify(result);
