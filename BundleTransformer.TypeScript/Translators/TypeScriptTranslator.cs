@@ -64,15 +64,6 @@
 		private readonly Hashtable _assetContentCache;
 
 		/// <summary>
-		/// Gets or sets a options of code stylization
-		/// </summary>
-		public StyleOptions StyleOptions
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
 		/// </summary>
 		public bool UseDefaultLib
@@ -91,28 +82,27 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disallow with statements
-		/// </summary>
-		public bool ErrorOnWith
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to infer class properties
-		/// from top-level assignments to <code>this</code>
-		/// </summary>
-		public bool InferPropertiesFromThisAssignment
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
 		/// </summary>
 		public CodeGenTarget CodeGenTarget
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow throw error for use of deprecated "bool" type
+		/// </summary>
+		public bool DisallowBool
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow automatic semicolon insertion
+		/// </summary>
+		public bool AllowAutomaticSemicolonInsertion
 		{
 			get;
 			set;
@@ -141,32 +131,12 @@
 			_relativePathResolver = relativePathResolver;
 			_assetContentCache = new Hashtable();
 
-			StyleSettings styleConfig = tsConfig.Style;
-
-			StyleOptions = new StyleOptions
-			{
-				Bitwise = styleConfig.Bitwise,
-				BlockInCompoundStatement = styleConfig.BlockInCompoundStatement,
-				EqEqEq = styleConfig.EqEqEq,
-				ForIn = styleConfig.ForIn,
-				EmptyBlocks = styleConfig.EmptyBlocks,
-				NewMustBeUsed = styleConfig.NewMustBeUsed,
-				RequireSemicolons = styleConfig.RequireSemicolons,
-				AssignmentInConditions = styleConfig.AssignmentInConditions,
-				EqNull = styleConfig.EqNull,
-				EvalOk = styleConfig.EvalOk,
-				InnerScopeDeclarationsEscape = styleConfig.InnerScopeDeclarationsEscape,
-				FunctionsInLoops = styleConfig.FunctionsInLoops,
-				ReDeclareLocal = styleConfig.ReDeclareLocal,
-				LiteralSubscript = styleConfig.LiteralSubscript,
-				ImplicitAny = styleConfig.ImplicitAny
-			};
 			UseNativeMinification = tsConfig.UseNativeMinification;
 			UseDefaultLib = tsConfig.UseDefaultLib;
 			PropagateConstants = tsConfig.PropagateConstants;
-			ErrorOnWith = tsConfig.ErrorOnWith;
-			InferPropertiesFromThisAssignment = tsConfig.InferPropertiesFromThisAssignment;
 			CodeGenTarget = tsConfig.CodeGenTarget;
+			DisallowBool = tsConfig.DisallowBool;
+			AllowAutomaticSemicolonInsertion = tsConfig.AllowAutomaticSemicolonInsertion;
 		}
 
 
@@ -251,10 +221,10 @@
 
 			try
 			{
-				string content = GetAssetFileTextContent(assetVirtualPath);
+				string content = GetAssetFileTextContent(assetUrl);
 				FillDependencies(assetUrl, content, assetUrl, dependencies);
 
-				newContent = typeScriptCompiler.Compile(content, dependencies);
+				newContent = typeScriptCompiler.Compile(content, assetUrl, dependencies);
 				newContent = RemoveReferenceComments(newContent);
 			}
 			catch (TypeScriptCompilingException e)
@@ -280,6 +250,34 @@
 		}
 
 		/// <summary>
+		/// Transforms relative paths of "reference" comments to absolute in TypeScript-code
+		/// </summary>
+		/// <param name="content">Text content of TypeScript-asset</param>
+		/// <param name="path">TypeScript-file path</param>
+		/// <returns>Processed text content of TypeScript-asset</returns>
+		private string ResolveReferenceCommentsRelativePaths(string content, string path)
+		{
+			return _referenceCommentsRegex.Replace(content, m =>
+			{
+				string result = m.Groups[0].Value;
+				GroupCollection groups = m.Groups;
+
+				if (groups["url"].Success)
+				{
+					string urlValue = groups["url"].Value.Trim();
+					string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
+
+					result = string.Format("///<reference path={0}{1}{0}/>",
+						quoteValue,
+						_relativePathResolver.ResolveRelativePath(path, urlValue)
+					);
+				}
+
+				return result;
+			});
+		}
+
+		/// <summary>
 		/// Creates a compilation options
 		/// </summary>
 		/// <param name="enableNativeMinification">Flag that indicating to use of native minification</param>
@@ -288,13 +286,12 @@
 		{
 			var options = new CompilationOptions
 			{
-				StyleOptions = StyleOptions,
 				UseDefaultLib = UseDefaultLib,
 				PropagateConstants = PropagateConstants,
 				EnableNativeMinification = enableNativeMinification,
-				ErrorOnWith = ErrorOnWith,
-				InferPropertiesFromThisAssignment = InferPropertiesFromThisAssignment,
-				CodeGenTarget = CodeGenTarget
+				CodeGenTarget = CodeGenTarget,
+				DisallowBool = DisallowBool,
+				AllowAutomaticSemicolonInsertion = AllowAutomaticSemicolonInsertion
 			};
 
 			return options;
@@ -324,8 +321,6 @@
 					string dependencyAssetUrl = match.Groups["url"].Value;
 					if (!string.IsNullOrWhiteSpace(dependencyAssetUrl))
 					{
-						dependencyAssetUrl = _relativePathResolver.ResolveRelativePath(
-							parentAssetUrl, dependencyAssetUrl.Trim());
 						if (string.Equals(dependencyAssetUrl, rootAssetUrl, StringComparison.InvariantCultureIgnoreCase))
 						{
 							continue;
@@ -339,9 +334,9 @@
 							if (duplicateDependency == null)
 							{
 								string dependencyAssetVirtualPath = dependencyAssetUrl;
-								if (AssetFileExists(dependencyAssetVirtualPath))
+								if (AssetFileExists(dependencyAssetUrl))
 								{
-									string dependencyAssetContent = GetAssetFileTextContent(dependencyAssetVirtualPath);
+									string dependencyAssetContent = GetAssetFileTextContent(dependencyAssetUrl);
 									var dependency = new Dependency
 									{
 										VirtualPath = dependencyAssetVirtualPath,
@@ -408,11 +403,11 @@
 		/// <summary>
 		/// Generates asset content cache item key
 		/// </summary>
-		/// <param name="assetVirtualPath">Virtual path to asset file</param>
+		/// <param name="assetUrl">URL of asset file</param>
 		/// <returns>Asset content cache item key</returns>
-		private string GenerateAssetContentCacheItemKey(string assetVirtualPath)
+		private string GenerateAssetContentCacheItemKey(string assetUrl)
 		{
-			string key = assetVirtualPath.Trim().ToUpperInvariant();
+			string key = assetUrl.Trim().ToUpperInvariant();
 
 			return key;
 		}
@@ -420,11 +415,11 @@
 		/// <summary>
 		/// Gets text content of asset
 		/// </summary>
-		/// <param name="assetVirtualPath">Virtual path to asset file</param>
+		/// <param name="assetUrl">URL to asset file</param>
 		/// <returns>Text content of asset</returns>
-		private string GetAssetFileTextContent(string assetVirtualPath)
+		private string GetAssetFileTextContent(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetVirtualPath);
+			string key = GenerateAssetContentCacheItemKey(assetUrl);
 			string assetContent;
 
 			if (_assetContentCache.ContainsKey(key))
@@ -433,7 +428,9 @@
 			}
 			else
 			{
-				assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetVirtualPath);
+				assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
+				assetContent = ResolveReferenceCommentsRelativePaths(assetContent, assetUrl);
+
 				_assetContentCache.Add(key, assetContent);
 			}
 
@@ -443,11 +440,11 @@
 		/// <summary>
 		/// Determines whether the specified asset file exists
 		/// </summary>
-		/// <param name="assetVirtualPath">Virtual path to asset file</param>
+		/// <param name="assetUrl">URL of asset file</param>
 		/// <returns>Result of checking (true – exist; false – not exist)</returns>
-		private bool AssetFileExists(string assetVirtualPath)
+		private bool AssetFileExists(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetVirtualPath);
+			string key = GenerateAssetContentCacheItemKey(assetUrl);
 			bool result;
 
 			if (_assetContentCache.ContainsKey(key))
@@ -456,7 +453,7 @@
 			}
 			else
 			{
-				result = _virtualFileSystemWrapper.FileExists(assetVirtualPath);
+				result = _virtualFileSystemWrapper.FileExists(assetUrl);
 			}
 
 			return result;

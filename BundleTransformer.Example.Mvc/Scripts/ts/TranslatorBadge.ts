@@ -53,5 +53,15 @@ module TranslatorBadges {
             /// </summary>
             this.$badgeElem.hide(0);
         }
+
+		public isVisible() : boolean {
+            /// <summary>
+            /// Checks whether the badge is visible
+            /// </summary>
+            /// <returns type="Boolean">
+            /// Flag for whether the badge is visible
+            /// </returns>			
+			return this.$badgeElem.is(":visible");
+		}
     }
 }

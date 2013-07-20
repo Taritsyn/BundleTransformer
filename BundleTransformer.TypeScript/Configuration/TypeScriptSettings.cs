@@ -8,15 +8,6 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of code stylization
-		/// </summary>
-		[ConfigurationProperty("style")]
-		public StyleSettings Style
-		{
-			get { return (StyleSettings)this["style"]; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to allow the use of native minification
 		/// </summary>
 		[ConfigurationProperty("useNativeMinification", DefaultValue = false)]
@@ -47,27 +38,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disallow with statements
-		/// </summary>
-		[ConfigurationProperty("errorOnWith", DefaultValue = true)]
-		public bool ErrorOnWith
-		{
-			get { return (bool)this["errorOnWith"]; }
-			set { this["errorOnWith"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to infer class properties 
-		/// from top-level assignments to <code>this</code>
-		/// </summary>
-		[ConfigurationProperty("inferPropertiesFromThisAssignment", DefaultValue = false)]
-		public bool InferPropertiesFromThisAssignment
-		{
-			get { return (bool)this["inferPropertiesFromThisAssignment"]; }
-			set { this["inferPropertiesFromThisAssignment"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
 		/// </summary>
 		[ConfigurationProperty("codeGenTarget", DefaultValue = CodeGenTarget.EcmaScript3)]
@@ -75,6 +45,26 @@
 		{
 			get { return (CodeGenTarget)this["codeGenTarget"]; }
 			set { this["codeGenTarget"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow throw error for use of deprecated "bool" type
+		/// </summary>
+		[ConfigurationProperty("disallowBool", DefaultValue = false)]
+		public bool DisallowBool
+		{
+			get { return (bool)this["disallowBool"]; }
+			set { this["disallowBool"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow automatic semicolon insertion
+		/// </summary>
+		[ConfigurationProperty("allowAutomaticSemicolonInsertion", DefaultValue = true)]
+		public bool AllowAutomaticSemicolonInsertion
+		{
+			get { return (bool)this["allowAutomaticSemicolonInsertion"]; }
+			set { this["allowAutomaticSemicolonInsertion"] = value; }
 		}
 	}
 }

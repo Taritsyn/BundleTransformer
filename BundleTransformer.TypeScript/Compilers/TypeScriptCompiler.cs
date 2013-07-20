@@ -38,7 +38,7 @@
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"typeScriptHelper.compile({0}, {1}, {2});";
+		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"typeScriptHelper.compile({0}, {1}, {2}, {3});";
 
 		/// <summary>
 		/// Default compilation options
@@ -111,7 +111,7 @@
 			{
 				Type type = GetType();
 
-				_jsEngine = new MsieJsEngine(true, false);
+				_jsEngine = new MsieJsEngine(true, true);
 				_jsEngine.ExecuteResource(TYPESCRIPT_LIBRARY_RESOURCE_NAME, type);
 				_jsEngine.ExecuteResource(TSC_HELPER_RESOURCE_NAME, type);
 
@@ -123,10 +123,12 @@
 		/// "Compiles" TypeScript-code to JS-code
 		/// </summary>
 		/// <param name="content">Text content written on TypeScript</param>
+		/// <param name="path">Path to TypeScript-file</param>
 		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Translated TypeScript-code</returns>
-		public string Compile(string content, IList<Dependency> dependencies, CompilationOptions options = null)
+		public string Compile(string content, string path, IList<Dependency> dependencies, 
+			CompilationOptions options = null)
 		{
 			string newContent;
 			CompilationOptions currentOptions;
@@ -164,6 +166,7 @@
 				{
 					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
 						JsonConvert.SerializeObject(content),
+						JsonConvert.SerializeObject(path),
 						ConvertDependenciesToJson(newDependencies),
 						currentOptionsString));
 					var json = JObject.Parse(result);
@@ -171,7 +174,8 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new TypeScriptCompilingException(FormatErrorDetails(errors[0], content));
+						throw new TypeScriptCompilingException(FormatErrorDetails(errors[0], content, path,
+							newDependencies));
 					}
 
 					newContent = json.Value<string>("compiledCode");
@@ -194,7 +198,10 @@
 		private static JArray ConvertDependenciesToJson(IEnumerable<Dependency> dependencies)
 		{
 			var dependenciesJson = new JArray(
-				dependencies.Select(d => new JObject(new JProperty("content", d.Content)))
+				dependencies.Select(d => new JObject(
+					new JProperty("path", d.Url),
+					new JProperty("content", d.Content))
+				)
 			);
 
 			return dependenciesJson;
@@ -207,32 +214,14 @@
 		/// <returns>Compilation options in JSON format</returns>
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
-			StyleOptions styleOptions = options.StyleOptions;
-
 			var optionsJson = new JObject(
-				new JProperty("styleSettings", new JObject(
-					new JProperty("bitwise", styleOptions.Bitwise),
-					new JProperty("blockInCompoundStmt", styleOptions.BlockInCompoundStatement),
-					new JProperty("eqeqeq", styleOptions.EqEqEq),
-					new JProperty("forin", styleOptions.ForIn),
-					new JProperty("emptyBlocks", styleOptions.EmptyBlocks),
-					new JProperty("newMustBeUsed", styleOptions.NewMustBeUsed),
-					new JProperty("requireSemi", styleOptions.RequireSemicolons),
-					new JProperty("assignmentInCond", styleOptions.AssignmentInConditions),
-					new JProperty("eqnull", styleOptions.EqNull),
-					new JProperty("evalOK", styleOptions.EvalOk),
-					new JProperty("innerScopeDeclEscape", styleOptions.InnerScopeDeclarationsEscape),
-					new JProperty("funcInLoop", styleOptions.FunctionsInLoops),
-					new JProperty("reDeclareLocal", styleOptions.ReDeclareLocal),
-					new JProperty("literalSubscript", styleOptions.LiteralSubscript),
-					new JProperty("implicitAny", styleOptions.ImplicitAny)
-				)),
+				new JProperty("useDefaultLib", options.UseDefaultLib),
 				new JProperty("propagateConstants", options.PropagateConstants),
 				new JProperty("minWhitespace", options.EnableNativeMinification),
 				new JProperty("emitComments", !options.EnableNativeMinification),
-				new JProperty("errorOnWith", options.ErrorOnWith),
-				new JProperty("inferPropertiesFromThisAssignment", options.InferPropertiesFromThisAssignment),
-				new JProperty("codeGenTarget", options.CodeGenTarget.ToString())
+				new JProperty("codeGenTarget", options.CodeGenTarget.ToString()),
+				new JProperty("disallowBool", options.DisallowBool),
+				new JProperty("allowAutomaticSemicolonInsertion", options.AllowAutomaticSemicolonInsertion)
 			);
 
 			return optionsJson;
@@ -243,20 +232,46 @@
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
+		/// <param name="currentFilePath">Path to current TypeScript-file</param>
+		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, string sourceCode)
+		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath, 
+			IEnumerable<Dependency> dependencies)
 		{
-			var startIndex = errorDetails.Value<int>("startIndex");
 			var message = errorDetails.Value<string>("message");
-			var nodeCoordinates = SourceCodeNavigator.CalculateNodeCoordinates(sourceCode, startIndex);
-			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode, nodeCoordinates);
+			var filePath = errorDetails.Value<string>("fileName");
+			var lineNumber = errorDetails.Value<int>("lineNumber");
+			var columnNumber = errorDetails.Value<int>("columnNumber");
+
+			string newSourceCode = string.Empty;
+			if (string.Equals(filePath, currentFilePath, StringComparison.InvariantCultureIgnoreCase))
+			{
+				newSourceCode = sourceCode;
+			}
+			else
+			{
+				var filePathInUpperCase = filePath.ToUpperInvariant();
+				var dependency = dependencies.SingleOrDefault(d => d.Url.ToUpperInvariant() == filePathInUpperCase);
+
+				if (dependency != null)
+				{
+					newSourceCode = dependency.Content;
+				}
+			}
+
+			string sourceFragment = SourceCodeNavigator.GetSourceFragment(newSourceCode,
+				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
 			var errorMessage = new StringBuilder();
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			if (!string.IsNullOrWhiteSpace(filePath))
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
+			}
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				nodeCoordinates.LineNumber.ToString());
+				lineNumber.ToString());
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				nodeCoordinates.ColumnNumber.ToString());
+				columnNumber.ToString());
 			if (!string.IsNullOrWhiteSpace(sourceFragment))
 			{
 				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
