@@ -84,8 +84,8 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 
 		for (argumentIndex = 0; argumentIndex < argumentCount - 1; argumentIndex++) {
 			regex = new RegExp("\\{" + argumentIndex + "\\}", "gm");
-
 			argument = arguments[argumentIndex + 1];
+
 			result = result.replace(regex, argument);
 		}
 
@@ -115,7 +115,7 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 	})();
 
 	var IoHost = (function () {
-		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'IoHost.{0}' is not supported.";
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'IoHost.{0}' is not implemented.";
 
 		function IoHost(files) {
 			this._files = files;

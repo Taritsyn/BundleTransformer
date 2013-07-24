@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.7.17
+           README file for Bundle Transformer: CoffeeScript 1.7.19
 
    ----------------------------------------------------------------------
 
@@ -20,7 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   CoffeeScript was updated to commit e581f7d2f0.
+   Added possibility to change the value of "bare" option.
 
    =============
    DOCUMENTATION

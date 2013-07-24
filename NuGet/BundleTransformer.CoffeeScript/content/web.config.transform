@@ -1,4 +1,9 @@
 <configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="coffeeScript" type="BundleTransformer.CoffeeScript.Configuration.CoffeeScriptSettings, BundleTransformer.CoffeeScript" />
+		</sectionGroup>
+	</configSections>
 	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
 		<core>
 			<js>

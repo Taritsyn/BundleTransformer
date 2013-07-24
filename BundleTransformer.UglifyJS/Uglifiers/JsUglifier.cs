@@ -115,7 +115,8 @@
 		public JsUglifier(UglificationOptions defaultOptions)
 		{
 			_defaultOptions = defaultOptions;
-			_defaultOptionsString = ConvertUglificationOptionsToJson(defaultOptions).ToString();
+			_defaultOptionsString = (defaultOptions != null) ?
+				ConvertUglificationOptionsToJson(defaultOptions).ToString() : "null";
 		}
 
 		/// <summary>

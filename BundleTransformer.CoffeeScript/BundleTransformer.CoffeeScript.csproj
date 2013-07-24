@@ -56,8 +56,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\CoffeeScriptCompilingException.cs" />
     <Compile Include="Compilers\CoffeeScriptCompiler.cs" />
+    <Compile Include="Configuration\CoffeeScriptSettings.cs" />
     <Compile Include="HttpHandlers\CoffeeScriptAssetHandler.cs" />
     <Compile Include="Translators\CoffeeScriptTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

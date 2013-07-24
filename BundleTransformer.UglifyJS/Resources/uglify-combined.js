@@ -4286,6 +4286,11 @@
 				a.forEach(function(exp, i){
 					if (i) output.comma();
 					exp.print(output);
+					// If the final element is a hole, we need to make sure it
+					// doesn't look like a trailing comma, by inserting an actual
+					// trailing comma.
+					if (i === len - 1 && exp instanceof AST_Hole)
+					  output.comma();
 				});
 				if (len > 0) output.space();
 			});

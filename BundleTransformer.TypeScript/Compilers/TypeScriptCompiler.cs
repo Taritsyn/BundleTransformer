@@ -79,7 +79,7 @@
 		/// <summary>
 		/// Constructs instance of TypeScript-compiler
 		/// </summary>
-		public TypeScriptCompiler() : this(null) 
+		public TypeScriptCompiler() : this(null)
 		{ }
 
 		/// <summary>
@@ -89,7 +89,8 @@
 		public TypeScriptCompiler(CompilationOptions defaultOptions)
 		{
 			_defaultOptions = defaultOptions;
-			_defaultOptionsString = ConvertCompilationOptionsToJson(defaultOptions).ToString();
+			_defaultOptionsString = (defaultOptions != null) ?
+				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
 			_commonTypesDefinitions = Utils.GetResourceAsString(DEFAULT_LIBRARY_RESOURCE_NAME, GetType());
 		}
 

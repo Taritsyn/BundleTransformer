@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.7.18
+           README file for Bundle Transformer: TypeScript 1.7.19
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 0.9.0.1.
+   Fixed minor bugs.
 
    =============
    DOCUMENTATION

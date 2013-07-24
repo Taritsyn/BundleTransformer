@@ -34,6 +34,11 @@
 		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"coffeeScriptHelper.compile({0}, {1});";
 
 		/// <summary>
+		/// String representation of the default compilation options
+		/// </summary>
+		private readonly string _defaultOptionsString;
+
+		/// <summary>
 		/// MSIE JS engine
 		/// </summary>
 		private MsieJsEngine _jsEngine;
@@ -53,6 +58,22 @@
 		/// </summary>
 		private bool _disposed;
 
+
+		/// <summary>
+		/// Constructs instance of CoffeeScript-compiler
+		/// </summary>
+		public CoffeeScriptCompiler() : this(null)
+		{ }
+
+		/// <summary>
+		/// Constructs instance of CoffeeScript-compiler
+		/// </summary>
+		/// <param name="defaultOptions">Default compilation options</param>
+		public CoffeeScriptCompiler(CompilationOptions defaultOptions)
+		{
+			_defaultOptionsString = (defaultOptions != null) ?
+				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
+		}
 
 		/// <summary>
 		/// Destructs instance of CoffeeScript-compiler
@@ -84,15 +105,13 @@
 		/// "Compiles" CoffeeScript-code to JS-code
 		/// </summary>
 		/// <param name="content">Text content written on CoffeeScript</param>
-		/// <param name="isLiterate">Flag for whether to enable "literate" mode</param>
+		/// <param name="options">Compilation options</param>
 		/// <returns>Translated CoffeeScript-code</returns>
-		public string Compile(string content, bool isLiterate = false)
+		public string Compile(string content, CompilationOptions options = null)
 		{
 			string newContent;
-			var options = new JObject(
-				new JProperty("bare", true),
-				new JProperty("literate", isLiterate)
-			);
+			string currentOptionsString = (options != null) ? 
+				ConvertCompilationOptionsToJson(options).ToString() : _defaultOptionsString;
 
 			lock (_compilationSynchronizer)
 			{
@@ -103,7 +122,7 @@
 					var result = _jsEngine.Evaluate<string>(
 						string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
 							JsonConvert.SerializeObject(content),
-							options));
+							currentOptionsString));
 					var json = JObject.Parse(result);
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
@@ -122,6 +141,21 @@
 			}
 
 			return newContent;
+		}
+
+		/// <summary>
+		/// Converts a compilation options to JSON
+		/// </summary>
+		/// <param name="options">Compilation options</param>
+		/// <returns>Compilation options in JSON format</returns>
+		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
+		{
+			var optionsJson = new JObject(
+				new JProperty("bare", options.Bare),
+				new JProperty("literate", options.Literate)
+			);
+
+			return optionsJson;
 		}
 
 		/// <summary>

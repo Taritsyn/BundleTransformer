@@ -4,11 +4,13 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using Core;
 	using Core.Assets;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Compilers;
+	using Configuration;
 
 	/// <summary>
 	/// Translator that responsible for translation of CoffeeScript-code to JS-code
@@ -32,6 +34,33 @@
 		{
 			get;
 			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow compilation to JavaScript 
+		/// without the top-level function safety wrapper
+		/// </summary>
+		public bool Bare
+		{
+			get;
+			set;
+		}
+
+
+		/// <summary>
+		/// Constructs instance of CoffeeScript-translator
+		/// </summary>
+		public CoffeeScriptTranslator()
+			: this(BundleTransformerContext.Current.GetCoffeeScriptConfiguration())
+		{ }
+
+		/// <summary>
+		/// Constructs instance of CoffeeScript-translator
+		/// </summary>
+		/// <param name="coffeeConfig">Configuration settings of CoffeeScript-translator</param>
+		public CoffeeScriptTranslator(CoffeeScriptSettings coffeeConfig)
+		{
+			Bare = coffeeConfig.Bare;
 		}
 
 
@@ -97,10 +126,11 @@
 			string assetVirtualPath = asset.VirtualPath;
 			bool isLiterate = (asset.AssetType == AssetType.LiterateCoffeeScript
 				|| asset.AssetType == AssetType.CoffeeScriptMarkdown);
+			CompilationOptions options = CreateCompilationOptions(isLiterate);
 
 			try
 			{
-				newContent = coffeeScriptCompiler.Compile(asset.Content, isLiterate);
+				newContent = coffeeScriptCompiler.Compile(asset.Content, options);
 			}
 			catch (CoffeeScriptCompilingException e)
 			{
@@ -116,6 +146,22 @@
 			}
 
 			asset.Content = newContent;
+		}
+
+		/// <summary>
+		/// Creates a compilation options
+		/// </summary>
+		/// <param name="isLiterate">Flag for whether to enable "literate" mode</param>
+		/// <returns>Compilation options</returns>
+		private CompilationOptions CreateCompilationOptions(bool isLiterate)
+		{
+			var options = new CompilationOptions
+			{
+				Bare = Bare,
+				Literate = isLiterate
+			};
+
+			return options;
 		}
 	}
 }

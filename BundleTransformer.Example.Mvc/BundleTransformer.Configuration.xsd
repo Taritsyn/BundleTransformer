@@ -15,6 +15,7 @@
 				<xs:element name="core" type="CoreSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="less" type="LessSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="sassAndScss" type="SassAndScssSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="coffeeScript" type="CoffeeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="typeScript" type="TypeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="microsoftAjax" type="MicrosoftAjaxSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="yui" type="YuiSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -299,6 +300,19 @@
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /Sass and SCSS settings -->
+
+	<!-- CoffeeScript settings -->
+	<xs:complexType name="CoffeeScriptSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of CoffeeScript-translator</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="bare" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow compilation to JavaScript without the top-level function safety wrapper</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /CoffeeScript settings -->
 
 	<!-- TypeScript settings -->
 	<xs:complexType name="TypeScriptSettings_SchemaType">
