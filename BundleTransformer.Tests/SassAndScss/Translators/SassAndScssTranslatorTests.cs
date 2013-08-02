@@ -1,6 +1,5 @@
 ﻿namespace BundleTransformer.Tests.SassAndScss.Translators
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Web;
 
@@ -19,14 +18,14 @@
 		private const string STYLES_DIRECTORY_URL = "/Content/";
 
 		private HttpContextBase _httpContext;
-		private ICssRelativePathResolver _cssRelativePathResolver;
+		private IRelativePathResolver _relativePathResolver;
 		private SassAndScssSettings _sassAndScssConfig;
 
 		[TestFixtureSetUp]
 		public void SetUp()
 		{
 			_httpContext = new Mock<HttpContextBase>().Object;
-			_cssRelativePathResolver = new MockCssRelativePathResolver();
+			_relativePathResolver = new MockRelativePathResolver();
 			_sassAndScssConfig = new SassAndScssSettings();
 		}
 
@@ -238,7 +237,7 @@ $alt-bg-color: #CE4DD6")
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 
 			var sassAndScssTranslator = new SassAndScssTranslator(_httpContext, virtualFileSystemWrapper, 
-				_cssRelativePathResolver, _sassAndScssConfig);
+				_relativePathResolver, _sassAndScssConfig);
 
 			const string assetContent = @"@import ""Colors""
 @import ""Mixins.sass""
@@ -497,7 +496,7 @@ $alt-bg-color: #CE4DD6;")
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 
 			var sassAndScssTranslator = new SassAndScssTranslator(_httpContext, virtualFileSystemWrapper,
-				_cssRelativePathResolver, _sassAndScssConfig);
+				_relativePathResolver, _sassAndScssConfig);
 
 			const string assetContent = @"@import ""Colors"";
 @import ""Mixins.scss"";
@@ -535,33 +534,16 @@ $alt-bg-color: #CE4DD6;")
 		[TestFixtureTearDown]
 		public void TearDown()
 		{
-			_cssRelativePathResolver = null;
+			_relativePathResolver = null;
 			_sassAndScssConfig = null;
 		}
 
-		private class MockCssRelativePathResolver : ICssRelativePathResolver
+		private class MockRelativePathResolver : IRelativePathResolver
 		{
 			public string ResolveRelativePath(string basePath, string relativePath)
 			{
 				return Utils.CombineUrls(STYLES_DIRECTORY_URL, relativePath);
 			}
-
-			#region Not implemented methods
-			public string ResolveComponentsRelativePaths(string content, string path)
-			{
-				throw new NotImplementedException();
-			}
-
-			public string ResolveImportsRelativePaths(string content, string path)
-			{
-				throw new NotImplementedException();
-			}
-
-			public string ResolveAllRelativePaths(string content, string path)
-			{
-				throw new NotImplementedException();
-			}
-			#endregion
 		}
 	}
 }

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.7.19
+              README file for Bundle Transformer: Core 1.7.20
 
    ----------------------------------------------------------------------
 
@@ -34,6 +34,12 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Now during combining of CSS-code a @import directives are moved on top 
+   of the stylesheet.
 
    =============
    DOCUMENTATION

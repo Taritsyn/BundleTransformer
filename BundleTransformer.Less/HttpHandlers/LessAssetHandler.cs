@@ -30,8 +30,8 @@
 		/// Constructs instance of LESS asset handler
 		/// </summary>
 		public LessAssetHandler()
-			: this(HttpContext.Current.Cache, 
-				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(), 
+			: this(HttpContext.Current.Cache,
+				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
 				BundleTransformerContext.Current.GetCoreConfiguration().AssetHandler,
 				BundleTransformerContext.Current.GetApplicationInfo())
 		{ }

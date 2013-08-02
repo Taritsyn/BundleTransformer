@@ -13,4 +13,14 @@
 			</css>
 		</core>
 	</bundleTransformer>
+	<system.web>
+		<httpHandlers>
+			<add path="*.less" verb="GET" type="BundleTransformer.Less.HttpHandlers.LessAssetHandler, BundleTransformer.Less" />
+		</httpHandlers>
+	</system.web>
+	<system.webServer>
+		<handlers>
+			<add name="LessAssetHandler" path="*.less" verb="GET" type="BundleTransformer.Less.HttpHandlers.LessAssetHandler, BundleTransformer.Less" resourceType="File" preCondition="" />
+		</handlers>
+	</system.webServer>
 </configuration>

@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{037761EE-3499-4D8E-95D9-9A71D471B102}</ProjectGuid>
+    <ProjectGuid>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BundleTransformer.Less</RootNamespace>
@@ -38,9 +38,11 @@
     <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="dotless.Core, Version=1.3.1.0, Culture=neutral, PublicKeyToken=96b446c9e63eae34, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\dotless.1.3.1.0\lib\dotless.Core.dll</HintPath>
+    <Reference Include="MsieJavaScriptEngine">
+      <HintPath>..\packages\MsieJavaScriptEngine.1.1.2\lib\net40\MsieJavaScriptEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -54,11 +56,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="CompilationOptions.cs" />
+    <Compile Include="Compilers\LessCompiler.cs" />
+    <Compile Include="Compilers\LessCompilingException.cs" />
     <Compile Include="Configuration\LessSettings.cs" />
+    <Compile Include="Constants\FileExtension.cs" />
+    <Compile Include="FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\LessAssetHandler.cs" />
-    <Compile Include="LessCompilingException.cs" />
-    <Compile Include="Loggers\LessLogger.cs" />
-    <Compile Include="VirtualFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translators\LessTranslator.cs" />
   </ItemGroup>
@@ -74,7 +78,20 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\less-combined.min.js" />
+    <EmbeddedResource Include="Resources\lesscHelper.min.js" />
+    <Content Include="Resources\less-combined.js" />
+    <Content Include="Resources\lesscHelper.js" />
+    <Content Include="Resources\LICENSE.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+
+wg.exe -m -in:"$(ProjectDir)Resources\less-combined.js" -out:"$(ProjectDir)Resources\less-combined.min.js"
+wg.exe -m -in:"$(ProjectDir)Resources\lesscHelper.js" -out:"$(ProjectDir)Resources\lesscHelper.min.js"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

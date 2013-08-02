@@ -1,8 +1,10 @@
 ﻿namespace BundleTransformer.Core.Transformers
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Configuration;
 	using System.Text;
+	using System.Text.RegularExpressions;
 	using System.Web;
 	using System.Web.Hosting;
 	using System.Web.Optimization;
@@ -21,6 +23,18 @@
 	/// </summary>
 	public sealed class CssTransformer : TransformerBase
 	{
+		/// <summary>
+		/// Regular expression for working with <code>@import</code> directives
+		/// </summary>
+		private static readonly Regex _cssImportRegex =
+			new Regex(@"@import\s+" +
+				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
+				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))" +
+				@"(?:\s+(?<media>[^;]+))?" +
+				@"\s*;",
+				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
 		/// <summary>
 		/// Constructs instance of CSS-transformer
 		/// </summary>
@@ -253,6 +267,7 @@
 		protected override string Combine(IList<IAsset> assets, bool enableTracing)
 		{
 			var content = new StringBuilder();
+			var imports = new List<string>();
 
 			foreach (var asset in assets)
 			{
@@ -260,7 +275,7 @@
 				{
 					content.AppendFormatLine("/*#region URL: {0} */", asset.Url);
 				}
-				content.AppendLine(asset.Content);
+				content.AppendLine(EjectCssImports(asset.Content, imports));
 				if (enableTracing)
 				{
 					content.AppendLine("/*#endregion*/");
@@ -268,7 +283,43 @@
 				content.AppendLine();
 			}
 
+			if (imports.Count > 0)
+			{
+				string pattern = enableTracing ? "/*#region CSS Imports */{0}{1}{0}/*#endregion*/{0}{0}" : "{1}{0}";
+
+				content.Insert(0, 
+					string.Format(pattern, Environment.NewLine, string.Join(Environment.NewLine, imports))
+				);
+			}
+
 			return content.ToString();
+		}
+
+		/// <summary>
+		/// Eject a CSS imports
+		/// </summary>
+		/// <param name="content">Text content of CSS-asset</param>
+		/// <param name="imports">List of CSS imports</param>
+		/// <returns>Text content of CSS-asset without <code>@import</code> directives</returns>
+		private static string EjectCssImports(string content, IList<string> imports)
+		{
+			return _cssImportRegex.Replace(content, m =>
+			{
+				GroupCollection groups = m.Groups;
+
+				string urlValue = groups["url"].Value;
+				string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
+				string media = groups["media"].Success ? (" " + groups["media"].Value) : string.Empty;
+				
+				string import = string.Format("@import {0}{1}{0}{2};",
+					quoteValue,
+					urlValue,
+					media
+				);
+				imports.Add(import);
+
+				return string.Empty;
+			});	
 		}
 	}
 }

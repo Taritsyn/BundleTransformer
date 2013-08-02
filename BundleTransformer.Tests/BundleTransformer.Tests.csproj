@@ -71,6 +71,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\MockVirtualFileSystemWrapper.cs" />
+    <Compile Include="Less\Translators\LessTranslatorTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SassAndScss\Translators\SassAndScssTranslatorTests.cs" />
     <Compile Include="TypeScript\Translators\TypeScriptTranslatorTests.cs" />
@@ -84,12 +87,8 @@
       <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
       <Name>BundleTransformer.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BundleTransformer.LessLite\BundleTransformer.LessLite.csproj">
-      <Project>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</Project>
-      <Name>BundleTransformer.LessLite</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Less\BundleTransformer.Less.csproj">
-      <Project>{037761EE-3499-4D8E-95D9-9A71D471B102}</Project>
+      <Project>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</Project>
       <Name>BundleTransformer.Less</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj">
@@ -101,6 +100,7 @@
       <Name>BundleTransformer.TypeScript</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

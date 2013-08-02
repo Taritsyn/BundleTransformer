@@ -1,4 +1,4 @@
-﻿namespace BundleTransformer.LessLite
+﻿namespace BundleTransformer.Less.Compilers
 {
 	using System;
 

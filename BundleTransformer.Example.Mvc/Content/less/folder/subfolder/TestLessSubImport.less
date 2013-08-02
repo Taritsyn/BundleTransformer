@@ -8,5 +8,9 @@
 .icon-network
 {
 	display: inline;
-	background-image: url(@network.png);
+	background-image: data-uri("image/png;base64", "@network.png");
 }
+
+@import url("../TagIcon.css");
+@import (css) "../UsbFlashDriveIcon";
+@import (less) "../ValidationIcon.css";

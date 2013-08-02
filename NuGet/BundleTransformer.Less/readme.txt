@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.7.16
+              README file for Bundle Transformer: LESS 1.7.20
 
    ----------------------------------------------------------------------
 
@@ -11,41 +11,18 @@
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.Less contains translator-adapter LessTranslator. 
-   This adapter makes translation of LESS-code to CSS-code. Also contains 
-   HTTP-handler LessAssetHandler, which is responsible for text output 
-   of translated LESS-asset.
-
-   Uses NuGet-package the dotless (http://nuget.org/packages/dotless).
- 
-   ====================
-   POST-INSTALL ACTIONS
-   ====================
-   To make LessAssetHandler is the default HTTP-handler for LESS-assets, 
-   you need to make changes to the Web.config file.
-   In the configuration\system.web\httpHandlers element you need to 
-   find the following code:
+   BundleTransformer.Less contains translator-adapter LessTranslator 
+   (supports LESS (http://lesscss.org) version 1.4.2). This adapter makes
+   translation of LESS-code to CSS-code. Also contains HTTP-handler 
+   LessAssetHandler, which is responsible for text output of translated 
+   LESS-asset.
    
-   <add path="*.less" verb="GET" 
-     type="dotless.Core.LessCssHttpHandler, dotless.Core" />
-	 
-   And replace it with:
-
-   <add path="*.less" verb="GET" 
-     type="BundleTransformer.Less.HttpHandlers.LessAssetHandler, BundleTransformer.Less" />
-
-   Then in the configuration\system.webServer\handlers element you need to 
-   find the following code:
-   
-   <add name="dotless" path="*.less" verb="GET" 
-     type="dotless.Core.LessCssHttpHandler,dotless.Core" resourceType="File" 
-	 preCondition="" />
-
-   And replace it with:
-   
-   <add name="LessAssetHandler" path="*.less" verb="GET" 
-     type="BundleTransformer.Less.HttpHandlers.LessAssetHandler, BundleTransformer.Less" 
-	 resourceType="File" preCondition="" />  
+   =============
+   RELEASE NOTES
+   =============
+   1. dotless library was replaced by my own implementation of the 
+      LESS-compiler;
+   2. Is now supported LESS version 1.4.2.
    
    =============
    DOCUMENTATION

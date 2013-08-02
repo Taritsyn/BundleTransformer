@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: YUI 1.7.16
+               README file for Bundle Transformer: YUI 1.7.20
  
    ----------------------------------------------------------------------
 
@@ -19,15 +19,11 @@
    =============
    RELEASE NOTES
    =============
-   Added support of YUI Compressor for .NET 2.2.1.0.
+   Added support of YUI Compressor for .NET 2.3.0.0.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
-   After installation you need to delete settings of the previous 
-   version of BundleTransformer.Yui from the Web.config file 
-   (\configuration\bundleTransformer\yui element).
-   
    To make YuiCssMinifier is the default CSS-minifier and YuiJsMinifier 
    is the default JS-minifier, you need to make changes to the 
    Web.config file. 

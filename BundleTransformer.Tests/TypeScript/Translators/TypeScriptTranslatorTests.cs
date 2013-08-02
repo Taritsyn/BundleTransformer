@@ -130,7 +130,7 @@ class ColoredTranslatorBadge extends TranslatorBadge {
 			var tsTranslator = new TypeScriptTranslator(virtualFileSystemWrapper, 
 				relativePathResolver, tsConfig);
 
-			const string assetContent = @"/// <reference path=""ColoredTranslatorBadge.ts"" />
+			const string assetContent = @"/// <reference path=""/Scripts/ColoredTranslatorBadge.ts"" />
 var TS_BADGE_TEXT = ""TypeScript"";
 var TS_BADGE_COLOR = ""#0074C1"";
 

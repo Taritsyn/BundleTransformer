@@ -1,14 +1,11 @@
 ﻿namespace BundleTransformer.Less.Translators
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Text.RegularExpressions;
-
-	using dotless.Core;
-	using dotless.Core.configuration;
-	using LessLogLevel = dotless.Core.Loggers.LogLevel;
 
 	using Core;
 	using Core.Assets;
@@ -16,8 +13,9 @@
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Compilers;
 	using Configuration;
-	using BtLessLogger = Loggers.LessLogger;
+	using Constants;
 
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
@@ -38,10 +36,16 @@
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _importLessFilesRuleRegex =
-			new Regex(@"(?<importDirective>@import(?:-once)?)\s(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
-				@"|(url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+			new Regex(@"@import\s+(?:\((?<type>(less|css))\)\s*)?" +
+				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
+				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
+		/// Virtual file system wrapper
+		/// </summary>
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		/// <summary>
 		/// Relative path resolver
@@ -49,58 +53,42 @@
 		private readonly IRelativePathResolver _relativePathResolver;
 
 		/// <summary>
-		/// Gets or sets a severity level of errors
-		///		0 - only syntax error messages;
-		///		1 - only syntax error messages and warnings.
+		/// Asset content cache
 		/// </summary>
-		public int Severity { get; set; }
+		private readonly Hashtable _assetContentCache;
+
+		/// <summary>
+		/// Synchronizer of translation
+		/// </summary>
+		private readonly object _translationSynchronizer = new object();
 
 
 		/// <summary>
 		/// Constructs instance of LESS-translator
 		/// </summary>
 		public LessTranslator()
-			: this(BundleTransformerContext.Current.GetCommonRelativePathResolver(),
+			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
 				BundleTransformerContext.Current.GetLessConfiguration())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of LESS-translator
 		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
-		public LessTranslator(IRelativePathResolver relativePathResolver, LessSettings lessConfig)
+		public LessTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			IRelativePathResolver relativePathResolver,
+			LessSettings lessConfig)
 		{
+			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_relativePathResolver = relativePathResolver;
+			_assetContentCache = new Hashtable();
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
-			Severity = lessConfig.Severity;
 		}
 
-
-		/// <summary>
-		/// Creates instance of LESS-engine
-		/// </summary>
-		/// <param name="enableNativeMinification">Enables native minification</param>
-		/// <param name="severity">Severity level</param>
-		/// <returns>LESS-engine</returns>
-		private ILessEngine CreateLessEngine(bool enableNativeMinification, int severity)
-		{
-			DotlessConfiguration lessEngineConfig = DotlessConfiguration.GetDefault();
-			lessEngineConfig.MapPathsToWeb = false;
-			lessEngineConfig.CacheEnabled = false;
-			lessEngineConfig.DisableUrlRewriting = false;
-			lessEngineConfig.Web = false;
-			lessEngineConfig.MinifyOutput = enableNativeMinification;
-			lessEngineConfig.LessSource = typeof(VirtualFileReader);
-			lessEngineConfig.LogLevel = ConvertSeverityLevelToLessLogLevelEnumValue(severity);
-			lessEngineConfig.Logger = typeof(BtLessLogger);
-
-			var lessEngineFactory = new EngineFactory(lessEngineConfig);
-			ILessEngine lessEngine = lessEngineFactory.GetEngine();
-
-			return lessEngine;
-		}
 
 		/// <summary>
 		/// Translates code of asset written on LESS to CSS-code
@@ -114,10 +102,24 @@
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			bool enableNativeMinification = NativeMinificationEnabled;
-			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification, Severity);
+			lock (_translationSynchronizer)
+			{
+				bool enableNativeMinification = NativeMinificationEnabled;
+				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+				var lessCompiler = new LessCompiler(options);
 
-			InnerTranslate(asset, lessEngine, enableNativeMinification);
+				ClearAssetContentCache();
+
+				try
+				{
+					InnerTranslate(asset, lessCompiler, enableNativeMinification);
+				}
+				finally
+				{
+					lessCompiler.Dispose();
+					ClearAssetContentCache();
+				}
+			}
 
 			return asset;
 		}
@@ -145,32 +147,44 @@
 				return assets;
 			}
 
-			bool enableNativeMinification = NativeMinificationEnabled;
-
-			ILessEngine lessEngine = CreateLessEngine(enableNativeMinification, Severity);
-
-			foreach (var asset in assetsToProcessing)
+			lock (_translationSynchronizer)
 			{
-				InnerTranslate(asset, lessEngine, enableNativeMinification);
+				bool enableNativeMinification = NativeMinificationEnabled;
+				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+				var lessCompiler = new LessCompiler(options);
+
+				ClearAssetContentCache();
+
+				try
+				{
+					foreach (var asset in assetsToProcessing)
+					{
+						InnerTranslate(asset, lessCompiler, enableNativeMinification);
+					}
+				}
+				finally
+				{
+					lessCompiler.Dispose();
+					ClearAssetContentCache();
+				}
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, ILessEngine lessEngine, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, LessCompiler lessCompiler, bool enableNativeMinification)
 		{
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
 			string assetUrl = asset.Url;
-			IList<string> virtualPathDependencies;
+			var dependencies = new List<Dependency>();
 
 			try
 			{
-				newContent = ResolveImportsRelativePaths(asset.Content, assetUrl);
-				newContent = lessEngine.TransformToCss(newContent, null);
-				IEnumerable<string> importedFiles = lessEngine.GetImports();
+				newContent = GetAssetFileTextContent(assetUrl);
+				FillDependencies(assetUrl, newContent, assetUrl, dependencies);
 
-				virtualPathDependencies = importedFiles.ToList();
+				newContent = lessCompiler.Compile(newContent, assetUrl, dependencies);
 			}
 			catch (FileNotFoundException)
 			{
@@ -191,7 +205,26 @@
 
 			asset.Content = newContent;
 			asset.Minified = enableNativeMinification;
-			asset.VirtualPathDependencies = virtualPathDependencies;
+			asset.VirtualPathDependencies = dependencies
+				.Select(d => d.VirtualPath)
+				.Distinct()
+				.ToList()
+				;
+		}
+
+		/// <summary>
+		/// Creates a compilation options
+		/// </summary>
+		/// <param name="enableNativeMinification">Flag that indicating to use of native minification</param>
+		/// <returns>Compilation options</returns>
+		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)
+		{
+			var options = new CompilationOptions
+			{
+				EnableNativeMinification = enableNativeMinification
+			};
+
+			return options;
 		}
 
 		/// <summary>
@@ -209,14 +242,25 @@
 
 				if (groups["url"].Success)
 				{
-					string importDirectiveValue = groups["importDirective"].Value;
+					string typeValue = groups["type"].Value;
 					string urlValue = groups["url"].Value;
 					string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
 
-					result = string.Format("{0} {1}{2}{1}",
-						importDirectiveValue,
+					string typeOption = (typeValue == "less") ? "(less) " : string.Empty;
+					string absoluteUrl = _relativePathResolver.ResolveRelativePath(path, urlValue);
+					string extension = Path.GetExtension(absoluteUrl);
+					
+					if (!FileExtensionHelper.IsLess(extension) && !FileExtensionHelper.IsCss(extension))
+					{
+						string newExtension = (typeValue == "css") ? FileExtension.Css : FileExtension.Less;
+						absoluteUrl += newExtension;
+					}
+
+					result = string.Format("@import {0}{1}{2}{1}",
+						typeOption,
 						quoteValue,
-						_relativePathResolver.ResolveRelativePath(path, urlValue));
+						absoluteUrl
+					);
 				}
 
 				return result;
@@ -224,28 +268,169 @@
 		}
 
 		/// <summary>
-		/// Convert severity level to LESS log level enum value
+		/// Fills the list of LESS-files, that were added to a LESS-asset 
+		/// by using the @import directive
 		/// </summary>
-		/// <param name="severity">Severity level</param>
-		/// <returns>LESS log level</returns>
-		private static LessLogLevel ConvertSeverityLevelToLessLogLevelEnumValue(int severity)
+		/// <param name="rootAssetUrl">URL of root LESS-asset file</param>
+		/// <param name="parentAssetContent">Text content of parent LESS-asset</param>
+		/// <param name="parentAssetUrl">URL of parent LESS-asset file</param>
+		/// <param name="dependencies">List of LESS-files, that were added to a 
+		/// LESS-asset by using the @import directive</param>
+		public void FillDependencies(string rootAssetUrl, string parentAssetContent, string parentAssetUrl, 
+			IList<Dependency> dependencies)
 		{
-			LessLogLevel logLevel;
-
-			switch (severity)
+			if (parentAssetContent.Length == 0)
 			{
-				case 0:
-					logLevel = LessLogLevel.Error;
-					break;
-				case 1:
-					logLevel = LessLogLevel.Warn;
-					break;
-				default:
-					throw new InvalidCastException(string.Format(CoreStrings.Common_SeverityLevelToEnumValueConversionFailed,
-						typeof(LessLogLevel), severity.ToString()));
+				return;
 			}
 
-			return logLevel;
+			MatchCollection matches = _importLessFilesRuleRegex.Matches(parentAssetContent);
+
+			foreach (Match match in matches)
+			{
+				GroupCollection groups = match.Groups;
+
+				if (groups["url"].Success)
+				{
+					string dependencyUrl = groups["url"].Value;
+					string dependencyType = groups["type"].Value;
+
+					if (!string.IsNullOrWhiteSpace(dependencyUrl))
+					{
+						if (string.Equals(dependencyUrl, rootAssetUrl, StringComparison.OrdinalIgnoreCase))
+						{
+							continue;
+						}
+
+						var duplicateDependency = GetDependencyByUrl(dependencies, dependencyUrl);
+						bool isDuplicateDependency = (duplicateDependency != null);
+						bool isEmptyDependency = isDuplicateDependency && (duplicateDependency.Content.Length == 0);
+
+						if (!isDuplicateDependency || isEmptyDependency)
+						{
+							if (AssetFileExists(dependencyUrl))
+							{
+								string dependencyExtension = Path.GetExtension(dependencyUrl);
+								string dependencyContent = string.Empty;
+
+								if (FileExtensionHelper.IsLess(dependencyExtension)
+									|| (FileExtensionHelper.IsCss(dependencyExtension) && dependencyType == "less"))
+								{
+									dependencyContent = GetAssetFileTextContent(dependencyUrl);
+								}
+
+								if (isEmptyDependency && dependencyContent.Length > 0)
+								{
+									duplicateDependency.Content = dependencyContent;
+								}
+								else
+								{
+									var dependency = new Dependency
+									{
+										VirtualPath = dependencyUrl,
+										Url = dependencyUrl,
+										Content = dependencyContent
+									};
+									dependencies.Add(dependency);
+								}
+
+								FillDependencies(rootAssetUrl, dependencyContent, dependencyUrl, dependencies);
+							}
+							else
+							{
+								throw new FileNotFoundException(
+									string.Format(CoreStrings.Common_FileNotExist, dependencyUrl));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets a dependency by URL
+		/// </summary>
+		/// <param name="dependencies">List of dependencies</param>
+		/// <param name="url">URL of dependency</param>
+		/// <returns>Dependency</returns>
+		private static Dependency GetDependencyByUrl(IEnumerable<Dependency> dependencies, string url)
+		{
+			var urlInUpperCase = url.ToUpperInvariant();
+			var dependency = dependencies
+				.SingleOrDefault(d => d.Url.ToUpperInvariant() == urlInUpperCase)
+				;
+
+			return dependency;
+		}
+
+		/// <summary>
+		/// Generates asset content cache item key
+		/// </summary>
+		/// <param name="assetUrl">URL of asset file</param>
+		/// <returns>Asset content cache item key</returns>
+		private string GenerateAssetContentCacheItemKey(string assetUrl)
+		{
+			string key = assetUrl.Trim().ToUpperInvariant();
+
+			return key;
+		}
+
+		/// <summary>
+		/// Gets text content of asset
+		/// </summary>
+		/// <param name="assetUrl">URL to asset file</param>
+		/// <returns>Text content of asset</returns>
+		private string GetAssetFileTextContent(string assetUrl)
+		{
+			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			string assetContent;
+
+			if (_assetContentCache.ContainsKey(key))
+			{
+				assetContent = (string)_assetContentCache[key];
+			}
+			else
+			{
+				assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
+				assetContent = ResolveImportsRelativePaths(assetContent, assetUrl);
+
+				_assetContentCache.Add(key, assetContent);
+			}
+
+			return assetContent;
+		}
+
+		/// <summary>
+		/// Determines whether the specified asset file exists
+		/// </summary>
+		/// <param name="assetUrl">URL of asset file</param>
+		/// <returns>Result of checking (true – exist; false – not exist)</returns>
+		private bool AssetFileExists(string assetUrl)
+		{
+			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			bool result;
+
+			if (_assetContentCache.ContainsKey(key))
+			{
+				result = true;
+			}
+			else
+			{
+				result = _virtualFileSystemWrapper.FileExists(assetUrl);
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Clears asset content cache
+		/// </summary>
+		private void ClearAssetContentCache()
+		{
+			if (_assetContentCache != null)
+			{
+				_assetContentCache.Clear();
+			}
 		}
 	}
 }
