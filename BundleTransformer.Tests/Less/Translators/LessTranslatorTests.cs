@@ -64,7 +64,7 @@
 .icon-headphone
 {
 	display: inline;
-	background-image: data-uri('headphone.png');
+	background-image: url('headphone.png');
 }
 
 @import url(""TestLessSubImport1.less"");
@@ -90,7 +90,7 @@
 .icon-network
 {
 	display: inline;
-	background-image: data-uri(""image/png;base64"", ""@network.png"");
+	background-image: url(""@network.png"");
 }
 
 @import url(""TagIcon.css"");")

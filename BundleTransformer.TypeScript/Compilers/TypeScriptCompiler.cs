@@ -245,7 +245,7 @@
 			var columnNumber = errorDetails.Value<int>("columnNumber");
 
 			string newSourceCode = string.Empty;
-			if (string.Equals(filePath, currentFilePath, StringComparison.InvariantCultureIgnoreCase))
+			if (string.Equals(filePath, currentFilePath, StringComparison.OrdinalIgnoreCase))
 			{
 				newSourceCode = sourceCode;
 			}

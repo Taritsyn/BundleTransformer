@@ -23,5 +23,15 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the CoffeeScript compilation options
+		/// </summary>
+		public CompilationOptions()
+		{
+			Bare = true;
+			Literate = false;
+		}
 	}
 }

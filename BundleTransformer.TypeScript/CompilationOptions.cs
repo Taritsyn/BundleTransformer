@@ -58,5 +58,19 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the TypeScript compilation options
+		/// </summary>
+		public CompilationOptions()
+		{
+			UseDefaultLib = true;
+			PropagateConstants = false;
+			EnableNativeMinification = false;
+			CodeGenTarget = CodeGenTarget.EcmaScript3;
+			DisallowBool = false;
+			AllowAutomaticSemicolonInsertion = true;
+		}
 	}
 }

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 
 	using Assets;
 	using FileSystem;
@@ -53,7 +54,13 @@
 				return assets;
 			}
 
-			foreach (var asset in assets)
+			var assetsToProcessing = assets.Where(a => !a.RelativePathsResolved).ToList();
+			if (assetsToProcessing.Count == 0)
+			{
+				return assets;
+			}
+
+			foreach (var asset in assetsToProcessing)
 			{
 				string url = asset.Url;
 				string content = _cssRelativePathResolver.ResolveAllRelativePaths(asset.Content, url);

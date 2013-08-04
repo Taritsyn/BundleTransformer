@@ -177,6 +177,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag indicating what all relative paths in 
+		/// text content of asset is transformed to absolute
+		/// </summary>
+		public bool RelativePathsResolved
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a text content of asset 
 		/// </summary>
 		public string Content
@@ -276,9 +286,10 @@
 
 			VirtualPath = virtualPath;
 			VirtualPathDependencies = new List<string>();
-			Minified = false;
-			Content = null;
 			AssetType = GetAssetType(virtualPath);
+			Minified = false;
+			RelativePathsResolved = false;
+			Content = null;
 		}
 
 		/// <summary>

@@ -15,7 +15,7 @@
 		/// <summary>
 		/// Regular expression for determine protocol in URL
 		/// </summary>
-		private static readonly Regex _protocolRegExp = new Regex(@"^(https?|ftp)\://",
+		private static readonly Regex _protocolRegExp = new Regex(@"^(?:https?|ftp)\://",
 			RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>

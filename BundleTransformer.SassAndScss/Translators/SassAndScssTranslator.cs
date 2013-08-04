@@ -36,18 +36,18 @@
 		/// <summary>
 		/// Regular expression for working with paths of imported Sass-files
 		/// </summary>
-		private static readonly Regex _importSassFilesRuleRegex =
+		private static readonly Regex _sassImportRuleRegex =
 			new Regex(@"@import\s*" +
-				@"(?<urlList>((?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" + 
-				@"|([\w\-+.:;/?&=%~#$@()]+))" +
-				@"(,\s*((?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" +
-				@"|([\w\-+.:;/?&=%~#$@()]+)))*)",
+				@"(?<urlList>((?<quote>'|"")(?:[\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" + 
+				@"|(?:[\w\-+.:;/?&=%~#$@()]+))" +
+				@"(?:,\s*(?:(?<quote>'|"")(?:[\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" +
+				@"|(?:[\w\-+.:;/?&=%~#$@()]+)))*)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with paths of imported SCSS-files
 		/// </summary>
-		private static readonly Regex _importScssFilesRuleRegex =
+		private static readonly Regex _scssImportRuleRegex =
 			new Regex(@"@import\s*" +
 				@"(?<urlList>(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" + 
 				@"(,\s*(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>))*)",
@@ -195,12 +195,12 @@
 
 		/// <summary>
 		/// Fills the list of Sass- and SCSS-files, that were added to a Sass- or SCSS-asset 
-		/// by using the @import directive
+		/// by using the<code>@import</code> rules
 		/// </summary>
 		/// <param name="assetContent">Text content of Sass- or SCSS-asset</param>
 		/// <param name="assetUrl">URL of Sass- or SCSS-asset file</param>
 		/// <param name="virtualPathDependencies">List of Sass- and SCSS-files, that were added to a 
-		/// Sass- or SCSS-asset by using the @import directive</param>
+		/// Sass- or SCSS-asset by using the <code>@import</code> rules</param>
 		public void FillDependencies(string assetContent, string assetUrl, IList<string> virtualPathDependencies)
 		{
 			string assetExtension = Path.GetExtension(assetUrl);
@@ -216,11 +216,11 @@
 			MatchCollection matches;
 			if (FileExtensionHelper.IsSass(assetExtension))
 			{
-				matches = _importSassFilesRuleRegex.Matches(assetContent);
+				matches = _sassImportRuleRegex.Matches(assetContent);
 			}
 			else
 			{
-				matches = _importScssFilesRuleRegex.Matches(assetContent);
+				matches = _scssImportRuleRegex.Matches(assetContent);
 			}
 			
 			foreach (Match match in matches)

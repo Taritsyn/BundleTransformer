@@ -53,5 +53,18 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the mangling options
+		/// </summary>
+		public ManglingOptions()
+		{
+			Mangle = true;
+			Except = string.Empty;
+			Eval = false;
+			Sort = false;
+			TopLevel = false;
+		}
 	}
 }

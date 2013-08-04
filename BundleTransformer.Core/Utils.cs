@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Reflection;
+	using System.Text;
 	using System.Text.RegularExpressions;
 
 	using Resources;
@@ -13,13 +14,13 @@
 		/// <summary>
 		/// Regular expression to find first slash
 		/// </summary>
-		private static readonly Regex _firstSlashRegExp = new Regex(@"^(\/|\\)*",
+		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:\/|\\)*",
 			RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression to find last slash
 		/// </summary>
-		private static readonly Regex _lastSlashRegExp = new Regex(@"(\/|\\)*$",
+		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:\/|\\)*$",
 			RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 
@@ -232,6 +233,74 @@
 					return reader.ReadToEnd();
 				}
 			}
+		}
+
+		/// <summary>
+		/// Detect if a stream is text and detect the encoding
+		/// </summary>
+		/// <param name="stream">Stream</param>
+		/// <param name="sampleSize">Number of characters to use for testing</param>
+		/// <param name="encoding">Detected encoding</param>
+		/// <returns>Result of check (true - is text; false - is binary)</returns>
+		public static bool IsTextStream(Stream stream, int sampleSize, out Encoding encoding)
+		{
+			var rawData = new byte[sampleSize];
+			var text = new char[sampleSize];
+			bool isText = true;
+
+			// Read raw bytes
+			int rawDataCount = stream.Read(rawData, 0, rawData.Length);
+			stream.Seek(0, SeekOrigin.Begin);
+
+			// Detect encoding correctly (from Rick Strahl's blog)
+			// http://www.west-wind.com/weblog/posts/2007/Nov/28/Detecting-Text-Encoding-for-StreamReader
+			if (rawData[0] == 0xef && rawData[1] == 0xbb && rawData[2] == 0xbf)
+			{
+				encoding = Encoding.UTF8;
+			}
+			else if (rawData[0] == 0xfe && rawData[1] == 0xff)
+			{
+				encoding = Encoding.Unicode;
+			}
+			else if (rawData[0] == 0 && rawData[1] == 0 && rawData[2] == 0xfe && rawData[3] == 0xff)
+			{
+				encoding = Encoding.UTF32;
+			}
+			else if (rawData[0] == 0x2b && rawData[1] == 0x2f && rawData[2] == 0x76)
+			{
+				encoding = Encoding.UTF7;
+			}
+			else
+			{
+				encoding = Encoding.Default;
+			}
+
+			// Read text and detect the encoding
+			using (var streamReader = new StreamReader(stream))
+			{
+				streamReader.Read(text, 0, text.Length);
+			}
+
+			using (var memoryStream = new MemoryStream())
+			{
+				using (var streamWriter = new StreamWriter(memoryStream, encoding))
+				{
+					// Write the text to a buffer
+					streamWriter.Write(text);
+					streamWriter.Flush();
+
+					// Get the buffer from the memory stream for comparision
+					var memoryBuffer = memoryStream.GetBuffer();
+
+					// Compare only bytes read
+					for (var rawDataIndex = 0; rawDataIndex < rawDataCount && isText; rawDataIndex++)
+					{
+						isText = rawData[rawDataIndex] == memoryBuffer[rawDataIndex];
+					}
+				}
+			}
+
+			return isText;
 		}
 	}
 }

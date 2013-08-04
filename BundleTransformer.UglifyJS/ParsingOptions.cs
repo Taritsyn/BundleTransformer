@@ -14,5 +14,14 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the parsing options
+		/// </summary>
+		public ParsingOptions()
+		{
+			Strict = false;
+		}
 	}
 }

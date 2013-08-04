@@ -44,6 +44,12 @@
 		bool Minified { get; set; }
 
 		/// <summary>
+		/// Gets or sets a flag indicating what all relative paths in 
+		/// text content of asset is transformed to absolute
+		/// </summary>
+		bool RelativePathsResolved { get; set; }
+
+		/// <summary>
 		/// Gets or sets a text content of asset 
 		/// </summary>
 		string Content { get; set; }

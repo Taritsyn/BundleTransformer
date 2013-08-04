@@ -151,7 +151,7 @@ See more details:
     <value>Can't find string code that corresponding to the value {0} of enumeration type {1}.</value>
   </data>
   <data name="Common_FileNotExist" xml:space="preserve">
-    <value>File {0} not exist.</value>
+    <value>File '{0}' not exist.</value>
   </data>
   <data name="Common_InstanceCreationFailed" xml:space="preserve">
     <value>During instantiate an object of type '{0}' from assembly '{1}' error occurred.</value>
@@ -164,6 +164,9 @@ See more details:
   </data>
   <data name="Common_UnknownError" xml:space="preserve">
     <value>Unknown error.</value>
+  </data>
+  <data name="Common_UnknownMimeType" xml:space="preserve">
+    <value>Failed to determine MIME-type of the file '{0}'.</value>
   </data>
   <data name="Common_ValueIsEmpty" xml:space="preserve">
     <value>Value cannot be empty.</value>
@@ -241,13 +244,13 @@ See more details:
     <value>warning</value>
   </data>
   <data name="Minifiers_MinificationFailed" xml:space="preserve">
-    <value>During minification of {0}-code, readed from the file {1}, by {2} error has occurred.	
+    <value>During minification of {0}-code, readed from the file '{1}', by {2} error has occurred.	
 See more details:
 
 {3}</value>
   </data>
   <data name="Minifiers_MinificationSyntaxError" xml:space="preserve">
-    <value>During minification of {0}-code, readed from the file {1}, by {2} syntax error has occurred. 
+    <value>During minification of {0}-code, readed from the file '{1}', by {2} syntax error has occurred. 
 See more details:
 
 {3}</value>
@@ -256,13 +259,13 @@ See more details:
     <value>Resource with name '{0}' is null.</value>
   </data>
   <data name="Translators_TranslationFailed" xml:space="preserve">
-    <value>During translation of {0}-code, readed from the file {2}, to {1}-code error has occurred.
+    <value>During translation of {0}-code, readed from the file '{2}', to {1}-code error has occurred.
 See more details:
 
 {3}</value>
   </data>
   <data name="Translators_TranslationSyntaxError" xml:space="preserve">
-    <value>During translation of {0}-code, readed from the file {2}, to {1}-code syntax error has occurred. 
+    <value>During translation of {0}-code, readed from the file '{2}', to {1}-code syntax error has occurred. 
 See more details:
 
 {3}</value>

@@ -175,7 +175,10 @@
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
 			var optionsJson = new JObject(
-				new JProperty("compress", options.EnableNativeMinification)
+				new JProperty("compress", options.EnableNativeMinification),
+				new JProperty("ieCompat", options.IeCompat),
+				new JProperty("strictMath", options.StrictMath),
+				new JProperty("strictUnits", options.StrictUnits)
 			);
 
 			return optionsJson;

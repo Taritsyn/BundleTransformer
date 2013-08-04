@@ -150,12 +150,17 @@
     <Content Include="AlternativeContent\css\images\icons\game.png" />
     <Content Include="AlternativeContent\css\TestCssComponentsPaths.css" />
     <Content Include="AlternativeContent\css\TestCssComponentsPaths.min.css" />
+    <Content Include="Content\images\icons\headphone.gif" />
     <Content Include="Content\less\folder\UsbFlashDriveIcon.css" />
     <Content Include="Content\less\folder\ValidationIcon.css" />
+    <Content Include="Content\less\folder\webcam.jpg" />
+    <None Include="Content\less\folder\YahooIcon.less" />
     <Content Include="Content\less\tag.png" />
     <Content Include="Content\less\folder\TagIcon.css" />
     <Content Include="Content\less\usb-flash-drive.png" />
     <Content Include="Content\less\validation.png" />
+    <Content Include="Content\less\xfn.png" />
+    <Content Include="Content\less\yahoo.ico" />
     <Content Include="Content\sass\%24license.png" />
     <Content Include="Content\scss\%24plug.png" />
     <Content Include="Content\less\folder\subfolder\%40network.png" />
@@ -176,7 +181,6 @@
     <Content Include="Content\images\0.gif" />
     <Content Include="Content\images\bundle_transformer_logo.png" />
     <Content Include="Content\images\icons\envelope.png" />
-    <Content Include="Content\images\icons\headphone.png" />
     <Content Include="Content\images\linkedin.png" />
     <Content Include="Content\sass\TestSass.sass" />
     <Content Include="Content\sass\TestSassImport.sass" />

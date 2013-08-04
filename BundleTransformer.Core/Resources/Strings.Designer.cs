@@ -148,7 +148,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File {0} not exist..
+        ///   Looks up a localized string similar to File &apos;{0}&apos; not exist..
         /// </summary>
         public static string Common_FileNotExist {
             get {
@@ -189,6 +189,15 @@ namespace BundleTransformer.Core.Resources {
         public static string Common_UnknownError {
             get {
                 return ResourceManager.GetString("Common_UnknownError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to determine MIME-type of the file &apos;{0}&apos;..
+        /// </summary>
+        public static string Common_UnknownMimeType {
+            get {
+                return ResourceManager.GetString("Common_UnknownMimeType", resourceCulture);
             }
         }
         
@@ -418,7 +427,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During minification of {0}-code, readed from the file {1}, by {2} error has occurred.	
+        ///   Looks up a localized string similar to During minification of {0}-code, readed from the file &apos;{1}&apos;, by {2} error has occurred.	
         ///See more details:
         ///
         ///{3}.
@@ -430,7 +439,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During minification of {0}-code, readed from the file {1}, by {2} syntax error has occurred. 
+        ///   Looks up a localized string similar to During minification of {0}-code, readed from the file &apos;{1}&apos;, by {2} syntax error has occurred. 
         ///See more details:
         ///
         ///{3}.
@@ -451,7 +460,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During translation of {0}-code, readed from the file {2}, to {1}-code error has occurred.
+        ///   Looks up a localized string similar to During translation of {0}-code, readed from the file &apos;{2}&apos;, to {1}-code error has occurred.
         ///See more details:
         ///
         ///{3}.
@@ -463,7 +472,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During translation of {0}-code, readed from the file {2}, to {1}-code syntax error has occurred. 
+        ///   Looks up a localized string similar to During translation of {0}-code, readed from the file &apos;{2}&apos;, to {1}-code syntax error has occurred. 
         ///See more details:
         ///
         ///{3}.

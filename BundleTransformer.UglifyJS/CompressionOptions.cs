@@ -180,5 +180,31 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the compression options
+		/// </summary>
+		public CompressionOptions()
+		{
+			Compress = true;
+			Sequences = true;
+			PropertiesDotNotation = true;
+			DeadCode = true;
+			DropDebugger = true;
+			Unsafe = false;
+			Conditionals = true;
+			Comparisons = true;
+			Evaluate = true;
+			Booleans = true;
+			Loops = true;
+			Unused = true;
+			HoistFunctions = true;
+			HoistVars = false;
+			IfReturn = true;
+			JoinVars = true;
+			Cascade = true;
+			GlobalDefinitions = string.Empty;
+		}
 	}
 }

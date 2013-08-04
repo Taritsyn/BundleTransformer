@@ -1,4 +1,4 @@
-set packages_directory="C:\Projects\BundleTransformer-prerelease\NuGet"
+set packages_directory="C:\Projects\BundleTransformer\NuGet"
 set repository_directory="C:\NuGet Repository"
 
 move %packages_directory%\BundleTransformer.Core\*.nupkg %repository_directory% 

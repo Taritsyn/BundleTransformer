@@ -80,7 +80,7 @@
 							StringComparison.OrdinalIgnoreCase) != -1)
 						{
 							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder, 
-								@"((\d+\.)*\d+((alpha|beta|rc)\d{0,1})?)");
+								@"(?:\d+\.)*\d+(?:(?:alpha|beta|rc)\d{0,1})?");
 						}
 						jsFileNamePattern = "^" + jsFileNamePattern + "$";
 

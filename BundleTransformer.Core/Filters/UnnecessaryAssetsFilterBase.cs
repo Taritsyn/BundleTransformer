@@ -48,7 +48,7 @@
 					string newIgnorePattern = Regex.Escape(processedIgnorePattern);
 					if (processedIgnorePattern.IndexOf("*", StringComparison.Ordinal) != -1)
 					{
-						newIgnorePattern = "^" + newIgnorePattern.Replace(@"\*", @"(.*)") + "$";
+						newIgnorePattern = "^" + newIgnorePattern.Replace(@"\*", @"(?:.*)") + "$";
 					}
 					else
 					{

@@ -61,5 +61,19 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the uglification options
+		/// </summary>
+		public UglificationOptions()
+		{
+			ParsingOptions = new ParsingOptions();
+			CompressionOptions = new CompressionOptions();
+			ManglingOptions = new ManglingOptions();
+			CodeGenerationOptions = new CodeGenerationOptions();
+			ScrewIe8 = false;
+			Severity = 0;
+		}
 	}
 }

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Csso</id>
-    <version>1.7.16</version>
+    <version>1.7.21</version>
 	<title>Bundle Transformer: CSSO</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -18,7 +18,7 @@ As a JS-engine is used the Noesis Javascript .NET (http://javascriptdotnet.codep
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.7.16" />
+      <dependency id="BundleTransformer.Core" version="1.7.21" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.Csso.dll" />

@@ -135,5 +135,27 @@
 			get;
 			set;
 		}
+
+
+		/// <summary>
+		/// Constructs instance of the options of code generation
+		/// </summary>
+		public CodeGenerationOptions()
+		{
+			Beautify = false;
+			IndentLevel = 4;
+			IndentStart = 0;
+			QuoteKeys = false;
+			SpaceColon = true;
+			AsciiOnly = false;
+			InlineScript = false;
+			Width = 80;
+			MaxLineLength = 32000;
+			IeProof = true;
+			Bracketize = false;
+			Semicolons = true;
+			Comments = false;
+			PreserveLine = false;
+		}
 	}
 }

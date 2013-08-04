@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.7.20
+              README file for Bundle Transformer: Core 1.7.21
 
    ----------------------------------------------------------------------
 
@@ -38,8 +38,9 @@
    =============
    RELEASE NOTES
    =============
-   Now during combining of CSS-code a @import directives are moved on top 
-   of the stylesheet.
+   Now does not produce the re-transformation of relative paths to 
+   absolute in the stylesheets (in previous version this affected the 
+   LESS-assets).
 
    =============
    DOCUMENTATION

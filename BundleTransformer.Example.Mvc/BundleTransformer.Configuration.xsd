@@ -272,6 +272,21 @@
 				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
 			</xs:annotation>			
 		</xs:attribute>
+		<xs:attribute name="ieCompat" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enforce IE compatibility (IE8 data-uri)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="strictMath" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether math has to be within parenthesis</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="strictUnits" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether units need to evaluate correctly</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /LESS settings -->
 

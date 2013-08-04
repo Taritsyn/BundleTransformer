@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.7.20
+            README file for Bundle Transformer: LESS Lite 1.7.21
 
    ----------------------------------------------------------------------
 
@@ -20,9 +20,9 @@
    =============
    RELEASE NOTES
    =============
-   1. DotlessClientOnly library was replaced by my own implementation of the 
-      LESS-compiler;
-   2. Is now supported LESS version 1.4.2.
+   1. Added support of the data-uri function;
+   2. In configuration settings of LESS-translator added 3 new properties: 
+      IeCompat, StrictMath and StrictUnits.
    
    =============
    DOCUMENTATION

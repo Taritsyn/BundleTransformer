@@ -32,16 +32,6 @@
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
-		/// TypeScript-file extension
-		/// </summary>
-		private const string TS_FILE_EXTENSION = ".ts";
-
-		/// <summary>
-		/// JS-file extension
-		/// </summary>
-		private const string JS_FILE_EXTENSION = ".js";
-
-		/// <summary>
 		/// Regular expression for working with "reference" comments
 		/// </summary>
 		private static readonly Regex _referenceCommentsRegex =
@@ -62,6 +52,11 @@
 		/// Asset content cache
 		/// </summary>
 		private readonly Hashtable _assetContentCache;
+
+		/// <summary>
+		/// Synchronizer of translation
+		/// </summary>
+		private readonly object _translationSynchronizer = new object();
 
 		/// <summary>
 		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
@@ -152,18 +147,23 @@
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			bool enableNativeMinification = NativeMinificationEnabled;
-			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
-			var typeScriptCompiler = new TypeScriptCompiler(options);
+			lock (_translationSynchronizer)
+			{
+				bool enableNativeMinification = NativeMinificationEnabled;
+				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+				var typeScriptCompiler = new TypeScriptCompiler(options);
 
-			try
-			{
-				InnerTranslate(asset, typeScriptCompiler, enableNativeMinification);
-			}
-			finally
-			{
-				typeScriptCompiler.Dispose();
 				ClearAssetContentCache();
+
+				try
+				{
+					InnerTranslate(asset, typeScriptCompiler, enableNativeMinification);
+				}
+				finally
+				{
+					typeScriptCompiler.Dispose();
+					ClearAssetContentCache();
+				}
 			}
 
 			return asset;
@@ -192,21 +192,26 @@
 				return assets;
 			}
 
-			bool enableNativeMinification = NativeMinificationEnabled;
-			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
-			var typeScriptCompiler = new TypeScriptCompiler(options);
+			lock (_translationSynchronizer)
+			{
+				bool enableNativeMinification = NativeMinificationEnabled;
+				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+				var typeScriptCompiler = new TypeScriptCompiler(options);
 
-			try
-			{
-				foreach (var asset in assetsToProcessing)
-				{
-					InnerTranslate(asset, typeScriptCompiler, enableNativeMinification);
-				}
-			}
-			finally
-			{
-				typeScriptCompiler.Dispose();
 				ClearAssetContentCache();
+
+				try
+				{
+					foreach (var asset in assetsToProcessing)
+					{
+						InnerTranslate(asset, typeScriptCompiler, enableNativeMinification);
+					}
+				}
+				finally
+				{
+					typeScriptCompiler.Dispose();
+					ClearAssetContentCache();
+				}
 			}
 
 			return assets;
@@ -250,34 +255,6 @@
 		}
 
 		/// <summary>
-		/// Transforms relative paths of "reference" comments to absolute in TypeScript-code
-		/// </summary>
-		/// <param name="content">Text content of TypeScript-asset</param>
-		/// <param name="path">TypeScript-file path</param>
-		/// <returns>Processed text content of TypeScript-asset</returns>
-		private string ResolveReferenceCommentsRelativePaths(string content, string path)
-		{
-			return _referenceCommentsRegex.Replace(content, m =>
-			{
-				string result = m.Groups[0].Value;
-				GroupCollection groups = m.Groups;
-
-				if (groups["url"].Success)
-				{
-					string urlValue = groups["url"].Value.Trim();
-					string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
-
-					result = string.Format("///<reference path={0}{1}{0}/>",
-						quoteValue,
-						_relativePathResolver.ResolveRelativePath(path, urlValue)
-					);
-				}
-
-				return result;
-			});
-		}
-
-		/// <summary>
 		/// Creates a compilation options
 		/// </summary>
 		/// <param name="enableNativeMinification">Flag that indicating to use of native minification</param>
@@ -295,6 +272,30 @@
 			};
 
 			return options;
+		}
+
+		/// <summary>
+		/// Transforms relative paths of "reference" comments to absolute in TypeScript-code
+		/// </summary>
+		/// <param name="content">Text content of TypeScript-asset</param>
+		/// <param name="path">TypeScript-file path</param>
+		/// <returns>Processed text content of TypeScript-asset</returns>
+		private string ResolveReferenceCommentsRelativePaths(string content, string path)
+		{
+			return _referenceCommentsRegex.Replace(content, m =>
+			{
+				GroupCollection groups = m.Groups;
+
+				string url = groups["url"].Value.Trim();
+				string quote = groups["quote"].Success ? groups["quote"].Value : @"""";
+
+				string result = string.Format("///<reference path={0}{1}{0}/>",
+					quote,
+					_relativePathResolver.ResolveRelativePath(path, url)
+				);
+
+				return result;
+			});
 		}
 
 		/// <summary>
@@ -321,14 +322,15 @@
 					string dependencyAssetUrl = match.Groups["url"].Value;
 					if (!string.IsNullOrWhiteSpace(dependencyAssetUrl))
 					{
-						if (string.Equals(dependencyAssetUrl, rootAssetUrl, StringComparison.InvariantCultureIgnoreCase))
+						if (string.Equals(dependencyAssetUrl, rootAssetUrl, StringComparison.OrdinalIgnoreCase))
 						{
 							continue;
 						}
 
 						string dependencyAssetExtension = Path.GetExtension(dependencyAssetUrl);
-						if (string.Equals(dependencyAssetExtension, TS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase)
-							|| string.Equals(dependencyAssetExtension, JS_FILE_EXTENSION, StringComparison.InvariantCultureIgnoreCase))
+
+						if (FileExtensionHelper.IsTypeScript(dependencyAssetExtension)
+							|| FileExtensionHelper.IsJavaScript(dependencyAssetExtension))
 						{
 							var duplicateDependency = GetDependencyByUrl(dependencies, dependencyAssetUrl);
 							if (duplicateDependency == null)
@@ -395,7 +397,7 @@
 		/// <returns>Text content without "reference" comments</returns>
 		private string RemoveReferenceComments(string content)
 		{
-			string newContent = _referenceCommentsRegex.Replace(content, string.Empty).Trim();
+			string newContent = _referenceCommentsRegex.Replace(content, string.Empty).TrimStart();
 
 			return newContent;
 		}

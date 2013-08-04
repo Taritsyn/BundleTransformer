@@ -24,10 +24,10 @@
 	public sealed class CssTransformer : TransformerBase
 	{
 		/// <summary>
-		/// Regular expression for working with <code>@import</code> directives
+		/// Regular expression for working with CSS <code>@import</code> rules
 		/// </summary>
-		private static readonly Regex _cssImportRegex =
-			new Regex(@"@import\s+" +
+		private static readonly Regex _cssImportRuleRegex =
+			new Regex(@"@import\s*" +
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
 				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))" +
@@ -300,20 +300,20 @@
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>
 		/// <param name="imports">List of CSS imports</param>
-		/// <returns>Text content of CSS-asset without <code>@import</code> directives</returns>
+		/// <returns>Text content of CSS-asset without <code>@import</code> rules</returns>
 		private static string EjectCssImports(string content, IList<string> imports)
 		{
-			return _cssImportRegex.Replace(content, m =>
+			return _cssImportRuleRegex.Replace(content, m =>
 			{
 				GroupCollection groups = m.Groups;
 
-				string urlValue = groups["url"].Value;
-				string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
+				string url = groups["url"].Value;
+				string quote = groups["quote"].Success ? groups["quote"].Value : @"""";
 				string media = groups["media"].Success ? (" " + groups["media"].Value) : string.Empty;
 				
 				string import = string.Format("@import {0}{1}{0}{2};",
-					quoteValue,
-					urlValue,
+					quote,
+					url,
 					media
 				);
 				imports.Add(import);

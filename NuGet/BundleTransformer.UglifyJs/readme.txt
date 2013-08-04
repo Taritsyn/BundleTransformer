@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: UglifyJS 1.7.19
+            README file for Bundle Transformer: UglifyJS 1.7.21
  
    ----------------------------------------------------------------------
 
@@ -15,11 +15,6 @@
    minification of JS-code - UglifyJsMinifier. UglifyJsMinifier is based 
    on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) 
    version 2.3.6.
-   
-   =============
-   RELEASE NOTES
-   =============
-   UglifyJS was updated to commit b1febde3e9.
    
    ====================
    POST-INSTALL ACTIONS

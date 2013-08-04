@@ -11,14 +11,14 @@
 		/// <summary>
 		/// Regular expression for working with paths of components in CSS-code
 		/// </summary>
-		private static readonly Regex _urlStylesheetRuleRegex =
-			new Regex(@"url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+		private static readonly Regex _urlRuleRegex =
+			new Regex(@"url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
-		/// Regular expression for working with paths of imported stylesheets in CSS-code
+		/// Regular expression for working with paths of CSS <code>@import</code> rules
 		/// </summary>
-		private static readonly Regex _importStylesheetRuleRegex =
+		private static readonly Regex _cssImportRuleRegex =
 			new Regex(@"@import\s*(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#\$@()\[\]{}]+)(\k<quote>)",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -47,24 +47,19 @@
 		/// <returns>Processed text content of CSS-asset</returns>
 		public string ResolveComponentsRelativePaths(string content, string path)
 		{
-			return _urlStylesheetRuleRegex.Replace(content, m =>
+			return _urlRuleRegex.Replace(content, m =>
 			{
 				GroupCollection groups = m.Groups;
-				string result = groups[0].Value;
 
-				if (groups["url"].Success)
+				string url = groups["url"].Value.Trim();
+				string quote = groups["quote"].Success ? groups["quote"].Value : string.Empty;
+				string newUrl = url;
+				if (url.IndexOf("data:", StringComparison.OrdinalIgnoreCase) != 0)
 				{
-					string urlValue = groups["url"].Value.Trim();
-					string quoteValue = groups["quote"].Success ? groups["quote"].Value : string.Empty;
-
-					string newUrl = urlValue;
-					if (urlValue.IndexOf("data:", StringComparison.OrdinalIgnoreCase) != 0)
-					{
-						newUrl = ResolveRelativePath(path, urlValue);
-					}
-
-					result = string.Format("url({0}{1}{0})", quoteValue, newUrl);
+					newUrl = ResolveRelativePath(path, url);
 				}
+
+				string result = string.Format("url({0}{1}{0})", quote, newUrl);
 
 				return result;
 			});
@@ -78,20 +73,17 @@
 		/// <returns>Processed text content of CSS-asset</returns>
 		public string ResolveImportsRelativePaths(string content, string path)
 		{
-			return _importStylesheetRuleRegex.Replace(content, m =>
+			return _cssImportRuleRegex.Replace(content, m =>
 			{
 				GroupCollection groups = m.Groups;
-				string result = groups[0].Value;
 
-				if (groups["url"].Success)
-				{
-					string urlValue = groups["url"].Value.Trim();
-					string quoteValue = groups["quote"].Success ? groups["quote"].Value : @"""";
+				string url = groups["url"].Value.Trim();
+				string quote = groups["quote"].Success ? groups["quote"].Value : @"""";
 
-					result = string.Format("@import {0}{1}{0}",
-						quoteValue,
-						ResolveRelativePath(path, urlValue));
-				}
+				string result = string.Format("@import {0}{1}{0}",
+					quote,
+					ResolveRelativePath(path, url)
+				);
 
 				return result;
 			});

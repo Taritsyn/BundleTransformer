@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.7.19
+           README file for Bundle Transformer: TypeScript 1.7.21
 
    ----------------------------------------------------------------------
 
@@ -17,11 +17,6 @@
    translation of TypeScript-code to JS-code. Also contains HTTP-handler 
    TypeScriptAssetHandler, which is responsible for text output of 
    translated TypeScript-asset.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Fixed minor bugs.
 
    =============
    DOCUMENTATION
