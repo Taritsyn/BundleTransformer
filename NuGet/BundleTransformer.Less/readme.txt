@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.7.21
+              README file for Bundle Transformer: LESS 1.7.22
 
    ----------------------------------------------------------------------
 
@@ -20,9 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the data-uri function;
-   2. In configuration settings of LESS-translator added 3 new properties: 
-      IeCompat, StrictMath and StrictUnits.
+   Fixed bug #40 "LESS @import with fonts.googleapis does not work".
    
    =============
    DOCUMENTATION

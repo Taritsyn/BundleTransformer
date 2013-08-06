@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Tests.Less.Translators
 {
 	using System.Collections.Generic;
+	using System.IO;
 
 	using Moq;
 	using NUnit.Framework;
@@ -64,11 +65,26 @@
 .icon-headphone
 {
 	display: inline;
-	background-image: url('headphone.png');
+	background-image: data-uri('headphone.gif');
 }
 
 @import url(""TestLessSubImport1.less"");
 @import 'TestLessSubImport2';")
+				;
+
+
+			string headphoneGifAssetVirtualPath = Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "headphone.gif");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(headphoneGifAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileStream(headphoneGifAssetVirtualPath))
+				.Returns(new MemoryStream(new byte[0]))
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileBinaryContent(headphoneGifAssetVirtualPath))
+				.Returns(new byte[0])
 				;
 
 
@@ -80,7 +96,9 @@
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(testLessSubImport1LessAssetVirtualPath))
-				.Returns(@"@border-color: #143352;
+				.Returns(@"@import url(http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext);
+
+@border-color: #143352;
 
 .translators #less
 {
@@ -90,23 +108,25 @@
 .icon-network
 {
 	display: inline;
-	background-image: url(""@network.png"");
+	background-image: data-uri('image/png', ""@network.png"");
 }
 
 @import url(""TagIcon.css"");")
 				;
 
 
-			string testLessSubImport2LessAssetVirtualPath = Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH,
-				"TestLessSubImport2.less");
+			string networkPngAssetVirtualPath = Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "@network.png");
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(testLessSubImport2LessAssetVirtualPath))
+				.Setup(fs => fs.FileExists(networkPngAssetVirtualPath))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.GetFileTextContent(testLessSubImport2LessAssetVirtualPath))
-				.Returns(@"@import (css) ""UsbFlashDriveIcon"";
-@import (less) ""ValidationIcon.css"";")
+				.Setup(fs => fs.GetFileStream(networkPngAssetVirtualPath))
+				.Returns(new MemoryStream(new byte[0]))
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileBinaryContent(networkPngAssetVirtualPath))
+				.Returns(new byte[0])
 				;
 
 
@@ -122,6 +142,20 @@
 	display: inline;
 	background-image: url(tag.png) !important;
 }")
+				;
+
+
+			string testLessSubImport2LessAssetVirtualPath = Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"TestLessSubImport2.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(testLessSubImport2LessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(testLessSubImport2LessAssetVirtualPath))
+				.Returns(@"@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext';
+@import (css) ""UsbFlashDriveIcon"";
+@import (less) ""ValidationIcon.css"";")
 				;
 
 
@@ -164,6 +198,7 @@
 				relativePathResolver, lessConfig);
 
 			const string assetContent = @"@import ""/Content/Mixins.less"";
+@import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
 
 @bg-color: #7AC0DA;
 @caption-color: #FFFFFF;
@@ -195,14 +230,18 @@
 			lessTranslator.FillDependencies(assetUrl, assetContent, assetUrl, dependencies);
 
 			// Assert
-			Assert.AreEqual(7, dependencies.Count);
+			Assert.AreEqual(10, dependencies.Count);
 			Assert.AreEqual(mixinsLessAssetVirtualPath, dependencies[0].VirtualPath);
-			Assert.AreEqual(testLessImportLessAssetVirtualPath, dependencies[1].VirtualPath);
-			Assert.AreEqual(testLessSubImport1LessAssetVirtualPath, dependencies[2].VirtualPath);
-			Assert.AreEqual(tagIconCssAssetVirtualPath, dependencies[3].VirtualPath);
-			Assert.AreEqual(testLessSubImport2LessAssetVirtualPath, dependencies[4].VirtualPath);
-			Assert.AreEqual(usbFlashDriveIconCssAssetVirtualPath, dependencies[5].VirtualPath);
-			Assert.AreEqual(validationIconCssAssetVirtualPath, dependencies[6].VirtualPath);
+			Assert.AreEqual(headphoneGifAssetVirtualPath, dependencies[1].VirtualPath);
+			Assert.AreEqual(testLessImportLessAssetVirtualPath, dependencies[2].VirtualPath);
+			Assert.AreEqual(networkPngAssetVirtualPath, dependencies[3].VirtualPath);
+			Assert.AreEqual(testLessSubImport1LessAssetVirtualPath, dependencies[4].VirtualPath);
+			Assert.AreEqual("http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext",
+				dependencies[5].VirtualPath);
+			Assert.AreEqual(tagIconCssAssetVirtualPath, dependencies[6].VirtualPath);
+			Assert.AreEqual(testLessSubImport2LessAssetVirtualPath, dependencies[7].VirtualPath);
+			Assert.AreEqual(usbFlashDriveIconCssAssetVirtualPath, dependencies[8].VirtualPath);
+			Assert.AreEqual(validationIconCssAssetVirtualPath, dependencies[9].VirtualPath);
 		}
 
 		private class MockRelativePathResolver : IRelativePathResolver
