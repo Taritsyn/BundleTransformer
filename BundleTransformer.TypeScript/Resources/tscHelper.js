@@ -240,34 +240,65 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			this.compilationSettings = compilationSettings;
 		}
 
-		CustomCompiler.prototype.batchCompile = function (path) {
-			var anyCompilationErrors;
+		CustomCompiler.prototype.compile = function (path) {
+			var compiler,
+				anySyntacticErrors,
+				anySemanticErrors,
+				anyEmitErrors
+				;
 
 			this.inputFiles.push(path);
 			this.logger = new TypeScript.NullLogger();
 
-			this.resolve();
-			anyCompilationErrors = this.compile();
+			this._resolve();
 
-			return anyCompilationErrors;
-		};
+			compiler = new TypeScript.TypeScriptCompiler(this.logger, this.compilationSettings);
 
-		CustomCompiler.prototype.resolve = function () {
-			var includeDefaultLibrary = !this.compilationSettings.noLib;
-			var resolvedFiles = [];
-			var resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this, 
-				this.compilationSettings);
-			resolvedFiles = resolutionResults.resolvedFiles;
-
-			includeDefaultLibrary = !this.compilationSettings.noLib && !resolutionResults.seenNoDefaultLibTag;
-
-			for (var i = 0, n = resolutionResults.diagnostics.length; i < n; i++) {
-				this.addDiagnostic(resolutionResults.diagnostics[i]);
+			anySyntacticErrors = this._addSourceUnit(compiler);
+			if (anySyntacticErrors) {
+				return true;
 			}
 
+			compiler.pullTypeCheck();
+
+			anySemanticErrors = this._diagnoseSemanticErrors(compiler);
+			anyEmitErrors = this._emitAll(compiler);
+
+			if (anyEmitErrors) {
+				return true;
+			}
+
+			if (anySemanticErrors) {
+				return true;
+			}
+
+			return false;
+		};
+
+		CustomCompiler.prototype._resolve = function () {
+			var includeDefaultLibrary,
+				resolvedFiles,
+				resolutionResults,
+				diagnostics,
+				diagnosticIndex,
+				diagnosticCount,
+				libraryResolvedFile
+				;
+
+			resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this,
+				this.compilationSettings);
+			resolvedFiles = resolutionResults.resolvedFiles;
+			includeDefaultLibrary = !this.compilationSettings.noLib && !resolutionResults.seenNoDefaultLibTag;
+
+			diagnostics = resolutionResults.diagnostics;
+			diagnosticCount = diagnostics.length;
+
+			for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
+				this.addDiagnostic(diagnostics[diagnosticIndex]);
+			}
 
 			if (includeDefaultLibrary) {
-				var libraryResolvedFile = {
+				libraryResolvedFile = {
 					path: this.getDefaultLibraryFilePath(),
 					referencedFiles: [],
 					importedFiles: []
@@ -279,20 +310,26 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			this.resolvedFiles = resolvedFiles;
 		};
 
-		CustomCompiler.prototype.compile = function () {
-			var that = this;
-			var compiler = new TypeScript.TypeScriptCompiler(this.logger, this.compilationSettings);
+		CustomCompiler.prototype._addSourceUnit = function (compiler) {
+			var anySyntacticErrors = false,
+				resolvedFiles,
+				resolvedFile,
+				resolvedFileIndex,
+				resolvedFileCount,
+				sourceFile,
+				syntacticDiagnostics
+				;
 
-			var anySyntacticErrors = false;
-			var anySemanticErrors = false;
+			resolvedFiles = this.resolvedFiles;
+			resolvedFileCount = resolvedFiles.length;
 
-			for (var i = 0, n = this.resolvedFiles.length; i < n; i++) {
-				var resolvedFile = this.resolvedFiles[i];
-				var sourceFile = this.getSourceFile(resolvedFile.path);
+			for (resolvedFileIndex = 0; resolvedFileIndex < resolvedFileCount; resolvedFileIndex++) {
+				resolvedFile = resolvedFiles[resolvedFileIndex];
+				sourceFile = this.getSourceFile(resolvedFile.path);
 				compiler.addSourceUnit(resolvedFile.path, sourceFile.scriptSnapshot,
 					sourceFile.byteOrderMark, 0, false, resolvedFile.referencedFiles);
 
-				var syntacticDiagnostics = compiler.getSyntacticDiagnostics(resolvedFile.path);
+				syntacticDiagnostics = compiler.getSyntacticDiagnostics(resolvedFile.path);
 				compiler.reportDiagnostics(syntacticDiagnostics, this);
 
 				if (syntacticDiagnostics.length > 0) {
@@ -300,37 +337,49 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 				}
 			}
 
-			if (anySyntacticErrors) {
-				return true;
-			}
+			return anySyntacticErrors;
+		};
 
-			compiler.pullTypeCheck();
-			var fileNames = compiler.fileNameToDocument.getAllKeys();
-			var n = fileNames.length;
-			for (var i = 0; i < n; i++) {
-				var fileName = fileNames[i];
-				var semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
+		CustomCompiler.prototype._diagnoseSemanticErrors = function (compiler) {
+			var anySemanticErrors = false,
+				fileNames,
+				fileName,
+				fileNameIndex,
+				fileNameCount,
+				semanticDiagnostics
+				;
+
+			fileNames = compiler.fileNameToDocument.getAllKeys();
+			fileNameCount = fileNames.length;
+
+			for (fileNameIndex = 0; fileNameIndex < fileNameCount; fileNameIndex++) {
+				fileName = fileNames[fileNameIndex];
+				semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
 				if (semanticDiagnostics.length > 0) {
 					anySemanticErrors = true;
 					compiler.reportDiagnostics(semanticDiagnostics, this);
 				}
 			}
 
-			var mapInputToOutput = function (inputFile, outputFile) {
+			return anySemanticErrors;
+		};
+
+		CustomCompiler.prototype._emitAll = function (compiler) {
+			var that = this,
+				anyEmitErrors,
+				mapInputToOutput,
+				emitDiagnostics
+				;
+
+			mapInputToOutput = function (inputFile, outputFile) {
 				that.inputFileNameToOutputFileName.addOrUpdate(inputFile, outputFile);
 			};
 
-			var emitDiagnostics = compiler.emitAll(this, mapInputToOutput);
+			emitDiagnostics = compiler.emitAll(this, mapInputToOutput);
 			compiler.reportDiagnostics(emitDiagnostics, this);
-			if (emitDiagnostics.length > 0) {
-				return true;
-			}
+			anyEmitErrors = (emitDiagnostics.length > 0);
 
-			if (anySemanticErrors) {
-				return true;
-			}
-
-			return false;
+			return anyEmitErrors;
 		};
 
 		CustomCompiler.prototype.getSourceFile = function (fileName) {
@@ -377,7 +426,8 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 
 			if (diagnostic.fileName()) {
 				var scriptSnapshot = this.getScriptSnapshot(diagnostic.fileName());
-				var lineMap = new TypeScript.LineMap(scriptSnapshot.getLineStartPositions(), scriptSnapshot.getLength());
+				var lineMap = new TypeScript.LineMap(scriptSnapshot.getLineStartPositions(), 
+					scriptSnapshot.getLength());
 				var lineCol = { line: -1, character: -1 };
 				lineMap.fillLineAndCharacterFromPosition(diagnostic.start(), lineCol);
 
@@ -461,7 +511,7 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		ioHost = new IoHost(files);
 
 		customCompiler = new CustomCompiler(ioHost, getCompilationSettings(options));
-		anyCompilationErrors = customCompiler.batchCompile(inputFilePath);
+		anyCompilationErrors = customCompiler.compile(inputFilePath);
 
 		if (!anyCompilationErrors) {
 			outputFileInformation = ioHost.readFile(outputFilePath);

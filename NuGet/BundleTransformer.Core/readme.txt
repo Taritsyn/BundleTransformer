@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.7.21
+              README file for Bundle Transformer: Core 1.7.23
 
    ----------------------------------------------------------------------
 
@@ -34,13 +34,6 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Now does not produce the re-transformation of relative paths to 
-   absolute in the stylesheets (in previous version this affected the 
-   LESS-assets).
 
    =============
    DOCUMENTATION
