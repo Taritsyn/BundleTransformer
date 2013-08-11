@@ -19,7 +19,7 @@
 	/// <summary>
 	/// Translator that responsible for translation of TypeScript-code to JS-code
 	/// </summary>
-	public sealed class TypeScriptTranslator : TranslatorWithNativeMinificationBase
+	public sealed class TypeScriptTranslator : ITranslator
 	{
 		/// <summary>
 		/// Name of input code type
@@ -59,6 +59,15 @@
 		private readonly object _translationSynchronizer = new object();
 
 		/// <summary>
+		/// Gets or sets a flag that web application is in debug mode
+		/// </summary>
+		public bool IsDebugMode
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
 		/// </summary>
 		public bool UseDefaultLib
@@ -68,9 +77,38 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to propagate constants to emitted code
+		/// Gets or sets a flag for whether to propagate enum constants to emitted code
 		/// </summary>
-		public bool PropagateConstants
+		public bool PropagateEnumConstants
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit comments to output
+		/// </summary>
+		public bool RemoveComments
+		{
+			get;
+			set;
+		}
+
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow automatic semicolon insertion
+		/// </summary>
+		public bool AllowAutomaticSemicolonInsertion
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to warn on expressions and declarations 
+		/// with an implied 'any' type
+		/// </summary>
+		public bool NoImplicitAny
 		{
 			get;
 			set;
@@ -80,24 +118,6 @@
 		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
 		/// </summary>
 		public CodeGenTarget CodeGenTarget
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow throw error for use of deprecated "bool" type
-		/// </summary>
-		public bool DisallowBool
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow automatic semicolon insertion
-		/// </summary>
-		public bool AllowAutomaticSemicolonInsertion
 		{
 			get;
 			set;
@@ -126,12 +146,12 @@
 			_relativePathResolver = relativePathResolver;
 			_assetContentCache = new Hashtable();
 
-			UseNativeMinification = tsConfig.UseNativeMinification;
 			UseDefaultLib = tsConfig.UseDefaultLib;
-			PropagateConstants = tsConfig.PropagateConstants;
-			CodeGenTarget = tsConfig.CodeGenTarget;
-			DisallowBool = tsConfig.DisallowBool;
+			PropagateEnumConstants = tsConfig.PropagateEnumConstants;
+			RemoveComments = tsConfig.RemoveComments;
 			AllowAutomaticSemicolonInsertion = tsConfig.AllowAutomaticSemicolonInsertion;
+			NoImplicitAny = tsConfig.NoImplicitAny;
+			CodeGenTarget = tsConfig.CodeGenTarget;
 		}
 
 
@@ -140,7 +160,7 @@
 		/// </summary>
 		/// <param name="asset">Asset with code written on TypeScript</param>
 		/// <returns>Asset with translated code</returns>
-		public override IAsset Translate(IAsset asset)
+		public IAsset Translate(IAsset asset)
 		{
 			if (asset == null)
 			{
@@ -149,15 +169,14 @@
 
 			lock (_translationSynchronizer)
 			{
-				bool enableNativeMinification = NativeMinificationEnabled;
-				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+				CompilationOptions options = CreateCompilationOptions();
 				var typeScriptCompiler = new TypeScriptCompiler(options);
 
 				ClearAssetContentCache();
 
 				try
 				{
-					InnerTranslate(asset, typeScriptCompiler, enableNativeMinification);
+					InnerTranslate(asset, typeScriptCompiler);
 				}
 				finally
 				{
@@ -174,7 +193,7 @@
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on TypeScript</param>
 		/// <returns>Set of assets with translated code</returns>
-		public override IList<IAsset> Translate(IList<IAsset> assets)
+		public IList<IAsset> Translate(IList<IAsset> assets)
 		{
 			if (assets == null)
 			{
@@ -194,8 +213,7 @@
 
 			lock (_translationSynchronizer)
 			{
-				bool enableNativeMinification = NativeMinificationEnabled;
-				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+				CompilationOptions options = CreateCompilationOptions();
 				var typeScriptCompiler = new TypeScriptCompiler(options);
 
 				ClearAssetContentCache();
@@ -204,7 +222,7 @@
 				{
 					foreach (var asset in assetsToProcessing)
 					{
-						InnerTranslate(asset, typeScriptCompiler, enableNativeMinification);
+						InnerTranslate(asset, typeScriptCompiler);
 					}
 				}
 				finally
@@ -217,7 +235,7 @@
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, TypeScriptCompiler typeScriptCompiler, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, TypeScriptCompiler typeScriptCompiler)
 		{
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
@@ -246,7 +264,6 @@
 			}
 
 			asset.Content = newContent;
-			asset.Minified = enableNativeMinification;
 			asset.VirtualPathDependencies = dependencies
 				.Select(d => d.VirtualPath)
 				.Distinct()
@@ -257,18 +274,17 @@
 		/// <summary>
 		/// Creates a compilation options
 		/// </summary>
-		/// <param name="enableNativeMinification">Flag that indicating to use of native minification</param>
 		/// <returns>Compilation options</returns>
-		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)
+		private CompilationOptions CreateCompilationOptions()
 		{
 			var options = new CompilationOptions
 			{
 				UseDefaultLib = UseDefaultLib,
-				PropagateConstants = PropagateConstants,
-				EnableNativeMinification = enableNativeMinification,
-				CodeGenTarget = CodeGenTarget,
-				DisallowBool = DisallowBool,
-				AllowAutomaticSemicolonInsertion = AllowAutomaticSemicolonInsertion
+				PropagateEnumConstants = PropagateEnumConstants,
+				RemoveComments = RemoveComments,
+				AllowAutomaticSemicolonInsertion = AllowAutomaticSemicolonInsertion,
+				NoImplicitAny = NoImplicitAny,
+				CodeGenTarget = CodeGenTarget
 			};
 
 			return options;

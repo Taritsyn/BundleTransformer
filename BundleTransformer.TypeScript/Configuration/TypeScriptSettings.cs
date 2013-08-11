@@ -8,16 +8,6 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to allow the use of native minification
-		/// </summary>
-		[ConfigurationProperty("useNativeMinification", DefaultValue = false)]
-		public bool UseNativeMinification
-		{
-			get { return (bool)this["useNativeMinification"]; }
-			set { this["useNativeMinification"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
 		/// </summary>
 		[ConfigurationProperty("useDefaultLib", DefaultValue = true)]
@@ -28,33 +18,23 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to propagate constants to emitted code
+		/// Gets or sets a flag for whether to propagate enum constants to emitted code
 		/// </summary>
-		[ConfigurationProperty("propagateConstants", DefaultValue = false)]
-		public bool PropagateConstants
+		[ConfigurationProperty("propagateEnumConstants", DefaultValue = false)]
+		public bool PropagateEnumConstants
 		{
-			get { return (bool)this["propagateConstants"]; }
-			set { this["propagateConstants"] = value; }
+			get { return (bool)this["propagateEnumConstants"]; }
+			set { this["propagateEnumConstants"] = value; }
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
+		/// Gets or sets a flag for whether to do not emit comments to output
 		/// </summary>
-		[ConfigurationProperty("codeGenTarget", DefaultValue = CodeGenTarget.EcmaScript3)]
-		public CodeGenTarget CodeGenTarget
+		[ConfigurationProperty("removeComments", DefaultValue = false)]
+		public bool RemoveComments
 		{
-			get { return (CodeGenTarget)this["codeGenTarget"]; }
-			set { this["codeGenTarget"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow throw error for use of deprecated "bool" type
-		/// </summary>
-		[ConfigurationProperty("disallowBool", DefaultValue = false)]
-		public bool DisallowBool
-		{
-			get { return (bool)this["disallowBool"]; }
-			set { this["disallowBool"] = value; }
+			get { return (bool)this["removeComments"]; }
+			set { this["removeComments"] = value; }
 		}
 
 		/// <summary>
@@ -65,6 +45,27 @@
 		{
 			get { return (bool)this["allowAutomaticSemicolonInsertion"]; }
 			set { this["allowAutomaticSemicolonInsertion"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to warn on expressions and declarations 
+		/// with an implied 'any' type
+		/// </summary>
+		[ConfigurationProperty("noImplicitAny", DefaultValue = false)]
+		public bool NoImplicitAny
+		{
+			get { return (bool)this["noImplicitAny"]; }
+			set { this["noImplicitAny"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
+		/// </summary>
+		[ConfigurationProperty("codeGenTarget", DefaultValue = CodeGenTarget.EcmaScript3)]
+		public CodeGenTarget CodeGenTarget
+		{
+			get { return (CodeGenTarget)this["codeGenTarget"]; }
+			set { this["codeGenTarget"] = value; }
 		}
 	}
 }

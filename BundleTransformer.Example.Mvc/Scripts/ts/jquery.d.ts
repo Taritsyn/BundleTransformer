@@ -13,7 +13,7 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
-// Typing for the jQuery library, version 1.7.x
+// Typing for the jQuery library, version 1.10
 
 /*
     Interface for the AJAX setting that will configure the AJAX request 
@@ -95,7 +95,6 @@ interface JQueryDeferred extends JQueryPromise {
     notify(...args: any[]): JQueryDeferred;
     notifyWith(context: any, ...args: any[]): JQueryDeferred;
 
-    pipe(doneFilter?: any, failFilter?: any, progressFilter?: any): JQueryPromise;
     progress(...progressCallbacks: any[]): JQueryDeferred;
     reject(...args: any[]): JQueryDeferred;
     rejectWith(context: any, ...args: any[]): JQueryDeferred;
@@ -159,6 +158,11 @@ interface JQuerySupport {
     tbody?: boolean;
 }
 
+interface JQueryTransport {
+    send(headers: { [index: string]: string; }, completeCallback: (status: number, statusText: string, responses: { [dataType: string]: any; }, headers: string) => void): void;
+    abort(): void;
+}
+
 /*
     Static members of jQuery (those on $ and jQuery themselves)
 */
@@ -172,6 +176,7 @@ interface JQueryStatic {
     ajaxPrefilter(handler: (opts: any, originalOpts: any, jqXHR: JQueryXHR) => any): any;
 
     ajaxSetup(options: any);
+    ajaxTransport(dataType: string, handler: (options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) => JQueryTransport): void;
 
     get(url: string, data?: any, success?: any, dataType?: any): JQueryXHR;
     getJSON(url: string, data?: any, success?: any): JQueryXHR;
@@ -271,6 +276,7 @@ interface JQueryStatic {
 
     now(): number;
 
+    parseHTML(data: string, context?: Element, keepScripts?: boolean): any[];
     parseJSON(json: string): any;
 
     //FIXME: This should return an XMLDocument
@@ -297,8 +303,6 @@ interface JQuery {
     ajaxStop(handler: () => any): JQuery;
     ajaxSuccess(handler: (evt: any, xml: any, opts: any) => any): JQuery;
 
-    load(url: string, data?: any, complete?: any): JQuery;
-
     serialize(): string;
     serializeArray(): any[];
 
@@ -316,7 +320,7 @@ interface JQuery {
     html(htmlString: string): JQuery;
     html(): string;
 
-    prop(propertyName: string): string;
+    prop(propertyName: string): any;
     prop(propertyName: string, value: any): JQuery;
     prop(map: any): JQuery;
     prop(propertyName: string, func: (index: any, oldPropertyValue: any) => any): JQuery;
@@ -338,8 +342,10 @@ interface JQuery {
     val(func: (index: any, value: any) => any): JQuery;
 
     // CSS
-    css(propertyName: string, value?: any);
-    css(propertyName: any, value?: any);
+    css(propertyNames: any[]): string;
+    css(propertyName: string): string;
+    css(propertyName: string, value: any): JQuery;
+    css(propertyName: any, value?: any): JQuery;
 
     height(): number;
     height(value: number): JQuery;
@@ -376,6 +382,10 @@ interface JQuery {
 
     dequeue(queueName?: string): JQuery;
 
+    queue(queueName?: string): any[];
+    queue(queueName: string, newQueueOrCallback: any): JQuery;
+    queue(newQueueOrCallback: any): JQuery;
+
     removeData(nameOrList?: any): JQuery;
 
     // Deferred
@@ -398,6 +408,8 @@ interface JQuery {
 
     fadeToggle(duration?: any, easing?: string, callback?: any): JQuery;
 
+    finish(queue?: string): JQuery;
+
     hide(duration?: any, callback?: any): JQuery;
     hide(duration?: any, easing?: string, callback?: any): JQuery;
 
@@ -415,10 +427,6 @@ interface JQuery {
 
     stop(clearQueue?: boolean, jumpToEnd?: boolean): JQuery;
     stop(queue?: any, clearQueue?: boolean, jumpToEnd?: boolean): JQuery;
-
-    toggle(duration?: any, callback?: any): JQuery;
-    toggle(duration?: any, easing?: string, callback?: any): JQuery;
-    toggle(showOrHide: boolean): JQuery;
 
     // Events
     bind(eventType: string, eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
@@ -592,7 +600,7 @@ interface JQuery {
     add(html: string): JQuery;
     add(obj: JQuery): JQuery;
 
-    andSelf(): JQuery;
+    addBack(selector?: any): JQuery;
 
     children(selector?: any): JQuery;
 
@@ -662,11 +670,6 @@ interface JQuery {
     siblings(selector?: string): JQuery;
 
     slice(start: number, end?: number): JQuery;
-
-    // Utilities
-    queue(queueName?: string): any[];
-    queue(queueName: string, newQueueOrCallback: any): JQuery;
-    queue(newQueueOrCallback: any): JQuery;
 }
 
 declare var jQuery: JQueryStatic;

@@ -3,26 +3,24 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 
 	var exports = {},
 		defaultOptions = {
-			propagateConstants: false,
-			minWhitespace: false,
-			emitComments: true,
+			propagateEnumConstants: false,
+			removeComments: false,
 			watch: false,
-			exec: false,
-			resolve: true,
-			disallowBool: false,
+			noResolve: false,
 			allowAutomaticSemicolonInsertion: true,
-			allowModuleKeywordInExternalModuleReference: true,
-			useDefaultLib: true,
+			noImplicitAny: false,
+			noLib: false,
 			codeGenTarget: 0 /* EcmaScript3 */,
-			moduleGenTarget: 0 /* Synchronous */,
-			outputOption: "",
+			moduleGenTarget: 0 /* Unspecified */,
+			outFileOption: "",
+			outDirOption: "",
 			mapSourceFiles: false,
-			emitFullSourceMapPath: false,
+			mapRoot: "",
+			sourceRoot: "",
 			generateDeclarationFiles: false,
 			useCaseSensitiveFileResolution: false,
 			gatherDiagnostics: false,
-			updateTC: false,
-			implicitAny: false
+			updateTC: false
 		}
 		;
 
@@ -120,7 +118,7 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		function IoHost(files) {
 			this._files = files;
 
-			this.arguments = [];
+			this.newLine = "\r\n";
 			this.stderr = new NullTextWriter();
 			this.stdout = new NullTextWriter();
 		}
@@ -214,7 +212,6 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		IoHost.prototype.dispose = function () {
 			this._files = null;
 
-			this.arguments = null;
 			this.stderr = null;
 			this.stdout = null;
 		};
@@ -222,32 +219,166 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		return IoHost;
 	})();
 
-	var ErrorReporter = (function () {
-		function ErrorReporter(ioHost, compilationEnvironment) {
+	var SourceFile = (function () {
+		function SourceFile(scriptSnapshot, byteOrderMark) {
+			this.scriptSnapshot = scriptSnapshot;
+			this.byteOrderMark = byteOrderMark;
+		}
+		return SourceFile;
+	})();
+
+	var CustomCompiler = (function () {
+		function CustomCompiler(ioHost, compilationSettings) {
 			this.ioHost = ioHost;
-			this.setCompilationEnvironment(compilationEnvironment);
+			this.inputFiles = [];
+			this.resolvedFiles = [];
+			this.inputFileNameToOutputFileName = new TypeScript.StringHashTable();
+			this.fileNameToSourceFile = new TypeScript.StringHashTable();
 			this.errors = [];
 			this.hasErrors = false;
+			this.logger = null;
+			this.compilationSettings = compilationSettings;
 		}
 
-		ErrorReporter.prototype.addDiagnostic = function (diagnostic) {
+		CustomCompiler.prototype.batchCompile = function (path) {
+			var anyCompilationErrors;
+
+			this.inputFiles.push(path);
+			this.logger = new TypeScript.NullLogger();
+
+			this.resolve();
+			anyCompilationErrors = this.compile();
+
+			return anyCompilationErrors;
+		};
+
+		CustomCompiler.prototype.resolve = function () {
+			var includeDefaultLibrary = !this.compilationSettings.noLib;
+			var resolvedFiles = [];
+			var resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this, 
+				this.compilationSettings);
+			resolvedFiles = resolutionResults.resolvedFiles;
+
+			includeDefaultLibrary = !this.compilationSettings.noLib && !resolutionResults.seenNoDefaultLibTag;
+
+			for (var i = 0, n = resolutionResults.diagnostics.length; i < n; i++) {
+				this.addDiagnostic(resolutionResults.diagnostics[i]);
+			}
+
+
+			if (includeDefaultLibrary) {
+				var libraryResolvedFile = {
+					path: this.getDefaultLibraryFilePath(),
+					referencedFiles: [],
+					importedFiles: []
+				};
+
+				resolvedFiles = [libraryResolvedFile].concat(resolvedFiles);
+			}
+
+			this.resolvedFiles = resolvedFiles;
+		};
+
+		CustomCompiler.prototype.compile = function () {
+			var that = this;
+			var compiler = new TypeScript.TypeScriptCompiler(this.logger, this.compilationSettings);
+
+			var anySyntacticErrors = false;
+			var anySemanticErrors = false;
+
+			for (var i = 0, n = this.resolvedFiles.length; i < n; i++) {
+				var resolvedFile = this.resolvedFiles[i];
+				var sourceFile = this.getSourceFile(resolvedFile.path);
+				compiler.addSourceUnit(resolvedFile.path, sourceFile.scriptSnapshot,
+					sourceFile.byteOrderMark, 0, false, resolvedFile.referencedFiles);
+
+				var syntacticDiagnostics = compiler.getSyntacticDiagnostics(resolvedFile.path);
+				compiler.reportDiagnostics(syntacticDiagnostics, this);
+
+				if (syntacticDiagnostics.length > 0) {
+					anySyntacticErrors = true;
+				}
+			}
+
+			if (anySyntacticErrors) {
+				return true;
+			}
+
+			compiler.pullTypeCheck();
+			var fileNames = compiler.fileNameToDocument.getAllKeys();
+			var n = fileNames.length;
+			for (var i = 0; i < n; i++) {
+				var fileName = fileNames[i];
+				var semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
+				if (semanticDiagnostics.length > 0) {
+					anySemanticErrors = true;
+					compiler.reportDiagnostics(semanticDiagnostics, this);
+				}
+			}
+
+			var mapInputToOutput = function (inputFile, outputFile) {
+				that.inputFileNameToOutputFileName.addOrUpdate(inputFile, outputFile);
+			};
+
+			var emitDiagnostics = compiler.emitAll(this, mapInputToOutput);
+			compiler.reportDiagnostics(emitDiagnostics, this);
+			if (emitDiagnostics.length > 0) {
+				return true;
+			}
+
+			if (anySemanticErrors) {
+				return true;
+			}
+
+			return false;
+		};
+
+		CustomCompiler.prototype.getSourceFile = function (fileName) {
+			var sourceFile = this.fileNameToSourceFile.lookup(fileName);
+			if (!sourceFile) {
+				var fileInformation = this.ioHost.readFile(fileName);
+				var snapshot = TypeScript.ScriptSnapshot.fromString(fileInformation.contents);
+				sourceFile = new SourceFile(snapshot, fileInformation.byteOrderMark);
+
+				this.fileNameToSourceFile.add(fileName, sourceFile);
+			}
+
+			return sourceFile;
+		};
+
+		CustomCompiler.prototype.getDefaultLibraryFilePath = function () {
+			return "lib.d.ts";
+		};
+
+		CustomCompiler.prototype.getScriptSnapshot = function (fileName) {
+			return this.getSourceFile(fileName).scriptSnapshot;
+		};
+
+		CustomCompiler.prototype.resolveRelativePath = function (path) {
+			return path;
+		};
+
+		CustomCompiler.prototype.fileExists = function (path) {
+			var result = this.ioHost.fileExists(path);
+
+			return result;
+		};
+
+		CustomCompiler.prototype.getParentDirectory = function (path) {
+			return this.ioHost.dirName(path);
+		};
+
+		CustomCompiler.prototype.addDiagnostic = function (diagnostic) {
 			var lineNumber = 0,
-				columnNumber = 0,
-				soruceUnit,
-				lineMap,
-				lineCol
+				columnNumber = 0
 				;
 
 			this.hasErrors = true;
 
 			if (diagnostic.fileName()) {
-				soruceUnit = this.compilationEnvironment.getSourceUnit(diagnostic.fileName());
-				if (!soruceUnit) {
-					soruceUnit = new TypeScript.SourceUnit(diagnostic.fileName(),
-						this.ioHost.readFile(diagnostic.fileName()));
-				}
-				lineMap = new TypeScript.LineMap(soruceUnit.getLineStartPositions(), soruceUnit.getLength());
-				lineCol = { line: -1, character: -1 };
+				var scriptSnapshot = this.getScriptSnapshot(diagnostic.fileName());
+				var lineMap = new TypeScript.LineMap(scriptSnapshot.getLineStartPositions(), scriptSnapshot.getLength());
+				var lineCol = { line: -1, character: -1 };
 				lineMap.fillLineAndCharacterFromPosition(diagnostic.start(), lineCol);
 
 				lineNumber = lineCol.line + 1;
@@ -262,302 +393,32 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			});
 		};
 
-		ErrorReporter.prototype.setCompilationEnvironment = function (compilationEnvironment) {
-			this.compilationEnvironment = compilationEnvironment;
+		CustomCompiler.prototype.writeFile = function (fileName, contents) {
+			this.ioHost.writeFile(fileName, contents);
 		};
 
-		ErrorReporter.prototype.reset = function () {
-			this.errors = [];
-			this.hasErrors = false;
+		CustomCompiler.prototype.directoryExists = function (path) {
+			var result = this.ioHost.directoryExists(path);
+
+			return result;
 		};
 
-		ErrorReporter.prototype.dispose = function () {
-			this.ioHost = null;
-			this.setCompilationEnvironment(null);
-			this.errors = null;
-			this.hasErrors = false;
-		};
+		CustomCompiler.prototype.resolvePath = function (path) {
+			var result = this.ioHost.resolvePath(path);
 
-		return ErrorReporter;
-	})();
-
-	var CommandLineHost = (function () {
-		function CommandLineHost(errorReporter) {
-			this.errorReporter = errorReporter;
-			this.pathMap = {};
-			this.resolvedPaths = {};
-		}
-
-		CommandLineHost.prototype.getPathIdentifier = function (path) {
-			return path.toLocaleUpperCase();
-		};
-
-		CommandLineHost.prototype.isResolved = function (path) {
-			return this.resolvedPaths[this.getPathIdentifier(this.pathMap[path])] !== undefined;
-		};
-
-		CommandLineHost.prototype.resolveCompilationEnvironment = function (preEnv, resolver) {
-			var that = this,
-				path,
-				resolvedEnv,
-				resolvedCodeList,
-				preCodeList,
-				preCodeIndex,
-				preCodeCount,
-				resolutionDispatcher
-				;
-
-			resolvedEnv = new TypeScript.CompilationEnvironment(preEnv.compilationSettings, preEnv.ioHost);
-
-			preCodeList = preEnv.code;
-			preCodeCount = preCodeList.length;
-
-			this.errorReporter.setCompilationEnvironment(resolvedEnv);
-
-			resolvedCodeList = resolvedEnv.code;
-
-			resolutionDispatcher = {
-				errorReporter: this.errorReporter,
-				postResolution: function (path, code) {
-					var pathId = that.getPathIdentifier(path);
-					if (!that.resolvedPaths[pathId]) {
-						resolvedCodeList.push(code);
-						that.resolvedPaths[pathId] = true;
-					}
-				}
-			};
-
-			for (preCodeIndex = 0; preCodeIndex < preCodeCount; preCodeIndex++) {
-				path = TypeScript.switchToForwardSlashes(preEnv.ioHost.resolvePath(preCodeList[preCodeIndex].path));
-				this.pathMap[preCodeList[preCodeIndex].path] = path;
-				resolver.resolveCode(path, "", false, resolutionDispatcher);
-			}
-
-			return resolvedEnv;
-		};
-
-		CommandLineHost.prototype.dispose = function () {
-			this.errorReporter = null;
-			this.pathMap = null;
-			this.resolvedPaths = null;
-		};
-
-		return CommandLineHost;
-	})();
-
-	var EmitterIoHost = (function () {
-		function EmitterIoHost(ioHost) {
-			this._ioHost = ioHost;
-		}
-
-		EmitterIoHost.prototype.writeFile = function (fileName, contents, writeByteOrderMark) {
-			this._ioHost.writeFile(fileName, contents, writeByteOrderMark);
-		};
-
-		EmitterIoHost.prototype.directoryExists = function (path) {
-			return this._ioHost.directoryExists(path);
-		};
-
-		EmitterIoHost.prototype.fileExists = function (path) {
-			return this._ioHost.fileExists(path);
-		};
-
-		EmitterIoHost.prototype.resolvePath = function (path) {
-			return path;
-		};
-
-		EmitterIoHost.prototype.dispose = function () {
-			this._ioHost = null;
-		};
-
-		return EmitterIoHost;
-	})();
-
-	var CustomCompiler = (function () {
-		function CustomCompiler(ioHost, compilationSettings) {
-			this.ioHost = ioHost;
-			this.resolvedEnvironment = null;
-			this.compilationSettings = compilationSettings;
-			this.compilationEnvironment = new TypeScript.CompilationEnvironment(this.compilationSettings, this.ioHost);
-			this.errorReporter = new ErrorReporter(this.ioHost, this.compilationEnvironment);
-		}
-
-		CustomCompiler.prototype._resolve = function () {
-			var resolver,
-				compilationEnvironment,
-				errorReporter,
-				commandLineHost,
-				ret,
-				codeList,
-				codeIndex,
-				codeCount,
-				path
-				;
-
-			compilationEnvironment = this.compilationEnvironment;
-			errorReporter = this.errorReporter;
-			resolver = new TypeScript.CodeResolver(compilationEnvironment);
-			commandLineHost = new CommandLineHost(errorReporter);
-			ret = commandLineHost.resolveCompilationEnvironment(compilationEnvironment, resolver, true);
-
-			codeList = compilationEnvironment.code;
-			codeCount = codeList.length;
-
-			for (codeIndex = 0; codeIndex < codeCount; codeIndex++) {
-				path = codeList[codeIndex].path;
-
-				if (!commandLineHost.isResolved(path)) {
-					if (!TypeScript.isTSFile(path) && !TypeScript.isDTSFile(path)) {
-						errorReporter.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, 269 /* Unknown_extension_for_file___0__Only__ts_and_d_ts_extensions_are_allowed */, [path]));
-					}
-					else {
-						errorReporter.addDiagnostic(new TypeScript.Diagnostic(null, 0, 0, 268 /* Could_not_find_file___0_ */, [path]));
-					}
-				}
-			}
-
-			commandLineHost.dispose();
-
-			return ret;
-		};
-
-		CustomCompiler.prototype._addSourceUnit = function (compiler) {
-			var anySyntacticErrors = false,
-				codeList,
-				codeCount,
-				codeIndex,
-				code,
-				path,
-				fileInfo,
-				syntacticDiagnostics
-				;
-
-			codeList = this.resolvedEnvironment.code;
-			codeCount = codeList.length;
-
-			for (codeIndex = 0; codeIndex < codeCount; codeIndex++) {
-				code = codeList[codeIndex];
-				path = code.path;
-				fileInfo = code.fileInformation;
-
-				if (code.fileInformation !== null) {
-					compiler.addSourceUnit(path,
-						TypeScript.ScriptSnapshot.fromString(fileInfo.contents()),
-						fileInfo.byteOrderMark(),
-						0,
-						false,
-						code.referencedFiles
-					);
-
-					syntacticDiagnostics = compiler.getSyntacticDiagnostics(path);
-					compiler.reportDiagnostics(syntacticDiagnostics, this.errorReporter);
-
-					if (syntacticDiagnostics.length > 0) {
-						anySyntacticErrors = true;
-					}
-				}
-			}
-
-			return anySyntacticErrors;
-		};
-
-		CustomCompiler.prototype._diagnoseSemanticErrors = function (compiler) {
-			var anySemanticErrors = false,
-				fileNames,
-				fileNameCount,
-				fileNameIndex,
-				fileName,
-				semanticDiagnostics
-				;
-
-			fileNames = compiler.fileNameToDocument.getAllKeys();
-			fileNameCount = fileNames.length;
-
-			for (fileNameIndex = 0; fileNameIndex < fileNameCount; fileNameIndex++) {
-				fileName = fileNames[fileNameIndex];
-				semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
-
-				if (semanticDiagnostics.length > 0) {
-					anySemanticErrors = true;
-					compiler.reportDiagnostics(semanticDiagnostics, this.errorReporter);
-				}
-			}
-
-			return anySemanticErrors;
-		};
-
-		CustomCompiler.prototype._emitAll = function (compiler) {
-			var that = this,
-				anyEmitErrors,
-				emitterIoHost,
-				mapInputToOutput,
-				emitDiagnostics
-				;
-
-			emitterIoHost = new EmitterIoHost(this.ioHost);
-			mapInputToOutput = function (inputFile, outputFile) {
-				that.resolvedEnvironment.inputFileNameToOutputFileName.addOrUpdate(inputFile, outputFile);
-			};
-
-			emitDiagnostics = compiler.emitAll(emitterIoHost, mapInputToOutput);
-			compiler.reportDiagnostics(emitDiagnostics, this.errorReporter);
-
-			anyEmitErrors = (emitDiagnostics.length > 0);
-
-			emitterIoHost.dispose();
-
-			return anyEmitErrors;
-		};
-
-		CustomCompiler.prototype.compile = function (path) {
-			var codeList,
-				logger,
-				compiler,
-				anySyntacticErrors,
-				anySemanticErrors,
-				anyEmitErrors
-				;
-
-			codeList = this.compilationEnvironment.code;
-			if (this.compilationSettings.useDefaultLib) {
-				codeList.push(new TypeScript.SourceUnit("lib.d.ts", null));
-			}
-			codeList.push(new TypeScript.SourceUnit(path, null));
-
-			this.resolvedEnvironment = this._resolve();
-
-			logger = new TypeScript.NullLogger();
-			compiler = new TypeScript.TypeScriptCompiler(logger, this.compilationSettings, null);
-
-			anySyntacticErrors = this._addSourceUnit(compiler);
-			if (anySyntacticErrors) {
-				return true;
-			}
-
-			compiler.pullTypeCheck();
-
-			anySemanticErrors = this._diagnoseSemanticErrors(compiler);
-			anyEmitErrors = this._emitAll(compiler);
-
-			if (anyEmitErrors) {
-				return true;
-			}
-
-			if (anySemanticErrors) {
-				return true;
-			}
-
-			return false;
+			return result;
 		};
 
 		CustomCompiler.prototype.dispose = function () {
 			this.ioHost = null;
-			this.resolvedEnvironment = null;
+			this.inputFiles = null;
+			this.resolvedFiles = null;
+			this.inputFileNameToOutputFileName = null;
+			this.fileNameToSourceFile = null;
+			this.errors = null;
+			this.hasErrors = false;
+			this.logger = null;
 			this.compilationSettings = null;
-			this.compilationEnvironment = null;
-
-			this.errorReporter.dispose();
-			this.errorReporter = null;
 		};
 
 		return CustomCompiler;
@@ -600,16 +461,16 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		ioHost = new IoHost(files);
 
 		customCompiler = new CustomCompiler(ioHost, getCompilationSettings(options));
-		anyCompilationErrors = customCompiler.compile(inputFilePath);
+		anyCompilationErrors = customCompiler.batchCompile(inputFilePath);
 
 		if (!anyCompilationErrors) {
 			outputFileInformation = ioHost.readFile(outputFilePath);
 			if (outputFileInformation) {
-				result.compiledCode = outputFileInformation.contents();
+				result.compiledCode = outputFileInformation.contents;
 			}
 		}
 		else {
-			result.errors = customCompiler.errorReporter.errors;
+			result.errors = customCompiler.errors;
 		}
 
 		customCompiler.dispose();

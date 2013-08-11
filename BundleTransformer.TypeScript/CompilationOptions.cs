@@ -15,36 +15,18 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to propagate constants to emitted code
+		/// Gets or sets a flag for whether to propagate enum constants to emitted code
 		/// </summary>
-		public bool PropagateConstants
+		public bool PropagateEnumConstants
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable native minification
+		/// Gets or sets a flag for whether to do not emit comments to output
 		/// </summary>
-		public bool EnableNativeMinification
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
-		/// </summary>
-		public CodeGenTarget CodeGenTarget
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow throw error for use of deprecated "bool" type
-		/// </summary>
-		public bool DisallowBool
+		public bool RemoveComments
 		{
 			get;
 			set;
@@ -59,6 +41,25 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to warn on expressions and declarations 
+		/// with an implied 'any' type
+		/// </summary>
+		public bool NoImplicitAny
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
+		/// </summary>
+		public CodeGenTarget CodeGenTarget
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the TypeScript compilation options
@@ -66,11 +67,11 @@
 		public CompilationOptions()
 		{
 			UseDefaultLib = true;
-			PropagateConstants = false;
-			EnableNativeMinification = false;
-			CodeGenTarget = CodeGenTarget.EcmaScript3;
-			DisallowBool = false;
+			PropagateEnumConstants = false;
+			RemoveComments = false;
 			AllowAutomaticSemicolonInsertion = true;
+			NoImplicitAny = false;
+			CodeGenTarget = CodeGenTarget.EcmaScript3;
 		}
 	}
 }

@@ -216,13 +216,12 @@
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
 			var optionsJson = new JObject(
-				new JProperty("useDefaultLib", options.UseDefaultLib),
-				new JProperty("propagateConstants", options.PropagateConstants),
-				new JProperty("minWhitespace", options.EnableNativeMinification),
-				new JProperty("emitComments", !options.EnableNativeMinification),
-				new JProperty("codeGenTarget", options.CodeGenTarget.ToString()),
-				new JProperty("disallowBool", options.DisallowBool),
-				new JProperty("allowAutomaticSemicolonInsertion", options.AllowAutomaticSemicolonInsertion)
+				new JProperty("noLib", !options.UseDefaultLib),
+				new JProperty("propagateEnumConstants", options.PropagateEnumConstants),
+				new JProperty("removeComments", options.RemoveComments),
+				new JProperty("allowAutomaticSemicolonInsertion", options.AllowAutomaticSemicolonInsertion),
+				new JProperty("noImplicitAny", options.NoImplicitAny),
+				new JProperty("codeGenTarget", options.CodeGenTarget.ToString())
 			);
 
 			return optionsJson;

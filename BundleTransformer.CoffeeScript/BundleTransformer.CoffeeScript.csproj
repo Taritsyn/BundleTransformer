@@ -88,7 +88,10 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
+del "$(ProjectDir)Resources\coffeescript-combined.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\coffeescript-combined.js" -out:"$(ProjectDir)Resources\coffeescript-combined.min.js"
+
+del "$(ProjectDir)Resources\cscHelper.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\cscHelper.js" -out:"$(ProjectDir)Resources\cscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

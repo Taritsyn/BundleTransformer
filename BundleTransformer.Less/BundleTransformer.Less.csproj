@@ -89,7 +89,10 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
+del "$(ProjectDir)Resources\less-combined.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\less-combined.js" -out:"$(ProjectDir)Resources\less-combined.min.js"
+
+del "$(ProjectDir)Resources\lesscHelper.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\lesscHelper.js" -out:"$(ProjectDir)Resources\lesscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

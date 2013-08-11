@@ -91,7 +91,10 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
+del "$(ProjectDir)Resources\typescript.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\typescript.js" -out:"$(ProjectDir)Resources\typescript.min.js"
+
+del "$(ProjectDir)Resources\tscHelper.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\tscHelper.js" -out:"$(ProjectDir)Resources\tscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

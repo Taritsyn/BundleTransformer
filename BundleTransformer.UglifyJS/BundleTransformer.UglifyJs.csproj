@@ -114,7 +114,10 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
+del "$(ProjectDir)Resources\uglify-combined.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\uglify-combined.js" -out:"$(ProjectDir)Resources\uglify-combined.min.js"
+
+del "$(ProjectDir)Resources\uglifyJsHelper.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\uglifyJsHelper.js" -out:"$(ProjectDir)Resources\uglifyJsHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -101,6 +101,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+
+del "$(ProjectDir)Resources\csso.web.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\csso.web.js" -out:"$(ProjectDir)Resources\csso.web.min.js"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

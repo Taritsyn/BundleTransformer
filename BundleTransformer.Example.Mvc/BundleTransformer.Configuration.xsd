@@ -321,19 +321,29 @@
 		<xs:annotation>
 			<xs:documentation>Configuration settings of TypeScript-translator</xs:documentation>
 		</xs:annotation>
-		<xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="useDefaultLib" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to include a default lib.d.ts with global declarations</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="propagateConstants" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="propagateEnumConstants" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to propagate constants to emitted code</xs:documentation>
+				<xs:documentation>Flag for whether to propagate enum constants to emitted code</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="allowAutomaticSemicolonInsertion" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow automatic semicolon insertion</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="noImplicitAny" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to warn on expressions and declarations with an implied 'any' type</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="codeGenTarget" use="optional" default="EcmaScript3">
@@ -346,16 +356,6 @@
 					<xs:enumeration value="EcmaScript5" />
 				</xs:restriction>
 			</xs:simpleType>
-		</xs:attribute>
-		<xs:attribute name="disallowBool" type="Boolean_SchemaType" use="optional" default="false">
-		  <xs:annotation>
-			<xs:documentation>Flag for whether to allow throw error for use of deprecated "bool" type</xs:documentation>
-		  </xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="allowAutomaticSemicolonInsertion" type="Boolean_SchemaType" use="optional" default="true">
-		  <xs:annotation>
-			<xs:documentation>Flag for whether to allow automatic semicolon insertion</xs:documentation>
-		  </xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /TypeScript settings -->
