@@ -3,6 +3,20 @@ var lessHelper = (function (Less) {
 
 	var exports = {};
 
+	function mix(destination, source) {
+		var propertyName;
+
+		destination = destination || {};
+
+		for (propertyName in source) {
+			if (source.hasOwnProperty(propertyName)) {
+				destination[propertyName] = source[propertyName];
+			}
+		}
+
+		return destination;
+	}
+
 	function formatString() {
 		var pattern = arguments[0],
 			result = pattern,
@@ -171,6 +185,7 @@ var lessHelper = (function (Less) {
 				rootFilename: path
 			}
 		};
+		mix(env, options);
 
 		var parser = new Less.Parser(env);
 		Less.ioHost = ioHost;

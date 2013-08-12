@@ -5150,63 +5150,40 @@ var Less = (function(){
 		//
 		// Used by `@import` directives
 		//
-		less.Parser.importer = function (path, currentFileInfo, callback, env) {
-			if (!/^([a-z-]+:)?\//.test(path) && currentFileInfo.currentDirectory) {
-				path = currentFileInfo.currentDirectory + path;
-			}
-			var sheetEnv = env.toSheet(path);
-			sheetEnv.processImports = false;
-			sheetEnv.currentFileInfo = currentFileInfo;
+		less.Parser.importer = function (filePath, currentFileInfo, callback, env) {
+			var ioHost = less.ioHost,
+				content,
+				newEnv,
+				newFileInfo = {
+					relativeUrls: env.relativeUrls,
+					entryPath: currentFileInfo.entryPath,
+					rootpath: currentFileInfo.rootpath,
+					rootFilename: currentFileInfo.rootFilename
+				}
+				;
 
-			// We pass `true` as 3rd argument, to force the reload of the import.
-			// This is so we can get the syntax tree as opposed to just the CSS output,
-			// as we need this to evaluate the current stylesheet.
-			loadStyleSheet(sheetEnv,
-				function (e, root, data, sheet, _, path) {
-					callback.call(null, e, root, path);
-				}, true);
-		};
-
-		function loadStyleSheet(sheet, callback, reload, remaining) {
-			var ioHost = less.ioHost;
-			var sheetPath = sheet.href;
-			var parentFileInfo = sheet.currentFileInfo;
-
-			var input;
 			try {
-				input = ioHost.readFile(sheetPath);
+				content = ioHost.readFile(filePath);
 			}
 			catch (e) {
 				return callback(e);
 			}
 
-			var contents = sheet.contents || {};
-			contents[sheetPath] = input;
+			newEnv = new tree.parseEnv(env);
+			newEnv.processImports = false;
 
-			var currentDirectoryPath = ioHost.dirName(sheetPath);
-			var currentFileInfo = {
-				filename: "input",
-				relativeUrls: parentFileInfo.relativeUrls,
-				rootpath: currentDirectoryPath,
-				currentDirectory: "",
-				entryPath: "",
-				rootFilename: sheetPath
-			};
+			if (newFileInfo.relativeUrls) {
+				newFileInfo.rootpath = ioHost.resolveRelativePath(newFileInfo.rootpath, filePath);
+			}
+			newFileInfo.currentDirectory = ioHost.dirName(filePath);
+			newFileInfo.filename = filePath;
 
-			var parser = new less.Parser({
-				paths: [sheetPath.replace(/[\w\.-]+$/, '')],
-				contents: contents,
-				currentFileInfo: currentFileInfo
-			});
-			parser.parse(input, function (e, root) {
-				if (e) {
-					return error(e, sheetPath);
-				}
-				try {
-					callback(e, root, input, sheet, { local: false, lastModified: 0, remaining: remaining }, sheetPath);
-				} catch (e) {
-					error(e, sheetPath);
-				}
+			newEnv.contents[filePath] = content; // Updating top importing parser content cache.
+			newEnv.currentFileInfo = newFileInfo;
+
+			var parser = new less.Parser(newEnv);
+			parser.parse(content, function (e, root) {
+				callback(e, root, filePath);
 			});
 		}
 

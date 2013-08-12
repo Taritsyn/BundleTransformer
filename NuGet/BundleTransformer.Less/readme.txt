@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.7.22
+              README file for Bundle Transformer: LESS 1.7.24
 
    ----------------------------------------------------------------------
 
@@ -20,7 +20,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #40 "LESS @import with fonts.googleapis does not work".
+   In configuration settings of LESS-translator added new property - 
+   DumpLineNumbers.
    
    =============
    DOCUMENTATION

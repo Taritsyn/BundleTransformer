@@ -178,10 +178,42 @@
 				new JProperty("compress", options.EnableNativeMinification),
 				new JProperty("ieCompat", options.IeCompat),
 				new JProperty("strictMath", options.StrictMath),
-				new JProperty("strictUnits", options.StrictUnits)
+				new JProperty("strictUnits", options.StrictUnits),
+				new JProperty("dumpLineNumbers", ConvertLineNumbersModeEnumValueToCode(options.DumpLineNumbers))
 			);
 
 			return optionsJson;
+		}
+
+		/// <summary>
+		/// Converts a line numbers mode enum value to the code
+		/// </summary>
+		/// <param name="lineNumbersMode">Line numbers mode enum value</param>
+		/// <returns>Line numbers mode code</returns>
+		private static string ConvertLineNumbersModeEnumValueToCode(LineNumbersMode lineNumbersMode)
+		{
+			string code;
+
+			switch (lineNumbersMode)
+			{
+				case LineNumbersMode.None:
+					code = string.Empty;
+					break;
+				case LineNumbersMode.Comments:
+					code = "comments";
+					break;
+				case LineNumbersMode.MediaQuery:
+					code = "mediaquery";
+					break;
+				case LineNumbersMode.All:
+					code = "all";
+					break;
+				default:
+					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
+						lineNumbersMode.ToString(), typeof(LineNumbersMode)));
+			}
+
+			return code;
 		}
 
 		/// <summary>

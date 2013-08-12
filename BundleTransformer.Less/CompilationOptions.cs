@@ -41,6 +41,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a output mode of the debug information
+		/// </summary>
+		public LineNumbersMode DumpLineNumbers
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the LESS compilation options
@@ -51,6 +60,7 @@
 			IeCompat = true;
 			StrictMath = false;
 			StrictUnits = false;
+			DumpLineNumbers = LineNumbersMode.None;
 		}
 	}
 }

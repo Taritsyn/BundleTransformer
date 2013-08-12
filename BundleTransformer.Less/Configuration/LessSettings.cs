@@ -46,5 +46,15 @@
 			get { return (bool)this["strictUnits"]; }
 			set { this["strictUnits"] = value; }
 		}
+		
+		/// <summary>
+		/// Gets or sets a output mode of the debug information
+		/// </summary>
+		[ConfigurationProperty("dumpLineNumbers", DefaultValue = LineNumbersMode.None)]
+		public LineNumbersMode DumpLineNumbers
+		{
+			get { return (LineNumbersMode)this["dumpLineNumbers"]; }
+			set { this["dumpLineNumbers"] = value; }
+		}
 	}
 }

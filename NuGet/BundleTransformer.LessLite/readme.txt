@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.7.22
+            README file for Bundle Transformer: LESS Lite 1.7.24
 
    ----------------------------------------------------------------------
 
@@ -11,16 +11,15 @@
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.LessLite contains translator-adapter LessTranslator 
-   (supports LESS (http://lesscss.org) version 1.4.2). This adapter makes
-   translation of LESS-code to CSS-code. Also contains HTTP-handler 
-   LessAssetHandler, which is responsible for text output of translated 
-   LESS-asset.
+   Legacy package, BundleTransformer.LessLite is now included in the 
+   'BundleTransformer.Less' package 
+   (http://nuget.org/packages/BundleTransformer.Less).
    
    =============
    RELEASE NOTES
    =============
-   Fixed bug #40 "LESS @import with fonts.googleapis does not work".
+   In configuration settings of LESS-translator added new property - 
+   DumpLineNumbers.
    
    =============
    DOCUMENTATION

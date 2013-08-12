@@ -287,6 +287,35 @@
 				<xs:documentation>Flag for whether units need to evaluate correctly</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="dumpLineNumbers" use="optional" default="None">
+			<xs:annotation>
+				<xs:documentation>Output mode of the debug information</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="None">
+						<xs:annotation>
+							<xs:documentation>No output the debug information</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="Comments">
+						<xs:annotation>
+							<xs:documentation>Output the debug information within comments</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="MediaQuery">
+						<xs:annotation>
+							<xs:documentation>Output the debug information within a fake media query which is compatible with the SASS format</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="All">
+						<xs:annotation>
+							<xs:documentation>Output the debug information within comments and fake media query</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /LESS settings -->
 
