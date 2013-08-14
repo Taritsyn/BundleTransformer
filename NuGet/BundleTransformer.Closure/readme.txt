@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Closure 1.7.21
+             README file for Bundle Transformer: Closure 1.7.25
  
    ----------------------------------------------------------------------
 
@@ -22,6 +22,12 @@
    ClosureLocalJsMinifier is based on the Google Closure Compiler Application 
    (https://developers.google.com/closure/compiler/docs/gettingstarted_app) 
    and for their work requires the latest version of file compiler.jar.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed bug #43 "ClosureRemoteJsMinifier throws exception Invalid URI: 
+   The Uri string is too long. in UriHelper.EscapeString method".
    
    ====================
    POST-INSTALL ACTIONS

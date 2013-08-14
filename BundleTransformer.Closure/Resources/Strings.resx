@@ -127,7 +127,7 @@
     <value>You have not specified URL of the Google Closure Compiler Service API.</value>
   </data>
   <data name="Minifiers_ClosureRemoteMinificationHttpRequestError" xml:space="preserve">
-    <value>Cannot connect to {0}! Check the specified URL and Internet connectivity.</value>
+    <value>Cannot connect to '{0}'! Check the specified URL and Internet connectivity.</value>
   </data>
   <data name="Minifiers_ClosureRemoteMinificationInvalidHttpStatus" xml:space="preserve">
     <value>When accessing to the Google Closure Compiler Service API occurred error with HTTP-status code '{0}'.</value>

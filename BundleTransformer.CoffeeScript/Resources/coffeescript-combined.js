@@ -13,7 +13,7 @@ var CoffeeScript = (function(){
 	//#region URL: ./helpers
 	require['./helpers'] = (function() {
 	  var exports = {};
-	  var buildLocationData, extend, flatten, last, repeat, _ref;
+	  var buildLocationData, extend, flatten, last, repeat, syntaxErrorToString, _ref;
 
 	  exports.starts = function(string, literal, start) {
 		return literal === string.substr(start, literal.length);
@@ -201,38 +201,50 @@ var CoffeeScript = (function(){
 
 	  exports.throwSyntaxError = function(message, location) {
 		var error;
-		if (location.last_line == null) {
-		  location.last_line = location.first_line;
-		}
-		if (location.last_column == null) {
-		  location.last_column = location.first_column;
-		}
 		error = new SyntaxError(message);
 		error.location = location;
+		error.toString = syntaxErrorToString;
+		error.stack = error.toString();
 		throw error;
 	  };
 
-	  exports.prettyErrorMessage = function(error, filename, code, useColors) {
-		var codeLine, colorize, end, first_column, first_line, last_column, last_line, marker, message, start, _ref1;
-		if (!error.location) {
-		  return error.stack || ("" + error);
+	  exports.updateSyntaxError = function(error, code, filename) {
+		if (error.toString === syntaxErrorToString) {
+		  error.code || (error.code = code);
+		  error.filename || (error.filename = filename);
+		  error.stack = error.toString();
 		}
-		filename = error.filename || filename;
-		code = error.code || code;
-		_ref1 = error.location, first_line = _ref1.first_line, first_column = _ref1.first_column, last_line = _ref1.last_line, last_column = _ref1.last_column;
-		codeLine = code.split('\n')[first_line];
+		return error;
+	  };
+
+	  syntaxErrorToString = function() {
+		var codeLine, colorize, colorsEnabled, end, filename, first_column, first_line, last_column, last_line, marker, start, _ref1, _ref2;
+		if (!(this.code && this.location)) {
+		  return Error.prototype.toString.call(this);
+		}
+		_ref1 = this.location, first_line = _ref1.first_line, first_column = _ref1.first_column, last_line = _ref1.last_line, last_column = _ref1.last_column;
+		if (last_line == null) {
+		  last_line = first_line;
+		}
+		if (last_column == null) {
+		  last_column = first_column;
+		}
+		filename = this.filename || '[stdin]';
+		codeLine = this.code.split('\n')[first_line];
 		start = first_column;
 		end = first_line === last_line ? last_column + 1 : codeLine.length;
 		marker = repeat(' ', start) + repeat('^', end - start);
-		if (useColors) {
+		if (typeof process !== "undefined" && process !== null) {
+		  colorsEnabled = process.stdout.isTTY && !process.env.NODE_DISABLE_COLORS;
+		}
+		if ((_ref2 = this.colorful) != null ? _ref2 : colorsEnabled) {
 		  colorize = function(str) {
 			return "\x1B[1;31m" + str + "\x1B[0m";
 		  };
 		  codeLine = codeLine.slice(0, start) + colorize(codeLine.slice(start, end)) + codeLine.slice(end);
 		  marker = colorize(marker);
 		}
-		message = "" + filename + ":" + (first_line + 1) + ":" + (first_column + 1) + ": error: " + error.message + "\n" + codeLine + "\n" + marker;
-		return message;
+		return "" + filename + ":" + (first_line + 1) + ":" + (first_column + 1) + ": error: " + this.message + "\n" + codeLine + "\n" + marker;
 	  };
   
 	  return exports;
@@ -5488,8 +5500,9 @@ var CoffeeScript = (function(){
 	//#region URL: ./coffee-script
 	require["./coffee-script"] = (function () {
 	  var exports = {};
-	  var Lexer, Module, SourceMap, child_process, compile, ext, findExtension, fork, formatSourcePosition, fs, helpers, lexer, loadFile, parser, patchStackTrace, patched, path, sourceMaps, vm, _i, _len, _ref,
-		__hasProp = {}.hasOwnProperty;
+	  var Lexer, Module, SourceMap, binary, child_process, compile, compileFile, ext, fileExtensions, findExtension, fork, formatSourcePosition, fs, getSourceMap, helpers, lexer, loadFile, parser, path, sourceMaps, vm, withPrettyErrors, _i, _len,
+		__hasProp = {}.hasOwnProperty,
+		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 	  //fs = require('fs');
 
@@ -5509,9 +5522,28 @@ var CoffeeScript = (function(){
 
 	  exports.VERSION = '1.6.3';
 
+	  //binary = require.resolve('../../bin/coffee');
+
+	  //fileExtensions = ['.coffee', '.litcoffee', '.coffee.md'];
+
 	  exports.helpers = helpers;
 
-	  exports.compile = compile = function(code, options) {
+	  withPrettyErrors = function(fn) {
+		return function(code, options) {
+		  var err;
+		  if (options == null) {
+			options = {};
+		  }
+		  try {
+			return fn.call(this, code, options);
+		  } catch (_error) {
+			err = _error;
+			throw helpers.updateSyntaxError(err, code, options.filename);
+		  }
+		};
+	  };
+
+	  exports.compile = compile = withPrettyErrors(function(code, options) {
 		var answer, currentColumn, currentLine, fragment, fragments, header, js, map, merge, newLines, _i, _len;
 		if (options == null) {
 		  options = {};
@@ -5540,7 +5572,11 @@ var CoffeeScript = (function(){
 //			}
 //			newLines = helpers.count(fragment.code, "\n");
 //			currentLine += newLines;
-//			currentColumn = fragment.code.length - (newLines ? fragment.code.lastIndexOf("\n") : 0);
+//			if (newLines) {
+//			  currentColumn = fragment.code.length - (fragment.code.lastIndexOf("\n") + 1);
+//			} else {
+//			  currentColumn += fragment.code.length;
+//			}
 //		  }
 		  js += fragment.code;
 		}
@@ -5558,40 +5594,34 @@ var CoffeeScript = (function(){
 //		} else {
 		  return js;
 //		}
-	  };
+	  });
 
-//	  exports.tokens = function(code, options) {
+//	  exports.tokens = withPrettyErrors(function(code, options) {
 //		return lexer.tokenize(code, options);
-//	  };
+//	  });
 
-//	  exports.nodes = function(source, options) {
+//	  exports.nodes = withPrettyErrors(function(source, options) {
 //		if (typeof source === 'string') {
 //		  return parser.parse(lexer.tokenize(source, options));
 //		} else {
 //		  return parser.parse(source);
 //		}
-//	  };
+//	  });
 
 //	  exports.run = function(code, options) {
-//		var answer, mainModule;
+//		var answer, mainModule, _ref;
 //		if (options == null) {
 //		  options = {};
 //		}
 //		mainModule = require.main;
-//		if (options.sourceMap == null) {
-//		  options.sourceMap = true;
-//		}
 //		mainModule.filename = process.argv[1] = options.filename ? fs.realpathSync(options.filename) : '.';
 //		mainModule.moduleCache && (mainModule.moduleCache = {});
 //		mainModule.paths = require('module')._nodeModulePaths(path.dirname(fs.realpathSync(options.filename || '.')));
 //		if (!helpers.isCoffee(mainModule.filename) || require.extensions) {
 //		  answer = compile(code, options);
-//		  patchStackTrace();
-//		  sourceMaps[mainModule.filename] = answer.sourceMap;
-//		  return mainModule._compile(answer.js, mainModule.filename);
-//		} else {
-//		  return mainModule._compile(code, mainModule.filename);
+//		  code = (_ref = answer.js) != null ? _ref : answer;
 //		}
+//		return mainModule._compile(code, mainModule.filename);
 //	  };
 
 //	  exports["eval"] = function(code, options) {
@@ -5657,30 +5687,32 @@ var CoffeeScript = (function(){
 //		}
 //	  };
 
-//	  loadFile = function(module, filename) {
+//	  compileFile = function(filename, sourceMap) {
 //		var answer, err, raw, stripped;
 //		raw = fs.readFileSync(filename, 'utf8');
 //		stripped = raw.charCodeAt(0) === 0xFEFF ? raw.substring(1) : raw;
 //		try {
 //		  answer = compile(stripped, {
 //			filename: filename,
-//			sourceMap: true,
+//			sourceMap: sourceMap,
 //			literate: helpers.isLiterate(filename)
 //		  });
 //		} catch (_error) {
 //		  err = _error;
-//		  err.filename = filename;
-//		  err.code = stripped;
-//		  throw err;
+//		  throw helpers.updateSyntaxError(err, stripped, filename);
 //		}
-//		sourceMaps[filename] = answer.sourceMap;
-//		return module._compile(answer.js, filename);
+//		return answer;
+//	  };
+
+//	  loadFile = function(module, filename) {
+//		var answer;
+//		answer = compileFile(filename, false);
+//		return module._compile(answer, filename);
 //	  };
 
 //	  if (require.extensions) {
-//		_ref = ['.coffee', '.litcoffee', '.coffee.md'];
-//		for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-//		  ext = _ref[_i];
+//		for (_i = 0, _len = fileExtensions.length; _i < _len; _i++) {
+//		  ext = fileExtensions[_i];
 //		  require.extensions[ext] = loadFile;
 //		}
 //		Module = require('module');
@@ -5718,7 +5750,7 @@ var CoffeeScript = (function(){
 //		  if (options == null) {
 //			options = {};
 //		  }
-//		  execPath = helpers.isCoffee(path) ? 'coffee' : null;
+//		  execPath = helpers.isCoffee(path) ? binary : null;
 //		  if (!Array.isArray(args)) {
 //			args = [];
 //			options = args || {};
@@ -5760,95 +5792,96 @@ var CoffeeScript = (function(){
 		return helpers.throwSyntaxError(message, parser.lexer.yylloc);
 	  };
 
-	  patched = false;
+//	  formatSourcePosition = function(frame, getSourceMapping) {
+//		var as, column, fileLocation, fileName, functionName, isConstructor, isMethodCall, line, methodName, source, tp, typeName;
+//		fileName = void 0;
+//		fileLocation = '';
+//		if (frame.isNative()) {
+//		  fileLocation = "native";
+//		} else {
+//		  if (frame.isEval()) {
+//			fileName = frame.getScriptNameOrSourceURL();
+//			if (!fileName) {
+//			  fileLocation = "" + (frame.getEvalOrigin()) + ", ";
+//			}
+//		  } else {
+//			fileName = frame.getFileName();
+//		  }
+//		  fileName || (fileName = "<anonymous>");
+//		  line = frame.getLineNumber();
+//		  column = frame.getColumnNumber();
+//		  source = getSourceMapping(fileName, line, column);
+//		  fileLocation = source ? "" + fileName + ":" + source[0] + ":" + source[1] : "" + fileName + ":" + line + ":" + column;
+//		}
+//		functionName = frame.getFunctionName();
+//		isConstructor = frame.isConstructor();
+//		isMethodCall = !(frame.isToplevel() || isConstructor);
+//		if (isMethodCall) {
+//		  methodName = frame.getMethodName();
+//		  typeName = frame.getTypeName();
+//		  if (functionName) {
+//			tp = as = '';
+//			if (typeName && functionName.indexOf(typeName)) {
+//			  tp = "" + typeName + ".";
+//			}
+//			if (methodName && functionName.indexOf("." + methodName) !== functionName.length - methodName.length - 1) {
+//			  as = " [as " + methodName + "]";
+//			}
+//			return "" + tp + functionName + as + " (" + fileLocation + ")";
+//		  } else {
+//			return "" + typeName + "." + (methodName || '<anonymous>') + " (" + fileLocation + ")";
+//		  }
+//		} else if (isConstructor) {
+//		  return "new " + (functionName || '<anonymous>') + " (" + fileLocation + ")";
+//		} else if (functionName) {
+//		  return "" + functionName + " (" + fileLocation + ")";
+//		} else {
+//		  return fileLocation;
+//		}
+//	  };
 
-	  sourceMaps = {};
+//	  sourceMaps = {};
 
-	  patchStackTrace = function() {
-		var mainModule;
-		if (patched) {
-		  return;
-		}
-		patched = true;
-		mainModule = require.main;
-		return Error.prepareStackTrace = function(err, stack) {
-		  var frame, frames, getSourceMapping, sourceFiles, _ref1;
-		  sourceFiles = {};
-		  getSourceMapping = function(filename, line, column) {
-			var answer, sourceMap;
-			sourceMap = sourceMaps[filename];
-			if (sourceMap) {
-			  answer = sourceMap.sourceLocation([line - 1, column - 1]);
-			}
-			if (answer) {
-			  return [answer[0] + 1, answer[1] + 1];
-			} else {
-			  return null;
-			}
-		  };
-		  frames = (function() {
-			var _j, _len1, _results;
-			_results = [];
-			for (_j = 0, _len1 = stack.length; _j < _len1; _j++) {
-			  frame = stack[_j];
-			  if (frame.getFunction() === exports.run) {
-				break;
-			  }
-			  _results.push("  at " + (formatSourcePosition(frame, getSourceMapping)));
-			}
-			return _results;
-		  })();
-		  return "" + err.name + ": " + ((_ref1 = err.message) != null ? _ref1 : '') + "\n" + (frames.join('\n')) + "\n";
-		};
-	  };
+//	  getSourceMap = function(filename) {
+//		var answer, _ref;
+//		if (sourceMaps[filename]) {
+//		  return sourceMaps[filename];
+//		}
+//		if (_ref = path != null ? path.extname(filename) : void 0, __indexOf.call(fileExtensions, _ref) < 0) {
+//		  return;
+//		}
+//		answer = compileFile(filename, true);
+//		return sourceMaps[filename] = answer.sourceMap;
+//	  };
 
-	  formatSourcePosition = function(frame, getSourceMapping) {
-		var as, column, fileLocation, fileName, functionName, isConstructor, isMethodCall, line, methodName, source, tp, typeName;
-		fileName = void 0;
-		fileLocation = '';
-		if (frame.isNative()) {
-		  fileLocation = "native";
-		} else {
-		  if (frame.isEval()) {
-			fileName = frame.getScriptNameOrSourceURL();
-			if (!fileName) {
-			  fileLocation = "" + (frame.getEvalOrigin()) + ", ";
-			}
-		  } else {
-			fileName = frame.getFileName();
-		  }
-		  fileName || (fileName = "<anonymous>");
-		  line = frame.getLineNumber();
-		  column = frame.getColumnNumber();
-		  source = getSourceMapping(fileName, line, column);
-		  fileLocation = source ? "" + fileName + ":" + source[0] + ":" + source[1] + ", <js>:" + line + ":" + column : "" + fileName + ":" + line + ":" + column;
-		}
-		functionName = frame.getFunctionName();
-		isConstructor = frame.isConstructor();
-		isMethodCall = !(frame.isToplevel() || isConstructor);
-		if (isMethodCall) {
-		  methodName = frame.getMethodName();
-		  typeName = frame.getTypeName();
-		  if (functionName) {
-			tp = as = '';
-			if (typeName && functionName.indexOf(typeName)) {
-			  tp = "" + typeName + ".";
-			}
-			if (methodName && functionName.indexOf("." + methodName) !== functionName.length - methodName.length - 1) {
-			  as = " [as " + methodName + "]";
-			}
-			return "" + tp + functionName + as + " (" + fileLocation + ")";
-		  } else {
-			return "" + typeName + "." + (methodName || '<anonymous>') + " (" + fileLocation + ")";
-		  }
-		} else if (isConstructor) {
-		  return "new " + (functionName || '<anonymous>') + " (" + fileLocation + ")";
-		} else if (functionName) {
-		  return "" + functionName + " (" + fileLocation + ")";
-		} else {
-		  return fileLocation;
-		}
-	  };
+//	  Error.prepareStackTrace = function(err, stack) {
+//		var frame, frames, getSourceMapping, _ref;
+//		getSourceMapping = function(filename, line, column) {
+//		  var answer, sourceMap;
+//		  sourceMap = getSourceMap(filename);
+//		  if (sourceMap) {
+//			answer = sourceMap.sourceLocation([line - 1, column - 1]);
+//		  }
+//		  if (answer) {
+//			return [answer[0] + 1, answer[1] + 1];
+//		  } else {
+//			return null;
+//		  }
+//		};
+//		frames = (function() {
+//		  var _j, _len1, _results;
+//		  _results = [];
+//		  for (_j = 0, _len1 = stack.length; _j < _len1; _j++) {
+//			frame = stack[_j];
+//			if (frame.getFunction() === exports.run) {
+//			  break;
+//			}
+//			_results.push("  at " + (formatSourcePosition(frame, getSourceMapping)));
+//		  }
+//		  return _results;
+//		})();
+//		return "" + err.name + ": " + ((_ref = err.message) != null ? _ref : '') + "\n" + (frames.join('\n')) + "\n";
+//	  };
   
 	  return exports;
 	}).call(this);

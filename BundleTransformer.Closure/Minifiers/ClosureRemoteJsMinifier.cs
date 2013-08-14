@@ -14,6 +14,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
+	using Http;
 	using Resources;
 	using FormItem = System.Collections.Generic.KeyValuePair<string, string>;
 
@@ -157,20 +158,41 @@
 				}
 			}
 
+			HttpContent httpContent = new CustomFormUrlEncodedContent(formItems);
+
 			using (var client = new HttpClient())
 			{
 				HttpResponseMessage response;
 				try
 				{
 					response = client
-						.PostAsync(new Uri(serviceUrl), new FormUrlEncodedContent(formItems))
+						.PostAsync(new Uri(serviceUrl), httpContent)
 						.Result
 						;
 				}
-				catch(Exception)
+				catch (AggregateException e)
+				{
+					Exception innerException = e.InnerException;
+					if (innerException != null)
+					{
+						if (innerException is HttpRequestException)
+						{
+							throw new AssetMinificationException(
+								string.Format(Strings.Minifiers_ClosureRemoteMinificationHttpRequestError, serviceUrl));
+						}
+
+						throw new AssetMinificationException(
+							string.Format(CoreStrings.Minifiers_MinificationFailed,
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, innerException.Message), innerException);
+					}
+
+					throw;
+				}
+				catch (Exception e)
 				{
 					throw new AssetMinificationException(
-						string.Format(Strings.Minifiers_ClosureRemoteMinificationHttpRequestError, serviceUrl));
+						string.Format(CoreStrings.Minifiers_MinificationFailed,
+							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
 				}
 
 				if (response.IsSuccessStatusCode)

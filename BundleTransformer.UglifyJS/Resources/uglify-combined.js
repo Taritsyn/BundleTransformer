@@ -5075,7 +5075,7 @@
 				// inherits from AST_Statement; however, an AST_Function
 				// isn't really a statement.  This could byte in other
 				// places too. :-( Wish JS had multiple inheritance.
-				return [ this ];
+				throw def;
 			});
 			function ev(node) {
 				return node._eval();
@@ -5412,7 +5412,7 @@
 				// pass 3: we should drop declarations not in_use
 				var tt = new TreeTransformer(
 					function before(node, descend, in_list) {
-						if (node instanceof AST_Lambda) {
+						if (node instanceof AST_Lambda && !(node instanceof AST_Accessor)) {
 							for (var a = node.argnames, i = a.length; --i >= 0;) {
 								var sym = a[i];
 								if (sym.unreferenced()) {

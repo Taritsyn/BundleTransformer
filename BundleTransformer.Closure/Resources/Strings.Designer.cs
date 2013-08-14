@@ -88,7 +88,7 @@ namespace BundleTransformer.Closure.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot connect to {0}! Check the specified URL and Internet connectivity..
+        ///   Looks up a localized string similar to Cannot connect to &apos;{0}&apos;! Check the specified URL and Internet connectivity..
         /// </summary>
         public static string Minifiers_ClosureRemoteMinificationHttpRequestError {
             get {
