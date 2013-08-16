@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.7.24
+            README file for Bundle Transformer: LESS Lite 1.7.26
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   In configuration settings of LESS-translator added new property - 
-   DumpLineNumbers.
+   Fixed bug #47 "[Bundle Transformer: LESS 1.7.24] @import (multiple) 
+   'some.less' doesn't work".
    
    =============
    DOCUMENTATION

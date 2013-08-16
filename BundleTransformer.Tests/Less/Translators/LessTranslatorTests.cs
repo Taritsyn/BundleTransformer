@@ -68,7 +68,7 @@
 	background-image: data-uri('headphone.gif');
 }
 
-@import url(""TestLessSubImport1.less"");
+@import (multiple) url(""TestLessSubImport1.less"");
 @import 'TestLessSubImport2';")
 				;
 
@@ -197,7 +197,7 @@
 			var lessTranslator = new LessTranslator(virtualFileSystemWrapper,
 				relativePathResolver, lessConfig);
 
-			const string assetContent = @"@import ""/Content/Mixins.less"";
+			const string assetContent = @"@import (once) ""/Content/Mixins.less"";
 @import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
 
 @bg-color: #7AC0DA;
@@ -222,7 +222,7 @@
 	background-image: url(""@{monitor-icon-url}"");
 }
 
-@import ""/Content/TestLessImport.less"";";
+@import (once) ""/Content/TestLessImport.less"";";
 			string assetUrl = Utils.CombineUrls(STYLES_DIRECTORY_URL, "TestLess.less");
 			var dependencies = new List<Dependency>();
 

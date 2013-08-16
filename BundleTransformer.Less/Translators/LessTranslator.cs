@@ -58,7 +58,7 @@
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _lessImportRuleRegex =
-			new Regex(@"@import\s*(?:\((?<type>(less|css))\)\s*)?" +
+			new Regex(@"@import\s*(?:\((?<type>(less|css|multiple|once))\)\s*)?" +
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
 				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
@@ -449,7 +449,8 @@
 				return string.Format(IMPORT_RULE_FORMAT, string.Empty, quote, assetUrl);
 			}
 
-			string typeOption = (type == "less") ? "(less) " : string.Empty;
+			string typeOption = (!string.IsNullOrWhiteSpace(type) && type != "css") ? 
+				string.Format("({0}) ", type) : string.Empty;
 			string absoluteUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
 			string extension = Path.GetExtension(absoluteUrl);
 

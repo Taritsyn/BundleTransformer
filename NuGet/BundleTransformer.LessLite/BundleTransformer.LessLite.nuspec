@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.LessLite</id>
-    <version>1.7.24</version>
+    <version>1.7.26</version>
 	<title>Bundle Transformer: LESS Lite</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,7 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Legacy package, BundleTransformer.LessLite is now included in the 'BundleTransformer.Less' package (http://nuget.org/packages/BundleTransformer.Less).</description>
     <summary>Legacy package, BundleTransformer.LessLite is now included in the 'BundleTransformer.Less' package.</summary>
-	<releaseNotes>In configuration settings of LESS-translator added new property - DumpLineNumbers.</releaseNotes>
+	<releaseNotes>Fixed bug #47 "[Bundle Transformer: LESS 1.7.24] @import (multiple) 'some.less' doesn't work".</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling LESS Translation Translator Compilation Compiler</tags>
