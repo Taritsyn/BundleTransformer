@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.7.21
+          README file for Bundle Transformer: Sass and SCSS 1.7.27
 
    ----------------------------------------------------------------------
 
@@ -13,10 +13,17 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
    SassAndScssTranslator (supports Sass (http://sass-lang.com) 
-   version 3.2.9). This adapter makes translation of Sass- and 
+   version 3.2.10). This adapter makes translation of Sass- and 
    SCSS-code to CSS-code.
    Also contains HTTP-handler SassAndScssAssetHandler, which is 
    responsible for text output of translated Sass- or SCSS-asset.
+   
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of Sass version 3.2.10;
+   2. In configuration settings of Sass- and SCSS-translator added 3 new 
+      properties: LineNumbers, TraceSelectors and DebugInfo.
    
    =============
    DOCUMENTATION

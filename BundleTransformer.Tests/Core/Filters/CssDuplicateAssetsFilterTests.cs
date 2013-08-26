@@ -5,10 +5,10 @@
 	using Moq;
 	using NUnit.Framework;
 
-	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
+	using BundleTransformer.Core.Helpers;
 
 	[TestFixture]
 	public class CssDuplicateAssetsFilterTests
@@ -28,16 +28,16 @@
 		public void DuplicateCssAssetsRemovedIsCorrect()
 		{
 			// Arrange
-			var siteAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+			var siteAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
 				_virtualFileSystemWrapper);
-			var jqueryUiAccordionMinAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH,
-				@"\themes\base\jquery.ui.accordion.min.css"), _virtualFileSystemWrapper);
-			var testCssComponentsPathsAsset = new Asset(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
-				@"\css\TestCssComponentsPaths.css"), _virtualFileSystemWrapper);
-			var testCssComponentsPathsMinAsset = new Asset(Utils.CombineUrls(
-				ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, @"\css\TestCssComponentsPaths.min.css"), 
+			var jqueryUiAccordionMinAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"themes\base\jquery.ui.accordion.min.css"), _virtualFileSystemWrapper);
+			var testCssComponentsPathsAsset = new Asset(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"css\TestCssComponentsPaths.css"), _virtualFileSystemWrapper);
+			var testCssComponentsPathsMinAsset = new Asset(UrlHelpers.Combine(
+				ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, @"css\TestCssComponentsPaths.min.css"), 
 				_virtualFileSystemWrapper);
-			var siteDuplicateAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "site.css"),
+			var siteDuplicateAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "site.css"),
 				_virtualFileSystemWrapper);
 
 			IList<IAsset> assets = new List<IAsset>
@@ -55,12 +55,12 @@
 			IList<IAsset> processedAssets = cssDuplicateFilter.Transform(assets);
 
 			// Assert
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
 				processedAssets[0].VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.min.css"), processedAssets[1].VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\css\TestCssComponentsPaths.css"), processedAssets[2].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.min.css"), processedAssets[1].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"css\TestCssComponentsPaths.css"), processedAssets[2].VirtualPath);
 		}
 
 		[TestFixtureTearDown]

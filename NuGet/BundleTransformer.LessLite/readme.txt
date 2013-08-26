@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: LESS Lite 1.7.26
+            README file for Bundle Transformer: LESS Lite 1.7.27
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #47 "[Bundle Transformer: LESS 1.7.24] @import (multiple) 
-   'some.less' doesn't work".
+   Fixed bug #49 "Commented-out @import directive in less file is still 
+   imported".
    
    =============
    DOCUMENTATION

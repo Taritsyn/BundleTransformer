@@ -162,6 +162,19 @@
     <Content Include="Content\less\xfn.png" />
     <Content Include="Content\less\yahoo.ico" />
     <Content Include="Content\sass\%24license.png" />
+    <Content Include="Content\sass\android.png" />
+    <Content Include="Content\sass\battery.png" />
+    <Content Include="Content\sass\computer.png" />
+    <Content Include="Content\sass\database.png" />
+    <Content Include="Content\sass\ebook-reader.png" />
+    <Content Include="Content\sass\folder.png" />
+    <Content Include="Content\sass\folder\AndroidIcon.sass" />
+    <Content Include="Content\sass\folder\BatteryIcon.scss" />
+    <Content Include="Content\sass\folder\ComputerIcon.css" />
+    <Content Include="Content\sass\folder\DatabaseIcon.css" />
+    <Content Include="Content\sass\folder\EbookReaderIcon.css" />
+    <Content Include="Content\sass\folder\FolderIcon.css" />
+    <Content Include="Content\sass\folder\subfolder\TestSassSubImport.sass" />
     <Content Include="Content\scss\%24plug.png" />
     <Content Include="Content\less\folder\subfolder\%40network.png" />
     <Content Include="AlternativeContent\images\icons\abacus.png" />
@@ -183,9 +196,22 @@
     <Content Include="Content\images\icons\envelope.png" />
     <Content Include="Content\images\linkedin.png" />
     <Content Include="Content\sass\TestSass.sass" />
-    <Content Include="Content\sass\TestSassImport.sass" />
+    <Content Include="Content\sass\folder\TestSassImport.sass" />
+    <Content Include="Content\scss\folder\GitIcon.scss" />
+    <Content Include="Content\scss\folder\HourglassIcon.sass" />
+    <Content Include="Content\scss\folder\ImageIcon.css" />
+    <Content Include="Content\scss\folder\JsonIcon.css" />
+    <Content Include="Content\scss\folder\KeyIcon.css" />
+    <Content Include="Content\scss\folder\LayoutIcon.css" />
+    <Content Include="Content\scss\folder\subfolder\TestScssSubImport.scss" />
+    <Content Include="Content\scss\git.png" />
+    <Content Include="Content\scss\hourglass.png" />
+    <Content Include="Content\scss\image.png" />
+    <Content Include="Content\scss\json.png" />
+    <Content Include="Content\scss\key.png" />
+    <Content Include="Content\scss\layout.png" />
     <Content Include="Content\scss\TestScss.scss" />
-    <Content Include="Content\scss\TestScssImport.scss" />
+    <Content Include="Content\scss\folder\TestScssImport.scss" />
     <Content Include="Content\TestTranslators.css" />
     <Content Include="Content\themes\base\images\animated-overlay.gif" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
@@ -421,7 +447,11 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.8\tools\Microsoft.Bcl.Build.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -7,7 +7,9 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			removeComments: false,
 			watch: false,
 			noResolve: false,
+			allowBool: false,
 			allowAutomaticSemicolonInsertion: true,
+			allowModuleKeywordInExternalModuleReference: false,
 			noImplicitAny: false,
 			noLib: false,
 			codeGenTarget: 0 /* EcmaScript3 */,
@@ -20,7 +22,8 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			generateDeclarationFiles: false,
 			useCaseSensitiveFileResolution: false,
 			gatherDiagnostics: false,
-			updateTC: false
+			updateTC: false,
+			codepage: null
 		}
 		;
 

@@ -5,89 +5,11 @@
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
-	using System.Text.RegularExpressions;
 
 	using Resources;
 
 	public static class Utils
 	{
-		/// <summary>
-		/// Regular expression to find first slash
-		/// </summary>
-		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:\/|\\)*",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
-		/// Regular expression to find last slash
-		/// </summary>
-		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:\/|\\)*$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-
-		/// <summary>
-		/// Processes back slashes in URL
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>Processed URL</returns>
-		public static string ProcessBackSlashesInUrl(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
-			}
-
-			string result = url.Trim().Replace(@"\", @"/");
-
-			return result;
-		}
-
-		/// <summary>
-		/// Removes first slash from URL
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>URL without the first slash</returns>
-		public static string RemoveFirstSlashFromUrl(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
-			}
-
-			string result = _firstSlashRegExp.Replace(url.Trim(), string.Empty);
-
-			return result;
-		}
-
-		/// <summary>
-		/// Removes last slash from URL
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>URL without the last slash</returns>
-		public static string RemoveLastSlashFromUrl(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
-			}
-
-			string result = _lastSlashRegExp.Replace(url.Trim(), string.Empty);
-
-			return result;
-		}
-
-		/// <summary>
-		/// Combines two URLs
-		/// </summary>
-		/// <param name="baseUrl">The base URL</param>
-		/// <param name="relativeUrl">The relative URL to add to the base URL</param>
-		/// <returns>The absolute URL</returns>
-		public static string CombineUrls(string baseUrl, string relativeUrl)
-		{
-			string result = RemoveLastSlashFromUrl(baseUrl) + "/" + RemoveFirstSlashFromUrl(relativeUrl);
-
-			return result;
-		}
-
 		/// <summary>
 		/// Converts string value to string collection
 		/// </summary>
@@ -301,6 +223,24 @@
 			}
 
 			return isText;
+		}
+
+		/// <summary>
+		/// Gets a stream from the string value
+		/// </summary>
+		/// <param name="value">String value</param>
+		/// <returns>Stream</returns>
+		public static Stream GetStreamFromString(string value)
+		{
+			var stream = new MemoryStream();
+
+			var writer = new StreamWriter(stream);
+			writer.Write(value);
+			writer.Flush();
+
+			stream.Position = 0;
+
+			return stream;
 		}
 	}
 }

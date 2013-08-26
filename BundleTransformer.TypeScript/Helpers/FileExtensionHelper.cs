@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.TypeScript
+﻿namespace BundleTransformer.TypeScript.Helpers
 {
 	using System;
 
 	using Constants;
 
 	/// <summary>
-	/// File extension helper
+	/// File extension helpers
 	/// </summary>
-	internal static class FileExtensionHelper
+	internal static class FileExtensionHelpers
 	{
 		/// <summary>
 		/// Checks whether specified file extension is the JavaScript file extension 
@@ -16,9 +16,9 @@
 		/// <returns>Result of check</returns>
 		public static bool IsJavaScript(string fileExtension)
 		{
-			bool isJavaScript = string.Equals(fileExtension, FileExtension.JavaScript, StringComparison.OrdinalIgnoreCase);
+			bool result = string.Equals(fileExtension, FileExtension.JavaScript, StringComparison.OrdinalIgnoreCase);
 
-			return isJavaScript;
+			return result;
 		}
 
 		/// <summary>
@@ -28,9 +28,9 @@
 		/// <returns>Result of check</returns>
 		public static bool IsTypeScript(string fileExtension)
 		{
-			bool isTypeScript = string.Equals(fileExtension, FileExtension.TypeScript, StringComparison.OrdinalIgnoreCase);
+			bool result = string.Equals(fileExtension, FileExtension.TypeScript, StringComparison.OrdinalIgnoreCase);
 
-			return isTypeScript;
+			return result;
 		}
 	}
 }

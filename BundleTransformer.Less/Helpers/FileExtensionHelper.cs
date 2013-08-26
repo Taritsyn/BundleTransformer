@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.Less
+﻿namespace BundleTransformer.Less.Helpers
 {
 	using System;
 
 	using Constants;
 
 	/// <summary>
-	/// File extension helper
+	/// File extension helpers
 	/// </summary>
-	internal static class FileExtensionHelper
+	internal static class FileExtensionHelpers
 	{
 		/// <summary>
 		/// Checks whether specified file extension is the CSS file extension 
@@ -16,9 +16,9 @@
 		/// <returns>Result of check</returns>
 		public static bool IsCss(string fileExtension)
 		{
-			bool isCss = string.Equals(fileExtension, FileExtension.Css, StringComparison.OrdinalIgnoreCase);
+			bool result = string.Equals(fileExtension, FileExtension.Css, StringComparison.OrdinalIgnoreCase);
 
-			return isCss;
+			return result;
 		}
 
 		/// <summary>
@@ -28,9 +28,9 @@
 		/// <returns>Result of check</returns>
 		public static bool IsLess(string fileExtension)
 		{
-			bool isLess = string.Equals(fileExtension, FileExtension.Less, StringComparison.OrdinalIgnoreCase);
+			bool result = string.Equals(fileExtension, FileExtension.Less, StringComparison.OrdinalIgnoreCase);
 
-			return isLess;
+			return result;
 		}
 	}
 }

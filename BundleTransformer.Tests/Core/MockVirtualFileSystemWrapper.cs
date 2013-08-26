@@ -4,8 +4,8 @@
 	using System.IO;
 	using System.Web.Caching;
 
-	using BundleTransformer.Core;
 	using BundleTransformer.Core.FileSystem;
+	using BundleTransformer.Core.Helpers;
 
 	public class MockVirtualFileSystemWrapper : IVirtualFileSystemWrapper
 	{
@@ -20,7 +20,7 @@
 
 		public string ToAbsolutePath(string virtualPath)
 		{
-			return Utils.CombineUrls(_applicationRootUrl, virtualPath.TrimStart('~'));
+			return UrlHelpers.Combine(_applicationRootUrl, virtualPath.TrimStart('~'));
 		}
 
 		#region Not implemented methods
@@ -71,6 +71,11 @@
 
 		public CacheDependency GetCacheDependency(string virtualPath, string[] virtualPathDependencies, 
 			DateTime utcStart)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool IsTextFile(string virtualPath, int sampleSize, out System.Text.Encoding encoding)
 		{
 			throw new NotImplementedException();
 		}

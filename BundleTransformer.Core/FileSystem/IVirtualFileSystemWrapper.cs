@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.IO;
+	using System.Text;
 	using System.Web.Caching;
 
 	/// <summary>
@@ -17,21 +18,21 @@
 		bool FileExists(string virtualPath);
 
 		/// <summary>
-		/// Gets text content of the specified file
+		/// Gets a text content of the specified file
 		/// </summary>
 		/// <param name="virtualPath">The path to the virtual file</param>
 		/// <returns>Text content</returns>
 		string GetFileTextContent(string virtualPath);
 
 		/// <summary>
-		/// Gets binary content of the specified file
+		/// Gets a binary content of the specified file
 		/// </summary>
 		/// <param name="virtualPath">The path to the virtual file</param>
 		/// <returns>Binary content</returns>
 		byte[] GetFileBinaryContent(string virtualPath);
 
 		/// <summary>
-		/// Gets file stream
+		/// Gets a file stream
 		/// </summary>
 		/// <param name="virtualPath">The path to the virtual file</param>
 		/// <returns>File stream</returns>
@@ -53,5 +54,14 @@
 		/// <returns>A System.Web.Caching.CacheDependency object for the specified virtual resources</returns>
 		CacheDependency GetCacheDependency(string virtualPath, string[] virtualPathDependencies,
 			DateTime utcStart);
+
+		/// <summary>
+		/// Detect if a file is text and detect the encoding
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual file</param>
+		/// <param name="sampleSize">Number of characters to use for testing</param>
+		/// <param name="encoding">Detected encoding</param>
+		/// <returns>Result of check (true - is text; false - is binary)</returns>
+		bool IsTextFile(string virtualPath, int sampleSize, out Encoding encoding);
 	}
 }

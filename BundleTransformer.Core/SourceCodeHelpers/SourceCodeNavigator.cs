@@ -57,12 +57,12 @@
 
 			if (fragmentStartPosition < 0)
 			{
-				throw new ArgumentException("", "fragmentStartPosition");
+				throw new ArgumentException(string.Empty, "fragmentStartPosition");
 			}
 
 			if (fragmentLength > sourceCodeLength - fragmentStartPosition)
 			{
-				throw new ArgumentException("", "fragmentLength");
+				throw new ArgumentException(string.Empty, "fragmentLength");
 			}
 
 			int fragmentEndPosition = fragmentStartPosition + fragmentLength - 1;
@@ -483,6 +483,74 @@
 			var absoluteNodeCoordinates = new SourceCodeNodeCoordinates(absoluteLineNumber, absoluteColumnNumber);
 
 			return absoluteNodeCoordinates;
+		}
+
+		/// <summary>
+		/// Gets a current line content
+		/// </summary>
+		/// <param name="sourceCode">Source code</param>
+		/// <param name="currentPosition">Current position</param>
+		/// <param name="startLinePosition">Start position of line</param>
+		/// <param name="endLinePosition">End position of line</param>
+		/// <returns>Line content</returns>
+		public static string GetCurrentLine(string sourceCode, int currentPosition,
+			out int startLinePosition, out int endLinePosition)
+		{
+			startLinePosition = -1;
+			endLinePosition = -1;
+
+			if (string.IsNullOrEmpty(sourceCode))
+			{
+				return string.Empty;
+			}
+
+			int sourceCodeLength = sourceCode.Length;
+			if (currentPosition >= sourceCodeLength)
+			{
+				throw new ArgumentException(string.Empty, "currentPosition");
+			}
+
+			string currentChar = sourceCode.Substring(currentPosition, 1);
+			if (currentChar == "\n" || currentChar == "\r")
+			{
+				return string.Empty;
+			}
+
+			startLinePosition = sourceCode.LastIndexOf("\n", currentPosition, StringComparison.Ordinal);
+			if (startLinePosition != -1)
+			{
+				if (startLinePosition + 1 < sourceCodeLength)
+				{
+					startLinePosition += 1;
+				}
+			}
+			else
+			{
+				startLinePosition = 0;
+			}
+
+			endLinePosition = sourceCode.IndexOf("\n", currentPosition, StringComparison.Ordinal);
+			if (endLinePosition != -1)
+			{
+				if (endLinePosition > 0)
+				{
+					endLinePosition -= 1;
+					if (endLinePosition > 0 
+						&& sourceCode.IndexOf("\r", endLinePosition, 1, StringComparison.Ordinal) == endLinePosition)
+					{
+						endLinePosition -= 1;
+					}
+				}
+			}
+			else
+			{
+				endLinePosition = sourceCodeLength - 1;
+			}
+
+			int lineLength = endLinePosition - startLinePosition + 1;
+			string lineContent = sourceCode.Substring(startLinePosition, lineLength);
+
+			return lineContent;
 		}
 	}
 }

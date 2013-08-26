@@ -5,7 +5,6 @@
 
 	using Core;
 	using Core.Assets;
-	using Core.Configuration;
 	using Core.FileSystem;
 	using Core.HttpHandlers;
 	using Core.Translators;
@@ -32,7 +31,6 @@
 		public TypeScriptAssetHandler()
 			: this(HttpContext.Current.Cache,
 				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCoreConfiguration().AssetHandler,
 				BundleTransformerContext.Current.GetApplicationInfo())
 		{ }
 
@@ -41,12 +39,10 @@
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of HTTP-handler that responsible 
-		/// for text output of processed asset</param>
 		/// <param name="applicationInfo">Information about web application</param>
 		public TypeScriptAssetHandler(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
-			AssetHandlerSettings assetHandlerConfig, IHttpApplicationInfo applicationInfo)
-			: base(cache, virtualFileSystemWrapper, assetHandlerConfig, applicationInfo)
+			IHttpApplicationInfo applicationInfo)
+			: base(cache, virtualFileSystemWrapper, applicationInfo)
 		{ }
 
 

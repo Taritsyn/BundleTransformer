@@ -82,13 +82,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Dependency.cs" />
+    <Compile Include="Assets\DependencyCollection.cs" />
     <Compile Include="Builders\NullBuilder.cs" />
     <Compile Include="Bundles\CustomScriptBundle.cs" />
     <Compile Include="Bundles\CustomStyleBundle.cs" />
-    <Compile Include="Configuration\AssetHandlerSettings.cs" />
     <Compile Include="Constants\ContentType.cs" />
     <Compile Include="Constants\MinifierName.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
+    <Compile Include="CssNodeMatch.cs" />
+    <Compile Include="CssNodeType.cs" />
     <Compile Include="EmptyValueException.cs" />
     <Compile Include="Assets\Asset.cs" />
     <Compile Include="Assets\AssetType.cs" />
@@ -108,10 +110,14 @@
     <Compile Include="FileSystem\VirtualFileSystemWrapper.cs" />
     <Compile Include="FileSystem\IRelativePathResolver.cs" />
     <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
+    <Compile Include="Helpers\Interval.cs" />
     <Compile Include="Helpers\MimeTypeHelpers.cs" />
+    <Compile Include="Helpers\StylesheetHelpers.cs" />
+    <Compile Include="Helpers\UrlHelpers.cs" />
     <Compile Include="SourceCodeHelpers\SourceCodeNavigator.cs" />
     <Compile Include="SourceCodeHelpers\SourceCodeNodeCoordinates.cs" />
     <Compile Include="StringExtensions.cs" />
+    <Compile Include="AssetNodeMatchBase.cs" />
     <Compile Include="UnknownMimeTypeException.cs" />
     <Compile Include="Web\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IVirtualFileSystemWrapper.cs" />
@@ -159,6 +165,7 @@
     <Compile Include="Validators\IValidator.cs" />
     <Compile Include="Validators\JsAssetTypesValidator.cs" />
     <Compile Include="Web\IHttpApplicationInfo.cs" />
+    <Compile Include="CommonRegExps.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Strings.ru-ru.resx">

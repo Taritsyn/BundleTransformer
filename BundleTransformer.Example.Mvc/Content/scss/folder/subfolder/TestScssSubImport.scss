@@ -1,0 +1,10 @@
+﻿$border-color: #CE4DD6;
+
+.translators #scss
+{
+	border-color: $border-color;
+}
+
+@import "../GitIcon", '../HourglassIcon', "../ImageIcon", url(../JsonIcon.css);
+@import url('../KeyIcon.css');
+@import '../LayoutIcon.css' screen;

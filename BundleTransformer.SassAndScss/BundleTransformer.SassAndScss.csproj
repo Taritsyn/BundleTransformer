@@ -68,14 +68,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
     <Compile Include="Constants\FileExtension.cs" />
-    <Compile Include="FileExtensionHelper.cs" />
+    <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
     <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />
     <Compile Include="Compilers\SassAndScssCompiler.cs" />
     <Compile Include="Compilers\SassAndScssCompilerScriptHost.cs" />
+    <Compile Include="SassAndScssNodeMatch.cs" />
+    <Compile Include="SassAndScssNodeType.cs" />
+    <Compile Include="SassAndScssStylesheet.cs" />
+    <Compile Include="SyntaxType.cs" />
     <Compile Include="Translators\SassAndScssTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -107,7 +112,7 @@
     <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldap.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldaps.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\uri\mailto.rb" />
-    <EmbeddedResource Include="Resources\sass_in_one.rb" />
+    <EmbeddedResource Include="Resources\sass-combined.rb" />
     <None Include="..\BundleTransformer.snk">
       <Link>BundleTransformer.snk</Link>
     </None>
@@ -117,7 +122,9 @@
     <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\delegate.rb" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\LICENSE.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

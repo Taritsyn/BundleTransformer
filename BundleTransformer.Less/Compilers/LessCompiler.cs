@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Less.Compilers
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text;
 
@@ -111,7 +110,7 @@
 		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Translated LESS-code</returns>
-		public string Compile(string content, string path, IList<Dependency> dependencies,
+		public string Compile(string content, string path, DependencyCollection dependencies,
 			CompilationOptions options = null)
 		{
 			string newContent;
@@ -155,7 +154,7 @@
 		/// </summary>
 		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>List of dependencies in JSON format</returns>
-		private static JArray ConvertDependenciesToJson(IEnumerable<Dependency> dependencies)
+		private static JArray ConvertDependenciesToJson(DependencyCollection dependencies)
 		{
 			var dependenciesJson = new JArray(
 				dependencies.Select(d => new JObject(
@@ -225,7 +224,7 @@
 		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath,
-			IEnumerable<Dependency> dependencies)
+			DependencyCollection dependencies)
 		{
 			var type = errorDetails.Value<string>("type");
 			var message = errorDetails.Value<string>("message");
@@ -240,9 +239,7 @@
 			}
 			else
 			{
-				var filePathInUpperCase = filePath.ToUpperInvariant();
-				var dependency = dependencies.SingleOrDefault(d => d.Url.ToUpperInvariant() == filePathInUpperCase);
-
+				var dependency = dependencies.GetByUrl(filePath);
 				if (dependency != null)
 				{
 					newSourceCode = dependency.Content;

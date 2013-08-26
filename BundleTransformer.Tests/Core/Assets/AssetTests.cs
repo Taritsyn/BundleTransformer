@@ -2,9 +2,9 @@
 {
 	using NUnit.Framework;
 
-	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
+	using BundleTransformer.Core.Helpers;
 
 	[TestFixture]
 	public class AssetTests
@@ -29,9 +29,9 @@
 		public void UrlCalculationIsCorrect()
 		{
 			// Arrange
-			var siteCssAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+			var siteCssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
 				_virtualFileSystemWrapper);
-			var jqueryAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+			var jqueryAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
 				_virtualFileSystemWrapper);
 
 			// Act
@@ -39,8 +39,8 @@
 			string jqueryAssetUrl = jqueryAsset.Url;
 
 			// Assert
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_URL, "Site.css"), siteCssAssetUrl);
-			Assert.AreEqual(Utils.CombineUrls(SCRIPTS_DIRECTORY_URL, "jquery-1.6.2.js"), jqueryAssetUrl);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_URL, "Site.css"), siteCssAssetUrl);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_URL, "jquery-1.6.2.js"), jqueryAssetUrl);
 		}
 
 		[Test]
@@ -49,43 +49,43 @@
 			// Arrange
 
 			// Act
-			var siteCssAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
+			var siteCssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
 				_virtualFileSystemWrapper);
 
-			var jqueryJsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+			var jqueryJsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
 				_virtualFileSystemWrapper);
 
-			var testLessAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"), 
+			var testLessAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"), 
 				_virtualFileSystemWrapper);
 
-			var testSassAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "TestSass.sass"), 
+			var testSassAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestSass.sass"), 
 				_virtualFileSystemWrapper);
 
-			var testScssAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "TestScss.scss"), 
+			var testScssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestScss.scss"), 
 				_virtualFileSystemWrapper);
 
 			var testCoffeeAsset = new Asset(
-				Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScript.coffee"), 
+				UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScript.coffee"), 
 				_virtualFileSystemWrapper);
 
 			var testLitCoffeeAsset = new Asset(
-				Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestLiterateCoffeeScript.litcoffee"), 
+				UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestLiterateCoffeeScript.litcoffee"), 
 				_virtualFileSystemWrapper);
 
 			var testCoffeeMdAsset = new Asset(
-				Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, @"TestCoffeeScriptMarkdown.coffee.md"), 
+				UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScriptMarkdown.coffee.md"), 
 				_virtualFileSystemWrapper);
 
-			var testTsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestTypeScript.ts"), 
+			var testTsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestTypeScript.ts"), 
 				_virtualFileSystemWrapper);
 
-			var testHandlebarsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestHandlebars.handlebars"),
+			var testHandlebarsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestHandlebars.handlebars"),
 				_virtualFileSystemWrapper);
 
-			var testShortHandlebarsAsset = new Asset(Utils.CombineUrls(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestShortHandlebars.hbs"),
+			var testShortHandlebarsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestShortHandlebars.hbs"),
 				_virtualFileSystemWrapper);
 
-			var testPlainTextAsset = new Asset(Utils.CombineUrls(APPLICATION_ROOT_VIRTUAL_PATH, "TestPlainText.txt"),
+			var testPlainTextAsset = new Asset(UrlHelpers.Combine(APPLICATION_ROOT_VIRTUAL_PATH, "TestPlainText.txt"),
 				_virtualFileSystemWrapper);
 
 			// Assert

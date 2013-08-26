@@ -55,15 +55,5 @@
 		{
 			get { return this["js"] as JsSettings; }
 		}
-
-		/// <summary>
-		/// Gets configuration settings of HTTP-handler, that responsible 
-		/// for text output of processed asset
-		/// </summary>
-		[ConfigurationProperty("assetHandler")]
-		public AssetHandlerSettings AssetHandler
-		{
-			get { return this["assetHandler"] as AssetHandlerSettings; }
-		}
 	}
 }

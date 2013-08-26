@@ -6,6 +6,11 @@
 	internal static class FileExtension
 	{
 		/// <summary>
+		/// CSS-file extension
+		/// </summary>
+		public const string Css = ".css";
+
+		/// <summary>
 		/// Sass-file extension
 		/// </summary>
 		public const string Sass = ".sass";

@@ -5,10 +5,10 @@
 	using Moq;
 	using NUnit.Framework;
 
-	using BundleTransformer.Core;
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Filters;
+	using BundleTransformer.Core.Helpers;
 
 	[TestFixture]
 	public class CssFileExtensionsFilterTests
@@ -24,33 +24,33 @@
 			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css")))
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css")))
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css")))
 				.Returns(false)
 				;
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-					@"\themes\base\jquery.ui.accordion.css")))
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+					@"themes\base\jquery.ui.accordion.css")))
 				.Returns(false)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-					@"\themes\base\jquery.ui.accordion.min.css")))
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+					@"themes\base\jquery.ui.accordion.min.css")))
 				.Returns(true)
 				;
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-					@"\css\TestCssComponentsPaths.css")))
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+					@"css\TestCssComponentsPaths.css")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-					@"\css\TestCssComponentsPaths.min.css")))
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+					@"css\TestCssComponentsPaths.min.css")))
 				.Returns(true)
 				;
 
@@ -59,12 +59,12 @@
 
 		private IList<IAsset> GetTestAssets()
 		{
-			var siteAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+			var siteAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
 				_virtualFileSystemWrapper);
-			var jqueryUiAccordionAsset = new Asset(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH,
-				@"\themes\base\jquery.ui.accordion.min.css"), _virtualFileSystemWrapper);
-			var testCssComponentsPathsAsset = new Asset(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
-				@"\css\TestCssComponentsPaths.css"), _virtualFileSystemWrapper);
+			var jqueryUiAccordionAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"themes\base\jquery.ui.accordion.min.css"), _virtualFileSystemWrapper);
+			var testCssComponentsPathsAsset = new Asset(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+				@"css\TestCssComponentsPaths.css"), _virtualFileSystemWrapper);
 
 			var testAssets = new List<IAsset>
 			{
@@ -94,13 +94,13 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreNotEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreNotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -125,13 +125,13 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreNotEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreNotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -156,12 +156,12 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreNotEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\css\TestCssComponentsPaths.min.css"), testCssComponentsPathsAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreNotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"css\TestCssComponentsPaths.min.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
@@ -186,11 +186,11 @@
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(Utils.CombineUrls(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
-				@"\css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+				@"css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
 			Assert.AreEqual(false, siteAsset.Minified);
 			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);

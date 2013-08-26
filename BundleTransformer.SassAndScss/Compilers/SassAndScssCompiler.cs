@@ -11,6 +11,7 @@
 	using Microsoft.Scripting.Hosting;
 
 	using Core;
+	using Core.Assets;
 	using CoreStrings = Core.Resources.Strings;
 
 	/* This compiler based on code of the SassAndCoffee.Ruby library
@@ -30,7 +31,7 @@
 		/// <summary>
 		/// Name of file, which contains a Sass library
 		/// </summary>
-		const string SASS_LIBRARY_FILE_NAME = "sass_in_one.rb";
+		const string SASS_LIBRARY_FILE_NAME = "sass-combined.rb";
 
 		/// <summary>
 		/// Name of folder, which contains a IronRuby library
@@ -41,6 +42,11 @@
 		/// Name of folder, which contains a Ruby library
 		/// </summary>
 		const string RUBY_FOLDER_NAME = @"ruby\1.9.1";
+
+		/// <summary>
+		/// String representation of the default compilation options
+		/// </summary>
+		private readonly string _defaultOptionsString;
 
 		/// <summary>
 		/// Script engine
@@ -63,26 +69,6 @@
 		private dynamic _sassEngine;
 
 		/// <summary>
-		/// Sass-compilation options
-		/// </summary>
-		private dynamic _sassOptions;
-
-		/// <summary>
-		/// Sass-compilation options with minification
-		/// </summary>
-		private dynamic _sassOptionsWithMinification;
-
-		/// <summary>
-		/// SCSS-compilation options
-		/// </summary>
-		private dynamic _scssOptions;
-
-		/// <summary>
-		/// SCSS-compilation options with minification
-		/// </summary>
-		private dynamic _scssOptionsWithMinification;
-
-		/// <summary>
 		/// Synchronizer of compilation
 		/// </summary>
 		private readonly object _compilationSynchronizer = new object();
@@ -94,14 +80,30 @@
 
 
 		/// <summary>
+		/// Constructs instance of Sass- and SCSS-compiler
+		/// </summary>
+		public SassAndScssCompiler() : this(null)
+		{ }
+
+		/// <summary>
+		/// Constructs instance of Sass- and SCSS-compiler
+		/// </summary>
+		/// <param name="defaultOptions">Default compilation options</param>
+		public SassAndScssCompiler(CompilationOptions defaultOptions)
+		{
+			_defaultOptionsString = (defaultOptions != null) ?
+				ConvertCompilationOptionsToString("an unknown file", defaultOptions) : "null";
+		}
+
+
+		/// <summary>
 		/// Initializes compiler
 		/// </summary>
 		private void Initialize()
 		{
 			if (!_initialized)
 			{
-				_platformAdaptationLayer = new ResourceRedirectionPlatformAdaptationLayer(
-					RESOURCES_NAMESPACE);
+				_platformAdaptationLayer = new ResourceRedirectionPlatformAdaptationLayer(RESOURCES_NAMESPACE);
 
 				var scriptRuntimeSetup = new ScriptRuntimeSetup
 				{
@@ -126,14 +128,7 @@
 
 				_scriptScope = _scriptEngine.CreateScope();
 				sassLibrary.Execute(_scriptScope);
-
 				_sassEngine = _scriptScope.Engine.Runtime.Globals.GetVariable("Sass");
-				_sassOptions = _scriptEngine.Execute("{:cache => false, :syntax => :sass}");
-				_sassOptionsWithMinification = _scriptEngine.Execute(
-					"{:cache => false, :syntax => :sass, :style => :compressed}");
-				_scssOptions = _scriptEngine.Execute("{:cache => false, :syntax => :scss}");
-				_scssOptionsWithMinification = _scriptEngine.Execute(
-					"{:cache => false, :syntax => :scss, :style => :compressed}");
 
 				_initialized = true;
 			}
@@ -143,78 +138,31 @@
 		/// "Compiles" Sass- or SCSS-code to CSS-code
 		/// </summary>
 		/// <param name="content">Text content written on Sass or SCSS</param>
-		/// <param name="filePath">Path to Sass- or SCSS-file</param>
-		/// <param name="minifyOutput">Flag for whether to enable minification of output</param>
-		/// <param name="dependentFilePaths">Paths to dependent files</param>
+		/// <param name="path">Path to Sass- or SCSS-file</param>
+		/// <param name="dependencies">List of dependencies</param>
+		/// <param name="options">Compilation options</param>
 		/// <returns>Translated Sass- or SCSS-code</returns>
-		public string Compile(string content, string filePath, bool minifyOutput, 
-			IList<string> dependentFilePaths = null)
+		public string Compile(string content, string path, DependencyCollection dependencies, 
+			CompilationOptions options = null)
 		{
-			if (string.IsNullOrWhiteSpace(filePath))
-			{
-				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "filePath");
-			}
-
-			if (!File.Exists(filePath))
-			{
-				throw new FileNotFoundException(
-					string.Format(CoreStrings.Common_FileNotExist, filePath), filePath);
-			}
+			string currentOptionsString = (options != null) ?
+				ConvertCompilationOptionsToString(path, options) : _defaultOptionsString;
 
 			lock (_compilationSynchronizer)
 			{
 				Initialize();
 
-				dynamic compilerOptions;
-				string fileExtension = Path.GetExtension(filePath);
-
-				if (FileExtensionHelper.IsSass(fileExtension))
-				{
-					compilerOptions = minifyOutput ? _sassOptionsWithMinification : _sassOptions;
-				}
-				else if (FileExtensionHelper.IsScss(fileExtension))
-				{
-					compilerOptions = minifyOutput ? _scssOptionsWithMinification : _scssOptions;
-				}
-				else
-				{
-					throw new FormatException();
-				}
-
-				string directoryPath = Path.GetDirectoryName(filePath);
-				if (string.IsNullOrWhiteSpace(directoryPath))
-				{
-					throw new EmptyValueException(CoreStrings.Common_ValueIsEmpty);
-				}
-
-				if (!directoryPath.Contains("\'"))
-				{
-					var statement = string.Format("Dir.chdir '{0}'", directoryPath);
-					_scriptEngine.Execute(statement, _scriptScope);
-				}
-
-				if (dependentFilePaths != null)
-				{
-					dependentFilePaths.Add(filePath);
-					_platformAdaptationLayer.OnOpenInputFileStream = accessedFile =>
-					{
-						if (!accessedFile.Contains(".sass-cache"))
-						{
-							dependentFilePaths.Add(accessedFile);
-						}
-					};
-				}
-
-				string newContent;
+				_platformAdaptationLayer.Dependencies = dependencies;
 				
+				string newContent;
 				try
 				{
-					newContent = (string)_sassEngine.compile(content, compilerOptions);
+					newContent = (string)_sassEngine.compile(content, _scriptEngine.Execute(currentOptionsString));
 				}
 				catch (Exception e)
 				{
 					if (e.Message == "Sass::SyntaxError") {
-						throw new SassAndScssCompilingException(FormatErrorDetails(e, filePath), e);
+						throw new SassAndScssCompilingException(FormatErrorDetails(e, path), e);
 					}
 					else
 					{
@@ -223,6 +171,7 @@
 				}
 				finally
 				{
+					_platformAdaptationLayer.Dependencies = null;
 					_platformAdaptationLayer.OnOpenInputFileStream = null;
 				}
 
@@ -231,20 +180,50 @@
 		}
 
 		/// <summary>
+		/// Converts a compilation options to string
+		/// </summary>
+		/// <param name="path">Path to Sass- or SCSS-file</param>
+		/// <param name="options">Compilation options</param>
+		/// <returns>String representation of the compilation options</returns>
+		private static string ConvertCompilationOptionsToString(string path, CompilationOptions options)
+		{
+			var stringBuilder = new StringBuilder();
+			stringBuilder.Append("{");
+			stringBuilder.AppendFormat(":cache => {0}, ", "false");
+			stringBuilder.AppendFormat(":filename => '{0}',", path);
+			stringBuilder.AppendFormat(":syntax => :{0}, ", 
+				(options.SyntaxType == SyntaxType.Sass) ? "sass" : "scss");
+			stringBuilder.AppendFormat(":style => :{0}, ",
+				options.EnableNativeMinification ? "compressed" : "expanded");
+			stringBuilder.AppendFormat(":line_numbers => {0}, ", 
+				options.LineNumbers.ToString().ToLowerInvariant());
+			stringBuilder.AppendFormat(":trace_selectors => {0}, ", 
+				options.TraceSelectors.ToString().ToLowerInvariant());
+			stringBuilder.AppendFormat(":debug_info => {0}", 
+				options.DebugInfo.ToString().ToLowerInvariant());
+			stringBuilder.Append("}");
+
+			return stringBuilder.ToString();
+		}
+
+		/// <summary>
 		/// Generates a detailed error message
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
-		/// <param name="filePath">File path</param>
+		/// <param name="currentFilePath">File path</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(dynamic errorDetails, string filePath)
+		private static string FormatErrorDetails(dynamic errorDetails, string currentFilePath)
 		{
 			var message = (string)errorDetails.to_s();
-			var path = (string)errorDetails.sass_filename() ?? filePath;
+			var filePath = (string)errorDetails.sass_filename() ?? currentFilePath;
 			var lineNumber = (int)errorDetails.sass_line();
 
 			var errorMessage = new StringBuilder();
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, path);
+			if (!string.IsNullOrWhiteSpace(filePath))
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
+			}
 			if (lineNumber > 0)
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,

@@ -2,12 +2,12 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 
 	using NUnit.Framework;
 
 	using BundleTransformer.Core.Assets;
 	using BundleTransformer.Core.FileSystem;
+	using BundleTransformer.Core.Helpers;
 	using BundleTransformer.Core.Validators;
 
 	[TestFixture]
@@ -29,27 +29,27 @@
 		public void CssAssetsListContainAssetsWithInvalidTypes()
 		{
 			// Arrange
-			var siteCssAsset = new Asset(Path.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
+			var siteCssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
 				_virtualFileSystemWrapper);
 
-			var jqueryJsAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),
+			var jqueryJsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),
 				_virtualFileSystemWrapper);
 
-			var testLessAsset = new Asset(Path.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"),
+			var testLessAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"),
 				_virtualFileSystemWrapper);
 
-			var testCoffeeAsset = new Asset(Path.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScript.coffee"),
+			var testCoffeeAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScript.coffee"),
 				_virtualFileSystemWrapper);
 
 			var testLitCoffeeAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestLiterateCoffeeScript.litcoffee"),
+				UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestLiterateCoffeeScript.litcoffee"),
 				_virtualFileSystemWrapper);
 
 			var testCoffeeMdAsset = new Asset(
-				Path.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScriptMarkdown.coffee.md"),
+				UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "TestCoffeeScriptMarkdown.coffee.md"),
 				_virtualFileSystemWrapper);
 
-			var testPlainTextAsset = new Asset(Path.Combine(APPLICATION_ROOT_VIRTUAL_PATH, "TestPlainText.txt"),
+			var testPlainTextAsset = new Asset(UrlHelpers.Combine(APPLICATION_ROOT_VIRTUAL_PATH, "TestPlainText.txt"),
 				_virtualFileSystemWrapper);
 
 			var assets = new List<IAsset>
@@ -97,10 +97,10 @@
 		public void CssAssetsListNotContainAssetsWithInvalidTypes()
 		{
 			// Arrange
-			var siteCssAsset = new Asset(Path.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
+			var siteCssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
 				_virtualFileSystemWrapper);
 
-			var testLessAsset = new Asset(Path.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"),
+			var testLessAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less"),
 				_virtualFileSystemWrapper);
 
 			var assets = new List<IAsset>

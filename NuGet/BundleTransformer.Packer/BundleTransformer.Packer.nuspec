@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Packer</id>
-    <version>1.7.21</version>
+    <version>1.7.27</version>
 	<title>Bundle Transformer: Packer</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,7 +16,7 @@
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Dean Edwards Packer</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.7.21" />
+      <dependency id="BundleTransformer.Core" version="1.7.27" />
 	  <dependency id="MsieJavaScriptEngine" version="1.1.2" />
     </dependencies>
     <references>

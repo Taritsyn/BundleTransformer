@@ -3,10 +3,13 @@
 	using System;
 	using System.IO;
 	using System.Reflection;
-	using System.Text.RegularExpressions;
-	using System.Web;
 
 	using Microsoft.Scripting;
+
+	using Core;
+	using Core.Assets;
+	using Core.Resources;
+	using Helpers;
 
 	/// <summary>
 	/// Resource redirection platform adaptation layer
@@ -14,15 +17,23 @@
 	internal sealed class ResourceRedirectionPlatformAdaptationLayer : PlatformAdaptationLayer
 	{
 		/// <summary>
-		/// Regular expression for working with physical file paths
-		/// </summary>
-		private static readonly Regex _physicalFilePathRegExp = new Regex(@"^[a-zA-Z]:(\\|/)", 
-			RegexOptions.Compiled);
-
-		/// <summary>
 		/// Resources namespace
 		/// </summary>
 		private readonly string _resourcesNamespace;
+
+		/// <summary>
+		/// List of dependencies
+		/// </summary>
+		private DependencyCollection _dependencies;
+
+		/// <summary>
+		/// Gets or sets a list of dependencies
+		/// </summary>
+		public DependencyCollection Dependencies
+		{
+			get { return _dependencies; }
+			set { _dependencies = value; }
+		}
 
 		public Action<string> OnOpenInputFileStream
 		{
@@ -38,91 +49,160 @@
 		public ResourceRedirectionPlatformAdaptationLayer(string resourcesNamespace)
 		{
 			_resourcesNamespace = resourcesNamespace;
+			_dependencies = null;
 		}
 
 
 		public override bool FileExists(string path)
 		{
-			Stream rubyResourceStream = GetRubyResourceStream(path);
-			if (rubyResourceStream != null)
+			string extension = Path.GetExtension(path);
+
+			if (FileExtensionHelpers.IsRuby(extension))
 			{
-				return true;
+				Stream rubyResourceStream = GetResourceStream(path);
+				if (rubyResourceStream != null)
+				{
+					return true;
+				}
+			}
+			else if (FileExtensionHelpers.IsSassOrScss(extension))
+			{
+				if (_dependencies.ContainsUrl(path))
+				{
+					return true;
+				}
 			}
 
-			string physicalPath = GetAssetPhysicalPath(path);
-
-			return base.FileExists(physicalPath);
+			return base.FileExists(path);
 		}
 
 		public override Stream OpenInputFileStream(string path)
 		{
-			Stream rubyResourceStream = GetRubyResourceStream(path);
-			if (rubyResourceStream != null)
+			Stream fileStream = GetVirtualFileStream(path);
+			if (fileStream != null)
 			{
-				return rubyResourceStream;
+				return fileStream;
 			}
 
-			string physicalPath = GetAssetPhysicalPath(path);
 			if (OnOpenInputFileStream != null)
 			{
-				OnOpenInputFileStream(physicalPath);
+				OnOpenInputFileStream(path);
 			}
 
-			return base.OpenInputFileStream(physicalPath);
+			return base.OpenInputFileStream(path);
 		}
 
 		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, 
 			FileShare share)
 		{
-			string physicalPath = GetAssetPhysicalPath(path);
-			if (OnOpenInputFileStream != null)
+			Stream fileStream = GetVirtualFileStream(path);
+			if (fileStream != null)
 			{
-				OnOpenInputFileStream(physicalPath);
+				return fileStream;
 			}
 
-			return base.OpenInputFileStream(physicalPath, mode, access, share);
+			if (OnOpenInputFileStream != null)
+			{
+				OnOpenInputFileStream(path);
+			}
+
+			return base.OpenInputFileStream(path, mode, access, share);
 		}
 
 		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, 
 			FileShare share, int bufferSize)
 		{
-			string physicalPath = GetAssetPhysicalPath(path);
-			if (OnOpenInputFileStream != null)
+			Stream fileStream = GetVirtualFileStream(path);
+			if (fileStream != null)
 			{
-				OnOpenInputFileStream(physicalPath);
+				return fileStream;
 			}
 
-			return base.OpenInputFileStream(physicalPath, mode, access, share, bufferSize);
+			if (OnOpenInputFileStream != null)
+			{
+				OnOpenInputFileStream(path);
+			}
+
+			return base.OpenInputFileStream(path, mode, access, share, bufferSize);
 		}
 
 		/// <summary>
-		/// Gets a specified Ruby resource from this assembly
+		/// Gets a virtual file stream
 		/// </summary>
 		/// <param name="path">File path</param>
-		/// <returns>A System.IO.Stream representing the Ruby resource;
-		/// null if no resources were specified during compilation, 
-		/// or if the resource is not visible to the caller</returns>
-		private Stream GetRubyResourceStream(string path)
+		/// <returns>Virtual file stream</returns>
+		private Stream GetVirtualFileStream(string path)
 		{
-			Stream rubyResourceStream = null;
+			Stream fileStream;
 			string extension = Path.GetExtension(path);
 
-			if (FileExtensionHelper.IsRuby(extension))
+			if (FileExtensionHelpers.IsRuby(extension))
 			{
-				Assembly assembly = Assembly.GetExecutingAssembly();
-				string resourceName = PathToResourceName(path);
+				fileStream = GetResourceStream(path);
+				if (fileStream != null)
+				{
+					return fileStream;
+				}
 
-				try
-				{
-					rubyResourceStream = assembly.GetManifestResourceStream(resourceName);
-				}
-				catch
-				{
-					rubyResourceStream = null;
-				}
+				throw new FileNotFoundException(
+					string.Format(Strings.Common_FileNotExist, path));
 			}
 
-			return rubyResourceStream;
+			if (FileExtensionHelpers.IsSassOrScss(extension))
+			{
+				fileStream = GetAssetFileStream(path);
+				if (fileStream != null)
+				{
+					return fileStream;
+				}
+
+				throw new FileNotFoundException(
+					string.Format(Strings.Common_FileNotExist, path));
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Gets a specified embedded resource from this assembly
+		/// </summary>
+		/// <param name="path">File path</param>
+		/// <returns>A System.IO.Stream representing the embedded resource;
+		/// null if no resources were specified during compilation, 
+		/// or if the resource is not visible to the caller</returns>
+		private Stream GetResourceStream(string path)
+		{
+			Stream resourceStream;
+			Assembly assembly = Assembly.GetExecutingAssembly();
+			string resourceName = PathToResourceName(path);
+
+			try
+			{
+				resourceStream = assembly.GetManifestResourceStream(resourceName);
+			}
+			catch
+			{
+				resourceStream = null;
+			}
+
+			return resourceStream;
+		}
+
+		/// <summary>
+		/// Gets a file stream of the Sass- and SCSS-assets
+		/// </summary>
+		/// <param name="path">File path</param>
+		/// <returns>File stream of the Sass- and SCSS-assets</returns>
+		private Stream GetAssetFileStream(string path)
+		{
+			Stream assetFileStream = null;
+			Dependency dependency = _dependencies.GetByUrl(path);
+			if (dependency != null)
+			{
+				assetFileStream = Utils.GetStreamFromString(dependency.Content);
+			}
+
+			return assetFileStream;
 		}
 
 		/// <summary>
@@ -138,28 +218,6 @@
 				.Replace(@"R:", _resourcesNamespace)
 				.TrimStart('.')
 				;
-		}
-
-		/// <summary>
-		/// Gets a physical path of Sass- or SCSS-asset
-		/// </summary>
-		/// <param name="path">File path</param>
-		/// <returns>Physical file path</returns>
-		private string GetAssetPhysicalPath(string path)
-		{
-			string physicalPath = path;
-			string extension = Path.GetExtension(path);
-
-			if (FileExtensionHelper.IsSass(extension) || FileExtensionHelper.IsScss(extension))
-			{
-				bool isPhysicalPath = _physicalFilePathRegExp.IsMatch(path);
-				if (!isPhysicalPath)
-				{
-					physicalPath = HttpContext.Current.Server.MapPath(path);
-				}
-			}
-
-			return physicalPath;
 		}
 
 		#region Disabled methods

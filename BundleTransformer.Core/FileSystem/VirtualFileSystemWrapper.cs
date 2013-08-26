@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.IO;
+	using System.Text;
 	using System.Web.Caching;
 	using System.Web.Hosting;
 	using System.Web.Optimization;
@@ -24,7 +25,7 @@
 		}
 
 		/// <summary>
-		/// Gets text content of the specified file
+		/// Gets a text content of the specified file
 		/// </summary>
 		/// <param name="virtualPath">The path to the virtual file</param>
 		/// <returns>Text content</returns>
@@ -51,7 +52,7 @@
 		}
 
 		/// <summary>
-		/// Gets binary content of the specified file
+		/// Gets a binary content of the specified file
 		/// </summary>
 		/// <param name="virtualPath">The path to the virtual file</param>
 		/// <returns>Binary content</returns>
@@ -79,7 +80,7 @@
 		}
 
 		/// <summary>
-		/// Gets file stream
+		/// Gets a file stream
 		/// </summary>
 		/// <param name="virtualPath">The path to the virtual file</param>
 		/// <returns>File stream</returns>
@@ -125,6 +126,25 @@
 		{
 			return BundleTable.VirtualPathProvider.GetCacheDependency(virtualPath, virtualPathDependencies, 
 				utcStart);
+		}
+
+		/// <summary>
+		/// Detect if a file is text and detect the encoding
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual file</param>
+		/// <param name="sampleSize">Number of characters to use for testing</param>
+		/// <param name="encoding">Detected encoding</param>
+		/// <returns>Result of check (true - is text; false - is binary)</returns>
+		public bool IsTextFile(string virtualPath, int sampleSize, out Encoding encoding)
+		{
+			bool isTextContent;
+
+			using (Stream fileStream = GetFileStream(virtualPath))
+			{
+				isTextContent = Utils.IsTextStream(fileStream, sampleSize, out encoding);
+			}
+
+			return isTextContent;
 		}
 	}
 }

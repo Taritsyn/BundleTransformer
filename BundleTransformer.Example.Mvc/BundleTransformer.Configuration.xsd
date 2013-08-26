@@ -52,11 +52,6 @@
 					<xs:documentation>Configuration settings of processing JS-assets</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="assetHandler" type="AssetHandlerSettings_SchemaType" minOccurs="0" maxOccurs="1">
-				<xs:annotation>
-					<xs:documentation>Configuration settings of HTTP-handler, that responsible for text output of processed asset</xs:documentation>
-				</xs:annotation>
-			</xs:element>
 		</xs:all>
 		<xs:attribute name="enableTracing" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
@@ -215,51 +210,6 @@
 	</xs:complexType>
 
 	<xs:complexType name="ClearAssetProcessorRegistrationBase_SchemaType" abstract="true" />
-
-	<xs:complexType name="AssetHandlerSettings_SchemaType">
-		<xs:attribute name="clientCacheDurationInDays" use="optional" default="365">
-			<xs:annotation>
-				<xs:documentation>Duration of storage text content of processed asset in browser cache (in days)</xs:documentation>
-			</xs:annotation>
-			<xs:simpleType>
-				<xs:restriction base="xs:int">
-					<xs:minInclusive value="0" />
-					<xs:maxInclusive value="365" />
-				</xs:restriction>
-			</xs:simpleType>
-		</xs:attribute>
-		<xs:attribute name="enableCompression" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable GZIP/Deflate-compression of processed asset</xs:documentation>
-			</xs:annotation>			
-		</xs:attribute>
-		<xs:attribute name="serverCacheDurationInMinutes" use="optional" default="15">
-			<xs:annotation>
-				<xs:documentation>Duration of storage the text content of processed asset in server cache (in minutes)</xs:documentation>
-			</xs:annotation>
-			<xs:simpleType>
-				<xs:restriction base="xs:int">
-					<xs:minInclusive value="1" />
-					<xs:maxInclusive value="1440" />
-				</xs:restriction>
-			</xs:simpleType>
-		</xs:attribute>
-		<xs:attribute name="useServerCacheSlidingExpiration" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable sliding expiration time of server cache</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="disableClientCacheInDebugMode" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to disable storage text content of processed asset in browser cache during debugging</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="disableCompressionInDebugMode" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to disable GZIP/Deflate-compression of processed asset during debugging</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-	</xs:complexType>
 	<!-- /Core settings -->
 
 	<!-- LESS settings -->
@@ -329,6 +279,21 @@
 				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="lineNumbers" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to output the line number and file within comments</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="traceSelectors" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to output the full trace of imports and mixins before each selector</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="debugInfo" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to output the line number and file within a fake media query</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /Sass and SCSS settings -->
 
@@ -363,6 +328,11 @@
 		<xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="allowBool" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow 'bool' as a synonym for 'boolean'</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="allowAutomaticSemicolonInsertion" type="Boolean_SchemaType" use="optional" default="true">

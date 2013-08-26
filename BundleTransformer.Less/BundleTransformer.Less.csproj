@@ -61,8 +61,12 @@
     <Compile Include="Compilers\LessCompilingException.cs" />
     <Compile Include="Configuration\LessSettings.cs" />
     <Compile Include="Constants\FileExtension.cs" />
-    <Compile Include="FileExtensionHelper.cs" />
+    <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\LessAssetHandler.cs" />
+    <Compile Include="LessImport.cs" />
+    <Compile Include="LessNodeMatch.cs" />
+    <Compile Include="LessNodeType.cs" />
+    <Compile Include="LessStylesheet.cs" />
     <Compile Include="LineNumbersMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translators\LessTranslator.cs" />

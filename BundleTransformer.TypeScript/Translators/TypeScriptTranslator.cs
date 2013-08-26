@@ -1,20 +1,22 @@
 ﻿namespace BundleTransformer.TypeScript.Translators
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Text;
 	using System.Text.RegularExpressions;
 
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
+	using Core.Helpers;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Compilers;
 	using Configuration;
+	using Helpers;
 
 	/// <summary>
 	/// Translator that responsible for translation of TypeScript-code to JS-code
@@ -32,7 +34,12 @@
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Regular expression for working with "reference" comments
+		/// Composite format string for <code>reference</code> comment
+		/// </summary>
+		const string REFERENCE_COMMENT_FORMAT = "///<reference path={0}{1}{0}/>";
+
+		/// <summary>
+		/// Regular expression for working with <code>reference</code> comments
 		/// </summary>
 		private static readonly Regex _referenceCommentsRegex =
 			new Regex(@"\/\/\/\s*<reference\s+path=(?<quote1>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote1>)\s*\/>",
@@ -51,7 +58,7 @@
 		/// <summary>
 		/// Asset content cache
 		/// </summary>
-		private readonly Hashtable _assetContentCache;
+		private readonly Dictionary<string, TypeScriptScript> _assetContentCache;
 
 		/// <summary>
 		/// Synchronizer of translation
@@ -94,6 +101,14 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to allow 'bool' as a synonym for 'boolean'
+		/// </summary>
+		public bool AllowBool
+		{
+			get;
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets a flag for whether to allow automatic semicolon insertion
@@ -144,11 +159,12 @@
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_relativePathResolver = relativePathResolver;
-			_assetContentCache = new Hashtable();
+			_assetContentCache = new Dictionary<string,TypeScriptScript>();
 
 			UseDefaultLib = tsConfig.UseDefaultLib;
 			PropagateEnumConstants = tsConfig.PropagateEnumConstants;
 			RemoveComments = tsConfig.RemoveComments;
+			AllowBool = tsConfig.AllowBool;
 			AllowAutomaticSemicolonInsertion = tsConfig.AllowAutomaticSemicolonInsertion;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			CodeGenTarget = tsConfig.CodeGenTarget;
@@ -240,14 +256,14 @@
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
 			string assetUrl = asset.Url;
-			var dependencies = new List<Dependency>();
+			var dependencies = new DependencyCollection();
 
 			try
 			{
-				string content = GetAssetFileTextContent(assetUrl);
-				FillDependencies(assetUrl, content, assetUrl, dependencies);
+				TypeScriptScript script = GetAssetFileTextContent(assetUrl);
+				FillDependencies(assetUrl, script, dependencies);
 
-				newContent = typeScriptCompiler.Compile(content, assetUrl, dependencies);
+				newContent = typeScriptCompiler.Compile(script.Content, script.Url, dependencies);
 				newContent = RemoveReferenceComments(newContent);
 			}
 			catch (TypeScriptCompilingException e)
@@ -265,7 +281,8 @@
 
 			asset.Content = newContent;
 			asset.VirtualPathDependencies = dependencies
-				.Select(d => d.VirtualPath)
+				.Where(d => d.IsObservable)
+				.Select(d => d.Url)
 				.Distinct()
 				.ToList()
 				;
@@ -282,6 +299,7 @@
 				UseDefaultLib = UseDefaultLib,
 				PropagateEnumConstants = PropagateEnumConstants,
 				RemoveComments = RemoveComments,
+				AllowBool = AllowBool,
 				AllowAutomaticSemicolonInsertion = AllowAutomaticSemicolonInsertion,
 				NoImplicitAny = NoImplicitAny,
 				CodeGenTarget = CodeGenTarget
@@ -291,27 +309,164 @@
 		}
 
 		/// <summary>
-		/// Transforms relative paths of "reference" comments to absolute in TypeScript-code
+		/// Preprocess a script content
 		/// </summary>
-		/// <param name="content">Text content of TypeScript-asset</param>
-		/// <param name="path">TypeScript-file path</param>
-		/// <returns>Processed text content of TypeScript-asset</returns>
-		private string ResolveReferenceCommentsRelativePaths(string content, string path)
+		/// <param name="assetContent">Text content of TypeScript-asset</param>
+		/// <param name="assetUrl">URL of TypeScript-asset file</param>
+		/// <returns>Preprocessed text content of TypeScript-asset</returns>
+		public TypeScriptScript PreprocessScript(string assetContent, string assetUrl)
 		{
-			return _referenceCommentsRegex.Replace(content, m =>
+			var script = new TypeScriptScript(assetUrl, assetContent);
+
+			int contentLength = assetContent.Length;
+			if (contentLength == 0)
 			{
-				GroupCollection groups = m.Groups;
+				return script;
+			}
 
-				string url = groups["url"].Value.Trim();
-				string quote = groups["quote"].Success ? groups["quote"].Value : @"""";
+			MatchCollection referenceCommentMatches = _referenceCommentsRegex.Matches(assetContent);
+			if (referenceCommentMatches.Count == 0)
+			{
+				return script;
+			}
 
-				string result = string.Format("///<reference path={0}{1}{0}/>",
-					quote,
-					_relativePathResolver.ResolveRelativePath(path, url)
-				);
+			var nodeMatches = new List<TypeScriptNodeMatch>();
+
+			foreach (Match referenceCommentMatch in referenceCommentMatches)
+			{
+				var nodeMatch = new TypeScriptNodeMatch(referenceCommentMatch.Index,
+					TypeScriptNodeType.ReferenceComment,
+					referenceCommentMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+
+			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(assetContent);
+
+			foreach (Match multilineCommentMatch in multilineCommentMatches)
+			{
+				var nodeMatch = new TypeScriptNodeMatch(multilineCommentMatch.Index,
+					TypeScriptNodeType.MultilineComment,
+					multilineCommentMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+
+			nodeMatches = nodeMatches
+				.OrderBy(n => n.Position)
+				.ToList()
+				;
+
+			var contentBuilder = new StringBuilder();
+			int endPosition = contentLength - 1;
+			int currentPosition = 0;
+
+			foreach (TypeScriptNodeMatch nodeMatch in nodeMatches)
+			{
+				TypeScriptNodeType nodeType = nodeMatch.NodeType;
+				int nodePosition = nodeMatch.Position;
+				Match match = nodeMatch.Match;
+
+				if (nodePosition < currentPosition)
+				{
+					continue;
+				}
+
+				if (nodeType == TypeScriptNodeType.ReferenceComment)
+				{
+					ProcessOtherContent(contentBuilder, assetContent,
+						ref currentPosition, nodePosition);
+
+					GroupCollection referenceCommentGroup = match.Groups;
+
+					string url = referenceCommentGroup["url"].Value.Trim();
+					string quote = referenceCommentGroup["quote"].Success ?
+						referenceCommentGroup["quote"].Value : @"""";
+					string processedReferenceUrl;
+
+					string referenceComment = match.Value;
+					string processedReferenceComment = ProcessReferenceComment(assetUrl, url, quote,
+						out processedReferenceUrl);
+
+					if (!string.IsNullOrWhiteSpace(processedReferenceUrl))
+					{
+						var references = script.References;
+						string urlInUpperCase = processedReferenceUrl.ToUpperInvariant();
+
+						if (references.Count(r => r.ToUpperInvariant() == urlInUpperCase) == 0)
+						{
+							references.Add(processedReferenceUrl);
+						}
+					}
+
+					contentBuilder.Append(processedReferenceComment);
+					currentPosition += referenceComment.Length;
+				}
+				else if (nodeType == TypeScriptNodeType.MultilineComment)
+				{
+					int nextPosition = nodePosition + match.Length;
+
+					ProcessOtherContent(contentBuilder, assetContent,
+										ref currentPosition, nextPosition);
+				}
+			}
+
+			if (currentPosition > 0 && currentPosition <= endPosition)
+			{
+				ProcessOtherContent(contentBuilder, assetContent,
+					ref currentPosition, endPosition + 1);
+			}
+
+			script.Content = contentBuilder.ToString();
+
+			return script;
+		}
+
+		/// <summary>
+		/// Process a <code>reference</code> comment
+		/// </summary>
+		/// <param name="parentAssetUrl">URL of parent TypeScript-asset file</param>
+		/// <param name="assetUrl">URL of TypeScript-asset file</param>
+		/// <param name="quote">Quote</param>
+		/// <param name="processedReferenceUrl">Processed reference URL</param>
+		/// <returns>Processed <code>reference</code> comment</returns>
+		private string ProcessReferenceComment(string parentAssetUrl, string assetUrl, string quote,
+			out string processedReferenceUrl)
+		{
+			string result;
+			processedReferenceUrl = string.Empty;
+
+			if (UrlHelpers.StartsWithProtocol(assetUrl))
+			{
+				result = string.Format(REFERENCE_COMMENT_FORMAT, quote, assetUrl);
 
 				return result;
-			});
+			}
+
+			string absoluteUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
+
+			result = string.Format(REFERENCE_COMMENT_FORMAT, quote, absoluteUrl);
+			processedReferenceUrl = absoluteUrl;
+
+			return result;
+		}
+
+		/// <summary>
+		/// Process a other script content
+		/// </summary>
+		/// <param name="contentBuilder">Content builder</param>
+		/// <param name="assetContent">Text content of TypeScript-asset</param>
+		/// <param name="currentPosition">Current position</param>
+		/// <param name="nextPosition">Next position</param>
+		private static void ProcessOtherContent(StringBuilder contentBuilder, string assetContent,
+			ref int currentPosition, int nextPosition)
+		{
+			if (nextPosition > currentPosition)
+			{
+				string otherContent = assetContent.Substring(currentPosition,
+					nextPosition - currentPosition);
+
+				contentBuilder.Append(otherContent);
+				currentPosition = nextPosition;
+			}
 		}
 
 		/// <summary>
@@ -319,91 +474,44 @@
 		/// by using the "reference" comments
 		/// </summary>
 		/// <param name="rootAssetUrl">URL of root TypeScript-asset file</param>
-		/// <param name="parentAssetContent">Text content of parent TypeScript-asset</param>
-		/// <param name="parentAssetUrl">URL of parent TypeScript-asset file</param>
+		/// <param name="parentScript">Parent TypeScript-script</param>
 		/// <param name="dependencies">List of TypeScript-files, references to which have been 
 		/// added to a TypeScript-asset by using the "reference" comments</param>
-		public void FillDependencies(string rootAssetUrl, string parentAssetContent, string parentAssetUrl, 
-			IList<Dependency> dependencies)
+		public void FillDependencies(string rootAssetUrl, TypeScriptScript parentScript,
+			DependencyCollection dependencies)
 		{
-			var parentDependency = GetDependencyByUrl(dependencies, parentAssetUrl);
-			int parentDependencyIndex = parentDependency != null ? dependencies.IndexOf(parentDependency) : 0;
-			int dependencyIndex = parentDependencyIndex;
-
-			MatchCollection matches = _referenceCommentsRegex.Matches(parentAssetContent);
-			foreach (Match match in matches)
+			foreach (string referenceUrl in parentScript.References)
 			{
-				if (match.Groups["url"].Success)
+				string dependencyUrl = referenceUrl;
+
+				if (string.Equals(dependencyUrl, rootAssetUrl, StringComparison.OrdinalIgnoreCase))
 				{
-					string dependencyAssetUrl = match.Groups["url"].Value;
-					if (!string.IsNullOrWhiteSpace(dependencyAssetUrl))
+					continue;
+				}
+
+				if (!dependencies.ContainsUrl(dependencyUrl))
+				{
+					string dependencyExtension = Path.GetExtension(dependencyUrl);
+					if (FileExtensionHelpers.IsTypeScript(dependencyExtension)
+						|| FileExtensionHelpers.IsJavaScript(dependencyExtension))
 					{
-						if (string.Equals(dependencyAssetUrl, rootAssetUrl, StringComparison.OrdinalIgnoreCase))
+						if (AssetFileExists(dependencyUrl))
 						{
-							continue;
+							TypeScriptScript script = GetAssetFileTextContent(dependencyUrl);
+
+							var dependency = new Dependency(dependencyUrl, script.Content);
+							dependencies.Add(dependency);
+
+							FillDependencies(rootAssetUrl, script, dependencies);
 						}
-
-						string dependencyAssetExtension = Path.GetExtension(dependencyAssetUrl);
-
-						if (FileExtensionHelper.IsTypeScript(dependencyAssetExtension)
-							|| FileExtensionHelper.IsJavaScript(dependencyAssetExtension))
+						else
 						{
-							var duplicateDependency = GetDependencyByUrl(dependencies, dependencyAssetUrl);
-							if (duplicateDependency == null)
-							{
-								string dependencyAssetVirtualPath = dependencyAssetUrl;
-								if (AssetFileExists(dependencyAssetUrl))
-								{
-									string dependencyAssetContent = GetAssetFileTextContent(dependencyAssetUrl);
-									var dependency = new Dependency
-									{
-										VirtualPath = dependencyAssetVirtualPath,
-										Url = dependencyAssetUrl,
-										Content = dependencyAssetContent
-									};
-									dependencies.Insert(dependencyIndex, dependency);
-
-									FillDependencies(rootAssetUrl, dependencyAssetContent, dependencyAssetUrl, 
-										dependencies);
-
-									dependencyIndex = dependencies.IndexOf(dependency) + 1;
-								}
-								else
-								{
-									throw new FileNotFoundException(
-										string.Format(CoreStrings.Common_FileNotExist, dependencyAssetVirtualPath));
-								}
-							}
-							else
-							{
-								if (dependencies.IndexOf(duplicateDependency) > dependencyIndex)
-								{
-									dependencies.Remove(duplicateDependency);
-									dependencies.Insert(dependencyIndex, duplicateDependency);
-
-									dependencyIndex++;
-								}
-							}
+							throw new FileNotFoundException(
+								string.Format(CoreStrings.Common_FileNotExist, dependencyUrl));
 						}
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Gets a dependency by URL
-		/// </summary>
-		/// <param name="dependencies">List of dependencies</param>
-		/// <param name="url">URL of dependency</param>
-		/// <returns>Dependency</returns>
-		private static Dependency GetDependencyByUrl(IEnumerable<Dependency> dependencies, string url)
-		{
-			var urlInUpperCase = url.ToUpperInvariant();
-			var dependency = dependencies
-				.SingleOrDefault(d => d.Url.ToUpperInvariant() == urlInUpperCase)
-				;
-
-			return dependency;
 		}
 
 		/// <summary>
@@ -431,31 +539,6 @@
 		}
 
 		/// <summary>
-		/// Gets text content of asset
-		/// </summary>
-		/// <param name="assetUrl">URL to asset file</param>
-		/// <returns>Text content of asset</returns>
-		private string GetAssetFileTextContent(string assetUrl)
-		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
-			string assetContent;
-
-			if (_assetContentCache.ContainsKey(key))
-			{
-				assetContent = (string)_assetContentCache[key];
-			}
-			else
-			{
-				assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
-				assetContent = ResolveReferenceCommentsRelativePaths(assetContent, assetUrl);
-
-				_assetContentCache.Add(key, assetContent);
-			}
-
-			return assetContent;
-		}
-
-		/// <summary>
 		/// Determines whether the specified asset file exists
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
@@ -475,6 +558,31 @@
 			}
 
 			return result;
+		}
+
+		/// <summary>
+		/// Gets TypeScript-script by URL
+		/// </summary>
+		/// <param name="assetUrl">URL to asset file</param>
+		/// <returns>TypeScript-script</returns>
+		private TypeScriptScript GetAssetFileTextContent(string assetUrl)
+		{
+			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			TypeScriptScript script;
+
+			if (_assetContentCache.ContainsKey(key))
+			{
+				script = _assetContentCache[key];
+			}
+			else
+			{
+				string assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
+				script = PreprocessScript(assetContent, assetUrl);
+
+				_assetContentCache.Add(key, script);
+			}
+
+			return script;
 		}
 
 		/// <summary>

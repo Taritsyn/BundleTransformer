@@ -2,9 +2,9 @@
 {
 	using System;
 	using System.IO;
-	using System.Text.RegularExpressions;
 
 	using Core;
+	using Helpers;
 	using Resources;
 
 	/// <summary>
@@ -12,12 +12,6 @@
 	/// </summary>
 	public class CommonRelativePathResolver : IRelativePathResolver
 	{
-		/// <summary>
-		/// Regular expression for determine protocol in URL
-		/// </summary>
-		private static readonly Regex _protocolRegExp = new Regex(@"^(?:https?|ftp)\://",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
 		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
@@ -58,9 +52,9 @@
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "relativePath");
 			}
 
-			string newRelativePath = Utils.ProcessBackSlashesInUrl(relativePath);
+			string newRelativePath = UrlHelpers.ProcessBackSlashes(relativePath);
 
-			if (newRelativePath.StartsWith("/") || _protocolRegExp.IsMatch(newRelativePath))
+			if (newRelativePath.StartsWith("/") || UrlHelpers.StartsWithProtocol(newRelativePath))
 			{
 				return newRelativePath;
 			}
@@ -71,7 +65,7 @@
 			}
 
 			string absolutePath;
-			string newBasePath = Utils.ProcessBackSlashesInUrl(
+			string newBasePath = UrlHelpers.ProcessBackSlashes(
 				_virtualFileSystemWrapper.ToAbsolutePath(Path.GetDirectoryName(basePath)) + @"/");
 
 			if (newRelativePath.StartsWith("../") || newRelativePath.StartsWith("./"))
@@ -85,7 +79,7 @@
 				}
 
 				const string fakeSiteUrl = "http://bundletransformer.codeplex.com/";
-				var baseUri = new Uri(Utils.CombineUrls(fakeSiteUrl, newBasePath), UriKind.Absolute);
+				var baseUri = new Uri(UrlHelpers.Combine(fakeSiteUrl, newBasePath), UriKind.Absolute);
 
 				var absoluteUri = new Uri(baseUri, newRelativePath);
 				absolutePath = absoluteUri.PathAndQuery;
@@ -96,7 +90,7 @@
 			}
 			else
 			{
-				absolutePath = Utils.CombineUrls(newBasePath, newRelativePath);
+				absolutePath = UrlHelpers.Combine(newBasePath, newRelativePath);
 			}
 
 			return absolutePath;

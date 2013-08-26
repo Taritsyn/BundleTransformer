@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Configuration;
+	using System.Linq;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using System.Web;
@@ -29,9 +30,9 @@
 		private static readonly Regex _cssImportRuleRegex =
 			new Regex(@"@import\s*" +
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
-				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+				@"|(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))" +
-				@"(?:\s+(?<media>[^;]+))?" +
+				@"(?:\s*(?<media>all|braille|embossed|handheld|print|projection|screen|speech|aural|tty|tv))?" +
 				@"\s*;",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -303,23 +304,117 @@
 		/// <returns>Text content of CSS-asset without <code>@import</code> rules</returns>
 		private static string EjectCssImports(string content, IList<string> imports)
 		{
-			return _cssImportRuleRegex.Replace(content, m =>
+			int contentLength = content.Length;
+			if (contentLength == 0)
 			{
-				GroupCollection groups = m.Groups;
+				return content;
+			}
 
-				string url = groups["url"].Value;
-				string quote = groups["quote"].Success ? groups["quote"].Value : @"""";
-				string media = groups["media"].Success ? (" " + groups["media"].Value) : string.Empty;
-				
-				string import = string.Format("@import {0}{1}{0}{2};",
-					quote,
-					url,
-					media
-				);
-				imports.Add(import);
+			MatchCollection importRuleMatches = _cssImportRuleRegex.Matches(content);
+			if (importRuleMatches.Count == 0)
+			{
+				return content;
+			}
 
-				return string.Empty;
-			});	
+			var nodeMatches = new List<CssNodeMatch>();
+
+			foreach (Match importRuleMatch in importRuleMatches)
+			{
+				var nodeMatch = new CssNodeMatch(importRuleMatch.Index,
+					CssNodeType.ImportRule,
+					importRuleMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+
+			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(content);
+
+			foreach (Match multilineCommentMatch in multilineCommentMatches)
+			{
+				var nodeMatch = new CssNodeMatch(multilineCommentMatch.Index,
+					CssNodeType.MultilineComment,
+					multilineCommentMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+
+			nodeMatches = nodeMatches
+				.OrderBy(n => n.Position)
+				.ToList()
+				;
+
+			var contentBuilder = new StringBuilder();
+			int endPosition = contentLength - 1;
+			int currentPosition = 0;
+
+			foreach (CssNodeMatch nodeMatch in nodeMatches)
+			{
+				CssNodeType nodeType = nodeMatch.NodeType;
+				int nodePosition = nodeMatch.Position;
+				Match match = nodeMatch.Match;
+
+				if (nodePosition < currentPosition)
+				{
+					continue;
+				}
+
+				if (nodeType == CssNodeType.MultilineComment)
+				{
+					int nextPosition = nodePosition + match.Length;
+
+					ProcessOtherContent(contentBuilder, content,
+						ref currentPosition, nextPosition);
+				}
+				else if (nodeType == CssNodeType.ImportRule)
+				{
+					ProcessOtherContent(contentBuilder, content,
+						ref currentPosition, nodePosition);
+
+					GroupCollection importRuleGroups = match.Groups;
+
+					string url = importRuleGroups["url"].Value;
+					string quote = importRuleGroups["quote"].Success ? 
+						importRuleGroups["quote"].Value : @"""";
+					string media = importRuleGroups["media"].Success ? 
+						(" " + importRuleGroups["media"].Value) : string.Empty;
+					
+					string importRule = match.Value;
+					string processedImportRule = string.Format("@import {0}{1}{0}{2};",
+						quote,
+						url,
+						media
+					);
+					imports.Add(processedImportRule);
+
+					currentPosition += importRule.Length;	
+				}
+			}
+
+			if (currentPosition > 0 && currentPosition <= endPosition)
+			{
+				ProcessOtherContent(contentBuilder, content,
+					ref currentPosition, endPosition + 1);
+			}
+
+			return contentBuilder.ToString();
+		}
+
+		/// <summary>
+		/// Process a other stylesheet content
+		/// </summary>
+		/// <param name="contentBuilder">Content builder</param>
+		/// <param name="assetContent">Text content of Sass-asset</param>
+		/// <param name="currentPosition">Current position</param>
+		/// <param name="nextPosition">Next position</param>
+		private static void ProcessOtherContent(StringBuilder contentBuilder, string assetContent,
+			ref int currentPosition, int nextPosition)
+		{
+			if (nextPosition > currentPosition)
+			{
+				string otherContent = assetContent.Substring(currentPosition,
+					nextPosition - currentPosition);
+
+				contentBuilder.Append(otherContent);
+				currentPosition = nextPosition;
+			}
 		}
 	}
 }

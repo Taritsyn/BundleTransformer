@@ -33,6 +33,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to allow 'bool' as a synonym for 'boolean'
+		/// </summary>
+		public bool AllowBool
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to allow automatic semicolon insertion
 		/// </summary>
 		public bool AllowAutomaticSemicolonInsertion
@@ -69,6 +78,7 @@
 			UseDefaultLib = true;
 			PropagateEnumConstants = false;
 			RemoveComments = false;
+			AllowBool = false;
 			AllowAutomaticSemicolonInsertion = true;
 			NoImplicitAny = false;
 			CodeGenTarget = CodeGenTarget.EcmaScript3;

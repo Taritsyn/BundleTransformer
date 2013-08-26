@@ -1,16 +1,16 @@
 ﻿namespace BundleTransformer.Core.Helpers
 {
-	using System.Collections;
+	using System.Collections.Generic;
 
 	/// <summary>
-	/// MIME type helper
+	/// MIME type helpers
 	/// </summary>
 	public static class MimeTypeHelpers
 	{
 		/// <summary>
 		/// List of MIME types
 		/// </summary>
-		private static readonly Hashtable _mimeTypes = new Hashtable
+		private static readonly Dictionary<string, string> _mimeTypes = new Dictionary<string, string>
 		{
 			{"ai", "application/postscript"},
 			{"aif", "audio/x-aiff"},
@@ -204,7 +204,7 @@
 
 			if (_mimeTypes.ContainsKey(processedFileExtension))
 			{
-				mimeType = _mimeTypes[processedFileExtension].ToString();
+				mimeType = _mimeTypes[processedFileExtension];
 			}
 
 			return mimeType;

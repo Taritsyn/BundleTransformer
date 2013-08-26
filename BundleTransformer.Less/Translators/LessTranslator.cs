@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Less.Translators
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
@@ -12,12 +11,14 @@
 	using Core.Assets;
 	using Core.FileSystem;
 	using Core.Helpers;
+	using Core.SourceCodeHelpers;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Compilers;
 	using Configuration;
 	using Constants;
+	using Helpers;
 
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
@@ -78,12 +79,6 @@
 		private static readonly Regex _base64OptionRegex = new Regex(@";base64$", RegexOptions.Compiled);
 
 		/// <summary>
-		/// Regular expression for determine protocol in URL
-		/// </summary>
-		private static readonly Regex _protocolRegExp = new Regex(@"^(?:https?|ftp)\://",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
@@ -96,7 +91,7 @@
 		/// <summary>
 		/// Asset content cache
 		/// </summary>
-		private readonly Hashtable _assetContentCache;
+		private readonly Dictionary<string, LessStylesheet> _assetContentCache;
 
 		/// <summary>
 		/// Synchronizer of translation
@@ -161,7 +156,7 @@
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_relativePathResolver = relativePathResolver;
-			_assetContentCache = new Hashtable();
+			_assetContentCache = new Dictionary<string, LessStylesheet>();
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
 			IeCompat = lessConfig.IeCompat;
@@ -258,14 +253,14 @@
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
 			string assetUrl = asset.Url;
-			var dependencies = new List<Dependency>();
+			var dependencies = new DependencyCollection();
 
 			try
 			{
-				newContent = GetAssetFileTextContent(assetUrl, dependencies);
-				FillDependencies(assetUrl, newContent, assetUrl, dependencies);
+				LessStylesheet stylesheet = GetAssetFileTextContent(assetUrl);
+				FillDependencies(assetUrl, stylesheet, dependencies);
 
-				newContent = lessCompiler.Compile(newContent, assetUrl, dependencies);
+				newContent = lessCompiler.Compile(stylesheet.Content, stylesheet.Url, dependencies);
 			}
 			catch (FileNotFoundException)
 			{
@@ -288,8 +283,8 @@
 			asset.Minified = enableNativeMinification;
 			asset.RelativePathsResolved = true;
 			asset.VirtualPathDependencies = dependencies
-				.Where(d => !UrlStartsWithProtocol(d.Url))
-				.Select(d => d.VirtualPath)
+				.Where(d => d.IsObservable)
+				.Select(d => d.Url)
 				.Distinct()
 				.ToList()
 				;
@@ -319,134 +314,198 @@
 		/// </summary>
 		/// <param name="assetContent">Text content of LESS-asset</param>
 		/// <param name="assetUrl">URL of LESS-asset file</param>
-		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>Preprocessed text content of LESS-asset</returns>
-		private string PreprocessStylesheet(string assetContent, string assetUrl, IList<Dependency> dependencies)
+		public LessStylesheet PreprocessStylesheet(string assetContent, string assetUrl)
 		{
+			var stylesheet = new LessStylesheet(assetUrl, assetContent);
+
 			int contentLength = assetContent.Length;
 			if (contentLength == 0)
 			{
-				return assetContent;
+				return stylesheet;
 			}
 
 			MatchCollection importRuleMatches = _lessImportRuleRegex.Matches(assetContent);
 			MatchCollection dataUriFunctionMatches = _dataUriFunctionRegex.Matches(assetContent);
 
-			Match importRuleMatch = null;
-			if (importRuleMatches.Count > 0)
+			if (importRuleMatches.Count == 0 && dataUriFunctionMatches.Count == 0)
 			{
-				importRuleMatch = importRuleMatches[0];
+				return stylesheet;
 			}
 
-			Match dataUriFunctionMatch = null;
-			if (dataUriFunctionMatches.Count > 0)
+			var nodeMatches = new List<LessNodeMatch>();
+
+			foreach (Match importRuleMatch in importRuleMatches)
 			{
-				dataUriFunctionMatch = dataUriFunctionMatches[0];
+				var nodeMatch = new LessNodeMatch(importRuleMatch.Index, 
+					LessNodeType.ImportRule, 
+					importRuleMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+		
+			foreach (Match dataUriFunctionMatch in dataUriFunctionMatches)
+			{
+				var nodeMatch = new LessNodeMatch(dataUriFunctionMatch.Index,
+					LessNodeType.DataUriFunction,
+					dataUriFunctionMatch);
+				nodeMatches.Add(nodeMatch);
 			}
 
-			if (importRuleMatch == null && dataUriFunctionMatch == null)
+			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(assetContent);
+
+			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
-				return assetContent;
+				var nodeMatch = new LessNodeMatch(multilineCommentMatch.Index, 
+					LessNodeType.MultilineComment, 
+					multilineCommentMatch);
+				nodeMatches.Add(nodeMatch);
 			}
+
+			nodeMatches = nodeMatches
+				.OrderBy(n => n.Position)
+				.ToList()
+				;
 
 			var contentBuilder = new StringBuilder();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
-			while (currentPosition <= endPosition)
+			foreach (LessNodeMatch nodeMatch in nodeMatches)
 			{
-				bool isOtherContent = true;
+				LessNodeType nodeType = nodeMatch.NodeType;
+				int nodePosition = nodeMatch.Position;
+				Match match = nodeMatch.Match;
 
-				bool importRuleSuccess = (importRuleMatch != null && importRuleMatch.Success);
-				int importRulePosition = importRuleSuccess ? importRuleMatch.Index : -1;
-
-				bool dataUriFunctionSuccess = (dataUriFunctionMatch != null && dataUriFunctionMatch.Success);
-				int dataUriFunctionPosition = dataUriFunctionSuccess ? dataUriFunctionMatch.Index : -1;
-
-				if (importRuleSuccess && importRulePosition != -1 
-					&& (dataUriFunctionPosition == -1 || importRulePosition < dataUriFunctionPosition))
+				if (nodePosition < currentPosition)
 				{
-					ProcessOtherContent(contentBuilder, assetContent,
-						ref currentPosition, importRulePosition);
-
-					GroupCollection importRuleGroups = importRuleMatch.Groups;
-
-					string type = importRuleGroups["type"].Value;
-					string url = importRuleGroups["url"].Value.Trim();
-					string quote = importRuleGroups["quote"].Success ?
-						importRuleGroups["quote"].Value : @"""";
-
-					string importRule = importRuleMatch.Value;
-					string processedImportRule = ProcessImportRule(assetUrl, url, type, quote);
-
-					contentBuilder.Append(processedImportRule);
-					currentPosition += importRule.Length;
-					isOtherContent = false;
-					importRuleMatch = importRuleMatch.NextMatch();
+					continue;
 				}
-				else if (dataUriFunctionSuccess && dataUriFunctionPosition != -1)
+
+				if (nodeType == LessNodeType.ImportRule || nodeType == LessNodeType.DataUriFunction)
 				{
 					ProcessOtherContent(contentBuilder, assetContent,
-						ref currentPosition, dataUriFunctionPosition);
+						ref currentPosition, nodePosition);
 
-					GroupCollection dataUriFunctionGroups = dataUriFunctionMatch.Groups;
+					int startLinePosition;
+					int endLinePosition;
+					string currentLine = SourceCodeNavigator.GetCurrentLine(assetContent, nodePosition,
+						out startLinePosition, out endLinePosition);
+					int localNodePosition = nodePosition - startLinePosition;
 
-					string url = dataUriFunctionGroups["url"].Value.Trim();
-					string mimeType = dataUriFunctionGroups["mimeType"].Value;
-					string processedUrl;
-
-					string dataUriFunction = dataUriFunctionMatch.Value;
-					string processedDataUriFunction = ProcessDataUriFunction(assetUrl, url, mimeType, 
-						out processedUrl);
-
-					if (!string.IsNullOrWhiteSpace(processedUrl) 
-						&& !DependencyExists(dependencies, processedUrl))
+					if (StylesheetHelpers.IncludedInSinglelineComment(currentLine, localNodePosition))
 					{
-						var dependency = new Dependency
+						int nextPosition = (endLinePosition < endPosition) ? endLinePosition + 1 : endPosition;
+
+						ProcessOtherContent(contentBuilder, assetContent,
+							ref currentPosition, nextPosition);
+						continue;
+					}
+
+					if (nodeType == LessNodeType.ImportRule)
+					{
+						GroupCollection importRuleGroups = match.Groups;
+
+						string type = importRuleGroups["type"].Value;
+						string url = importRuleGroups["url"].Value.Trim();
+						string quote = importRuleGroups["quote"].Success ?
+							importRuleGroups["quote"].Value : @"""";
+						LessImport processedImport;
+
+						string importRule = match.Value;
+						string processedImportRule = ProcessImportRule(assetUrl, url, type, quote,
+							out processedImport);
+
+						if (processedImport != null)
 						{
-							VirtualPath = processedUrl,
-							Url = processedUrl,
-							Content = string.Empty
-						};
-						dependencies.Add(dependency);
-					}
+							var imports = stylesheet.Imports;
+							string importType = processedImport.ImportType;
+							string urlInUpperCase = processedImport.Url.ToUpperInvariant();
 
-					contentBuilder.Append(processedDataUriFunction);
-					currentPosition += dataUriFunction.Length;
-					isOtherContent = false;
-					dataUriFunctionMatch = dataUriFunctionMatch.NextMatch();
+							if (imports.Count(i => i.Url.ToUpperInvariant() == urlInUpperCase
+								&& i.ImportType == importType) == 0)
+							{
+								imports.Add(processedImport);
+							}
+						}
+
+						contentBuilder.Append(processedImportRule);
+						currentPosition += importRule.Length;
+					}
+					else if (nodeType == LessNodeType.DataUriFunction)
+					{
+						GroupCollection dataUriFunctionGroups = match.Groups;
+
+						string url = dataUriFunctionGroups["url"].Value.Trim();
+						string mimeType = dataUriFunctionGroups["mimeType"].Value;
+						string processedDataUriFunctionAssetUrl;
+
+						string dataUriFunction = match.Value;
+						string processedDataUriFunction = ProcessDataUriFunction(assetUrl, url, mimeType,
+							out processedDataUriFunctionAssetUrl);
+
+						if (!string.IsNullOrWhiteSpace(processedDataUriFunctionAssetUrl))
+						{
+							var dataUriFunctionAssetUrls = stylesheet.DataUriFunctionAssetUrls;
+							string urlInUpperCase = processedDataUriFunctionAssetUrl.ToUpperInvariant();
+
+							if (dataUriFunctionAssetUrls.Count(u => u.ToUpperInvariant() == urlInUpperCase) == 0)
+							{
+								dataUriFunctionAssetUrls.Add(processedDataUriFunctionAssetUrl);
+							}
+						}
+
+						contentBuilder.Append(processedDataUriFunction);
+						currentPosition += dataUriFunction.Length;
+					}
 				}
-
-				if (isOtherContent)
+				else if (nodeType == LessNodeType.MultilineComment)
 				{
-					if (currentPosition > 0)
-					{
-						ProcessOtherContent(contentBuilder, assetContent, 
-							ref currentPosition, endPosition + 1);
-					}
-					else
-					{
-						return assetContent;
-					}
+					int nextPosition = nodePosition + match.Length;
+
+					ProcessOtherContent(contentBuilder, assetContent,
+						ref currentPosition, nextPosition);
 				}
 			}
 
-			return contentBuilder.ToString();
+			if (currentPosition > 0 && currentPosition <= endPosition)
+			{
+				ProcessOtherContent(contentBuilder, assetContent,
+					ref currentPosition, endPosition + 1);
+			}
+
+			stylesheet.Content = contentBuilder.ToString();
+
+			return stylesheet;
 		}
 
 		/// <summary>
 		/// Process a LESS <code>@import</code> rule
 		/// </summary>
 		/// <param name="parentAssetUrl">URL of parent LESS-asset file</param>
-		/// <param name="assetUrl">URL of CSS-component</param>
+		/// <param name="assetUrl">URL of LESS-asset file</param>
 		/// <param name="type">Stylesheet type</param>
 		/// <param name="quote">Quote</param>
+		/// <param name="processedImport">Processed LESS-import</param>
 		/// <returns>Processed LESS <code>@import</code> rule</returns>
-		private string ProcessImportRule(string parentAssetUrl, string assetUrl, string type, string quote)
+		private string ProcessImportRule(string parentAssetUrl, string assetUrl, string type, string quote,
+			out LessImport processedImport)
 		{
-			if (UrlStartsWithProtocol(assetUrl) || UrlStartsWithDataUriScheme(assetUrl))
+			string result;
+			processedImport = null;
+
+			if (UrlHelpers.StartsWithDataUriScheme(assetUrl))
 			{
-				return string.Format(IMPORT_RULE_FORMAT, string.Empty, quote, assetUrl);
+				result = string.Format(IMPORT_RULE_FORMAT, string.Empty, quote, assetUrl);
+
+				return result;
+			}
+
+			if (UrlHelpers.StartsWithProtocol(assetUrl))
+			{
+				result = string.Format(IMPORT_RULE_FORMAT, string.Empty, quote, assetUrl);
+				processedImport = new LessImport(assetUrl);
+
+				return result;
 			}
 
 			string typeOption = (!string.IsNullOrWhiteSpace(type) && type != "css") ? 
@@ -454,13 +513,14 @@
 			string absoluteUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
 			string extension = Path.GetExtension(absoluteUrl);
 
-			if (!FileExtensionHelper.IsLess(extension) && !FileExtensionHelper.IsCss(extension))
+			if (!FileExtensionHelpers.IsLess(extension) && !FileExtensionHelpers.IsCss(extension))
 			{
 				string newExtension = (type == "css") ? FileExtension.Css : FileExtension.Less;
 				absoluteUrl += newExtension;
 			}
 
-			string result = string.Format(IMPORT_RULE_FORMAT, typeOption, quote, absoluteUrl);
+			result = string.Format(IMPORT_RULE_FORMAT, typeOption, quote, absoluteUrl);
+			processedImport = new LessImport(absoluteUrl, type);
 
 			return result;
 		}
@@ -471,15 +531,16 @@
 		/// <param name="parentAssetUrl">URL of parent LESS-asset file</param>
 		/// <param name="assetUrl">URL of CSS-component</param>
 		/// <param name="mimeType">MIME-type</param>
-		/// <param name="observableAssetUrl">URL of observable CSS-component</param>
+		/// <param name="processedDataUriFunctionAssetUrl">Processed asset URL 
+		/// from <code>data-uri</code> function</param>
 		/// <returns><code>data-uri</code> function result</returns>
 		private string ProcessDataUriFunction(string parentAssetUrl, string assetUrl, string mimeType,
-			out string observableAssetUrl)
+			out string processedDataUriFunctionAssetUrl)
 		{
 			string result;
-			observableAssetUrl = string.Empty;
+			processedDataUriFunctionAssetUrl = string.Empty;
 
-			if (UrlStartsWithProtocol(assetUrl) || UrlStartsWithDataUriScheme(assetUrl))
+			if (UrlHelpers.StartsWithProtocol(assetUrl) || UrlHelpers.StartsWithDataUriScheme(assetUrl))
 			{
 				return string.Format(URL_RULE_FORMAT, assetUrl);
 			}
@@ -494,12 +555,7 @@
 
 			bool useBase64;
 			Encoding encoding;
-			bool isTextContent;
-
-			using (Stream fileStream = _virtualFileSystemWrapper.GetFileStream(absoluteUrl))
-			{
-				isTextContent = Utils.IsTextStream(fileStream, 256, out encoding);
-			}
+			bool isTextContent = _virtualFileSystemWrapper.IsTextFile(absoluteUrl, 256, out encoding);
 
 			if (!string.IsNullOrWhiteSpace(mimeType))
 			{
@@ -534,7 +590,7 @@
 			{
 				// IE8 cannot handle a data-uri larger than 32KB
 				result = string.Format(URL_RULE_FORMAT, absoluteUrl);
-				observableAssetUrl = absoluteUrl;
+				processedDataUriFunctionAssetUrl = absoluteUrl;
 
 				return result;
 			}
@@ -552,11 +608,10 @@
 			}
 
 			result = string.Format(URL_RULE_WITH_DATA_URI_SCHEME_FORMAT, mimeType, fileContent);
-			observableAssetUrl = absoluteUrl;
+			processedDataUriFunctionAssetUrl = absoluteUrl;
 
 			return result;
 		}
-
 
 		/// <summary>
 		/// Process a other stylesheet content
@@ -579,156 +634,87 @@
 		}
 
 		/// <summary>
-		/// Determines whether the beginning of this url matches the protocol
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>Result of check (true - is starts with the protocol;
-		/// false - is not starts with the protocol)</returns>
-		private static bool UrlStartsWithProtocol(string url)
-		{
-			return _protocolRegExp.IsMatch(url);
-		}
-
-		/// <summary>
-		/// Determines whether the beginning of this url matches the data URI scheme
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>Result of check (true - is starts with the data URI scheme;
-		/// false - is not starts with the data URI scheme)</returns>
-		private static bool UrlStartsWithDataUriScheme(string url)
-		{
-			return url.StartsWith("data:", StringComparison.OrdinalIgnoreCase);
-		}
-
-		/// <summary>
 		/// Fills the list of LESS-files, that were added to a LESS-asset 
 		/// by using the LESS <code>@import</code> rules
 		/// </summary>
 		/// <param name="rootAssetUrl">URL of root LESS-asset file</param>
-		/// <param name="parentAssetContent">Text content of parent LESS-asset</param>
-		/// <param name="parentAssetUrl">URL of parent LESS-asset file</param>
+		/// <param name="parentStylesheet">Parent LESS-stylesheet</param>
 		/// <param name="dependencies">List of LESS-files, that were added to a 
 		/// LESS-asset by using the LESS <code>@import</code> rules</param>
-		public void FillDependencies(string rootAssetUrl, string parentAssetContent, string parentAssetUrl, 
-			IList<Dependency> dependencies)
+		public void FillDependencies(string rootAssetUrl, LessStylesheet parentStylesheet, DependencyCollection dependencies)
 		{
-			if (parentAssetContent.Length == 0)
+			foreach (string dataUriFunctionImageUrl in parentStylesheet.DataUriFunctionAssetUrls)
 			{
-				return;
+				var dependency = new Dependency(dataUriFunctionImageUrl, string.Empty);
+				dependencies.Add(dependency);
 			}
 
-			MatchCollection matches = _lessImportRuleRegex.Matches(parentAssetContent);
-
-			foreach (Match match in matches)
+			foreach (LessImport import in parentStylesheet.Imports)
 			{
-				GroupCollection groups = match.Groups;
+				string dependencyUrl = import.Url;
+				string dependencyType = import.ImportType;
 
-				if (groups["url"].Success)
+				if (UrlHelpers.StartsWithProtocol(dependencyUrl))
 				{
-					string dependencyUrl = groups["url"].Value;
-					string dependencyType = groups["type"].Value;
-
-					if (UrlStartsWithDataUriScheme(dependencyUrl))
+					if (!dependencies.ContainsUrl(dependencyUrl))
 					{
-						continue;
+						var dependency = new Dependency(dependencyUrl, string.Empty, false);
+						dependencies.Add(dependency);
 					}
 
-					if (UrlStartsWithProtocol(dependencyUrl))
+					continue;
+				}
+
+				if (string.Equals(dependencyUrl, rootAssetUrl, StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
+
+				var duplicateDependency = dependencies.GetByUrl(dependencyUrl);
+				bool isDuplicateDependency = (duplicateDependency != null);
+				bool isEmptyDependency = isDuplicateDependency && (duplicateDependency.Content.Length == 0);
+
+				if (!isDuplicateDependency || isEmptyDependency)
+				{
+					if (AssetFileExists(dependencyUrl))
 					{
-						if (!DependencyExists(dependencies, dependencyUrl))
+						string dependencyExtension = Path.GetExtension(dependencyUrl);
+						var stylesheet = new LessStylesheet(dependencyUrl, string.Empty);
+
+						if (FileExtensionHelpers.IsLess(dependencyExtension)
+							|| (FileExtensionHelpers.IsCss(dependencyExtension) && dependencyType == "less"))
 						{
-							var dependency = new Dependency
+							stylesheet = GetAssetFileTextContent(dependencyUrl);
+
+							if (isEmptyDependency && stylesheet.Content.Length > 0)
 							{
-								VirtualPath = dependencyUrl,
-								Url = dependencyUrl,
-								Content = string.Empty
-							};
-							dependencies.Add(dependency);
-						}
-
-						continue;
-					}
-
-					if (!string.IsNullOrWhiteSpace(dependencyUrl))
-					{
-						if (string.Equals(dependencyUrl, rootAssetUrl, StringComparison.OrdinalIgnoreCase))
-						{
-							continue;
-						}
-
-						var duplicateDependency = GetDependencyByUrl(dependencies, dependencyUrl);
-						bool isDuplicateDependency = (duplicateDependency != null);
-						bool isEmptyDependency = isDuplicateDependency && (duplicateDependency.Content.Length == 0);
-
-						if (!isDuplicateDependency || isEmptyDependency)
-						{
-							if (AssetFileExists(dependencyUrl))
-							{
-								string dependencyExtension = Path.GetExtension(dependencyUrl);
-								string dependencyContent = string.Empty;
-
-								if (FileExtensionHelper.IsLess(dependencyExtension)
-									|| (FileExtensionHelper.IsCss(dependencyExtension) && dependencyType == "less"))
-								{
-									dependencyContent = GetAssetFileTextContent(dependencyUrl, dependencies);
-								}
-
-								if (isEmptyDependency && dependencyContent.Length > 0)
-								{
-									duplicateDependency.Content = dependencyContent;
-								}
-								else
-								{
-									var dependency = new Dependency
-									{
-										VirtualPath = dependencyUrl,
-										Url = dependencyUrl,
-										Content = dependencyContent
-									};
-									dependencies.Add(dependency);
-								}
-
-								FillDependencies(rootAssetUrl, dependencyContent, dependencyUrl, dependencies);
+								duplicateDependency.Content = stylesheet.Content;
+								duplicateDependency.IsObservable = true;
 							}
 							else
 							{
-								throw new FileNotFoundException(
-									string.Format(CoreStrings.Common_FileNotExist, dependencyUrl));
+								var dependency = new Dependency(dependencyUrl, stylesheet.Content);
+								dependencies.Add(dependency);
 							}
 						}
+						else
+						{
+							if (!isDuplicateDependency)
+							{
+								var dependency = new Dependency(dependencyUrl, string.Empty, false);
+								dependencies.Add(dependency);	
+							}
+						}
+
+						FillDependencies(rootAssetUrl, stylesheet, dependencies);
+					}
+					else
+					{
+						throw new FileNotFoundException(
+							string.Format(CoreStrings.Common_FileNotExist, dependencyUrl));
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Gets a value that indicates whether a dependency exists in the list of dependencies
-		/// </summary>
-		/// <param name="dependencies">List of dependencies</param>
-		/// <param name="url">URL of dependency</param>
-		/// <returns>Result of checking (true – exist; false – not exist)</returns>
-		private static bool DependencyExists(IEnumerable<Dependency> dependencies, string url)
-		{
-			var urlInUpperCase = url.ToUpperInvariant();
-			bool isExist = (dependencies.Count(d => d.Url.ToUpperInvariant() == urlInUpperCase) > 0);
-
-			return isExist;
-		}
-
-		/// <summary>
-		/// Gets a dependency by URL
-		/// </summary>
-		/// <param name="dependencies">List of dependencies</param>
-		/// <param name="url">URL of dependency</param>
-		/// <returns>Dependency</returns>
-		private static Dependency GetDependencyByUrl(IEnumerable<Dependency> dependencies, string url)
-		{
-			var urlInUpperCase = url.ToUpperInvariant();
-			var dependency = dependencies
-				.SingleOrDefault(d => d.Url.ToUpperInvariant() == urlInUpperCase)
-				;
-
-			return dependency;
 		}
 
 		/// <summary>
@@ -741,32 +727,6 @@
 			string key = assetUrl.Trim().ToUpperInvariant();
 
 			return key;
-		}
-
-		/// <summary>
-		/// Gets text content of asset
-		/// </summary>
-		/// <param name="assetUrl">URL to asset file</param>
-		/// <param name="dependencies">List of dependencies</param>
-		/// <returns>Text content of asset</returns>
-		private string GetAssetFileTextContent(string assetUrl, IList<Dependency> dependencies)
-		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
-			string assetContent;
-
-			if (_assetContentCache.ContainsKey(key))
-			{
-				assetContent = (string)_assetContentCache[key];
-			}
-			else
-			{
-				assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
-				assetContent = PreprocessStylesheet(assetContent, assetUrl, dependencies);
-
-				_assetContentCache.Add(key, assetContent);
-			}
-
-			return assetContent;
 		}
 
 		/// <summary>
@@ -789,6 +749,31 @@
 			}
 
 			return result;
+		}
+
+		/// <summary>
+		/// Gets LESS-stylesheet by URL
+		/// </summary>
+		/// <param name="assetUrl">URL to asset file</param>
+		/// <returns>LESS-stylesheet</returns>
+		private LessStylesheet GetAssetFileTextContent(string assetUrl)
+		{
+			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			LessStylesheet stylesheet;
+
+			if (_assetContentCache.ContainsKey(key))
+			{
+				stylesheet = _assetContentCache[key];
+			}
+			else
+			{
+				string assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
+				stylesheet = PreprocessStylesheet(assetContent, assetUrl);
+
+				_assetContentCache.Add(key, stylesheet);
+			}
+
+			return stylesheet;
 		}
 
 		/// <summary>

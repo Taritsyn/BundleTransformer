@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.TypeScript.Compilers
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text;
 
@@ -128,7 +127,7 @@
 		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Translated TypeScript-code</returns>
-		public string Compile(string content, string path, IList<Dependency> dependencies, 
+		public string Compile(string content, string path, DependencyCollection dependencies, 
 			CompilationOptions options = null)
 		{
 			string newContent;
@@ -146,15 +145,10 @@
 				currentOptionsString = _defaultOptionsString;
 			}
 
-			var newDependencies = new List<Dependency>();
+			var newDependencies = new DependencyCollection();
 			if (currentOptions.UseDefaultLib)
 			{
-				var defaultLibDependency = new Dependency
-					{
-						Url = "lib.d.ts",
-						VirtualPath = "lib.d.ts",
-						Content = _commonTypesDefinitions
-					};
+				var defaultLibDependency = new Dependency("lib.d.ts", _commonTypesDefinitions);
 				newDependencies.Add(defaultLibDependency);
 			}
 			newDependencies.AddRange(dependencies);
@@ -196,7 +190,7 @@
 		/// </summary>
 		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>List of dependencies in JSON format</returns>
-		private static JArray ConvertDependenciesToJson(IEnumerable<Dependency> dependencies)
+		private static JArray ConvertDependenciesToJson(DependencyCollection dependencies)
 		{
 			var dependenciesJson = new JArray(
 				dependencies.Select(d => new JObject(
@@ -219,6 +213,7 @@
 				new JProperty("noLib", !options.UseDefaultLib),
 				new JProperty("propagateEnumConstants", options.PropagateEnumConstants),
 				new JProperty("removeComments", options.RemoveComments),
+				new JProperty("allowBool", options.AllowBool),
 				new JProperty("allowAutomaticSemicolonInsertion", options.AllowAutomaticSemicolonInsertion),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
 				new JProperty("codeGenTarget", options.CodeGenTarget.ToString())
@@ -235,8 +230,8 @@
 		/// <param name="currentFilePath">Path to current TypeScript-file</param>
 		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath, 
-			IEnumerable<Dependency> dependencies)
+		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath,
+			DependencyCollection dependencies)
 		{
 			var message = errorDetails.Value<string>("message");
 			var filePath = errorDetails.Value<string>("fileName");
@@ -250,9 +245,7 @@
 			}
 			else
 			{
-				var filePathInUpperCase = filePath.ToUpperInvariant();
-				var dependency = dependencies.SingleOrDefault(d => d.Url.ToUpperInvariant() == filePathInUpperCase);
-
+				var dependency = dependencies.GetByUrl(filePath);
 				if (dependency != null)
 				{
 					newSourceCode = dependency.Content;

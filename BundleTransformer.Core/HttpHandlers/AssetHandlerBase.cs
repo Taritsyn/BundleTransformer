@@ -3,13 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.IO.Compression;
+	using System.Security.Cryptography;
 	using System.Web;
 	using System.Web.Caching;
-	using System.Linq;
 
 	using Assets;
-	using Configuration;
 	using FileSystem;
 	using Minifiers;
 	using Resources;
@@ -22,6 +20,12 @@
 	/// </summary>
 	public abstract class AssetHandlerBase : IHttpHandler
 	{
+		/// <summary>
+		/// Duration of storage the text content of processed asset in 
+		/// server cache (in minutes)
+		/// </summary>
+		const int SERVER_CACHE_DURATION_IN_MINUTES = 15;
+
 		/// <summary>
 		/// Server cache
 		/// </summary>
@@ -36,12 +40,6 @@
 		/// Virtual file system wrapper
 		/// </summary>
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
-
-		/// <summary>
-		/// Configuration settings of HTTP-handler that responsible 
-		/// for text output of processed asset
-		/// </summary>
-		private readonly AssetHandlerSettings _assetHandlerConfig;
 
 		/// <summary>
 		/// Information about web application
@@ -67,15 +65,12 @@
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of HTTP-handler that responsible 
-		/// for text output of processed asset</param>
 		/// <param name="applicationInfo">Information about web application</param>
 		protected AssetHandlerBase(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
-			AssetHandlerSettings assetHandlerConfig, IHttpApplicationInfo applicationInfo)
+			IHttpApplicationInfo applicationInfo)
 		{
 			_cache = cache;
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
-			_assetHandlerConfig = assetHandlerConfig;
 			_applicationInfo = applicationInfo;
 		}
 
@@ -90,14 +85,19 @@
 			var request = context.Request; 
 			var response = context.Response;
 
-			string assetUrl = request.Url.LocalPath;
-			string assetVirtualPath = assetUrl;
-			var asset = new Asset(assetVirtualPath);
+			Uri assetUri = request.Url;
+			if (assetUri == null)
+			{
+				ThrowHttpNotFoundError(response);
+				return;
+			}
 
+			string assetUrl = assetUri.LocalPath;
 			string content = string.Empty;
+
 			try
 			{
-				content = GetProcessedAssetContent(asset);
+				content = GetProcessedAssetContent(assetUrl);
 			}
 			catch (FileNotFoundException)
 			{
@@ -122,60 +122,64 @@
 				return;
 			}
 
+			// Generate a ETag value and check it
+			string eTag = GenerateAssetETag(assetUrl, content);
+			bool eTagChanged = IsETagHeaderChanged(request, eTag);
+			
 			// Add a special HTTP-headers to ensure that 
 			// asset caching in browsers
-			var clientCache = response.Cache;
-
-			if (_applicationInfo.IsDebugMode && _assetHandlerConfig.DisableClientCacheInDebugMode)
+			if (eTagChanged)
 			{
-				clientCache.SetCacheability(HttpCacheability.NoCache);
-				clientCache.SetExpires(DateTime.UtcNow.AddDays(-1));
-				clientCache.SetValidUntilExpires(false);
-				clientCache.SetRevalidation(HttpCacheRevalidation.AllCaches);
-				clientCache.SetNoStore();
+				response.StatusCode = 200;
+				response.StatusDescription = "OK";
 			}
 			else
 			{
-				var cacheDuration = TimeSpan.FromDays(_assetHandlerConfig.ClientCacheDurationInDays);
+				response.StatusCode = 304;
+				response.StatusDescription = "Not Modified";
 
-				clientCache.SetCacheability(HttpCacheability.Public);
-				clientCache.SetExpires(DateTime.UtcNow.Add(cacheDuration));
-				clientCache.SetValidUntilExpires(true);
-				clientCache.SetNoServerCaching();
-				clientCache.SetMaxAge(cacheDuration);
-				clientCache.AppendCacheExtension("must-revalidate");
+				// Set to 0 to prevent client waiting for data
+				response.AddHeader("Content-Length", "0");
 			}
 
-			if (_assetHandlerConfig.EnableCompression
-				&& (!_applicationInfo.IsDebugMode || !_assetHandlerConfig.DisableCompressionInDebugMode))
+			var clientCache = response.Cache;
+			clientCache.SetCacheability(HttpCacheability.Public);
+			clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
+			clientCache.SetValidUntilExpires(true);
+			clientCache.AppendCacheExtension("must-revalidate");
+			clientCache.SetNoServerCaching();
+			clientCache.VaryByHeaders["If-None-Match"] = true;
+			clientCache.SetETag(eTag);
+
+			if (eTagChanged)
 			{
-				// Compress asset by GZIP/Deflate
-				TryCompressAsset(context);
+				// Output text content of asset
+				response.ContentType = ContentType;
+				response.Write(content);
 			}
 
-			// Output text content of asset
-			response.ContentType = ContentType;
-			response.Write(content);
 			response.End();
 		}
 
 		/// <summary>
-		/// Returns a cache key to use for the specified virtual path
+		/// Returns a cache key to use for the specified URL
 		/// </summary>
-		/// <param name="assetVirtualPath">The virtual path to the asset</param>
-		/// <returns>A cache key for the specified asset</returns>
-		private string GetCacheKey(string assetVirtualPath)
+		/// <param name="assetUrl">URL to the asset</param>
+		/// <returns>Cache key for the specified asset</returns>
+		private string GetCacheKey(string assetUrl)
 		{
-			return string.Format(Constants.Common.ProcessedAssetContentCacheItemKeyPattern, assetVirtualPath);
+			return string.Format(
+				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, assetUrl.ToLowerInvariant());
 		}
 
 		/// <summary>
 		/// Gets a processed asset content
 		/// </summary>
-		/// <param name="asset">Asset</param>
-		/// <returns>Asset content</returns>
-		private string GetProcessedAssetContent(IAsset asset)
+		/// <param name="assetUrl">URL to the asset</param>
+		/// <returns>Text content of asset</returns>
+		private string GetProcessedAssetContent(string assetUrl)
 		{
+			var asset = new Asset(assetUrl);
 			string content;
 			string cacheItemKey = GetCacheKey(asset.VirtualPath);
 
@@ -191,20 +195,10 @@
 					IAsset processedAsset = ProcessAsset(asset);
 					content = processedAsset.Content;
 					string assetVirtualPath = processedAsset.VirtualPath;
-					DateTime utcStart = DateTime.UtcNow;
 
-					DateTime absoluteExpiration;
-					TimeSpan slidingExpiration;
-					if (_assetHandlerConfig.UseServerCacheSlidingExpiration)
-					{
-						absoluteExpiration = Cache.NoAbsoluteExpiration;
-						slidingExpiration = TimeSpan.FromMinutes(_assetHandlerConfig.ServerCacheDurationInMinutes);
-					}
-					else
-					{
-						absoluteExpiration = DateTime.Now.AddMinutes(_assetHandlerConfig.ServerCacheDurationInMinutes);
-						slidingExpiration = Cache.NoSlidingExpiration;
-					}
+					DateTime utcStart = DateTime.UtcNow;
+					DateTime absoluteExpiration = DateTime.Now.AddMinutes(SERVER_CACHE_DURATION_IN_MINUTES);
+					TimeSpan slidingExpiration = Cache.NoSlidingExpiration;
 
 					var fileDependencies = new List<string> { assetVirtualPath };
 					fileDependencies.AddRange(processedAsset.VirtualPathDependencies);
@@ -221,36 +215,56 @@
 		}
 
 		/// <summary>
+		/// Generates value for HTTP-header "ETag" based on 
+		/// information about processed asset
+		/// </summary>
+		/// <param name="assetUrl">URL to the asset</param>
+		/// <param name="assetContent">Text content of asset</param>
+		/// <returns>ETag value</returns>
+		private static string GenerateAssetETag(string assetUrl, string assetContent)
+		{
+			byte[] hash;
+
+			using (Stream stream = Utils.GetStreamFromString(assetUrl + ";" + assetContent))
+			{
+				using (var md5 = new MD5CryptoServiceProvider())
+				{
+					hash = md5.ComputeHash(stream);
+				}
+			}
+
+			string hashString = BitConverter.ToString(hash);
+			string eTag = "\"" + hashString.Replace("-", string.Empty).ToLowerInvariant() + "\"";
+
+			return eTag;
+		}
+
+		/// <summary>
+		/// Checks actuality of data in browser cache using 
+		/// HTTP-header "ETag"
+		/// </summary>
+		/// <param name="request">HttpRequest object</param>
+		/// <param name="eTag">ETag value</param>
+		/// <returns>Result of checking (true – data has changed; false – has not changed)</returns>
+		private static bool IsETagHeaderChanged(HttpRequestBase request, string eTag)
+		{
+			bool eTagChanged = true;
+			string ifNoneMatch = request.Headers["If-None-Match"];
+
+			if (!string.IsNullOrWhiteSpace(ifNoneMatch))
+			{
+				eTagChanged = (ifNoneMatch != eTag);
+			}
+
+			return eTagChanged;
+		}
+
+		/// <summary>
 		/// Process asset
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <returns>Processed asset</returns>
 		protected abstract IAsset ProcessAsset(IAsset asset);
-
-		/// <summary>
-		/// Compresses processed asset, using GZIP or Deflate 
-		/// (if there is support in browser)
-		/// </summary>
-		/// <param name="context">HttpContext object</param>
-		private void TryCompressAsset(HttpContextBase context)
-		{
-			var response = context.Response;
-			string acceptEncoding = context.Request.Headers["Accept-Encoding"];
-
-			if (acceptEncoding != null)
-			{
-				if (acceptEncoding.Contains("gzip"))
-				{
-					response.Filter = new GZipStream(response.Filter, CompressionMode.Compress);
-					response.AppendHeader("Content-Encoding", "gzip");
-				}
-				else if (acceptEncoding.Contains("deflate"))
-				{
-					response.Filter = new DeflateStream(response.Filter, CompressionMode.Compress);
-					response.AppendHeader("Content-Encoding", "deflate");
-				}
-			}
-		}
 
 		/// <summary>
 		/// Throw 404 error (page not found)
