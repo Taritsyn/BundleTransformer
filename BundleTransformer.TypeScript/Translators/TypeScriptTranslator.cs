@@ -2,10 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
 	using System.Text.RegularExpressions;
+
+	using JavaScriptEngineSwitcher.Core;
 
 	using Core;
 	using Core.Assets;
@@ -44,6 +47,11 @@
 		private static readonly Regex _referenceCommentsRegex =
 			new Regex(@"\/\/\/\s*<reference\s+path=(?<quote1>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote1>)\s*\/>",
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+		/// <summary>
+		/// Delegate that creates an instance of JavaScript engine
+		/// </summary>
+		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
 		/// Virtual file system wrapper
@@ -143,7 +151,8 @@
 		/// Constructs instance of TypeScript-translator
 		/// </summary>
 		public TypeScriptTranslator()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
+			: this(null,
+				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
 				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
 				BundleTransformerContext.Current.GetTypeScriptConfiguration())
 		{ }
@@ -151,10 +160,12 @@
 		/// <summary>
 		/// Constructs instance of TypeScript-translator
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="tsConfig">Configuration settings of TypeScript-translator</param>
-		public TypeScriptTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper,
+		public TypeScriptTranslator(Func<IJsEngine> createJsEngineInstance, 
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			IRelativePathResolver relativePathResolver, TypeScriptSettings tsConfig)
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
@@ -168,6 +179,26 @@
 			AllowAutomaticSemicolonInsertion = tsConfig.AllowAutomaticSemicolonInsertion;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			CodeGenTarget = tsConfig.CodeGenTarget;
+
+			if (createJsEngineInstance == null)
+			{
+				string jsEngineName = tsConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
+				{
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"typeScript",
+							@"
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
+							"MsieJsEngine")
+					);
+				}
+
+				createJsEngineInstance = (() =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
 
 
@@ -186,7 +217,7 @@
 			lock (_translationSynchronizer)
 			{
 				CompilationOptions options = CreateCompilationOptions();
-				var typeScriptCompiler = new TypeScriptCompiler(options);
+				var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance, options);
 
 				ClearAssetContentCache();
 
@@ -230,7 +261,7 @@
 			lock (_translationSynchronizer)
 			{
 				CompilationOptions options = CreateCompilationOptions();
-				var typeScriptCompiler = new TypeScriptCompiler(options);
+				var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance, options);
 
 				ClearAssetContentCache();
 

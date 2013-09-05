@@ -1,10 +1,10 @@
 ﻿namespace BundleTransformer.Csso.Optimizers
 {
 	using System;
-	using System.Reflection;
-	using System.Text;
 
-	using Core;
+	using JavaScriptEngineSwitcher.Core;
+	using JavaScriptEngineSwitcher.Core.Helpers;
+
 	using CoreStrings = Core.Resources.Strings;
 
 	using CssoStrings = Resources.Strings;
@@ -27,7 +27,7 @@
 		/// <summary>
 		/// JS engine
 		/// </summary>
-		private JavascriptEngine _jsEngine;
+		private readonly IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of optimization
@@ -46,11 +46,12 @@
 
 
 		/// <summary>
-		/// Destructs instance of CSS-optimizer
+		/// Constructs instance of CSS-optimizer
 		/// </summary>
-		~CssOptimizer()
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		public CssOptimizer(Func<IJsEngine> createJsEngineInstance)
 		{
-			Dispose(false /* disposing */);
+			_jsEngine = createJsEngineInstance();
 		}
 
 
@@ -61,10 +62,8 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine = new JavascriptEngine();
-				_jsEngine.Run(Utils.GetResourceAsString(CSSO_LIBRARY_RESOURCE_NAME, 
-					Assembly.GetExecutingAssembly()));
-				_jsEngine.Run(string.Format(@"function {0}(code, disableRestructuring) {{
+				_jsEngine.ExecuteResource(CSSO_LIBRARY_RESOURCE_NAME, GetType());
+				_jsEngine.Execute(string.Format(@"function {0}(code, disableRestructuring) {{
 	var compressor = new CSSOCompressor(),
 		translator = new CSSOTranslator();
 
@@ -91,16 +90,13 @@
 
 				try
 				{
-					_jsEngine.SetParameter("code", content);
-					_jsEngine.SetParameter("disableRestructuring", disableRestructuring);
-					_jsEngine.Run(string.Format(
-						"var result = {0}(code, disableRestructuring);", OPTIMIZATION_FUNCTION_NAME));
-
-					newContent = (string)_jsEngine.GetParameter("result");
+					newContent = _jsEngine.CallFunction<string>(OPTIMIZATION_FUNCTION_NAME,
+						content, disableRestructuring);
 				}
-				catch (Exception e)
+				catch (JsRuntimeException e)
 				{
-					throw new CssOptimizingException(FormatErrorDetails(e));
+					throw new CssOptimizingException(
+						JsRuntimeErrorHelpers.Format(e));
 				}
 			}
 
@@ -108,51 +104,9 @@
 		}
 
 		/// <summary>
-		/// Generates a detailed error message
-		/// </summary>
-		/// <param name="javascriptException">JavaScript exception</param>
-		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(dynamic javascriptException)
-		{
-			var message = (string)javascriptException.Message;
-			var helpLink = (string)javascriptException.HelpLink;
-			var line = (int)javascriptException.Line;
-			var startColumn = (int)javascriptException.StartColumn;
-			var endColumn = (int)javascriptException.EndColumn;
-			var source = (string)javascriptException.Source;
-
-			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
-			if (!string.IsNullOrWhiteSpace(javascriptException.HelpLink))
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword, helpLink);
-			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber, line.ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn, startColumn.ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, endColumn.ToString());
-			if (!string.IsNullOrWhiteSpace(javascriptException.Source))
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_SourceError, source);
-			}
-
-			return errorMessage.ToString();
-		}
-
-		/// <summary>
 		/// Destroys object
 		/// </summary>
 		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
 		{
 			if (!_disposed)
 			{

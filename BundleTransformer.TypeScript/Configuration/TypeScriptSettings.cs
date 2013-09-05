@@ -2,6 +2,8 @@
 {
 	using System.Configuration;
 
+	using Core.Configuration;
+
 	/// <summary>
 	/// Configuration settings of TypeScript-translator
 	/// </summary>
@@ -76,6 +78,15 @@
 		{
 			get { return (CodeGenTarget)this["codeGenTarget"]; }
 			set { this["codeGenTarget"] = value; }
+		}
+
+		/// <summary>
+		/// Gets a configuration settings of JavaScript engine
+		/// </summary>
+		[ConfigurationProperty("jsEngine")]
+		public JsEngineSettings JsEngine
+		{
+			get { return (JsEngineSettings)this["jsEngine"]; }
 		}
 	}
 }

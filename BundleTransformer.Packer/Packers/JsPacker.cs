@@ -2,8 +2,8 @@
 {
 	using System;
 
-	using MsieJavaScriptEngine;
-	using MsieJavaScriptEngine.ActiveScript;
+	using JavaScriptEngineSwitcher.Core;
+	using JavaScriptEngineSwitcher.Core.Helpers;
 
 	using CoreStrings = Core.Resources.Strings;
 
@@ -23,9 +23,9 @@
 		const string PACKING_FUNCTION_NAME = "packerPack";
 
 		/// <summary>
-		/// MSIE JS engine
+		/// JS engine
 		/// </summary>
-		private MsieJsEngine _jsEngine;
+		private readonly IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of packing
@@ -44,11 +44,12 @@
 
 
 		/// <summary>
-		/// Destructs instance of JS-packer
+		/// Constructs instance of JS-packer
 		/// </summary>
-		~JsPacker()
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		public JsPacker(Func<IJsEngine> createJsEngineInstance)
 		{
-			Dispose(false /* disposing */);
+			_jsEngine = createJsEngineInstance();
 		}
 
 
@@ -59,7 +60,6 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine = new MsieJsEngine(false);
 				_jsEngine.ExecuteResource(PACKER_LIBRARY_RESOURCE_NAME, GetType());
 				_jsEngine.Execute(
 					string.Format(@"var {0} = function(code, base62Encode, shrinkVariables) {{
@@ -92,10 +92,10 @@
 					newContent = _jsEngine.CallFunction<string>(PACKING_FUNCTION_NAME,
 						content, base62Encode, shrinkVariables);
 				}
-				catch (ActiveScriptException e)
+				catch (JsRuntimeException e)
 				{
 					throw new JsPackingException(
-						ActiveScriptErrorFormatter.Format(e));
+						JsRuntimeErrorHelpers.Format(e));
 				}
 			}
 
@@ -106,17 +106,6 @@
 		/// Destroys object
 		/// </summary>
 		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
 		{
 			if (!_disposed)
 			{

@@ -130,7 +130,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can not convert value &apos;{0}&apos; of enumeration type &apos;{1}&apos; to value of enumeration type &apos;{2}&apos;..
+        ///   Looks up a localized string similar to Can not convert value &apos;{0}&apos; of enumeration type `{1}` to value of enumeration type `{2}`..
         /// </summary>
         public static string Common_EnumValueConversionFailed {
             get {
@@ -139,7 +139,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t find string code that corresponding to the value {0} of enumeration type {1}..
+        ///   Looks up a localized string similar to Can&apos;t find string code that corresponding to the value &apos;{0}&apos; of enumeration type `{1}`..
         /// </summary>
         public static string Common_EnumValueToCodeConversionFailed {
             get {
@@ -157,7 +157,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During instantiate an object of type &apos;{0}&apos; from assembly &apos;{1}&apos; error occurred..
+        ///   Looks up a localized string similar to During instantiate an object of type `{0}` from assembly `{1}` error occurred..
         /// </summary>
         public static string Common_InstanceCreationFailed {
             get {
@@ -166,7 +166,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t find a value of enumeration type {0} that corresponding to the severity level {1}..
+        ///   Looks up a localized string similar to Can&apos;t find a value of enumeration type `{0}` that corresponding to the severity level {1}..
         /// </summary>
         public static string Common_SeverityLevelToEnumValueConversionFailed {
             get {
@@ -229,7 +229,20 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}-minifier with name &apos;{1}&apos; is not registered in configuration file..
+        ///   Looks up a localized string similar to In the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element not specified a name of JavaScript engine.
+        ///
+        ///If you have not installed JavaScript engine, then for correct working of this module is recommended to install one of the following NuGet packages: {1}
+        ///
+        ///After package is installed, need set a name of JavaScript engine (for example, `{2}`) to the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element..
+        /// </summary>
+        public static string Configuration_JsEngineNotSpecified {
+            get {
+                return ResourceManager.GetString("Configuration_JsEngineNotSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}-minifier with name `{1}` is not registered in configuration file..
         /// </summary>
         public static string Configuration_MinifierNotRegistered {
             get {
@@ -238,7 +251,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Translator, which compiles the code on intermediate language to {0}, and has the name &apos;{1}&apos; is not registered in  configuration file..
+        ///   Looks up a localized string similar to Translator, which compiles the code on intermediate language to {0}, and has the name `{1}` is not registered in  configuration file..
         /// </summary>
         public static string Configuration_TranslatorNotRegistered {
             get {

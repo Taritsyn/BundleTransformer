@@ -5,13 +5,13 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 
-	using MsieJavaScriptEngine;
-	using MsieJavaScriptEngine.ActiveScript;
+	using JavaScriptEngineSwitcher.Core;
+	using JavaScriptEngineSwitcher.Core.Helpers;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
 	using Core;
-	using Core.SourceCodeHelpers;
+	using Core.Helpers;
 	using CoreStrings = Core.Resources.Strings;
 	using UglifyStrings = Resources.Strings;
 
@@ -47,9 +47,9 @@
 		private readonly string _defaultOptionsString;
 
 		/// <summary>
-		/// MSIE JS engine
+		/// JS engine
 		/// </summary>
-		private MsieJsEngine _jsEngine;
+		private readonly IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of uglification
@@ -105,26 +105,22 @@
 		/// <summary>
 		/// Constructs instance of JS-uglifier
 		/// </summary>
-		public JsUglifier() : this(null)
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		public JsUglifier(Func<IJsEngine> createJsEngineInstance)
+			: this(createJsEngineInstance, null)
 		{ }
 
 		/// <summary>
 		/// Constructs instance of JS-uglifier
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default uglification options</param>
-		public JsUglifier(UglificationOptions defaultOptions)
+		public JsUglifier(Func<IJsEngine> createJsEngineInstance, UglificationOptions defaultOptions)
 		{
+			_jsEngine = createJsEngineInstance();
 			_defaultOptions = defaultOptions;
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertUglificationOptionsToJson(defaultOptions).ToString() : "null";
-		}
-
-		/// <summary>
-		/// Destructs instance of JS-uglifier
-		/// </summary>
-		~JsUglifier()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -137,7 +133,6 @@
 			{
 				Type type = GetType();
 
-				_jsEngine = new MsieJsEngine(true, true);
 				_jsEngine.ExecuteResource(UGLIFY_JS_LIBRARY_RESOURCE_NAME, type);
 				_jsEngine.ExecuteResource(UGLIFY_JS_HELPER_RESOURCE_NAME, type);
 
@@ -197,9 +192,9 @@
 
 					newContent = json.Value<string>("minifiedCode");
 				}
-				catch (ActiveScriptException e)
+				catch (JsRuntimeException e)
 				{
-					throw new JsUglifyingException(ActiveScriptErrorFormatter.Format(e));
+					throw new JsUglifyingException(JsRuntimeErrorHelpers.Format(e));
 				}
 			}
 
@@ -447,17 +442,6 @@
 		/// Destroys object
 		/// </summary>
 		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
 		{
 			if (!_disposed)
 			{

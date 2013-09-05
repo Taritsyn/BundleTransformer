@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: JSMin 1.7.27
+              README file for Bundle Transformer: JSMin 1.8.0
  
    ----------------------------------------------------------------------
 
@@ -12,17 +12,17 @@
    DESCRIPTION
    ===========
    BundleTransformer.JsMin contains one minifier-adapter for minification 
-   of JS-code - CrockfordJsMinifier. CrockfordJsMinifier is based on 
+   of JS-code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on 
    the C# port of Douglas Crockford's JSMin 
    (http://www.crockford.com/javascript/jsmin.html).
 
    ====================
    POST-INSTALL ACTIONS
    ====================
-   To make CrockfordJsMinifier is the default JS-minifier, you need to 
-   make changes to the Web.config file. In the defaultMinifier attribute 
-   of the \configuration\bundleTransformer\core\js element must be set 
-   value equal to CrockfordJsMinifier.
+   To make `CrockfordJsMinifier` is the default JS-minifier, you need to 
+   make changes to the Web.config file. In the `defaultMinifier` attribute 
+   of `\configuration\bundleTransformer\core\js` element must be set 
+   value equal to `CrockfordJsMinifier`.
    
    =============
    DOCUMENTATION

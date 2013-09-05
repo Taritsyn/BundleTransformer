@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.Linq;
+
+	using JavaScriptEngineSwitcher.Core;
 
 	using Core;
 	using Core.Assets;
@@ -28,6 +31,11 @@
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
+		/// Delegate that creates an instance of JavaScript engine
+		/// </summary>
+		private readonly Func<IJsEngine> _createJsEngineInstance;
+
+		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode
 		/// </summary>
 		public bool IsDebugMode
@@ -51,16 +59,38 @@
 		/// Constructs instance of CoffeeScript-translator
 		/// </summary>
 		public CoffeeScriptTranslator()
-			: this(BundleTransformerContext.Current.GetCoffeeScriptConfiguration())
+			: this(null, BundleTransformerContext.Current.GetCoffeeScriptConfiguration())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of CoffeeScript-translator
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="coffeeConfig">Configuration settings of CoffeeScript-translator</param>
-		public CoffeeScriptTranslator(CoffeeScriptSettings coffeeConfig)
+		public CoffeeScriptTranslator(Func<IJsEngine> createJsEngineInstance,
+			CoffeeScriptSettings coffeeConfig)
 		{
 			Bare = coffeeConfig.Bare;
+
+			if (createJsEngineInstance == null)
+			{
+				string jsEngineName = coffeeConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
+				{
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"coffeeScript",
+							@"
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
+							"MsieJsEngine")
+					);
+				}
+
+				createJsEngineInstance = (() =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
 
 
@@ -76,7 +106,7 @@
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			using (var coffeeScriptCompiler = new CoffeeScriptCompiler())
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(_createJsEngineInstance))
 			{
 				InnerTranslate(asset, coffeeScriptCompiler);
 			}
@@ -109,7 +139,7 @@
 				return assets;
 			}
 
-			using (var coffeeScriptCompiler = new CoffeeScriptCompiler())
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(_createJsEngineInstance))
 			{
 				foreach (var asset in assetsToProcessing)
 				{

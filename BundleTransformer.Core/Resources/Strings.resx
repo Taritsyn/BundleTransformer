@@ -145,19 +145,19 @@ See more details:
     <value>You do not specified a name of assembly.</value>
   </data>
   <data name="Common_EnumValueConversionFailed" xml:space="preserve">
-    <value>Can not convert value '{0}' of enumeration type '{1}' to value of enumeration type '{2}'.</value>
+    <value>Can not convert value '{0}' of enumeration type `{1}` to value of enumeration type `{2}`.</value>
   </data>
   <data name="Common_EnumValueToCodeConversionFailed" xml:space="preserve">
-    <value>Can't find string code that corresponding to the value {0} of enumeration type {1}.</value>
+    <value>Can't find string code that corresponding to the value '{0}' of enumeration type `{1}`.</value>
   </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>File '{0}' not exist.</value>
   </data>
   <data name="Common_InstanceCreationFailed" xml:space="preserve">
-    <value>During instantiate an object of type '{0}' from assembly '{1}' error occurred.</value>
+    <value>During instantiate an object of type `{0}` from assembly `{1}` error occurred.</value>
   </data>
   <data name="Common_SeverityLevelToEnumValueConversionFailed" xml:space="preserve">
-    <value>Can't find a value of enumeration type {0} that corresponding to the severity level {1}.</value>
+    <value>Can't find a value of enumeration type `{0}` that corresponding to the severity level {1}.</value>
   </data>
   <data name="Common_TypeNameIsEmpty" xml:space="preserve">
     <value>You do not specified a type name.</value>
@@ -177,11 +177,18 @@ See more details:
   <data name="Configuration_DefaultMinifierNotSpecified" xml:space="preserve">
     <value>Default {0}-minifier not specified.</value>
   </data>
+  <data name="Configuration_JsEngineNotSpecified" xml:space="preserve">
+    <value>In the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element not specified a name of JavaScript engine.
+
+If you have not installed JavaScript engine, then for correct working of this module is recommended to install one of the following NuGet packages: {1}
+
+After package is installed, need set a name of JavaScript engine (for example, `{2}`) to the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element.</value>
+  </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
-    <value>{0}-minifier with name '{1}' is not registered in configuration file.</value>
+    <value>{0}-minifier with name `{1}` is not registered in configuration file.</value>
   </data>
   <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
-    <value>Translator, which compiles the code on intermediate language to {0}, and has the name '{1}' is not registered in  configuration file.</value>
+    <value>Translator, which compiles the code on intermediate language to {0}, and has the name `{1}` is not registered in  configuration file.</value>
   </data>
   <data name="ErrorDetails_ColumnNumber" xml:space="preserve">
     <value>Column number</value>

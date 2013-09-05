@@ -4,14 +4,14 @@
 	using System.Linq;
 	using System.Text;
 
-	using MsieJavaScriptEngine;
-	using MsieJavaScriptEngine.ActiveScript;
+	using JavaScriptEngineSwitcher.Core;
+	using JavaScriptEngineSwitcher.Core.Helpers;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
 	using Core;
 	using Core.Assets;
-	using Core.SourceCodeHelpers;
+	using Core.Helpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -55,9 +55,9 @@
 		private readonly string _commonTypesDefinitions;
 
 		/// <summary>
-		/// MSIE JS engine
+		/// JS engine
 		/// </summary>
-		private MsieJsEngine _jsEngine;
+		private readonly IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of compilation
@@ -78,27 +78,23 @@
 		/// <summary>
 		/// Constructs instance of TypeScript-compiler
 		/// </summary>
-		public TypeScriptCompiler() : this(null)
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance)
+			: this(createJsEngineInstance, null)
 		{ }
 
 		/// <summary>
 		/// Constructs instance of TypeScript-compiler
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>
-		public TypeScriptCompiler(CompilationOptions defaultOptions)
+		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
 		{
+			_jsEngine = createJsEngineInstance();
 			_defaultOptions = defaultOptions;
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
 			_commonTypesDefinitions = Utils.GetResourceAsString(DEFAULT_LIBRARY_RESOURCE_NAME, GetType());
-		}
-
-		/// <summary>
-		/// Destructs instance of TypeScript-compiler
-		/// </summary>
-		~TypeScriptCompiler()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -111,7 +107,6 @@
 			{
 				Type type = GetType();
 
-				_jsEngine = new MsieJsEngine(true, true);
 				_jsEngine.ExecuteResource(TYPESCRIPT_LIBRARY_RESOURCE_NAME, type);
 				_jsEngine.ExecuteResource(TSC_HELPER_RESOURCE_NAME, type);
 
@@ -175,10 +170,10 @@
 
 					newContent = json.Value<string>("compiledCode");
 				}
-				catch (ActiveScriptException e)
+				catch (JsRuntimeException e)
 				{
 					throw new TypeScriptCompilingException(
-						ActiveScriptErrorFormatter.Format(e));
+						JsRuntimeErrorHelpers.Format(e));
 				}
 			}
 
@@ -235,6 +230,10 @@
 		{
 			var message = errorDetails.Value<string>("message");
 			var filePath = errorDetails.Value<string>("fileName");
+			if (string.IsNullOrWhiteSpace(filePath))
+			{
+				filePath = currentFilePath;
+			}
 			var lineNumber = errorDetails.Value<int>("lineNumber");
 			var columnNumber = errorDetails.Value<int>("columnNumber");
 
@@ -261,10 +260,16 @@
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
 			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				lineNumber.ToString());
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				columnNumber.ToString());
+			if (lineNumber > 0)
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+					lineNumber.ToString());
+			}
+			if (columnNumber > 0)
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+					columnNumber.ToString());
+			}
 			if (!string.IsNullOrWhiteSpace(sourceFragment))
 			{
 				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
@@ -278,17 +283,6 @@
 		/// Destroys object
 		/// </summary>
 		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
 		{
 			if (!_disposed)
 			{

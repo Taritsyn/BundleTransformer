@@ -145,19 +145,19 @@
     <value>Вы не указали имя сборки!</value>
   </data>
   <data name="Common_EnumValueConversionFailed" xml:space="preserve">
-    <value>Невозможно преобразовать значение "{0}" перечислимого типа "{1}" в значение перечислимого типа "{2}"!</value>
+    <value>Невозможно преобразовать значение "{0}" перечислимого типа `{1}` в значение перечислимого типа `{2}`!</value>
   </data>
   <data name="Common_EnumValueToCodeConversionFailed" xml:space="preserve">
-    <value>Не удается найти строковый код, соответствующий значению {0} перечислимого типа {1}!</value>
+    <value>Не удается найти строковый код, соответствующий значению "{0}" перечислимого типа `{1}`!</value>
   </data>
   <data name="Common_FileNotExist" xml:space="preserve">
     <value>Файл "{0}" не существует!</value>
   </data>
   <data name="Common_InstanceCreationFailed" xml:space="preserve">
-    <value>При создании экземпляра объекта типа "{0}" из сборки "{1}" произошла ошибка!</value>
+    <value>При создании экземпляра объекта типа `{0}` из сборки `{1}` произошла ошибка!</value>
   </data>
   <data name="Common_SeverityLevelToEnumValueConversionFailed" xml:space="preserve">
-    <value>Не удается найти значениe перечислимого типа {0}, соответствующее коду серьезности ошибки {1}!</value>
+    <value>Не удается найти значениe перечислимого типа `{0}`, соответствующее коду серьезности ошибки {1}!</value>
   </data>
   <data name="Common_TypeNameIsEmpty" xml:space="preserve">
     <value>Вы не указали имя типа!</value>
@@ -177,11 +177,18 @@
   <data name="Configuration_DefaultMinifierNotSpecified" xml:space="preserve">
     <value>Вы не задали минимизатор {0}-кода по умолчанию!</value>
   </data>
+  <data name="Configuration_JsEngineNotSpecified" xml:space="preserve">
+    <value>В атрибуте `name` конфигурационного элемента `/configuration/bundleTransformer/{0}/jsEngine` не указано название JavaScript-движка.
+
+Если у вас еще не установлен ни один JavaScript-движок, то для нормальной работы данного модуля рекомендуется установить один из следующих NuGet-пакетов: {1}
+
+После установки пакета присвойте название JavaScript-движка (например, `{2}`) атрибуту `name` конфигурационного элемента `/configuration/bundleTransformer/{0}/jsEngine`.</value>
+  </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
-    <value>Минимизатор {0}-кода с именем "{1}" не зарегистрирован в конфигурационном файле!</value>
+    <value>Минимизатор {0}-кода с именем `{1}` не зарегистрирован в конфигурационном файле!</value>
   </data>
   <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
-    <value>Транслятор, компилирующий код на промежуточном языке в {0}, и имеющий имя "{1}" не зарегистрирован в конфигурационном файле!</value>
+    <value>Транслятор, компилирующий код на промежуточном языке в {0}, и имеющий имя `{1}` не зарегистрирован в конфигурационном файле!</value>
   </data>
   <data name="ErrorDetails_ColumnNumber" xml:space="preserve">
     <value>Номер столбца</value>

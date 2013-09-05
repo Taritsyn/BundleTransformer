@@ -3,7 +3,6 @@ set repository_directory="C:\NuGet Repository"
 
 move %packages_directory%\BundleTransformer.Core\*.nupkg %repository_directory% 
 move %packages_directory%\BundleTransformer.Less\*.nupkg %repository_directory% 
-move %packages_directory%\BundleTransformer.LessLite\*.nupkg %repository_directory% 
 move %packages_directory%\BundleTransformer.SassAndScss\*.nupkg %repository_directory% 
 move %packages_directory%\BundleTransformer.CoffeeScript\*.nupkg %repository_directory% 
 move %packages_directory%\BundleTransformer.TypeScript\*.nupkg %repository_directory% 

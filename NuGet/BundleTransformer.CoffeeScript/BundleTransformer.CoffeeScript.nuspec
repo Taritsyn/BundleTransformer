@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.CoffeeScript</id>
-    <version>1.7.27</version>
+    <version>1.8.0</version>
 	<title>Bundle Transformer: CoffeeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,14 +10,17 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476850</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.CoffeeScript contains translator-adapter CoffeeScriptTranslator (supports CoffeeScript (http://coffeescript.org) version 1.6.3). This adapter makes translation of CoffeeScript-code to JS-code. Also contains HTTP-handler CoffeeScriptAssetHandler, which is responsible for text output of translated CoffeeScript-asset.</description>
-    <summary>BundleTransformer.CoffeeScript contains translator-adapter CoffeeScriptTranslator (supports CoffeeScript version 1.6.3). This adapter makes translation of CoffeeScript-code to JS-code. Also contains HTTP-handler CoffeeScriptAssetHandler, which is responsible for text output of translated CoffeeScript-asset.</summary>
+    <description>BundleTransformer.CoffeeScript contains translator-adapter `CoffeeScriptTranslator` (supports CoffeeScript (http://coffeescript.org) version 1.6.3). This adapter makes translation of CoffeeScript-code to JS-code. Also contains debugging HTTP-handler `CoffeeScriptAssetHandler`, which is responsible for text output of translated CoffeeScript-asset.
+	
+As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
+    <summary>BundleTransformer.CoffeeScript contains translator-adapter `CoffeeScriptTranslator` (supports CoffeeScript version 1.6.3). This adapter makes translation of CoffeeScript-code to JS-code. Also contains debugging HTTP-handler `CoffeeScriptAssetHandler`, which is responsible for text output of translated CoffeeScript-asset.</summary>
+	<releaseNotes>Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript Engine Switcher library.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling CoffeeScript Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.7.27" />
-	  <dependency id="MsieJavaScriptEngine" version="1.1.2" />
+      <dependency id="BundleTransformer.Core" version="1.8.0" />
+	  <dependency id="JavaScriptEngineSwitcher.Core" version="0.9.2" />
 	  <dependency id="Newtonsoft.Json" version="5.0.6" />
     </dependencies>
     <references>

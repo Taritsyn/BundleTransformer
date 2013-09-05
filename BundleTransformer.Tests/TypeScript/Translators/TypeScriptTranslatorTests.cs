@@ -1,5 +1,8 @@
 ﻿namespace BundleTransformer.Tests.TypeScript.Translators
 {
+	using System;
+
+	using JavaScriptEngineSwitcher.Core;
 	using Moq;
 	using NUnit.Framework;
 
@@ -127,12 +130,13 @@ class ColoredTranslatorBadge extends TranslatorBadge {
 				;
 
 
+			Func<IJsEngine> createJsEngineInstance = () => (new Mock<IJsEngine>()).Object;
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			var relativePathResolver = new MockRelativePathResolver();
 			var tsConfig = new TypeScriptSettings();
 
-			var tsTranslator = new TypeScriptTranslator(virtualFileSystemWrapper, 
-				relativePathResolver, tsConfig);
+			var tsTranslator = new TypeScriptTranslator(createJsEngineInstance,
+				virtualFileSystemWrapper, relativePathResolver, tsConfig);
 
 			const string assetContent = @"/// <reference path=""ColoredTranslatorBadge.ts"" />
 var TS_BADGE_TEXT = ""TypeScript"";

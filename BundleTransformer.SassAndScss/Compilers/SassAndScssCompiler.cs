@@ -215,7 +215,11 @@
 		private static string FormatErrorDetails(dynamic errorDetails, string currentFilePath)
 		{
 			var message = (string)errorDetails.to_s();
-			var filePath = (string)errorDetails.sass_filename() ?? currentFilePath;
+			var filePath = (string)errorDetails.sass_filename();
+			if (string.IsNullOrWhiteSpace(filePath))
+			{
+				filePath = currentFilePath;
+			}
 			var lineNumber = (int)errorDetails.sass_line();
 
 			var errorMessage = new StringBuilder();

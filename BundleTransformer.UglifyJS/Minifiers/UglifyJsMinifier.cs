@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.Linq;
+
+	using JavaScriptEngineSwitcher.Core;
 
 	using Core;
 	using Core.Assets;
@@ -27,6 +30,11 @@
 		/// Name of code type
 		/// </summary>
 		const string CODE_TYPE = "JS";
+
+		/// <summary>
+		/// Delegate that creates an instance of JavaScript engine
+		/// </summary>
+		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
 		/// Gets or sets a options of parsing
@@ -90,14 +98,15 @@
 		/// Constructs instance of Uglify JS-minifier
 		/// </summary>
 		public UglifyJsMinifier() 
-			: this(BundleTransformerContext.Current.GetUglifyJsConfiguration())
+			: this(null, BundleTransformerContext.Current.GetUglifyJsConfiguration())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Uglify JS-minifier
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="uglifyConfig">Configuration settings of Uglify Minifier</param>
-		public UglifyJsMinifier(UglifySettings uglifyConfig)
+		public UglifyJsMinifier(Func<IJsEngine> createJsEngineInstance, UglifySettings uglifyConfig)
 		{
 			JsSettings jsConfig = uglifyConfig.Js;
 			ParsingSettings parsing = jsConfig.Parsing;
@@ -161,6 +170,26 @@
 
 			ScrewIe8 = jsConfig.ScrewIe8;
 			Severity = jsConfig.Severity;
+
+			if (createJsEngineInstance == null)
+			{
+				string jsEngineName = uglifyConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
+				{
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"uglify",
+							@"
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
+							"MsieJsEngine")
+					);
+				}
+
+				createJsEngineInstance = (() =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
 
 
@@ -189,7 +218,7 @@
 				return assets;
 			}
 
-			using (var jsUglifier = new JsUglifier(options))
+			using (var jsUglifier = new JsUglifier(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{

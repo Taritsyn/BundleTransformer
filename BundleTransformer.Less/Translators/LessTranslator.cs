@@ -2,16 +2,18 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.IO;
 	using System.Linq;
 	using System.Text;
 	using System.Text.RegularExpressions;
 
+	using JavaScriptEngineSwitcher.Core;
+
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
 	using Core.Helpers;
-	using Core.SourceCodeHelpers;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
@@ -77,6 +79,11 @@
 		/// Regular expression for working with the base64 option of data-uri
 		/// </summary>
 		private static readonly Regex _base64OptionRegex = new Regex(@";base64$", RegexOptions.Compiled);
+		
+		/// <summary>
+		/// Delegate that creates an instance of JavaScript engine
+		/// </summary>
+		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
 		/// Virtual file system wrapper
@@ -139,7 +146,8 @@
 		/// Constructs instance of LESS-translator
 		/// </summary>
 		public LessTranslator()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
+			: this(null,
+				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
 				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
 				BundleTransformerContext.Current.GetLessConfiguration())
 		{ }
@@ -147,10 +155,12 @@
 		/// <summary>
 		/// Constructs instance of LESS-translator
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
-		public LessTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper,
+		public LessTranslator(Func<IJsEngine> createJsEngineInstance,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			IRelativePathResolver relativePathResolver,
 			LessSettings lessConfig)
 		{
@@ -163,6 +173,26 @@
 			StrictMath = lessConfig.StrictMath;
 			StrictUnits = lessConfig.StrictUnits;
 			DumpLineNumbers = lessConfig.DumpLineNumbers;
+
+			if (createJsEngineInstance == null)
+			{
+				string jsEngineName = lessConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
+				{
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"less",
+							@"
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
+							"MsieJsEngine")
+					);
+				}
+
+				createJsEngineInstance = (() =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
 
 
@@ -182,7 +212,7 @@
 			{
 				bool enableNativeMinification = NativeMinificationEnabled;
 				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
-				var lessCompiler = new LessCompiler(options);
+				var lessCompiler = new LessCompiler(_createJsEngineInstance, options);
 
 				ClearAssetContentCache();
 
@@ -227,7 +257,7 @@
 			{
 				bool enableNativeMinification = NativeMinificationEnabled;
 				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
-				var lessCompiler = new LessCompiler(options);
+				var lessCompiler = new LessCompiler(_createJsEngineInstance, options);
 
 				ClearAssetContentCache();
 

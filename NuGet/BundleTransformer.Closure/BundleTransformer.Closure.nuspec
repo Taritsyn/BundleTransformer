@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Closure</id>
-    <version>1.7.27</version>
+    <version>1.8.0</version>
 	<title>Bundle Transformer: Closure</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,13 +10,13 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476855</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Closure contains 2 minifier-adapters for minification of JS-code: ClosureRemoteJsMinifier and ClosureLocalJsMinifier. ClosureRemoteJsMinifier is based on the Google Closure Compiler Service API (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet. ClosureLocalJsMinifier is based on the Google Closure Compiler Application (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of file compiler.jar.</description>
-    <summary>BundleTransformer.Closure contains 2 minifier-adapters for minification of JS-code: ClosureRemoteJsMinifier and ClosureLocalJsMinifier. These adapters perform minification using the Google Closure Compiler.</summary>
+    <description>BundleTransformer.Closure contains 2 minifier-adapters for minification of JS-code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. `ClosureRemoteJsMinifier` is based on the Google Closure Compiler Service API (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet. `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of file compiler.jar.</description>
+    <summary>BundleTransformer.Closure contains 2 minifier-adapters for minification of JS-code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. These adapters perform minification using the Google Closure Compiler.</summary>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Google Closure Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.7.27" />
+      <dependency id="BundleTransformer.Core" version="1.8.0" />
 	  <dependency id="Microsoft.Net.Http" version="2.2.13" />
 	  <dependency id="Newtonsoft.Json" version="5.0.6" />
     </dependencies>

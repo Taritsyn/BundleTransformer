@@ -1,8 +1,8 @@
 /*!
-* CSSO (CSS Optimizer) v1.3.7
+* CSSO (CSS Optimizer) v1.3.8
 * http://github.com/css/csso
 *
-* Copyright 2012, Sergey Kryzhanovsky
+* Copyright 2013, Sergey Kryzhanovsky
 * Released under the MIT License
 */
 var $util = {};
@@ -2831,6 +2831,7 @@ CSSOCompressor.prototype.freezeRulesets = function(token, rule, container, i) {
     info.freeze = this.freezeNeeded(selector);
     info.freezeID = this.selectorSignature(selector);
     info.pseudoID = this.composePseudoID(selector);
+    info.pseudoSignature = this.pseudoSelectorSignature(selector, this.allowedPClasses, true);
     this.markSimplePseudo(selector);
 
     return token;
@@ -2885,7 +2886,7 @@ CSSOCompressor.prototype.selectorSignature = function(selector) {
     return a.join(',');
 };
 
-CSSOCompressor.prototype.pseudoSelectorSignature = function(selector, exclude) {
+CSSOCompressor.prototype.pseudoSelectorSignature = function(selector, exclude, dontAppendExcludeMark) {
     var a = [], b = {}, ss, wasExclude = false;
     exclude = exclude || {};
 
@@ -2907,7 +2908,7 @@ CSSOCompressor.prototype.pseudoSelectorSignature = function(selector, exclude) {
 
     a.sort();
 
-    return a.join(',') + wasExclude;
+    return a.join(',') + (dontAppendExcludeMark? '' : wasExclude);
 };
 
 CSSOCompressor.prototype.notFPClasses = {
@@ -3374,7 +3375,6 @@ CSSOCompressor.prototype.restructureBlock = function(token, rule, container, j, 
     var x, p, v, imp, t,
         pre = this.pathUp(path) + '/' + selector + '/',
         ppre;
-
     for (var i = token.length - 1; i > -1; i--) {
         x = token[i];
         if (x[1] === 'declaration') {
@@ -3394,7 +3394,7 @@ CSSOCompressor.prototype.restructureBlock = function(token, rule, container, j, 
                     } else {
                         token.splice(i, 1);
                     }
-                } 
+                }
             } else if (this.needless(p, props, pre, imp, v, x, freeze)) {
                 token.splice(i, 1);
             } else {
@@ -3554,7 +3554,7 @@ CSSOCompressor.prototype.rejoinRuleset = function(token, rule, container, i) {
 
     if (!tb.length) return null;
 
-    if (ps.length && pb.length) {
+    if (ps.length && pb.length && token[0].pseudoSignature == p[0].pseudoSignature) {
         if (token[1] !== p[1]) return;
         // try to join by selectors
         ph = this.getHash(ps);
@@ -3621,7 +3621,7 @@ CSSOCompressor.prototype.restructureRuleset = function(token, rule, container, i
 
     if (!tb.length) return null;
 
-    if (ps.length && pb.length) {
+    if (ps.length && pb.length && token[0].pseudoSignature == p[0].pseudoSignature) {
         if (token[1] !== p[1]) return;
         // try to join by properties
         r = this.analyze(token, p);

@@ -13,7 +13,6 @@
 	using Core.Helpers;
 	using CoreStrings = Core.Resources.Strings;
 	using Core.Resources;
-	using Core.SourceCodeHelpers;
 	using Core.Translators;
 
 	using Compilers;

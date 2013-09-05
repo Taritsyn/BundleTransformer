@@ -123,7 +123,7 @@
 			}
 
 			// Generate a ETag value and check it
-			string eTag = GenerateAssetETag(assetUrl, content);
+			string eTag = GenerateAssetETag(content);
 			bool eTagChanged = IsETagHeaderChanged(request, eTag);
 			
 			// Add a special HTTP-headers to ensure that 
@@ -218,14 +218,13 @@
 		/// Generates value for HTTP-header "ETag" based on 
 		/// information about processed asset
 		/// </summary>
-		/// <param name="assetUrl">URL to the asset</param>
 		/// <param name="assetContent">Text content of asset</param>
 		/// <returns>ETag value</returns>
-		private static string GenerateAssetETag(string assetUrl, string assetContent)
+		private static string GenerateAssetETag(string assetContent)
 		{
 			byte[] hash;
 
-			using (Stream stream = Utils.GetStreamFromString(assetUrl + ";" + assetContent))
+			using (Stream stream = Utils.GetStreamFromString(assetContent))
 			{
 				using (var md5 = new MD5CryptoServiceProvider())
 				{
@@ -234,7 +233,7 @@
 			}
 
 			string hashString = BitConverter.ToString(hash);
-			string eTag = "\"" + hashString.Replace("-", string.Empty).ToLowerInvariant() + "\"";
+			string eTag = string.Format("\"{0}\"", hashString);
 
 			return eTag;
 		}

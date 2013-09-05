@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.Linq;
+
+	using JavaScriptEngineSwitcher.Core;
 
 	using Core;
 	using Core.Assets;
@@ -29,6 +32,11 @@
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
+		/// Delegate that creates an instance of JavaScript engine
+		/// </summary>
+		private readonly Func<IJsEngine> _createJsEngineInstance;
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disable structure minification
 		/// </summary>
 		public bool DisableRestructuring
@@ -42,16 +50,35 @@
 		/// Constructs instance of Sergey Kryzhanovsky's CSS-minifier
 		/// </summary>
 		public KryzhanovskyCssMinifier()
-			: this(BundleTransformerContext.Current.GetCssoConfiguration())
+			: this(null, BundleTransformerContext.Current.GetCssoConfiguration())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Sergey Kryzhanovsky's CSS-minifier
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="cssoConfig">Configuration settings of Sergey Kryzhanovsky's Minifier</param>
-		public KryzhanovskyCssMinifier(CssoSettings cssoConfig)
+		public KryzhanovskyCssMinifier(Func<IJsEngine> createJsEngineInstance, CssoSettings cssoConfig)
 		{
 			DisableRestructuring = cssoConfig.CssMinifier.DisableRestructuring;
+
+			if (createJsEngineInstance == null)
+			{
+				string jsEngineName = cssoConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
+				{
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"csso",
+							"JavaScriptEngineSwitcher.V8",
+							"V8JsEngine")
+					);
+				}
+
+				createJsEngineInstance = (() =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
 
 
@@ -80,7 +107,7 @@
 
 			bool disableRestructuring = DisableRestructuring;
 
-			using (var cssOptimizer = new CssOptimizer())
+			using (var cssOptimizer = new CssOptimizer(_createJsEngineInstance))
 			{
 				foreach (var asset in assetsToProcessing)
 				{

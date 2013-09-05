@@ -38,8 +38,9 @@
     <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MsieJavaScriptEngine">
-      <HintPath>..\packages\MsieJavaScriptEngine.1.1.2\lib\net40\MsieJavaScriptEngine.dll</HintPath>
+    <Reference Include="JavaScriptEngineSwitcher.Core, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.0.9.2\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -81,6 +82,7 @@
     <None Include="..\BundleTransformer.snk">
       <Link>BundleTransformer.snk</Link>
     </None>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

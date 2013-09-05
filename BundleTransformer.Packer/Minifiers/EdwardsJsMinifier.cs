@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Configuration;
 	using System.Linq;
+
+	using JavaScriptEngineSwitcher.Core;
 
 	using Core;
 	using Core.Assets;
@@ -46,23 +49,49 @@
 			set;
 		}
 
+		/// <summary>
+		/// Delegate that creates an instance of JavaScript engine
+		/// </summary>
+		private readonly Func<IJsEngine> _createJsEngineInstance;
+
 
 		/// <summary>
 		/// Constructs instance of Dean Edwards' JS-minifier
 		/// </summary>
 		public EdwardsJsMinifier()
-			: this(BundleTransformerContext.Current.GetPackerConfiguration())
+			: this(null, BundleTransformerContext.Current.GetPackerConfiguration())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Dean Edwards' JS-minifier
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="packerConfig">Configuration settings of Dean Edwards' Minifier</param>
-		public EdwardsJsMinifier(PackerSettings packerConfig)
+		public EdwardsJsMinifier(Func<IJsEngine> createJsEngineInstance, PackerSettings packerConfig)
 		{
 			JsMinifierSettings jsMinifierConfig = packerConfig.JsMinifier;
 			ShrinkVariables = jsMinifierConfig.ShrinkVariables;
 			Base62Encode = jsMinifierConfig.Base62Encode;
+
+			if (createJsEngineInstance == null)
+			{
+				string jsEngineName = packerConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
+				{
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"packer",
+							@"
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
+							"MsieJsEngine")
+					);
+				}
+
+				createJsEngineInstance = (() =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
 
 
@@ -92,7 +121,7 @@
 			bool shrinkVariables = ShrinkVariables;
 			bool base62Encode = Base62Encode;
 
-			using (var jsPacker = new JsPacker())
+			using (var jsPacker = new JsPacker(_createJsEngineInstance))
 			{
 				foreach (var asset in assetsToProcessing)
 				{

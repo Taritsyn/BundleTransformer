@@ -1,7 +1,9 @@
 ﻿namespace BundleTransformer.Tests.Less.Translators
 {
+	using System;
 	using System.Text;
 
+	using JavaScriptEngineSwitcher.Core;
 	using Moq;
 	using NUnit.Framework;
 
@@ -198,12 +200,13 @@
 }")
 				;
 
+			Func<IJsEngine> createJsEngineInstance = () => (new Mock<IJsEngine>()).Object;
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			IRelativePathResolver relativePathResolver = new MockRelativePathResolver();
 			var lessConfig = new LessSettings();
 
-			var lessTranslator = new LessTranslator(virtualFileSystemWrapper,
-				relativePathResolver, lessConfig);
+			var lessTranslator = new LessTranslator(createJsEngineInstance, 
+				virtualFileSystemWrapper, relativePathResolver, lessConfig);
 			const string assetContent = @"@import (once) ""Mixins.less"";
 @import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
 

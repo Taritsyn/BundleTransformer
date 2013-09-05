@@ -86,6 +86,7 @@
     <Compile Include="Builders\NullBuilder.cs" />
     <Compile Include="Bundles\CustomScriptBundle.cs" />
     <Compile Include="Bundles\CustomStyleBundle.cs" />
+    <Compile Include="Configuration\JsEngineSettings.cs" />
     <Compile Include="Constants\ContentType.cs" />
     <Compile Include="Constants\MinifierName.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
@@ -114,8 +115,8 @@
     <Compile Include="Helpers\MimeTypeHelpers.cs" />
     <Compile Include="Helpers\StylesheetHelpers.cs" />
     <Compile Include="Helpers\UrlHelpers.cs" />
-    <Compile Include="SourceCodeHelpers\SourceCodeNavigator.cs" />
-    <Compile Include="SourceCodeHelpers\SourceCodeNodeCoordinates.cs" />
+    <Compile Include="Helpers\SourceCodeNavigator.cs" />
+    <Compile Include="Helpers\SourceCodeNodeCoordinates.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="AssetNodeMatchBase.cs" />
     <Compile Include="UnknownMimeTypeException.cs" />

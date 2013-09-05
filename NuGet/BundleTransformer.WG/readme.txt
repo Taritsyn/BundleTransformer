@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.7.27 Alpha
+         README file for Bundle Transformer: WebGrease 1.8.0 Alpha
  
    ----------------------------------------------------------------------
 
@@ -12,16 +12,16 @@
    DESCRIPTION
    ===========
    BundleTransformer.WG contains one minifier-adapter for minification 
-   of CSS-code - WgCssMinifier. WgCssMinifier is based on 
+   of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on 
    the WebGrease Semantic CSS-minifier (http://webgrease.codeplex.com).
 
    ====================
    POST-INSTALL ACTIONS
    ====================
-   To make WgCssMinifier is the default CSS-minifier, you need to 
-   make changes to the Web.config file. In the defaultMinifier attribute 
-   of the \configuration\bundleTransformer\core\css element must be set 
-   value equal to WgCssMinifier.
+   To make `WgCssMinifier` is the default CSS-minifier, you need to 
+   make changes to the Web.config file. In the `defaultMinifier` attribute 
+   of `\configuration\bundleTransformer\core\css` element must be set 
+   value equal to `WgCssMinifier`.
    
    =============
    DOCUMENTATION

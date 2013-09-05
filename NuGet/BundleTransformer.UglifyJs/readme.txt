@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: UglifyJS 1.7.27
+            README file for Bundle Transformer: UglifyJS 1.8.0
  
    ----------------------------------------------------------------------
 
@@ -12,17 +12,36 @@
    DESCRIPTION
    ===========
    BundleTransformer.UglifyJs contains one minifier-adapter for 
-   minification of JS-code - UglifyJsMinifier. UglifyJsMinifier is based 
-   on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) 
-   version 2.3.6.
+   minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is 
+   based on the Mihai Bazon's UglifyJS 
+   (http://github.com/mishoo/UglifyJS2) version 2.3.6.
+   
+   As a JS-engine is used the JavaScript Engine Switcher library 
+   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
+   working of this module is recommended to install one of the following 
+   NuGet packages: JavaScriptEngineSwitcher.Msie or 
+   JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript
+   Engine Switcher library.
    
    ====================
    POST-INSTALL ACTIONS
    ====================
-   To make UglifyJsMinifier is the default JS-minifier, you need to 
-   make changes to the Web.config file. In the defaultMinifier attribute 
-   of the \configuration\bundleTransformer\core\js element must be set 
-   value equal to UglifyJsMinifier.
+   For correct working of this module is recommended to install one of 
+   the following NuGet packages: JavaScriptEngineSwitcher.Msie or 
+   JavaScriptEngineSwitcher.V8. After package is installed, need set a 
+   name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
+   attribute of `/configuration/bundleTransformer/uglify/jsEngine` 
+   configuration element.   
+   
+   To make `UglifyJsMinifier` is the default JS-minifier, you need to 
+   make changes to the Web.config file. In the `defaultMinifier` attribute 
+   of `\configuration\bundleTransformer\core\js` element must be set 
+   value equal to `UglifyJsMinifier`.
    
    =============
    DOCUMENTATION

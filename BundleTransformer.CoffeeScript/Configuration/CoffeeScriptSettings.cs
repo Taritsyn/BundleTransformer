@@ -2,6 +2,8 @@
 {
 	using System.Configuration;
 
+	using Core.Configuration;
+
 	/// <summary>
 	/// Configuration settings of CoffeeScript-translator
 	/// </summary>
@@ -16,6 +18,15 @@
 		{
 			get { return (bool)this["bare"]; }
 			set { this["bare"] = value; }
+		}
+
+		/// <summary>
+		/// Gets a configuration settings of JavaScript engine
+		/// </summary>
+		[ConfigurationProperty("jsEngine")]
+		public JsEngineSettings JsEngine
+		{
+			get { return (JsEngineSettings)this["jsEngine"]; }
 		}
 	}
 }

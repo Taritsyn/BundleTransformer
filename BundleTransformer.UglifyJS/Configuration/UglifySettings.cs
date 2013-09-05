@@ -2,6 +2,8 @@
 {
 	using System.Configuration;
 
+	using Core.Configuration;
+
 	/// <summary>
 	/// Configuration settings of Uglify Minifier
 	/// </summary>
@@ -14,6 +16,15 @@
 		public JsSettings Js
 		{
 			get { return (JsSettings)this["js"]; }
+		}
+
+		/// <summary>
+		/// Gets a configuration settings of JavaScript engine
+		/// </summary>
+		[ConfigurationProperty("jsEngine")]
+		public JsEngineSettings JsEngine
+		{
+			get { return (JsEngineSettings)this["jsEngine"]; }
 		}
 	}
 }

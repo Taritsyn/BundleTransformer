@@ -32,15 +32,22 @@
 		public string GetFileTextContent(string virtualPath)
 		{
 			string content;
-
+			
 			try
 			{
 				VirtualFile virtualFile = BundleTable.VirtualPathProvider.GetFile(virtualPath);
+				var stringBuilder = new StringBuilder();
 
 				using (var streamReader = new StreamReader(virtualFile.Open()))
 				{
-					content = streamReader.ReadToEnd();
+					// Fixes a single CR/LF
+					while (streamReader.Peek() >= 0)
+					{
+						stringBuilder.AppendLine(streamReader.ReadLine());
+					}
 				}
+
+				content = stringBuilder.ToString();
 			}
 			catch (FileNotFoundException e)
 			{

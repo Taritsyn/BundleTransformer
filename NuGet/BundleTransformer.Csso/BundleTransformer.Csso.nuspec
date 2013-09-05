@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Csso</id>
-    <version>1.7.27</version>
+    <version>1.8.0</version>
 	<title>Bundle Transformer: CSSO</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,15 +10,17 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=484303</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.7.
+    <description>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.8.
    
-As a JS-engine is used the Noesis Javascript .NET (http://javascriptdotnet.codeplex.com). For correct working of the Noesis Javascript .NET require assemblies msvcp100.dll and msvcr100.dll from the Microsoft Visual C++ 2010.</description>
-    <summary>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - KryzhanovskyCssMinifier. KryzhanovskyCssMinifier is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.7.</summary>
+As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet package - JavaScriptEngineSwitcher.V8.</description>
+    <summary>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.8.</summary>
+	<releaseNotes>Added support of CSSO version 1.3.8.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.7.27" />
+      <dependency id="BundleTransformer.Core" version="1.8.0" />
+	  <dependency id="JavaScriptEngineSwitcher.Core" version="0.9.2" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.Csso.dll" />
@@ -27,8 +29,6 @@ As a JS-engine is used the Noesis Javascript .NET (http://javascriptdotnet.codep
   <files>
     <file src="..\..\BundleTransformer.Csso\bin\Release\BundleTransformer.Csso.dll" target="lib\net40" />
 	<file src="..\..\BundleTransformer.Csso\bin\Release\**\BundleTransformer.Csso.resources.dll" target="lib\net40" />
-	<file src="..\..\BundleTransformer.Example.Mvc\App_Data\Noesis.Javascript\x86\Noesis.Javascript.dll" target="content\App_Data\Noesis.Javascript\x86" />
-	<file src="..\..\BundleTransformer.Example.Mvc\App_Data\Noesis.Javascript\x64\Noesis.Javascript.dll" target="content\App_Data\Noesis.Javascript\x64" />
 	<file src="content\web.config.transform" target="content" />
 	<file src="readme.txt" />
 	<file src="..\..\Licenses\javascript-net-license.txt" />

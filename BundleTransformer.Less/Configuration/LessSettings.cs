@@ -2,6 +2,8 @@
 {
 	using System.Configuration;
 
+	using Core.Configuration;
+
 	/// <summary>
 	/// Configuration settings of LESS-translator
 	/// </summary>
@@ -55,6 +57,15 @@
 		{
 			get { return (LineNumbersMode)this["dumpLineNumbers"]; }
 			set { this["dumpLineNumbers"] = value; }
+		}
+
+		/// <summary>
+		/// Gets a configuration settings of JavaScript engine
+		/// </summary>
+		[ConfigurationProperty("jsEngine")]
+		public JsEngineSettings JsEngine
+		{
+			get { return (JsEngineSettings)this["jsEngine"]; }
 		}
 	}
 }

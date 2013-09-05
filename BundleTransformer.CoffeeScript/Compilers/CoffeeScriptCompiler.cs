@@ -3,13 +3,13 @@
 	using System;
 	using System.Text;
 
-	using MsieJavaScriptEngine;
-	using MsieJavaScriptEngine.ActiveScript;
+	using JavaScriptEngineSwitcher.Core;
+	using JavaScriptEngineSwitcher.Core.Helpers;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
 	using Core;
-	using Core.SourceCodeHelpers;
+	using Core.Helpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -39,9 +39,9 @@
 		private readonly string _defaultOptionsString;
 
 		/// <summary>
-		/// MSIE JS engine
+		/// JS engine
 		/// </summary>
-		private MsieJsEngine _jsEngine;
+		private readonly IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of compilation
@@ -62,25 +62,21 @@
 		/// <summary>
 		/// Constructs instance of CoffeeScript-compiler
 		/// </summary>
-		public CoffeeScriptCompiler() : this(null)
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		public CoffeeScriptCompiler(Func<IJsEngine> createJsEngineInstance)
+			: this(createJsEngineInstance, null)
 		{ }
 
 		/// <summary>
 		/// Constructs instance of CoffeeScript-compiler
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>
-		public CoffeeScriptCompiler(CompilationOptions defaultOptions)
+		public CoffeeScriptCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
 		{
+			_jsEngine = createJsEngineInstance();
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
-		}
-
-		/// <summary>
-		/// Destructs instance of CoffeeScript-compiler
-		/// </summary>
-		~CoffeeScriptCompiler()
-		{
-			Dispose(false /* disposing */);
 		}
 
 
@@ -93,7 +89,6 @@
 			{
 				Type type = GetType();
 
-				_jsEngine = new MsieJsEngine(true, true);
 				_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, type);
 				_jsEngine.ExecuteResource(CSC_HELPER_RESOURCE_NAME, type);
 
@@ -133,10 +128,10 @@
 
 					newContent = json.Value<string>("compiledCode");
 				}
-				catch (ActiveScriptException e)
+				catch (JsRuntimeException e)
 				{
 					throw new CoffeeScriptCompilingException(
-						ActiveScriptErrorFormatter.Format(e));
+						JsRuntimeErrorHelpers.Format(e));
 				}
 			}
 
@@ -192,22 +187,11 @@
 
 			return errorMessage.ToString();
 		}
-	
-		/// <summary>
-		/// Destroys object
-		/// </summary>
-		public void Dispose()
-		{
-			Dispose(true /* disposing */);
-			GC.SuppressFinalize(this);
-		}
 
 		/// <summary>
 		/// Destroys object
 		/// </summary>
-		/// <param name="disposing">Flag, allowing destruction of 
-		/// managed objects contained in fields of class</param>
-		private void Dispose(bool disposing)
+		public void Dispose()
 		{
 			if (!_disposed)
 			{

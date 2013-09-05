@@ -6,9 +6,6 @@ call build-package.cmd
 cd %packages_directory%\BundleTransformer.Less
 call build-package.cmd
 
-cd %packages_directory%\BundleTransformer.LessLite
-call build-package.cmd
-
 cd %packages_directory%\BundleTransformer.SassAndScss
 call build-package.cmd
 

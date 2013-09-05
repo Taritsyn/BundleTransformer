@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Packer 1.7.27
+             README file for Bundle Transformer: Packer 1.8.0
  
    ----------------------------------------------------------------------
 
@@ -12,17 +12,36 @@
    DESCRIPTION
    ===========
    BundleTransformer.Packer contains one minifier-adapter for 
-   minification of JS-code - EdwardsJsMinifier. EdwardsJsMinifier is 
+   minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is 
    based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) 
    version 3.0.
+   
+   As a JS-engine is used the JavaScript Engine Switcher library 
+   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
+   working of this module is recommended to install one of the following 
+   NuGet packages: JavaScriptEngineSwitcher.Msie or 
+   JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript
+   Engine Switcher library.
    
    ====================
    POST-INSTALL ACTIONS
    ====================
-   To make EdwardsJsMinifier is the default JS-minifier, you need to 
-   make changes to the Web.config file. In the defaultMinifier attribute 
-   of the \configuration\bundleTransformer\core\js element must be set 
-   value equal to EdwardsJsMinifier.
+   For correct working of this module is recommended to install one of 
+   the following NuGet packages: JavaScriptEngineSwitcher.Msie or 
+   JavaScriptEngineSwitcher.V8. After package is installed, need set a 
+   name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
+   attribute of `/configuration/bundleTransformer/packer/jsEngine` 
+   configuration element. 
+   
+   To make `EdwardsJsMinifier` is the default JS-minifier, you need to 
+   make changes to the Web.config file. In the `defaultMinifier` attribute 
+   of `\configuration\bundleTransformer\core\js` element must be set 
+   value equal to `EdwardsJsMinifier`.
    
    =============
    DOCUMENTATION

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.7.27
+              README file for Bundle Transformer: Core 1.8.0
 
    ----------------------------------------------------------------------
 
@@ -13,15 +13,15 @@
    ===========   
    Bundle Transformer - a modular extension for System.Web.Optimization 
    (aka Microsoft ASP.NET Web Optimization Framework). Classes 
-   CssTransformer and JsTransformer, included in the core of Bundle 
-   Transformer, implement interface IBundleTransform. They are intended 
-   to replace the standard classes CssMinify and JsMinify.
+   `CssTransformer` and `JsTransformer`, included in the core of Bundle 
+   Transformer, implement interface `IBundleTransform`. They are intended 
+   to replace the standard classes `CssMinify` and `JsMinify`.
 
-   The main differences classes CssTransformer and JsTransformer from 
+   The main differences classes `CssTransformer` and `JsTransformer` from 
    standard implementations: ability to exclude unnecessary assets when 
    adding assets from a directory, does not produce the re-minification 
    of code of pre-minified assets, support automatic transformation of 
-   relative paths to absolute in CSS-code (for CssTransformer), etc. 
+   relative paths to absolute in CSS-code (for `CssTransformer`), etc. 
    These classes do not produce 
    the minification of code in runtime, but this feature can be added 
    by installing of minifier-adapter (now available adapters based on 
@@ -34,15 +34,6 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. From the Web.config file was removed the 
-      \configuration\bundleTransformer\core\assetHandler configuration 
-	  element;
-   2. In the base debugging HTTP handler added support of the ETag HTTP 
-      header.
 
    =============
    DOCUMENTATION

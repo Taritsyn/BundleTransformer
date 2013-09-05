@@ -210,6 +210,17 @@
 	</xs:complexType>
 
 	<xs:complexType name="ClearAssetProcessorRegistrationBase_SchemaType" abstract="true" />
+
+	<xs:complexType name="JsEngineSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of JavaScript engine</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="name" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>JavaScript engine name</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
 	<!-- /Core settings -->
 
 	<!-- LESS settings -->
@@ -217,6 +228,9 @@
 		<xs:annotation>
 			<xs:documentation>Configuration settings of LESS-translator</xs:documentation>
 		</xs:annotation>
+		<xs:all>
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
 		<xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
@@ -302,6 +316,9 @@
 		<xs:annotation>
 			<xs:documentation>Configuration settings of CoffeeScript-translator</xs:documentation>
 		</xs:annotation>
+		<xs:all>
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
 		<xs:attribute name="bare" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to allow compilation to JavaScript without the top-level function safety wrapper</xs:documentation>
@@ -315,6 +332,9 @@
 		<xs:annotation>
 			<xs:documentation>Configuration settings of TypeScript-translator</xs:documentation>
 		</xs:annotation>
+		<xs:all>
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
 		<xs:attribute name="useDefaultLib" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to include a default lib.d.ts with global declarations</xs:documentation>
@@ -974,6 +994,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="js" type="UglifyJsSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 	</xs:complexType>
 
@@ -1229,6 +1250,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="js" type="PackerJsMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 	</xs:complexType>
 
@@ -1256,6 +1278,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="css" type="CssoCssMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 	</xs:complexType>
 
