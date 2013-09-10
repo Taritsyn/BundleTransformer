@@ -108,11 +108,11 @@
 		/// <param name="uglifyConfig">Configuration settings of Uglify Minifier</param>
 		public UglifyJsMinifier(Func<IJsEngine> createJsEngineInstance, UglifySettings uglifyConfig)
 		{
-			JsSettings jsConfig = uglifyConfig.Js;
-			ParsingSettings parsing = jsConfig.Parsing;
-			CompressionSettings compressionConfig = jsConfig.Compression;
-			ManglingSettings manglingConfig = jsConfig.Mangling;
-			CodeGenerationSettings codeGenerationConfig = jsConfig.CodeGeneration;
+			JsMinifierSettings jsMinifierConfig = uglifyConfig.Js;
+			ParsingSettings parsing = jsMinifierConfig.Parsing;
+			CompressionSettings compressionConfig = jsMinifierConfig.Compression;
+			ManglingSettings manglingConfig = jsMinifierConfig.Mangling;
+			CodeGenerationSettings codeGenerationConfig = jsMinifierConfig.CodeGeneration;
 
 			ParsingOptions = new ParsingOptions
 			{
@@ -161,15 +161,14 @@
 				InlineScript = codeGenerationConfig.InlineScript,
 				Width = codeGenerationConfig.Width,
 				MaxLineLength = codeGenerationConfig.MaxLineLength,
-				IeProof = codeGenerationConfig.IeProof,
 				Bracketize = codeGenerationConfig.Bracketize,
 				Semicolons = codeGenerationConfig.Semicolons,
 				Comments = codeGenerationConfig.Comments,
 				PreserveLine = codeGenerationConfig.PreserveLine
 			};
 
-			ScrewIe8 = jsConfig.ScrewIe8;
-			Severity = jsConfig.Severity;
+			ScrewIe8 = jsMinifierConfig.ScrewIe8;
+			Severity = jsMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
 			{
@@ -210,13 +209,13 @@
 				return assets;
 			}
 
-			UglificationOptions options = CreateUglificationOptions();
-
 			var assetsToProcessing = assets.Where(a => a.IsScript && !a.Minified).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
 			}
+
+			UglificationOptions options = CreateUglificationOptions();
 
 			using (var jsUglifier = new JsUglifier(_createJsEngineInstance, options))
 			{

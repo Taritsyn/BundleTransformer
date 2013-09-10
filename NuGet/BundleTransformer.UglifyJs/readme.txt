@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: UglifyJS 1.8.0
+            README file for Bundle Transformer: UglifyJS 1.8.2
  
    ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
    BundleTransformer.UglifyJs contains one minifier-adapter for 
    minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is 
    based on the Mihai Bazon's UglifyJS 
-   (http://github.com/mishoo/UglifyJS2) version 2.3.6.
+   (http://github.com/mishoo/UglifyJS2) version 2.4.0.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
@@ -25,8 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript
-   Engine Switcher library.
+   Added support of UglifyJS version 2.4.0.
    
    ====================
    POST-INSTALL ACTIONS

@@ -3,9 +3,9 @@
 	using System.Configuration;
 
 	/// <summary>
-	/// Configuration settings of minification JS-assets
+	/// Configuration settings of Uglify JS-minifier
 	/// </summary>
-	public sealed class JsSettings : ConfigurationElement
+	public sealed class JsMinifierSettings : ConfigurationElement
 	{
 		/// <summary>
 		/// Gets a configuration settings of parsing

@@ -38,3 +38,6 @@ call build-package.cmd
 
 cd %packages_directory%\BundleTransformer.WG
 call build-package.cmd
+
+cd %packages_directory%\BundleTransformer.CleanCss
+call build-package.cmd

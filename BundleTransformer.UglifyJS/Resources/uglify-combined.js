@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.3.6
+ * UglifyJS v2.4.0
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2013, Mihai Bazon <mihai.bazon@gmail.com>
@@ -3320,14 +3320,13 @@
 			inline_script : false,
 			width         : 80,
 			max_line_len  : 32000,
-			ie_proof      : true,
 			beautify      : false,
 			source_map    : null,
 			bracketize    : false,
 			semicolons    : true,
 			comments      : false,
 			preserve_line : false,
-			negate_iife   : !(options && options.beautify)
+			screw_ie8     : false
 		}, true);
 
 		var indentation = 0;
@@ -3621,20 +3620,16 @@
 
 		AST_Node.DEFMETHOD("print", function(stream, force_parens){
 			var self = this, generator = self._codegen;
-			stream.push_node(self);
-			var needs_parens = self.needs_parens(stream);
-			var fc = self instanceof AST_Function && stream.option("negate_iife");
-			if (force_parens || (needs_parens && !fc)) {
-				stream.with_parens(function(){
-					self.add_comments(stream);
-					self.add_source_map(stream);
-					generator(self, stream);
-				});
-			} else {
+			function doit() {
 				self.add_comments(stream);
-				if (needs_parens && fc) stream.print("!");
 				self.add_source_map(stream);
 				generator(self, stream);
+			}
+			stream.push_node(self);
+			if (force_parens || self.needs_parens(stream)) {
+				stream.with_parens(doit);
+			} else {
+				doit();
 			}
 			stream.pop_node();
 		});
@@ -4031,7 +4026,7 @@
 			if (!self.body)
 				return output.force_semicolon();
 			if (self.body instanceof AST_Do
-				&& output.option("ie_proof")) {
+				&& !output.option("screw_ie8")) {
 				// https://github.com/mishoo/UglifyJS/issues/#issue/57 IE
 				// croaks with "syntax error" on code like this: if (foo)
 				// do ... while(cond); else ...  we need block brackets
@@ -4318,10 +4313,10 @@
 						&& +key + "" == key)
 					   && parseFloat(key) >= 0) {
 				output.print(make_num(key));
-			} else if (!is_identifier(key)) {
-				output.print_string(key);
-			} else {
+			} else if (RESERVED_WORDS(key) ? output.option("screw_ie8") : is_identifier_string(key)) {
 				output.print_name(key);
+			} else {
+				output.print_string(key);
 			}
 			output.colon();
 			self.value.print(output);
@@ -4530,6 +4525,7 @@
 			join_vars     : !false_by_default,
 			cascade       : !false_by_default,
 			side_effects  : !false_by_default,
+			negate_iife   : !false_by_default,
 			screw_ie8     : false,
 
 			warnings      : true,
@@ -4678,6 +4674,11 @@
 					statements = join_consecutive_vars(statements, compressor);
 				}
 			} while (CHANGED);
+
+			if (compressor.option("negate_iife")) {
+				negate_iifes(statements, compressor);
+			}
+
 			return statements;
 
 			function eliminate_spurious_blocks(statements) {
@@ -4959,6 +4960,40 @@
 					}
 					return a;
 				}, []);
+			};
+
+			function negate_iifes(statements, compressor) {
+				statements.forEach(function(stat){
+					if (stat instanceof AST_SimpleStatement) {
+						stat.body = (function transform(thing) {
+							return thing.transform(new TreeTransformer(function(node){
+								if (node instanceof AST_Call && node.expression instanceof AST_Function) {
+									return make_node(AST_UnaryPrefix, node, {
+										operator: "!",
+										expression: node
+									});
+								}
+								else if (node instanceof AST_Call) {
+									node.expression = transform(node.expression);
+								}
+								else if (node instanceof AST_Seq) {
+									node.car = transform(node.car);
+								}
+								else if (node instanceof AST_Conditional) {
+									var expr = transform(node.condition);
+									if (expr !== node.condition) {
+										// it has been negated, reverse
+										node.condition = expr;
+										var tmp = node.consequent;
+										node.consequent = node.alternative;
+										node.alternative = tmp;
+									}
+								}
+								return node;
+							}));
+						})(stat.body);
+					}
+				});
 			};
 
 		};
@@ -6469,8 +6504,7 @@
 			var prop = self.property;
 			if (prop instanceof AST_String && compressor.option("properties")) {
 				prop = prop.getValue();
-				if ((compressor.option("screw_ie8") && RESERVED_WORDS(prop))
-					|| (!(RESERVED_WORDS(prop)) && is_identifier_string(prop))) {
+				if (RESERVED_WORDS(prop) ? compressor.option("screw_ie8") : is_identifier_string(prop)) {
 					return make_node(AST_Dot, self, {
 						expression : self.expression,
 						property   : prop

@@ -57,6 +57,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JavaScriptEngineSwitcher.Core.0.9.2\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -83,6 +86,8 @@
   <ItemGroup>
     <Content Include="Resources\csso.web.js" />
     <EmbeddedResource Include="Resources\csso.web.min.js" />
+    <Content Include="Resources\cssoHelper.js" />
+    <EmbeddedResource Include="Resources\cssoHelper.min.js" />
     <Content Include="Resources\MIT-LICENSE.txt" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -108,7 +113,10 @@
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
 del "$(ProjectDir)Resources\csso.web.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\csso.web.js" -out:"$(ProjectDir)Resources\csso.web.min.js"</PreBuildEvent>
+wg.exe -m -in:"$(ProjectDir)Resources\csso.web.js" -out:"$(ProjectDir)Resources\csso.web.min.js"
+
+del "$(ProjectDir)Resources\cssoHelper.min.js"
+wg.exe -m -in:"$(ProjectDir)Resources\cssoHelper.js" -out:"$(ProjectDir)Resources\cssoHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>

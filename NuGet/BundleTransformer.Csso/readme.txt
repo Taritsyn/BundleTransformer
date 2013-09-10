@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: CSSO 1.8.0
+              README file for Bundle Transformer: CSSO 1.8.2
  
    ----------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CSSO version 1.3.8.
+   Improved error handling.
    
    ====================
    POST-INSTALL ACTIONS

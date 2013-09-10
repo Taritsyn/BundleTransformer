@@ -130,11 +130,9 @@
 						GroupCollection importRuleGroups = match.Groups;
 
 						string url = importRuleGroups["url"].Value.Trim();
-						string quote = importRuleGroups["quote"].Success ?
-							importRuleGroups["quote"].Value : string.Empty;
 
 						string importRule = match.Value;
-						string processedImportRule = ProcessImportRule(path, url, quote);
+						string processedImportRule = ProcessImportRule(path, url);
 
 						contentBuilder.Append(processedImportRule);
 						currentPosition += importRule.Length;
@@ -163,9 +161,8 @@
 		/// </summary>
 		/// <param name="parentAssetUrl">URL of parent CSS-asset file</param>
 		/// <param name="assetUrl">URL of CSS-asset file</param>
-		/// <param name="quote">Quote</param>
 		/// <returns>Processed CSS <code>@import</code> rule</returns>
-		private string ProcessImportRule(string parentAssetUrl, string assetUrl, string quote)
+		private string ProcessImportRule(string parentAssetUrl, string assetUrl)
 		{
 			string processedAssetUrl = assetUrl;
 			if (!UrlHelpers.StartsWithProtocol(assetUrl) && !UrlHelpers.StartsWithDataUriScheme(assetUrl))
@@ -173,7 +170,7 @@
 				processedAssetUrl = ResolveRelativePath(parentAssetUrl, assetUrl);
 			}
 
-			string result = string.Format("@import {0}{1}{0}", quote, processedAssetUrl);
+			string result = string.Format(@"@import ""{0}""", processedAssetUrl);
 
 			return result;
 		}

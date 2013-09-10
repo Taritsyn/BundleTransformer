@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.0
+              README file for Bundle Transformer: Core 1.8.2
 
    ----------------------------------------------------------------------
 
@@ -22,15 +22,14 @@
    adding assets from a directory, does not produce the re-minification 
    of code of pre-minified assets, support automatic transformation of 
    relative paths to absolute in CSS-code (for `CssTransformer`), etc. 
-   These classes do not produce 
-   the minification of code in runtime, but this feature can be added 
-   by installing of minifier-adapter (now available adapters based on 
-   Microsoft Ajax Minifier, YUI Compressor for .NET, Google Closure 
-   Compiler, Douglas Crockford's JSMin, Mihai Bazon's UglifyJS, Dean 
-   Edwards' Packer, Sergey Kryzhanovsky's CSSO (CSS Optimizer) and 
-   WebGrease). In addition, you can also install translator-adapters 
-   that implement the translation of code on intermediate languages 
-   (LESS, Sass, SCSS, CoffeeScript and TypeScript).
+   These classes do not produce the minification of code in runtime, but 
+   this feature can be added by installing of minifier-adapter (now 
+   available adapters based on Microsoft Ajax Minifier, YUI Compressor 
+   for .NET, Google Closure Compiler, Douglas Crockford's JSMin, Dean 
+   Edwards' Packer, Mihai Bazon's UglifyJS, Sergey Kryzhanovsky's CSSO 
+   (CSS Optimizer), WebGrease and Clean-css). In addition, you can also 
+   install translator-adapters that implement the translation of code on 
+   intermediate languages (LESS, Sass, SCSS, CoffeeScript and TypeScript).
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.

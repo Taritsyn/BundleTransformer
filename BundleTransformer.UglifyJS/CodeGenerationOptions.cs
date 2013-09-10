@@ -88,17 +88,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to generate “IE-proof” code 
-		/// (for now this means add brackets around the do/while in 
-		/// code like this: <code>if (foo) do something(); while (bar); else ....</code>)
-		/// </summary>
-		public bool IeProof
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to insert brackets in <code>if</code>, 
 		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code> 
 		/// statements, even if their body is a single statement
@@ -151,7 +140,6 @@
 			InlineScript = false;
 			Width = 80;
 			MaxLineLength = 32000;
-			IeProof = true;
 			Bracketize = false;
 			Semicolons = true;
 			Comments = false;

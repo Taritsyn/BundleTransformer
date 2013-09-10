@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.8.1 Beta 1 
+         README file for Bundle Transformer: WebGrease 1.8.2 Beta 1 
  
    ----------------------------------------------------------------------
 
@@ -19,7 +19,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of WebGrease Semantic CSS-minifier version 1.5.2.
+   In configuration settings of WebGrease Semantic CSS-minifier added 
+   new property - `ShouldMinify`.
 
    ====================
    POST-INSTALL ACTIONS

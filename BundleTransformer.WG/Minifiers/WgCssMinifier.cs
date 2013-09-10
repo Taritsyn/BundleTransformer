@@ -16,6 +16,8 @@
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Configuration;
+
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code 
 	/// by using WebGrease Semantic CSS-minifier
@@ -39,7 +41,7 @@
 		private static readonly ConstructorInfo _wgConfigurationConstructorInfo;
 
 		/// <summary>
-		/// Web Grease configuration
+		/// Instance of <code>WebGrease.Configuration.WebGreaseConfiguration</code> class
 		/// </summary>
 		private readonly WebGreaseConfiguration _wgConfiguration;
 
@@ -49,6 +51,15 @@
 		private static readonly Regex _errorStringRegex =
 			new Regex(@"^\((?<lineNumber>\d+),\s*(?<columnNumber>\d+)\):\s*" +
 				@"(?<subcategory>.*?)\s*(?<errorCode>[A-Za-z]+\d+):\s*(?<message>.*?)$", RegexOptions.Compiled);
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable usual minification
+		/// </summary>
+		public bool ShouldMinify
+		{
+			get;
+			set;
+		}
 
 		
 		/// <summary>
@@ -66,7 +77,17 @@
 		/// Constructs instance of WebGrease Semantic CSS-minifier
 		/// </summary>
 		public WgCssMinifier()
+			: this(BundleTransformerContext.Current.GetWgConfiguration())
+		{ }
+
+		/// <summary>
+		/// Constructs instance of WebGrease Semantic CSS-minifier
+		/// </summary>
+		/// <param name="wgConfig">Configuration settings of WebGrease Minifier</param>
+		public WgCssMinifier(WgSettings wgConfig)
 		{
+			ShouldMinify = wgConfig.CssMinifier.ShouldMinify;
+
 			_wgConfiguration = CreateWebGreaseConfiguration();
 		}
 
@@ -96,7 +117,7 @@
 
 			var wgCssMinifier = new CssMinifier(new WebGreaseContext(_wgConfiguration))
 			{
-				ShouldMinify = true
+				ShouldMinify = ShouldMinify
 			};
 
 			foreach (var asset in assetsToProcessing)
@@ -112,10 +133,10 @@
 					IList<string> errors = wgCssMinifier.Errors;
 					if (errors.Count > 0)
 					{
-						throw new WgMinifyingException(FormatErrorDetails(errors[0], content, assetUrl));
+						throw new WgMinificationException(FormatErrorDetails(errors[0], content, assetUrl));
 					}
 				}
-				catch (WgMinifyingException e)
+				catch (WgMinificationException e)
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,

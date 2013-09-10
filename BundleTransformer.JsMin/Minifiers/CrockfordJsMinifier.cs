@@ -12,7 +12,7 @@
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code 
-	/// by using C# port of Douglas Crockford's JSMin (version of May 22 2007)
+	/// by using C# port of Douglas Crockford's JSMin
 	/// </summary>
 	public sealed class CrockfordJsMinifier : IMinifier
 	{
@@ -28,7 +28,7 @@
 
 		/// <summary>
 		/// Produces code minifiction of JS-assets by using C# port of 
-		/// Douglas Crockford's JSMin (version of May 22 2007)
+		/// Douglas Crockford's JSMin
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>
@@ -55,17 +55,23 @@
 			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
-				string assetVirtualPath = asset.VirtualPath;
+				string assetUrl = asset.Url;
 				
 				try
 				{
 					newContent = jsMin.Minify(asset.Content);
 				}
+				catch (JsMinificationException e)
+				{
+					throw new AssetMinificationException(
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
+				}
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 				}
 
 				asset.Content = newContent;

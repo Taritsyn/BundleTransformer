@@ -272,11 +272,11 @@
 				new JProperty("inline_script", codeGenerationOptions.InlineScript),
 				new JProperty("width", codeGenerationOptions.Width),
 				new JProperty("max_line_len", codeGenerationOptions.MaxLineLength),
-				new JProperty("ie_proof", codeGenerationOptions.IeProof),
 				new JProperty("bracketize", codeGenerationOptions.Bracketize),
 				new JProperty("semicolons", codeGenerationOptions.Semicolons),
 				new JProperty("comments", codeGenerationOptions.Comments),
-				new JProperty("preserve_line", codeGenerationOptions.PreserveLine)
+				new JProperty("preserve_line", codeGenerationOptions.PreserveLine),
+				new JProperty("screw_ie8", options.ScrewIe8)
 			));
 
 			return optionsJson;

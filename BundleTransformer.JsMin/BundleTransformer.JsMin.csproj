@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DouglasCrockford\JavaScriptMinifier.cs" />
+    <Compile Include="DouglasCrockford\JsMinificationException.cs" />
     <Compile Include="Minifiers\CrockfordJsMinifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -23,6 +23,8 @@
 				<xs:element name="uglify" type="UglifySettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="packer" type="PackerSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="csso" type="CssoSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="webGrease" type="WgSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="clean" type="CleanSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 			</xs:all>
 		</xs:complexType>
 	</xs:element>
@@ -993,14 +995,14 @@ to preserve references to external symbols.</xs:documentation>
 			<xs:documentation>Configuration settings of Uglify Minifier</xs:documentation>
 		</xs:annotation>
 		<xs:all>
-			<xs:element name="js" type="UglifyJsSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="js" type="UglifyJsMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 	</xs:complexType>
 
-	<xs:complexType name="UglifyJsSettings_SchemaType">
+	<xs:complexType name="UglifyJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of minification JS-assets</xs:documentation>
+			<xs:documentation>Configuration settings of Uglify JS-minifier</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="parsing" type="UglifyParsingSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -1215,11 +1217,6 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Maximum line length (for uglified code)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="ieProof" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to generate “IE-proof” code</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="bracketize" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to insert brackets in if, for, do, while or with statements, even if their body is a single statement</xs:documentation>
@@ -1293,4 +1290,78 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /CSSO settings -->
+	
+	<!-- WebGrease settings -->
+	<xs:complexType name="WgSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of WebGrease Minifier</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="css" type="WgCssMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="WgCssMinifierSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of WebGrease Semantic CSS-minifier</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="shouldMinify" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable usual minification</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /WebGrease settings -->
+	
+	<!-- Clean-css settings -->
+	<xs:complexType name="CleanSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Clean-css Minifier</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="css" type="CleanCssMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+	</xs:complexType>
+
+	<xs:complexType name="CleanCssMinifierSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Clean CSS-minifier</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="keepSpecialComments" use="optional" default="KeepAll">
+			<xs:annotation>
+				<xs:documentation>Special comments mode</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="KeepAll">
+						<xs:annotation>
+							<xs:documentation>Keep all special comments</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="KeepFirstOne">
+						<xs:annotation>
+							<xs:documentation>Keep first one special comment</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="RemoveAll">
+						<xs:annotation>
+							<xs:documentation>Remove all special comments</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="keepBreaks" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to keep line breaks</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeEmpty" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove empty elements</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /Clean-css settings -->
 </xs:schema>

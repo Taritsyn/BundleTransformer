@@ -327,7 +327,6 @@
     <Content Include="Scripts\MicrosoftAjax.debug.js" />
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\modernizr-2.6.2.min.js" />
     <Content Include="Scripts\coffee\TestCoffeeScript.coffee" />
     <Content Include="Scripts\folder\test.js" />
     <Content Include="Scripts\ts\ColoredTranslatorBadge.ts" />
@@ -375,6 +374,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BundleTransformer.CleanCss\BundleTransformer.CleanCss.csproj">
+      <Project>{AF409D45-61D1-4906-B7CA-92AB133F3044}</Project>
+      <Name>BundleTransformer.CleanCss</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Closure\BundleTransformer.Closure.csproj">
       <Project>{C0CA5EE5-832E-4090-A749-CDC0479A35C7}</Project>
       <Name>BundleTransformer.Closure</Name>

@@ -10,12 +10,12 @@
 	public sealed class UglifySettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Get a configuration settings of minification JS-assets
+		/// Gets a configuration settings of Uglify JS-minifier
 		/// </summary>
 		[ConfigurationProperty("js")]
-		public JsSettings Js
+		public JsMinifierSettings Js
 		{
-			get { return (JsSettings)this["js"]; }
+			get { return (JsMinifierSettings)this["js"]; }
 		}
 
 		/// <summary>

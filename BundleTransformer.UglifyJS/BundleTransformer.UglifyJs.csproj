@@ -59,7 +59,7 @@
     <Compile Include="CompressionOptions.cs" />
     <Compile Include="Configuration\CodeGenerationSettings.cs" />
     <Compile Include="Configuration\CompressionSettings.cs" />
-    <Compile Include="Configuration\JsSettings.cs" />
+    <Compile Include="Configuration\JsMinifierSettings.cs" />
     <Compile Include="Configuration\ManglingSettings.cs" />
     <Compile Include="Configuration\ParsingSettings.cs" />
     <Compile Include="Configuration\UglifySettings.cs" />

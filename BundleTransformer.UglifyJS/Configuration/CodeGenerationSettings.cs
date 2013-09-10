@@ -99,18 +99,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to generate “IE-proof” code 
-		/// (for now this means add brackets around the do/while in 
-		/// code like this: <code>if (foo) do something(); while (bar); else ....</code>)
-		/// </summary>
-		[ConfigurationProperty("ieProof", DefaultValue = true)]
-		public bool IeProof
-		{
-			get { return (bool)this["ieProof"]; }
-			set { this["ieProof"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to insert brackets in <code>if</code>, 
 		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code> 
 		/// statements, even if their body is a single statement

@@ -4,6 +4,8 @@
 
 	using JavaScriptEngineSwitcher.Core;
 	using JavaScriptEngineSwitcher.Core.Helpers;
+	using Newtonsoft.Json;
+	using Newtonsoft.Json.Linq;
 
 	using CoreStrings = Core.Resources.Strings;
 
@@ -20,9 +22,14 @@
 		const string CSSO_LIBRARY_RESOURCE_NAME = "BundleTransformer.Csso.Resources.csso.web.min.js";
 
 		/// <summary>
-		/// Name of function, which is responsible for CSS-optimization
+		/// Name of resource, which contains a CSSO-minifier helper
 		/// </summary>
-		const string OPTIMIZATION_FUNCTION_NAME = "cssoJustDoIt";
+		const string CSSO_HELPER_RESOURCE_NAME = "BundleTransformer.Csso.Resources.cssoHelper.min.js";
+
+		/// <summary>
+		/// Template of function call, which is responsible for CSS-optimization
+		/// </summary>
+		const string OPTIMIZATION_FUNCTION_CALL_TEMPLATE = @"cssoHelper.minify({0}, {1});";
 
 		/// <summary>
 		/// JS engine
@@ -62,13 +69,10 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine.ExecuteResource(CSSO_LIBRARY_RESOURCE_NAME, GetType());
-				_jsEngine.Execute(string.Format(@"function {0}(code, disableRestructuring) {{
-	var compressor = new CSSOCompressor(),
-		translator = new CSSOTranslator();
+				Type type = GetType();
 
-	return translator.translate(cleanInfo(compressor.compress(srcToCSSP(code, 'stylesheet', true), disableRestructuring)));
-}}", OPTIMIZATION_FUNCTION_NAME));
+				_jsEngine.ExecuteResource(CSSO_LIBRARY_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(CSSO_HELPER_RESOURCE_NAME, type);
 
 				_initialized = true;
 			}
@@ -90,8 +94,21 @@
 
 				try
 				{
-					newContent = _jsEngine.CallFunction<string>(OPTIMIZATION_FUNCTION_NAME,
-						content, disableRestructuring);
+					var result = _jsEngine.Evaluate<string>(
+						string.Format(OPTIMIZATION_FUNCTION_CALL_TEMPLATE,
+							JsonConvert.SerializeObject(content),
+							JsonConvert.SerializeObject(disableRestructuring)));
+
+					var json = JObject.Parse(result);
+
+					var errors = json["errors"] != null ? json["errors"] as JArray : null;
+					if (errors != null && errors.Count > 0)
+					{
+						throw new CssOptimizingException(errors[0].Value<string>());
+					}
+
+					newContent = json.Value<string>("minifiedCode");
+
 				}
 				catch (JsRuntimeException e)
 				{

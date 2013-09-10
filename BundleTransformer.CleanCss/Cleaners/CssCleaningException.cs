@@ -1,28 +1,28 @@
-﻿namespace BundleTransformer.WG
+﻿namespace BundleTransformer.CleanCss.Cleaners
 {
 	using System;
 
 	/// <summary>
-	/// The exception that is thrown when a minifying of asset code by WebGrease Minifier is failed
+	/// The exception that is thrown when a cleaning of asset code by CSS-cleaner is failed
 	/// </summary>
-	internal sealed class WgMinifyingException : Exception
+	internal sealed class CssCleaningException : Exception
 	{
 		/// <summary>
-		/// Initializes a new instance of the BundleTransformer.WG.WgMinifyingException class 
+		/// Initializes a new instance of the BundleTransformer.CleanCss.Cleaners.CssCleaningException class 
 		/// with a specified error message
 		/// </summary>
 		/// <param name="message">The message that describes the error</param>
-		public WgMinifyingException(string message)
+		public CssCleaningException(string message)
 			: base(message)
 		{ }
 
 		/// <summary>
-		/// Initializes a new instance of the BundleTransformer.WG.WgMinifyingException class 
+		/// Initializes a new instance of the BundleTransformer.CleanCss.Cleaners.CssCleaningException class 
 		/// with a specified error message and a reference to the inner exception that is the cause of this exception
 		/// </summary>
 		/// <param name="message">The error message that explains the reason for the exception</param>
 		/// <param name="innerException">The exception that is the cause of the current exception</param>
-		public WgMinifyingException(string message, Exception innerException)
+		public CssCleaningException(string message, Exception innerException)
 			: base(message, innerException)
 		{ }
 	}

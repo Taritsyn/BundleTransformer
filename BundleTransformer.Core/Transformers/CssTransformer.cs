@@ -179,13 +179,13 @@
 			assets = RemoveUnnecessaryAssets(assets);
 			assets = ReplaceFileExtensions(assets);
 			assets = Translate(assets);
-			if (!_applicationInfo.IsDebugMode)
-			{
-				assets = Minify(assets);
-			}
 			if (!_coreConfig.Css.DisableNativeCssRelativePathTransformation)
 			{
 				assets = ResolveRelativePaths(assets);
+			}
+			if (!_applicationInfo.IsDebugMode)
+			{
+				assets = Minify(assets);
 			}
 
 			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
@@ -371,17 +371,11 @@
 					GroupCollection importRuleGroups = match.Groups;
 
 					string url = importRuleGroups["url"].Value;
-					string quote = importRuleGroups["quote"].Success ? 
-						importRuleGroups["quote"].Value : @"""";
 					string media = importRuleGroups["media"].Success ? 
 						(" " + importRuleGroups["media"].Value) : string.Empty;
 					
 					string importRule = match.Value;
-					string processedImportRule = string.Format("@import {0}{1}{0}{2};",
-						quote,
-						url,
-						media
-					);
+					string processedImportRule = string.Format(@"@import ""{0}""{1};", url, media);
 					imports.Add(processedImportRule);
 
 					currentPosition += importRule.Length;	

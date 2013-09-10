@@ -18,7 +18,7 @@
 			new Lazy<CssoSettings>(() => (CssoSettings)ConfigurationManager.GetSection("bundleTransformer/csso"));
 
 		/// <summary>
-		/// Gets Sergey Kryzhanovsky's Minifier configuration settings
+		/// Gets a Sergey Kryzhanovsky's Minifier configuration settings
 		/// </summary>
 		/// <param name="context">Bundle transformer context</param>
 		/// <returns>Configuration settings of Sergey Kryzhanovsky's Minifier</returns>

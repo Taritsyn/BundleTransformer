@@ -16,8 +16,8 @@
 	using Optimizers;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
-	/// by using Sergey Kryzhanovsky's CSSO (CSS Optimizer) version 1.2.17
+	/// Minifier, which produces minifiction of CSS-code 
+	/// by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 	/// </summary>
 	public sealed class KryzhanovskyCssMinifier : IMinifier
 	{
@@ -112,7 +112,7 @@
 				foreach (var asset in assetsToProcessing)
 				{
 					string newContent;
-					string assetVirtualPath = asset.VirtualPath;
+					string assetUrl = asset.Url;
 
 					try
 					{	
@@ -122,13 +122,13 @@
 					{
 					    throw new AssetMinificationException(
 					        string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+								CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 					}
 					catch (Exception e)
 					{
 						throw new AssetMinificationException(
 							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+								CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 					}
 
 					asset.Content = newContent;
