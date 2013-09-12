@@ -3,7 +3,7 @@
 	/// <summary>
 	/// TypeScript node types
 	/// </summary>
-	internal enum TypeScriptNodeType
+	internal enum TsNodeType
 	{
 		/// <summary>
 		/// Unknown node

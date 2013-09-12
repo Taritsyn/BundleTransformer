@@ -66,9 +66,9 @@
     <Compile Include="HttpHandlers\TypeScriptAssetHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translators\TypeScriptTranslator.cs" />
-    <Compile Include="TypeScriptNodeMatch.cs" />
-    <Compile Include="TypeScriptNodeType.cs" />
-    <Compile Include="TypeScriptScript.cs" />
+    <Compile Include="TsNodeMatch.cs" />
+    <Compile Include="TsNodeType.cs" />
+    <Compile Include="TsScript.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -147,7 +147,7 @@ tsBadge.setText(TS_BADGE_TEXT);
 tsBadge.setTextColor(TS_BADGE_COLOR);
 tsBadge.setBorderColor(TS_BADGE_COLOR);";
 			string assetUrl = UrlHelpers.Combine(SCRIPTS_DIRECTORY_URL, "TestTypeScript.ts");
-			TypeScriptScript script = tsTranslator.PreprocessScript(assetContent, assetUrl);
+			TsScript script = tsTranslator.PreprocessScript(assetContent, assetUrl);
 			var dependencies = new DependencyCollection();
 
 			// Act

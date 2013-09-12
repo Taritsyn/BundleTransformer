@@ -75,9 +75,9 @@
 		private readonly SassAndScssCompiler _sassAndScssCompiler;
 
 		/// <summary>
-		/// Asset content cache
+		/// Sass- and SCSS-stylesheet cache
 		/// </summary>
-		private readonly Dictionary<string, SassAndScssStylesheet> _assetContentCache;
+		private readonly Dictionary<string, SassAndScssStylesheet> _sassAndScssStylesheetCache;
 
 		/// <summary>
 		/// Synchronizer of translation
@@ -135,7 +135,7 @@
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_relativePathResolver = relativePathResolver;
 			_sassAndScssCompiler = new SassAndScssCompiler();
-			_assetContentCache = new Dictionary<string, SassAndScssStylesheet>();
+			_sassAndScssStylesheetCache = new Dictionary<string, SassAndScssStylesheet>();
 
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 			LineNumbers = sassAndScssConfig.LineNumbers;
@@ -160,7 +160,7 @@
 			{
 				bool enableNativeMinification = NativeMinificationEnabled;
 
-				ClearAssetContentCache();
+				ClearSassAndScssStylesheetCache();
 
 				try
 				{
@@ -168,8 +168,7 @@
 				}
 				finally
 				{
-					//lessCompiler.Dispose();
-					ClearAssetContentCache();
+					ClearSassAndScssStylesheetCache();
 				}
 			}
 
@@ -204,7 +203,7 @@
 			{
 				bool enableNativeMinification = NativeMinificationEnabled;
 
-				ClearAssetContentCache();
+				ClearSassAndScssStylesheetCache();
 
 				try
 				{
@@ -215,8 +214,7 @@
 				}
 				finally
 				{
-					//lessCompiler.Dispose();
-					ClearAssetContentCache();
+					ClearSassAndScssStylesheetCache();
 				}
 			}
 
@@ -227,7 +225,6 @@
 		{
 			string assetTypeName = (asset.AssetType == AssetType.Scss) ? "SCSS" : "Sass";
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
 			string assetUrl = asset.Url;
 			var dependencies = new DependencyCollection();
 			CompilationOptions options = CreateCompilationOptions(
@@ -236,7 +233,7 @@
 
 			try
 			{
-				SassAndScssStylesheet stylesheet = GetAssetFileTextContent(assetUrl);
+				SassAndScssStylesheet stylesheet = GetSassAndScssStylesheet(asset);
 				FillDependencies(assetUrl, stylesheet, dependencies);
 
 				newContent = _sassAndScssCompiler.Compile(stylesheet.Content, stylesheet.Url,
@@ -250,13 +247,13 @@
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
-						assetTypeName, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						assetTypeName, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
-						assetTypeName, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message), e);
+						assetTypeName, OUTPUT_CODE_TYPE, assetUrl, e.Message), e);
 			}
 
 			asset.Content = newContent;
@@ -468,7 +465,8 @@
 						GroupCollection urlRuleGroups = match.Groups;
 
 						string url = urlRuleGroups["url"].Value.Trim();
-						string quote = urlRuleGroups["quote"].Success ? urlRuleGroups["quote"].Value : string.Empty;
+						string quote = urlRuleGroups["quote"].Success ? 
+							urlRuleGroups["quote"].Value : string.Empty;
 
 						string urlRule = match.Value;
 						string processedUrlRule = ProcessUrlRule(assetUrl, url, quote);
@@ -524,7 +522,7 @@
 					if (FileExtensionHelpers.IsSass(importExtension)
 						|| FileExtensionHelpers.IsScss(importExtension))
 					{
-						bool importExists = AssetFileExists(importUrl);
+						bool importExists = SassAndScssStylesheetExists(importUrl);
 
 						partialImportUrl = string.Empty;
 						partialImportExists = false;
@@ -532,7 +530,7 @@
 						if (!importExists)
 						{
 							partialImportUrl = GetPartialAssetUrl(importUrl);
-							partialImportExists = AssetFileExists(partialImportUrl);
+							partialImportExists = SassAndScssStylesheetExists(partialImportUrl);
 
 							importExists = partialImportExists;
 						}
@@ -558,7 +556,7 @@
 					{
 						string newImportExtension = parentAssetFileExtension;
 						string newImportUrl = importUrl + newImportExtension;
-						bool newImportExists = AssetFileExists(newImportUrl);
+						bool newImportExists = SassAndScssStylesheetExists(newImportUrl);
 
 						partialImportUrl = string.Empty;
 						partialImportExists = false;
@@ -566,7 +564,7 @@
 						if (!newImportExists)
 						{
 							partialImportUrl = GetPartialAssetUrl(newImportUrl);
-							partialImportExists = AssetFileExists(partialImportUrl);
+							partialImportExists = SassAndScssStylesheetExists(partialImportUrl);
 
 							newImportExists = partialImportExists;
 						}
@@ -577,13 +575,13 @@
 								FileExtension.Scss : FileExtension.Sass;
 							newImportUrl = importUrl + newImportExtension;
 
-							newImportExists = AssetFileExists(newImportUrl);
+							newImportExists = SassAndScssStylesheetExists(newImportUrl);
 						}
 
 						if (!newImportExists)
 						{
 							partialImportUrl = GetPartialAssetUrl(newImportUrl);
-							partialImportExists = AssetFileExists(partialImportUrl);
+							partialImportExists = SassAndScssStylesheetExists(partialImportUrl);
 
 							newImportExists = partialImportExists;
 						}
@@ -600,7 +598,7 @@
 							newImportExtension = FileExtension.Css;
 							newImportUrl = importUrl + newImportExtension;
 
-							newImportExists = AssetFileExists(newImportUrl);
+							newImportExists = SassAndScssStylesheetExists(newImportUrl);
 							if (newImportExists)
 							{
 								importUrls.Add(newImportUrl);
@@ -709,9 +707,9 @@
 
 				if (!dependencies.ContainsUrl(dependencyUrl))
 				{
-					if (AssetFileExists(dependencyUrl))
+					if (SassAndScssStylesheetExists(dependencyUrl))
 					{
-						SassAndScssStylesheet stylesheet = GetAssetFileTextContent(dependencyUrl);
+						SassAndScssStylesheet stylesheet = GetSassAndScssStylesheet(dependencyUrl);
 						
 						var dependency = new Dependency(dependencyUrl, stylesheet.Content);
 						dependencies.Add(dependency);
@@ -743,11 +741,11 @@
 		}
 
 		/// <summary>
-		/// Generates asset content cache item key
+		/// Generates a Sass- and SCSS-stylesheet cache item key
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
 		/// <returns>Asset content cache item key</returns>
-		private string GenerateAssetContentCacheItemKey(string assetUrl)
+		private string GenerateSassAndScssStylesheetCacheItemKey(string assetUrl)
 		{
 			string key = assetUrl.Trim().ToUpperInvariant();
 
@@ -755,16 +753,16 @@
 		}
 
 		/// <summary>
-		/// Determines whether the specified asset file exists
+		/// Determines whether the specified Sass- and SCSS-stylesheet exists
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
 		/// <returns>Result of checking (true – exist; false – not exist)</returns>
-		private bool AssetFileExists(string assetUrl)
+		private bool SassAndScssStylesheetExists(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			string key = GenerateSassAndScssStylesheetCacheItemKey(assetUrl);
 			bool result;
 
-			if (_assetContentCache.ContainsKey(key))
+			if (_sassAndScssStylesheetCache.ContainsKey(key))
 			{
 				result = true;
 			}
@@ -777,38 +775,55 @@
 		}
 
 		/// <summary>
-		/// Gets Sass- and SCSS-stylesheet by URL
+		/// Gets a Sass- and SCSS-stylesheet
+		/// </summary>
+		/// <param name="asset">Asset with code written on Sass or SCSS</param>
+		/// <returns>Sass- and SCSS-stylesheet</returns>
+		private SassAndScssStylesheet GetSassAndScssStylesheet(IAsset asset)
+		{
+			string assetUrl = asset.Url;
+			string assetContent = asset.Content;
+			SassAndScssStylesheet stylesheet = PreprocessStylesheet(assetContent, assetUrl);
+			
+			string key = GenerateSassAndScssStylesheetCacheItemKey(assetUrl);
+			_sassAndScssStylesheetCache[key] = stylesheet;
+
+			return stylesheet;
+		}
+
+		/// <summary>
+		/// Gets a Sass- and SCSS-stylesheet by URL
 		/// </summary>
 		/// <param name="assetUrl">URL to asset file</param>
 		/// <returns>Sass- and SCSS-stylesheet</returns>
-		private SassAndScssStylesheet GetAssetFileTextContent(string assetUrl)
+		private SassAndScssStylesheet GetSassAndScssStylesheet(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			string key = GenerateSassAndScssStylesheetCacheItemKey(assetUrl);
 			SassAndScssStylesheet stylesheet;
 
-			if (_assetContentCache.ContainsKey(key))
+			if (_sassAndScssStylesheetCache.ContainsKey(key))
 			{
-				stylesheet = _assetContentCache[key];
+				stylesheet = _sassAndScssStylesheetCache[key];
 			}
 			else
 			{
 				string assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
 				stylesheet = PreprocessStylesheet(assetContent, assetUrl);
 
-				_assetContentCache.Add(key, stylesheet);
+				_sassAndScssStylesheetCache.Add(key, stylesheet);
 			}
 
 			return stylesheet;
 		}
 
 		/// <summary>
-		/// Clears asset content cache
+		/// Clears Sass- and SCSS-stylesheet cache
 		/// </summary>
-		private void ClearAssetContentCache()
+		private void ClearSassAndScssStylesheetCache()
 		{
-			if (_assetContentCache != null)
+			if (_sassAndScssStylesheetCache != null)
 			{
-				_assetContentCache.Clear();
+				_sassAndScssStylesheetCache.Clear();
 			}
 		}
 	}

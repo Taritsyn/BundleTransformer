@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.TypeScript</id>
-    <version>1.8.0</version>
+    <version>1.8.3</version>
 	<title>Bundle Transformer: TypeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,13 +16,12 @@ BundleTransformer.TypeScript does not support external modules (CommonJS and AMD
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
     <summary>BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator` (supports TypeScript version 0.9.1.1). This adapter makes translation of TypeScript-code to JS-code. Also contains debugging HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of translated TypeScript-asset.</summary>
-	<releaseNotes>1. Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript Engine Switcher library;
-2. Fixed bug #54 "Typescript: exporting a class results in "Object reference not set to an instance of an object'".</releaseNotes>
+	<releaseNotes>Fixed an error that occurred when using the item transformations (classes that implements an `IItemTransform` interface).</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling TypeScript Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.8.0" />
+      <dependency id="BundleTransformer.Core" version="1.8.2" />
 	  <dependency id="JavaScriptEngineSwitcher.Core" version="0.9.2" />
 	  <dependency id="Newtonsoft.Json" version="5.0.6" />
     </dependencies>

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.0
+          README file for Bundle Transformer: Sass and SCSS 1.8.3
 
    ----------------------------------------------------------------------
 
@@ -17,6 +17,12 @@
    SCSS-code to CSS-code.
    Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which 
    is responsible for text output of translated Sass- or SCSS-asset.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed an error that occurred when using the item transformations 
+   (classes that implements an `IItemTransform` interface).
    
    =============
    DOCUMENTATION

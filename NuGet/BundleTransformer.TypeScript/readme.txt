@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.8.0
+           README file for Bundle Transformer: TypeScript 1.8.3
 
    ----------------------------------------------------------------------
 
@@ -30,10 +30,8 @@
    =============
    RELEASE NOTES
    =============
-   1. Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript
-      Engine Switcher library;
-   2. Fixed bug #54 "Typescript: exporting a class results in "Object 
-      reference not set to an instance of an object'"
+   Fixed an error that occurred when using the item transformations 
+   (classes that implements an `IItemTransform` interface).
 	  
    ====================
    POST-INSTALL ACTIONS

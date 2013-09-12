@@ -64,9 +64,9 @@
 		private readonly IRelativePathResolver _relativePathResolver;
 
 		/// <summary>
-		/// Asset content cache
+		/// TypeScript-script cache
 		/// </summary>
-		private readonly Dictionary<string, TypeScriptScript> _assetContentCache;
+		private readonly Dictionary<string, TsScript> _tsScriptCache;
 
 		/// <summary>
 		/// Synchronizer of translation
@@ -170,7 +170,7 @@
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_relativePathResolver = relativePathResolver;
-			_assetContentCache = new Dictionary<string,TypeScriptScript>();
+			_tsScriptCache = new Dictionary<string, TsScript>();
 
 			UseDefaultLib = tsConfig.UseDefaultLib;
 			PropagateEnumConstants = tsConfig.PropagateEnumConstants;
@@ -219,7 +219,7 @@
 				CompilationOptions options = CreateCompilationOptions();
 				var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance, options);
 
-				ClearAssetContentCache();
+				ClearTsScriptCache();
 
 				try
 				{
@@ -228,7 +228,7 @@
 				finally
 				{
 					typeScriptCompiler.Dispose();
-					ClearAssetContentCache();
+					ClearTsScriptCache();
 				}
 			}
 
@@ -263,7 +263,7 @@
 				CompilationOptions options = CreateCompilationOptions();
 				var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance, options);
 
-				ClearAssetContentCache();
+				ClearTsScriptCache();
 
 				try
 				{
@@ -275,7 +275,7 @@
 				finally
 				{
 					typeScriptCompiler.Dispose();
-					ClearAssetContentCache();
+					ClearTsScriptCache();
 				}
 			}
 
@@ -285,13 +285,12 @@
 		private void InnerTranslate(IAsset asset, TypeScriptCompiler typeScriptCompiler)
 		{
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
 			string assetUrl = asset.Url;
 			var dependencies = new DependencyCollection();
 
 			try
 			{
-				TypeScriptScript script = GetAssetFileTextContent(assetUrl);
+				TsScript script = GetTsScript(asset);
 				FillDependencies(assetUrl, script, dependencies);
 
 				newContent = typeScriptCompiler.Compile(script.Content, script.Url, dependencies);
@@ -301,13 +300,13 @@
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 
 			asset.Content = newContent;
@@ -345,9 +344,9 @@
 		/// <param name="assetContent">Text content of TypeScript-asset</param>
 		/// <param name="assetUrl">URL of TypeScript-asset file</param>
 		/// <returns>Preprocessed text content of TypeScript-asset</returns>
-		public TypeScriptScript PreprocessScript(string assetContent, string assetUrl)
+		public TsScript PreprocessScript(string assetContent, string assetUrl)
 		{
-			var script = new TypeScriptScript(assetUrl, assetContent);
+			var script = new TsScript(assetUrl, assetContent);
 
 			int contentLength = assetContent.Length;
 			if (contentLength == 0)
@@ -361,12 +360,12 @@
 				return script;
 			}
 
-			var nodeMatches = new List<TypeScriptNodeMatch>();
+			var nodeMatches = new List<TsNodeMatch>();
 
 			foreach (Match referenceCommentMatch in referenceCommentMatches)
 			{
-				var nodeMatch = new TypeScriptNodeMatch(referenceCommentMatch.Index,
-					TypeScriptNodeType.ReferenceComment,
+				var nodeMatch = new TsNodeMatch(referenceCommentMatch.Index,
+					TsNodeType.ReferenceComment,
 					referenceCommentMatch);
 				nodeMatches.Add(nodeMatch);
 			}
@@ -375,8 +374,8 @@
 
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
-				var nodeMatch = new TypeScriptNodeMatch(multilineCommentMatch.Index,
-					TypeScriptNodeType.MultilineComment,
+				var nodeMatch = new TsNodeMatch(multilineCommentMatch.Index,
+					TsNodeType.MultilineComment,
 					multilineCommentMatch);
 				nodeMatches.Add(nodeMatch);
 			}
@@ -390,9 +389,9 @@
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
-			foreach (TypeScriptNodeMatch nodeMatch in nodeMatches)
+			foreach (TsNodeMatch nodeMatch in nodeMatches)
 			{
-				TypeScriptNodeType nodeType = nodeMatch.NodeType;
+				TsNodeType nodeType = nodeMatch.NodeType;
 				int nodePosition = nodeMatch.Position;
 				Match match = nodeMatch.Match;
 
@@ -401,7 +400,7 @@
 					continue;
 				}
 
-				if (nodeType == TypeScriptNodeType.ReferenceComment)
+				if (nodeType == TsNodeType.ReferenceComment)
 				{
 					ProcessOtherContent(contentBuilder, assetContent,
 						ref currentPosition, nodePosition);
@@ -431,7 +430,7 @@
 					contentBuilder.Append(processedReferenceComment);
 					currentPosition += referenceComment.Length;
 				}
-				else if (nodeType == TypeScriptNodeType.MultilineComment)
+				else if (nodeType == TsNodeType.MultilineComment)
 				{
 					int nextPosition = nodePosition + match.Length;
 
@@ -508,7 +507,7 @@
 		/// <param name="parentScript">Parent TypeScript-script</param>
 		/// <param name="dependencies">List of TypeScript-files, references to which have been 
 		/// added to a TypeScript-asset by using the "reference" comments</param>
-		public void FillDependencies(string rootAssetUrl, TypeScriptScript parentScript,
+		public void FillDependencies(string rootAssetUrl, TsScript parentScript,
 			DependencyCollection dependencies)
 		{
 			foreach (string referenceUrl in parentScript.References)
@@ -526,9 +525,9 @@
 					if (FileExtensionHelpers.IsTypeScript(dependencyExtension)
 						|| FileExtensionHelpers.IsJavaScript(dependencyExtension))
 					{
-						if (AssetFileExists(dependencyUrl))
+						if (TsScriptExists(dependencyUrl))
 						{
-							TypeScriptScript script = GetAssetFileTextContent(dependencyUrl);
+							TsScript script = GetTsScript(dependencyUrl);
 
 							var dependency = new Dependency(dependencyUrl, script.Content);
 							dependencies.Add(dependency);
@@ -558,11 +557,11 @@
 		}
 
 		/// <summary>
-		/// Generates asset content cache item key
+		/// Generates a TypeScript-script cache item key
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
-		/// <returns>Asset content cache item key</returns>
-		private string GenerateAssetContentCacheItemKey(string assetUrl)
+		/// <returns>TypeScript-script cache item key</returns>
+		private string GenerateTsScriptCacheItemKey(string assetUrl)
 		{
 			string key = assetUrl.Trim().ToUpperInvariant();
 
@@ -570,16 +569,16 @@
 		}
 
 		/// <summary>
-		/// Determines whether the specified asset file exists
+		/// Determines whether the specified TypeScript-script exists
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
 		/// <returns>Result of checking (true – exist; false – not exist)</returns>
-		private bool AssetFileExists(string assetUrl)
+		private bool TsScriptExists(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			string key = GenerateTsScriptCacheItemKey(assetUrl);
 			bool result;
 
-			if (_assetContentCache.ContainsKey(key))
+			if (_tsScriptCache.ContainsKey(key))
 			{
 				result = true;
 			}
@@ -592,38 +591,55 @@
 		}
 
 		/// <summary>
-		/// Gets TypeScript-script by URL
+		/// Gets a TypeScript-script
+		/// </summary>
+		/// <param name="asset">Asset with code written on TypeScript</param>
+		/// <returns>TypeScript-script</returns>
+		private TsScript GetTsScript(IAsset asset)
+		{
+			string assetUrl = asset.Url;
+			string assetContent = asset.Content;
+			TsScript script = PreprocessScript(assetContent, assetUrl);
+
+			string key = GenerateTsScriptCacheItemKey(assetUrl);
+			_tsScriptCache[key] = script;
+
+			return script;
+		}
+
+		/// <summary>
+		/// Gets a TypeScript-script by URL
 		/// </summary>
 		/// <param name="assetUrl">URL to asset file</param>
 		/// <returns>TypeScript-script</returns>
-		private TypeScriptScript GetAssetFileTextContent(string assetUrl)
+		private TsScript GetTsScript(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
-			TypeScriptScript script;
+			string key = GenerateTsScriptCacheItemKey(assetUrl);
+			TsScript script;
 
-			if (_assetContentCache.ContainsKey(key))
+			if (_tsScriptCache.ContainsKey(key))
 			{
-				script = _assetContentCache[key];
+				script = _tsScriptCache[key];
 			}
 			else
 			{
 				string assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
 				script = PreprocessScript(assetContent, assetUrl);
 
-				_assetContentCache.Add(key, script);
+				_tsScriptCache.Add(key, script);
 			}
 
 			return script;
 		}
 
 		/// <summary>
-		/// Clears asset content cache
+		/// Clears a TypeScript-script cache
 		/// </summary>
-		private void ClearAssetContentCache()
+		private void ClearTsScriptCache()
 		{
-			if (_assetContentCache != null)
+			if (_tsScriptCache != null)
 			{
-				_assetContentCache.Clear();
+				_tsScriptCache.Clear();
 			}
 		}
 	}

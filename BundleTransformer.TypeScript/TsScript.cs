@@ -5,7 +5,7 @@
 	/// <summary>
 	/// TypeScript-script
 	/// </summary>
-	public sealed class TypeScriptScript
+	public sealed class TsScript
 	{
 		/// <summary>
 		/// Gets a URL of script file
@@ -39,7 +39,7 @@
 		/// Constructs instance of TypeScript-script
 		/// </summary>
 		/// <param name="url">URL of script file</param>
-		public TypeScriptScript(string url) : this(url, string.Empty)
+		public TsScript(string url) : this(url, string.Empty)
 		{ }
 
 		/// <summary>
@@ -47,7 +47,7 @@
 		/// </summary>
 		/// <param name="url">URL of script file</param>
 		/// <param name="content">Text content of script</param>
-		public TypeScriptScript(string url, string content)
+		public TsScript(string url, string content)
 			: this(url, content, new List<string>())
 		{ }
 
@@ -57,7 +57,7 @@
 		/// <param name="url">URL of script file</param>
 		/// <param name="content">Text content of script</param>
 		/// <param name="references">List of references</param>
-		public TypeScriptScript(string url, string content, List<string> references)
+		public TsScript(string url, string content, List<string> references)
 		{
 			Url = url;
 			Content = content;

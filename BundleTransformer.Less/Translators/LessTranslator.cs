@@ -96,9 +96,9 @@
 		private readonly IRelativePathResolver _relativePathResolver;
 
 		/// <summary>
-		/// Asset content cache
+		/// LESS-stylesheet cache
 		/// </summary>
-		private readonly Dictionary<string, LessStylesheet> _assetContentCache;
+		private readonly Dictionary<string, LessStylesheet> _lessStylesheetCache;
 
 		/// <summary>
 		/// Synchronizer of translation
@@ -166,7 +166,7 @@
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_relativePathResolver = relativePathResolver;
-			_assetContentCache = new Dictionary<string, LessStylesheet>();
+			_lessStylesheetCache = new Dictionary<string, LessStylesheet>();
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
 			IeCompat = lessConfig.IeCompat;
@@ -214,7 +214,7 @@
 				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 				var lessCompiler = new LessCompiler(_createJsEngineInstance, options);
 
-				ClearAssetContentCache();
+				ClearLessStylesheetCache();
 
 				try
 				{
@@ -223,7 +223,7 @@
 				finally
 				{
 					lessCompiler.Dispose();
-					ClearAssetContentCache();
+					ClearLessStylesheetCache();
 				}
 			}
 
@@ -259,7 +259,7 @@
 				CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 				var lessCompiler = new LessCompiler(_createJsEngineInstance, options);
 
-				ClearAssetContentCache();
+				ClearLessStylesheetCache();
 
 				try
 				{
@@ -271,7 +271,7 @@
 				finally
 				{
 					lessCompiler.Dispose();
-					ClearAssetContentCache();
+					ClearLessStylesheetCache();
 				}
 			}
 
@@ -281,13 +281,12 @@
 		private void InnerTranslate(IAsset asset, LessCompiler lessCompiler, bool enableNativeMinification)
 		{
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
 			string assetUrl = asset.Url;
 			var dependencies = new DependencyCollection();
 
 			try
 			{
-				LessStylesheet stylesheet = GetAssetFileTextContent(assetUrl);
+				LessStylesheet stylesheet = GetLessStylesheet(asset);
 				FillDependencies(assetUrl, stylesheet, dependencies);
 
 				newContent = lessCompiler.Compile(stylesheet.Content, stylesheet.Url, dependencies);
@@ -300,13 +299,13 @@
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message), e);
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message), e);
 			}
 
 			asset.Content = newContent;
@@ -706,7 +705,7 @@
 
 				if (!isDuplicateDependency || isEmptyDependency)
 				{
-					if (AssetFileExists(dependencyUrl))
+					if (LessStylesheetExists(dependencyUrl))
 					{
 						string dependencyExtension = Path.GetExtension(dependencyUrl);
 						var stylesheet = new LessStylesheet(dependencyUrl, string.Empty);
@@ -714,7 +713,7 @@
 						if (FileExtensionHelpers.IsLess(dependencyExtension)
 							|| (FileExtensionHelpers.IsCss(dependencyExtension) && dependencyType == "less"))
 						{
-							stylesheet = GetAssetFileTextContent(dependencyUrl);
+							stylesheet = GetLessStylesheet(dependencyUrl);
 
 							if (isEmptyDependency && stylesheet.Content.Length > 0)
 							{
@@ -748,11 +747,11 @@
 		}
 
 		/// <summary>
-		/// Generates asset content cache item key
+		/// Generates a LESS-stylesheet cache item key
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
-		/// <returns>Asset content cache item key</returns>
-		private string GenerateAssetContentCacheItemKey(string assetUrl)
+		/// <returns>LESS-stylesheet cache item key</returns>
+		private string GenerateLessStylesheetCacheItemKey(string assetUrl)
 		{
 			string key = assetUrl.Trim().ToUpperInvariant();
 
@@ -760,16 +759,16 @@
 		}
 
 		/// <summary>
-		/// Determines whether the specified asset file exists
+		/// Determines whether the specified LESS-stylesheet exists
 		/// </summary>
 		/// <param name="assetUrl">URL of asset file</param>
 		/// <returns>Result of checking (true – exist; false – not exist)</returns>
-		private bool AssetFileExists(string assetUrl)
+		private bool LessStylesheetExists(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			string key = GenerateLessStylesheetCacheItemKey(assetUrl);
 			bool result;
 
-			if (_assetContentCache.ContainsKey(key))
+			if (_lessStylesheetCache.ContainsKey(key))
 			{
 				result = true;
 			}
@@ -782,38 +781,55 @@
 		}
 
 		/// <summary>
-		/// Gets LESS-stylesheet by URL
+		/// Gets a LESS-stylesheet
+		/// </summary>
+		/// <param name="asset">Asset with code written on LESS</param>
+		/// <returns>LESS-stylesheet</returns>
+		private LessStylesheet GetLessStylesheet(IAsset asset)
+		{
+			string assetUrl = asset.Url;
+			string assetContent = asset.Content;
+			LessStylesheet stylesheet = PreprocessStylesheet(assetContent, assetUrl);
+
+			string key = GenerateLessStylesheetCacheItemKey(assetUrl);
+			_lessStylesheetCache[key] = stylesheet;
+
+			return stylesheet;
+		}
+
+		/// <summary>
+		/// Gets a LESS-stylesheet by URL
 		/// </summary>
 		/// <param name="assetUrl">URL to asset file</param>
 		/// <returns>LESS-stylesheet</returns>
-		private LessStylesheet GetAssetFileTextContent(string assetUrl)
+		private LessStylesheet GetLessStylesheet(string assetUrl)
 		{
-			string key = GenerateAssetContentCacheItemKey(assetUrl);
+			string key = GenerateLessStylesheetCacheItemKey(assetUrl);
 			LessStylesheet stylesheet;
 
-			if (_assetContentCache.ContainsKey(key))
+			if (_lessStylesheetCache.ContainsKey(key))
 			{
-				stylesheet = _assetContentCache[key];
+				stylesheet = _lessStylesheetCache[key];
 			}
 			else
 			{
 				string assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
 				stylesheet = PreprocessStylesheet(assetContent, assetUrl);
 
-				_assetContentCache.Add(key, stylesheet);
+				_lessStylesheetCache.Add(key, stylesheet);
 			}
 
 			return stylesheet;
 		}
 
 		/// <summary>
-		/// Clears asset content cache
+		/// Clears a LESS-stylesheet cache
 		/// </summary>
-		private void ClearAssetContentCache()
+		private void ClearLessStylesheetCache()
 		{
-			if (_assetContentCache != null)
+			if (_lessStylesheetCache != null)
 			{
-				_assetContentCache.Clear();
+				_lessStylesheetCache.Clear();
 			}
 		}
 	}
