@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: JSMin 1.8.2
+              README file for Bundle Transformer: JSMin 1.8.4
  
    ----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   C# port of Douglas Crockford's JSMin was updated to version of March 29 2013.
+   Changed the architecture of the C# port of Douglas Crockford's JSMin.
 
    ====================
    POST-INSTALL ACTIONS

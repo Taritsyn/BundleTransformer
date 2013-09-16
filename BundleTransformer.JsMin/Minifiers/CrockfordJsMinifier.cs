@@ -50,7 +50,7 @@
 				return assets;
 			}
 
-			var jsMin = new JavaScriptMinifier();
+			var jsMin = new JsMinifier();
 
 			foreach (var asset in assetsToProcessing)
 			{

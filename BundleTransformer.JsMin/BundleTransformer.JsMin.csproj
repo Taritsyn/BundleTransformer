@@ -45,8 +45,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DouglasCrockford\JavaScriptMinifier.cs" />
     <Compile Include="DouglasCrockford\JsMinificationException.cs" />
+    <Compile Include="DouglasCrockford\JsMinifier.cs" />
     <Compile Include="Minifiers\CrockfordJsMinifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
