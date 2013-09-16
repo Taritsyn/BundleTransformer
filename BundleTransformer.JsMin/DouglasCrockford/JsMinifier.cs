@@ -1,4 +1,4 @@
-﻿/* This is a .NET port of the Douglas Crockford's JSMin 'C' project.
+﻿/* This is a .NET port of the Douglas Crockford's JSMin 'C' project. 
  * The author's copyright message is reproduced below.
  */
 
