@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
+	using System.IO;
 	using System.Linq;
+	using System.Text;
 
 	using Microsoft.Ajax.Utilities;
 	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
@@ -20,6 +23,7 @@
 	using BtEvalTreatment = EvalTreatment;
 	using BtLocalRenaming = LocalRenaming;
 	using BtBlockStart = BlockStart;
+	using Resources;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code 
@@ -622,33 +626,62 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent = string.Empty;
-				string assetVirtualPath = asset.VirtualPath;
+				string newContent;
+				string assetUrl = asset.Url;
 
-				var jsParser = new JSParser(asset.Content)
+				var documentContext = new DocumentContext(asset.Content)
 				{
-					FileContext = assetVirtualPath
+					FileContext = assetUrl
+				};
+
+				var jsParser = new JSParser
+				{
+					Settings = _jsParserConfiguration
 				};
 				jsParser.CompilerError += ParserErrorHandler;
 
 				try
 				{
-					Block block = jsParser.Parse(_jsParserConfiguration);
-					if (block != null)
+					var stringBuilder = new StringBuilder();
+
+					using (var stringWriter = new StringWriter(stringBuilder, CultureInfo.InvariantCulture))
 					{
-						newContent = block.ToCode();
+						Block block = jsParser.Parse(documentContext);
+						if (block != null)
+						{
+							if (_jsParserConfiguration.Format == JavaScriptFormat.JSON)
+							{
+								// Use a JSON output visitor
+								if (!JSONOutputVisitor.Apply(stringWriter, block))
+								{
+									throw new MicrosoftAjaxParsingException(Strings.Minifiers_InvalidJsonOutput);
+								}
+							}
+							else
+							{
+								// Use normal output visitor
+								OutputVisitor.Apply(stringWriter, block, _jsParserConfiguration);
+							}
+						}
 					}
+
+					newContent = stringBuilder.ToString();
+				}
+				catch (MicrosoftAjaxParsingException e)
+				{
+					throw new AssetMinificationException(
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 				}
 				catch (Exception e)
 				{
 				    throw new AssetMinificationException(
 				        string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 				}
 				finally
 				{
 					jsParser.CompilerError -= ParserErrorHandler;
-					jsParser.FileContext = null;
 				}
 				
 				asset.Content = newContent;
@@ -662,17 +695,15 @@
 		/// JS-parser error handler
 		/// </summary>
 		/// <param name="source">The source of the event</param>
-		/// <param name="args">A Microsoft.Ajax.Utilities.JScriptExceptionEventArgs that
+		/// <param name="args">A Microsoft.Ajax.Utilities.ContextErrorEventArgs that
 		/// contains the event data</param>
-		private void ParserErrorHandler(object source, JScriptExceptionEventArgs args)
+		private void ParserErrorHandler(object source, ContextErrorEventArgs args)
 		{
 			ContextError error = args.Error;
 
 			if (error.Severity <= Severity)
 			{
-				throw new MicrosoftAjaxParsingException(
-					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, error.File, MINIFIER_NAME, FormatContextError(error)));
+				throw new MicrosoftAjaxParsingException(FormatContextError(error));
 			}
 		}
 	}

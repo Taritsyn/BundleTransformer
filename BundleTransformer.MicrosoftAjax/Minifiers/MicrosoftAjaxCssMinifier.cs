@@ -290,20 +290,26 @@
 			foreach (var asset in assetsToProcessing)
 			{
 				string newContent;
-				string assetVirtualPath = asset.VirtualPath;
+				string assetUrl = asset.Url;
 
-				cssParser.FileContext = assetVirtualPath;
+				cssParser.FileContext = assetUrl;
 				cssParser.CssError += ParserErrorHandler;
 
 				try
 				{
 					newContent = cssParser.Parse(asset.Content);
 				}
+				catch (MicrosoftAjaxParsingException e)
+				{
+					throw new AssetMinificationException(
+						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+				}
 				catch (Exception e)
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 				}
 				finally
 				{
@@ -322,17 +328,15 @@
 		/// CSS-parser error handler
 		/// </summary>
 		/// <param name="source">The source of the event</param>
-		/// <param name="args">A Microsoft.Ajax.Utilities.CssErrorEventArgs 
+		/// <param name="args">A Microsoft.Ajax.Utilities.ContextErrorEventArgs
 		/// that contains the event data</param>
-		private void ParserErrorHandler(object source, CssErrorEventArgs args)
+		private void ParserErrorHandler(object source, ContextErrorEventArgs args)
 		{
 			ContextError error = args.Error;
 
 			if (error.Severity <= Severity)
 			{
-				throw new MicrosoftAjaxParsingException(
-					string.Format(CoreStrings.Minifiers_MinificationSyntaxError, 
-						CODE_TYPE, error.File, MINIFIER_NAME, FormatContextError(error)));
+				throw new MicrosoftAjaxParsingException(FormatContextError(error));
 			}
 		}
 	}
