@@ -1,8 +1,4 @@
-﻿if (typeof console === 'undefined') {
-	var console = {};
-}
-
-var cssoHelper = (function (srcToCSSP, CSSOCompressor, cleanInfo, CSSOTranslator, undefined) {
+﻿var cssoHelper = (function (csso, undefined) {
 	"use strict";
 
 	var exports = {};
@@ -10,31 +6,11 @@ var cssoHelper = (function (srcToCSSP, CSSOCompressor, cleanInfo, CSSOTranslator
 	exports.minify = function (code, disableRestructuring) {
 		var result = {},
 			errors = [],
-			originalConsoleErrorMethod,
-			compressor,
-			translator,
-			parsedCode,
-			compressedCode,
-			cleanedCode,
-			translatedCode = ""
+			minifiedCode = ""
 			;
 
-		if (typeof console.error !== 'undefined') {
-			originalConsoleErrorMethod = console.error;
-		}
-
-		console.error = function (message) {
-			errors.push(message);
-		};
-
-		compressor = new CSSOCompressor();
-		translator = new CSSOTranslator();
-
 		try {
-			parsedCode = srcToCSSP(code, 'stylesheet', true);
-			compressedCode = compressor.compress(parsedCode, disableRestructuring);
-			cleanedCode = cleanInfo(compressedCode);
-			translatedCode = translator.translate(cleanedCode);
+			minifiedCode = csso.justDoIt(code, disableRestructuring, true);
 		}
 		catch (e) {
 			if (e.message) {
@@ -42,11 +18,7 @@ var cssoHelper = (function (srcToCSSP, CSSOCompressor, cleanInfo, CSSOTranslator
 			}
 		}
 
-		if (originalConsoleErrorMethod) {
-			console.error = originalConsoleErrorMethod;
-		}
-
-		result.minifiedCode = translatedCode;
+		result.minifiedCode = minifiedCode;
 		if (errors.length > 0) {
 			result.errors = errors;
 		}
@@ -55,4 +27,4 @@ var cssoHelper = (function (srcToCSSP, CSSOCompressor, cleanInfo, CSSOTranslator
 	};
 
 	return exports;
-} (srcToCSSP, CSSOCompressor, cleanInfo, CSSOTranslator));
+} (CSSO));

@@ -1,5 +1,5 @@
 /*!
- * Clean-css v1.1.1
+ * Clean-css v1.1.3
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2013 GoalSmashers.com
@@ -347,10 +347,49 @@ var CleanCss = (function(){
 	}).call(this);
 	//#endregion
 	
+	//#region URL: ./text/escape-store
+	require['./text/escape-store'] = (function () {
+		function EscapeStore(placeholderRoot) {
+		  var placeholderToData = {};
+		  var dataToPlaceholder = {};
+		  var count = 0;
+		  var nextPlaceholder = function() {
+			return '__' + placeholderRoot + (count++) + '__';
+		  };
+		  var pattern = '(__' + placeholderRoot + '\\d{1,}__)';
+
+		  return {
+			placeholderPattern: pattern,
+
+			placeholderRegExp: new RegExp(pattern, 'g'),
+
+			store: function(data) {
+			  var placeholder = dataToPlaceholder[data];
+			  if (!placeholder) {
+				placeholder = nextPlaceholder();
+				placeholderToData[placeholder] = data;
+				dataToPlaceholder[data] = placeholder;
+			  }
+
+			  return placeholder;
+			},
+
+			restore: function(placeholder) {
+			  return placeholderToData[placeholder];
+			}
+		  };
+		};
+		
+		return EscapeStore;
+	}).call(this);
+	//#endregion
+	
 	//#region URL: ./text/comments
 	require['./text/comments'] = (function () {
+		var EscapeStore = require('./text/escape-store');
+		
 		function Comments(keepSpecialComments, keepBreaks, lineBreak) {
-		  var comments = [];
+		  var comments = new EscapeStore('CSSCOMMENT');
 
 		  return {
 			// Strip special comments (/*! ... */) by replacing them by __CSSCOMMENT__ marker
@@ -371,8 +410,9 @@ var CleanCss = (function(){
 				tempData.push(data.substring(cursor, nextStart));
 				if (data[nextStart + 2] == '!') {
 				  // in case of special comments, replace them with a placeholder
-				  comments.push(data.substring(nextStart, nextEnd + 2));
-				  tempData.push('__CSSCOMMENT__');
+				  var comment = data.substring(nextStart, nextEnd + 2);
+				  var placeholder = comments.store(comment);
+				  tempData.push(placeholder);
 				}
 				cursor = nextEnd + 2;
 			  }
@@ -383,16 +423,18 @@ var CleanCss = (function(){
 			},
 
 			restore: function(data) {
-			  var commentsCount = comments.length;
+			  var restored = 0;
 			  var breakSuffix = keepBreaks ? lineBreak : '';
 
-			  return data.replace(new RegExp('__CSSCOMMENT__(' + lineBreak + '| )?', 'g'), function() {
+			  return data.replace(new RegExp(comments.placeholderPattern + '(' + lineBreak + '| )?', 'g'), function(match, placeholder) {
+				restored++;
+
 				switch (keepSpecialComments) {
 				  case '*':
-					return comments.shift() + breakSuffix;
+					return comments.restore(placeholder) + breakSuffix;
 				  case 1:
-					return comments.length == commentsCount ?
-					  comments.shift() + breakSuffix :
+					return restored == 1 ?
+					  comments.restore(placeholder) + breakSuffix :
 					  '';
 				  case 0:
 					return '';
@@ -408,8 +450,10 @@ var CleanCss = (function(){
 	
 	//#region URL: ./text/expressions
 	require['./text/expressions'] = (function () {
+		var EscapeStore = require('./text/escape-store');
+		
 		function Expressions() {
-		  var expressions = [];
+		  var expressions = new EscapeStore('EXPRESSION');
 
 		  var findEnd = function(data, start) {
 			var end = start + 'expression'.length;
@@ -454,9 +498,10 @@ var CleanCss = (function(){
 
 				nextEnd = findEnd(data, nextStart);
 
+				var expression = data.substring(nextStart, nextEnd);
+				var placeholder = expressions.store(expression);
 				tempData.push(data.substring(cursor, nextStart));
-				tempData.push('__EXPRESSION__');
-				expressions.push(data.substring(nextStart, nextEnd));
+				tempData.push(placeholder);
 				cursor = nextEnd;
 			  }
 
@@ -466,9 +511,7 @@ var CleanCss = (function(){
 			},
 
 			restore: function(data) {
-			  return data.replace(/__EXPRESSION__/g, function() {
-				return expressions.shift();
-			  });
+			  return data.replace(expressions.placeholderRegExp, expressions.restore);
 			}
 		  };
 		};
@@ -479,8 +522,10 @@ var CleanCss = (function(){
 	
 	//#region URL: ./text/free
 	require['./text/free'] = (function () {
+		var EscapeStore = require('./text/escape-store');
+		
 		function Free() {
-		  var texts = [];
+		  var texts = new EscapeStore('CSSFREETEXT');
 
 		  return {
 			// Strip content tags by replacing them by the __CSSFREETEXT__
@@ -520,9 +565,10 @@ var CleanCss = (function(){
 				if (nextStart == -1 || nextEnd == -1)
 				  break;
 
+				var text = data.substring(nextStart, nextEnd + 1);
+				var placeholder = texts.store(text);
 				tempData.push(data.substring(cursor, nextStart));
-				tempData.push('__CSSFREETEXT__');
-				texts.push(data.substring(nextStart, nextEnd + 1));
+				tempData.push(placeholder);
 				cursor = nextEnd + 1;
 			  }
 
@@ -532,9 +578,7 @@ var CleanCss = (function(){
 			},
 
 			restore: function(data) {
-			  return data.replace(/__CSSFREETEXT__/g, function() {
-				return texts.shift();
-			  });
+			  return data.replace(texts.placeholderRegExp, texts.restore);
 			}
 		  };
 		};
@@ -545,8 +589,10 @@ var CleanCss = (function(){
 	
 	//#region URL: ./text/urls
 	require['./text/urls'] = (function () {
+		var EscapeStore = require('./text/escape-store');
+		
 		function Urls() {
-		  var urls = [];
+		  var urls = new EscapeStore('URL');
 
 		  return {
 			// Strip urls by replacing them by the __URL__
@@ -565,9 +611,10 @@ var CleanCss = (function(){
 
 				nextEnd = data.indexOf(')', nextStart);
 
+				var url = data.substring(nextStart, nextEnd + 1);
+				var placeholder = urls.store(url);
 				tempData.push(data.substring(cursor, nextStart));
-				tempData.push('__URL__');
-				urls.push(data.substring(nextStart, nextEnd + 1));
+				tempData.push(placeholder);
 				cursor = nextEnd + 1;
 			  }
 
@@ -577,9 +624,7 @@ var CleanCss = (function(){
 			},
 
 			restore: function(data) {
-			  return data.replace(/__URL__/g, function() {
-				return urls.shift();
-			  });
+			  return data.replace(urls.placeholderRegExp, urls.restore);
 			}
 		  };
 		};
@@ -767,11 +812,14 @@ var CleanCss = (function(){
 			});
 
 			// replace font weight with numerical value
-			replace(/(font|font\-weight):(normal|bold)([ ;\}!])/g, function(match, property, weight, suffix) {
+			replace(/(font\-weight|font):(normal|bold)([ ;\}!])(\w*)/g, function(match, property, weight, suffix, next) {
+			  if (suffix == ' ' && next.length > 0 && !/[.\d]/.test(next))
+				return match;
+
 			  if (weight == 'normal')
-				return property + ':400' + suffix;
+				return property + ':400' + suffix + next;
 			  else if (weight == 'bold')
-				return property + ':700' + suffix;
+				return property + ':700' + suffix + next;
 			  else
 				return match;
 			});
@@ -798,8 +846,8 @@ var CleanCss = (function(){
 			// none to 0
 			replace(/(border|border-top|border-right|border-bottom|border-left|outline):none/g, '$1:0');
 
-			// background:none to 0
-			replace(/(background):none([;}])/g, '$1:0$2');
+			// background:none to background:0 0
+			replace(/background:none([;}])/g, 'background:0 0$1');
 
 			// multiple zeros into one
 			replace(/box-shadow:0 0 0 0([^\.])/g, 'box-shadow:0 0$1');

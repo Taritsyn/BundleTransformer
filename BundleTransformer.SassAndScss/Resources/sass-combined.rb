@@ -1,5 +1,5 @@
 #############################################################################
-# Sass v3.2.10
+# Sass v3.2.12
 # http://sass-lang.com
 #
 # Copyright 2006-2013, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
@@ -24,6 +24,7 @@ require 'set'
 require 'enumerator'
 require 'stringio'
 require 'rbconfig'
+#RG require 'thread'
 
 module Sass
   # The root directory of the Sass source tree.
@@ -1025,6 +1026,29 @@ MSG
       end
     end
 
+    # This creates a temp file and yields it for writing. When the
+    # write is complete, the file is moved into the desired location.
+    # The atomicity of this operation is provided by the filesystem's
+    # rename operation.
+    #
+    # @param filename [String] The file to write to.
+    # @yieldparam tmpfile [Tempfile] The temp file that can be written to.
+    # @return The value returned by the block.
+    def atomic_create_and_write_file(filename)
+      require 'tempfile'
+      tmpfile = Tempfile.new(File.basename(filename), File.dirname(filename))
+      tmp_path = tmpfile.path
+      tmpfile.binmode if tmpfile.respond_to?(:binmode)
+      result = yield tmpfile
+      File.rename tmpfile.path, filename
+      result
+    ensure
+      # close and remove the tempfile if it still exists,
+      # presumably due to an error during write
+      tmpfile.close if tmpfile
+      tmpfile.unlink if tmpfile
+    end
+
     private
 
     # Calculates the memoization table for the Least Common Subsequence algorithm.
@@ -1648,7 +1672,7 @@ module Sass
         # return if File.exists?(File.dirname(compiled_filename)) && !File.writable?(File.dirname(compiled_filename))
         # return if File.exists?(compiled_filename) && !File.writable?(compiled_filename)
         FileUtils.mkdir_p(File.dirname(compiled_filename))
-        File.open(compiled_filename, "wb") do |f|
+        Sass::Util.atomic_create_and_write_file(compiled_filename) do |f|
           f.puts(version)
           f.puts(sha)
           f.write(contents)
@@ -3689,12 +3713,12 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
       end
 
       sel = sseq.members
-      parent.resolved_rules.members.each do |seq|
-        if !seq.members.last.is_a?(Sass::Selector::SimpleSequence)
-          raise Sass::SyntaxError.new("#{seq} can't extend: invalid selector")
+      parent.resolved_rules.members.each do |member|
+        if !member.members.last.is_a?(Sass::Selector::SimpleSequence)
+          raise Sass::SyntaxError.new("#{member} can't extend: invalid selector")
         end
 
-        @extends[sel] = Extend.new(seq, sel, node, @parent_directives.dup, :not_found)
+        @extends[sel] = Extend.new(member, sel, node, @parent_directives.dup, :not_found)
       end
     end
 
@@ -4338,7 +4362,6 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
 
       to_return = ''
       old_spaces = '  ' * @tabs
-      spaces = '  ' * (@tabs + 1)
       if node.style != :compressed
         if node.options[:debug_info] && !@in_directive
           to_return << visit(debug_info_rule(node.debug_info, node.options)) << "\n"
@@ -4866,7 +4889,7 @@ module Sass
         sels_with_ix = Sass::Util.enum_with_index(sels)
         _, i =
           if self.is_a?(Pseudo) || self.is_a?(SelectorPseudoClass)
-            sels_with_ix.find {|sel, _| sel.is_a?(Pseudo) && (sels.last.final? || sels.last.type == :element)}
+            sels_with_ix.find {|sel, _| sel.is_a?(Pseudo) && (sels.last.type == :element)}
           else
             sels_with_ix.find {|sel, _| sel.is_a?(Pseudo) || sel.is_a?(SelectorPseudoClass)}
           end
@@ -5341,7 +5364,7 @@ module Sass
           # is a supersequence of the other, use that, otherwise give up.
           lcs = Sass::Util.lcs(ops1, ops2)
           return unless lcs == ops1 || lcs == ops2
-          res.unshift *(ops1.size > ops2.size ? ops1 : ops2).reverse
+          res.unshift(*(ops1.size > ops2.size ? ops1 : ops2).reverse)
           return res
         end
 
@@ -5536,7 +5559,7 @@ module Sass
         # separate sequences should limit the quadratic behavior.
         seqses.each_with_index do |seqs1, i|
           result[i] = seqs1.reject do |seq1|
-            min_spec = _sources(seq1).map {|seq| seq.specificity}.min || 0
+            max_spec = _sources(seq1).map {|seq| seq.specificity}.max || 0
             result.any? do |seqs2|
               next if seqs1.equal?(seqs2)
               # Second Law of Extend: the specificity of a generated selector
@@ -5544,7 +5567,7 @@ module Sass
               # selector.
               #
               # See https://github.com/nex3/sass/issues/324.
-              seqs2.any? {|seq2| _specificity(seq2) >= min_spec && _superselector?(seq2, seq1)}
+              seqs2.any? {|seq2| _specificity(seq2) >= max_spec && _superselector?(seq2, seq1)}
             end
           end
         end
@@ -5630,11 +5653,16 @@ module Sass
         @base ||= (members.first if members.first.is_a?(Element) || members.first.is_a?(Universal))
       end
 
-      # Returns the non-base selectors in this sequence.
+      def pseudo_elements
+        @pseudo_elements ||= (members - [base]).
+          select {|sel| sel.is_a?(Pseudo) && sel.type == :element}
+      end
+
+      # Returns the non-base, non-pseudo-class selectors in this sequence.
       #
       # @return [Set<Simple>]
       def rest
-        @rest ||= Set.new(base ? members[1..-1] : members)
+        @rest ||= Set.new(members - [base] - pseudo_elements)
       end
 
       # Whether or not this compound selector is the subject of the parent
@@ -5722,9 +5750,9 @@ module Sass
       #   by the time extension and unification happen,
       #   this exception will only ever be raised as a result of programmer error
       def unify(sels, other_subject)
-        return unless sseq = members.inject(sels) do |sseq, sel|
-          return unless sseq
-          sel.unify(sseq)
+        return unless sseq = members.inject(sels) do |member, sel|
+          return unless member
+          sel.unify(member)
         end
         SimpleSequence.new(sseq, other_subject || subject?)
       end
@@ -5738,7 +5766,9 @@ module Sass
       # @param sseq [SimpleSequence]
       # @return [Boolean]
       def superselector?(sseq)
-        (base.nil? || base.eql?(sseq.base)) && rest.subset?(sseq.rest)
+        (base.nil? || base.eql?(sseq.base)) &&
+          pseudo_elements.eql?(sseq.pseudo_elements) &&
+          rest.subset?(sseq.rest)
       end
 
       # @see Simple#to_a
@@ -5790,8 +5820,8 @@ WARNING
       end
 
       def _eql?(other)
-        other.base.eql?(self.base) && Sass::Util.set_eql?(other.rest, self.rest) &&
-          other.subject? == self.subject?
+        other.base.eql?(self.base) && other.pseudo_elements == pseudo_elements &&
+          Sass::Util.set_eql?(other.rest, self.rest) && other.subject? == self.subject?
       end
     end
   end
@@ -5913,7 +5943,7 @@ module Sass
 
       # @see AbstractSequence#specificity
       def specificity
-        0
+        SPECIFICITY_BASE
       end
     end
 
@@ -6139,19 +6169,19 @@ module Sass
     # A pseudoclass (e.g. `:visited`) or pseudoelement (e.g. `::first-line`) selector.
     # It can have arguments (e.g. `:nth-child(2n+1)`).
     class Pseudo < Simple
-      # The type of the selector.
-      # `:class` if this is a pseudoclass selector,
-      # `:element` if it's a pseudoelement.
-      #
-      # @return [Symbol]
-      attr_reader :type
-
-      # Some psuedo-class-syntax selectors (`:after` and `:before)
-      # are actually considered pseudo-elements
-      # and must be at the end of the selector to function properly.
+      # Some psuedo-class-syntax selectors are actually considered
+      # pseudo-elements and must be treated differently. This is a list of such
+      # selectors
       #
       # @return [Array<String>]
-      FINAL_SELECTORS = %w[after before]
+      ACTUALLY_ELEMENTS = %w[after before first-line first-letter]
+
+      # Like \{#type}, but returns the type of selector this looks like, rather
+      # than the type it is semantically. This only differs from type for
+      # selectors in \{ACTUALLY\_ELEMENTS}.
+      #
+      # @return [Symbol]
+      attr_reader :syntactic_type
 
       # The name of the selector.
       #
@@ -6173,18 +6203,22 @@ module Sass
       # @param arg [nil, Array<String, Sass::Script::Node>] The argument to the selector,
       #   or nil if no argument was given
       def initialize(type, name, arg)
-        @type = type
+        @syntactic_type = type
         @name = name
         @arg = arg
       end
 
-      def final?
-        type == :class && FINAL_SELECTORS.include?(name.first)
+      # The type of the selector. `:class` if this is a pseudoclass selector,
+      # `:element` if it's a pseudoelement.
+      #
+      # @return [Symbol]
+      def type
+        ACTUALLY_ELEMENTS.include?(name.first) ? :element : syntactic_type
       end
 
       # @see Selector#to_a
       def to_a
-        res = [@type == :class ? ":" : "::"] + @name
+        res = [syntactic_type == :class ? ":" : "::"] + @name
         (res << "(").concat(Sass::Util.strip_string_array(@arg)) << ")" if @arg
         res
       end
@@ -6198,7 +6232,6 @@ module Sass
           sel.is_a?(Pseudo) && sel.type == :element &&
             (sel.name != self.name || sel.arg != self.arg)
         end
-        return sels + [self] if final?
         super
       end
 
@@ -6535,7 +6568,7 @@ module Sass::Script
   # : Creates a {Color} from hue, saturation, and lightness values.
   #
   # \{#hsla hsla($hue, $saturation, $lightness, $alpha)}
-  # : Creates a {Color} from hue, saturation, lightness, lightness, and alpha
+  # : Creates a {Color} from hue, saturation, lightness, and alpha
   #   values.
   #
   # \{#hue hue($color)}
@@ -6960,7 +6993,7 @@ module Sass::Script
     end
     declare :hsl, [:hue, :saturation, :lightness]
 
-    # Creates a {Color} from hue, saturation, lightness, lightness, and alpha
+    # Creates a {Color} from hue, saturation, lightness, and alpha
     # values. Uses the algorithm from the [CSS3 spec][].
     #
     # [CSS3 spec]: http://www.w3.org/TR/css3-color/#hsl-color
@@ -7987,7 +8020,7 @@ module Sass::Script
     end
     declare :if, [:condition, :if_true, :if_false]
 
-    # This function only exists as a workaround for IE7's [`content:counter`
+    # This function only exists as a workaround for IE7's [`content: counter`
     # bug][bug]. It works identically to any other plain-CSS function, except it
     # avoids adding spaces between the argument commas.
     #
@@ -8001,6 +8034,21 @@ module Sass::Script
       Sass::Script::String.new("counter(#{args.map {|a| a.to_s(options)}.join(',')})")
     end
     declare :counter, [], :var_args => true
+
+    # This function only exists as a workaround for IE7's [`content: counters`
+    # bug][bug]. It works identically to any other plain-CSS function, except it
+    # avoids adding spaces between the argument commas.
+    #
+    # [bug]: http://jes.st/2013/ie7s-css-breaking-content-counter-bug/
+    #
+    # @example
+    #   counters(item, ".") => counters(item,".")
+    # @overload counters($args...)
+    # @return [String]
+    def counters(*args)
+      Sass::Script::String.new("counters(#{args.map {|a| a.to_s(options)}.join(',')})")
+    end
+    declare :counters, [], :var_args => true
 
     private
 
@@ -9429,7 +9477,8 @@ module Sass::Script
       return "()" if value.empty?
       precedence = Sass::Script::Parser.precedence_of(separator)
       value.reject {|e| e.is_a?(Null)}.map do |v|
-        if v.is_a?(List) && Sass::Script::Parser.precedence_of(v.separator) <= precedence
+        if v.is_a?(List) && Sass::Script::Parser.precedence_of(v.separator) <= precedence ||
+            separator == :space && v.is_a?(UnaryOperation) && (v.operator == :minus || v.operator == :plus)
           "(#{v.to_sass(opts)})"
         else
           v.to_sass(opts)
@@ -9777,9 +9826,14 @@ module Sass::Script
   #
   # Currently only `-`, `/`, and `not` are unary operators.
   class UnaryOperation < Node
-    # @param operand [Script::Node] The parse-tree node
-    #   for the object of the operator
-    # @param operator [Symbol] The operator to perform
+    # @return [Symbol] The operation to perform
+    attr_reader :operator
+
+    # @return [Script::Node] The parse-tree node for the object of the operator
+    attr_reader :operand
+
+    # @param operand [Script::Node] See \{#operand}
+    # @param operator [Symbol] See \{#operator}
     def initialize(operand, operator)
       @operand = operand
       @operator = operator
@@ -10046,7 +10100,6 @@ module Sass::Script
 
     # @see Node#to_sass
     def to_sass(opts = {})
-      pred = Sass::Script::Parser.precedence_of(@operator)
       o1 = operand_to_sass @operand1, :left, opts
       o2 = operand_to_sass @operand2, :right, opts
       sep =
@@ -12213,6 +12266,7 @@ MESSAGE
         :qualified_name => "identifier",
         :expr => "expression (e.g. 1px, bold)",
         :_selector => "selector",
+        :selector_comma_sequence => "selector",
         :simple_selector_sequence => "selector",
         :import_arg => "file to import (string or url())",
         :moz_document_function => "matching function (e.g. url-prefix(), domain())",
@@ -14452,1161 +14506,4 @@ WARNING
       res << rest
     end
   end
-end
-
-dir = File.dirname(__FILE__)
-$LOAD_PATH.unshift dir unless $LOAD_PATH.include?(dir)
-
-# This is necessary to set so that the Haml code that tries to load Sass
-# knows that Sass is indeed loading,
-# even if there's some crazy autoload stuff going on.
-SASS_BEGUN_TO_LOAD = true unless defined?(SASS_BEGUN_TO_LOAD)
-
-
-# The module that contains everything Sass-related:
-#
-# * {Sass::Engine} is the class used to render Sass/SCSS within Ruby code.
-# * {Sass::Plugin} is interfaces with web frameworks (Rails and Merb in particular).
-# * {Sass::SyntaxError} is raised when Sass encounters an error.
-# * {Sass::CSS} handles conversion of CSS to Sass.
-#
-# Also see the {file:SASS_REFERENCE.md full Sass reference}.
-module Sass
-  # The global load paths for Sass files. This is meant for plugins and
-  # libraries to register the paths to their Sass stylesheets to that they may
-  # be `@imported`. This load path is used by every instance of [Sass::Engine].
-  # They are lower-precedence than any load paths passed in via the
-  # {file:SASS_REFERENCE.md#load_paths-option `:load_paths` option}.
-  #
-  # If the `SASS_PATH` environment variable is set,
-  # the initial value of `load_paths` will be initialized based on that.
-  # The variable should be a colon-separated list of path names
-  # (semicolon-separated on Windows).
-  #
-  # Note that files on the global load path are never compiled to CSS
-  # themselves, even if they aren't partials. They exist only to be imported.
-  #
-  # @example
-  #   Sass.load_paths << File.dirname(__FILE__ + '/sass')
-  # @return [Array<String, Pathname, Sass::Importers::Base>]
-  def self.load_paths
-    @load_paths ||= ENV['SASS_PATH'] ?
-      ENV['SASS_PATH'].split(Sass::Util.windows? ? ';' : ':') : []
-  end
-
-  # Compile a Sass or SCSS string to CSS.
-  # Defaults to SCSS.
-  #
-  # @param contents [String] The contents of the Sass file.
-  # @param options [{Symbol => Object}] An options hash;
-  #   see {file:SASS_REFERENCE.md#sass_options the Sass options documentation}
-  # @raise [Sass::SyntaxError] if there's an error in the document
-  # @raise [Encoding::UndefinedConversionError] if the source encoding
-  #   cannot be converted to UTF-8
-  # @raise [ArgumentError] if the document uses an unknown encoding with `@charset`
-  def self.compile(contents, options = {})
-    options[:syntax] ||= :scss
-    Engine.new(contents, options).to_css
-  end
-
-  # Compile a file on disk to CSS.
-  #
-  # @param filename [String] The path to the Sass, SCSS, or CSS file on disk.
-  # @param options [{Symbol => Object}] An options hash;
-  #   see {file:SASS_REFERENCE.md#sass_options the Sass options documentation}
-  # @raise [Sass::SyntaxError] if there's an error in the document
-  # @raise [Encoding::UndefinedConversionError] if the source encoding
-  #   cannot be converted to UTF-8
-  # @raise [ArgumentError] if the document uses an unknown encoding with `@charset`
-  #
-  # @overload compile_file(filename, options = {})
-  #   Return the compiled CSS rather than writing it to a file.
-  #
-  #   @return [String] The compiled CSS.
-  #
-  # @overload compile_file(filename, css_filename, options = {})
-  #   Write the compiled CSS to a file.
-  #
-  #   @param css_filename [String] The location to which to write the compiled CSS.
-  def self.compile_file(filename, *args)
-    options = args.last.is_a?(Hash) ? args.pop : {}
-    css_filename = args.shift
-    result = Sass::Engine.for_file(filename, options).render
-    if css_filename
-      options[:css_filename] ||= css_filename
-      open(css_filename,"w") {|css_file| css_file.write(result)}
-      nil
-    else
-      result
-    end
-  end
-end
-
-
-# Rails 3.0.0.beta.2+, < 3.1
-#RG if defined?(ActiveSupport) && Sass::Util.has?(:public_method, ActiveSupport, :on_load) &&
-#RG     !Sass::Util.ap_geq?('3.1.0.beta')
-# We keep configuration in its own self-contained file
-# so that we can load it independently in Rails 3,
-# where the full plugin stuff is lazy-loaded.
-
-module Sass
-  module Plugin
-    module Configuration
-
-      # Returns the default options for a {Sass::Plugin::Compiler}.
-      #
-      # @return [{Symbol => Object}]
-      def default_options
-        @default_options ||= {
-          :css_location       => './public/stylesheets',
-          :always_update      => false,
-          :always_check       => true,
-          :full_exception     => true,
-          :cache_location     => ".sass-cache"
-        }.freeze
-      end
-
-      # Resets the options and {Sass::Callbacks::InstanceMethods#clear_callbacks! clears all callbacks}.
-      def reset!
-        @options = nil
-        clear_callbacks!
-      end
-
-      # An options hash.
-      # See {file:SASS_REFERENCE.md#sass_options the Sass options documentation}.
-      #
-      # @return [{Symbol => Object}]
-      def options
-        @options ||= default_options.dup
-      end
-
-      # Sets the options hash.
-      # See {file:SASS_REFERENCE.md#sass_options the Sass options documentation}.
-      # See {Sass::Plugin::Configuration#reset!}
-      # @deprecated Instead, modify the options hash in-place.
-      # @param value [{Symbol => Object}] The options hash
-      def options=(value)
-        Sass::Util.sass_warn("Setting Sass::Plugin.options is deprecated " +
-                             "and will be removed in a future release.")
-        options.merge!(value)
-      end
-
-      # Adds a new template-location/css-location mapping.
-      # This means that Sass/SCSS files in `template_location`
-      # will be compiled to CSS files in `css_location`.
-      #
-      # This is preferred over manually manipulating the {file:SASS_REFERENCE.md#template_location-option `:template_location` option}
-      # since the option can be in multiple formats.
-      #
-      # Note that this method will change `options[:template_location]`
-      # to be in the Array format.
-      # This means that even if `options[:template_location]`
-      # had previously been a Hash or a String,
-      # it will now be an Array.
-      #
-      # @param template_location [String] The location where Sass/SCSS files will be.
-      # @param css_location [String] The location where compiled CSS files will go.
-      def add_template_location(template_location, css_location = options[:css_location])
-        normalize_template_location!
-        template_location_array << [template_location, css_location]
-      end
-
-      # Removes a template-location/css-location mapping.
-      # This means that Sass/SCSS files in `template_location`
-      # will no longer be compiled to CSS files in `css_location`.
-      #
-      # This is preferred over manually manipulating the {file:SASS_REFERENCE.md#template_location-option `:template_location` option}
-      # since the option can be in multiple formats.
-      #
-      # Note that this method will change `options[:template_location]`
-      # to be in the Array format.
-      # This means that even if `options[:template_location]`
-      # had previously been a Hash or a String,
-      # it will now be an Array.
-      #
-      # @param template_location [String]
-      #   The location where Sass/SCSS files were,
-      #   which is now going to be ignored.
-      # @param css_location [String]
-      #   The location where compiled CSS files went, but will no longer go.
-      # @return [Boolean]
-      #   Non-`nil` if the given mapping already existed and was removed,
-      #   or `nil` if nothing was changed.
-      def remove_template_location(template_location, css_location = options[:css_location])
-        normalize_template_location!
-        template_location_array.delete([template_location, css_location])
-      end
-
-      # Returns the template locations configured for Sass
-      # as an array of `[template_location, css_location]` pairs.
-      # See the {file:SASS_REFERENCE.md#template_location-option `:template_location` option}
-      # for details.
-      #
-      # @return [Array<(String, String)>]
-      #   An array of `[template_location, css_location]` pairs.
-      def template_location_array
-        old_template_location = options[:template_location]
-        normalize_template_location!
-        options[:template_location]
-      ensure
-        options[:template_location] = old_template_location
-      end
-
-      private
-
-      def normalize_template_location!
-        return if options[:template_location].is_a?(Array)
-        options[:template_location] =
-          case options[:template_location]
-          when nil
-            options[:css_location] ?
-              [[File.join(options[:css_location], 'sass'), options[:css_location]]] : []
-          when String; [[options[:template_location], options[:css_location]]]
-          else; options[:template_location].to_a
-          end
-      end
-    end
-  end
-end
-#RG   ActiveSupport.on_load(:before_configuration) do
-#RG   end
-#RG end
-
-# XXX CE: is this still necessary now that we have the compiler class?
-module Sass
-  # A lightweight infrastructure for defining and running callbacks.
-  # Callbacks are defined using \{#define\_callback\} at the class level,
-  # and called using `run_#{name}` at the instance level.
-  #
-  # Clients can add callbacks by calling the generated `on_#{name}` method,
-  # and passing in a block that's run when the callback is activated.
-  #
-  # @example Define a callback
-  #   class Munger
-  #     extend Sass::Callbacks
-  #     define_callback :string_munged
-  #
-  #     def munge(str)
-  #       res = str.gsub(/[a-z]/, '\1\1')
-  #       run_string_munged str, res
-  #       res
-  #     end
-  #   end
-  #
-  # @example Use a callback
-  #   m = Munger.new
-  #   m.on_string_munged {|str, res| puts "#{str} was munged into #{res}!"}
-  #   m.munge "bar" #=> bar was munged into bbaarr!
-  module Callbacks
-    # Automatically includes {InstanceMethods}
-    # when something extends this module.
-    #
-    # @param base [Module]
-    def self.extended(base)
-      base.send(:include, InstanceMethods)
-    end
-    protected
-
-    module InstanceMethods
-      # Removes all callbacks registered against this object.
-      def clear_callbacks!
-        @_sass_callbacks = {}
-      end
-    end
-
-    # Define a callback with the given name.
-    # This will define an `on_#{name}` method
-    # that registers a block,
-    # and a `run_#{name}` method that runs that block
-    # (optionall with some arguments).
-    #
-    # @param name [Symbol] The name of the callback
-    # @return [void]
-    def define_callback(name)
-      class_eval <<RUBY, __FILE__, __LINE__ + 1
-def on_#{name}(&block)
-  @_sass_callbacks ||= {}
-  (@_sass_callbacks[#{name.inspect}] ||= []) << block
-end
-
-def run_#{name}(*args)
-  return unless @_sass_callbacks
-  return unless @_sass_callbacks[#{name.inspect}]
-  @_sass_callbacks[#{name.inspect}].each {|c| c[*args]}
-end
-private :run_#{name}
-RUBY
-    end
-  end
-end
-module Sass
-  module Plugin
-    # The class handles `.s[ca]ss` file staleness checks via their mtime timestamps.
-    #
-    # To speed things up two level of caches are employed:
-    #
-    # * A class-level dependency cache which stores @import paths for each file.
-    #   This is a long-lived cache that is reused by every StalenessChecker instance.
-    # * Three short-lived instance-level caches, one for file mtimes,
-    #   one for whether a file is stale during this particular run.
-    #   and one for the parse tree for a file.
-    #   These are only used by a single StalenessChecker instance.
-    #
-    # Usage:
-    #
-    # * For a one-off staleness check of a single `.s[ca]ss` file,
-    #   the class-level {stylesheet_needs_update?} method
-    #   should be used.
-    # * For a series of staleness checks (e.g. checking all files for staleness)
-    #   a StalenessChecker instance should be created,
-    #   and the instance-level \{#stylesheet\_needs\_update?} method should be used.
-    #   the caches should make the whole process significantly faster.
-    #   *WARNING*: It is important not to retain the instance for too long,
-    #   as its instance-level caches are never explicitly expired.
-    class StalenessChecker
-      @dependencies_cache = {}
-
-      class << self
-        # TODO: attach this to a compiler instance.
-        # @private
-        attr_accessor :dependencies_cache
-      end
-
-      # Creates a new StalenessChecker
-      # for checking the staleness of several stylesheets at once.
-      #
-      # @param options [{Symbol => Object}]
-      #   See {file:SASS_REFERENCE.md#sass_options the Sass options documentation}.
-      def initialize(options)
-        @dependencies = self.class.dependencies_cache
-
-        # URIs that are being actively checked for staleness. Protects against
-        # import loops.
-        @actively_checking = Set.new
-
-        # Entries in the following instance-level caches are never explicitly expired.
-        # Instead they are supposed to automaticaly go out of scope when a series of staleness checks
-        # (this instance of StalenessChecker was created for) is finished.
-        @mtimes, @dependencies_stale, @parse_trees = {}, {}, {}
-        @options = Sass::Engine.normalize_options(options)
-      end
-
-      # Returns whether or not a given CSS file is out of date
-      # and needs to be regenerated.
-      #
-      # @param css_file [String] The location of the CSS file to check.
-      # @param template_file [String] The location of the Sass or SCSS template
-      #   that is compiled to `css_file`.
-      # @return [Boolean] Whether the stylesheet needs to be updated.
-      def stylesheet_needs_update?(css_file, template_file, importer = nil)
-        template_file = File.expand_path(template_file)
-        begin
-          css_mtime = File.mtime(css_file)
-        rescue Errno::ENOENT
-          return true
-        end
-        stylesheet_modified_since?(template_file, css_mtime, importer)
-      end
-
-      # Returns whether a Sass or SCSS stylesheet has been modified since a given time.
-      #
-      # @param template_file [String] The location of the Sass or SCSS template.
-      # @param mtime [Fixnum] The modification time to check against.
-      # @param importer [Sass::Importers::Base] The importer used to locate the stylesheet.
-      #   Defaults to the filesystem importer.
-      # @return [Boolean] Whether the stylesheet has been modified.
-      def stylesheet_modified_since?(template_file, mtime, importer = nil)
-        importer ||= @options[:filesystem_importer].new(".")
-        dependency_updated?(mtime).call(template_file, importer)
-      end
-
-      # Returns whether or not a given CSS file is out of date
-      # and needs to be regenerated.
-      #
-      # The distinction between this method and the instance-level \{#stylesheet\_needs\_update?}
-      # is that the instance method preserves mtime and stale-dependency caches,
-      # so it's better to use when checking multiple stylesheets at once.
-      #
-      # @param css_file [String] The location of the CSS file to check.
-      # @param template_file [String] The location of the Sass or SCSS template
-      #   that is compiled to `css_file`.
-      # @return [Boolean] Whether the stylesheet needs to be updated.
-      def self.stylesheet_needs_update?(css_file, template_file, importer = nil)
-        new(Plugin.engine_options).stylesheet_needs_update?(css_file, template_file, importer)
-      end
-
-      # Returns whether a Sass or SCSS stylesheet has been modified since a given time.
-      #
-      # The distinction between this method and the instance-level \{#stylesheet\_modified\_since?}
-      # is that the instance method preserves mtime and stale-dependency caches,
-      # so it's better to use when checking multiple stylesheets at once.
-      #
-      # @param template_file [String] The location of the Sass or SCSS template.
-      # @param mtime [Fixnum] The modification time to check against.
-      # @param importer [Sass::Importers::Base] The importer used to locate the stylesheet.
-      #   Defaults to the filesystem importer.
-      # @return [Boolean] Whether the stylesheet has been modified.
-      def self.stylesheet_modified_since?(template_file, mtime, importer = nil)
-        new(Plugin.engine_options).stylesheet_modified_since?(template_file, mtime, importer)
-      end
-
-      private
-
-      def dependencies_stale?(uri, importer, css_mtime)
-        timestamps = @dependencies_stale[[uri, importer]] ||= {}
-        timestamps.each_pair do |checked_css_mtime, is_stale|
-          if checked_css_mtime <= css_mtime && !is_stale
-            return false
-          elsif checked_css_mtime > css_mtime && is_stale
-            return true
-          end
-        end
-        timestamps[css_mtime] = dependencies(uri, importer).any?(&dependency_updated?(css_mtime))
-      rescue Sass::SyntaxError
-        # If there's an error finding dependencies, default to recompiling.
-        true
-      end
-
-      def mtime(uri, importer)
-        @mtimes[[uri, importer]] ||=
-          begin
-            mtime = importer.mtime(uri, @options)
-            if mtime.nil?
-              @dependencies.delete([uri, importer])
-              nil
-            else
-              mtime
-            end
-          end
-      end
-
-      def dependencies(uri, importer)
-        stored_mtime, dependencies = Sass::Util.destructure(@dependencies[[uri, importer]])
-
-        if !stored_mtime || stored_mtime < mtime(uri, importer)
-          dependencies = compute_dependencies(uri, importer)
-          @dependencies[[uri, importer]] = [mtime(uri, importer), dependencies]
-        end
-
-        dependencies
-      end
-
-      def dependency_updated?(css_mtime)
-        Proc.new do |uri, importer|
-          next true if @actively_checking.include?(uri)
-          begin
-            @actively_checking << uri
-            sass_mtime = mtime(uri, importer)
-            !sass_mtime ||
-              sass_mtime > css_mtime ||
-              dependencies_stale?(uri, importer, css_mtime)
-          ensure
-            @actively_checking.delete uri
-          end
-        end
-      end
-
-      def compute_dependencies(uri, importer)
-        tree(uri, importer).grep(Tree::ImportNode) do |n|
-          next if n.css_import?
-          file = n.imported_file
-          key = [file.options[:filename], file.options[:importer]]
-          @parse_trees[key] = file.to_tree
-          key
-        end.compact
-      end
-
-      def tree(uri, importer)
-        @parse_trees[[uri, importer]] ||= importer.find(uri, @options).to_tree
-      end
-    end
-  end
-end
-
-module Sass::Plugin
-
-  # The Compiler class handles compilation of multiple files and/or directories,
-  # including checking which CSS files are out-of-date and need to be updated
-  # and calling Sass to perform the compilation on those files.
-  #
-  # {Sass::Plugin} uses this class to update stylesheets for a single application.
-  # Unlike {Sass::Plugin}, though, the Compiler class has no global state,
-  # and so multiple instances may be created and used independently.
-  #
-  # If you need to compile a Sass string into CSS,
-  # please see the {Sass::Engine} class.
-  #
-  # Unlike {Sass::Plugin}, this class doesn't keep track of
-  # whether or how many times a stylesheet should be updated.
-  # Therefore, the following `Sass::Plugin` options are ignored by the Compiler:
-  #
-  # * `:never_update`
-  # * `:always_check`
-  class Compiler
-    include Sass::Util
-    include Configuration
-    extend Sass::Callbacks
-
-    # Creates a new compiler.
-    #
-    # @param options [{Symbol => Object}]
-    #   See {file:SASS_REFERENCE.md#sass_options the Sass options documentation}.
-    def initialize(options = {})
-      self.options.merge!(options)
-    end
-
-    # Register a callback to be run after stylesheets are mass-updated.
-    # This is run whenever \{#update\_stylesheets} is called,
-    # unless the \{file:SASS_REFERENCE.md#never_update-option `:never_update` option}
-    # is enabled.
-    #
-    # @yield [individual_files]
-    # @yieldparam individual_files [<(String, String)>]
-    #   Individual files to be updated, in addition to the directories
-    #   specified in the options.
-    #   The first element of each pair is the source file,
-    #   the second is the target CSS file.
-    define_callback :updating_stylesheets
-
-    # Register a callback to be run after a single stylesheet is updated.
-    # The callback is only run if the stylesheet is really updated;
-    # if the CSS file is fresh, this won't be run.
-    #
-    # Even if the \{file:SASS_REFERENCE.md#full_exception-option `:full_exception` option}
-    # is enabled, this callback won't be run
-    # when an exception CSS file is being written.
-    # To run an action for those files, use \{#on\_compilation\_error}.
-    #
-    # @yield [template, css]
-    # @yieldparam template [String]
-    #   The location of the Sass/SCSS file being updated.
-    # @yieldparam css [String]
-    #   The location of the CSS file being generated.
-    define_callback :updated_stylesheet
-
-    # Register a callback to be run before a single stylesheet is updated.
-    # The callback is only run if the stylesheet is guaranteed to be updated;
-    # if the CSS file is fresh, this won't be run.
-    #
-    # Even if the \{file:SASS_REFERENCE.md#full_exception-option `:full_exception` option}
-    # is enabled, this callback won't be run
-    # when an exception CSS file is being written.
-    # To run an action for those files, use \{#on\_compilation\_error}.
-    #
-    # @yield [template, css]
-    # @yieldparam template [String]
-    #   The location of the Sass/SCSS file being updated.
-    # @yieldparam css [String]
-    #   The location of the CSS file being generated.
-    define_callback :updating_stylesheet
-
-    def on_updating_stylesheet_with_deprecation_warning(&block)
-      Sass::Util.sass_warn("Sass::Compiler#on_updating_stylesheet callback is deprecated and will be removed in a future release. Use Sass::Compiler#on_updated_stylesheet instead, which is run after stylesheet compilation.")
-      on_updating_stylesheet_without_deprecation_warning(&block)
-    end
-    alias_method :on_updating_stylesheet_without_deprecation_warning, :on_updating_stylesheet
-    alias_method :on_updating_stylesheet, :on_updating_stylesheet_with_deprecation_warning
-
-    # Register a callback to be run when Sass decides not to update a stylesheet.
-    # In particular, the callback is run when Sass finds that
-    # the template file and none of its dependencies
-    # have been modified since the last compilation.
-    #
-    # Note that this is **not** run when the
-    # \{file:SASS_REFERENCE.md#never-update_option `:never_update` option} is set,
-    # nor when Sass decides not to compile a partial.
-    #
-    # @yield [template, css]
-    # @yieldparam template [String]
-    #   The location of the Sass/SCSS file not being updated.
-    # @yieldparam css [String]
-    #   The location of the CSS file not being generated.
-    define_callback :not_updating_stylesheet
-
-    # Register a callback to be run when there's an error
-    # compiling a Sass file.
-    # This could include not only errors in the Sass document,
-    # but also errors accessing the file at all.
-    #
-    # @yield [error, template, css]
-    # @yieldparam error [Exception] The exception that was raised.
-    # @yieldparam template [String]
-    #   The location of the Sass/SCSS file being updated.
-    # @yieldparam css [String]
-    #   The location of the CSS file being generated.
-    define_callback :compilation_error
-
-    # Register a callback to be run when Sass creates a directory
-    # into which to put CSS files.
-    #
-    # Note that even if multiple levels of directories need to be created,
-    # the callback may only be run once.
-    # For example, if "foo/" exists and "foo/bar/baz/" needs to be created,
-    # this may only be run for "foo/bar/baz/".
-    # This is not a guarantee, however;
-    # it may also be run for "foo/bar/".
-    #
-    # @yield [dirname]
-    # @yieldparam dirname [String]
-    #   The location of the directory that was created.
-    define_callback :creating_directory
-
-    # Register a callback to be run when Sass detects
-    # that a template has been modified.
-    # This is only run when using \{#watch}.
-    #
-    # @yield [template]
-    # @yieldparam template [String]
-    #   The location of the template that was modified.
-    define_callback :template_modified
-
-    # Register a callback to be run when Sass detects
-    # that a new template has been created.
-    # This is only run when using \{#watch}.
-    #
-    # @yield [template]
-    # @yieldparam template [String]
-    #   The location of the template that was created.
-    define_callback :template_created
-
-    # Register a callback to be run when Sass detects
-    # that a template has been deleted.
-    # This is only run when using \{#watch}.
-    #
-    # @yield [template]
-    # @yieldparam template [String]
-    #   The location of the template that was deleted.
-    define_callback :template_deleted
-
-    # Register a callback to be run when Sass deletes a CSS file.
-    # This happens when the corresponding Sass/SCSS file has been deleted.
-    #
-    # @yield [filename]
-    # @yieldparam filename [String]
-    #   The location of the CSS file that was deleted.
-    define_callback :deleting_css
-
-    # Updates out-of-date stylesheets.
-    #
-    # Checks each Sass/SCSS file in {file:SASS_REFERENCE.md#template_location-option `:template_location`}
-    # to see if it's been modified more recently than the corresponding CSS file
-    # in {file:SASS_REFERENCE.md#css_location-option `:css_location`}.
-    # If it has, it updates the CSS file.
-    #
-    # @param individual_files [Array<(String, String)>]
-    #   A list of files to check for updates
-    #   **in addition to those specified by the
-    #   {file:SASS_REFERENCE.md#template_location-option `:template_location` option}.**
-    #   The first string in each pair is the location of the Sass/SCSS file,
-    #   the second is the location of the CSS file that it should be compiled to.
-    def update_stylesheets(individual_files = [])
-      individual_files = individual_files.dup
-      Sass::Plugin.checked_for_updates = true
-      staleness_checker = StalenessChecker.new(engine_options)
-
-      template_location_array.each do |template_location, css_location|
-        Sass::Util.glob(File.join(template_location, "**", "[^_]*.s[ca]ss")).sort.each do |file|
-          # Get the relative path to the file
-          name = file.sub(template_location.to_s.sub(/\/*$/, '/'), "")
-          css = css_filename(name, css_location)
-          individual_files << [file, css]
-        end
-      end
-
-      run_updating_stylesheets individual_files
-
-      individual_files.each do |file, css|
-        if options[:always_update] || staleness_checker.stylesheet_needs_update?(css, file)
-          update_stylesheet(file, css)
-        else
-          run_not_updating_stylesheet(file, css)
-        end
-      end
-    end
-
-    # Watches the template directory (or directories)
-    # and updates the CSS files whenever the related Sass/SCSS files change.
-    # `watch` never returns.
-    #
-    # Whenever a change is detected to a Sass/SCSS file in
-    # {file:SASS_REFERENCE.md#template_location-option `:template_location`},
-    # the corresponding CSS file in {file:SASS_REFERENCE.md#css_location-option `:css_location`}
-    # will be recompiled.
-    # The CSS files of any Sass/SCSS files that import the changed file will also be recompiled.
-    #
-    # Before the watching starts in earnest, `watch` calls \{#update\_stylesheets}.
-    #
-    # Note that `watch` uses the [Listen](http://github.com/guard/listen) library
-    # to monitor the filesystem for changes.
-    # Listen isn't loaded until `watch` is run.
-    # The version of Listen distributed with Sass is loaded by default,
-    # but if another version has already been loaded that will be used instead.
-    #
-    # @param individual_files [Array<(String, String)>]
-    #   A list of files to watch for updates
-    #   **in addition to those specified by the
-    #   {file:SASS_REFERENCE.md#template_location-option `:template_location` option}.**
-    #   The first string in each pair is the location of the Sass/SCSS file,
-    #   the second is the location of the CSS file that it should be compiled to.
-    def watch(individual_files = [])
-      update_stylesheets(individual_files)
-
-      load_listen!
-
-      template_paths = template_locations # cache the locations
-      individual_files_hash = individual_files.inject({}) do |h, files|
-        parent = File.dirname(files.first)
-        (h[parent] ||= []) << files unless template_paths.include?(parent)
-        h
-      end
-      directories = template_paths + individual_files_hash.keys +
-        [{:relative_paths => true}]
-
-      # TODO: Keep better track of what depends on what
-      # so we don't have to run a global update every time anything changes.
-      listener = Listen::MultiListener.new(*directories) do |modified, added, removed|
-        modified.each do |f|
-          parent = File.dirname(f)
-          if files = individual_files_hash[parent]
-            next unless files.first == f
-          else
-            next unless f =~ /\.s[ac]ss$/
-          end
-          run_template_modified(f)
-        end
-
-        added.each do |f|
-          parent = File.dirname(f)
-          if files = individual_files_hash[parent]
-            next unless files.first == f
-          else
-            next unless f =~ /\.s[ac]ss$/
-          end
-          run_template_created(f)
-        end
-
-        removed.each do |f|
-          parent = File.dirname(f)
-          if files = individual_files_hash[parent]
-            next unless files.first == f
-            try_delete_css files[1]
-          else
-            next unless f =~ /\.s[ac]ss$/
-            try_delete_css f.gsub(/\.s[ac]ss$/, '.css')
-          end
-          run_template_deleted(f)
-        end
-
-        update_stylesheets(individual_files)
-      end
-
-      # The native windows listener is much slower than the polling
-      # option, according to https://github.com/nex3/sass/commit/a3031856b22bc834a5417dedecb038b7be9b9e3e#commitcomment-1295118
-      listener.force_polling(true) if @options[:poll] || Sass::Util.windows?
-
-      begin
-        listener.start
-      rescue Exception => e
-        raise e unless e.is_a?(Interrupt)
-      end
-    end
-
-    # Non-destructively modifies \{#options} so that default values are properly set,
-    # and returns the result.
-    #
-    # @param additional_options [{Symbol => Object}] An options hash with which to merge \{#options}
-    # @return [{Symbol => Object}] The modified options hash
-    def engine_options(additional_options = {})
-      opts = options.merge(additional_options)
-      opts[:load_paths] = load_paths(opts)
-      opts
-    end
-
-    # Compass expects this to exist
-    def stylesheet_needs_update?(css_file, template_file)
-      StalenessChecker.stylesheet_needs_update?(css_file, template_file)
-    end
-
-    private
-
-    def load_listen!
-      if defined?(gem)
-        begin
-          gem 'listen', '~> 0.7'
-          require 'listen'
-        rescue Gem::LoadError
-          dir = Sass::Util.scope("vendor/listen/lib")
-          $LOAD_PATH.unshift dir
-          begin
-          rescue LoadError => e
-            e.message << "\n" <<
-              if File.exists?(scope(".git"))
-                'Run "git submodule update --init" to get the recommended version.'
-              else
-                'Run "gem install listen" to get it.'
-              end
-            raise e
-          end
-        end
-      else
-        begin
-        rescue LoadError => e
-          dir = Sass::Util.scope("vendor/listen/lib")
-          if $LOAD_PATH.include?(dir)
-            raise e unless File.exists?(scope(".git"))
-            e.message << "\n" <<
-              'Run "git submodule update --init" to get the recommended version.'
-          else
-            $LOAD_PATH.unshift dir
-            retry
-          end
-        end
-      end
-    end
-
-    def update_stylesheet(filename, css)
-      dir = File.dirname(css)
-      unless File.exists?(dir)
-        run_creating_directory dir
-        FileUtils.mkdir_p dir
-      end
-
-      begin
-        File.read(filename) unless File.readable?(filename) # triggers an error for handling
-        engine_opts = engine_options(:css_filename => css, :filename => filename)
-        result = Sass::Engine.for_file(filename, engine_opts).render
-      rescue Exception => e
-        compilation_error_occured = true
-        run_compilation_error e, filename, css
-        result = Sass::SyntaxError.exception_to_css(e, options)
-      else
-        run_updating_stylesheet filename, css
-      end
-
-      write_file(css, result)
-      run_updated_stylesheet(filename, css) unless compilation_error_occured
-    end
-
-    def write_file(css, content)
-      flag = 'w'
-      flag = 'wb' if Sass::Util.windows? && options[:unix_newlines]
-      File.open(css, flag) do |file|
-        file.set_encoding(content.encoding) unless Sass::Util.ruby1_8?
-        file.print(content)
-      end
-    end
-
-    def try_delete_css(css)
-      return unless File.exists?(css)
-      run_deleting_css css
-      File.delete css
-    end
-
-    def load_paths(opts = options)
-      (opts[:load_paths] || []) + template_locations
-    end
-
-    def template_locations
-      template_location_array.to_a.map {|l| l.first}
-    end
-
-    def css_locations
-      template_location_array.to_a.map {|l| l.last}
-    end
-
-    def css_filename(name, path)
-      "#{path}/#{name}".gsub(/\.s[ac]ss$/, '.css')
-    end
-  end
-end
-
-module Sass
-  # This module provides a single interface to the compilation of Sass/SCSS files
-  # for an application. It provides global options and checks whether CSS files
-  # need to be updated.
-  #
-  # This module is used as the primary interface with Sass
-  # when it's used as a plugin for various frameworks.
-  # All Rack-enabled frameworks are supported out of the box.
-  # The plugin is {file:SASS_REFERENCE.md#rails_merb_plugin automatically activated for Rails and Merb}.
-  # Other frameworks must enable it explicitly; see {Sass::Plugin::Rack}.
-  #
-  # This module has a large set of callbacks available
-  # to allow users to run code (such as logging) when certain things happen.
-  # All callback methods are of the form `on_#{name}`,
-  # and they all take a block that's called when the given action occurs.
-  #
-  # Note that this class proxies almost all methods to its {Sass::Plugin::Compiler} instance.
-  # See \{#compiler}.
-  #
-  # @example Using a callback
-  #   Sass::Plugin.on_updating_stylesheet do |template, css|
-  #     puts "Compiling #{template} to #{css}"
-  #   end
-  #   Sass::Plugin.update_stylesheets
-  #     #=> Compiling app/sass/screen.scss to public/stylesheets/screen.css
-  #     #=> Compiling app/sass/print.scss to public/stylesheets/print.css
-  #     #=> Compiling app/sass/ie.scss to public/stylesheets/ie.css
-  # @see Sass::Plugin::Compiler
-  module Plugin
-    include Sass::Util
-    extend self
-
-    @checked_for_updates = false
-
-    # Whether or not Sass has **ever** checked if the stylesheets need to be updated
-    # (in this Ruby instance).
-    #
-    # @return [Boolean]
-    attr_accessor :checked_for_updates
-
-    # Same as \{#update\_stylesheets}, but respects \{#checked\_for\_updates}
-    # and the {file:SASS_REFERENCE.md#always_update-option `:always_update`}
-    # and {file:SASS_REFERENCE.md#always_check-option `:always_check`} options.
-    #
-    # @see #update_stylesheets
-    def check_for_updates
-      return unless !Sass::Plugin.checked_for_updates ||
-          Sass::Plugin.options[:always_update] || Sass::Plugin.options[:always_check]
-      update_stylesheets
-    end
-
-    # Returns the singleton compiler instance.
-    # This compiler has been pre-configured according
-    # to the plugin configuration.
-    #
-    # @return [Sass::Plugin::Compiler]
-    def compiler
-      @compiler ||= Compiler.new
-    end
-
-    # Updates out-of-date stylesheets.
-    #
-    # Checks each Sass/SCSS file in {file:SASS_REFERENCE.md#template_location-option `:template_location`}
-    # to see if it's been modified more recently than the corresponding CSS file
-    # in {file:SASS_REFERENCE.md#css_location-option `:css_location`}.
-    # If it has, it updates the CSS file.
-    #
-    # @param individual_files [Array<(String, String)>]
-    #   A list of files to check for updates
-    #   **in addition to those specified by the
-    #   {file:SASS_REFERENCE.md#template_location-option `:template_location` option}.**
-    #   The first string in each pair is the location of the Sass/SCSS file,
-    #   the second is the location of the CSS file that it should be compiled to.
-    def update_stylesheets(individual_files = [])
-      return if options[:never_update]
-      compiler.update_stylesheets(individual_files)
-    end
-
-    # Updates all stylesheets, even those that aren't out-of-date.
-    # Ignores the cache.
-    #
-    # @param individual_files [Array<(String, String)>]
-    #   A list of files to check for updates
-    #   **in addition to those specified by the
-    #   {file:SASS_REFERENCE.md#template_location-option `:template_location` option}.**
-    #   The first string in each pair is the location of the Sass/SCSS file,
-    #   the second is the location of the CSS file that it should be compiled to.
-    # @see #update_stylesheets
-    def force_update_stylesheets(individual_files = [])
-      Compiler.new(options.dup.merge(
-          :never_update => false,
-          :always_update => true,
-          :cache => false)).update_stylesheets(individual_files)
-    end
-
-    # All other method invocations are proxied to the \{#compiler}.
-    #
-    # @see #compiler
-    # @see Sass::Plugin::Compiler
-    def method_missing(method, *args, &block)
-      if compiler.respond_to?(method)
-        compiler.send(method, *args, &block)
-      else
-        super
-      end
-    end
-
-    # For parity with method_missing
-    def respond_to?(method)
-      super || compiler.respond_to?(method)
-    end
-
-    # There's a small speedup by not using method missing for frequently delegated methods.
-    def options
-      compiler.options
-    end
-
-  end
-end
-
-if defined?(ActionController)
-unless defined?(Sass::RAILS_LOADED)
-  Sass::RAILS_LOADED = true
-
-  module Sass::Plugin::Configuration
-    # Different default options in a rails envirionment.
-    def default_options
-      return @default_options if @default_options
-      opts = {
-        :quiet             => Sass::Util.rails_env != "production",
-        :full_exception    => Sass::Util.rails_env != "production",
-        :cache_location    => Sass::Util.rails_root + '/tmp/sass-cache'
-      }
-
-      opts.merge!(
-        :always_update     => false,
-        :template_location => Sass::Util.rails_root + '/public/stylesheets/sass',
-        :css_location      => Sass::Util.rails_root + '/public/stylesheets',
-        :always_check      => Sass::Util.rails_env == "development")
-
-      @default_options = opts.freeze
-    end
-  end
-
-  Sass::Plugin.options.reverse_merge!(Sass::Plugin.default_options)
-
-  # Rails 3.1 loads and handles Sass all on its own
-  if defined?(ActionController::Metal)
-    # 3.1 > Rails >= 3.0
-module Sass
-  module Plugin
-    # Rack middleware for compiling Sass code.
-    #
-    # ## Activate
-    #
-    #     use Sass::Plugin::Rack
-    #
-    # ## Customize
-    #
-    #     Sass::Plugin.options.merge(
-    #       :cache_location => './tmp/sass-cache',
-    #       :never_update => environment != :production,
-    #       :full_exception => environment != :production)
-    #
-    # {file:SASS_REFERENCE.md#options See the Reference for more options}.
-    #
-    # ## Use
-    #
-    # Put your Sass files in `public/stylesheets/sass`.
-    # Your CSS will be generated in `public/stylesheets`,
-    # and regenerated every request if necessary.
-    # The locations and frequency {file:SASS_REFERENCE.md#options can be customized}.
-    # That's all there is to it!
-    class Rack
-      # The delay, in seconds, between update checks.
-      # Useful when many resources are requested for a single page.
-      # `nil` means no delay at all.
-      #
-      # @return [Float]
-      attr_accessor :dwell
-
-      # Initialize the middleware.
-      #
-      # @param app [#call] The Rack application
-      # @param dwell [Float] See \{#dwell}
-      def initialize(app, dwell = 1.0)
-        @app = app
-        @dwell = dwell
-        @check_after = Time.now.to_f
-      end
-
-      # Process a request, checking the Sass stylesheets for changes
-      # and updating them if necessary.
-      #
-      # @param env The Rack request environment
-      # @return [(#to_i, {String => String}, Object)] The Rack response
-      def call(env)
-        if @dwell.nil? || Time.now.to_f > @check_after
-          Sass::Plugin.check_for_updates
-          @check_after = Time.now.to_f + @dwell if @dwell
-        end
-        @app.call(env)
-      end
-    end
-  end
-end
-
-    Rails.configuration.middleware.use(Sass::Plugin::Rack)
-  elsif defined?(ActionController::Dispatcher) &&
-      defined?(ActionController::Dispatcher.middleware)
-    # Rails >= 2.3
-    ActionController::Dispatcher.middleware.use(Sass::Plugin::Rack)
-  else
-    module ActionController
-      class Base
-        alias_method :sass_old_process, :process
-        def process(*args)
-          Sass::Plugin.check_for_updates
-          sass_old_process(*args)
-        end
-      end
-    end
-  end
-end
-elsif defined?(Merb::Plugins)
-unless defined?(Sass::MERB_LOADED)
-  Sass::MERB_LOADED = true
-
-  module Sass::Plugin::Configuration
-    # Different default options in a m envirionment.
-    def default_options
-      @default_options ||= begin
-        version = Merb::VERSION.split('.').map { |n| n.to_i }
-        if version[0] <= 0 && version[1] < 5
-          root = MERB_ROOT
-          env  = MERB_ENV
-        else
-          root = Merb.root.to_s
-          env  = Merb.environment
-        end
-
-        {
-          :always_update      => false,
-          :template_location => root + '/public/stylesheets/sass',
-          :css_location      => root + '/public/stylesheets',
-          :cache_location    => root + '/tmp/sass-cache',
-          :always_check      => env != "production",
-          :quiet             => env != "production",
-          :full_exception    => env != "production"
-        }.freeze
-      end
-    end
-  end
-
-  config = Merb::Plugins.config[:sass] || Merb::Plugins.config["sass"] || {}
-
-  if defined? config.symbolize_keys!
-    config.symbolize_keys!
-  end
-
-  Sass::Plugin.options.merge!(config)
-
-  class Sass::Plugin::MerbBootLoader < Merb::BootLoader
-    after Merb::BootLoader::RackUpApplication
-
-    def self.run
-      # Apparently there's no better way than this to add Sass
-      # to Merb's Rack stack.
-      Merb::Config[:app] = Sass::Plugin::Rack.new(Merb::Config[:app])
-    end
-  end
-end
-else
-# The reason some options are declared here rather than in sass/plugin/configuration.rb
-# is that otherwise they'd clobber the Rails-specific options.
-# Since Rails' options are lazy-loaded in Rails 3,
-# they're reverse-merged with the default options
-# so that user configuration is preserved.
-# This means that defaults that differ from Rails'
-# must be declared here.
-
-unless defined?(Sass::GENERIC_LOADED)
-  Sass::GENERIC_LOADED = true
-
-  Sass::Plugin.options.merge!(:css_location   => './public/stylesheets',
-                              :always_update  => false,
-                              :always_check   => true)
-end
 end

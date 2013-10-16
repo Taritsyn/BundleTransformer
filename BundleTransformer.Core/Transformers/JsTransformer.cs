@@ -239,28 +239,33 @@
 		{
 			var content = new StringBuilder();
 
-			foreach (var asset in assets)
+			int assetCount = assets.Count;
+			int lastAssetIndex = assetCount - 1;
+
+			for (int assetIndex = 0; assetIndex < assetCount; assetIndex++)
 			{
-				string assetContent = asset.Content.Trim();
+				IAsset asset = assets[assetIndex];
+				string assetContent = asset.Content.TrimEnd();
 
 				if (enableTracing)
 				{
 					content.AppendFormatLine("//#region URL: {0}", asset.Url);
 				}
 				content.Append(assetContent);
-				if (assetContent.EndsWith(";"))
+				if (!assetContent.EndsWith(";"))
 				{
-					content.AppendLine();
-				}
-				else
-				{
-					content.AppendLine(";");
+					content.Append(";");
 				}
 				if (enableTracing)
 				{
+					content.AppendLine();
 					content.AppendLine("//#endregion");
 				}
-				content.AppendLine();
+
+				if (assetIndex != lastAssetIndex)
+				{
+					content.AppendLine();
+				}
 			}
 
 			return content.ToString();

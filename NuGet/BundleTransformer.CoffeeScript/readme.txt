@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.0
+           README file for Bundle Transformer: CoffeeScript 1.8.7
 
    ----------------------------------------------------------------------
 
@@ -27,8 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   Now instead of the MSIE JavaScript Engine for .Net uses a JavaScript
-   Engine Switcher library.
+   CoffeeScript was updated to commit 581af4540a.
    
    ====================
    POST-INSTALL ACTIONS

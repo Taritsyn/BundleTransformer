@@ -19,7 +19,7 @@
 		/// <summary>
 		/// Name of resource, which contains a Sergey Kryzhanovsky's CSSO-library
 		/// </summary>
-		const string CSSO_LIBRARY_RESOURCE_NAME = "BundleTransformer.Csso.Resources.csso.web.min.js";
+		const string CSSO_LIBRARY_RESOURCE_NAME = "BundleTransformer.Csso.Resources.csso-combined.min.js";
 
 		/// <summary>
 		/// Name of resource, which contains a CSSO-minifier helper

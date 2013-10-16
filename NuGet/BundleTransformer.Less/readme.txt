@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.3
+              README file for Bundle Transformer: LESS 1.8.7
 
    ----------------------------------------------------------------------
 
@@ -22,12 +22,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Fixed an error that occurred when using the item transformations 
-   (classes that implements an `IItemTransform` interface).
    
    ====================
    POST-INSTALL ACTIONS

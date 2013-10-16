@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: JSMin 1.8.4
+              README file for Bundle Transformer: JSMin 1.8.7
  
    ----------------------------------------------------------------------
 
@@ -15,11 +15,6 @@
    of JS-code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on 
    the C# port of Douglas Crockford's JSMin 
    (http://github.com/douglascrockford/JSMin) version of March 29 2013.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Changed the architecture of the C# port of Douglas Crockford's JSMin.
 
    ====================
    POST-INSTALL ACTIONS

@@ -11,6 +11,11 @@
 		Unknown = 0,
 
 		/// <summary>
+		/// <code>@charset</code> rule
+		/// </summary>
+		CharsetRule,
+
+		/// <summary>
 		/// <code>@import</code> rule
 		/// </summary>
 		ImportRule,

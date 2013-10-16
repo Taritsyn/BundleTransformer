@@ -37,6 +37,13 @@
 				RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
 		/// <summary>
+		/// Regular expression for working with CSS <code>@charset</code> rules
+		/// </summary>
+		private static readonly Regex _cssCharsetRuleRegex = 
+			new Regex(@"@charset\s*(?<quote>'|"")(?<charset>[a-zA-Z0-9\-]+)(\k<quote>)\s*;", 
+				RegexOptions.Compiled);
+
+		/// <summary>
 		/// Constructs instance of CSS-transformer
 		/// </summary>
 		public CssTransformer()
@@ -268,41 +275,59 @@
 		protected override string Combine(IList<IAsset> assets, bool enableTracing)
 		{
 			var content = new StringBuilder();
+			string topCharset = string.Empty;
 			var imports = new List<string>();
 
-			foreach (var asset in assets)
+			int assetCount = assets.Count;
+			int lastAssetIndex = assetCount - 1;
+
+			for (int assetIndex = 0; assetIndex < assetCount; assetIndex++)
 			{
+				IAsset asset = assets[assetIndex];
+
 				if (enableTracing)
 				{
 					content.AppendFormatLine("/*#region URL: {0} */", asset.Url);
 				}
-				content.AppendLine(EjectCssImports(asset.Content, imports));
+				content.Append(EjectCssCharsetAndImports(asset.Content, ref topCharset, imports));
 				if (enableTracing)
 				{
+					content.AppendLine();
 					content.AppendLine("/*#endregion*/");
 				}
-				content.AppendLine();
+
+				if (assetIndex != lastAssetIndex)
+				{
+					content.AppendLine();
+				}
 			}
 
 			if (imports.Count > 0)
 			{
-				string pattern = enableTracing ? "/*#region CSS Imports */{0}{1}{0}/*#endregion*/{0}{0}" : "{1}{0}";
+				string importsTemplate = enableTracing ? 
+					"/*#region CSS Imports */{0}{1}{0}/*#endregion*/{0}{0}" : "{1}{0}";
 
-				content.Insert(0, 
-					string.Format(pattern, Environment.NewLine, string.Join(Environment.NewLine, imports))
-				);
+				content.Insert(0, string.Format(importsTemplate, Environment.NewLine, 
+					string.Join(Environment.NewLine, imports)));
+			}
+
+			if (!string.IsNullOrWhiteSpace(topCharset))
+			{
+				content.Insert(0, topCharset + Environment.NewLine);
 			}
 
 			return content.ToString();
 		}
 
 		/// <summary>
-		/// Eject a CSS imports
+		/// Eject a <code>@charset</code> and <code>@import</code> rules
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>
-		/// <param name="imports">List of CSS imports</param>
-		/// <returns>Text content of CSS-asset without <code>@import</code> rules</returns>
-		private static string EjectCssImports(string content, IList<string> imports)
+		/// <param name="topCharset">Processed top <code>@charset</code> rule</param>
+		/// <param name="imports">List of processed <code>@import</code> rules</param>
+		/// <returns>Text content of CSS-asset without <code>@charset</code> and <code>@import</code> rules</returns>
+		private static string EjectCssCharsetAndImports(string content, ref string topCharset, 
+			IList<string> imports)
 		{
 			int contentLength = content.Length;
 			if (contentLength == 0)
@@ -310,13 +335,23 @@
 				return content;
 			}
 
+			MatchCollection charsetRuleMatches = _cssCharsetRuleRegex.Matches(content);
 			MatchCollection importRuleMatches = _cssImportRuleRegex.Matches(content);
-			if (importRuleMatches.Count == 0)
+
+			if (charsetRuleMatches.Count == 0 && importRuleMatches.Count == 0)
 			{
 				return content;
 			}
 
 			var nodeMatches = new List<CssNodeMatch>();
+
+			foreach (Match charsetRuleMatch in charsetRuleMatches)
+			{
+				var nodeMatch = new CssNodeMatch(charsetRuleMatch.Index,
+					CssNodeType.CharsetRule,
+					charsetRuleMatch);
+				nodeMatches.Add(nodeMatch);
+			}
 
 			foreach (Match importRuleMatch in importRuleMatches)
 			{
@@ -363,22 +398,37 @@
 					ProcessOtherContent(contentBuilder, content,
 						ref currentPosition, nextPosition);
 				}
-				else if (nodeType == CssNodeType.ImportRule)
+				else if (nodeType == CssNodeType.CharsetRule || nodeType == CssNodeType.ImportRule)
 				{
 					ProcessOtherContent(contentBuilder, content,
 						ref currentPosition, nodePosition);
 
-					GroupCollection importRuleGroups = match.Groups;
+					if (nodeType == CssNodeType.CharsetRule)
+					{
+						string charset = match.Groups["charset"].Value;
 
-					string url = importRuleGroups["url"].Value;
-					string media = importRuleGroups["media"].Success ? 
-						(" " + importRuleGroups["media"].Value) : string.Empty;
-					
-					string importRule = match.Value;
-					string processedImportRule = string.Format(@"@import ""{0}""{1};", url, media);
-					imports.Add(processedImportRule);
+						string charsetRule = match.Value;
+						if (string.IsNullOrWhiteSpace(topCharset))
+						{
+							topCharset = string.Format(@"@charset ""{0}"";", charset);
+						}
 
-					currentPosition += importRule.Length;	
+						currentPosition += charsetRule.Length;
+					}
+					else if (nodeType == CssNodeType.ImportRule)
+					{
+						GroupCollection importRuleGroups = match.Groups;
+
+						string url = importRuleGroups["url"].Value;
+						string media = importRuleGroups["media"].Success ?
+							(" " + importRuleGroups["media"].Value) : string.Empty;
+
+						string importRule = match.Value;
+						string processedImportRule = string.Format(@"@import ""{0}""{1};", url, media);
+						imports.Add(processedImportRule);
+
+						currentPosition += importRule.Length;	
+					}
 				}
 			}
 
