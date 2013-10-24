@@ -13,13 +13,6 @@
 			</js>
 		</core>
 	</bundleTransformer>
-	<system.web>
-		<httpHandlers>
-			<add path="*.coffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
-			<add path="*.litcoffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
-			<add path="*.coffee.md" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
-		</httpHandlers>
-	</system.web>
 	<system.webServer>
 		<handlers>
 			<add name="CoffeeScriptAssetHandler" path="*.coffee" verb="GET" type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" resourceType="File" preCondition="" />

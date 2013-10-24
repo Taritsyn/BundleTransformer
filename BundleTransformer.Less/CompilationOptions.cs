@@ -50,6 +50,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to enable JavaScript in less files
+		/// </summary>
+		public bool JavascriptEnabled
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the LESS compilation options
@@ -61,6 +70,7 @@
 			StrictMath = false;
 			StrictUnits = false;
 			DumpLineNumbers = LineNumbersMode.None;
+			JavascriptEnabled = true;
 		}
 	}
 }

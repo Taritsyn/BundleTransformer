@@ -61,11 +61,11 @@
 		/// Regular expression for working with paths of imported LESS-files
 		/// </summary>
 		private static readonly Regex _lessImportRuleRegex =
-			new Regex(@"@import\s*(?:\((?<type>(less|css|multiple|once))\)\s*)?" +
+			new Regex(@"@import\s*(?:\((?<typeList>[a-z]+(?:\s*,\s*[a-z]+\s*)*)\)\s*)?" +
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
 				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with the <code>data-uri</code> functions of LESS
@@ -73,7 +73,7 @@
 		private static readonly Regex _dataUriFunctionRegex =
 			new Regex(@"data-uri\(\s*(?:(?<quote1>'|"")(?<mimeType>[\w\-+.;\/]+)(\k<quote1>)\s*,\s*)?" +
 				@"(?<quote2>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote2>)\s*\)",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with the base64 option of data-uri
@@ -141,6 +141,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to enable JavaScript in less files
+		/// </summary>
+		public bool JavascriptEnabled
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of LESS-translator
@@ -173,6 +182,7 @@
 			StrictMath = lessConfig.StrictMath;
 			StrictUnits = lessConfig.StrictUnits;
 			DumpLineNumbers = lessConfig.DumpLineNumbers;
+			JavascriptEnabled = lessConfig.JavascriptEnabled;
 
 			if (createJsEngineInstance == null)
 			{
@@ -332,7 +342,8 @@
 				IeCompat = IeCompat,
 				StrictMath = StrictMath,
 				StrictUnits = StrictUnits,
-				DumpLineNumbers = DumpLineNumbers
+				DumpLineNumbers = DumpLineNumbers,
+				JavascriptEnabled = JavascriptEnabled
 			};
 
 			return options;
@@ -343,8 +354,10 @@
 		/// </summary>
 		/// <param name="assetContent">Text content of LESS-asset</param>
 		/// <param name="assetUrl">URL of LESS-asset file</param>
+		/// <param name="assetImportOptions">Import options</param>
 		/// <returns>Preprocessed text content of LESS-asset</returns>
-		public LessStylesheet PreprocessStylesheet(string assetContent, string assetUrl)
+		public LessStylesheet PreprocessStylesheet(string assetContent, string assetUrl, 
+			LessImportOptions assetImportOptions)
 		{
 			var stylesheet = new LessStylesheet(assetUrl, assetContent);
 
@@ -356,8 +369,14 @@
 
 			MatchCollection importRuleMatches = _lessImportRuleRegex.Matches(assetContent);
 			MatchCollection dataUriFunctionMatches = _dataUriFunctionRegex.Matches(assetContent);
+			MatchCollection urlRuleMatches = null;
+			if (assetImportOptions.Inline)
+			{
+				urlRuleMatches = CommonRegExps.CssUrlRuleRegex.Matches(assetContent);
+			}
 
-			if (importRuleMatches.Count == 0 && dataUriFunctionMatches.Count == 0)
+			if (importRuleMatches.Count == 0 && dataUriFunctionMatches.Count == 0
+				&& (urlRuleMatches == null || urlRuleMatches.Count == 0))
 			{
 				return stylesheet;
 			}
@@ -378,6 +397,17 @@
 					LessNodeType.DataUriFunction,
 					dataUriFunctionMatch);
 				nodeMatches.Add(nodeMatch);
+			}
+
+			if (urlRuleMatches != null)
+			{
+				foreach (Match urlRuleMatch in urlRuleMatches)
+				{
+					var nodeMatch = new LessNodeMatch(urlRuleMatch.Index,
+						LessNodeType.UrlRule,
+						urlRuleMatch);
+					nodeMatches.Add(nodeMatch);
+				}
 			}
 
 			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(assetContent);
@@ -410,7 +440,8 @@
 					continue;
 				}
 
-				if (nodeType == LessNodeType.ImportRule || nodeType == LessNodeType.DataUriFunction)
+				if (nodeType == LessNodeType.ImportRule || nodeType == LessNodeType.DataUriFunction
+					|| nodeType == LessNodeType.UrlRule)
 				{
 					ProcessOtherContent(contentBuilder, assetContent,
 						ref currentPosition, nodePosition);
@@ -434,24 +465,26 @@
 					{
 						GroupCollection importRuleGroups = match.Groups;
 
-						string type = importRuleGroups["type"].Value;
 						string url = importRuleGroups["url"].Value.Trim();
 						string quote = importRuleGroups["quote"].Success ?
 							importRuleGroups["quote"].Value : @"""";
+						string typeList = importRuleGroups["typeList"].Value;
+						IList<string> types = Utils.ConvertToStringCollection(typeList, ',', 
+							trimItemValues: true, removeEmptyItems: true);
 						LessImport processedImport;
 
 						string importRule = match.Value;
-						string processedImportRule = ProcessImportRule(assetUrl, url, type, quote,
+						string processedImportRule = ProcessImportRule(assetUrl, url, types, quote,
 							out processedImport);
 
 						if (processedImport != null)
 						{
 							var imports = stylesheet.Imports;
-							string importType = processedImport.ImportType;
+							LessImportOptions importOptions = processedImport.ImportOptions;
 							string urlInUpperCase = processedImport.Url.ToUpperInvariant();
 
 							if (imports.Count(i => i.Url.ToUpperInvariant() == urlInUpperCase
-								&& i.ImportType == importType) == 0)
+								&& i.ImportOptions == importOptions) == 0)
 							{
 								imports.Add(processedImport);
 							}
@@ -486,6 +519,20 @@
 						contentBuilder.Append(processedDataUriFunction);
 						currentPosition += dataUriFunction.Length;
 					}
+					else if (nodeType == LessNodeType.UrlRule)
+					{
+						GroupCollection urlRuleGroups = match.Groups;
+
+						string url = urlRuleGroups["url"].Value.Trim();
+						string quote = urlRuleGroups["quote"].Success ?
+							urlRuleGroups["quote"].Value : string.Empty;
+
+						string urlRule = match.Value;
+						string processedUrlRule = ProcessUrlRule(assetUrl, url, quote);
+
+						contentBuilder.Append(processedUrlRule);
+						currentPosition += urlRule.Length;
+					}
 				}
 				else if (nodeType == LessNodeType.MultilineComment)
 				{
@@ -512,15 +559,16 @@
 		/// </summary>
 		/// <param name="parentAssetUrl">URL of parent LESS-asset file</param>
 		/// <param name="assetUrl">URL of LESS-asset file</param>
-		/// <param name="type">Stylesheet type</param>
+		/// <param name="assetImportTypes">List of import types</param>
 		/// <param name="quote">Quote</param>
 		/// <param name="processedImport">Processed LESS-import</param>
 		/// <returns>Processed LESS <code>@import</code> rule</returns>
-		private string ProcessImportRule(string parentAssetUrl, string assetUrl, string type, string quote,
-			out LessImport processedImport)
+		private string ProcessImportRule(string parentAssetUrl, string assetUrl, 
+			IEnumerable<string> assetImportTypes, string quote, out LessImport processedImport)
 		{
 			string result;
 			processedImport = null;
+			string extension = Path.GetExtension(assetUrl);
 
 			if (UrlHelpers.StartsWithDataUriScheme(assetUrl))
 			{
@@ -532,24 +580,64 @@
 			if (UrlHelpers.StartsWithProtocol(assetUrl))
 			{
 				result = string.Format(IMPORT_RULE_FORMAT, string.Empty, quote, assetUrl);
-				processedImport = new LessImport(assetUrl);
+				processedImport = new LessImport(assetUrl, new LessImportOptions(extension));
 
 				return result;
 			}
 
-			string typeOption = (!string.IsNullOrWhiteSpace(type) && type != "css") ? 
-				string.Format("({0}) ", type) : string.Empty;
-			string absoluteUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
-			string extension = Path.GetExtension(absoluteUrl);
+			var importOptions = new LessImportOptions(extension);
+			var importTypes = new List<string>();
 
+			foreach (string importType in assetImportTypes)
+			{
+				switch (importType)
+				{
+					case ImportType.Less:
+						importOptions.Less = true;
+						break;
+					case ImportType.Css:
+						importOptions.Less = false;
+						break;
+					case ImportType.Multiple:
+						importOptions.Multiple = true;
+						break;
+					case ImportType.Once:
+						importOptions.Multiple = false;
+						break;
+					case ImportType.Inline:
+						importOptions.Inline = true;
+						break;
+					case ImportType.Reference:
+						importOptions.Reference = true;
+						break;
+				}
+
+				importTypes.Add(importType);
+			}
+
+			string absoluteUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
+			
 			if (!FileExtensionHelpers.IsLess(extension) && !FileExtensionHelpers.IsCss(extension))
 			{
-				string newExtension = (type == "css") ? FileExtension.Css : FileExtension.Less;
+				string newExtension;
+				if (importOptions.Less)
+				{
+					newExtension = FileExtension.Less;
+				}
+				else
+				{
+					newExtension = FileExtension.Css;
+					importTypes.Remove(newExtension);
+				}
+
 				absoluteUrl += newExtension;
 			}
 
-			result = string.Format(IMPORT_RULE_FORMAT, typeOption, quote, absoluteUrl);
-			processedImport = new LessImport(absoluteUrl, type);
+			string typeList = (importTypes.Count > 0) ? 
+				string.Format("({0}) ", string.Join(", ", importTypes)) : string.Empty;
+
+			result = string.Format(IMPORT_RULE_FORMAT, typeList, quote, absoluteUrl);
+			processedImport = new LessImport(absoluteUrl, importOptions);
 
 			return result;
 		}
@@ -643,6 +731,26 @@
 		}
 
 		/// <summary>
+		/// Process a CSS <code>url</code> rule
+		/// </summary>
+		/// <param name="parentAssetUrl">URL of parent asset file</param>
+		/// <param name="assetUrl">URL of CSS-asset file</param>
+		/// <param name="quote">Quote</param>
+		/// <returns>Processed CSS <code>url</code> rule</returns>
+		private string ProcessUrlRule(string parentAssetUrl, string assetUrl, string quote)
+		{
+			string processedAssetUrl = assetUrl;
+			if (!UrlHelpers.StartsWithProtocol(assetUrl) && !UrlHelpers.StartsWithDataUriScheme(assetUrl))
+			{
+				processedAssetUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
+			}
+
+			string result = string.Format("url({0}{1}{0})", quote, processedAssetUrl);
+
+			return result;
+		}
+
+		/// <summary>
 		/// Process a other stylesheet content
 		/// </summary>
 		/// <param name="contentBuilder">Content builder</param>
@@ -681,7 +789,7 @@
 			foreach (LessImport import in parentStylesheet.Imports)
 			{
 				string dependencyUrl = import.Url;
-				string dependencyType = import.ImportType;
+				LessImportOptions dependencyOptions = import.ImportOptions;
 
 				if (UrlHelpers.StartsWithProtocol(dependencyUrl))
 				{
@@ -707,13 +815,11 @@
 				{
 					if (LessStylesheetExists(dependencyUrl))
 					{
-						string dependencyExtension = Path.GetExtension(dependencyUrl);
 						var stylesheet = new LessStylesheet(dependencyUrl, string.Empty);
 
-						if (FileExtensionHelpers.IsLess(dependencyExtension)
-							|| (FileExtensionHelpers.IsCss(dependencyExtension) && dependencyType == "less"))
+						if (dependencyOptions.Less || dependencyOptions.Inline)
 						{
-							stylesheet = GetLessStylesheet(dependencyUrl);
+							stylesheet = GetLessStylesheet(dependencyUrl, dependencyOptions);
 
 							if (isEmptyDependency && stylesheet.Content.Length > 0)
 							{
@@ -788,8 +894,10 @@
 		private LessStylesheet GetLessStylesheet(IAsset asset)
 		{
 			string assetUrl = asset.Url;
+			string assetExtension = Path.GetExtension(assetUrl);
 			string assetContent = asset.Content;
-			LessStylesheet stylesheet = PreprocessStylesheet(assetContent, assetUrl);
+			LessStylesheet stylesheet = PreprocessStylesheet(assetContent, assetUrl, 
+				new LessImportOptions(assetExtension));
 
 			string key = GenerateLessStylesheetCacheItemKey(assetUrl);
 			_lessStylesheetCache[key] = stylesheet;
@@ -801,8 +909,10 @@
 		/// Gets a LESS-stylesheet by URL
 		/// </summary>
 		/// <param name="assetUrl">URL to asset file</param>
+		/// <param name="assetImportOptions">Import options</param>
 		/// <returns>LESS-stylesheet</returns>
-		private LessStylesheet GetLessStylesheet(string assetUrl)
+		private LessStylesheet GetLessStylesheet(string assetUrl, 
+			LessImportOptions assetImportOptions)
 		{
 			string key = GenerateLessStylesheetCacheItemKey(assetUrl);
 			LessStylesheet stylesheet;
@@ -814,7 +924,7 @@
 			else
 			{
 				string assetContent = _virtualFileSystemWrapper.GetFileTextContent(assetUrl);
-				stylesheet = PreprocessStylesheet(assetContent, assetUrl);
+				stylesheet = PreprocessStylesheet(assetContent, assetUrl, assetImportOptions);
 
 				_lessStylesheetCache.Add(key, stylesheet);
 			}

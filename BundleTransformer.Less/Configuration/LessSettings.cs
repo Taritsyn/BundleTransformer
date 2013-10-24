@@ -60,6 +60,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable JavaScript in less files
+		/// </summary>
+		[ConfigurationProperty("javascriptEnabled", DefaultValue = true)]
+		public bool JavascriptEnabled
+		{
+			get { return (bool)this["javascriptEnabled"]; }
+			set { this["javascriptEnabled"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

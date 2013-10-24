@@ -13,12 +13,6 @@
 			</css>
 		</core>
 	</bundleTransformer>
-	<system.web>
-		<httpHandlers>
-			<add path="*.sass" verb="GET" type="BundleTransformer.SassAndScss.HttpHandlers.SassAndScssAssetHandler, BundleTransformer.SassAndScss" />
-			<add path="*.scss" verb="GET" type="BundleTransformer.SassAndScss.HttpHandlers.SassAndScssAssetHandler, BundleTransformer.SassAndScss" />
-		</httpHandlers>
-	</system.web>
 	<system.webServer>
 		<handlers>
 			<add name="SassAssetHandler" path="*.sass" verb="GET" type="BundleTransformer.SassAndScss.HttpHandlers.SassAndScssAssetHandler, BundleTransformer.SassAndScss" resourceType="File" preCondition="" />

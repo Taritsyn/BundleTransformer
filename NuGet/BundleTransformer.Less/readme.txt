@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.7
+              README file for Bundle Transformer: LESS 1.8.8
 
    ----------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.Less contains translator-adapter `LessTranslator` 
-   (supports LESS (http://lesscss.org) version 1.4.2). This adapter makes
+   (supports LESS (http://lesscss.org) version 1.5.0). This adapter makes
    translation of LESS-code to CSS-code. Also contains debugging 
    HTTP-handler `LessAssetHandler`, which is responsible for text output 
    of translated LESS-asset.
@@ -23,6 +23,16 @@
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
    
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of LESS version 1.5.0;
+   2. In configuration settings of LESS-translator added new property -
+      `JavascriptEnabled`;
+   3. From `/configuration/system.web/httpHandlers` element of the Web.config
+      file was removed a debugging HTTP-handler, that used for working in
+      the IIS Classic mode.
+   
    ====================
    POST-INSTALL ACTIONS
    ====================
@@ -31,7 +41,15 @@
    JavaScriptEngineSwitcher.V8. After package is installed, need set a 
    name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
    attribute of `/configuration/bundleTransformer/less/jsEngine` 
-   configuration element.  
+   configuration element.
+
+   To use a debugging HTTP-handler in the IIS Classic mode, you need add
+   to the `/configuration/system.web/httpHandlers` element of the 
+   Web.config file a following code:
+
+   <add
+	path="*.less" verb="GET"
+	type="BundleTransformer.Less.HttpHandlers.LessAssetHandler, BundleTransformer.Less" />
    
    =============
    DOCUMENTATION

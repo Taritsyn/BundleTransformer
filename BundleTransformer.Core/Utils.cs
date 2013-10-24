@@ -14,26 +14,43 @@
 		/// Converts string value to string collection
 		/// </summary>
 		/// <param name="value">String value</param>
-		/// <param name="delimiter">Delimiter</param>
-		/// <param name="removeEmptyEntries">Allow removal of empty items from collection</param>
+		/// <param name="separator">Separator</param>
+		/// <param name="trimItemValues">Allow trim of item values</param>
+		/// <param name="removeEmptyItems">Allow removal of empty items from collection</param>
 		/// <returns>String collection</returns>
-		public static string[] ConvertToStringCollection(string value, char delimiter, 
-			bool removeEmptyEntries = false)
+		public static string[] ConvertToStringCollection(string value, char separator,
+			bool trimItemValues = false, bool removeEmptyItems = false)
+		{
+			return ConvertToStringCollection(value, new [] { separator }, trimItemValues, removeEmptyItems);
+		}
+
+		/// <summary>
+		/// Converts string value to string collection
+		/// </summary>
+		/// <param name="value">String value</param>
+		/// <param name="separator">Separator</param>
+		/// <param name="trimItemValues">Allow trim of item values</param>
+		/// <param name="removeEmptyItems">Allow removal of empty items from collection</param>
+		/// <returns>String collection</returns>
+		public static string[] ConvertToStringCollection(string value, char[] separator, 
+			bool trimItemValues = false, bool removeEmptyItems = false)
 		{
 			var result = new List<string>();
 
 			if (!string.IsNullOrWhiteSpace(value))
 			{
-				string[] itemList = value
-					.Trim()
-					.Split(delimiter)
-					;
+				string[] itemList = value.Split(separator);
 				int itemCount = itemList.Length;
 
 				for (int itemIndex = 0; itemIndex < itemCount; itemIndex++)
 				{
-					string item = itemList[itemIndex].Trim();
-					if (item.Length > 0 || !removeEmptyEntries)
+					string item = itemList[itemIndex];
+					if (trimItemValues)
+					{
+						item = item.Trim();
+					}
+
+					if (item.Length > 0 || !removeEmptyItems)
 					{
 						result.Add(item);
 					}

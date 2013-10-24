@@ -13,11 +13,6 @@
 			</js>
 		</core>
 	</bundleTransformer>
-	<system.web>
-		<httpHandlers>
-			<add path="*.ts" verb="GET" type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" />
-		</httpHandlers>
-	</system.web>
 	<system.webServer>
 		<handlers>
 			<add name="TypeScriptAssetHandler" path="*.ts" verb="GET" type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" resourceType="File" preCondition="" />

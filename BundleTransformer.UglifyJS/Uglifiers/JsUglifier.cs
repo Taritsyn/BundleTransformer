@@ -290,7 +290,8 @@
 		private static JObject ParseGlobalDefinitions(string globalDefsString)
 		{
 			var globalDefs = new JObject();
-			var symbolValueList = Utils.ConvertToStringCollection(globalDefsString, ',', true);
+			var symbolValueList = Utils.ConvertToStringCollection(globalDefsString, ',', 
+				trimItemValues: true, removeEmptyItems: true);
 
 			foreach (string symbolValue in symbolValueList)
 			{
@@ -390,7 +391,8 @@
 		/// <returns>"Except" list in JSON format</returns>
 		private static JArray ParseExcept(string exceptString)
 		{
-			var except = Utils.ConvertToStringCollection(exceptString, ',', true);
+			var except = Utils.ConvertToStringCollection(exceptString, ',', 
+				trimItemValues: true, removeEmptyItems: true);
 
 			return new JArray(except.Select(e => new JValue(e)));
 		}

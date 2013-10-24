@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: UglifyJS 1.8.7
+            README file for Bundle Transformer: UglifyJS 1.8.8
  
    ----------------------------------------------------------------------
 
@@ -21,11 +21,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   UglifyJS was updated to commit 3fa9265ce4.
    
    ====================
    POST-INSTALL ACTIONS

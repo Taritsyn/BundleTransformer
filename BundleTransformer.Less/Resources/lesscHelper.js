@@ -1,4 +1,102 @@
-var lessHelper = (function (Less) {
+if (typeof Buffer === 'undefined') {
+	var Buffer = (function () {
+		"use strict";
+
+		var symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+		function Buffer(value) {
+			this._value = value;
+		}
+
+		Buffer.prototype.toString = function (mode) {
+			if (mode === 'base64') {
+				return Buffer._base64Encode(this._value);
+			}
+
+			return this._value.toString();
+		};
+
+		Buffer._base64Encode = function (value) {
+			var result,
+				processedValue,
+				charIndex,
+				charCount,
+				charCode1,
+				charCode2,
+				charCode3,
+				encodedCharCode1,
+				encodedCharCode2,
+				encodedCharCode3,
+				encodedCharCode4
+				;
+
+			result = '';
+			processedValue = Buffer._utf8Encode(value);
+			charCount = processedValue.length;
+
+			for (charIndex = 0; charIndex < charCount; ) {
+				charCode1 = processedValue.charCodeAt(charIndex++);
+				charCode2 = processedValue.charCodeAt(charIndex++);
+				charCode3 = processedValue.charCodeAt(charIndex++);
+
+				encodedCharCode1 = charCode1 >> 2;
+				encodedCharCode2 = ((charCode1 & 3) << 4) | (charCode2 >> 4);
+				encodedCharCode3 = ((charCode2 & 15) << 2) | (charCode3 >> 6);
+				encodedCharCode4 = charCode3 & 63;
+
+				if (isNaN(charCode2)) {
+					encodedCharCode3 = encodedCharCode4 = 64;
+				} else if (isNaN(charCode3)) {
+					encodedCharCode4 = 64;
+				}
+
+				result += symbols.charAt(encodedCharCode1);
+				result += symbols.charAt(encodedCharCode2);
+				result += symbols.charAt(encodedCharCode3);
+				result += symbols.charAt(encodedCharCode4);
+			}
+
+			return result;
+		};
+
+		Buffer._utf8Encode = function (value) {
+			var result,
+				processedValue,
+				charIndex,
+				charCount,
+				charCode,
+				strFromCharCode = String.fromCharCode
+				;
+
+			result = '';
+			processedValue = value.replace(/\r\n/g, '\n');
+			charCount = processedValue.length;
+
+			for (charIndex = 0; charIndex < charCount; charIndex++) {
+				charCode = processedValue.charCodeAt(charIndex);
+
+				if (charCode < 128) {
+					result += strFromCharCode(charCode);
+				}
+				else if ((charCode > 127) && (charCode < 2048)) {
+					result += strFromCharCode((charCode >> 6) | 192);
+					result += strFromCharCode((charCode & 63) | 128);
+				}
+				else {
+					result += strFromCharCode((charCode >> 12) | 224);
+					result += strFromCharCode(((charCode >> 6) & 63) | 128);
+					result += strFromCharCode((charCode & 63) | 128);
+				}
+			}
+
+			return result;
+		};
+
+		return Buffer;
+	})();
+}
+
+var lessHelper = (function (less) {
 	"use strict";
 
 	var exports = {};
@@ -27,7 +125,7 @@ var lessHelper = (function (Less) {
 			;
 
 		for (argumentIndex = 0; argumentIndex < argumentCount - 1; argumentIndex++) {
-			regex = new RegExp("\\{" + argumentIndex + "\\}", "gm");
+			regex = new RegExp('\\{' + argumentIndex + '\\}', 'gm');
 			argument = arguments[argumentIndex + 1];
 
 			result = result.replace(regex, argument);
@@ -48,7 +146,7 @@ var lessHelper = (function (Less) {
 		}
 
 		function removeLastSlash(path) {
-			var newPath = path.replace(/[\/]+$/g, "");
+			var newPath = path.replace(/[\/]+$/g, '');
 
 			return newPath;
 		}
@@ -60,16 +158,16 @@ var lessHelper = (function (Less) {
 				pathPartCount
 				;
 
-			pathParts = path.split("/");
+			pathParts = path.split('/');
 			pathPartCount = pathParts.length;
 
 			for (pathPartIndex = 0; pathPartIndex < pathPartCount; pathPartIndex++) {
 				pathPart = pathParts[pathPartIndex];
 
-				if (pathPart === "..") {
+				if (pathPart === '..') {
 					absolutePathParts.pop();
 				}
-				else if (pathPart === ".") {
+				else if (pathPart === '.') {
 					continue;
 				}
 				else {
@@ -84,7 +182,7 @@ var lessHelper = (function (Less) {
 				;
 
 			key = generateFileCacheItemKey(path);
-			if (typeof this._files[key] === "undefined") {
+			if (typeof this._files[key] === 'undefined') {
 				throw new Error(formatString("File '{0}' does not exist.", path));
 			}
 
@@ -94,8 +192,8 @@ var lessHelper = (function (Less) {
 		};
 
 		IoHost.prototype.dirName = function (path) {
-			var directoryName = "",
-				lastSlashPosition = path.lastIndexOf("/")
+			var directoryName = '',
+				lastSlashPosition = path.lastIndexOf('/')
 				;
 
 			if (lastSlashPosition !== -1) {
@@ -111,7 +209,7 @@ var lessHelper = (function (Less) {
 				baseDirectoryPath
 				;
 
-			if (relativePath.indexOf("/") === 0) {
+			if (relativePath.indexOf('/') === 0) {
 				return relativePath;
 			}
 
@@ -120,7 +218,7 @@ var lessHelper = (function (Less) {
 			buildAbsolutePath(absolutePathParts, removeLastSlash(baseDirectoryPath));
 			buildAbsolutePath(absolutePathParts, relativePath);
 
-			absolutePath = absolutePathParts.join("/");
+			absolutePath = absolutePathParts.join('/');
 
 			return absolutePath;
 		};
@@ -134,7 +232,7 @@ var lessHelper = (function (Less) {
 
 	exports.compile = function (code, path, dependencies, options) {
 		var result = {
-				compiledCode: "",
+				compiledCode: '',
 				errors: []
 			},
 			inputFilePath = path,
@@ -183,12 +281,22 @@ var lessHelper = (function (Less) {
 				currentDirectory: currentDirectoryPath,
 				entryPath: currentDirectoryPath,
 				rootFilename: path
-			}
+			},
+			insecure: false,
+            cleancss: false,
+            sourceMap: false,
+            sourceMapFilename: '',
+            sourceMapOutputFilename: '',
+			sourceMapFullFilename: '',
+            sourceMapBasepath: '',
+            sourceMapRootpath: '',
+            outputSourceFiles: false,
+            writeSourceMap: false
 		};
 		mix(env, options);
 
-		var parser = new Less.Parser(env);
-		Less.ioHost = ioHost;
+		var parser = new less.Parser(env);
+		less.ioHost = ioHost;
 
 		try {
 			parser.parse(code, function (err, tree) {
@@ -208,7 +316,7 @@ var lessHelper = (function (Less) {
 			});
 		}
 		catch (e) {
-			if (typeof e.line !== "undefined") {
+			if (typeof e.line !== 'undefined') {
 				errors.push({
 					type: e.type,
 					message: e.message,
@@ -226,7 +334,7 @@ var lessHelper = (function (Less) {
 			result.errors = errors;
 		}
 
-		Less.ioHost = undefined;
+		less.ioHost = undefined;
 		ioHost.dispose();
 
 		return JSON.stringify(result);

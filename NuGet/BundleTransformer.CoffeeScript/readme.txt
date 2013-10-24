@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.7
+           README file for Bundle Transformer: CoffeeScript 1.8.8
 
    ----------------------------------------------------------------------
 
@@ -27,7 +27,9 @@
    =============
    RELEASE NOTES
    =============
-   CoffeeScript was updated to commit 581af4540a.
+   From `/configuration/system.web/httpHandlers` element of the Web.config
+   file was removed a debugging HTTP-handlers, that used for working in 
+   the IIS Classic mode.
    
    ====================
    POST-INSTALL ACTIONS
@@ -37,7 +39,21 @@
    JavaScriptEngineSwitcher.V8. After package is installed, need set a 
    name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
    attribute of `/configuration/bundleTransformer/coffeeScript/jsEngine` 
-   configuration element.   
+   configuration element.
+   
+   To use a debugging HTTP-handlers in the IIS Classic mode, you need add
+   to the `/configuration/system.web/httpHandlers` element of the 
+   Web.config file a following code:
+   
+   <add
+	path="*.coffee" verb="GET"
+	type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
+   <add
+	path="*.litcoffee" verb="GET"
+	type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
+   <add
+	path="*.coffee.md" verb="GET"
+	type="BundleTransformer.CoffeeScript.HttpHandlers.CoffeeScriptAssetHandler, BundleTransformer.CoffeeScript" />
    
    =============
    DOCUMENTATION

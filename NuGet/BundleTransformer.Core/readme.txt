@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.7
+              README file for Bundle Transformer: Core 1.8.8
 
    ----------------------------------------------------------------------
 
@@ -37,10 +37,8 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the Microsoft ASP.NET Web Optimization Framework
-      version 1.1.1;
-   2. Now during combining of CSS-code a duplicate @charset directives
-      are combined and moved on the top of stylesheet.
+   Fixed an error that occurred during processing of complex CSS 
+   media-queries.
    
    =============
    DOCUMENTATION

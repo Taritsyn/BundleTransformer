@@ -173,7 +173,8 @@
 				new JProperty("ieCompat", options.IeCompat),
 				new JProperty("strictMath", options.StrictMath),
 				new JProperty("strictUnits", options.StrictUnits),
-				new JProperty("dumpLineNumbers", ConvertLineNumbersModeEnumValueToCode(options.DumpLineNumbers))
+				new JProperty("dumpLineNumbers", ConvertLineNumbersModeEnumValueToCode(options.DumpLineNumbers)),
+				new JProperty("javascriptEnabled", options.JavascriptEnabled)
 			);
 
 			return optionsJson;

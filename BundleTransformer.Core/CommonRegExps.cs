@@ -25,6 +25,7 @@
 		/// </summary>
 		public static readonly Regex CssUrlRuleRegex =
 			new Regex(@"url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
-				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)", 
+				RegexOptions.Compiled);
 	}
 }

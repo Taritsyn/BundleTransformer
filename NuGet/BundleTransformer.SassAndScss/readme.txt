@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.7
+          README file for Bundle Transformer: Sass and SCSS 1.8.8
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,23 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Sass version 3.2.12.
+   From `/configuration/system.web/httpHandlers` element of the Web.config
+   file was removed a debugging HTTP-handlers, that used for working in 
+   the IIS Classic mode.
+   
+   ====================
+   POST-INSTALL ACTIONS
+   ====================
+   To use a debugging HTTP-handlers in the IIS Classic mode, you need add
+   to the `/configuration/system.web/httpHandlers` element of the 
+   Web.config file a following code:
+   
+   <add
+	path="*.sass" verb="GET"
+	type="BundleTransformer.SassAndScss.HttpHandlers.SassAndScssAssetHandler, BundleTransformer.SassAndScss" />
+   <add
+	path="*.scss" verb="GET"
+	type="BundleTransformer.SassAndScss.HttpHandlers.SassAndScssAssetHandler, BundleTransformer.SassAndScss" />
    
    =============
    DOCUMENTATION

@@ -1,4 +1,6 @@
-﻿@import (once) "Mixins.less";
+﻿@import (css) "folder/OpenIdIcon.less";
+@import (once) "Mixins.less";
+@import (reference) "Selectors.less";
 
 @bg-color: #7AC0DA;
 @caption-color: #FFFFFF;
@@ -7,7 +9,7 @@
 .translators #less
 {
 	float: left;
-	.visible();
+	.visible;
 	padding: 0.2em 0.5em 0.2em 0.5em;
 	background-color: @bg-color;
 	color: @caption-color;

@@ -21,6 +21,11 @@
 		DataUriFunction,
 
 		/// <summary>
+		/// <code>url</code> rule
+		/// </summary>
+		UrlRule,
+
+		/// <summary>
 		/// Multiline comment
 		/// </summary>
 		MultilineComment

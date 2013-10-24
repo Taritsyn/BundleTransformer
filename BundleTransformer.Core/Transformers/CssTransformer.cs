@@ -32,9 +32,10 @@
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
 				@"|(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))" +
-				@"(?:\s*(?<media>all|braille|embossed|handheld|print|projection|screen|speech|aural|tty|tv))?" +
+				@"(?:\s*(?<media>([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))" + 
+				@"(?:\s*,\s*([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))\s*)*))?" +
 				@"\s*;",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.Compiled);
 
 		/// <summary>
 		/// Regular expression for working with CSS <code>@charset</code> rules

@@ -31,33 +31,46 @@
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Regular expression for working with Sass <code>@import</code> rules
+		/// Regular expression for working with Sass server <code>@import</code> rules
 		/// </summary>
-		private static readonly Regex _sassImportRuleRegex =
+		private static readonly Regex _sassServerImportRuleRegex =
 			new Regex(@"@import\s*" +
 				@"(?<urlList>(?<quote>'|"")(?:[\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" +
 				@"(?:,\s*(?<quote>'|"")(?:[\w \-+.:,;/?&=%~#$@()]+)(\k<quote>))*)",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.Compiled);
 
 		/// <summary>
-		/// Regular expression for working with SCSS <code>@import</code> rules
+		/// Regular expression for working with SCSS server <code>@import</code> rules
 		/// </summary>
-		private static readonly Regex _scssImportRuleRegex =
+		private static readonly Regex _scssServerImportRuleRegex =
 			new Regex(@"@import\s*" +
 				@"(?<urlList>(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" + 
 				@"(?:,\s*(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>))*)",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.Compiled);
 
 		/// <summary>
-		/// Regular expression for working with CSS <code>@import</code> rules
+		/// Regular expression for working with Sass client <code>@import</code> rules
 		/// </summary>
-		private static readonly Regex _cssImportRuleRegex =
+		private static readonly Regex _sassClientImportRuleRegex =
 			new Regex(@"@import\s*" +
 				@"(?:(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\))" +
 				@"|(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
-				@"\s*(?<media>all|braille|embossed|handheld|print|projection|screen|speech|aural|tty|tv)))",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				@"[ \t\v]*(?<media>([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+[ \t\v]+and[ \t\v]+\([a-z][^,;()""']+?\))" +
+				@"(?:[ \t\v]*,[ \t\v]*([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+[ \t\v]+and[ \t\v]+\([a-z][^,;()""']+?\))[ \t\v]*)*)))",
+				RegexOptions.Compiled);
+
+		/// <summary>
+		/// Regular expression for working with SCSS client <code>@import</code> rules
+		/// </summary>
+		private static readonly Regex _scssClientImportRuleRegex =
+			new Regex(@"@import\s*" +
+				@"(?:(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\))" +
+				@"|(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+				@"\s*(?<media>([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))" +
+				@"(?:\s*,\s*([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))\s*)*)\s*;))",
+				RegexOptions.Compiled);
 
 		/// <summary>
 		/// Virtual file system wrapper
@@ -304,22 +317,24 @@
 			}
 
 			MatchCollection serverImportRuleMatches;
+			MatchCollection clientImportRuleMatches;
 			string assetFileExtension = Path.GetExtension(assetUrl);
 
 			if (FileExtensionHelpers.IsSass(assetFileExtension))
 			{
-				serverImportRuleMatches = _sassImportRuleRegex.Matches(assetContent);
+				serverImportRuleMatches = _sassServerImportRuleRegex.Matches(assetContent);
+				clientImportRuleMatches = _sassClientImportRuleRegex.Matches(assetContent);
 			}
 			else if (FileExtensionHelpers.IsScss(assetFileExtension))
 			{
-				serverImportRuleMatches = _scssImportRuleRegex.Matches(assetContent);
+				serverImportRuleMatches = _scssServerImportRuleRegex.Matches(assetContent);
+				clientImportRuleMatches = _scssClientImportRuleRegex.Matches(assetContent);
 			}
 			else
 			{
 				throw new FormatException();
 			}
 
-			MatchCollection clientImportRuleMatches = _cssImportRuleRegex.Matches(assetContent); 
 			MatchCollection urlRuleMatches = CommonRegExps.CssUrlRuleRegex.Matches(assetContent);
 
 			if (serverImportRuleMatches.Count == 0 && clientImportRuleMatches.Count == 0 

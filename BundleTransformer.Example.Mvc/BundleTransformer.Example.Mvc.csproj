@@ -169,6 +169,9 @@
     <None Include="BundleTransformer.Configuration.xss">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
+    <Content Include="Content\less\folder\MicroformatsIcon.css" />
+    <None Include="Content\less\folder\OpenIdIcon.less" />
+    <None Include="Content\less\Selectors.less" />
     <None Include="Content\sass\_Colors.sass" />
     <None Include="Content\sass\_Mixins.sass" />
     <None Include="Content\scss\_Colors.scss" />
@@ -189,6 +192,10 @@
     <Content Include="Content\less\folder\ValidationIcon.css" />
     <Content Include="Content\less\folder\webcam.jpg" />
     <None Include="Content\less\folder\YahooIcon.less" />
+    <Content Include="Content\less\microformats.png" />
+    <Content Include="Content\less\node.png" />
+    <None Include="Content\less\folder\NodeIcon.less" />
+    <Content Include="Content\less\openid.png" />
     <Content Include="Content\less\tag.png" />
     <Content Include="Content\less\folder\TagIcon.css" />
     <Content Include="Content\less\usb-flash-drive.png" />

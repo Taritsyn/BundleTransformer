@@ -40,15 +40,22 @@
   -webkit-border-radius: @radius;
      -moz-border-radius: @radius;
           border-radius: @radius;
-}
+}")
+				;
 
-// Visible
-.visible()
+			string selectorsLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Selectors.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(selectorsLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(selectorsLessAssetVirtualPath))
+				.Returns(@"// Visible
+.visible
 {
 	display: block;
 }")
 				;
-
 
 			string testLessImportLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestLessImport.less");
@@ -165,7 +172,10 @@
 				.Setup(fs => fs.GetFileTextContent(testLessImportSub2LessAssetVirtualPath))
 				.Returns(@"@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext';
 @import (css) ""UsbFlashDriveIcon"";
-@import (less) ""ValidationIcon.css"";")
+@import (less) ""ValidationIcon.css"";
+@import (inline) ""MicroformatsIcon.css"";
+@import (inline, css) 'NodeIcon.less';
+@import (css) ""OpenIdIcon.less"";")
 				;
 
 
@@ -184,7 +194,6 @@
 }")
 				;
 
-
 			string validationIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
 				"ValidationIcon.css");
 			virtualFileSystemMock
@@ -200,6 +209,51 @@
 }")
 				;
 
+			string microformatsIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"MicroformatsIcon.css");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(microformatsIconCssAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(microformatsIconCssAssetVirtualPath))
+				.Returns(@".icon-microformats
+{
+	display: inline;
+	background-image: url(microformats.png) !important;
+}")
+				;
+
+			string nodeIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"NodeIcon.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(nodeIconLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(nodeIconLessAssetVirtualPath))
+				.Returns(@".icon-node
+{
+	display: inline;
+	background-image: url(node.png) !important;
+}")
+				;
+
+			string openIdIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"OpenIdIcon.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(openIdIconLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(openIdIconLessAssetVirtualPath))
+				.Returns(@".icon-openid
+{
+	display: inline;
+	background-image: url(openid.png) !important;
+}")
+				;
+
 			Func<IJsEngine> createJsEngineInstance = () => (new Mock<IJsEngine>()).Object;
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			IRelativePathResolver relativePathResolver = new MockRelativePathResolver();
@@ -208,6 +262,7 @@
 			var lessTranslator = new LessTranslator(createJsEngineInstance, 
 				virtualFileSystemWrapper, relativePathResolver, lessConfig);
 			const string assetContent = @"@import (once) ""Mixins.less"";
+@import (reference) ""Selectors.less"";
 @import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
 
 @bg-color: #7AC0DA;
@@ -234,28 +289,36 @@
 
 @import (once) ""TestLessImport.less"";";
 			string assetUrl = UrlHelpers.Combine(STYLES_DIRECTORY_URL, "TestLess.less");
-			LessStylesheet stylesheet = lessTranslator.PreprocessStylesheet(assetContent, assetUrl);
+			LessStylesheet stylesheet = lessTranslator.PreprocessStylesheet(assetContent, assetUrl,
+				new LessImportOptions(".less"));
 			var dependencies = new DependencyCollection();
 
 			// Act
 			lessTranslator.FillDependencies(assetUrl, stylesheet, dependencies);
 
 			// Assert
-			Assert.AreEqual(10, dependencies.Count);
+			Assert.AreEqual(14, dependencies.Count);
 
 			Dependency mixinsLessAsset = dependencies[0];
-			Dependency testLessImportLessAsset = dependencies[1];
-			Dependency headphoneGifAsset = dependencies[2];
-			Dependency testLessImportSub1LessAsset = dependencies[3];
-			Dependency networkPngAsset = dependencies[4];
-			Dependency googleFontAsset = dependencies[5];
-			Dependency tagIconCssAsset = dependencies[6];
-			Dependency testLessImportSub2LessAsset = dependencies[7];
-			Dependency usbFlashDriveIconCssAsset = dependencies[8];
-			Dependency validationIconCssAsset = dependencies[9];
+			Dependency selectorsLessAsset = dependencies[1];
+			Dependency testLessImportLessAsset = dependencies[2];
+			Dependency headphoneGifAsset = dependencies[3];
+			Dependency testLessImportSub1LessAsset = dependencies[4];
+			Dependency networkPngAsset = dependencies[5];
+			Dependency googleFontAsset = dependencies[6];
+			Dependency tagIconCssAsset = dependencies[7];
+			Dependency testLessImportSub2LessAsset = dependencies[8];
+			Dependency usbFlashDriveIconCssAsset = dependencies[9];
+			Dependency validationIconCssAsset = dependencies[10];
+			Dependency microformatsIconCssAsset = dependencies[11];
+			Dependency nodeIconLessAsset = dependencies[12];
+			Dependency openIdIconLessAsset = dependencies[13];
 
 			Assert.AreEqual(mixinsLessAssetVirtualPath, mixinsLessAsset.Url);
 			Assert.AreEqual(true, mixinsLessAsset.IsObservable);
+
+			Assert.AreEqual(selectorsLessAssetVirtualPath, selectorsLessAsset.Url);
+			Assert.AreEqual(true, selectorsLessAsset.IsObservable);
 
 			Assert.AreEqual(testLessImportLessAssetVirtualPath, testLessImportLessAsset.Url);
 			Assert.AreEqual(true, testLessImportLessAsset.IsObservable);
@@ -284,6 +347,15 @@
 
 			Assert.AreEqual(validationIconCssAssetVirtualPath, validationIconCssAsset.Url);
 			Assert.AreEqual(true, validationIconCssAsset.IsObservable);
+
+			Assert.AreEqual(microformatsIconCssAssetVirtualPath, microformatsIconCssAsset.Url);
+			Assert.AreEqual(true, microformatsIconCssAsset.IsObservable);
+
+			Assert.AreEqual(nodeIconLessAssetVirtualPath, nodeIconLessAsset.Url);
+			Assert.AreEqual(true, nodeIconLessAsset.IsObservable);
+
+			Assert.AreEqual(openIdIconLessAssetVirtualPath, openIdIconLessAsset.Url);
+			Assert.AreEqual(false, openIdIconLessAsset.IsObservable);
 		}
 
 		private class MockRelativePathResolver : IRelativePathResolver

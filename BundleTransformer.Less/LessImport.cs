@@ -15,9 +15,9 @@
 		}
 
 		/// <summary>
-		/// Gets a type of import
+		/// Gets a import options
 		/// </summary>
-		public string ImportType
+		public LessImportOptions ImportOptions
 		{
 			get;
 			private set;
@@ -27,25 +27,12 @@
 		/// <summary>
 		/// Constructs instance of LESS-import
 		/// </summary>
-		public LessImport() : this(string.Empty)
-		{ }
-
-		/// <summary>
-		/// Constructs instance of LESS-import
-		/// </summary>
 		/// <param name="url">URL of imported stylesheet file</param>
-		public LessImport(string url) : this(url, string.Empty)
-		{ }
-
-		/// <summary>
-		/// Constructs instance of LESS-import
-		/// </summary>
-		/// <param name="url">URL of imported stylesheet file</param>
-		/// <param name="importType">Type of import</param>
-		public LessImport(string url, string importType)
+		/// <param name="importOptions">Import options</param>
+		public LessImport(string url, LessImportOptions importOptions)
 		{
 			Url = url;
-			ImportType = importType;
+			ImportOptions = importOptions;
 		}
 	}
 }

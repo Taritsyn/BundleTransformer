@@ -62,9 +62,11 @@
     <Compile Include="Compilers\LessCompilingException.cs" />
     <Compile Include="Configuration\LessSettings.cs" />
     <Compile Include="Constants\FileExtension.cs" />
+    <Compile Include="Constants\ImportType.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\LessAssetHandler.cs" />
     <Compile Include="LessImport.cs" />
+    <Compile Include="LessImportOptions.cs" />
     <Compile Include="LessNodeMatch.cs" />
     <Compile Include="LessNodeType.cs" />
     <Compile Include="LessStylesheet.cs" />
