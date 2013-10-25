@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.8.7 Beta 1 
+         README file for Bundle Transformer: WebGrease 1.8.9 Beta 1 
  
    ----------------------------------------------------------------------
 
@@ -15,6 +15,11 @@
    of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the 
    WebGrease Semantic CSS-minifier (http://webgrease.codeplex.com) 
    version 1.5.2.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed minor bugs.
 
    ====================
    POST-INSTALL ACTIONS

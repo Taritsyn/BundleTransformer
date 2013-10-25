@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.8
+              README file for Bundle Transformer: Core 1.8.9
 
    ----------------------------------------------------------------------
 
@@ -37,8 +37,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed an error that occurred during processing of complex CSS 
-   media-queries.
+   Fixed minor bugs.
    
    =============
    DOCUMENTATION

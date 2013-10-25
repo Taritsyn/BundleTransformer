@@ -24,10 +24,11 @@
 		/// </summary>
 		/// <param name="position">Position in the original string where 
 		/// the first character of the captured substring was found</param>
+		/// <param name="length">Length of the captured substring</param>
 		/// <param name="nodeType">Type of LESS-node</param>
 		/// <param name="match">Single regular expression match</param>
-		public LessNodeMatch(int position, LessNodeType nodeType, Match match)
-			: base(position, match)
+		public LessNodeMatch(int position, int length, LessNodeType nodeType, Match match)
+			: base(position, length, match)
 		{
 			NodeType = nodeType;
 		}

@@ -50,7 +50,7 @@
 		/// </summary>
 		private static readonly Regex _errorStringRegex =
 			new Regex(@"^\((?<lineNumber>\d+),\s*(?<columnNumber>\d+)\):\s*" +
-				@"(?<subcategory>.*?)\s*(?<errorCode>[A-Za-z]+\d+):\s*(?<message>.*?)$", RegexOptions.Compiled);
+				@"(?<subcategory>.*?)\s*(?<errorCode>[A-Za-z]+\d+):\s*(?<message>.*?)$");
 
 		/// <summary>
 		/// Gets or sets a flag for whether to enable usual minification

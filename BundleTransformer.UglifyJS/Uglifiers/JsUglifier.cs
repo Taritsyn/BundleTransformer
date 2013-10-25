@@ -69,32 +69,28 @@
 		/// <summary>
 		/// Regular expression for working with strings of the form SYMBOL[=value]
 		/// </summary>
-		private static readonly Regex _symbolValueRegex =
-			new Regex(@"^(?<symbol>[a-zA-Z_\$][a-zA-Z_\$0-9]*)(=(?<value>.*))?$", RegexOptions.Compiled);
+		private static readonly Regex _symbolValueRegex = 
+			new Regex(@"^(?<symbol>[a-zA-Z_\$][a-zA-Z_\$0-9]*)(=(?<value>.*))?$");
 
 		/// <summary>
 		/// Regular expression for working with names
 		/// </summary>
-		private static readonly Regex _nameRegex =
-			new Regex(@"^[a-zA-Z\$_][a-zA-Z\$_0-9]*$", RegexOptions.Compiled);
+		private static readonly Regex _nameRegex = new Regex(@"^[a-zA-Z\$_][a-zA-Z\$_0-9]*$");
 
 		/// <summary>
 		/// Regular expression for working with string values
 		/// </summary>
-		private static readonly Regex _stringValueRegex =
-			new Regex(@"^(?<quote>'|"")(?<value>.*)(\k<quote>)$", RegexOptions.Compiled);
+		private static readonly Regex _stringValueRegex = new Regex(@"^(?<quote>'|"")(?<value>.*)(\k<quote>)$");
 
 		/// <summary>
 		/// Regular expression for working with integer values
 		/// </summary>
-		private static readonly Regex _integerValueRegex =
-			new Regex(@"^(\+|\-)?[0-9]+$", RegexOptions.Compiled);
+		private static readonly Regex _integerValueRegex = new Regex(@"^(\+|\-)?[0-9]+$");
 
 		/// <summary>
 		/// Regular expression for working with float values
 		/// </summary>
-		private static readonly Regex _floatValueRegex =
-			new Regex(@"^(\+|\-)?[0-9]*\.[0-9]+(e(\+|\-)?[0-9]+)?$", RegexOptions.Compiled);
+		private static readonly Regex _floatValueRegex = new Regex(@"^(\+|\-)?[0-9]*\.[0-9]+(e(\+|\-)?[0-9]+)?$");
 
 		/// <summary>
 		/// List of inbuilt constants of JavaScript language

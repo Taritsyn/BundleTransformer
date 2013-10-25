@@ -37,7 +37,7 @@
 			new Regex(@"@import\s*" +
 				@"(?<urlList>(?<quote>'|"")(?:[\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" +
 				@"(?:,\s*(?<quote>'|"")(?:[\w \-+.:,;/?&=%~#$@()]+)(\k<quote>))*)",
-				RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for working with SCSS server <code>@import</code> rules
@@ -46,7 +46,7 @@
 			new Regex(@"@import\s*" +
 				@"(?<urlList>(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" + 
 				@"(?:,\s*(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>))*)",
-				RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for working with Sass client <code>@import</code> rules
@@ -56,9 +56,9 @@
 				@"(?:(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\))" +
 				@"|(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
-				@"[ \t\v]*(?<media>([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+[ \t\v]+and[ \t\v]+\([a-z][^,;()""']+?\))" +
-				@"(?:[ \t\v]*,[ \t\v]*([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+[ \t\v]+and[ \t\v]+\([a-z][^,;()""']+?\))[ \t\v]*)*)))",
-				RegexOptions.Compiled);
+				@"[ \t\v]*(?<media>([A-Za-z]+|\([A-Za-z][^,;()""']+?\)|[A-Za-z]+[ \t\v]+and[ \t\v]+\([A-Za-z][^,;()""']+?\))" +
+				@"(?:[ \t\v]*,[ \t\v]*([A-Za-z]+|\([A-Za-z][^,;()""']+?\)|[A-Za-z]+[ \t\v]+and[ \t\v]+\([A-Za-z][^,;()""']+?\))[ \t\v]*)*)))",
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for working with SCSS client <code>@import</code> rules
@@ -68,9 +68,9 @@
 				@"(?:(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\))" +
 				@"|(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
-				@"\s*(?<media>([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))" +
-				@"(?:\s*,\s*([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))\s*)*)\s*;))",
-				RegexOptions.Compiled);
+				@"\s*(?<media>([A-Za-z]+|\([A-Za-z][^,;()""']+?\)|[A-Za-z]+\s+and\s+\([A-Za-z][^,;()""']+?\))" +
+				@"(?:\s*,\s*([A-Za-z]+|\([A-Za-z][^,;()""']+?\)|[A-Za-z]+\s+and\s+\([A-Za-z][^,;()""']+?\))\s*)*)))",
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Virtual file system wrapper
@@ -348,6 +348,7 @@
 			foreach (Match serverImportRuleMatch in serverImportRuleMatches)
 			{
 				var nodeMatch = new SassAndScssNodeMatch(serverImportRuleMatch.Index,
+					serverImportRuleMatch.Length,
 					SassAndScssNodeType.ServerImportRule,
 					serverImportRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -356,6 +357,7 @@
 			foreach (Match clientImportRuleMatch in clientImportRuleMatches)
 			{
 				var nodeMatch = new SassAndScssNodeMatch(clientImportRuleMatch.Index,
+					clientImportRuleMatch.Length,
 					SassAndScssNodeType.ClientImportRule,
 					clientImportRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -364,6 +366,7 @@
 			foreach (Match urlRuleMatch in urlRuleMatches)
 			{
 				var nodeMatch = new SassAndScssNodeMatch(urlRuleMatch.Index,
+					urlRuleMatch.Length,
 					SassAndScssNodeType.UrlRule,
 					urlRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -374,6 +377,7 @@
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
 				var nodeMatch = new SassAndScssNodeMatch(multilineCommentMatch.Index,
+					multilineCommentMatch.Length,
 					SassAndScssNodeType.MultilineComment,
 					multilineCommentMatch);
 				nodeMatches.Add(nodeMatch);
@@ -381,6 +385,7 @@
 
 			nodeMatches = nodeMatches
 				.OrderBy(n => n.Position)
+				.ThenByDescending(n => n.Length)
 				.ToList()
 				;
 
@@ -399,7 +404,8 @@
 					continue;
 				}
 
-				if (nodeType == SassAndScssNodeType.ServerImportRule || nodeType == SassAndScssNodeType.ClientImportRule
+				if (nodeType == SassAndScssNodeType.ServerImportRule
+					|| nodeType == SassAndScssNodeType.ClientImportRule
 					|| nodeType == SassAndScssNodeType.UrlRule)
 				{
 					ProcessOtherContent(contentBuilder, assetContent,
@@ -439,8 +445,8 @@
 						List<string> processedServerImportUrls;
 
 						string serverImportRule = match.Value;
-						string processedServerImportRule = ProcessServerImportRule(assetUrl, assetFileExtension, urlList,
-							out processedServerImportUrls);
+						string processedServerImportRule = ProcessServerImportRule(assetUrl, assetFileExtension, 
+							urlList, out processedServerImportUrls);
 
 						if (processedServerImportUrls.Count > 0)
 						{

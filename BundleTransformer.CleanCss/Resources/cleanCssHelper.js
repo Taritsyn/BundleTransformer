@@ -16,7 +16,8 @@ var cleanCssHelper = (function (cleanCss, undefined) {
 			root: '',
 			relativeTo: '',
 			processImport: false,
-			benchmark: false
+			benchmark: false,
+			noRebase: true
 		}
 		;
 

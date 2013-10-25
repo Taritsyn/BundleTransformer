@@ -1,5 +1,5 @@
 /*!
- * Clean-css v1.1.3
+ * Clean-css v1.1.5
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2013 GoalSmashers.com
@@ -433,10 +433,12 @@ var CleanCss = (function(){
 				  case '*':
 					return comments.restore(placeholder) + breakSuffix;
 				  case 1:
+				  case '1':
 					return restored == 1 ?
 					  comments.restore(placeholder) + breakSuffix :
 					  '';
 				  case 0:
+				  case '0':
 					return '';
 				}
 			  });
@@ -873,7 +875,7 @@ var CleanCss = (function(){
 			  data = urlsProcessor.restore(data);
 			});
 //			replace(function rebaseUrls() {
-//			  data = UrlRebase.process(data, options);
+//			  data = options.noRebase ? data : UrlRebase.process(data, options);
 //			});
 			replace(function restoreFreeText() {
 			  data = freeTextProcessor.restore(data);

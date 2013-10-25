@@ -13,20 +13,18 @@
 		/// <summary>
 		/// Regular expression to find first slash
 		/// </summary>
-		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:\/|\\)*",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:\/|\\)*", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to find last slash
 		/// </summary>
-		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:\/|\\)*$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:\/|\\)*$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for determine protocol in URL
 		/// </summary>
 		private static readonly Regex _protocolRegExp = new Regex(@"^(?:(?:https?|ftp)\://)|(?://)",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			RegexOptions.IgnoreCase);
 
 
 		/// <summary>

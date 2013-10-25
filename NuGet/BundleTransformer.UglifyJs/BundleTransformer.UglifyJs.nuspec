@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.UglifyJs</id>
-    <version>1.8.8</version>
+    <version>1.8.9</version>
 	<title>Bundle Transformer: UglifyJS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,15 +10,16 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476857</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) version 2.4.0.
+    <description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) version 2.4.1.
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
-    <summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.4.0.</summary>
+    <summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.4.1.</summary>
+	<releaseNotes>Added support of UglifyJS version 2.4.1.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify UglifyJS</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.8.8" />
+      <dependency id="BundleTransformer.Core" version="1.8.9" />
 	  <dependency id="JavaScriptEngineSwitcher.Core" version="0.9.2" />
 	  <dependency id="Newtonsoft.Json" version="5.0.7" />
     </dependencies>

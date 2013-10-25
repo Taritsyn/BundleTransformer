@@ -65,7 +65,7 @@
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
 				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
-				RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for working with the <code>data-uri</code> functions of LESS
@@ -73,12 +73,12 @@
 		private static readonly Regex _dataUriFunctionRegex =
 			new Regex(@"data-uri\(\s*(?:(?<quote1>'|"")(?<mimeType>[\w\-+.;\/]+)(\k<quote1>)\s*,\s*)?" +
 				@"(?<quote2>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote2>)\s*\)",
-				RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for working with the base64 option of data-uri
 		/// </summary>
-		private static readonly Regex _base64OptionRegex = new Regex(@";base64$", RegexOptions.Compiled);
+		private static readonly Regex _base64OptionRegex = new Regex(@";base64$", RegexOptions.IgnoreCase);
 		
 		/// <summary>
 		/// Delegate that creates an instance of JavaScript engine
@@ -385,7 +385,8 @@
 
 			foreach (Match importRuleMatch in importRuleMatches)
 			{
-				var nodeMatch = new LessNodeMatch(importRuleMatch.Index, 
+				var nodeMatch = new LessNodeMatch(importRuleMatch.Index,
+					importRuleMatch.Length,
 					LessNodeType.ImportRule, 
 					importRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -394,6 +395,7 @@
 			foreach (Match dataUriFunctionMatch in dataUriFunctionMatches)
 			{
 				var nodeMatch = new LessNodeMatch(dataUriFunctionMatch.Index,
+					dataUriFunctionMatch.Length,
 					LessNodeType.DataUriFunction,
 					dataUriFunctionMatch);
 				nodeMatches.Add(nodeMatch);
@@ -404,6 +406,7 @@
 				foreach (Match urlRuleMatch in urlRuleMatches)
 				{
 					var nodeMatch = new LessNodeMatch(urlRuleMatch.Index,
+						urlRuleMatch.Length,
 						LessNodeType.UrlRule,
 						urlRuleMatch);
 					nodeMatches.Add(nodeMatch);
@@ -414,7 +417,8 @@
 
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
-				var nodeMatch = new LessNodeMatch(multilineCommentMatch.Index, 
+				var nodeMatch = new LessNodeMatch(multilineCommentMatch.Index,
+					multilineCommentMatch.Length,
 					LessNodeType.MultilineComment, 
 					multilineCommentMatch);
 				nodeMatches.Add(nodeMatch);
@@ -422,6 +426,7 @@
 
 			nodeMatches = nodeMatches
 				.OrderBy(n => n.Position)
+				.ThenByDescending(n => n.Length)
 				.ToList()
 				;
 

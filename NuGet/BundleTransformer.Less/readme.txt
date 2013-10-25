@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.8
+              README file for Bundle Transformer: LESS 1.8.9
 
    ----------------------------------------------------------------------
 
@@ -26,12 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of LESS version 1.5.0;
-   2. In configuration settings of LESS-translator added new property -
-      `JavascriptEnabled`;
-   3. From `/configuration/system.web/httpHandlers` element of the Web.config
-      file was removed a debugging HTTP-handler, that used for working in
-      the IIS Classic mode.
+   Fixed minor bugs.
    
    ====================
    POST-INSTALL ACTIONS

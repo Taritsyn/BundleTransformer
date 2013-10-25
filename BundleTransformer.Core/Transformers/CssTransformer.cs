@@ -32,17 +32,17 @@
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
 				@"|(?:url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
 				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))" +
-				@"(?:\s*(?<media>([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))" + 
-				@"(?:\s*,\s*([a-z]+|\([a-z][^,;()""']+?\)|[a-z]+\s+and\s+\([a-z][^,;()""']+?\))\s*)*))?" +
+				@"(?:\s*(?<media>([A-Za-z]+|\([A-Za-z][^,;()""']+?\)|[A-Za-z]+\s+and\s+\([A-Za-z][^,;()""']+?\))" + 
+				@"(?:\s*,\s*([A-Za-z]+|\([A-Za-z][^,;()""']+?\)|[A-Za-z]+\s+and\s+\([A-Za-z][^,;()""']+?\))\s*)*?))?" +
 				@"\s*;",
-				RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression for working with CSS <code>@charset</code> rules
 		/// </summary>
-		private static readonly Regex _cssCharsetRuleRegex = 
-			new Regex(@"@charset\s*(?<quote>'|"")(?<charset>[a-zA-Z0-9\-]+)(\k<quote>)\s*;", 
-				RegexOptions.Compiled);
+		private static readonly Regex _cssCharsetRuleRegex =
+			new Regex(@"@charset\s*(?<quote>'|"")(?<charset>[A-Za-z0-9\-]+)(\k<quote>)\s*;",
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Constructs instance of CSS-transformer
@@ -349,6 +349,7 @@
 			foreach (Match charsetRuleMatch in charsetRuleMatches)
 			{
 				var nodeMatch = new CssNodeMatch(charsetRuleMatch.Index,
+					charsetRuleMatch.Length,
 					CssNodeType.CharsetRule,
 					charsetRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -357,6 +358,7 @@
 			foreach (Match importRuleMatch in importRuleMatches)
 			{
 				var nodeMatch = new CssNodeMatch(importRuleMatch.Index,
+					importRuleMatch.Length,
 					CssNodeType.ImportRule,
 					importRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -367,6 +369,7 @@
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
 				var nodeMatch = new CssNodeMatch(multilineCommentMatch.Index,
+					multilineCommentMatch.Length,
 					CssNodeType.MultilineComment,
 					multilineCommentMatch);
 				nodeMatches.Add(nodeMatch);
@@ -374,6 +377,7 @@
 
 			nodeMatches = nodeMatches
 				.OrderBy(n => n.Position)
+				.ThenByDescending(n => n.Length)
 				.ToList()
 				;
 

@@ -294,7 +294,7 @@ $alt-bg-color: #CE4DD6")
 				.Setup(fs => fs.GetFileTextContent(testSassImportSub2SassAssetVirtualPath))
 				.Returns(@"@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext'
 @import url(""EbookReaderIcon.css"")
-@import ""FolderIcon.css"" screen")
+@import ""FolderIcon.css"" screen, projection")
 				;
 
 			string testSassImportSub2ScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
@@ -656,7 +656,7 @@ $alt-bg-color: #CE4DD6;")
 				.Setup(fs => fs.GetFileTextContent(testScssImportSub2ScssAssetVirtualPath))
 				.Returns(@"@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext';
 @import url('KeyIcon.css');
-@import 'LayoutIcon.css' screen;")
+@import 'LayoutIcon.css' screen and (orientation:landscape);")
 				;
 
 			string testScssImportSub2SassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,

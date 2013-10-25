@@ -24,10 +24,11 @@
 		/// </summary>
 		/// <param name="position">Position in the original string where 
 		/// the first character of the captured substring was found</param>
+		/// <param name="length">Length of the captured substring</param>
 		/// <param name="nodeType">Type of TypeScript-node</param>
 		/// <param name="match">Single regular expression match</param>
-		public TsNodeMatch(int position, TsNodeType nodeType, Match match)
-			: base(position, match)
+		public TsNodeMatch(int position, int length, TsNodeType nodeType, Match match)
+			: base(position, length, match)
 		{
 			NodeType = nodeType;
 		}

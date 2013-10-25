@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.8
+           README file for Bundle Transformer: CoffeeScript 1.8.9
 
    ----------------------------------------------------------------------
 
@@ -27,9 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   From `/configuration/system.web/httpHandlers` element of the Web.config
-   file was removed a debugging HTTP-handlers, that used for working in 
-   the IIS Classic mode.
+   CoffeeScript was updated to commit 5456bd5f89.
    
    ====================
    POST-INSTALL ACTIONS

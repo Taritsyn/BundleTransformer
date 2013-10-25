@@ -180,7 +180,7 @@ var CoffeeScript = (function(){
 		pathSep = useWinPathSep ? /\\|\// : /\//;
 		parts = file.split(pathSep);
 		file = parts[parts.length - 1];
-		if (!stripExt) {
+		if (!(stripExt && file.indexOf('.') >= 0)) {
 		  return file;
 		}
 		parts = file.split('.');
@@ -257,7 +257,7 @@ var CoffeeScript = (function(){
 	  var BALANCED_PAIRS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, left, rite, _i, _len, _ref,
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
 		__slice = [].slice;
-		
+
 	  generate = function(tag, value) {
 		var tok;
 		tok = [tag, value];
@@ -271,10 +271,9 @@ var CoffeeScript = (function(){
 		Rewriter.prototype.rewrite = function(tokens) {
 		  this.tokens = tokens;
 		  this.removeLeadingNewlines();
-		  this.removeMidExpressionNewlines();
 		  this.closeOpenCalls();
 		  this.closeOpenIndexes();
-		  this.addImplicitIndentation();
+		  this.normalizeLines();
 		  this.tagPostfixConditionals();
 		  this.addImplicitBracesAndParens();
 		  this.addLocationDataToGeneratedTokens();
@@ -324,17 +323,6 @@ var CoffeeScript = (function(){
 		  if (i) {
 			return this.tokens.splice(0, i);
 		  }
-		};
-
-		Rewriter.prototype.removeMidExpressionNewlines = function() {
-		  return this.scanTokens(function(token, i, tokens) {
-			var _ref;
-			if (!(token[0] === 'TERMINATOR' && (_ref = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref) >= 0))) {
-			  return 1;
-			}
-			tokens.splice(i, 1);
-			return 0;
-		  });
 		};
 
 		Rewriter.prototype.closeOpenCalls = function() {
@@ -608,30 +596,32 @@ var CoffeeScript = (function(){
 		  });
 		};
 
-		Rewriter.prototype.addImplicitIndentation = function() {
+		Rewriter.prototype.normalizeLines = function() {
 		  var action, condition, indent, outdent, starter;
 		  starter = indent = outdent = null;
 		  condition = function(token, i) {
-			var _ref, _ref1;
-			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((_ref1 = token[0]) === 'CATCH' || _ref1 === 'FINALLY') && (starter === '->' || starter === '=>'));
+			var _ref, _ref1, _ref2;
+			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'TERMINATOR' && (_ref1 = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((_ref2 = token[0]) === 'CATCH' || _ref2 === 'FINALLY') && (starter === '->' || starter === '=>'));
 		  };
 		  action = function(token, i) {
 			return this.tokens.splice((this.tag(i - 1) === ',' ? i - 1 : i), 0, outdent);
 		  };
 		  return this.scanTokens(function(token, i, tokens) {
-			var j, tag, _i, _ref, _ref1;
+			var j, tag, _i, _ref, _ref1, _ref2;
 			tag = token[0];
-			if (tag === 'TERMINATOR' && this.tag(i + 1) === 'THEN') {
-			  tokens.splice(i, 1);
-			  return 0;
-			}
-			if (tag === 'ELSE' && this.tag(i - 1) !== 'OUTDENT') {
-			  tokens.splice.apply(tokens, [i, 0].concat(__slice.call(this.indentation())));
-			  return 2;
+			if (tag === 'TERMINATOR') {
+			  if (this.tag(i + 1) === 'ELSE' && this.tag(i - 1) !== 'OUTDENT') {
+				tokens.splice.apply(tokens, [i, 1].concat(__slice.call(this.indentation())));
+				return 1;
+			  }
+			  if (_ref = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref) >= 0) {
+				tokens.splice(i, 1);
+				return 0;
+			  }
 			}
 			if (tag === 'CATCH') {
 			  for (j = _i = 1; _i <= 2; j = ++_i) {
-				if (!((_ref = this.tag(i + j)) === 'OUTDENT' || _ref === 'TERMINATOR' || _ref === 'FINALLY')) {
+				if (!((_ref1 = this.tag(i + j)) === 'OUTDENT' || _ref1 === 'TERMINATOR' || _ref1 === 'FINALLY')) {
 				  continue;
 				}
 				tokens.splice.apply(tokens, [i + j, 0].concat(__slice.call(this.indentation())));
@@ -640,7 +630,7 @@ var CoffeeScript = (function(){
 			}
 			if (__indexOf.call(SINGLE_LINERS, tag) >= 0 && this.tag(i + 1) !== 'INDENT' && !(tag === 'ELSE' && this.tag(i + 1) === 'IF')) {
 			  starter = tag;
-			  _ref1 = this.indentation(true), indent = _ref1[0], outdent = _ref1[1];
+			  _ref2 = this.indentation(true), indent = _ref2[0], outdent = _ref2[1];
 			  if (starter === 'THEN') {
 				indent.fromThen = true;
 			  }
@@ -720,7 +710,7 @@ var CoffeeScript = (function(){
 		EXPRESSION_END.push(INVERSES[left] = rite);
 	  }
 
-	  EXPRESSION_CLOSE = ['CATCH', 'WHEN', 'ELSE', 'FINALLY'].concat(EXPRESSION_END);
+	  EXPRESSION_CLOSE = ['CATCH', 'THEN', 'ELSE', 'FINALLY'].concat(EXPRESSION_END);
 
 	  IMPLICIT_FUNC = ['IDENTIFIER', 'SUPER', ')', 'CALL_END', ']', 'INDEX_END', '@', 'THIS'];
 
@@ -928,7 +918,7 @@ var CoffeeScript = (function(){
 				  lexedLength: string.length
 				});
 			  } else {
-				this.token('STRING', this.escapeLines(string, 0, string.length));
+				this.token('STRING', this.escapeLines(string), 0, string.length);
 			  }
 			  break;
 			default:
@@ -1018,7 +1008,7 @@ var CoffeeScript = (function(){
 		  var body, flags, flagsOffset, heregex, plusToken, prev, re, tag, token, tokens, value, _i, _len, _ref2, _ref3, _ref4;
 		  heregex = match[0], body = match[1], flags = match[2];
 		  if (0 > body.indexOf('#{')) {
-			re = body.replace(HEREGEX_OMIT, '').replace(/\//g, '\\/');
+			re = this.escapeLines(body.replace(HEREGEX_OMIT, '$1$2').replace(/\//g, '\\/'), true);
 			if (re.match(/^\*/)) {
 			  this.error('regular expressions cannot begin with `*`');
 			}
@@ -1037,7 +1027,7 @@ var CoffeeScript = (function(){
 			if (tag === 'TOKENS') {
 			  tokens.push.apply(tokens, value);
 			} else if (tag === 'NEOSTRING') {
-			  if (!(value = value.replace(HEREGEX_OMIT, ''))) {
+			  if (!(value = value.replace(HEREGEX_OMIT, '$1$2'))) {
 				continue;
 			  }
 			  value = value.replace(/\\/g, '\\\\');
@@ -1601,9 +1591,9 @@ var CoffeeScript = (function(){
 
 	  REGEX = /^(\/(?![\s=])[^[\/\n\\]*(?:(?:\\[\s\S]|\[[^\]\n\\]*(?:\\[\s\S][^\]\n\\]*)*])[^[\/\n\\]*)*\/)([imgy]{0,4})(?!\w)/;
 
-	  HEREGEX = /^\/{3}([\s\S]+?)\/{3}([imgy]{0,4})(?!\w)/;
+	  HEREGEX = /^\/{3}((?:\\?[\s\S])+?)\/{3}([imgy]{0,4})(?!\w)/;
 
-	  HEREGEX_OMIT = /\s+(?:#.*)?/g;
+	  HEREGEX_OMIT = /((?:\\\\)+)|\\(\s|\/)|\s+(?:#.*)?/g;
 
 	  MULTILINER = /\n/g;
 
@@ -2444,7 +2434,7 @@ var CoffeeScript = (function(){
 	//#region URL: ./nodes
 	require['./nodes'] = (function() {
 	  var exports = {};
-	  var Access, Arr, Assign, Base, Block, Call, Class, Closure, Code, CodeFragment, Comment, Existence, Extends, For, HEXNUM, IDENTIFIER, IDENTIFIER_STR, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, METHOD_DEF, NEGATE, NO, NUMBER, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, last, locationDataToString, merge, multident, parseNum, some, starts, throwSyntaxError, unfoldSoak, utility, _ref, _ref1, _ref2, _ref3,
+	  var Access, Arr, Assign, Base, Block, Call, Class, Closure, Code, CodeFragment, Comment, Existence, Extends, For, HEXNUM, IDENTIFIER, IDENTIFIER_STR, IS_REGEX, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, METHOD_DEF, NEGATE, NO, NUMBER, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, last, locationDataToString, merge, multident, parseNum, some, starts, throwSyntaxError, unfoldSoak, utility, _ref, _ref1, _ref2, _ref3,
 		__hasProp = {}.hasOwnProperty,
 		__extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -3122,8 +3112,16 @@ var CoffeeScript = (function(){
 		  return !!this.properties.length;
 		};
 
+		Value.prototype.bareLiteral = function(type) {
+		  return !this.properties.length && this.base instanceof type;
+		};
+
 		Value.prototype.isArray = function() {
-		  return !this.properties.length && this.base instanceof Arr;
+		  return this.bareLiteral(Arr);
+		};
+
+		Value.prototype.isRange = function() {
+		  return this.bareLiteral(Range);
 		};
 
 		Value.prototype.isComplex = function() {
@@ -3135,11 +3133,15 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.isSimpleNumber = function() {
-		  return this.base instanceof Literal && SIMPLENUM.test(this.base.value);
+		  return this.bareLiteral(Literal) && SIMPLENUM.test(this.base.value);
 		};
 
 		Value.prototype.isString = function() {
-		  return this.base instanceof Literal && IS_STRING.test(this.base.value);
+		  return this.bareLiteral(Literal) && IS_STRING.test(this.base.value);
+		};
+
+		Value.prototype.isRegex = function() {
+		  return this.bareLiteral(Literal) && IS_REGEX.test(this.base.value);
 		};
 
 		Value.prototype.isAtomic = function() {
@@ -3152,6 +3154,10 @@ var CoffeeScript = (function(){
 			}
 		  }
 		  return true;
+		};
+
+		Value.prototype.isNotCallable = function() {
+		  return this.isSimpleNumber() || this.isString() || this.isRegex() || this.isArray() || this.isRange() || this.isSplice() || this.isObject();
 		};
 
 		Value.prototype.isStatement = function(o) {
@@ -3223,33 +3229,34 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.unfoldSoak = function(o) {
-		  var _this = this;
-		  return this.unfoldedSoak != null ? this.unfoldedSoak : this.unfoldedSoak = (function() {
-			var fst, i, ifn, prop, ref, snd, _i, _len, _ref4, _ref5;
-			if (ifn = _this.base.unfoldSoak(o)) {
-			  (_ref4 = ifn.body.properties).push.apply(_ref4, _this.properties);
-			  return ifn;
-			}
-			_ref5 = _this.properties;
-			for (i = _i = 0, _len = _ref5.length; _i < _len; i = ++_i) {
-			  prop = _ref5[i];
-			  if (!prop.soak) {
-				continue;
+		  return this.unfoldedSoak != null ? this.unfoldedSoak : this.unfoldedSoak = (function(_this) {
+			return function() {
+			  var fst, i, ifn, prop, ref, snd, _i, _len, _ref4, _ref5;
+			  if (ifn = _this.base.unfoldSoak(o)) {
+				(_ref4 = ifn.body.properties).push.apply(_ref4, _this.properties);
+				return ifn;
 			  }
-			  prop.soak = false;
-			  fst = new Value(_this.base, _this.properties.slice(0, i));
-			  snd = new Value(_this.base, _this.properties.slice(i));
-			  if (fst.isComplex()) {
-				ref = new Literal(o.scope.freeVariable('ref'));
-				fst = new Parens(new Assign(ref, fst));
-				snd.base = ref;
+			  _ref5 = _this.properties;
+			  for (i = _i = 0, _len = _ref5.length; _i < _len; i = ++_i) {
+				prop = _ref5[i];
+				if (!prop.soak) {
+				  continue;
+				}
+				prop.soak = false;
+				fst = new Value(_this.base, _this.properties.slice(0, i));
+				snd = new Value(_this.base, _this.properties.slice(i));
+				if (fst.isComplex()) {
+				  ref = new Literal(o.scope.freeVariable('ref'));
+				  fst = new Parens(new Assign(ref, fst));
+				  snd.base = ref;
+				}
+				return new If(new Existence(fst), snd, {
+				  soak: true
+				});
 			  }
-			  return new If(new Existence(fst), snd, {
-				soak: true
-			  });
-			}
-			return false;
-		  })();
+			  return false;
+			};
+		  })(this)();
 		};
 
 		return Value;
@@ -3268,8 +3275,9 @@ var CoffeeScript = (function(){
 		Comment.prototype.makeReturn = THIS;
 
 		Comment.prototype.compileNode = function(o, level) {
-		  var code;
-		  code = "/*" + (multident(this.comment, this.tab)) + (__indexOf.call(this.comment, '\n') >= 0 ? "\n" + this.tab : '') + "*/";
+		  var code, comment;
+		  comment = this.comment.replace(/^(\s*)#/gm, "$1 *");
+		  code = "/*" + (multident(comment, this.tab)) + (__indexOf.call(comment, '\n') >= 0 ? "\n" + this.tab : '') + " */";
 		  if ((level || o.level) === LEVEL_TOP) {
 			code = o.indent + code;
 		  }
@@ -3289,6 +3297,9 @@ var CoffeeScript = (function(){
 		  this.isNew = false;
 		  this.isSuper = variable === 'super';
 		  this.variable = this.isSuper ? null : variable;
+		  if (variable instanceof Value && variable.isNotCallable()) {
+			variable.error("literal is not a function");
+		  }
 		}
 
 		Call.prototype.children = ['variable', 'args'];
@@ -3881,26 +3892,27 @@ var CoffeeScript = (function(){
 		};
 
 		Class.prototype.walkBody = function(name, o) {
-		  var _this = this;
-		  return this.traverseChildren(false, function(child) {
-			var cont, exps, i, node, _i, _len, _ref4;
-			cont = true;
-			if (child instanceof Class) {
-			  return false;
-			}
-			if (child instanceof Block) {
-			  _ref4 = exps = child.expressions;
-			  for (i = _i = 0, _len = _ref4.length; _i < _len; i = ++_i) {
-				node = _ref4[i];
-				if (node instanceof Value && node.isObject(true)) {
-				  cont = false;
-				  exps[i] = _this.addProperties(node, name, o);
-				}
+		  return this.traverseChildren(false, (function(_this) {
+			return function(child) {
+			  var cont, exps, i, node, _i, _len, _ref4;
+			  cont = true;
+			  if (child instanceof Class) {
+				return false;
 			  }
-			  child.expressions = exps = flatten(exps);
-			}
-			return cont && !(child instanceof Class);
-		  });
+			  if (child instanceof Block) {
+				_ref4 = exps = child.expressions;
+				for (i = _i = 0, _len = _ref4.length; _i < _len; i = ++_i) {
+				  node = _ref4[i];
+				  if (node instanceof Value && node.isObject(true)) {
+					cont = false;
+					exps[i] = _this.addProperties(node, name, o);
+				  }
+				}
+				child.expressions = exps = flatten(exps);
+			  }
+			  return cont && !(child instanceof Class);
+			};
+		  })(this));
 		};
 
 		Class.prototype.hoistDirectivePrologue = function() {
@@ -3961,7 +3973,7 @@ var CoffeeScript = (function(){
 		  this.body.expressions.push(lname);
 		  (_ref4 = this.body.expressions).unshift.apply(_ref4, this.directives);
 		  call = Closure.wrap(this.body);
-		  if (this.parent) {
+		  if (this.parent && call.args) {
 			this.superClass = new Literal(o.scope.freeVariable('super', false));
 			this.body.expressions.unshift(new Extends(lname, this.superClass));
 			call.args.push(this.parent);
@@ -4153,15 +4165,24 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileConditional = function(o) {
-		  var left, right, _ref4;
+		  var fragments, left, right, _ref4;
 		  _ref4 = this.variable.cacheReference(o), left = _ref4[0], right = _ref4[1];
 		  if (!left.properties.length && left.base instanceof Literal && left.base.value !== "this" && !o.scope.check(left.base.value)) {
 			this.variable.error("the variable \"" + left.base.value + "\" can't be assigned with " + this.context + " because it has not been declared before");
 		  }
 		  if (__indexOf.call(this.context, "?") >= 0) {
 			o.isExistentialEquals = true;
+			return new If(new Existence(left), right, {
+			  type: 'if'
+			}).addElse(new Assign(right, this.value, '=')).compileToFragments(o);
+		  } else {
+			fragments = new Op(this.context.slice(0, -1), left, new Assign(right, this.value, '=')).compileToFragments(o);
+			if (o.level <= LEVEL_LIST) {
+			  return fragments;
+			} else {
+			  return this.wrapInBraces(fragments);
+			}
 		  }
-		  return new Op(this.context.slice(0, -1), left, new Assign(right, this.value, '=')).compileToFragments(o);
 		};
 
 		Assign.prototype.compileSplice = function(o) {
@@ -4174,7 +4195,7 @@ var CoffeeScript = (function(){
 			fromDecl = fromRef = '0';
 		  }
 		  if (to) {
-			if ((from != null ? from.isSimpleNumber() : void 0) && to.isSimpleNumber()) {
+			if (from && from instanceof Value && (from != null ? from.isSimpleNumber() : void 0) && to instanceof Value && to.isSimpleNumber()) {
 			  to = +to.compile(o) - +fromRef;
 			  if (!exclusive) {
 				to += 1;
@@ -4222,7 +4243,14 @@ var CoffeeScript = (function(){
 		Code.prototype.jumps = NO;
 
 		Code.prototype.compileNode = function(o) {
-		  var answer, code, exprs, i, idt, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref4, _ref5, _ref6, _ref7, _ref8;
+		  var answer, boundfunc, code, exprs, i, idt, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, wrapper, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref4, _ref5, _ref6, _ref7, _ref8;
+		  if (this.bound && !this.wrapped && !this["static"]) {
+			this.wrapped = true;
+			wrapper = new Code([new Param(new Literal('_this'))], new Block([this]));
+			boundfunc = new Call(wrapper, [new Literal('this')]);
+			boundfunc.updateLocationDataIfMissing(this.locationData);
+			return boundfunc.compileNode(o);
+		  }
 		  o.scope = new Scope(o.scope, this.body, this);
 		  o.scope.shared = del(o, 'sharedScope');
 		  o.indent += TAB;
@@ -4308,12 +4336,8 @@ var CoffeeScript = (function(){
 		  if (!(wasEmpty || this.noReturn)) {
 			this.body.makeReturn();
 		  }
-		  if (this.bound) {
-			if ((_ref8 = o.scope.parent.method) != null ? _ref8.bound : void 0) {
-			  this.bound = this.context = o.scope.parent.method.context;
-			} else if (!this["static"]) {
-			  o.scope.parent.assign('_this', 'this');
-			}
+		  if (this.bound && ((_ref8 = o.scope.parent.method) != null ? _ref8.bound : void 0)) {
+			this.bound = this.context = o.scope.parent.method.context;
 		  }
 		  idt = o.indent;
 		  code = 'function';
@@ -4402,6 +4426,7 @@ var CoffeeScript = (function(){
 		  if (this.splat) {
 			node = new Splat(node);
 		  }
+		  node.updateLocationDataIfMissing(this.locationData);
 		  return this.reference = node;
 		};
 
@@ -4755,7 +4780,7 @@ var CoffeeScript = (function(){
 
 		Op.prototype.compileExistence = function(o) {
 		  var fst, ref;
-		  if (!o.isExistentialEquals && this.first.isComplex()) {
+		  if (this.first.isComplex()) {
 			ref = new Literal(o.scope.freeVariable('ref'));
 			fst = new Parens(new Assign(ref, this.first));
 		  } else {
@@ -5032,7 +5057,7 @@ var CoffeeScript = (function(){
 			this.name.error('cannot pattern match over range loops');
 		  }
 		  if (this.own && !this.object) {
-			this.index.error('cannot use own with for-in');
+			this.name.error('cannot use own with for-in');
 		  }
 		  this.returns = false;
 		}
@@ -5485,6 +5510,8 @@ var CoffeeScript = (function(){
 
 	  IS_STRING = /^['"]/;
 
+	  IS_REGEX = /^\//;
+
 	  utility = function(name) {
 		var ref;
 		ref = "__" + name;
@@ -5514,17 +5541,15 @@ var CoffeeScript = (function(){
 	//#region URL: ./coffee-script
 	require["./coffee-script"] = (function () {
 	  var exports = {};
-	  var Lexer, Module, SourceMap, binary, child_process, compile, compileFile, ext, fileExtensions, findExtension, fork, formatSourcePosition, fs, getSourceMap, helpers, lexer, loadFile, parser, path, sourceMaps, vm, withPrettyErrors, _i, _len,
+	  var Lexer, SourceMap, compile, formatSourcePosition, fs, getSourceMap, helpers, lexer, parser, path, sourceMaps, vm, withPrettyErrors,
 		__hasProp = {}.hasOwnProperty,
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-	  //fs = require('fs');
+//	  fs = require('fs');
 
-	  //vm = require('vm');
+//	  vm = require('vm');
 
-	  //path = require('path');
-
-	  //child_process = require('child_process');
+//	  path = require('path');
 
 	  Lexer = require('./lexer').Lexer;
 
@@ -5532,13 +5557,11 @@ var CoffeeScript = (function(){
 
 	  helpers = require('./helpers');
 
-	  //SourceMap = require('./sourcemap');
+//	  SourceMap = require('./sourcemap');
 
 	  exports.VERSION = '1.6.3';
 
-	  //binary = require.resolve('../../bin/coffee');
-
-	  //fileExtensions = ['.coffee', '.litcoffee', '.coffee.md'];
+//	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
 	  exports.helpers = helpers;
 
@@ -5558,11 +5581,9 @@ var CoffeeScript = (function(){
 	  };
 
 	  exports.compile = compile = withPrettyErrors(function(code, options) {
-		var answer, currentColumn, currentLine, fragment, fragments, header, js, map, merge, newLines, _i, _len;
-		if (options == null) {
-		  options = {};
-		}
-		merge = helpers.merge;
+		var answer, currentColumn, currentLine, extend, fragment, fragments, header, js, map, merge, newLines, _i, _len;
+		merge = helpers.merge, extend = helpers.extend;
+		options = extend({}, options);
 //		if (options.sourceMap) {
 //		  map = new SourceMap;
 //		}
@@ -5623,14 +5644,15 @@ var CoffeeScript = (function(){
 //	  });
 
 //	  exports.run = function(code, options) {
-//		var answer, mainModule, _ref;
+//		var answer, dir, mainModule, _ref;
 //		if (options == null) {
 //		  options = {};
 //		}
 //		mainModule = require.main;
 //		mainModule.filename = process.argv[1] = options.filename ? fs.realpathSync(options.filename) : '.';
 //		mainModule.moduleCache && (mainModule.moduleCache = {});
-//		mainModule.paths = require('module')._nodeModulePaths(path.dirname(fs.realpathSync(options.filename || '.')));
+//		dir = options.fileName ? path.dirname(fs.realpathSync(options.filename)) : fs.realpathSync('.');
+//		mainModule.paths = require('module')._nodeModulePaths(dir);
 //		if (!helpers.isCoffee(mainModule.filename) || require.extensions) {
 //		  answer = compile(code, options);
 //		  code = (_ref = answer.js) != null ? _ref : answer;
@@ -5701,8 +5723,11 @@ var CoffeeScript = (function(){
 //		}
 //	  };
 
-//	  compileFile = function(filename, sourceMap) {
+//	  exports._compileFile = function(filename, sourceMap) {
 //		var answer, err, raw, stripped;
+//		if (sourceMap == null) {
+//		  sourceMap = false;
+//		}
 //		raw = fs.readFileSync(filename, 'utf8');
 //		stripped = raw.charCodeAt(0) === 0xFEFF ? raw.substring(1) : raw;
 //		try {
@@ -5717,62 +5742,6 @@ var CoffeeScript = (function(){
 //		}
 //		return answer;
 //	  };
-
-//	  loadFile = function(module, filename) {
-//		var answer;
-//		answer = compileFile(filename, false);
-//		return module._compile(answer, filename);
-//	  };
-
-//	  if (require.extensions) {
-//		for (_i = 0, _len = fileExtensions.length; _i < _len; _i++) {
-//		  ext = fileExtensions[_i];
-//		  require.extensions[ext] = loadFile;
-//		}
-//		Module = require('module');
-//		findExtension = function(filename) {
-//		  var curExtension, extensions;
-//		  extensions = path.basename(filename).split('.');
-//		  if (extensions[0] === '') {
-//			extensions.shift();
-//		  }
-//		  while (extensions.shift()) {
-//			curExtension = '.' + extensions.join('.');
-//			if (Module._extensions[curExtension]) {
-//			  return curExtension;
-//			}
-//		  }
-//		  return '.js';
-//		};
-//		Module.prototype.load = function(filename) {
-//		  var extension;
-//		  this.filename = filename;
-//		  this.paths = Module._nodeModulePaths(path.dirname(filename));
-//		  extension = findExtension(filename);
-//		  Module._extensions[extension](this, filename);
-//		  return this.loaded = true;
-//		};
-//	  }
-
-//	  if (child_process) {
-//		fork = child_process.fork;
-//		child_process.fork = function(path, args, options) {
-//		  var execPath;
-//		  if (args == null) {
-//			args = [];
-//		  }
-//		  if (options == null) {
-//			options = {};
-//		  }
-//		  execPath = helpers.isCoffee(path) ? binary : null;
-//		  if (!Array.isArray(args)) {
-//			args = [];
-//			options = args || {};
-//		  }
-//		  options.execPath || (options.execPath = execPath);
-//		  return fork(path, args, options);
-//		};
-//	  }
 
 	  lexer = new Lexer;
 
@@ -5861,10 +5830,10 @@ var CoffeeScript = (function(){
 //		if (sourceMaps[filename]) {
 //		  return sourceMaps[filename];
 //		}
-//		if (_ref = path != null ? path.extname(filename) : void 0, __indexOf.call(fileExtensions, _ref) < 0) {
+//		if (_ref = path != null ? path.extname(filename) : void 0, __indexOf.call(exports.FILE_EXTENSIONS, _ref) < 0) {
 //		  return;
 //		}
-//		answer = compileFile(filename, true);
+//		answer = exports._compileFile(filename, true);
 //		return sourceMaps[filename] = answer.sourceMap;
 //	  };
 
@@ -5883,10 +5852,10 @@ var CoffeeScript = (function(){
 //		  }
 //		};
 //		frames = (function() {
-//		  var _j, _len1, _results;
+//		  var _i, _len, _results;
 //		  _results = [];
-//		  for (_j = 0, _len1 = stack.length; _j < _len1; _j++) {
-//			frame = stack[_j];
+//		  for (_i = 0, _len = stack.length; _i < _len; _i++) {
+//			frame = stack[_i];
 //			if (frame.getFunction() === exports.run) {
 //			  break;
 //			}

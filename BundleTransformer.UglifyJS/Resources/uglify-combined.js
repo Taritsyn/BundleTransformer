@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.0
+ * UglifyJS v2.4.1
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2013, Mihai Bazon <mihai.bazon@gmail.com>
@@ -2940,7 +2940,7 @@
 						for (var s = node.scope; s && !s.uses_eval; s = s.parent_scope)
 							s.uses_eval = true;
 					}
-					if (name == "arguments") {
+					if (func && name == "arguments") {
 						func.uses_arguments = true;
 					}
 				} else {
@@ -4568,12 +4568,14 @@
 		before: function(node, descend, in_list) {
 			if (node._squeezed) return node;
 			if (node instanceof AST_Scope) {
+				//node.drop_unused(this);
 				node = node.hoist_declarations(this);
 			}
 			descend(node, this);
 			node = node.optimize(this);
 			if (node instanceof AST_Scope) {
 				node.drop_unused(this);
+				descend(node, this);
 			}
 			node._squeezed = true;
 			return node;
@@ -5563,18 +5565,23 @@
 							}
 							return node;
 						}
-						if (node instanceof AST_For && node.init instanceof AST_BlockStatement) {
+						if (node instanceof AST_For) {
 							descend(node, this);
-							// certain combination of unused name + side effect leads to:
-							//    https://github.com/mishoo/UglifyJS2/issues/44
-							// that's an invalid AST.
-							// We fix it at this stage by moving the `var` outside the `for`.
-							var body = node.init.body.slice(0, -1);
-							node.init = node.init.body.slice(-1)[0].body;
-							body.push(node);
-							return in_list ? MAP.splice(body) : make_node(AST_BlockStatement, node, {
-								body: body
-							});
+
+							if (node.init instanceof AST_BlockStatement) {
+								// certain combination of unused name + side effect leads to:
+								//    https://github.com/mishoo/UglifyJS2/issues/44
+								// that's an invalid AST.
+								// We fix it at this stage by moving the `var` outside the `for`.
+
+								var body = node.init.body.slice(0, -1);
+								node.init = node.init.body.slice(-1)[0].body;
+								body.push(node);
+
+								return in_list ? MAP.splice(body) : make_node(AST_BlockStatement, node, {
+									body: body
+								});
+							}
 						}
 						if (node instanceof AST_Scope && node !== self)
 							return node;
@@ -6095,7 +6102,7 @@
 						if (self.args.length != 1) {
 							return make_node(AST_Array, self, {
 								elements: self.args
-							});
+							}).transform(compressor);
 						}
 						break;
 					  case "Object":
@@ -6109,11 +6116,30 @@
 						if (self.args.length == 0) return make_node(AST_String, self, {
 							value: ""
 						});
-						return make_node(AST_Binary, self, {
+						if (self.args.length <= 1) return make_node(AST_Binary, self, {
 							left: self.args[0],
 							operator: "+",
 							right: make_node(AST_String, self, { value: "" })
+						}).transform(compressor);
+						break;
+					  case "Number":
+						if (self.args.length == 0) return make_node(AST_Number, self, {
+							value: 0
 						});
+						if (self.args.length == 1) return make_node(AST_UnaryPrefix, self, {
+							expression: self.args[0],
+							operator: "+"
+						}).transform(compressor);
+					  case "Boolean":
+						if (self.args.length == 0) return make_node(AST_False, self);
+						if (self.args.length == 1) return make_node(AST_UnaryPrefix, self, {
+							expression: make_node(AST_UnaryPrefix, null, {
+								expression: self.args[0],
+								operator: "!"
+							}),
+							operator: "!"
+						}).transform(compressor);
+						break;
 					  case "Function":
 						if (all(self.args, function(x){ return x instanceof AST_String })) {
 							// quite a corner-case, but we can handle it:
@@ -6474,6 +6500,16 @@
 				&& self.right.getValue() === "" && self.left instanceof AST_Binary
 				&& self.left.operator == "+" && self.left.is_string(compressor)) {
 				return self.left;
+			} else if (self.operator == "+" && self.right instanceof AST_String
+				&& self.right.getValue() === "" && self.left instanceof AST_Binary
+				&& self.left.operator == "+" && self.left.right instanceof AST_Number) {
+				return make_node(AST_Binary, self, {
+					left: self.left.left,
+					operator: "+",
+					right: make_node(AST_String, self.right, {
+						value: String(self.left.right.value)
+					})
+				});
 			}
 			if (compressor.option("evaluate")) {
 				if (self.operator == "+") {

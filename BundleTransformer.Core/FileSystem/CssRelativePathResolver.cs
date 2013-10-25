@@ -17,7 +17,7 @@
 		/// </summary>
 		private static readonly Regex _cssImportRuleRegex =
 			new Regex(@"@import\s*(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 
 		/// <summary>
@@ -63,6 +63,7 @@
 			foreach (Match urlRuleMatch in urlRuleMatches)
 			{
 				var nodeMatch = new CssNodeMatch(urlRuleMatch.Index,
+					urlRuleMatch.Length,
 					CssNodeType.UrlRule,
 					urlRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -71,6 +72,7 @@
 			foreach (Match importRuleMatch in importRuleMatches)
 			{
 				var nodeMatch = new CssNodeMatch(importRuleMatch.Index,
+					importRuleMatch.Length,
 					CssNodeType.ImportRule,
 					importRuleMatch);
 				nodeMatches.Add(nodeMatch);
@@ -81,6 +83,7 @@
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
 				var nodeMatch = new CssNodeMatch(multilineCommentMatch.Index,
+					multilineCommentMatch.Length,
 					CssNodeType.MultilineComment,
 					multilineCommentMatch);
 				nodeMatches.Add(nodeMatch);
@@ -88,6 +91,7 @@
 
 			nodeMatches = nodeMatches
 				.OrderBy(n => n.Position)
+				.ThenByDescending(n => n.Length)
 				.ToList()
 				;
 

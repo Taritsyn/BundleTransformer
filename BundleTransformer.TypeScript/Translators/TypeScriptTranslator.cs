@@ -46,7 +46,7 @@
 		/// </summary>
 		private static readonly Regex _referenceCommentsRegex =
 			new Regex(@"\/\/\/\s*<reference\s+path=(?<quote1>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote1>)\s*\/>",
-				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+				RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Delegate that creates an instance of JavaScript engine
@@ -365,6 +365,7 @@
 			foreach (Match referenceCommentMatch in referenceCommentMatches)
 			{
 				var nodeMatch = new TsNodeMatch(referenceCommentMatch.Index,
+					referenceCommentMatch.Length,
 					TsNodeType.ReferenceComment,
 					referenceCommentMatch);
 				nodeMatches.Add(nodeMatch);
@@ -375,6 +376,7 @@
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
 				var nodeMatch = new TsNodeMatch(multilineCommentMatch.Index,
+					multilineCommentMatch.Length,
 					TsNodeType.MultilineComment,
 					multilineCommentMatch);
 				nodeMatches.Add(nodeMatch);
@@ -382,6 +384,7 @@
 
 			nodeMatches = nodeMatches
 				.OrderBy(n => n.Position)
+				.ThenByDescending(n => n.Length)
 				.ToList()
 				;
 

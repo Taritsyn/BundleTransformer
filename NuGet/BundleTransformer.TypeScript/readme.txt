@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.8.8
+           README file for Bundle Transformer: TypeScript 1.8.9
 
    ----------------------------------------------------------------------
 
@@ -30,9 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   From `/configuration/system.web/httpHandlers` element of the Web.config
-   file was removed a debugging HTTP-handler, that used for working in 
-   the IIS Classic mode.
+   Fixed minor bugs.
 	  
    ====================
    POST-INSTALL ACTIONS

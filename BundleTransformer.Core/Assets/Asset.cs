@@ -25,92 +25,85 @@
 		/// Regular expression to determine whether
 		/// asset is CSS-file based on its extension
 		/// </summary>
-		private static readonly Regex _cssFileExtensionRegex = new Regex(@"\.css$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _cssFileExtensionRegex = new Regex(@"\.css$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether 
 		/// asset is JS-file based on its extension
 		/// </summary>
-		private static readonly Regex _jsFileExtensionRegex = new Regex(@"\.js$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _jsFileExtensionRegex = new Regex(@"\.js$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is LESS-file based on its extension
 		/// </summary>
-		private static readonly Regex _lessFileExtensionRegex = new Regex(@"\.less$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _lessFileExtensionRegex = new Regex(@"\.less$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is Sass-file based on its extension
 		/// </summary>
-		private static readonly Regex _sassFileExtensionRegex = new Regex(@"\.sass$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _sassFileExtensionRegex = new Regex(@"\.sass$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is SCSS-file based on its extension
 		/// </summary>
-		private static readonly Regex _scssFileExtensionRegex = new Regex(@"\.scss$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled); 
+		private static readonly Regex _scssFileExtensionRegex = new Regex(@"\.scss$", RegexOptions.IgnoreCase); 
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is CoffeeScript-file based on its extension
 		/// </summary>
-		private static readonly Regex _coffeeFileExtensionRegex = new Regex(@"\.coffee$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _coffeeFileExtensionRegex = new Regex(@"\.coffee$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is Literate CoffeeScript-file based on its extension
 		/// </summary>
-		private static readonly Regex _litcoffeeFileExtensionRegex = new Regex(@"\.litcoffee$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _litcoffeeFileExtensionRegex = new Regex(@"\.litcoffee$", 
+			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is CoffeeScript Markdown-file based on its extension
 		/// </summary>
-		private static readonly Regex _coffeeMdFileExtensionRegex = new Regex(@"\.coffee\.md$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _coffeeMdFileExtensionRegex = new Regex(@"\.coffee\.md$", 
+			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is TypeScript-file based on its extension
 		/// </summary>
-		private static readonly Regex _tsFileExtensionRegex = new Regex(@"\.ts$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _tsFileExtensionRegex = new Regex(@"\.ts$", RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether
 		/// asset is Handlebars template-file based on its extension
 		/// </summary>
 		private static readonly Regex _handlebarsFileExtensionRegex = new Regex(@"\.handlebars$|\.hbs$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether asset is 
 		/// minified version of CSS-file with *.min.css extension
 		/// </summary>
 		private static readonly Regex _cssFileWithMinExtensionRegex = new Regex(@"\.min\.css$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether asset is 
 		/// debug version of JS-file with *.debug.js extension
 		/// </summary>
 		private static readonly Regex _jsFileWithDebugExtensionRegex = new Regex(@"\.debug\.js$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether asset is 
 		/// minified version of JS-file with *.min.js extension
 		/// </summary>
-		private static readonly Regex _jsFileWithMinExtensionRegex = new Regex(@"\.min\.js$",
-			RegexOptions.IgnoreCase | RegexOptions.Compiled);
+		private static readonly Regex _jsFileWithMinExtensionRegex = new Regex(@"\.min\.js$", 
+			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Virtual file system wrapper
