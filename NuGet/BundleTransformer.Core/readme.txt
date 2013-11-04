@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.9
+              README file for Bundle Transformer: Core 1.8.10
 
    ----------------------------------------------------------------------
 
@@ -37,7 +37,10 @@
    =============
    RELEASE NOTES
    =============
-   Fixed minor bugs.
+   1. Added support of the Microsoft ASP.NET Web Optimization Framework 
+      version 1.1.2;
+   2. Fixed an error that occurred during processing of complex CSS
+      media-queries.
    
    =============
    DOCUMENTATION

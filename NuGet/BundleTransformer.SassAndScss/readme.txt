@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.9
+          README file for Bundle Transformer: Sass and SCSS 1.8.10
 
    ----------------------------------------------------------------------
 
@@ -21,7 +21,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed minor bugs.
+   Fixed an error that occurred during processing of complex CSS 
+   media-queries.
    
    ====================
    POST-INSTALL ACTIONS

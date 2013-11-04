@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Core</id>
-    <version>1.8.9</version>
+    <version>1.8.10</version>
 	<title>Bundle Transformer: Core</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,12 +16,13 @@ The main differences classes `CssTransformer` and `JsTransformer` from standard 
 
 This extension will help your web applications successfully pass a most part of the tests in YSlow.</description>
     <summary>Bundle Transformer - a modular extension for System.Web.Optimization (aka Microsoft ASP.NET Web Optimization Framework). Classes `CssTransformer` and `JsTransformer`, included in the core of Bundle Transformer, implement interface `IBundleTransform`. They are intended to replace the standard classes `CssMinify` and `JsMinify`.</summary>
-	<releaseNotes>Fixed minor bugs.</releaseNotes>
+	<releaseNotes>1. Added support of the Microsoft ASP.NET Web Optimization Framework version 1.1.2;
+2. Fixed an error that occurred during processing of complex CSS media-queries.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Performance Optimization YSlow Speed Pre-minified Combine Compression</tags>
     <dependencies>
-      <dependency id="Microsoft.AspNet.Web.Optimization" version="1.1.1" />
+      <dependency id="Microsoft.AspNet.Web.Optimization" version="1.1.2" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.Core.dll" />
