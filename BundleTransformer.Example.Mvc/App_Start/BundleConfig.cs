@@ -57,7 +57,7 @@
 				"~/Scripts/jquery.validate.js",
 				"~/Scripts/jquery.validate.unobtrusive.js",
 				"~/Scripts/jquery.unobtrusive-ajax.js",
-				"~/Scripts/knockout-2.*",
+				"~/Scripts/knockout-3.*",
 				"~/Scripts/coffee/TestCoffeeScript.coffee",
 				"~/Scripts/coffee/TestLiterateCoffeeScript.litcoffee",
 				"~/Scripts/coffee/TestCoffeeScriptMarkdown.coffee.md",
@@ -84,8 +84,10 @@
 			};
 			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js", true);
 			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
-				new[] { "*.all.js", "references.js" }));
+				new[] { "*.all.js", "_references.js" }));
 			bundles.Add(scriptsDirectoryBundle);
+
+			BundleTable.EnableOptimizations = false;
 		}
 	}
 }

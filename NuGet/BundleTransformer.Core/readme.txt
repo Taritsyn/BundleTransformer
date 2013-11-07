@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.10
+              README file for Bundle Transformer: Core 1.8.11
 
    ----------------------------------------------------------------------
 
@@ -37,10 +37,11 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the Microsoft ASP.NET Web Optimization Framework 
-      version 1.1.2;
-   2. Fixed an error that occurred during processing of complex CSS
-      media-queries.
+   1. From the `configuration\bundleTransformer\core` configuration 
+      element was removed a `useEnableOptimizationsProperty` attribute;
+   2. Added new configuration element - 
+      `configuration\bundleTransformer\core\assetHandler`, that responsible
+      for settings of the debugging HTTP handlers.
    
    =============
    DOCUMENTATION

@@ -4,28 +4,22 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Security.Cryptography;
+	using System.Text;
 	using System.Web;
 	using System.Web.Caching;
 
 	using Assets;
+	using Configuration;
 	using FileSystem;
-	using Minifiers;
 	using Resources;
 	using Translators;
-	using Web;
 
 	/// <summary>
-	/// HTTP-handler, which is responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output 
 	/// of processed asset
 	/// </summary>
 	public abstract class AssetHandlerBase : IHttpHandler
 	{
-		/// <summary>
-		/// Duration of storage the text content of processed asset in 
-		/// server cache (in minutes)
-		/// </summary>
-		const int SERVER_CACHE_DURATION_IN_MINUTES = 15;
-
 		/// <summary>
 		/// Server cache
 		/// </summary>
@@ -42,9 +36,10 @@
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		/// <summary>
-		/// Information about web application
+		/// Configuration settings of the debugging HTTP-handler, that responsible 
+		/// for text output of processed asset
 		/// </summary>
-		protected readonly IHttpApplicationInfo _applicationInfo;
+		private readonly AssetHandlerSettings _assetHandlerConfig;
 
 		/// <summary>
 		/// Asset content type
@@ -61,17 +56,19 @@
 
 
 		/// <summary>
-		/// Constructs instance of asset handler
+		/// Constructs a instance of the debugging HTTP-handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="applicationInfo">Information about web application</param>
-		protected AssetHandlerBase(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
-			IHttpApplicationInfo applicationInfo)
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler,
+		/// that responsible for text output of processed asset</param>
+		protected AssetHandlerBase(Cache cache,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper, 
+			AssetHandlerSettings assetHandlerConfig)
 		{
 			_cache = cache;
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
-			_applicationInfo = applicationInfo;
+			_assetHandlerConfig = assetHandlerConfig;
 		}
 
 
@@ -104,12 +101,6 @@
 				ThrowHttpNotFoundError(response);
 				return;
 			}
-			catch (AssetMinificationException e)
-			{
-				ThrowHttpInternalServerError(response,
-					string.Format(Strings.AssetHandler_MinificationError, e.Message));
-				return;
-			}
 			catch (AssetTranslationException e)
 			{
 				ThrowHttpInternalServerError(response,
@@ -122,40 +113,59 @@
 				return;
 			}
 
-			// Generate a ETag value and check it
-			string eTag = GenerateAssetETag(content);
-			bool eTagChanged = IsETagHeaderChanged(request, eTag);
-			
-			// Add a special HTTP-headers to ensure that 
-			// asset caching in browsers
-			if (eTagChanged)
+			var clientCache = response.Cache;
+			if (_assetHandlerConfig.DisableClientCache)
 			{
 				response.StatusCode = 200;
 				response.StatusDescription = "OK";
-			}
-			else
-			{
-				response.StatusCode = 304;
-				response.StatusDescription = "Not Modified";
 
-				// Set to 0 to prevent client waiting for data
-				response.AddHeader("Content-Length", "0");
-			}
+				// Configure browser cache
+				clientCache.SetCacheability(HttpCacheability.NoCache);
+				clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
+				clientCache.SetValidUntilExpires(false);
+				clientCache.SetNoStore();
+				clientCache.SetNoServerCaching();
 
-			var clientCache = response.Cache;
-			clientCache.SetCacheability(HttpCacheability.Public);
-			clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
-			clientCache.SetValidUntilExpires(true);
-			clientCache.AppendCacheExtension("must-revalidate");
-			clientCache.SetNoServerCaching();
-			clientCache.VaryByHeaders["If-None-Match"] = true;
-			clientCache.SetETag(eTag);
-
-			if (eTagChanged)
-			{
 				// Output text content of asset
 				response.ContentType = ContentType;
 				response.Write(content);
+			}
+			else
+			{
+				// Generate a ETag value and check it
+				string eTag = GenerateAssetETag(content);
+				bool eTagChanged = IsETagHeaderChanged(request, eTag);
+
+				// Add a special HTTP-headers to ensure that 
+				// asset caching in browsers
+				if (eTagChanged)
+				{
+					response.StatusCode = 200;
+					response.StatusDescription = "OK";
+				}
+				else
+				{
+					response.StatusCode = 304;
+					response.StatusDescription = "Not Modified";
+
+					// Set to 0 to prevent client waiting for data
+					response.AddHeader("Content-Length", "0");
+				}
+
+				clientCache.SetCacheability(HttpCacheability.Public);
+				clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
+				clientCache.SetValidUntilExpires(true);
+				clientCache.AppendCacheExtension("must-revalidate");
+				clientCache.SetNoServerCaching();
+				clientCache.VaryByHeaders["If-None-Match"] = true;
+				clientCache.SetETag(eTag);
+
+				if (eTagChanged)
+				{
+					// Output text content of asset
+					response.ContentType = ContentType;
+					response.Write(content);
+				}
 			}
 
 			response.End();
@@ -179,35 +189,45 @@
 		/// <returns>Text content of asset</returns>
 		private string GetProcessedAssetContent(string assetUrl)
 		{
-			var asset = new Asset(assetUrl);
 			string content;
-			string cacheItemKey = GetCacheKey(asset.VirtualPath);
-
-			lock (_cacheSynchronizer)
+			var asset = new Asset(assetUrl);
+			
+			if (_assetHandlerConfig.DisableServerCache)
 			{
-				object cacheItem = _cache.Get(cacheItemKey);
-				if (cacheItem != null)
+				IAsset processedAsset = ProcessAsset(asset);
+				content = processedAsset.Content;
+			}
+			else
+			{
+				lock (_cacheSynchronizer)
 				{
-					content = (string)cacheItem;
-				}
-				else
-				{
-					IAsset processedAsset = ProcessAsset(asset);
-					content = processedAsset.Content;
-					string assetVirtualPath = processedAsset.VirtualPath;
+					string processedAssetUrl = asset.Url;
+					string cacheItemKey = GetCacheKey(processedAssetUrl);
+					object cacheItem = _cache.Get(cacheItemKey);
 
-					DateTime utcStart = DateTime.UtcNow;
-					DateTime absoluteExpiration = DateTime.Now.AddMinutes(SERVER_CACHE_DURATION_IN_MINUTES);
-					TimeSpan slidingExpiration = Cache.NoSlidingExpiration;
+					if (cacheItem != null)
+					{
+						content = (string)cacheItem;
+					}
+					else
+					{
+						IAsset processedAsset = ProcessAsset(asset);
+						content = processedAsset.Content;
 
-					var fileDependencies = new List<string> { assetVirtualPath };
-					fileDependencies.AddRange(processedAsset.VirtualPathDependencies);
+						DateTime utcStart = DateTime.UtcNow;
+						DateTime absoluteExpiration = DateTime.Now.AddMinutes(
+							_assetHandlerConfig.ServerCacheDurationInMinutes);
+						TimeSpan slidingExpiration = Cache.NoSlidingExpiration;
 
-					var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(assetVirtualPath,
-						fileDependencies.ToArray(), utcStart);
+						var fileDependencies = new List<string> { processedAssetUrl };
+						fileDependencies.AddRange(processedAsset.VirtualPathDependencies);
 
-					_cache.Insert(cacheItemKey, content, cacheDep,
-						absoluteExpiration, slidingExpiration, CacheItemPriority.Low, null);
+						var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(processedAssetUrl,
+							fileDependencies.ToArray(), utcStart);
+
+						_cache.Insert(cacheItemKey, content, cacheDep,
+							absoluteExpiration, slidingExpiration, CacheItemPriority.Low, null);
+					}
 				}
 			}
 
@@ -215,31 +235,49 @@
 		}
 
 		/// <summary>
-		/// Generates value for HTTP-header "ETag" based on 
+		/// Generates a value for HTTP-header "ETag" based on 
 		/// information about processed asset
 		/// </summary>
 		/// <param name="assetContent">Text content of asset</param>
 		/// <returns>ETag value</returns>
 		private static string GenerateAssetETag(string assetContent)
 		{
-			byte[] hash;
+			string hash;
 
-			using (Stream stream = Utils.GetStreamFromString(assetContent))
+			using (var hashAlgorithm = CreateHashAlgorithm())
 			{
-				using (var md5 = new MD5CryptoServiceProvider())
-				{
-					hash = md5.ComputeHash(stream);
-				}
+				hash = HttpServerUtility.UrlTokenEncode(
+					hashAlgorithm.ComputeHash(Encoding.Unicode.GetBytes(assetContent)));
 			}
 
-			string hashString = BitConverter.ToString(hash);
-			string eTag = string.Format("\"{0}\"", hashString);
+			string eTag = string.Format("\"{0}\"", hash);
 
 			return eTag;
 		}
 
 		/// <summary>
-		/// Checks actuality of data in browser cache using 
+		/// Creates a hash algorithm
+		/// </summary>
+		/// <returns>Hash algorithm</returns>
+		private static SHA256 CreateHashAlgorithm()
+		{
+			bool isMonoRuntime = (Type.GetType("Mono.Runtime") != null);
+			SHA256 hashAlgorithm;
+
+			if (!isMonoRuntime)
+			{
+				hashAlgorithm = new SHA256CryptoServiceProvider();
+			}
+			else
+			{
+				hashAlgorithm = new SHA256Managed();
+			}
+
+			return hashAlgorithm;
+		}
+
+		/// <summary>
+		/// Checks a actuality of data in browser cache using 
 		/// HTTP-header "ETag"
 		/// </summary>
 		/// <param name="request">HttpRequest object</param>
@@ -259,11 +297,22 @@
 		}
 
 		/// <summary>
-		/// Process asset
+		/// Process a asset
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <returns>Processed asset</returns>
-		protected abstract IAsset ProcessAsset(IAsset asset);
+		protected IAsset ProcessAsset(IAsset asset)
+		{
+			return ProcessAsset(asset, BundleTransformerContext.Current.IsDebugMode);
+		}
+
+		/// <summary>
+		/// Process a asset
+		/// </summary>
+		/// <param name="asset">Asset</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
+		/// <returns>Processed asset</returns>
+		protected abstract IAsset ProcessAsset(IAsset asset, bool isDebugMode);
 
 		/// <summary>
 		/// Throw 404 error (page not found)

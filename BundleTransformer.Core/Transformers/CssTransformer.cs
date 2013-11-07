@@ -17,7 +17,6 @@
 	using Resources;
 	using Translators;
 	using Validators;
-	using Web;
 
 	/// <summary>
 	/// Transformer that responsible for processing CSS-assets
@@ -44,15 +43,16 @@
 			new Regex(@"@charset\s*(?<quote>'|"")(?<charset>[A-Za-z0-9\-]+)(\k<quote>)\s*;",
 				RegexOptions.IgnoreCase);
 
+
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		public CssTransformer()
 			: this(null, null, new string[0])
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		public CssTransformer(IMinifier minifier)
@@ -60,7 +60,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		/// <param name="translators">List of translators</param>
 		public CssTransformer(IList<ITranslator> translators)
@@ -68,7 +68,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
@@ -77,7 +77,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
@@ -86,43 +86,27 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns)
-			: this(minifier, translators, ignorePatterns, 
-				BundleTransformerContext.Current.GetApplicationInfo())
+			: this(minifier, translators, ignorePatterns, BundleTransformerContext.Current.GetCoreConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-transformer
+		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		/// <param name="applicationInfo">Information about web application</param>
-		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns, 
-			IHttpApplicationInfo applicationInfo)
-			: this(minifier, translators, ignorePatterns, applicationInfo, 
-				BundleTransformerContext.Current.GetCoreConfiguration())
-		{ }
-
-		/// <summary>
-		/// Constructs instance of CSS-transformer
-		/// </summary>
-		/// <param name="minifier">Minifier</param>
-		/// <param name="translators">List of translators</param>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
-		/// should be ignored when processing</param>
-		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
 		public CssTransformer(IMinifier minifier, IList<ITranslator> translators,
-			string[] ignorePatterns, IHttpApplicationInfo applicationInfo, CoreSettings coreConfig)
-			: base(ignorePatterns, applicationInfo, coreConfig)
+			string[] ignorePatterns, CoreSettings coreConfig)
+			: base(ignorePatterns, coreConfig)
 		{
 			_minifier = minifier ?? CreateDefaultMinifier();
 			_translators = translators ?? CreateDefaultTranslators();
@@ -130,7 +114,7 @@
 
 
 		/// <summary>
-		/// Creates instance of default CSS-minifier
+		/// Creates a instance of default CSS-minifier
 		/// </summary>
 		/// <returns>Default CSS-minifier</returns>
 		private IMinifier CreateDefaultMinifier()
@@ -149,7 +133,7 @@
 		}
 
 		/// <summary>
-		/// Creates list of default CSS-translators
+		/// Creates a list of default CSS-translators
 		/// </summary>
 		/// <returns>List of default CSS-translators</returns>
 		private IList<ITranslator> CreateDefaultTranslators()
@@ -179,25 +163,26 @@
 		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="virtualPathProvider">Virtual path provider</param>
 		/// <param name="httpContext">Object HttpContext</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext)
+			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext, bool isDebugMode)
 		{
 			ValidateAssetTypes(assets);
 			assets = RemoveDuplicateAssets(assets);
 			assets = RemoveUnnecessaryAssets(assets);
-			assets = ReplaceFileExtensions(assets);
-			assets = Translate(assets);
+			assets = ReplaceFileExtensions(assets, isDebugMode);
+			assets = Translate(assets, isDebugMode);
 			if (!_coreConfig.Css.DisableNativeCssRelativePathTransformation)
 			{
 				assets = ResolveRelativePaths(assets);
 			}
-			if (!_applicationInfo.IsDebugMode)
+			if (!isDebugMode)
 			{
 				assets = Minify(assets);
 			}
 
 			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
-			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider);
+			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider, isDebugMode);
 			bundleResponse.ContentType = Constants.ContentType.Css;
 		}
 
@@ -212,7 +197,7 @@
 		}
 
 		/// <summary>
-		/// Removes duplicate CSS-assets
+		/// Removes a duplicate CSS-assets
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of unique CSS-assets</returns>
@@ -225,7 +210,7 @@
 		}
 
 		/// <summary>
-		/// Removes unnecessary CSS-assets
+		/// Removes a unnecessary CSS-assets
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of necessary CSS-assets</returns>
@@ -238,15 +223,16 @@
 		}
 
 		/// <summary>
-		/// Replaces file extensions of CSS-assets
+		/// Replaces a file extensions of CSS-assets
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		/// <returns>Set of CSS-assets with a modified extension</returns>
-		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets)
+		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets, bool isDebugMode)
 		{
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter
 			{
-			    IsDebugMode = _applicationInfo.IsDebugMode,
+			    IsDebugMode = isDebugMode,
 				UsePreMinifiedFiles = _coreConfig.Css.UsePreMinifiedFiles
 			};
 
@@ -256,7 +242,7 @@
 		}
 
 		/// <summary>
-		/// Resolves relative paths in CSS-assets
+		/// Resolves a relative paths in CSS-assets
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of CSS-assets with a fixed relative paths</returns>

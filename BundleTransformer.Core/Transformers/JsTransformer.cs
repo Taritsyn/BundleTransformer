@@ -14,7 +14,6 @@
 	using Resources;
 	using Translators;
 	using Validators;
-	using Web;
 
 	/// <summary>
 	/// Transformer that responsible for processing JS-assets
@@ -22,14 +21,14 @@
 	public sealed class JsTransformer : TransformerBase
 	{
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		public JsTransformer()
 			: this(null, null, new string[0])
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		public JsTransformer(IMinifier minifier)
@@ -37,7 +36,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		/// <param name="translators">List of translators</param>
 		public JsTransformer(IList<ITranslator> translators)
@@ -45,7 +44,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
@@ -54,7 +53,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
@@ -63,42 +62,27 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns)
-			: this(minifier, translators, ignorePatterns, BundleTransformerContext.Current.GetApplicationInfo())
+			: this(minifier, translators, ignorePatterns, BundleTransformerContext.Current.GetCoreConfiguration())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-transformer
+		/// Constructs a instance of JS-transformer
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		/// <param name="applicationInfo">Information about web application</param>
-		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns,
-			IHttpApplicationInfo applicationInfo)
-			: this(minifier, translators, ignorePatterns, applicationInfo, 
-				BundleTransformerContext.Current.GetCoreConfiguration())
-		{ }
-
-		/// <summary>
-		/// Constructs instance of JS-transformer
-		/// </summary>
-		/// <param name="minifier">Minifier</param>
-		/// <param name="translators">List of translators</param>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
-		/// should be ignored when processing</param>
-		/// <param name="applicationInfo">Information about web application</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
 		public JsTransformer(IMinifier minifier, IList<ITranslator> translators,
-			string[] ignorePatterns, IHttpApplicationInfo applicationInfo, CoreSettings coreConfig)
-			: base(ignorePatterns, applicationInfo, coreConfig)
+			string[] ignorePatterns, CoreSettings coreConfig)
+			: base(ignorePatterns, coreConfig)
 		{
 			_minifier = minifier ?? CreateDefaultMinifier();
 			_translators = translators ?? CreateDefaultTranslators();
@@ -106,7 +90,7 @@
 
 
 		/// <summary>
-		/// Creates instance of default JS-minifier
+		/// Creates a instance of default JS-minifier
 		/// </summary>
 		/// <returns>Default JS-minifier</returns>
 		private IMinifier CreateDefaultMinifier()
@@ -125,7 +109,7 @@
 		}
 
 		/// <summary>
-		/// Creates list of default JS-translators
+		/// Creates a list of default JS-translators
 		/// </summary>
 		/// <returns>List of default JS-translators</returns>
 		private IList<ITranslator> CreateDefaultTranslators()
@@ -149,27 +133,28 @@
 		}
 
 		/// <summary>
-		/// Transforms JS-assets
+		/// Transforms a JS-assets
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="virtualPathProvider">Virtual path provider</param>
 		/// <param name="httpContext">Object HttpContext</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext)
+			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext, bool isDebugMode)
 		{
 			ValidateAssetTypes(assets);
 			assets = RemoveDuplicateAssets(assets);
 			assets = RemoveUnnecessaryAssets(assets);
-			assets = ReplaceFileExtensions(assets);
-			assets = Translate(assets);
-			if (!_applicationInfo.IsDebugMode)
+			assets = ReplaceFileExtensions(assets, isDebugMode);
+			assets = Translate(assets, isDebugMode);
+			if (!isDebugMode)
 			{
 				assets = Minify(assets);
 			}
 
 			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
-			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider);
+			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider, isDebugMode);
 			bundleResponse.ContentType = Constants.ContentType.Js;
 		}
 
@@ -184,7 +169,7 @@
 		}
 
 		/// <summary>
-		/// Removes duplicate JS-assets
+		/// Removes a duplicate JS-assets
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of unique JS-assets</returns>
@@ -197,7 +182,7 @@
 		}
 
 		/// <summary>
-		/// Removes unnecessary JS-assets
+		/// Removes a unnecessary JS-assets
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of necessary JS-assets</returns>
@@ -210,18 +195,19 @@
 		}
 
 		/// <summary>
-		/// Replaces file extensions of JS-assets
+		/// Replaces a file extensions of JS-assets
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		/// <returns>Set of JS-assets with a modified extension</returns>
-		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets)
+		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets, bool isDebugMode)
 		{
 			var jsFileExtensionsFilter = new JsFileExtensionsFilter(
 				Utils.ConvertToStringCollection(
 					_coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','), 
-					',', true))
+					',', true, true))
 			{
-			    IsDebugMode = _applicationInfo.IsDebugMode,
+			    IsDebugMode = isDebugMode,
 				UsePreMinifiedFiles = _coreConfig.Js.UsePreMinifiedFiles
 			};
 
@@ -231,7 +217,7 @@
 		}
 
 		/// <summary>
-		/// Combines code of JS-assets
+		/// Combines a code of JS-assets
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <param name="enableTracing">Enables tracing</param>

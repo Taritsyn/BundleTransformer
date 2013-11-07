@@ -4,14 +4,14 @@
 	using System.Web.Caching;
 
 	using Core;
+	using Core.Configuration;
 	using Core.Assets;
 	using Core.FileSystem;
 	using Core.HttpHandlers;
 	using Core.Translators;
-	using Core.Web;
 
 	/// <summary>
-	/// HTTP-handler, which is responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output 
 	/// of translated LESS-asset
 	/// </summary>
 	public sealed class LessAssetHandler : AssetHandlerBase
@@ -26,36 +26,39 @@
 
 
 		/// <summary>
-		/// Constructs instance of LESS asset handler
+		/// Constructs a instance of LESS asset handler
 		/// </summary>
 		public LessAssetHandler()
 			: this(HttpContext.Current.Cache,
 				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.GetApplicationInfo())
+				BundleTransformerContext.Current.GetCoreConfiguration().AssetHandler)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of LESS asset handler
+		/// Constructs a instance of LESS asset handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="applicationInfo">Information about web application</param>
-		public LessAssetHandler(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
-			IHttpApplicationInfo applicationInfo)
-			: base(cache, virtualFileSystemWrapper, applicationInfo)
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler,
+		/// that responsible for text output of processed asset</param>
+		public LessAssetHandler(Cache cache,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			AssetHandlerSettings assetHandlerConfig)
+			: base(cache, virtualFileSystemWrapper, assetHandlerConfig)
 		{ }
 
 
 		/// <summary>
-		/// Translates code of asset written on LESS to CSS-code
+		/// Translates a code of asset written on LESS to CSS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on LESS</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		/// <returns>Asset with translated code</returns>
-		protected override IAsset ProcessAsset(IAsset asset)
+		protected override IAsset ProcessAsset(IAsset asset, bool isDebugMode)
 		{
 			ITranslator lessTranslator = BundleTransformerContext.Current.GetCssTranslatorInstance(
 				Core.Constants.TranslatorName.LessTranslator);
-			lessTranslator.IsDebugMode = _applicationInfo.IsDebugMode;
+			lessTranslator.IsDebugMode = isDebugMode;
 
 			IAsset processedAsset = lessTranslator.Translate(asset);
 

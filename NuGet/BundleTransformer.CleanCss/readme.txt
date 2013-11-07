@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Clean-css 1.8.9
+            README file for Bundle Transformer: Clean-css 1.8.11
  
    ----------------------------------------------------------------------
 
@@ -20,11 +20,6 @@
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install the following 
    NuGet package - JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Clean-css version 1.1.5.
    
    ====================
    POST-INSTALL ACTIONS

@@ -5,13 +5,13 @@
 
 	using Core;
 	using Core.Assets;
+	using Core.Configuration;
 	using Core.FileSystem;
 	using Core.HttpHandlers;
 	using Core.Translators;
-	using Core.Web;
 
 	/// <summary>
-	/// HTTP-handler, which is responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output 
 	/// of translated CoffeeScript-asset
 	/// </summary>
 	public sealed class CoffeeScriptAssetHandler : AssetHandlerBase
@@ -26,36 +26,39 @@
 
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript asset handler
+		/// Constructs a instance of CoffeeScript asset handler
 		/// </summary>
 		public CoffeeScriptAssetHandler()
-			: this(HttpContext.Current.Cache, 
-				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(), 
-				BundleTransformerContext.Current.GetApplicationInfo())
+			: this(HttpContext.Current.Cache,
+				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.GetCoreConfiguration().AssetHandler)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript asset handler
+		/// Constructs a instance of CoffeeScript asset handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="applicationInfo">Information about web application</param>
-		public CoffeeScriptAssetHandler(Cache cache, IVirtualFileSystemWrapper virtualFileSystemWrapper,
-			IHttpApplicationInfo applicationInfo)
-				: base(cache, virtualFileSystemWrapper, applicationInfo)
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler,
+		/// that responsible for text output of processed asset</param>
+		public CoffeeScriptAssetHandler(Cache cache,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			AssetHandlerSettings assetHandlerConfig)
+			: base(cache, virtualFileSystemWrapper, assetHandlerConfig)
 		{ }
 
 
 		/// <summary>
-		/// Translates code of asset written on CoffeeScript to JS-code
+		/// Translates a code of asset written on CoffeeScript to JS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on CoffeeScript</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		/// <returns>Asset with translated code</returns>
-		protected override IAsset ProcessAsset(IAsset asset)
+		protected override IAsset ProcessAsset(IAsset asset, bool isDebugMode)
 		{
 			ITranslator coffeeScriptTranslator = BundleTransformerContext.Current.GetJsTranslatorInstance(
 				Core.Constants.TranslatorName.CoffeeScriptTranslator);
-			coffeeScriptTranslator.IsDebugMode = _applicationInfo.IsDebugMode;
+			coffeeScriptTranslator.IsDebugMode = isDebugMode;
 
 			IAsset processedAsset = coffeeScriptTranslator.Translate(asset);
 

@@ -54,6 +54,11 @@
 					<xs:documentation>Configuration settings of processing JS-assets</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element name="assetHandler" type="AssetHandlerSettings_SchemaType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Configuration settings of the debugging HTTP-handler, that responsible for text output of processed asset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 		</xs:all>
 		<xs:attribute name="enableTracing" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
@@ -65,11 +70,6 @@
 			<xs:annotation>
 				<xs:documentation>List of JS-files with Microsoft-style extensions</xs:documentation>
 			</xs:annotation>			
-		</xs:attribute>
-		<xs:attribute name="useEnableOptimizationsProperty" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag, which makes the debug mode is dependent on the value of the BundleTable.EnableOptimizations property</xs:documentation>
-			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 
@@ -220,6 +220,30 @@
 		<xs:attribute name="name" type="xs:string" use="optional" default="">
 			<xs:annotation>
 				<xs:documentation>JavaScript engine name</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="AssetHandlerSettings_SchemaType">
+		<xs:attribute name="disableServerCache" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disable storage text content of processed asset in server cache</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="serverCacheDurationInMinutes" use="optional" default="15">
+			<xs:annotation>
+				<xs:documentation>Duration of storage the text content of processed asset in server cache (in minutes)</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="1" />
+					<xs:maxInclusive value="1440" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="disableClientCache" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disable storage text content of processed asset in browser cache</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>

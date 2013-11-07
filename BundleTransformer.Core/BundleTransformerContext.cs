@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Configuration;
-	using System.Web;
 	using System.Web.Optimization;
 
 	using Configuration;
@@ -12,7 +11,6 @@
 	using Resources;
 	using Transformers;
 	using Translators;
-	using Web;
 
 	/// <summary>
 	/// Bundle transformer context
@@ -36,12 +34,6 @@
 		/// </summary>
 		private readonly Lazy<JsTransformer> _jsTransformer =
 			new Lazy<JsTransformer>();
-
-		/// <summary>
-		/// Information about web application
-		/// </summary>
-		private readonly Lazy<HttpApplicationInfo> _applicationInfo =
-			new Lazy<HttpApplicationInfo>();
 
 		/// <summary>
 		/// Virtual file system wrapper 
@@ -109,7 +101,7 @@
 		private readonly object _jsMinifiersPoolSynchronizer = new object();
 		
 		/// <summary>
-		/// Gets instance of bundle transformer context
+		/// Gets a instance of bundle transformer context
 		/// </summary>
 		public static BundleTransformerContext Current
 		{
@@ -121,17 +113,7 @@
 		/// </summary>
 		public bool IsDebugMode
 		{
-			get
-			{
-				CoreSettings coreConfig = GetCoreConfiguration();
-
-				if (coreConfig.UseEnableOptimizationsProperty)
-				{
-					return !BundleTable.EnableOptimizations;
-				}
-
-				return HttpContext.Current.IsDebuggingEnabled;
-			}
+			get { return !BundleTable.EnableOptimizations; }
 		}
 
 
@@ -143,7 +125,7 @@
 
 
 		/// <summary>
-		/// Gets instance of CSS-transformer
+		/// Gets a instance of CSS-transformer
 		/// </summary>
 		/// <returns>Instance of CSS-transformer</returns>
 		public CssTransformer GetCssTransformerInstance()
@@ -152,7 +134,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of JS-transformer
+		/// Gets a instance of JS-transformer
 		/// </summary>
 		/// <returns>Instance of JS-transformer</returns>
 		public JsTransformer GetJsTransformerInstance()
@@ -161,16 +143,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of the web application info
-		/// </summary>
-		/// <returns>Information about web application</returns>
-		public IHttpApplicationInfo GetApplicationInfo()
-		{
-			return _applicationInfo.Value;
-		}
-
-		/// <summary>
-		/// Gets instance of the virtual file system wrapper
+		/// Gets a instance of the virtual file system wrapper
 		/// </summary>
 		/// <returns>Virtual file system wrapper</returns>
 		public VirtualFileSystemWrapper GetVirtualFileSystemWrapper()
@@ -179,7 +152,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of the common relative path resolver
+		/// Gets a instance of the common relative path resolver
 		/// </summary>
 		/// <returns>Common relative path resolver</returns>
 		public CommonRelativePathResolver GetCommonRelativePathResolver()
@@ -188,7 +161,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of the CSS relative path resolver
+		/// Gets a instance of the CSS relative path resolver
 		/// </summary>
 		/// <returns>Stylesheet relative path resolver</returns>
 		public CssRelativePathResolver GetCssRelativePathResolver()
@@ -197,7 +170,7 @@
 		}
 
 		/// <summary>
-		/// Gets core configuration settings
+		/// Gets a core configuration settings
 		/// </summary>
 		/// <returns>Configuration settings of core</returns>
 		public CoreSettings GetCoreConfiguration()
@@ -206,7 +179,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of CSS-translator
+		/// Gets a instance of CSS-translator
 		/// </summary>
 		/// <param name="cssTranslatorName">CSS-translator name</param>
 		/// <returns>Instance of CSS-translator</returns>
@@ -249,7 +222,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of CSS-minifier
+		/// Gets a instance of CSS-minifier
 		/// </summary>
 		/// <param name="cssMinifierName">CSS-minifier name</param>
 		/// <returns>Instance of CSS-minifier</returns>
@@ -292,7 +265,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of JS-translator
+		/// Gets a instance of JS-translator
 		/// </summary>
 		/// <param name="jsTranslatorName">JS-translator name</param>
 		/// <returns>Instance of JS-translator</returns>
@@ -335,7 +308,7 @@
 		}
 
 		/// <summary>
-		/// Gets instance of JS-minifier
+		/// Gets a instance of JS-minifier
 		/// </summary>
 		/// <param name="jsMinifierName">JS-minifier name</param>
 		/// <returns>Instance of JS-minifier</returns>

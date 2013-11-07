@@ -64,7 +64,7 @@
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.5.0.7\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -89,6 +89,7 @@
     <Compile Include="Builders\NullBuilder.cs" />
     <Compile Include="Bundles\CustomScriptBundle.cs" />
     <Compile Include="Bundles\CustomStyleBundle.cs" />
+    <Compile Include="Configuration\AssetHandlerSettings.cs" />
     <Compile Include="Configuration\JsEngineSettings.cs" />
     <Compile Include="Constants\ContentType.cs" />
     <Compile Include="Constants\MinifierName.cs" />
@@ -123,7 +124,6 @@
     <Compile Include="StringExtensions.cs" />
     <Compile Include="AssetNodeMatchBase.cs" />
     <Compile Include="UnknownMimeTypeException.cs" />
-    <Compile Include="Web\HttpApplicationInfo.cs" />
     <Compile Include="FileSystem\IVirtualFileSystemWrapper.cs" />
     <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
     <Compile Include="Filters\CssUnnecessaryAssetsFilter.cs" />
@@ -168,7 +168,6 @@
     <Compile Include="Validators\InvalidAssetTypesException.cs" />
     <Compile Include="Validators\IValidator.cs" />
     <Compile Include="Validators\JsAssetTypesValidator.cs" />
-    <Compile Include="Web\IHttpApplicationInfo.cs" />
     <Compile Include="CommonRegExps.cs" />
   </ItemGroup>
   <ItemGroup>
