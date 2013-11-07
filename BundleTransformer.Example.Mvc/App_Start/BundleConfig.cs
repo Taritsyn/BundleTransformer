@@ -86,8 +86,6 @@
 			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
 				new[] { "*.all.js", "_references.js" }));
 			bundles.Add(scriptsDirectoryBundle);
-
-			BundleTable.EnableOptimizations = false;
 		}
 	}
 }
