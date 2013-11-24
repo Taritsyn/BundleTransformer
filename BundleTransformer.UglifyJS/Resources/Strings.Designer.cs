@@ -61,7 +61,7 @@ namespace BundleTransformer.UglifyJs.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot convert the value &apos;{0}&apos; of symbol &apos;{1}&apos; to type {2}..
+        ///   Looks up a localized string similar to Cannot convert the value &apos;{0}&apos; of symbol `{1}` to type `{2}`..
         /// </summary>
         public static string GlobalDefsParsing_CannotConvertValue {
             get {
@@ -70,7 +70,7 @@ namespace BundleTransformer.UglifyJs.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot parse the value &apos;{0}&apos; of symbol &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Cannot parse the value &apos;{0}&apos; of symbol `{1}`..
         /// </summary>
         public static string GlobalDefsParsing_CannotParseValue {
             get {
@@ -79,7 +79,7 @@ namespace BundleTransformer.UglifyJs.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The value &apos;{0}&apos; does not correspond to the format of SYMBOL[=value]..
+        ///   Looks up a localized string similar to The value &apos;{0}&apos; of UglifyJS property `GlobalDefinitions` does not correspond to the format of `SYMBOL[=value]`..
         /// </summary>
         public static string GlobalDefsParsing_InvalidSymbolValueFormat {
             get {

@@ -138,7 +138,9 @@
 				IfReturn = compressionConfig.IfReturn,
 				JoinVars = compressionConfig.JoinVars,
 				Cascade = compressionConfig.Cascade,
-				GlobalDefinitions = compressionConfig.GlobalDefinitions
+				GlobalDefinitions = compressionConfig.GlobalDefinitions,
+				PureGetters = compressionConfig.PureGetters,
+				PureFunctions = compressionConfig.PureFunctions
 			};
 
 			ManglingOptions = new ManglingOptions

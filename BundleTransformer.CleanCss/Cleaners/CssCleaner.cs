@@ -1,12 +1,14 @@
 ﻿namespace BundleTransformer.CleanCss.Cleaners
 {
 	using System;
+	using System.Text;
 
 	using JavaScriptEngineSwitcher.Core;
 	using JavaScriptEngineSwitcher.Core.Helpers;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
+	using Core;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -29,6 +31,11 @@
 		/// Template of function call, which is responsible for cleaning
 		/// </summary>
 		const string CLEANING_FUNCTION_CALL_TEMPLATE = @"cleanCssHelper.minify({0}, {1});";
+
+		/// <summary>
+		/// Default cleaning options
+		/// </summary>
+		private readonly CleaningOptions _defaultOptions;
 
 		/// <summary>
 		/// String representation of the default cleaning options
@@ -72,6 +79,7 @@
 		public CssCleaner(Func<IJsEngine> createJsEngineInstance, CleaningOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
+			_defaultOptions = defaultOptions;
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCleaningOptionsToJson(defaultOptions).ToString() : "null";
 		}
@@ -102,10 +110,19 @@
 		public string Clean(string content, CleaningOptions options = null)
 		{
 			string newContent;
+			CleaningOptions currentOptions;
 			string currentOptionsString;
 
-			currentOptionsString = (options != null) ?
-				ConvertCleaningOptionsToJson(options).ToString() : _defaultOptionsString;
+			if (options != null)
+			{
+				currentOptions = options;
+				currentOptionsString = ConvertCleaningOptionsToJson(options).ToString();
+			}
+			else
+			{
+				currentOptions = _defaultOptions;
+				currentOptionsString = _defaultOptionsString;
+			}
 
 			lock (_cleaningSynchronizer)
 			{
@@ -113,9 +130,28 @@
 				
 				try
 				{
-					newContent = _jsEngine.Evaluate<string>(
+					var result = _jsEngine.Evaluate<string>(
 						string.Format(CLEANING_FUNCTION_CALL_TEMPLATE,
 							JsonConvert.SerializeObject(content), currentOptionsString));
+
+					var json = JObject.Parse(result);
+
+					var errors = json["errors"] != null ? json["errors"] as JArray : null;
+					if (errors != null && errors.Count > 0)
+					{
+						throw new CssCleaningException(FormatErrorDetails(errors[0].Value<string>(), true));
+					}
+
+					if (currentOptions.Severity > 0)
+					{
+						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
+						if (warnings != null && warnings.Count > 0)
+						{
+							throw new CssCleaningException(FormatErrorDetails(warnings[0].Value<string>(), false));
+						}
+					}
+
+					newContent = json.Value<string>("minifiedCode");
 				}
 				catch (JsRuntimeException e)
 				{
@@ -137,7 +173,9 @@
 				new JProperty("keepSpecialComments", 
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
 				new JProperty("keepBreaks", options.KeepBreaks),
-				new JProperty("removeEmpty", options.RemoveEmpty)
+				new JProperty("noAdvanced", options.NoAdvanced),
+				new JProperty("selectorsMergeMode",
+					ConvertSelectorsMergeModeEnumValueToCode(options.SelectorsMergeMode))
 			);
 
 			return optionsJson;
@@ -169,6 +207,47 @@
 			}
 
 			return code;
+		}
+
+		/// <summary>
+		/// Converts a selectors merge mode enum value to the code
+		/// </summary>
+		/// <param name="selectorsMergeMode">Selectors merge mode enum value</param>
+		/// <returns>Selectors merge mode code</returns>
+		private static string ConvertSelectorsMergeModeEnumValueToCode(SelectorsMergeMode selectorsMergeMode)
+		{
+			string code;
+
+			switch (selectorsMergeMode)
+			{
+				case SelectorsMergeMode.MergeAll:
+					code = "*";
+					break;
+				case SelectorsMergeMode.Ie8Compatible:
+					code = "ie8";
+					break;
+				default:
+					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
+						selectorsMergeMode.ToString(), typeof(SelectorsMergeMode)));
+			}
+
+			return code;
+		}
+
+		/// <summary>
+		/// Generates a detailed error message
+		/// </summary>
+		/// <param name="message">Message</param>
+		/// <param name="isError">Flag indicating that this issue is a error</param>
+		/// <returns>Detailed error message</returns>
+		private static string FormatErrorDetails(string message, bool isError)
+		{
+			var errorMessage = new StringBuilder();
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
+				isError ? CoreStrings.ErrorType_Error : CoreStrings.ErrorType_Warning);
+			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+
+			return errorMessage.ToString();
 		}
 
 		/// <summary>

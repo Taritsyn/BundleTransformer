@@ -14,6 +14,8 @@
 	using Core.Helpers;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Resources;
+
 	/// <summary>
 	/// LESS-compiler
 	/// </summary>
@@ -33,6 +35,11 @@
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
 		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"lessHelper.compile({0}, {1}, {2}, {3});";
+
+		/// <summary>
+		/// Default compilation options
+		/// </summary>
+		private readonly CompilationOptions _defaultOptions;
 
 		/// <summary>
 		/// String representation of the default compilation options
@@ -76,6 +83,7 @@
 		public LessCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
+			_defaultOptions = defaultOptions;
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
 		}
@@ -109,8 +117,40 @@
 			CompilationOptions options = null)
 		{
 			string newContent;
-			string currentOptionsString = (options != null) ? 
-				ConvertCompilationOptionsToJson(options).ToString() : _defaultOptionsString;
+			CompilationOptions currentOptions;
+			string currentOptionsString;
+
+			if (options != null)
+			{
+				currentOptions = options;
+				currentOptionsString = ConvertCompilationOptionsToJson(options).ToString();
+			}
+			else
+			{
+				currentOptions = _defaultOptions;
+				currentOptionsString = _defaultOptionsString;
+			}
+
+			string processedContent = content;
+			string globalVariables = currentOptions.GlobalVariables;
+			string modifyVariables = currentOptions.ModifyVariables;
+
+			if (!string.IsNullOrWhiteSpace(globalVariables)
+				|| !string.IsNullOrWhiteSpace(modifyVariables))
+			{
+				var contentBuilder = new StringBuilder();
+				if (!string.IsNullOrWhiteSpace(globalVariables))
+				{
+					contentBuilder.Append(ParseVariables(globalVariables, "GlobalVariables"));
+				}
+				contentBuilder.Append(content);
+				if (!string.IsNullOrWhiteSpace(modifyVariables))
+				{
+					contentBuilder.Append(ParseVariables(modifyVariables, "ModifyVariables"));
+				}
+
+				processedContent = contentBuilder.ToString();
+			}
 
 			lock (_compilationSynchronizer)
 			{
@@ -119,7 +159,7 @@
 				try
 				{
 					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
-						JsonConvert.SerializeObject(content),
+						JsonConvert.SerializeObject(processedContent),
 						JsonConvert.SerializeObject(path),
 						ConvertDependenciesToJson(dependencies),
 						currentOptionsString));
@@ -128,7 +168,7 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new LessCompilingException(FormatErrorDetails(errors[0], content, path, 
+						throw new LessCompilingException(FormatErrorDetails(errors[0], processedContent, path, 
 							dependencies));
 					}
 
@@ -209,6 +249,44 @@
 			}
 
 			return code;
+		}
+
+		/// <summary>
+		/// Parses a string representation of the variable list
+		/// </summary>
+		/// <param name="variablesString">String representation of the variable list</param>
+		/// <param name="propertyName">Name of property</param>
+		/// <returns>LESS representation of the variable list</returns>
+		private static string ParseVariables(string variablesString, string propertyName)
+		{
+			string variables = string.Empty;
+			var nameValueList = Utils.ConvertToStringCollection(variablesString, ';',
+				trimItemValues: true, removeEmptyItems: true);
+
+			if (nameValueList.Length > 0)
+			{
+				var variablesBuilder = new StringBuilder();
+
+				foreach (string nameValue in nameValueList)
+				{
+					int equalSignPosition = nameValue.IndexOf("=", StringComparison.Ordinal);
+					if (equalSignPosition == -1)
+					{
+						throw new FormatException(
+							string.Format(Strings.VariablesParsing_InvalidNameValueFormat, 
+								propertyName, variablesString));
+					}
+
+					string name = nameValue.Substring(0, equalSignPosition);
+					string value = nameValue.Substring(equalSignPosition + 1);
+
+					variablesBuilder.AppendFormatLine("@{0}: {1};", name, value);
+				}
+
+				variables = variablesBuilder.ToString();
+			}
+
+			return variables;
 		}
 
 		/// <summary>

@@ -1,5 +1,5 @@
 /*!
- * LESS v1.5.0
+ * LESS v1.5.1
  * http://lesscss.org
  *
  * Copyright 2013, Alexis Sellier & The Core Less Team
@@ -932,9 +932,9 @@ var Less = (function(){
 					if (rule !== self) {
 						for (var j = 0; j < rule.selectors.length; j++) {
 							if (match = selector.match(rule.selectors[j])) {
-								if (selector.elements.length > rule.selectors[j].elements.length) {
+								if (selector.elements.length > match) {
 									Array.prototype.push.apply(rules, rule.find(
-										new(tree.Selector)(selector.elements.slice(1)), self));
+										new(tree.Selector)(selector.elements.slice(match)), self));
 								} else {
 									rules.push(rule);
 								}
@@ -1362,15 +1362,15 @@ var Less = (function(){
 				max = Math.min(len, olen);
 
 				if (olen === 0 || len < olen) {
-					return false;
+					return 0;
 				} else {
 					for (i = 0; i < max; i++) {
 						if (elements[i].value !== oelements[i].value) {
-							return false;
+							return 0;
 						}
 					}
 				}
-				return true;
+				return max; // return number of matched selectors 
 			},
 			eval: function (env) {
 				var evaldCondition = this.condition && this.condition.eval(env);
@@ -4732,16 +4732,36 @@ var Less = (function(){
 							}
 
 							try {
-								evaldRoot = evaluate.call(this, evalEnv);
+								var preEvalVisitors = [],
+									visitors = [
+										new(tree.joinSelectorVisitor)(),
+										new(tree.processExtendsVisitor)(),
+										new(tree.toCSSVisitor)({compress: Boolean(options.compress)})
+									], i, root = this;
 
-								new(tree.joinSelectorVisitor)()
-									.run(evaldRoot);
+//								if (options.plugins) {
+//									for(i =0; i < options.plugins.length; i++) {
+//										if (options.plugins[i].isPreEvalVisitor) {
+//											preEvalVisitors.push(options.plugins[i]);
+//										} else {
+//											if (options.plugins[i].isPreVisitor) {
+//												visitors.splice(0, 0, options.plugins[i]);
+//											} else {
+//												visitors.push(options.plugins[i]);
+//											}
+//										}
+//									}
+//								}
 
-								new(tree.processExtendsVisitor)()
-									.run(evaldRoot);
+								for(i = 0; i < preEvalVisitors.length; i++) {
+									preEvalVisitors[i].run(root);
+								}
 
-								new(tree.toCSSVisitor)({compress: Boolean(options.compress)})
-									.run(evaldRoot);
+								evaldRoot = evaluate.call(root, evalEnv);
+
+								for(i = 0; i < visitors.length; i++) {
+									visitors[i].run(evaldRoot);
+								}
 
 //								if (options.sourceMap) {
 //									evaldRoot = new tree.sourceMapOutput(
@@ -4750,6 +4770,7 @@ var Less = (function(){
 //											rootNode: evaldRoot,
 //											contentsMap: parser.imports.contents,
 //											sourceMapFilename: options.sourceMapFilename,
+//											sourceMapURL: options.sourceMapURL,
 //											outputFilename: options.sourceMapOutputFilename,
 //											sourceMapBasepath: options.sourceMapBasepath,
 //											sourceMapRootpath: options.sourceMapRootpath,

@@ -9,7 +9,7 @@
 	public sealed class AssetTranslationException : Exception
 	{
 		/// <summary>
-		/// Initializes a new instance of the BundleTransformer.Core.Translators.AssetTranslationException class 
+		/// Initializes a new instance of the <code>BundleTransformer.Core.Translators.AssetTranslationException</code> class 
 		/// with a specified error message
 		/// </summary>
 		/// <param name="message">The message that describes the error</param>
@@ -18,7 +18,7 @@
 		{ }
 
 		/// <summary>
-		/// Initializes a new instance of the BundleTransformer.Core.Translators.AssetTranslationException class 
+		/// Initializes a new instance of the <code>BundleTransformer.Core.Translators.AssetTranslationException</code> class 
 		/// with a specified error message and a reference to the inner exception that is the cause of this exception
 		/// </summary>
 		/// <param name="message">The error message that explains the reason for the exception</param>

@@ -28,13 +28,37 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to remove empty elements
+		/// Gets or sets a flag for whether to disable advanced optimizations
+		/// (selector and property merging, reduction, etc)
 		/// </summary>
-		[ConfigurationProperty("removeEmpty", DefaultValue = false)]
-		public bool RemoveEmpty
+		[ConfigurationProperty("noAdvanced", DefaultValue = false)]
+		public bool NoAdvanced
 		{
-			get { return (bool)this["removeEmpty"]; }
-			set { this["removeEmpty"] = value; }
+			get { return (bool)this["noAdvanced"]; }
+			set { this["noAdvanced"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a selectors merge mode
+		/// </summary>
+		[ConfigurationProperty("selectorsMergeMode", DefaultValue = SelectorsMergeMode.Ie8Compatible)]
+		public SelectorsMergeMode SelectorsMergeMode
+		{
+			get { return (SelectorsMergeMode)this["selectorsMergeMode"]; }
+			set { this["selectorsMergeMode"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		[ConfigurationProperty("severity", DefaultValue = 0)]
+		[IntegerValidator(MinValue = 0, MaxValue = 1, ExcludeRange = false)]
+		public int Severity
+		{
+			get { return (int)this["severity"]; }
+			set { this["severity"] = value; }
 		}
 	}
 }

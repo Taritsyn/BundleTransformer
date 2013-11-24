@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.11
+              README file for Bundle Transformer: LESS 1.8.12
 
    ----------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.Less contains translator-adapter `LessTranslator` 
-   (supports LESS (http://lesscss.org) version 1.5.0). This adapter makes
+   (supports LESS (http://lesscss.org) version 1.5.1). This adapter makes
    translation of LESS-code to CSS-code. Also contains debugging 
    HTTP-handler `LessAssetHandler`, which is responsible for text output 
    of translated LESS-asset.
@@ -22,6 +22,13 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of LESS version 1.5.1;
+   2. In configuration settings of LESS-translator added 2 new properties: 
+      `GlobalVariables` and `ModifyVariables`.
    
    ====================
    POST-INSTALL ACTIONS

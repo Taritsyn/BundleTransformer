@@ -122,6 +122,16 @@
 		}
 
 		/// <summary>
+		/// Returns a cache key to use for the specified virtual path
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual resource</param>
+		/// <returns>A cache key for the specified virtual resource</returns>
+		public string GetCacheKey(string virtualPath)
+		{
+			return BundleTable.VirtualPathProvider.GetCacheKey(virtualPath);
+		}
+
+		/// <summary>
 		/// Creates a cache dependency based on the specified virtual paths
 		/// </summary>
 		/// <param name="virtualPath">The path to the primary virtual resource</param>

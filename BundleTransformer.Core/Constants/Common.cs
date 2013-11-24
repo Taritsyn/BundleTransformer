@@ -13,6 +13,6 @@
 		/// <summary>
 		/// Pattern of cache item key, which stores text content of the processed asset
 		/// </summary>
-		internal const string ProcessedAssetContentCacheItemKeyPattern = "ProcessedAssetContent_{0}";
+		internal const string ProcessedAssetContentCacheItemKeyPattern = "BT:ProcessedAssetContent_{0}";
 	}
 }

@@ -74,6 +74,7 @@
     <Compile Include="Constants\FileExtension.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
+    <Compile Include="HttpHandlers\SassAndScssAssetHandlerBase.cs" />
     <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />
     <Compile Include="Compilers\SassAndScssCompiler.cs" />
     <Compile Include="Compilers\SassAndScssCompilerScriptHost.cs" />

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.8.11 Beta 1 
+         README file for Bundle Transformer: WebGrease 1.8.12 Beta 1 
  
    ----------------------------------------------------------------------
 

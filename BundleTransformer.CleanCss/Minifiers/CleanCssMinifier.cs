@@ -55,9 +55,30 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to remove empty elements
+		/// Gets or sets a flag for whether to disable advanced optimizations
+		/// (selector and property merging, reduction, etc)
 		/// </summary>
-		public bool RemoveEmpty
+		public bool NoAdvanced
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a selectors merge mode
+		/// </summary>
+		public SelectorsMergeMode SelectorsMergeMode
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		public int Severity
 		{
 			get;
 			set;
@@ -81,8 +102,9 @@
 			CssMinifierSettings cssMinifierConfig = cleanConfig.Css;
 			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
 			KeepBreaks = cssMinifierConfig.KeepBreaks;
-			RemoveEmpty = cssMinifierConfig.RemoveEmpty;
-
+			NoAdvanced = cssMinifierConfig.NoAdvanced;
+			SelectorsMergeMode = cssMinifierConfig.SelectorsMergeMode;
+			Severity = cssMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
 			{
@@ -170,7 +192,9 @@
 			{
 				KeepSpecialComments = KeepSpecialComments,
 				KeepBreaks = KeepBreaks,
-				RemoveEmpty = RemoveEmpty
+				NoAdvanced = NoAdvanced,
+				SelectorsMergeMode = SelectorsMergeMode,
+				Severity = Severity
 			};
 
 			return options;

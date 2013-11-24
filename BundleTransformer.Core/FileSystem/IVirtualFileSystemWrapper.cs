@@ -46,6 +46,13 @@
 		string ToAbsolutePath(string virtualPath);
 
 		/// <summary>
+		/// Returns a cache key to use for the specified virtual path
+		/// </summary>
+		/// <param name="virtualPath">The path to the virtual resource</param>
+		/// <returns>A cache key for the specified virtual resource</returns>
+		string GetCacheKey(string virtualPath);
+
+		/// <summary>
 		/// Creates a cache dependency based on the specified virtual paths
 		/// </summary>
 		/// <param name="virtualPath">The path to the primary virtual resource</param>

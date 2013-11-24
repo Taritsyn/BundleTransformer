@@ -181,6 +181,27 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to UglifyJS will assume 
+		/// that object property access (e.g. <code>foo.bar</code> or <code>foo["bar"]</code>) 
+		/// doesn't have any side effects
+		/// </summary>
+		public bool PureGetters
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of the function names list, 
+		/// which UglifyJS will assume that those functions do not produce side effects
+		/// </summary>
+		public string PureFunctions
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the compression options
@@ -205,6 +226,8 @@
 			JoinVars = true;
 			Cascade = true;
 			GlobalDefinitions = string.Empty;
+			PureGetters = false;
+			PureFunctions = string.Empty;
 		}
 	}
 }

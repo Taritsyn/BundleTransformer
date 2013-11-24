@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AssetHandler_MinificationError" xml:space="preserve">
-    <value>Во время вывода текстового содержимого минимизированного ресурса произошла ошибка!
+  <data name="AssetHandler_DependencyNotFoundError" xml:space="preserve">
+    <value>Во время вывода текстового содержимого обработанного ресурса не была найдена одна из его зависимостей!
 Смотрите более подробную информацию об ошибке:
 {0}</value>
   </data>
@@ -136,10 +136,16 @@
     <value>Перечисленные ресурсы не являются таблицами стилей: {0}!</value>
   </data>
   <data name="Assets_InvalidIgnorePattern" xml:space="preserve">
-    <value>Шаблоны для исключения ненужных ресурсов вида "*" и "*.*" не поддерживаются!</value>
+    <value>Шаблоны для исключения ненужных ресурсов вида `*` и `*.*` не поддерживаются!</value>
   </data>
   <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>Перечисленные ресурсы не являются скриптами: {0}!</value>
+  </data>
+  <data name="Common_ArgumentIsEmpty" xml:space="preserve">
+    <value>Параметр с именем `{0}` не должен содержать пустую строку!</value>
+  </data>
+  <data name="Common_ArgumentIsNull" xml:space="preserve">
+    <value>Параметр с именем `{0}` не должен содержать значение равное null!</value>
   </data>
   <data name="Common_AssemblyNameIsEmpty" xml:space="preserve">
     <value>Вы не указали имя сборки!</value>

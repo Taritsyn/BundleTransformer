@@ -4,27 +4,15 @@
 	using System.Web.Caching;
 
 	using Core;
-	using Core.Assets;
 	using Core.Configuration;
 	using Core.FileSystem;
-	using Core.HttpHandlers;
-	using Core.Translators;
 
 	/// <summary>
 	/// Debugging HTTP-handler that responsible for text output 
 	/// of translated Sass- or SCSS-asset
 	/// </summary>
-	public sealed class SassAndScssAssetHandler : AssetHandlerBase
+	public sealed class SassAndScssAssetHandler : SassAndScssAssetHandlerBase
 	{
-		/// <summary>
-		/// Asset content type
-		/// </summary>
-		public override string ContentType
-		{
-			get { return Core.Constants.ContentType.Css; }
-		}
-
-
 		/// <summary>
 		/// Constructs a instance of Sass and SCSS asset handler
 		/// </summary>
@@ -46,23 +34,5 @@
 			AssetHandlerSettings assetHandlerConfig)
 			: base(cache, virtualFileSystemWrapper, assetHandlerConfig)
 		{ }
-
-
-		/// <summary>
-		/// Translates a code of asset written on Sass or SCSS to CSS-code
-		/// </summary>
-		/// <param name="asset">Asset with code written on Sass or SCSS</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		/// <returns>Asset with translated code</returns>
-		protected override IAsset ProcessAsset(IAsset asset, bool isDebugMode)
-		{
-			ITranslator sassAndScssTranslator = BundleTransformerContext.Current.GetCssTranslatorInstance(
-				Core.Constants.TranslatorName.SassAndScssTranslator);
-			sassAndScssTranslator.IsDebugMode = isDebugMode;
-
-			IAsset processedAsset = sassAndScssTranslator.Translate(asset);
-
-			return processedAsset;
-		}
 	}
 }

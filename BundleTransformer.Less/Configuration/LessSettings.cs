@@ -70,6 +70,28 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a string representation of variable list, that can be referenced by the file
+		/// (semicolon-separated list of values of the form VAR=VALUE)
+		/// </summary>
+		[ConfigurationProperty("globalVariables", DefaultValue = "")]
+		public string GlobalVariables
+		{
+			get { return (string)this["globalVariables"]; }
+			set { this["globalVariables"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of variable list, that modifies a variables 
+		/// already declared in the file (semicolon-separated list of values of the form VAR=VALUE)
+		/// </summary>
+		[ConfigurationProperty("modifyVariables", DefaultValue = "")]
+		public string ModifyVariables
+		{
+			get { return (string)this["modifyVariables"]; }
+			set { this["modifyVariables"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

@@ -200,5 +200,28 @@
 			get { return (string)this["globalDefinitions"]; }
 			set { this["globalDefinitions"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to UglifyJS will assume 
+		/// that object property access (e.g. <code>foo.bar</code> or <code>foo["bar"]</code>) 
+		/// doesn't have any side effects
+		/// </summary>
+		[ConfigurationProperty("pureGetters", DefaultValue = false)]
+		public bool PureGetters
+		{
+			get { return (bool)this["pureGetters"]; }
+			set { this["pureGetters"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of the function names list, 
+		/// which UglifyJS will assume that those functions do not produce side effects
+		/// </summary>
+		[ConfigurationProperty("pureFunctions", DefaultValue = "")]
+		public string PureFunctions
+		{
+			get { return (string)this["pureFunctions"]; }
+			set { this["pureFunctions"] = value; }
+		}
 	}
 }

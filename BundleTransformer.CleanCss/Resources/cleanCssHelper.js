@@ -4,20 +4,22 @@
 	};
 }
 
-var cleanCssHelper = (function (cleanCss, undefined) {
+var cleanCssHelper = (function (CleanCss, undefined) {
 	"use strict";
 
 	var exports = {},
 		defaultOptions = {
 			target: null,
-			removeEmpty: false,
 			keepBreaks: false,
 			keepSpecialComments: '*',
 			root: '',
 			relativeTo: '',
 			processImport: false,
 			benchmark: false,
-			noRebase: true
+			noRebase: true,
+			noAdvanced: false,
+			selectorsMergeMode: 'ie8',
+			debug: false
 		}
 		;
 
@@ -36,14 +38,30 @@ var cleanCssHelper = (function (cleanCss, undefined) {
 	}
 
 	exports.minify = function (code, options) {
-		var minifiedCode,
-			cleanOptions
+		var cleanOptions,
+			cleaner,
+			result = {},
+			minifiedCode,
+			errors,
+			warnings
 			;
 
 		cleanOptions = mix(mix({}, defaultOptions), options);
-		minifiedCode = cleanCss.process(code, cleanOptions);
+		cleaner = new CleanCss(cleanOptions);
 
-		return minifiedCode;
+		minifiedCode = cleaner.minify(code);
+		errors = cleaner.errors;
+		warnings = cleaner.warnings;
+
+		result.minifiedCode = minifiedCode;
+		if (errors.length > 0) {
+			result.errors = errors;
+		}
+		if (warnings.length > 0) {
+			result.warnings = warnings;
+		}
+
+		return JSON.stringify(result);
 	};
 
 	return exports;

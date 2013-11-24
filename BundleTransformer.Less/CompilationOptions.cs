@@ -59,6 +59,26 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a string representation of variable list, that can be referenced by the file
+		/// (semicolon-separated list of values of the form VAR=VALUE)
+		/// </summary>
+		public string GlobalVariables
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of variable list, that modifies a variables 
+		/// already declared in the file (semicolon-separated list of values of the form VAR=VALUE)
+		/// </summary>
+		public string ModifyVariables
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the LESS compilation options
@@ -71,6 +91,8 @@
 			StrictUnits = false;
 			DumpLineNumbers = LineNumbersMode.None;
 			JavascriptEnabled = true;
+			GlobalVariables = string.Empty;
+			ModifyVariables = string.Empty;
 		}
 	}
 }

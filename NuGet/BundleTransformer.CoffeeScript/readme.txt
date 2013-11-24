@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.11
+           README file for Bundle Transformer: CoffeeScript 1.8.12
 
    ----------------------------------------------------------------------
 
@@ -23,6 +23,11 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   CoffeeScript was updated to commit f047ba52b2.
    
    ====================
    POST-INSTALL ACTIONS

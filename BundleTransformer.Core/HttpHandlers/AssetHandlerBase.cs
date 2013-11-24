@@ -15,7 +15,7 @@
 	using Translators;
 
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output 
+	/// Base class of the debugging HTTP-handler that responsible for text output 
 	/// of processed asset
 	/// </summary>
 	public abstract class AssetHandlerBase : IHttpHandler
@@ -90,21 +90,29 @@
 			}
 
 			string assetUrl = assetUri.LocalPath;
-			string content = string.Empty;
+			if (!_virtualFileSystemWrapper.FileExists(assetUrl))
+			{
+				ThrowHttpNotFoundError(response);
+				return;
+			}
+
+			string content;
 
 			try
 			{
 				content = GetProcessedAssetContent(assetUrl);
 			}
-			catch (FileNotFoundException)
-			{
-				ThrowHttpNotFoundError(response);
-				return;
-			}
 			catch (AssetTranslationException e)
 			{
 				ThrowHttpInternalServerError(response,
 					string.Format(Strings.AssetHandler_TranslationError, e.Message));
+				return;
+			}
+			catch (FileNotFoundException e)
+			{
+				ThrowHttpInternalServerError(response,
+					string.Format(Strings.AssetHandler_DependencyNotFoundError, e.Message));
+				return;
 			}
 			catch (Exception e)
 			{
@@ -176,8 +184,14 @@
 		/// </summary>
 		/// <param name="assetUrl">URL to the asset</param>
 		/// <returns>Cache key for the specified asset</returns>
-		private string GetCacheKey(string assetUrl)
+		public virtual string GetCacheKey(string assetUrl)
 		{
+			if (string.IsNullOrWhiteSpace(assetUrl))
+			{
+				throw new ArgumentException(
+					string.Format(Strings.Common_ArgumentIsEmpty, "assetUrl"), "assetUrl");
+			}
+
 			return string.Format(
 				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, assetUrl.ToLowerInvariant());
 		}
@@ -189,6 +203,12 @@
 		/// <returns>Text content of asset</returns>
 		private string GetProcessedAssetContent(string assetUrl)
 		{
+			if (string.IsNullOrWhiteSpace(assetUrl))
+			{
+				throw new ArgumentException(
+					string.Format(Strings.Common_ArgumentIsEmpty, "assetUrl"), "assetUrl");
+			}
+
 			string content;
 			var asset = new Asset(assetUrl);
 			

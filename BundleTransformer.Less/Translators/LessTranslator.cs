@@ -150,6 +150,26 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a string representation of variable list, that can be referenced by the file
+		/// (semicolon-separated list of values of the form VAR=VALUE)
+		/// </summary>
+		public string GlobalVariables
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of variable list, that modifies a variables 
+		/// already declared in the file (semicolon-separated list of values of the form VAR=VALUE)
+		/// </summary>
+		public string ModifyVariables
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of LESS-translator
@@ -183,6 +203,8 @@
 			StrictUnits = lessConfig.StrictUnits;
 			DumpLineNumbers = lessConfig.DumpLineNumbers;
 			JavascriptEnabled = lessConfig.JavascriptEnabled;
+			GlobalVariables = lessConfig.GlobalVariables;
+			ModifyVariables = lessConfig.ModifyVariables;
 
 			if (createJsEngineInstance == null)
 			{
@@ -343,7 +365,9 @@
 				StrictMath = StrictMath,
 				StrictUnits = StrictUnits,
 				DumpLineNumbers = DumpLineNumbers,
-				JavascriptEnabled = JavascriptEnabled
+				JavascriptEnabled = JavascriptEnabled,
+				GlobalVariables = GlobalVariables,
+				ModifyVariables = ModifyVariables
 			};
 
 			return options;

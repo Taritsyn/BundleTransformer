@@ -286,6 +286,7 @@ var lessHelper = (function (less) {
             cleancss: false,
             sourceMap: false,
             sourceMapFilename: '',
+			sourceMapURL: '',
             sourceMapOutputFilename: '',
 			sourceMapFullFilename: '',
             sourceMapBasepath: '',

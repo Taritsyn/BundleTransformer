@@ -234,7 +234,9 @@
 					new JProperty("join_vars", compressionOptions.JoinVars),
 					new JProperty("cascade", compressionOptions.Cascade),
 					new JProperty("screw_ie8", options.ScrewIe8),
-					new JProperty("global_defs",ParseGlobalDefinitions(compressionOptions.GlobalDefinitions))
+					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
+					new JProperty("pure_getters", compressionOptions.PureGetters),
+					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions))
 				));
 			}
 			else
@@ -294,7 +296,8 @@
 				Match symbolValueMatch = _symbolValueRegex.Match(symbolValue);
 				if (symbolValueMatch.Length == 0)
 				{
-					throw new FormatException(UglifyStrings.GlobalDefsParsing_InvalidSymbolValueFormat);
+					throw new FormatException(
+						string.Format(UglifyStrings.GlobalDefsParsing_InvalidSymbolValueFormat, globalDefsString));
 				}
 
 				GroupCollection symbolValueGroups = symbolValueMatch.Groups;
@@ -378,6 +381,25 @@
 			}
 
 			return globalDefs;
+		}
+
+		/// <summary>
+		/// Parses a string representation of the pure function names to list
+		/// </summary>
+		/// <param name="pureFunctionsString">String representation of the pure function names</param>
+		/// <returns>Pure function names list in JSON format</returns>
+		private static JArray ParsePureFunctions(string pureFunctionsString)
+		{
+			JArray processedPureFunctions = null;
+			var pureFunctions = Utils.ConvertToStringCollection(pureFunctionsString, ',',
+				trimItemValues: true, removeEmptyItems: true);
+
+			if (pureFunctions.Length > 0)
+			{
+				processedPureFunctions = new JArray(pureFunctions.Select(e => new JValue(e)));
+			}
+
+			return processedPureFunctions;
 		}
 
 		/// <summary>

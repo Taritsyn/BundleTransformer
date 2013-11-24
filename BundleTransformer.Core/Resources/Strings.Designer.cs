@@ -61,13 +61,13 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to During the output text content of minified asset an error has occurred.
+        ///   Looks up a localized string similar to During the output text content of processed asset is not found one of its dependencies.
         ///See more details:
         ///{0}.
         /// </summary>
-        public static string AssetHandler_MinificationError {
+        public static string AssetHandler_DependencyNotFoundError {
             get {
-                return ResourceManager.GetString("AssetHandler_MinificationError", resourceCulture);
+                return ResourceManager.GetString("AssetHandler_DependencyNotFoundError", resourceCulture);
             }
         }
         
@@ -103,7 +103,7 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pure wildcard ignore patterns &apos;*&apos; and &apos;*.*&apos; are not supported..
+        ///   Looks up a localized string similar to Pure wildcard ignore patterns `*` and `*.*` are not supported..
         /// </summary>
         public static string Assets_InvalidIgnorePattern {
             get {
@@ -117,6 +117,24 @@ namespace BundleTransformer.Core.Resources {
         public static string Assets_JsAssetsContainAssetsWithInvalidTypes {
             get {
                 return ResourceManager.GetString("Assets_JsAssetsContainAssetsWithInvalidTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter `{0}` must be a non-empty string..
+        /// </summary>
+        public static string Common_ArgumentIsEmpty {
+            get {
+                return ResourceManager.GetString("Common_ArgumentIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter `{0}` must be a non-nullable..
+        /// </summary>
+        public static string Common_ArgumentIsNull {
+            get {
+                return ResourceManager.GetString("Common_ArgumentIsNull", resourceCulture);
             }
         }
         

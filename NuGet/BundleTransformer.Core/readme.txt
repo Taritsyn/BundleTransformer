@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.11
+              README file for Bundle Transformer: Core 1.8.12
 
    ----------------------------------------------------------------------
 
@@ -33,15 +33,6 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. From the `configuration\bundleTransformer\core` configuration 
-      element was removed a `useEnableOptimizationsProperty` attribute;
-   2. Added new configuration element - 
-      `configuration\bundleTransformer\core\assetHandler`, that responsible
-      for settings of the debugging HTTP handlers.
    
    =============
    DOCUMENTATION

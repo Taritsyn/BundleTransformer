@@ -62,6 +62,7 @@
     <Compile Include="Compilers\CoffeeScriptCompiler.cs" />
     <Compile Include="Configuration\CoffeeScriptSettings.cs" />
     <Compile Include="HttpHandlers\CoffeeScriptAssetHandler.cs" />
+    <Compile Include="HttpHandlers\CoffeeScriptAssetHandlerBase.cs" />
     <Compile Include="Translators\CoffeeScriptTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

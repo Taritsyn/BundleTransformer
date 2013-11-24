@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Closure 1.8.11
+             README file for Bundle Transformer: Closure 1.8.12
  
    ----------------------------------------------------------------------
 
@@ -39,7 +39,7 @@
    http://www.java.com/download/.
    2. You need to download the latest version of the Google Closure 
    Compiler Application, which is located on the link - 
-   http://closure-compiler.googlecode.com/files/compiler-latest.zip.
+   http://dl.google.com/closure-compiler/compiler-latest.zip.
    3. Unzip the downloaded archive and copy the file compiler.jar in 
    some directory on disk of your computer.
    4. In Web.config file find the 

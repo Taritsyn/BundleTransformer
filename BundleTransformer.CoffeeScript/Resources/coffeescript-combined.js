@@ -906,7 +906,7 @@ var CoffeeScript = (function(){
 				return 0;
 			  }
 			  string = match[0];
-			  this.token('STRING', string.replace(MULTILINER, '\\\n'), 0, string.length);
+			  this.token('STRING', this.removeNewlines(string), 0, string.length);
 			  break;
 			case '"':
 			  if (!(string = this.balancedString(this.chunk, '"'))) {
@@ -918,7 +918,7 @@ var CoffeeScript = (function(){
 				  lexedLength: string.length
 				});
 			  } else {
-				this.token('STRING', this.escapeLines(string), 0, string.length);
+				this.token('STRING', this.removeNewlines(string), 0, string.length);
 			  }
 			  break;
 			default:
@@ -1495,8 +1495,16 @@ var CoffeeScript = (function(){
 		  return LINE_CONTINUER.test(this.chunk) || ((_ref2 = this.tag()) === '\\' || _ref2 === '.' || _ref2 === '?.' || _ref2 === '?::' || _ref2 === 'UNARY' || _ref2 === 'MATH' || _ref2 === '+' || _ref2 === '-' || _ref2 === 'SHIFT' || _ref2 === 'RELATION' || _ref2 === 'COMPARE' || _ref2 === 'LOGIC' || _ref2 === 'THROW' || _ref2 === 'EXTENDS');
 		};
 
+		Lexer.prototype.removeNewlines = function(str) {
+		  return this.escapeLines(str.replace(/^(.)\s*\n\s*/, '$1').replace(/\s*\n\s*(.)$/, '$1'));
+		};
+
 		Lexer.prototype.escapeLines = function(str, heredoc) {
-		  return str.replace(MULTILINER, heredoc ? '\\n' : '');
+		  if (heredoc) {
+			return str.replace(MULTILINER, '\\n');
+		  } else {
+			return str.replace(/((^|[^\\])(\\\\)+)\n/g, '$1 \\\n').replace(/\\\s*\n\s*/g, '').replace(/\s*\n\s*/g, ' ');
+		  }
 		};
 
 		Lexer.prototype.makeString = function(body, quote, heredoc) {
@@ -1504,7 +1512,7 @@ var CoffeeScript = (function(){
 			return quote + quote;
 		  }
 		  body = body.replace(/\\([\s\S])/g, function(match, contents) {
-			if (contents === '\n' || contents === quote) {
+			if (contents === quote || heredoc && contents === '\n') {
 			  return contents;
 			} else {
 			  return match;
@@ -1585,7 +1593,7 @@ var CoffeeScript = (function(){
 
 	  MULTI_DENT = /^(?:\n[^\n\S]*)+/;
 
-	  SIMPLESTR = /^'[^\\']*(?:\\.[^\\']*)*'/;
+	  SIMPLESTR = /^'[^\\']*(?:\\[\s\S][^\\']*)*'/;
 
 	  JSTOKEN = /^`[^\\`]*(?:\\.[^\\`]*)*`/;
 
@@ -2434,7 +2442,7 @@ var CoffeeScript = (function(){
 	//#region URL: ./nodes
 	require['./nodes'] = (function() {
 	  var exports = {};
-	  var Access, Arr, Assign, Base, Block, Call, Class, Closure, Code, CodeFragment, Comment, Existence, Extends, For, HEXNUM, IDENTIFIER, IDENTIFIER_STR, IS_REGEX, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, METHOD_DEF, NEGATE, NO, NUMBER, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, last, locationDataToString, merge, multident, parseNum, some, starts, throwSyntaxError, unfoldSoak, utility, _ref, _ref1, _ref2, _ref3,
+	  var Access, Arr, Assign, Base, Block, Call, Class, Code, CodeFragment, Comment, Existence, Extends, For, HEXNUM, IDENTIFIER, IDENTIFIER_STR, IS_REGEX, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, METHOD_DEF, NEGATE, NO, NUMBER, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, isLiteralArguments, isLiteralThis, last, locationDataToString, merge, multident, parseNum, some, starts, throwSyntaxError, unfoldSoak, utility, _ref, _ref1,
 		__hasProp = {}.hasOwnProperty,
 		__extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -2521,12 +2529,24 @@ var CoffeeScript = (function(){
 		};
 
 		Base.prototype.compileClosure = function(o) {
-		  var jumpNode;
+		  var args, argumentsNode, func, jumpNode, meth;
 		  if (jumpNode = this.jumps()) {
 			jumpNode.error('cannot use a pure statement in an expression');
 		  }
 		  o.sharedScope = true;
-		  return Closure.wrap(this).compileNode(o);
+		  func = new Code([], Block.wrap([this]));
+		  args = [];
+		  if ((argumentsNode = this.contains(isLiteralArguments)) || this.contains(isLiteralThis)) {
+			args = [new Literal('this')];
+			if (argumentsNode) {
+			  meth = 'apply';
+			  args.push(new Literal('arguments'));
+			} else {
+			  meth = 'call';
+			}
+			func = new Value(func, [new Access(new Literal(meth))]);
+		  }
+		  return (new Call(func, args)).compileNode(o);
 		};
 
 		Base.prototype.cache = function(o, level, reused) {
@@ -2749,12 +2769,12 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.jumps = function(o) {
-		  var exp, _i, _len, _ref2;
+		  var exp, jumpNode, _i, _len, _ref2;
 		  _ref2 = this.expressions;
 		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
 			exp = _ref2[_i];
-			if (exp.jumps(o)) {
-			  return exp;
+			if (jumpNode = exp.jumps(o)) {
+			  return jumpNode;
 			}
 		  }
 		};
@@ -2989,8 +3009,7 @@ var CoffeeScript = (function(){
 		__extends(Undefined, _super);
 
 		function Undefined() {
-		  _ref2 = Undefined.__super__.constructor.apply(this, arguments);
-		  return _ref2;
+		  return Undefined.__super__.constructor.apply(this, arguments);
 		}
 
 		Undefined.prototype.isAssignable = NO;
@@ -3009,8 +3028,7 @@ var CoffeeScript = (function(){
 		__extends(Null, _super);
 
 		function Null() {
-		  _ref3 = Null.__super__.constructor.apply(this, arguments);
-		  return _ref3;
+		  return Null.__super__.constructor.apply(this, arguments);
 		}
 
 		Null.prototype.isAssignable = NO;
@@ -3062,8 +3080,8 @@ var CoffeeScript = (function(){
 		Return.prototype.jumps = THIS;
 
 		Return.prototype.compileToFragments = function(o, level) {
-		  var expr, _ref4;
-		  expr = (_ref4 = this.expression) != null ? _ref4.makeReturn() : void 0;
+		  var expr, _ref2;
+		  expr = (_ref2 = this.expression) != null ? _ref2.makeReturn() : void 0;
 		  if (expr && !(expr instanceof Return)) {
 			return expr.compileToFragments(o, level);
 		  } else {
@@ -3145,10 +3163,10 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.isAtomic = function() {
-		  var node, _i, _len, _ref4;
-		  _ref4 = this.properties.concat(this.base);
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			node = _ref4[_i];
+		  var node, _i, _len, _ref2;
+		  _ref2 = this.properties.concat(this.base);
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			node = _ref2[_i];
 			if (node.soak || node instanceof Call) {
 			  return false;
 			}
@@ -3181,6 +3199,11 @@ var CoffeeScript = (function(){
 
 		Value.prototype.isSplice = function() {
 		  return last(this.properties) instanceof Slice;
+		};
+
+		Value.prototype.looksStatic = function(className) {
+		  var _ref2;
+		  return this.base.value === className && this.properties.length && ((_ref2 = this.properties[0].name) != null ? _ref2.value : void 0) !== 'prototype';
 		};
 
 		Value.prototype.unwrap = function() {
@@ -3231,14 +3254,14 @@ var CoffeeScript = (function(){
 		Value.prototype.unfoldSoak = function(o) {
 		  return this.unfoldedSoak != null ? this.unfoldedSoak : this.unfoldedSoak = (function(_this) {
 			return function() {
-			  var fst, i, ifn, prop, ref, snd, _i, _len, _ref4, _ref5;
+			  var fst, i, ifn, prop, ref, snd, _i, _len, _ref2, _ref3;
 			  if (ifn = _this.base.unfoldSoak(o)) {
-				(_ref4 = ifn.body.properties).push.apply(_ref4, _this.properties);
+				(_ref2 = ifn.body.properties).push.apply(_ref2, _this.properties);
 				return ifn;
 			  }
-			  _ref5 = _this.properties;
-			  for (i = _i = 0, _len = _ref5.length; _i < _len; i = ++_i) {
-				prop = _ref5[i];
+			  _ref3 = _this.properties;
+			  for (i = _i = 0, _len = _ref3.length; _i < _len; i = ++_i) {
+				prop = _ref3[i];
 				if (!prop.soak) {
 				  continue;
 				}
@@ -3305,8 +3328,8 @@ var CoffeeScript = (function(){
 		Call.prototype.children = ['variable', 'args'];
 
 		Call.prototype.newInstance = function() {
-		  var base, _ref4;
-		  base = ((_ref4 = this.variable) != null ? _ref4.base : void 0) || this.variable;
+		  var base, _ref2;
+		  base = ((_ref2 = this.variable) != null ? _ref2.base : void 0) || this.variable;
 		  if (base instanceof Call && !base.isNew) {
 			base.newInstance();
 		  } else {
@@ -3339,13 +3362,13 @@ var CoffeeScript = (function(){
 		};
 
 		Call.prototype.unfoldSoak = function(o) {
-		  var call, ifn, left, list, rite, _i, _len, _ref4, _ref5;
+		  var call, ifn, left, list, rite, _i, _len, _ref2, _ref3;
 		  if (this.soak) {
 			if (this.variable) {
 			  if (ifn = unfoldSoak(o, this, 'variable')) {
 				return ifn;
 			  }
-			  _ref4 = new Value(this.variable).cacheReference(o), left = _ref4[0], rite = _ref4[1];
+			  _ref2 = new Value(this.variable).cacheReference(o), left = _ref2[0], rite = _ref2[1];
 			} else {
 			  left = new Literal(this.superReference(o));
 			  rite = new Value(left);
@@ -3373,9 +3396,9 @@ var CoffeeScript = (function(){
 			  break;
 			}
 		  }
-		  _ref5 = list.reverse();
-		  for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-			call = _ref5[_i];
+		  _ref3 = list.reverse();
+		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+			call = _ref3[_i];
 			if (ifn) {
 			  if (call.variable instanceof Call) {
 				call.variable = ifn;
@@ -3389,18 +3412,18 @@ var CoffeeScript = (function(){
 		};
 
 		Call.prototype.compileNode = function(o) {
-		  var arg, argIndex, compiledArgs, compiledArray, fragments, preface, _i, _len, _ref4, _ref5;
-		  if ((_ref4 = this.variable) != null) {
-			_ref4.front = this.front;
+		  var arg, argIndex, compiledArgs, compiledArray, fragments, preface, _i, _len, _ref2, _ref3;
+		  if ((_ref2 = this.variable) != null) {
+			_ref2.front = this.front;
 		  }
 		  compiledArray = Splat.compileSplattedArray(o, this.args, true);
 		  if (compiledArray.length) {
 			return this.compileSplat(o, compiledArray);
 		  }
 		  compiledArgs = [];
-		  _ref5 = this.args;
-		  for (argIndex = _i = 0, _len = _ref5.length; _i < _len; argIndex = ++_i) {
-			arg = _ref5[argIndex];
+		  _ref3 = this.args;
+		  for (argIndex = _i = 0, _len = _ref3.length; _i < _len; argIndex = ++_i) {
+			arg = _ref3[argIndex];
 			if (argIndex) {
 			  compiledArgs.push(this.makeCode(", "));
 			}
@@ -3540,23 +3563,23 @@ var CoffeeScript = (function(){
 		}
 
 		Range.prototype.compileVariables = function(o) {
-		  var step, _ref4, _ref5, _ref6, _ref7;
+		  var step, _ref2, _ref3, _ref4, _ref5;
 		  o = merge(o, {
 			top: true
 		  });
-		  _ref4 = this.cacheToCodeFragments(this.from.cache(o, LEVEL_LIST)), this.fromC = _ref4[0], this.fromVar = _ref4[1];
-		  _ref5 = this.cacheToCodeFragments(this.to.cache(o, LEVEL_LIST)), this.toC = _ref5[0], this.toVar = _ref5[1];
+		  _ref2 = this.cacheToCodeFragments(this.from.cache(o, LEVEL_LIST)), this.fromC = _ref2[0], this.fromVar = _ref2[1];
+		  _ref3 = this.cacheToCodeFragments(this.to.cache(o, LEVEL_LIST)), this.toC = _ref3[0], this.toVar = _ref3[1];
 		  if (step = del(o, 'step')) {
-			_ref6 = this.cacheToCodeFragments(step.cache(o, LEVEL_LIST)), this.step = _ref6[0], this.stepVar = _ref6[1];
+			_ref4 = this.cacheToCodeFragments(step.cache(o, LEVEL_LIST)), this.step = _ref4[0], this.stepVar = _ref4[1];
 		  }
-		  _ref7 = [this.fromVar.match(NUMBER), this.toVar.match(NUMBER)], this.fromNum = _ref7[0], this.toNum = _ref7[1];
+		  _ref5 = [this.fromVar.match(NUMBER), this.toVar.match(NUMBER)], this.fromNum = _ref5[0], this.toNum = _ref5[1];
 		  if (this.stepVar) {
 			return this.stepNum = this.stepVar.match(NUMBER);
 		  }
 		};
 
 		Range.prototype.compileNode = function(o) {
-		  var cond, condPart, from, gt, idx, idxName, known, lt, namedIndex, stepPart, to, varPart, _ref4, _ref5;
+		  var cond, condPart, from, gt, idx, idxName, known, lt, namedIndex, stepPart, to, varPart, _ref2, _ref3;
 		  if (!this.fromVar) {
 			this.compileVariables(o);
 		  }
@@ -3574,8 +3597,8 @@ var CoffeeScript = (function(){
 		  if (this.step !== this.stepVar) {
 			varPart += ", " + this.step;
 		  }
-		  _ref4 = ["" + idx + " <" + this.equals, "" + idx + " >" + this.equals], lt = _ref4[0], gt = _ref4[1];
-		  condPart = this.stepNum ? parseNum(this.stepNum[0]) > 0 ? "" + lt + " " + this.toVar : "" + gt + " " + this.toVar : known ? ((_ref5 = [parseNum(this.fromNum[0]), parseNum(this.toNum[0])], from = _ref5[0], to = _ref5[1], _ref5), from <= to ? "" + lt + " " + to : "" + gt + " " + to) : (cond = this.stepVar ? "" + this.stepVar + " > 0" : "" + this.fromVar + " <= " + this.toVar, "" + cond + " ? " + lt + " " + this.toVar + " : " + gt + " " + this.toVar);
+		  _ref2 = ["" + idx + " <" + this.equals, "" + idx + " >" + this.equals], lt = _ref2[0], gt = _ref2[1];
+		  condPart = this.stepNum ? parseNum(this.stepNum[0]) > 0 ? "" + lt + " " + this.toVar : "" + gt + " " + this.toVar : known ? ((_ref3 = [parseNum(this.fromNum[0]), parseNum(this.toNum[0])], from = _ref3[0], to = _ref3[1], _ref3), from <= to ? "" + lt + " " + to : "" + gt + " " + to) : (cond = this.stepVar ? "" + this.stepVar + " > 0" : "" + this.fromVar + " <= " + this.toVar, "" + cond + " ? " + lt + " " + this.toVar + " : " + gt + " " + this.toVar);
 		  stepPart = this.stepVar ? "" + idx + " += " + this.stepVar : known ? namedIndex ? from <= to ? "++" + idx : "--" + idx : from <= to ? "" + idx + "++" : "" + idx + "--" : namedIndex ? "" + cond + " ? ++" + idx + " : --" + idx : "" + cond + " ? " + idx + "++ : " + idx + "--";
 		  if (namedIndex) {
 			varPart = "" + idxName + " = " + varPart;
@@ -3587,11 +3610,11 @@ var CoffeeScript = (function(){
 		};
 
 		Range.prototype.compileArray = function(o) {
-		  var args, body, cond, hasArgs, i, idt, post, pre, range, result, vars, _i, _ref4, _ref5, _results;
+		  var args, body, cond, hasArgs, i, idt, post, pre, range, result, vars, _i, _ref2, _ref3, _results;
 		  if (this.fromNum && this.toNum && Math.abs(this.fromNum - this.toNum) <= 20) {
 			range = (function() {
 			  _results = [];
-			  for (var _i = _ref4 = +this.fromNum, _ref5 = +this.toNum; _ref4 <= _ref5 ? _i <= _ref5 : _i >= _ref5; _ref4 <= _ref5 ? _i++ : _i--){ _results.push(_i); }
+			  for (var _i = _ref2 = +this.fromNum, _ref3 = +this.toNum; _ref2 <= _ref3 ? _i <= _ref3 : _i >= _ref3; _ref2 <= _ref3 ? _i++ : _i--){ _results.push(_i); }
 			  return _results;
 			}).apply(this);
 			if (this.exclusive) {
@@ -3613,9 +3636,7 @@ var CoffeeScript = (function(){
 		  }
 		  post = "{ " + result + ".push(" + i + "); }\n" + idt + "return " + result + ";\n" + o.indent;
 		  hasArgs = function(node) {
-			return node != null ? node.contains(function(n) {
-			  return n instanceof Literal && n.value === 'arguments' && !n.asKey;
-			}) : void 0;
+			return node != null ? node.contains(isLiteralArguments) : void 0;
 		  };
 		  if (hasArgs(this.from) || hasArgs(this.to)) {
 			args = ', arguments';
@@ -3638,8 +3659,8 @@ var CoffeeScript = (function(){
 		}
 
 		Slice.prototype.compileNode = function(o) {
-		  var compiled, compiledText, from, fromCompiled, to, toStr, _ref4;
-		  _ref4 = this.range, to = _ref4.to, from = _ref4.from;
+		  var compiled, compiledText, from, fromCompiled, to, toStr, _ref2;
+		  _ref2 = this.range, to = _ref2.to, from = _ref2.from;
 		  fromCompiled = from && from.compileToFragments(o, LEVEL_PAREN) || [this.makeCode('0')];
 		  if (to) {
 			compiled = to.compileToFragments(o, LEVEL_PAREN);
@@ -3716,10 +3737,10 @@ var CoffeeScript = (function(){
 		};
 
 		Obj.prototype.assigns = function(name) {
-		  var prop, _i, _len, _ref4;
-		  _ref4 = this.properties;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			prop = _ref4[_i];
+		  var prop, _i, _len, _ref2;
+		  _ref2 = this.properties;
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			prop = _ref2[_i];
 			if (prop.assigns(name)) {
 			  return true;
 			}
@@ -3752,11 +3773,11 @@ var CoffeeScript = (function(){
 		  }
 		  answer = [];
 		  compiledObjs = (function() {
-			var _i, _len, _ref4, _results;
-			_ref4 = this.objects;
+			var _i, _len, _ref2, _results;
+			_ref2 = this.objects;
 			_results = [];
-			for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			  obj = _ref4[_i];
+			for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			  obj = _ref2[_i];
 			  _results.push(obj.compileToFragments(o, LEVEL_LIST));
 			}
 			return _results;
@@ -3779,10 +3800,10 @@ var CoffeeScript = (function(){
 		};
 
 		Arr.prototype.assigns = function(name) {
-		  var obj, _i, _len, _ref4;
-		  _ref4 = this.objects;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			obj = _ref4[_i];
+		  var obj, _i, _len, _ref2;
+		  _ref2 = this.objects;
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			obj = _ref2[_i];
 			if (obj.assigns(name)) {
 			  return true;
 			}
@@ -3836,10 +3857,10 @@ var CoffeeScript = (function(){
 		};
 
 		Class.prototype.addBoundFunctions = function(o) {
-		  var bvar, lhs, _i, _len, _ref4;
-		  _ref4 = this.boundFuncs;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			bvar = _ref4[_i];
+		  var bvar, lhs, _i, _len, _ref2;
+		  _ref2 = this.boundFuncs;
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			bvar = _ref2[_i];
 			lhs = (new Value(new Literal("this"), [new Access(bvar)])).compile(o);
 			this.ctor.body.unshift(new Literal("" + lhs + " = " + (utility('bind')) + "(" + lhs + ", this)"));
 		  }
@@ -3866,15 +3887,12 @@ var CoffeeScript = (function(){
 				  if (func instanceof Code) {
 					assign = this.ctor = func;
 				  } else {
-					this.externalCtor = o.scope.freeVariable('class');
+					this.externalCtor = o.classScope.freeVariable('class');
 					assign = new Assign(new Literal(this.externalCtor), func);
 				  }
 				} else {
 				  if (assign.variable["this"]) {
 					func["static"] = true;
-					if (func.bound) {
-					  func.context = name;
-					}
 				  } else {
 					assign.variable = new Value(new Literal(name), [new Access(new Literal('prototype')), new Access(base)]);
 					if (func instanceof Code && func.bound) {
@@ -3894,16 +3912,18 @@ var CoffeeScript = (function(){
 		Class.prototype.walkBody = function(name, o) {
 		  return this.traverseChildren(false, (function(_this) {
 			return function(child) {
-			  var cont, exps, i, node, _i, _len, _ref4;
+			  var cont, exps, i, node, _i, _len, _ref2;
 			  cont = true;
 			  if (child instanceof Class) {
 				return false;
 			  }
 			  if (child instanceof Block) {
-				_ref4 = exps = child.expressions;
-				for (i = _i = 0, _len = _ref4.length; _i < _len; i = ++_i) {
-				  node = _ref4[i];
-				  if (node instanceof Value && node.isObject(true)) {
+				_ref2 = exps = child.expressions;
+				for (i = _i = 0, _len = _ref2.length; _i < _len; i = ++_i) {
+				  node = _ref2[i];
+				  if (node instanceof Assign && node.variable.looksStatic(name)) {
+					node.value["static"] = true;
+				  } else if (node instanceof Value && node.isObject(true)) {
 					cont = false;
 					exps[i] = _this.addProperties(node, name, o);
 				  }
@@ -3925,62 +3945,53 @@ var CoffeeScript = (function(){
 		  return this.directives = expressions.splice(0, index);
 		};
 
-		Class.prototype.ensureConstructor = function(name, o) {
-		  var missing, ref, superCall;
-		  missing = !this.ctor;
-		  this.ctor || (this.ctor = new Code);
+		Class.prototype.ensureConstructor = function(name) {
+		  if (!this.ctor) {
+			this.ctor = new Code;
+			if (this.externalCtor) {
+			  this.ctor.body.push(new Literal("" + this.externalCtor + ".apply(this, arguments)"));
+			} else if (this.parent) {
+			  this.ctor.body.push(new Literal("" + name + ".__super__.constructor.apply(this, arguments)"));
+			}
+			this.ctor.body.makeReturn();
+			this.body.expressions.unshift(this.ctor);
+		  }
 		  this.ctor.ctor = this.ctor.name = name;
 		  this.ctor.klass = null;
-		  this.ctor.noReturn = true;
-		  if (missing) {
-			if (this.parent) {
-			  superCall = new Literal("" + name + ".__super__.constructor.apply(this, arguments)");
-			}
-			if (this.externalCtor) {
-			  superCall = new Literal("" + this.externalCtor + ".apply(this, arguments)");
-			}
-			if (superCall) {
-			  ref = new Literal(o.scope.freeVariable('ref'));
-			  this.ctor.body.unshift(new Assign(ref, superCall));
-			}
-			this.addBoundFunctions(o);
-			if (superCall) {
-			  this.ctor.body.push(ref);
-			  this.ctor.body.makeReturn();
-			}
-			return this.body.expressions.unshift(this.ctor);
-		  } else {
-			return this.addBoundFunctions(o);
-		  }
+		  return this.ctor.noReturn = true;
 		};
 
 		Class.prototype.compileNode = function(o) {
-		  var call, decl, klass, lname, name, params, _ref4;
-		  decl = this.determineName();
-		  name = decl || '_Class';
+		  var args, argumentsNode, func, jumpNode, klass, lname, name, superClass, _ref2;
+		  if (jumpNode = this.body.jumps()) {
+			jumpNode.error('Class bodies cannot contain pure statements');
+		  }
+		  if (argumentsNode = this.body.contains(isLiteralArguments)) {
+			argumentsNode.error("Class bodies shouldn't reference arguments");
+		  }
+		  name = this.determineName() || '_Class';
 		  if (name.reserved) {
 			name = "_" + name;
 		  }
 		  lname = new Literal(name);
+		  func = new Code([], Block.wrap([this.body]));
+		  args = [];
+		  o.classScope = func.makeScope(o.scope);
 		  this.hoistDirectivePrologue();
 		  this.setContext(name);
 		  this.walkBody(name, o);
-		  this.ensureConstructor(name, o);
+		  this.ensureConstructor(name);
+		  this.addBoundFunctions(o);
 		  this.body.spaced = true;
-		  if (!(this.ctor instanceof Code)) {
-			this.body.expressions.unshift(this.ctor);
-		  }
 		  this.body.expressions.push(lname);
-		  (_ref4 = this.body.expressions).unshift.apply(_ref4, this.directives);
-		  call = Closure.wrap(this.body);
-		  if (this.parent && call.args) {
-			this.superClass = new Literal(o.scope.freeVariable('super', false));
-			this.body.expressions.unshift(new Extends(lname, this.superClass));
-			call.args.push(this.parent);
-			params = call.variable.params || call.variable.base.params;
-			params.push(new Param(this.superClass));
+		  if (this.parent) {
+			superClass = new Literal(o.classScope.freeVariable('super', false));
+			this.body.expressions.unshift(new Extends(lname, superClass));
+			func.params.push(new Param(superClass));
+			args.push(this.parent);
 		  }
-		  klass = new Parens(call, true);
+		  (_ref2 = this.body.expressions).unshift.apply(_ref2, this.directives);
+		  klass = new Parens(new Call(func, args));
 		  if (this.variable) {
 			klass = new Assign(this.variable, klass);
 		  }
@@ -3995,13 +4006,13 @@ var CoffeeScript = (function(){
 		__extends(Assign, _super);
 
 		function Assign(variable, value, context, options) {
-		  var forbidden, name, _ref4;
+		  var forbidden, name, _ref2;
 		  this.variable = variable;
 		  this.value = value;
 		  this.context = context;
 		  this.param = options && options.param;
 		  this.subpattern = options && options.subpattern;
-		  forbidden = (_ref4 = (name = this.variable.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref4) >= 0);
+		  forbidden = (_ref2 = (name = this.variable.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref2) >= 0);
 		  if (forbidden && this.context !== 'object') {
 			this.variable.error("variable name may not be \"" + name + "\"");
 		  }
@@ -4022,7 +4033,7 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileNode = function(o) {
-		  var answer, compiledName, isValue, match, name, val, varBase, _ref4, _ref5, _ref6, _ref7;
+		  var answer, compiledName, isValue, match, name, val, varBase, _ref2, _ref3, _ref4;
 		  if (isValue = this.variable instanceof Value) {
 			if (this.variable.isArray() || this.variable.isObject()) {
 			  return this.compilePatternMatch(o);
@@ -4030,7 +4041,7 @@ var CoffeeScript = (function(){
 			if (this.variable.isSplice()) {
 			  return this.compileSplice(o);
 			}
-			if ((_ref4 = this.context) === '||=' || _ref4 === '&&=' || _ref4 === '?=') {
+			if ((_ref2 = this.context) === '||=' || _ref2 === '&&=' || _ref2 === '?=') {
 			  return this.compileConditional(o);
 			}
 		  }
@@ -4050,10 +4061,10 @@ var CoffeeScript = (function(){
 			}
 		  }
 		  if (this.value instanceof Code && (match = METHOD_DEF.exec(name))) {
-			if (match[1]) {
+			if (match[2]) {
 			  this.value.klass = match[1];
 			}
-			this.value.name = (_ref5 = (_ref6 = (_ref7 = match[2]) != null ? _ref7 : match[3]) != null ? _ref6 : match[4]) != null ? _ref5 : match[5];
+			this.value.name = (_ref3 = (_ref4 = match[3]) != null ? _ref4 : match[4]) != null ? _ref3 : match[5];
 		  }
 		  val = this.value.compileToFragments(o, LEVEL_LIST);
 		  if (this.context === 'object') {
@@ -4068,7 +4079,7 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compilePatternMatch = function(o) {
-		  var acc, assigns, code, fragments, i, idx, isObject, ivar, name, obj, objects, olen, ref, rest, splat, top, val, value, vvar, vvarText, _i, _len, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+		  var acc, assigns, code, fragments, i, idx, isObject, ivar, name, obj, objects, olen, ref, rest, splat, top, val, value, vvar, vvarText, _i, _len, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
 		  top = o.level === LEVEL_TOP;
 		  value = this.value;
 		  objects = this.variable.base.objects;
@@ -4083,14 +4094,14 @@ var CoffeeScript = (function(){
 		  isObject = this.variable.isObject();
 		  if (top && olen === 1 && !((obj = objects[0]) instanceof Splat)) {
 			if (obj instanceof Assign) {
-			  _ref4 = obj, (_ref5 = _ref4.variable, idx = _ref5.base), obj = _ref4.value;
+			  _ref2 = obj, (_ref3 = _ref2.variable, idx = _ref3.base), obj = _ref2.value;
 			} else {
 			  idx = isObject ? obj["this"] ? obj.properties[0].name : obj : new Literal(0);
 			}
 			acc = IDENTIFIER.test(idx.unwrap().value || 0);
 			value = new Value(value);
 			value.properties.push(new (acc ? Access : Index)(idx));
-			if (_ref6 = obj.unwrap().value, __indexOf.call(RESERVED, _ref6) >= 0) {
+			if (_ref4 = obj.unwrap().value, __indexOf.call(RESERVED, _ref4) >= 0) {
 			  obj.error("assignment to a reserved word: " + (obj.compile(o)));
 			}
 			return new Assign(obj, value, null, {
@@ -4111,10 +4122,10 @@ var CoffeeScript = (function(){
 			idx = i;
 			if (isObject) {
 			  if (obj instanceof Assign) {
-				_ref7 = obj, (_ref8 = _ref7.variable, idx = _ref8.base), obj = _ref7.value;
+				_ref5 = obj, (_ref6 = _ref5.variable, idx = _ref6.base), obj = _ref5.value;
 			  } else {
 				if (obj.base instanceof Parens) {
-				  _ref9 = new Value(obj.unwrapAll()).cacheReference(o), obj = _ref9[0], idx = _ref9[1];
+				  _ref7 = new Value(obj.unwrapAll()).cacheReference(o), obj = _ref7[0], idx = _ref7[1];
 				} else {
 				  idx = obj["this"] ? obj.properties[0].name : obj;
 				}
@@ -4165,8 +4176,8 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileConditional = function(o) {
-		  var fragments, left, right, _ref4;
-		  _ref4 = this.variable.cacheReference(o), left = _ref4[0], right = _ref4[1];
+		  var fragments, left, right, _ref2;
+		  _ref2 = this.variable.cacheReference(o), left = _ref2[0], right = _ref2[1];
 		  if (!left.properties.length && left.base instanceof Literal && left.base.value !== "this" && !o.scope.check(left.base.value)) {
 			this.variable.error("the variable \"" + left.base.value + "\" can't be assigned with " + this.context + " because it has not been declared before");
 		  }
@@ -4186,17 +4197,17 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileSplice = function(o) {
-		  var answer, exclusive, from, fromDecl, fromRef, name, to, valDef, valRef, _ref4, _ref5, _ref6;
-		  _ref4 = this.variable.properties.pop().range, from = _ref4.from, to = _ref4.to, exclusive = _ref4.exclusive;
+		  var answer, exclusive, from, fromDecl, fromRef, name, to, valDef, valRef, _ref2, _ref3, _ref4;
+		  _ref2 = this.variable.properties.pop().range, from = _ref2.from, to = _ref2.to, exclusive = _ref2.exclusive;
 		  name = this.variable.compile(o);
 		  if (from) {
-			_ref5 = this.cacheToCodeFragments(from.cache(o, LEVEL_OP)), fromDecl = _ref5[0], fromRef = _ref5[1];
+			_ref3 = this.cacheToCodeFragments(from.cache(o, LEVEL_OP)), fromDecl = _ref3[0], fromRef = _ref3[1];
 		  } else {
 			fromDecl = fromRef = '0';
 		  }
 		  if (to) {
-			if (from && from instanceof Value && (from != null ? from.isSimpleNumber() : void 0) && to instanceof Value && to.isSimpleNumber()) {
-			  to = +to.compile(o) - +fromRef;
+			if (from instanceof Value && from.isSimpleNumber() && to instanceof Value && to.isSimpleNumber()) {
+			  to = to.compile(o) - fromRef;
 			  if (!exclusive) {
 				to += 1;
 			  }
@@ -4209,7 +4220,7 @@ var CoffeeScript = (function(){
 		  } else {
 			to = "9e9";
 		  }
-		  _ref6 = this.value.cache(o, LEVEL_LIST), valDef = _ref6[0], valRef = _ref6[1];
+		  _ref4 = this.value.cache(o, LEVEL_LIST), valDef = _ref4[0], valRef = _ref4[1];
 		  answer = [].concat(this.makeCode("[].splice.apply(" + name + ", [" + fromDecl + ", " + to + "].concat("), valDef, this.makeCode(")), "), valRef);
 		  if (o.level > LEVEL_TOP) {
 			return this.wrapInBraces(answer);
@@ -4229,9 +4240,6 @@ var CoffeeScript = (function(){
 		  this.params = params || [];
 		  this.body = body || new Block;
 		  this.bound = tag === 'boundfunc';
-		  if (this.bound) {
-			this.context = '_this';
-		  }
 		}
 
 		Code.prototype.children = ['params', 'body'];
@@ -4242,16 +4250,23 @@ var CoffeeScript = (function(){
 
 		Code.prototype.jumps = NO;
 
+		Code.prototype.makeScope = function(parentScope) {
+		  return new Scope(parentScope, this.body, this);
+		};
+
 		Code.prototype.compileNode = function(o) {
-		  var answer, boundfunc, code, exprs, i, idt, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, wrapper, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref4, _ref5, _ref6, _ref7, _ref8;
-		  if (this.bound && !this.wrapped && !this["static"]) {
-			this.wrapped = true;
-			wrapper = new Code([new Param(new Literal('_this'))], new Block([this]));
+		  var answer, boundfunc, code, exprs, i, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, wrapper, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref2, _ref3, _ref4, _ref5, _ref6;
+		  if (this.bound && ((_ref2 = o.scope.method) != null ? _ref2.bound : void 0)) {
+			this.context = o.scope.method.context;
+		  }
+		  if (this.bound && !this.context) {
+			this.context = '_this';
+			wrapper = new Code([new Param(new Literal(this.context))], new Block([this]));
 			boundfunc = new Call(wrapper, [new Literal('this')]);
 			boundfunc.updateLocationDataIfMissing(this.locationData);
 			return boundfunc.compileNode(o);
 		  }
-		  o.scope = new Scope(o.scope, this.body, this);
+		  o.scope = del(o, 'classScope') || this.makeScope(o.scope);
 		  o.scope.shared = del(o, 'sharedScope');
 		  o.indent += TAB;
 		  delete o.bare;
@@ -4263,15 +4278,15 @@ var CoffeeScript = (function(){
 			  return o.scope.parameter(name);
 			}
 		  });
-		  _ref4 = this.params;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			param = _ref4[_i];
+		  _ref3 = this.params;
+		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+			param = _ref3[_i];
 			if (!param.splat) {
 			  continue;
 			}
-			_ref5 = this.params;
-			for (_j = 0, _len1 = _ref5.length; _j < _len1; _j++) {
-			  p = _ref5[_j].name;
+			_ref4 = this.params;
+			for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+			  p = _ref4[_j].name;
 			  if (p["this"]) {
 				p = p.properties[0].name;
 			  }
@@ -4280,20 +4295,20 @@ var CoffeeScript = (function(){
 			  }
 			}
 			splats = new Assign(new Value(new Arr((function() {
-			  var _k, _len2, _ref6, _results;
-			  _ref6 = this.params;
+			  var _k, _len2, _ref5, _results;
+			  _ref5 = this.params;
 			  _results = [];
-			  for (_k = 0, _len2 = _ref6.length; _k < _len2; _k++) {
-				p = _ref6[_k];
+			  for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
+				p = _ref5[_k];
 				_results.push(p.asReference(o));
 			  }
 			  return _results;
 			}).call(this))), new Value(new Literal('arguments')));
 			break;
 		  }
-		  _ref6 = this.params;
-		  for (_k = 0, _len2 = _ref6.length; _k < _len2; _k++) {
-			param = _ref6[_k];
+		  _ref5 = this.params;
+		  for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
+			param = _ref5[_k];
 			if (param.isComplex()) {
 			  val = ref = param.asReference(o);
 			  if (param.value) {
@@ -4319,7 +4334,7 @@ var CoffeeScript = (function(){
 			exprs.unshift(splats);
 		  }
 		  if (exprs.length) {
-			(_ref7 = this.body.expressions).unshift.apply(_ref7, exprs);
+			(_ref6 = this.body.expressions).unshift.apply(_ref6, exprs);
 		  }
 		  for (i = _l = 0, _len3 = params.length; _l < _len3; i = ++_l) {
 			p = params[i];
@@ -4336,10 +4351,6 @@ var CoffeeScript = (function(){
 		  if (!(wasEmpty || this.noReturn)) {
 			this.body.makeReturn();
 		  }
-		  if (this.bound && ((_ref8 = o.scope.parent.method) != null ? _ref8.bound : void 0)) {
-			this.bound = this.context = o.scope.parent.method.context;
-		  }
-		  idt = o.indent;
 		  code = 'function';
 		  if (this.ctor) {
 			code += ' ' + this.name;
@@ -4369,11 +4380,11 @@ var CoffeeScript = (function(){
 		};
 
 		Code.prototype.eachParamName = function(iterator) {
-		  var param, _i, _len, _ref4, _results;
-		  _ref4 = this.params;
+		  var param, _i, _len, _ref2, _results;
+		  _ref2 = this.params;
 		  _results = [];
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			param = _ref4[_i];
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			param = _ref2[_i];
 			_results.push(param.eachName(iterator));
 		  }
 		  return _results;
@@ -4393,11 +4404,11 @@ var CoffeeScript = (function(){
 		__extends(Param, _super);
 
 		function Param(name, value, splat) {
-		  var _ref4;
+		  var _ref2;
 		  this.name = name;
 		  this.value = value;
 		  this.splat = splat;
-		  if (_ref4 = (name = this.name.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref4) >= 0) {
+		  if (_ref2 = (name = this.name.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref2) >= 0) {
 			this.name.error("parameter name \"" + name + "\" is not allowed");
 		  }
 		}
@@ -4435,7 +4446,7 @@ var CoffeeScript = (function(){
 		};
 
 		Param.prototype.eachName = function(iterator, name) {
-		  var atParam, node, obj, _i, _len, _ref4;
+		  var atParam, node, obj, _i, _len, _ref2;
 		  if (name == null) {
 			name = this.name;
 		  }
@@ -4452,9 +4463,9 @@ var CoffeeScript = (function(){
 		  if (name instanceof Value) {
 			return atParam(name);
 		  }
-		  _ref4 = name.objects;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			obj = _ref4[_i];
+		  _ref2 = name.objects;
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			obj = _ref2[_i];
 			if (obj instanceof Assign) {
 			  this.eachName(iterator, obj.value.unwrap());
 			} else if (obj instanceof Splat) {
@@ -4530,11 +4541,11 @@ var CoffeeScript = (function(){
 			return args[0].concat(node.makeCode(".concat("), concatPart, node.makeCode(")"));
 		  }
 		  base = (function() {
-			var _j, _len1, _ref4, _results;
-			_ref4 = list.slice(0, index);
+			var _j, _len1, _ref2, _results;
+			_ref2 = list.slice(0, index);
 			_results = [];
-			for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-			  node = _ref4[_j];
+			for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+			  node = _ref2[_j];
 			  _results.push(node.compileToFragments(o, LEVEL_LIST));
 			}
 			return _results;
@@ -4577,17 +4588,17 @@ var CoffeeScript = (function(){
 		};
 
 		While.prototype.jumps = function() {
-		  var expressions, node, _i, _len;
+		  var expressions, jumpNode, node, _i, _len;
 		  expressions = this.body.expressions;
 		  if (!expressions.length) {
 			return false;
 		  }
 		  for (_i = 0, _len = expressions.length; _i < _len; _i++) {
 			node = expressions[_i];
-			if (node.jumps({
+			if (jumpNode = node.jumps({
 			  loop: true
 			})) {
-			  return node;
+			  return jumpNode;
 			}
 		  }
 		  return false;
@@ -4674,17 +4685,17 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.isComplex = function() {
-		  var _ref4;
-		  return !(this.isUnary() && ((_ref4 = this.operator) === '+' || _ref4 === '-')) || this.first.isComplex();
+		  var _ref2;
+		  return !(this.isUnary() && ((_ref2 = this.operator) === '+' || _ref2 === '-')) || this.first.isComplex();
 		};
 
 		Op.prototype.isChainable = function() {
-		  var _ref4;
-		  return (_ref4 = this.operator) === '<' || _ref4 === '>' || _ref4 === '>=' || _ref4 === '<=' || _ref4 === '===' || _ref4 === '!==';
+		  var _ref2;
+		  return (_ref2 = this.operator) === '<' || _ref2 === '>' || _ref2 === '>=' || _ref2 === '<=' || _ref2 === '===' || _ref2 === '!==';
 		};
 
 		Op.prototype.invert = function() {
-		  var allInvertable, curr, fst, op, _ref4;
+		  var allInvertable, curr, fst, op, _ref2;
 		  if (this.isChainable() && this.first.isChainable()) {
 			allInvertable = true;
 			curr = this;
@@ -4710,7 +4721,7 @@ var CoffeeScript = (function(){
 			return this;
 		  } else if (this.second) {
 			return new Parens(this).invert();
-		  } else if (this.operator === '!' && (fst = this.first.unwrap()) instanceof Op && ((_ref4 = fst.operator) === '!' || _ref4 === 'in' || _ref4 === 'instanceof')) {
+		  } else if (this.operator === '!' && (fst = this.first.unwrap()) instanceof Op && ((_ref2 = fst.operator) === '!' || _ref2 === 'in' || _ref2 === 'instanceof')) {
 			return fst;
 		  } else {
 			return new Op('!', this);
@@ -4718,17 +4729,17 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.unfoldSoak = function(o) {
-		  var _ref4;
-		  return ((_ref4 = this.operator) === '++' || _ref4 === '--' || _ref4 === 'delete') && unfoldSoak(o, this, 'first');
+		  var _ref2;
+		  return ((_ref2 = this.operator) === '++' || _ref2 === '--' || _ref2 === 'delete') && unfoldSoak(o, this, 'first');
 		};
 
 		Op.prototype.generateDo = function(exp) {
-		  var call, func, param, passedParams, ref, _i, _len, _ref4;
+		  var call, func, param, passedParams, ref, _i, _len, _ref2;
 		  passedParams = [];
 		  func = exp instanceof Assign && (ref = exp.value.unwrap()) instanceof Code ? ref : exp;
-		  _ref4 = func.params || [];
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			param = _ref4[_i];
+		  _ref2 = func.params || [];
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			param = _ref2[_i];
 			if (param.value) {
 			  passedParams.push(param.value);
 			  delete param.value;
@@ -4742,7 +4753,7 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.compileNode = function(o) {
-		  var answer, isChain, _ref4, _ref5;
+		  var answer, isChain, _ref2, _ref3;
 		  isChain = this.isChainable() && this.first.isChainable();
 		  if (!isChain) {
 			this.first.front = this.front;
@@ -4750,7 +4761,7 @@ var CoffeeScript = (function(){
 		  if (this.operator === 'delete' && o.scope.check(this.first.unwrapAll().value)) {
 			this.error('delete operand may not be argument or var');
 		  }
-		  if (((_ref4 = this.operator) === '--' || _ref4 === '++') && (_ref5 = this.first.unwrapAll().value, __indexOf.call(STRICT_PROSCRIBED, _ref5) >= 0)) {
+		  if (((_ref2 = this.operator) === '--' || _ref2 === '++') && (_ref3 = this.first.unwrapAll().value, __indexOf.call(STRICT_PROSCRIBED, _ref3) >= 0)) {
 			this.error("cannot increment/decrement \"" + (this.first.unwrapAll().value) + "\"");
 		  }
 		  if (this.isUnary()) {
@@ -4771,8 +4782,8 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.compileChain = function(o) {
-		  var fragments, fst, shared, _ref4;
-		  _ref4 = this.first.second.cache(o), this.first.second = _ref4[0], shared = _ref4[1];
+		  var fragments, fst, shared, _ref2;
+		  _ref2 = this.first.second.cache(o), this.first.second = _ref2[0], shared = _ref2[1];
 		  fst = this.first.compileToFragments(o, LEVEL_OP);
 		  fragments = fst.concat(this.makeCode(" " + (this.invert ? '&&' : '||') + " "), shared.compileToFragments(o), this.makeCode(" " + this.operator + " "), this.second.compileToFragments(o, LEVEL_OP));
 		  return this.wrapInBraces(fragments);
@@ -4839,11 +4850,11 @@ var CoffeeScript = (function(){
 		In.prototype.invert = NEGATE;
 
 		In.prototype.compileNode = function(o) {
-		  var hasSplat, obj, _i, _len, _ref4;
+		  var hasSplat, obj, _i, _len, _ref2;
 		  if (this.array instanceof Value && this.array.isArray()) {
-			_ref4 = this.array.base.objects;
-			for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			  obj = _ref4[_i];
+			_ref2 = this.array.base.objects;
+			for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			  obj = _ref2[_i];
 			  if (!(obj instanceof Splat)) {
 				continue;
 			  }
@@ -4858,16 +4869,16 @@ var CoffeeScript = (function(){
 		};
 
 		In.prototype.compileOrTest = function(o) {
-		  var cmp, cnj, i, item, ref, sub, tests, _i, _len, _ref4, _ref5, _ref6;
+		  var cmp, cnj, i, item, ref, sub, tests, _i, _len, _ref2, _ref3, _ref4;
 		  if (this.array.base.objects.length === 0) {
 			return [this.makeCode("" + (!!this.negated))];
 		  }
-		  _ref4 = this.object.cache(o, LEVEL_OP), sub = _ref4[0], ref = _ref4[1];
-		  _ref5 = this.negated ? [' !== ', ' && '] : [' === ', ' || '], cmp = _ref5[0], cnj = _ref5[1];
+		  _ref2 = this.object.cache(o, LEVEL_OP), sub = _ref2[0], ref = _ref2[1];
+		  _ref3 = this.negated ? [' !== ', ' && '] : [' === ', ' || '], cmp = _ref3[0], cnj = _ref3[1];
 		  tests = [];
-		  _ref6 = this.array.base.objects;
-		  for (i = _i = 0, _len = _ref6.length; _i < _len; i = ++_i) {
-			item = _ref6[i];
+		  _ref4 = this.array.base.objects;
+		  for (i = _i = 0, _len = _ref4.length; _i < _len; i = ++_i) {
+			item = _ref4[i];
 			if (i) {
 			  tests.push(this.makeCode(cnj));
 			}
@@ -4881,8 +4892,8 @@ var CoffeeScript = (function(){
 		};
 
 		In.prototype.compileLoopTest = function(o) {
-		  var fragments, ref, sub, _ref4;
-		  _ref4 = this.object.cache(o, LEVEL_LIST), sub = _ref4[0], ref = _ref4[1];
+		  var fragments, ref, sub, _ref2;
+		  _ref2 = this.object.cache(o, LEVEL_LIST), sub = _ref2[0], ref = _ref2[1];
 		  fragments = [].concat(this.makeCode(utility('indexOf') + ".call("), this.array.compileToFragments(o, LEVEL_LIST), this.makeCode(", "), ref, this.makeCode(") " + (this.negated ? '< 0' : '>= 0')));
 		  if (fragmentsToText(sub) === fragmentsToText(ref)) {
 			return fragments;
@@ -4918,8 +4929,8 @@ var CoffeeScript = (function(){
 		Try.prototype.isStatement = YES;
 
 		Try.prototype.jumps = function(o) {
-		  var _ref4;
-		  return this.attempt.jumps(o) || ((_ref4 = this.recovery) != null ? _ref4.jumps(o) : void 0);
+		  var _ref2;
+		  return this.attempt.jumps(o) || ((_ref2 = this.recovery) != null ? _ref2.jumps(o) : void 0);
 		};
 
 		Try.prototype.makeReturn = function(res) {
@@ -4980,11 +4991,11 @@ var CoffeeScript = (function(){
 		Existence.prototype.invert = NEGATE;
 
 		Existence.prototype.compileNode = function(o) {
-		  var cmp, cnj, code, _ref4;
+		  var cmp, cnj, code, _ref2;
 		  this.expression.front = this.front;
 		  code = this.expression.compile(o, LEVEL_OP);
 		  if (IDENTIFIER.test(code) && !o.scope.check(code)) {
-			_ref4 = this.negated ? ['===', '||'] : ['!==', '&&'], cmp = _ref4[0], cnj = _ref4[1];
+			_ref2 = this.negated ? ['===', '||'] : ['!==', '&&'], cmp = _ref2[0], cnj = _ref2[1];
 			code = "typeof " + code + " " + cmp + " \"undefined\" " + cnj + " " + code + " " + cmp + " null";
 		  } else {
 			code = "" + code + " " + (this.negated ? '==' : '!=') + " null";
@@ -5037,13 +5048,13 @@ var CoffeeScript = (function(){
 		__extends(For, _super);
 
 		function For(body, source) {
-		  var _ref4;
+		  var _ref2;
 		  this.source = source.source, this.guard = source.guard, this.step = source.step, this.name = source.name, this.index = source.index;
 		  this.body = Block.wrap([body]);
 		  this.own = !!source.own;
 		  this.object = !!source.object;
 		  if (this.object) {
-			_ref4 = [this.index, this.name], this.name = _ref4[0], this.index = _ref4[1];
+			_ref2 = [this.index, this.name], this.name = _ref2[0], this.index = _ref2[1];
 		  }
 		  if (this.index instanceof Value) {
 			this.index.error('index cannot be a pattern matching expression');
@@ -5065,9 +5076,9 @@ var CoffeeScript = (function(){
 		For.prototype.children = ['body', 'source', 'guard', 'step'];
 
 		For.prototype.compileNode = function(o) {
-		  var body, bodyFragments, compare, compareDown, declare, declareDown, defPart, defPartFragments, down, forPartFragments, guardPart, idt1, increment, index, ivar, kvar, kvarAssign, lastJumps, lvar, name, namePart, ref, resultPart, returnResult, rvar, scope, source, step, stepNum, stepVar, svar, varPart, _ref4, _ref5;
+		  var body, bodyFragments, compare, compareDown, declare, declareDown, defPart, defPartFragments, down, forPartFragments, guardPart, idt1, increment, index, ivar, kvar, kvarAssign, lastJumps, lvar, name, namePart, ref, resultPart, returnResult, rvar, scope, source, step, stepNum, stepVar, svar, varPart, _ref2, _ref3;
 		  body = Block.wrap([this.body]);
-		  lastJumps = (_ref4 = last(body.expressions)) != null ? _ref4.jumps() : void 0;
+		  lastJumps = (_ref2 = last(body.expressions)) != null ? _ref2.jumps() : void 0;
 		  if (lastJumps && lastJumps instanceof Return) {
 			this.returns = false;
 		  }
@@ -5088,7 +5099,7 @@ var CoffeeScript = (function(){
 		  kvar = (this.range && name) || index || ivar;
 		  kvarAssign = kvar !== ivar ? "" + kvar + " = " : "";
 		  if (this.step && !this.range) {
-			_ref5 = this.cacheToCodeFragments(this.step.cache(o, LEVEL_LIST)), step = _ref5[0], stepVar = _ref5[1];
+			_ref3 = this.cacheToCodeFragments(this.step.cache(o, LEVEL_LIST)), step = _ref3[0], stepVar = _ref3[1];
 			stepNum = stepVar.match(NUMBER);
 		  }
 		  if (this.pattern) {
@@ -5178,24 +5189,24 @@ var CoffeeScript = (function(){
 		};
 
 		For.prototype.pluckDirectCall = function(o, body) {
-		  var base, defs, expr, fn, idx, ref, val, _i, _len, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+		  var base, defs, expr, fn, idx, ref, val, _i, _len, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
 		  defs = [];
-		  _ref4 = body.expressions;
-		  for (idx = _i = 0, _len = _ref4.length; _i < _len; idx = ++_i) {
-			expr = _ref4[idx];
+		  _ref2 = body.expressions;
+		  for (idx = _i = 0, _len = _ref2.length; _i < _len; idx = ++_i) {
+			expr = _ref2[idx];
 			expr = expr.unwrapAll();
 			if (!(expr instanceof Call)) {
 			  continue;
 			}
-			val = expr.variable.unwrapAll();
-			if (!((val instanceof Code) || (val instanceof Value && ((_ref5 = val.base) != null ? _ref5.unwrapAll() : void 0) instanceof Code && val.properties.length === 1 && ((_ref6 = (_ref7 = val.properties[0].name) != null ? _ref7.value : void 0) === 'call' || _ref6 === 'apply')))) {
+			val = (_ref3 = expr.variable) != null ? _ref3.unwrapAll() : void 0;
+			if (!((val instanceof Code) || (val instanceof Value && ((_ref4 = val.base) != null ? _ref4.unwrapAll() : void 0) instanceof Code && val.properties.length === 1 && ((_ref5 = (_ref6 = val.properties[0].name) != null ? _ref6.value : void 0) === 'call' || _ref5 === 'apply')))) {
 			  continue;
 			}
-			fn = ((_ref8 = val.base) != null ? _ref8.unwrapAll() : void 0) || val;
+			fn = ((_ref7 = val.base) != null ? _ref7.unwrapAll() : void 0) || val;
 			ref = new Literal(o.scope.freeVariable('fn'));
 			base = new Value(ref);
 			if (val.base) {
-			  _ref9 = [base, val], val.base = _ref9[0], base = _ref9[1];
+			  _ref8 = [base, val], val.base = _ref8[0], base = _ref8[1];
 			}
 			body.expressions[idx] = new Call(base, expr.args);
 			defs = defs.concat(this.makeCode(this.tab), new Assign(ref, fn).compileToFragments(o, LEVEL_TOP), this.makeCode(';\n'));
@@ -5221,49 +5232,49 @@ var CoffeeScript = (function(){
 		Switch.prototype.isStatement = YES;
 
 		Switch.prototype.jumps = function(o) {
-		  var block, conds, _i, _len, _ref4, _ref5, _ref6;
+		  var block, conds, jumpNode, _i, _len, _ref2, _ref3, _ref4;
 		  if (o == null) {
 			o = {
 			  block: true
 			};
 		  }
-		  _ref4 = this.cases;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			_ref5 = _ref4[_i], conds = _ref5[0], block = _ref5[1];
-			if (block.jumps(o)) {
-			  return block;
+		  _ref2 = this.cases;
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			_ref3 = _ref2[_i], conds = _ref3[0], block = _ref3[1];
+			if (jumpNode = block.jumps(o)) {
+			  return jumpNode;
 			}
 		  }
-		  return (_ref6 = this.otherwise) != null ? _ref6.jumps(o) : void 0;
+		  return (_ref4 = this.otherwise) != null ? _ref4.jumps(o) : void 0;
 		};
 
 		Switch.prototype.makeReturn = function(res) {
-		  var pair, _i, _len, _ref4, _ref5;
-		  _ref4 = this.cases;
-		  for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-			pair = _ref4[_i];
+		  var pair, _i, _len, _ref2, _ref3;
+		  _ref2 = this.cases;
+		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+			pair = _ref2[_i];
 			pair[1].makeReturn(res);
 		  }
 		  if (res) {
 			this.otherwise || (this.otherwise = new Block([new Literal('void 0')]));
 		  }
-		  if ((_ref5 = this.otherwise) != null) {
-			_ref5.makeReturn(res);
+		  if ((_ref3 = this.otherwise) != null) {
+			_ref3.makeReturn(res);
 		  }
 		  return this;
 		};
 
 		Switch.prototype.compileNode = function(o) {
-		  var block, body, cond, conditions, expr, fragments, i, idt1, idt2, _i, _j, _len, _len1, _ref4, _ref5, _ref6;
+		  var block, body, cond, conditions, expr, fragments, i, idt1, idt2, _i, _j, _len, _len1, _ref2, _ref3, _ref4;
 		  idt1 = o.indent + TAB;
 		  idt2 = o.indent = idt1 + TAB;
 		  fragments = [].concat(this.makeCode(this.tab + "switch ("), (this.subject ? this.subject.compileToFragments(o, LEVEL_PAREN) : this.makeCode("false")), this.makeCode(") {\n"));
-		  _ref4 = this.cases;
-		  for (i = _i = 0, _len = _ref4.length; _i < _len; i = ++_i) {
-			_ref5 = _ref4[i], conditions = _ref5[0], block = _ref5[1];
-			_ref6 = flatten([conditions]);
-			for (_j = 0, _len1 = _ref6.length; _j < _len1; _j++) {
-			  cond = _ref6[_j];
+		  _ref2 = this.cases;
+		  for (i = _i = 0, _len = _ref2.length; _i < _len; i = ++_i) {
+			_ref3 = _ref2[i], conditions = _ref3[0], block = _ref3[1];
+			_ref4 = flatten([conditions]);
+			for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+			  cond = _ref4[_j];
 			  if (!this.subject) {
 				cond = cond.invert();
 			  }
@@ -5309,13 +5320,13 @@ var CoffeeScript = (function(){
 		If.prototype.children = ['condition', 'body', 'elseBody'];
 
 		If.prototype.bodyNode = function() {
-		  var _ref4;
-		  return (_ref4 = this.body) != null ? _ref4.unwrap() : void 0;
+		  var _ref2;
+		  return (_ref2 = this.body) != null ? _ref2.unwrap() : void 0;
 		};
 
 		If.prototype.elseBodyNode = function() {
-		  var _ref4;
-		  return (_ref4 = this.elseBody) != null ? _ref4.unwrap() : void 0;
+		  var _ref2;
+		  return (_ref2 = this.elseBody) != null ? _ref2.unwrap() : void 0;
 		};
 
 		If.prototype.addElse = function(elseBody) {
@@ -5330,13 +5341,13 @@ var CoffeeScript = (function(){
 		};
 
 		If.prototype.isStatement = function(o) {
-		  var _ref4;
-		  return (o != null ? o.level : void 0) === LEVEL_TOP || this.bodyNode().isStatement(o) || ((_ref4 = this.elseBodyNode()) != null ? _ref4.isStatement(o) : void 0);
+		  var _ref2;
+		  return (o != null ? o.level : void 0) === LEVEL_TOP || this.bodyNode().isStatement(o) || ((_ref2 = this.elseBodyNode()) != null ? _ref2.isStatement(o) : void 0);
 		};
 
 		If.prototype.jumps = function(o) {
-		  var _ref4;
-		  return this.body.jumps(o) || ((_ref4 = this.elseBody) != null ? _ref4.jumps(o) : void 0);
+		  var _ref2;
+		  return this.body.jumps(o) || ((_ref2 = this.elseBody) != null ? _ref2.jumps(o) : void 0);
 		};
 
 		If.prototype.compileNode = function(o) {
@@ -5418,52 +5429,6 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  Closure = {
-		wrap: function(expressions, statement, noReturn) {
-		  var args, argumentsNode, call, func, meth;
-		  if (expressions.jumps()) {
-			return expressions;
-		  }
-		  func = new Code([], Block.wrap([expressions]));
-		  args = [];
-		  argumentsNode = expressions.contains(this.isLiteralArguments);
-		  if (argumentsNode && expressions.classBody) {
-			argumentsNode.error("Class bodies shouldn't reference arguments");
-		  }
-		  if (argumentsNode || expressions.contains(this.isLiteralThis)) {
-			meth = new Literal(argumentsNode ? 'apply' : 'call');
-			args = [new Literal('this')];
-			if (argumentsNode) {
-			  args.push(new Literal('arguments'));
-			}
-			func = new Value(func, [new Access(meth)]);
-		  }
-		  func.noReturn = noReturn;
-		  call = new Call(func, args);
-		  if (statement) {
-			return Block.wrap([call]);
-		  } else {
-			return call;
-		  }
-		},
-		isLiteralArguments: function(node) {
-		  return node instanceof Literal && node.value === 'arguments' && !node.asKey;
-		},
-		isLiteralThis: function(node) {
-		  return (node instanceof Literal && node.value === 'this' && !node.asKey) || (node instanceof Code && node.bound) || (node instanceof Call && node.isSuper);
-		}
-	  };
-
-	  unfoldSoak = function(o, parent, name) {
-		var ifn;
-		if (!(ifn = parent[name].unfoldSoak(o))) {
-		  return;
-		}
-		parent[name] = ifn.body;
-		ifn.body = new Value(parent);
-		return ifn;
-	  };
-
 	  UTILITIES = {
 		"extends": function() {
 		  return "function(child, parent) { for (var key in parent) { if (" + (utility('hasProp')) + ".call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; }";
@@ -5506,7 +5471,7 @@ var CoffeeScript = (function(){
 
 	  NUMBER = /^[+-]?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)$/i;
 
-	  METHOD_DEF = RegExp("^(?:(" + IDENTIFIER_STR + ")\\.prototype(?:\\.(" + IDENTIFIER_STR + ")|\\[(\"(?:[^\\\\\"\\r\\n]|\\\\.)*\"|'(?:[^\\\\'\\r\\n]|\\\\.)*')\\]|\\[(0x[\\da-fA-F]+|\\d*\\.?\\d+(?:[eE][+-]?\\d+)?)\\]))|(" + IDENTIFIER_STR + ")$");
+	  METHOD_DEF = RegExp("^(" + IDENTIFIER_STR + ")(\\.prototype)?(?:\\.(" + IDENTIFIER_STR + ")|\\[(\"(?:[^\\\\\"\\r\\n]|\\\\.)*\"|'(?:[^\\\\'\\r\\n]|\\\\.)*')\\]|\\[(0x[\\da-fA-F]+|\\d*\\.?\\d+(?:[eE][+-]?\\d+)?)\\])$");
 
 	  IS_STRING = /^['"]/;
 
@@ -5532,6 +5497,24 @@ var CoffeeScript = (function(){
 		} else {
 		  return parseFloat(x);
 		}
+	  };
+
+	  isLiteralArguments = function(node) {
+		return node instanceof Literal && node.value === 'arguments' && !node.asKey;
+	  };
+
+	  isLiteralThis = function(node) {
+		return (node instanceof Literal && node.value === 'this' && !node.asKey) || (node instanceof Code && node.bound) || (node instanceof Call && node.isSuper);
+	  };
+
+	  unfoldSoak = function(o, parent, name) {
+		var ifn;
+		if (!(ifn = parent[name].unfoldSoak(o))) {
+		  return;
+		}
+		parent[name] = ifn.body;
+		ifn.body = new Value(parent);
+		return ifn;
 	  };
 
 	  return exports;
