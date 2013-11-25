@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: CSSO 1.8.12
+              README file for Bundle Transformer: CSSO 1.8.13
  
    ----------------------------------------------------------------------
 
@@ -14,12 +14,17 @@
    BundleTransformer.Csso contains one minifier-adapter for 
    minification of CSS-code - `KryzhanovskyCssMinifier`. 
    `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's 
-   CSSO (http://github.com/css/csso) version 1.3.9.
+   CSSO (http://github.com/css/csso) version 1.3.10.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install the following 
    NuGet package - JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of CSSO version 1.3.10.
    
    ====================
    POST-INSTALL ACTIONS

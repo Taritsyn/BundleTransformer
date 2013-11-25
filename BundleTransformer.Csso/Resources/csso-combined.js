@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.3.9
+* CSSO (CSS Optimizer) v1.3.10
 * http://github.com/css/csso
 *
 * Copyright 2013, Sergey Kryzhanovsky
@@ -3345,11 +3345,26 @@ var CSSO = (function(){
 					if (t === 'number') v.push(body[i]);
 					else if (t !== 'operator') { v = []; break }
 				}
+
+				// check if color is followed by number
+				var parent = token[0].parent;
+				var parentIx = parent.indexOf(token);
+				var appendSpace = parent[parentIx + 1] && parent[parentIx + 1][1] != 's';
+
 				if (v.length === 3) {
 					h += (t = Number(v[0][2]).toString(16)).length === 1 ? '0' + t : t;
 					h += (t = Number(v[1][2]).toString(16)).length === 1 ? '0' + t : t;
 					h += (t = Number(v[2][2]).toString(16)).length === 1 ? '0' + t : t;
-					if (h.length === 6) return this._compressHashColor(h, {});
+					if (h.length === 6) {
+						var vhash = this._compressHashColor(h, {});
+						if (appendSpace) {
+							// che: I guess this is not right: modify color token with
+							// indentation, but I can't find any better solution right now
+							vhash[2] += ' ';
+						}
+
+						return vhash;
+					}
 				}
 			}
 		};
