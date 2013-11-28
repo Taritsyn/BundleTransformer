@@ -39,32 +39,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IronRuby, Version=1.1.3.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronRuby.1.1.3\Lib\IronRuby.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Binaries\IronRuby\IronRuby.dll</HintPath>
     </Reference>
     <Reference Include="IronRuby.Libraries, Version=1.1.3.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronRuby.1.1.3\Lib\IronRuby.Libraries.dll</HintPath>
-    </Reference>
-    <Reference Include="IronRuby.Libraries.Yaml, Version=1.1.3.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronRuby.1.1.3\Lib\IronRuby.Libraries.Yaml.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Binaries\IronRuby\IronRuby.Libraries.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronRuby.1.1.3\Lib\Microsoft.Dynamic.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Binaries\IronRuby\Microsoft.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronRuby.1.1.3\Lib\Microsoft.Scripting.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Scripting.Metadata, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <HintPath>..\packages\IronRuby.1.1.3\Lib\Microsoft.Scripting.Metadata.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Binaries\IronRuby\Microsoft.Scripting.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BundleTransformerContextExtensions.cs" />
@@ -117,7 +111,6 @@
     <None Include="..\BundleTransformer.snk">
       <Link>BundleTransformer.snk</Link>
     </None>
-    <None Include="packages.config" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\date.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\date\format.rb" />
     <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.rb" />

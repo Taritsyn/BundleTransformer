@@ -76,39 +76,6 @@
 			return base.FileExists(path);
 		}
 
-		public override Stream OpenInputFileStream(string path)
-		{
-			Stream fileStream = GetVirtualFileStream(path);
-			if (fileStream != null)
-			{
-				return fileStream;
-			}
-
-			if (OnOpenInputFileStream != null)
-			{
-				OnOpenInputFileStream(path);
-			}
-
-			return base.OpenInputFileStream(path);
-		}
-
-		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, 
-			FileShare share)
-		{
-			Stream fileStream = GetVirtualFileStream(path);
-			if (fileStream != null)
-			{
-				return fileStream;
-			}
-
-			if (OnOpenInputFileStream != null)
-			{
-				OnOpenInputFileStream(path);
-			}
-
-			return base.OpenInputFileStream(path, mode, access, share);
-		}
-
 		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, 
 			FileShare share, int bufferSize)
 		{

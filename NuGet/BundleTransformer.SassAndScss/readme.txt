@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.12
+       README file for Bundle Transformer: Sass and SCSS 1.8.14 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -14,9 +14,20 @@
    BundleTransformer.SassAndScss contains translator-adapter 
    `SassAndScssTranslator` (supports Sass (http://sass-lang.com) 
    version 3.2.12). This adapter makes translation of Sass- and 
-   SCSS-code to CSS-code.
-   Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which 
-   is responsible for text output of translated Sass- or SCSS-asset.
+   SCSS-code to CSS-code. Also contains debugging HTTP-handler
+   `SassAndScssAssetHandler`, which is responsible for text output of 
+   translated Sass- or SCSS-asset.
+   
+   For execution of Ruby-code is used a IronRuby (http://ironruby.net)
+   version 1.1.4.0. Assemblies `IronRuby.dll`, `IronRuby.Libraries.dll`, 
+   `Microsoft.Dynamic.dll` and `Microsoft.Scripting.dll` were builded 
+   from source code of the IronLanguages project
+   (http://github.com/IronLanguages/main).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of IronRuby version 1.1.4.0.
    
    ====================
    POST-INSTALL ACTIONS
