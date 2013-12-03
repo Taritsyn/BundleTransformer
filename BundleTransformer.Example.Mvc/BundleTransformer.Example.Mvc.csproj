@@ -44,6 +44,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="ClearScript, Version=5.3.10.0, Culture=neutral, PublicKeyToken=fd665343e29c428c, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.0.9.5-Alpha2\lib\net40\ClearScript.dll</HintPath>
+    </Reference>
     <Reference Include="JavaScriptEngineSwitcher.Core, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JavaScriptEngineSwitcher.Core.0.9.2\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
@@ -52,9 +56,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JavaScriptEngineSwitcher.Msie.0.9.2\lib\net40\JavaScriptEngineSwitcher.Msie.dll</HintPath>
     </Reference>
-    <Reference Include="JavaScriptEngineSwitcher.V8, Version=0.9.3.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.0.9.3\lib\net40\JavaScriptEngineSwitcher.V8.dll</HintPath>
+    <Reference Include="JavaScriptEngineSwitcher.V8, Version=0.9.5.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
+      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.0.9.5-Alpha2\lib\net40\JavaScriptEngineSwitcher.V8.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="MsieJavaScriptEngine">
@@ -168,6 +171,18 @@
     </None>
     <None Include="BundleTransformer.Configuration.xss">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
+    </None>
+    <None Include="ClearScript.V8\ClearScriptV8-32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ClearScript.V8\ClearScriptV8-64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ClearScript.V8\v8-ia32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="ClearScript.V8\v8-x64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="Content\less\folder\MicroformatsIcon.css" />
     <None Include="Content\less\folder\OpenIdIcon.less" />
@@ -318,12 +333,6 @@
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
     <None Include="Scripts\coffee\TestCoffeeScriptMarkdown.coffee.md" />
-    <None Include="Noesis.Javascript\Noesis.Javascript.x64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Noesis.Javascript\Noesis.Javascript.x86.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <Content Include="Scripts\jquery-1.10.2-vsdoc.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

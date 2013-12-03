@@ -254,7 +254,7 @@ var CoffeeScript = (function(){
 	//#region URL: ./rewriter
 	require['./rewriter'] = (function() {
 	  var exports = {};
-	  var BALANCED_PAIRS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, left, rite, _i, _len, _ref,
+	  var BALANCED_PAIRS, CALL_CLOSERS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, left, rite, _i, _len, _ref,
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
 		__slice = [].slice;
 
@@ -403,9 +403,9 @@ var CoffeeScript = (function(){
 		  var stack;
 		  stack = [];
 		  return this.scanTokens(function(token, i, tokens) {
-			var endImplicitCall, endImplicitObject, forward, inImplicit, inImplicitCall, inImplicitControl, inImplicitObject, nextTag, offset, prevTag, s, sameLine, stackIdx, stackTag, stackTop, startIdx, startImplicitCall, startImplicitObject, startsLine, tag, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+			var endAllImplicitCalls, endImplicitCall, endImplicitObject, forward, inImplicit, inImplicitCall, inImplicitControl, inImplicitObject, nextTag, offset, prevTag, prevToken, s, sameLine, stackIdx, stackTag, stackTop, startIdx, startImplicitCall, startImplicitObject, startsLine, tag, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
 			tag = token[0];
-			prevTag = (i > 0 ? tokens[i - 1] : [])[0];
+			prevTag = (prevToken = i > 0 ? tokens[i - 1] : [])[0];
 			nextTag = (i < tokens.length - 1 ? tokens[i + 1] : [])[0];
 			stackTop = function() {
 			  return stack[stack.length - 1];
@@ -447,6 +447,14 @@ var CoffeeScript = (function(){
 			  stack.pop();
 			  tokens.splice(i, 0, generate('CALL_END', ')'));
 			  return i += 1;
+			};
+			endAllImplicitCalls = function() {
+			  var _results;
+			  _results = [];
+			  while (inImplicitCall()) {
+				_results.push(endImplicitCall());
+			  }
+			  return _results;
 			};
 			startImplicitObject = function(j, startsLine) {
 			  var idx;
@@ -539,9 +547,15 @@ var CoffeeScript = (function(){
 			  startImplicitObject(s, !!startsLine);
 			  return forward(2);
 			}
-			if (prevTag === 'OUTDENT' && inImplicitCall() && (tag === '.' || tag === '?.' || tag === '::' || tag === '?::')) {
-			  endImplicitCall();
-			  return forward(1);
+			if (inImplicitCall() && __indexOf.call(CALL_CLOSERS, tag) >= 0) {
+			  if (prevTag === 'OUTDENT') {
+				endImplicitCall();
+				return forward(1);
+			  }
+			  if (prevToken.newLine) {
+				endAllImplicitCalls();
+				return forward(1);
+			  }
 			}
 			if (inImplicitObject() && __indexOf.call(LINEBREAKS, tag) >= 0) {
 			  stackTop()[2].sameLine = false;
@@ -600,8 +614,8 @@ var CoffeeScript = (function(){
 		  var action, condition, indent, outdent, starter;
 		  starter = indent = outdent = null;
 		  condition = function(token, i) {
-			var _ref, _ref1, _ref2;
-			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'TERMINATOR' && (_ref1 = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((_ref2 = token[0]) === 'CATCH' || _ref2 === 'FINALLY') && (starter === '->' || starter === '=>'));
+			var _ref, _ref1, _ref2, _ref3;
+			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'TERMINATOR' && (_ref1 = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((_ref2 = token[0]) === 'CATCH' || _ref2 === 'FINALLY') && (starter === '->' || starter === '=>')) || (_ref3 = token[0], __indexOf.call(CALL_CLOSERS, _ref3) >= 0) && this.tokens[i - 1].newLine;
 		  };
 		  action = function(token, i) {
 			return this.tokens.splice((this.tag(i - 1) === ',' ? i - 1 : i), 0, outdent);
@@ -725,6 +739,8 @@ var CoffeeScript = (function(){
 	  SINGLE_CLOSERS = ['TERMINATOR', 'CATCH', 'FINALLY', 'ELSE', 'OUTDENT', 'LEADING_WHEN'];
 
 	  LINEBREAKS = ['TERMINATOR', 'INDENT', 'OUTDENT'];
+
+	  CALL_CLOSERS = ['.', '?.', '::', '?::'];
   
 	  return exports;
 	}).call(this);
@@ -899,30 +915,25 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.stringToken = function() {
-		  var match, octalEsc, string;
-		  switch (this.chunk.charAt(0)) {
+		  var octalEsc, quote, string, trimmed;
+		  switch (quote = this.chunk.charAt(0)) {
 			case "'":
-			  if (!(match = SIMPLESTR.exec(this.chunk))) {
-				return 0;
-			  }
-			  string = match[0];
-			  this.token('STRING', this.removeNewlines(string), 0, string.length);
+			  string = SIMPLESTR.exec(this.chunk)[0];
 			  break;
 			case '"':
-			  if (!(string = this.balancedString(this.chunk, '"'))) {
-				return 0;
-			  }
-			  if (0 < string.indexOf('#{', 1)) {
-				this.interpolateString(string.slice(1, -1), {
-				  strOffset: 1,
-				  lexedLength: string.length
-				});
-			  } else {
-				this.token('STRING', this.removeNewlines(string), 0, string.length);
-			  }
-			  break;
-			default:
-			  return 0;
+			  string = this.balancedString(this.chunk, '"');
+		  }
+		  if (!string) {
+			return 0;
+		  }
+		  trimmed = this.removeNewlines(string.slice(1, -1));
+		  if (quote === '"' && 0 < string.indexOf('#{', 1)) {
+			this.interpolateString(trimmed, {
+			  strOffset: 1,
+			  lexedLength: string.length
+			});
+		  } else {
+			this.token('STRING', quote + this.escapeLines(trimmed) + quote, 0, string.length);
 		  }
 		  if (octalEsc = /^(?:\\.|[^\\])*\\(?:0[0-7]|[1-7])/.test(string)) {
 			this.error("octal escape sequences " + string + " are not allowed");
@@ -1334,10 +1345,6 @@ var CoffeeScript = (function(){
 		  offsetInChunk = offsetInChunk || 0;
 		  strOffset = strOffset || 0;
 		  lexedLength = lexedLength || str.length;
-		  if (heredoc && str.length > 0 && str[0] === '\n') {
-			str = str.slice(1);
-			strOffset++;
-		  }
 		  tokens = [];
 		  pi = 0;
 		  i = -1;
@@ -1496,14 +1503,21 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.removeNewlines = function(str) {
-		  return this.escapeLines(str.replace(/^(.)\s*\n\s*/, '$1').replace(/\s*\n\s*(.)$/, '$1'));
+		  return str.replace(/^\s*\n\s*/, '').replace(/([^\\]|\\\\)\s*\n\s*$/, '$1');
 		};
 
 		Lexer.prototype.escapeLines = function(str, heredoc) {
+		  str = str.replace(/\\[^\S\n]*(\n|\\)\s*/g, function(escaped, character) {
+			if (character === '\n') {
+			  return '';
+			} else {
+			  return escaped;
+			}
+		  });
 		  if (heredoc) {
 			return str.replace(MULTILINER, '\\n');
 		  } else {
-			return str.replace(/((^|[^\\])(\\\\)+)\n/g, '$1 \\\n').replace(/\\\s*\n\s*/g, '').replace(/\s*\n\s*/g, ' ');
+			return str.replace(/\s*\n\s*/g, ' ');
 		  }
 		};
 
@@ -1511,8 +1525,8 @@ var CoffeeScript = (function(){
 		  if (!body) {
 			return quote + quote;
 		  }
-		  body = body.replace(/\\([\s\S])/g, function(match, contents) {
-			if (contents === quote || heredoc && contents === '\n') {
+		  body = body.replace(RegExp("\\\\(" + quote + "|\\\\)", "g"), function(match, contents) {
+			if (contents === quote) {
 			  return contents;
 			} else {
 			  return match;
@@ -1581,13 +1595,13 @@ var CoffeeScript = (function(){
 
 	  NUMBER = /^0b[01]+|^0o[0-7]+|^0x[\da-f]+|^\d*\.?\d+(?:e[+-]?\d+)?/i;
 
-	  HEREDOC = /^("""|''')([\s\S]*?)(?:\n[^\n\S]*)?\1/;
+	  HEREDOC = /^("""|''')((?:\\[\s\S]|[^\\])*?)(?:\n[^\n\S]*)?\1/;
 
 	  OPERATOR = /^(?:[-=]>|[-+*\/%<>&|^!?=]=|>>>=?|([-+:])\1|([&|<>])\2=?|\?(\.|::)|\.{2,3})/;
 
 	  WHITESPACE = /^[^\n\S]+/;
 
-	  COMMENT = /^###([^#][\s\S]*?)(?:###[^\n\S]*|(?:###)$)|^(?:\s*#(?!##[^#]).*)+/;
+	  COMMENT = /^###([^#][\s\S]*?)(?:###[^\n\S]*|###$)|^(?:\s*#(?!##[^#]).*)+/;
 
 	  CODE = /^[-=]>/;
 
@@ -4255,7 +4269,7 @@ var CoffeeScript = (function(){
 		};
 
 		Code.prototype.compileNode = function(o) {
-		  var answer, boundfunc, code, exprs, i, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, wrapper, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref2, _ref3, _ref4, _ref5, _ref6;
+		  var answer, boundfunc, code, exprs, i, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, wrapper, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
 		  if (this.bound && ((_ref2 = o.scope.method) != null ? _ref2.bound : void 0)) {
 			this.context = o.scope.method.context;
 		  }
@@ -4273,20 +4287,20 @@ var CoffeeScript = (function(){
 		  delete o.isExistentialEquals;
 		  params = [];
 		  exprs = [];
-		  this.eachParamName(function(name) {
-			if (!o.scope.check(name)) {
-			  return o.scope.parameter(name);
-			}
-		  });
 		  _ref3 = this.params;
 		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
 			param = _ref3[_i];
+			o.scope.parameter(param.asReference(o));
+		  }
+		  _ref4 = this.params;
+		  for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+			param = _ref4[_j];
 			if (!param.splat) {
 			  continue;
 			}
-			_ref4 = this.params;
-			for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-			  p = _ref4[_j].name;
+			_ref5 = this.params;
+			for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
+			  p = _ref5[_k].name;
 			  if (p["this"]) {
 				p = p.properties[0].name;
 			  }
@@ -4295,20 +4309,20 @@ var CoffeeScript = (function(){
 			  }
 			}
 			splats = new Assign(new Value(new Arr((function() {
-			  var _k, _len2, _ref5, _results;
-			  _ref5 = this.params;
+			  var _l, _len3, _ref6, _results;
+			  _ref6 = this.params;
 			  _results = [];
-			  for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
-				p = _ref5[_k];
+			  for (_l = 0, _len3 = _ref6.length; _l < _len3; _l++) {
+				p = _ref6[_l];
 				_results.push(p.asReference(o));
 			  }
 			  return _results;
 			}).call(this))), new Value(new Literal('arguments')));
 			break;
 		  }
-		  _ref5 = this.params;
-		  for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
-			param = _ref5[_k];
+		  _ref6 = this.params;
+		  for (_l = 0, _len3 = _ref6.length; _l < _len3; _l++) {
+			param = _ref6[_l];
 			if (param.isComplex()) {
 			  val = ref = param.asReference(o);
 			  if (param.value) {
@@ -4334,9 +4348,9 @@ var CoffeeScript = (function(){
 			exprs.unshift(splats);
 		  }
 		  if (exprs.length) {
-			(_ref6 = this.body.expressions).unshift.apply(_ref6, exprs);
+			(_ref7 = this.body.expressions).unshift.apply(_ref7, exprs);
 		  }
-		  for (i = _l = 0, _len3 = params.length; _l < _len3; i = ++_l) {
+		  for (i = _m = 0, _len4 = params.length; _m < _len4; i = ++_m) {
 			p = params[i];
 			params[i] = p.compileToFragments(o);
 			o.scope.parameter(fragmentsToText(params[i]));
@@ -4357,7 +4371,7 @@ var CoffeeScript = (function(){
 		  }
 		  code += '(';
 		  answer = [this.makeCode(code)];
-		  for (i = _m = 0, _len4 = params.length; _m < _len4; i = ++_m) {
+		  for (i = _n = 0, _len5 = params.length; _n < _len5; i = ++_n) {
 			p = params[i];
 			if (i) {
 			  answer.push(this.makeCode(", "));

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.12
+              README file for Bundle Transformer: LESS 1.8.14
 
    ----------------------------------------------------------------------
 
@@ -26,9 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of LESS version 1.5.1;
-   2. In configuration settings of LESS-translator added 2 new properties: 
-      `GlobalVariables` and `ModifyVariables`.
+   LESS was updated to commit a2081fb00c.
    
    ====================
    POST-INSTALL ACTIONS

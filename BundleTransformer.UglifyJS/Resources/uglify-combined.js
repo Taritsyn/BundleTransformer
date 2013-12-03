@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.1
+ * UglifyJS v2.4.6
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2013, Mihai Bazon <mihai.bazon@gmail.com>
@@ -57,12 +57,16 @@
 		this.defs = defs;
 	};
 
+	DefaultsError.croak = function(msg, defs) {
+		throw new DefaultsError(msg, defs);
+	};
+
 	function defaults(args, defs, croak) {
 		if (args === true)
 			args = {};
 		var ret = args || {};
 		if (croak) for (var i in ret) if (ret.hasOwnProperty(i) && !defs.hasOwnProperty(i))
-			throw new DefaultsError("`" + i + "` is not a supported option", defs);
+			DefaultsError.croak("`" + i + "` is not a supported option", defs);
 		for (var i in defs) if (defs.hasOwnProperty(i)) {
 			ret[i] = (args && args.hasOwnProperty(i)) ? args[i] : defs[i];
 		}
@@ -599,7 +603,7 @@
 	}, AST_Scope);
 
 	var AST_Accessor = DEFNODE("Accessor", null, {
-		$documentation: "A setter/getter function"
+		$documentation: "A setter/getter function.  The `name` property is always null."
 	}, AST_Lambda);
 
 	var AST_Function = DEFNODE("Function", null, {
@@ -726,12 +730,6 @@
 		}
 	}, AST_Block);
 
-	// XXX: this is wrong according to ECMA-262 (12.4).  the catch block
-	// should introduce another scope, as the argname should be visible
-	// only inside the catch block.  However, doing it this way because of
-	// IE which simply introduces the name in the surrounding scope.  If
-	// we ever want to fix this then AST_Catch should inherit from
-	// AST_Scope.
 	var AST_Catch = DEFNODE("Catch", "argname", {
 		$documentation: "A `catch` node; only makes sense as part of a `try` statement",
 		$propdoc: {
@@ -743,7 +741,7 @@
 				walk_body(this, visitor);
 			});
 		}
-	}, AST_Block);
+	}, AST_Scope);
 
 	var AST_Finally = DEFNODE("Finally", null, {
 		$documentation: "A `finally` node; only makes sense as part of a `try` statement"
@@ -984,7 +982,7 @@
 	var AST_ObjectProperty = DEFNODE("ObjectProperty", "key value", {
 		$documentation: "Base class for literal object properties",
 		$propdoc: {
-			key: "[string] the property name; it's always a plain string in our AST, no matter if it was a string, number or identifier in original code",
+			key: "[string] the property name converted to a string for ObjectKeyVal.  For setters and getters this is an arbitrary AST_Node.",
 			value: "[AST_Node] property value.  For setters and getters this is an AST_Function."
 		},
 		_walk: function(visitor) {
@@ -1756,10 +1754,10 @@
 	var ASSIGNMENT = makePredicate([ "=", "+=", "-=", "/=", "*=", "%=", ">>=", "<<=", ">>>=", "|=", "^=", "&=" ]);
 
 	var PRECEDENCE = (function(a, ret){
-		for (var i = 0, n = 1; i < a.length; ++i, ++n) {
+		for (var i = 0; i < a.length; ++i) {
 			var b = a[i];
 			for (var j = 0; j < b.length; ++j) {
-				ret[b[j]] = n;
+				ret[b[j]] = i + 1;
 			}
 		}
 		return ret;
@@ -1966,7 +1964,7 @@
 					return for_();
 
 				  case "function":
-					return function_(true);
+					return function_(AST_Defun);
 
 				  case "if":
 					return if_();
@@ -2110,19 +2108,12 @@
 			});
 		};
 
-		var function_ = function(in_statement, ctor) {
-			var is_accessor = ctor === AST_Accessor;
-			var name = (is("name") ? as_symbol(in_statement
-											   ? AST_SymbolDefun
-											   : is_accessor
-											   ? AST_SymbolAccessor
-											   : AST_SymbolLambda)
-						: is_accessor && (is("string") || is("num")) ? as_atom_node()
-						: null);
+		var function_ = function(ctor) {
+			var in_statement = ctor === AST_Defun;
+			var name = is("name") ? as_symbol(in_statement ? AST_SymbolDefun : AST_SymbolLambda) : null;
 			if (in_statement && !name)
 				unexpected();
 			expect("(");
-			if (!ctor) ctor = in_statement ? AST_Defun : AST_Function;
 			return new ctor({
 				name: name,
 				argnames: (function(first, a){
@@ -2293,7 +2284,9 @@
 			var tok = S.token, ret;
 			switch (tok.type) {
 			  case "name":
-				return as_symbol(AST_SymbolRef);
+			  case "keyword":
+				ret = _make_symbol(AST_SymbolRef);
+				break;
 			  case "num":
 				ret = new AST_Number({ start: tok, end: tok, value: tok.value });
 				break;
@@ -2344,7 +2337,7 @@
 			}
 			if (is("keyword", "function")) {
 				next();
-				var func = function_(false);
+				var func = function_(AST_Function);
 				func.start = start;
 				func.end = prev();
 				return subscripts(func, allow_calls);
@@ -2392,8 +2385,8 @@
 					if (name == "get") {
 						a.push(new AST_ObjectGetter({
 							start : start,
-							key   : name,
-							value : function_(false, AST_Accessor),
+							key   : as_atom_node(),
+							value : function_(AST_Accessor),
 							end   : prev()
 						}));
 						continue;
@@ -2401,8 +2394,8 @@
 					if (name == "set") {
 						a.push(new AST_ObjectSetter({
 							start : start,
-							key   : name,
-							value : function_(false, AST_Accessor),
+							key   : as_atom_node(),
+							value : function_(AST_Accessor),
 							end   : prev()
 						}));
 						continue;
@@ -2450,17 +2443,21 @@
 			}
 		};
 
+		function _make_symbol(type) {
+			var name = S.token.value;
+			return new (name == "this" ? AST_This : type)({
+				name  : String(name),
+				start : S.token,
+				end   : S.token
+			});
+		};
+
 		function as_symbol(type, noerror) {
 			if (!is("name")) {
 				if (!noerror) croak("Name expected");
 				return null;
 			}
-			var name = S.token.value;
-			var sym = new (name == "this" ? AST_This : type)({
-				name  : String(S.token.value),
-				start : S.token,
-				end   : S.token
-			});
+			var sym = _make_symbol(type);
 			next();
 			return sym;
 		};
@@ -2839,34 +2836,35 @@
 		mangle: function(options) {
 			if (!this.mangled_name && !this.unmangleable(options)) {
 				var s = this.scope;
-				if (this.orig[0] instanceof AST_SymbolLambda && !options.screw_ie8)
+				if (!options.screw_ie8 && this.orig[0] instanceof AST_SymbolLambda)
 					s = s.parent_scope;
-				this.mangled_name = s.next_mangled(options);
+				this.mangled_name = s.next_mangled(options, this);
 			}
 		}
 	};
 
-	AST_Toplevel.DEFMETHOD("figure_out_scope", function(){
-		// This does what ast_add_scope did in UglifyJS v1.
-		//
-		// Part of it could be done at parse time, but it would complicate
-		// the parser (and it's already kinda complex).  It's also worth
-		// having it separated because we might need to call it multiple
-		// times on the same tree.
+	AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
+		options = defaults(options, {
+			screw_ie8: false
+		});
 
 		// pass 1: setup scope chaining and handle definitions
 		var self = this;
 		var scope = self.parent_scope = null;
+		var defun = null;
 		var nesting = 0;
 		var tw = new TreeWalker(function(node, descend){
 			if (node instanceof AST_Scope) {
 				node.init_scope_vars(nesting);
 				var save_scope = node.parent_scope = scope;
-				++nesting;
+				var save_defun = defun;
+				if (!(node instanceof AST_Catch)) {
+					defun = node;
+				}
 				scope = node;
-				descend();
+				++nesting; descend(); --nesting;
 				scope = save_scope;
-				--nesting;
+				defun = save_defun;
 				return true;        // don't descend again in TreeWalker
 			}
 			if (node instanceof AST_Directive) {
@@ -2883,7 +2881,7 @@
 				node.scope = scope;
 			}
 			if (node instanceof AST_SymbolLambda) {
-				scope.def_function(node);
+				defun.def_function(node);
 			}
 			else if (node instanceof AST_SymbolDefun) {
 				// Careful here, the scope where this should be defined is
@@ -2891,22 +2889,17 @@
 				// scope when we encounter the AST_Defun node (which is
 				// instanceof AST_Scope) but we get to the symbol a bit
 				// later.
-				(node.scope = scope.parent_scope).def_function(node);
+				(node.scope = defun.parent_scope).def_function(node);
 			}
 			else if (node instanceof AST_SymbolVar
 					 || node instanceof AST_SymbolConst) {
-				var def = scope.def_variable(node);
+				var def = defun.def_variable(node);
 				def.constant = node instanceof AST_SymbolConst;
 				def.init = tw.parent().value;
 			}
 			else if (node instanceof AST_SymbolCatch) {
-				// XXX: this is wrong according to ECMA-262 (12.4).  the
-				// `catch` argument name should be visible only inside the
-				// catch block.  For a quick fix AST_Catch should inherit
-				// from AST_Scope.  Keeping it this way because of IE,
-				// which doesn't obey the standard. (it introduces the
-				// identifier in the enclosing scope)
-				scope.def_variable(node);
+				(options.screw_ie8 ? scope : defun)
+					.def_variable(node);
 			}
 		});
 		self.walk(tw);
@@ -3028,6 +3021,19 @@
 				if (m == name) continue out;
 			}
 			return m;
+		}
+	});
+
+	AST_Function.DEFMETHOD("next_mangled", function(options, def){
+		// #179, #326
+		// in Safari strict mode, something like (function x(x){...}) is a syntax error;
+		// a function expression's argument cannot shadow the function expression's name
+
+		var tricky_def = def.orig[0] instanceof AST_SymbolFunarg && this.name && this.name.definition();
+		while (true) {
+			var name = AST_Lambda.prototype.next_mangled.call(this, options, def);
+			if (!(tricky_def && tricky_def.mangled_name == name))
+				return name;
 		}
 	});
 
@@ -3338,7 +3344,8 @@
 			semicolons    : true,
 			comments      : false,
 			preserve_line : false,
-			screw_ie8     : false
+			screw_ie8     : false,
+			preamble      : null
 		}, true);
 
 		var indentation = 0;
@@ -3581,6 +3588,10 @@
 			return OUTPUT;
 		};
 
+		if (options.preamble) {
+			print(options.preamble.replace(/\r\n?|[\n\u2028\u2029]|\s*$/g, "\n"));
+		}
+
 		var stack = [];
 		return {
 			get             : get,
@@ -3660,14 +3671,15 @@
 				var start = self.start;
 				if (start && !start._comments_dumped) {
 					start._comments_dumped = true;
-					var comments = start.comments_before;
+					var comments = start.comments_before || [];
 
 					// XXX: ugly fix for https://github.com/mishoo/UglifyJS2/issues/112
 					//      if this node is `return` or `throw`, we cannot allow comments before
 					//      the returned or thrown value.
-					if (self instanceof AST_Exit &&
-						self.value && self.value.start.comments_before.length > 0) {
-						comments = (comments || []).concat(self.value.start.comments_before);
+					if (self instanceof AST_Exit && self.value
+						&& self.value.start.comments_before
+						&& self.value.start.comments_before.length > 0) {
+						comments = comments.concat(self.value.start.comments_before);
 						self.value.start.comments_before = [];
 					}
 
@@ -3757,11 +3769,7 @@
 				var so = this.operator, sp = PRECEDENCE[so];
 				if (pp > sp
 					|| (pp == sp
-						&& this === p.right
-						&& !(so == po &&
-							 (so == "*" ||
-							  so == "&&" ||
-							  so == "||")))) {
+						&& this === p.right)) {
 					return true;
 				}
 			}
@@ -3788,8 +3796,17 @@
 		});
 
 		PARENS(AST_Call, function(output){
-			var p = output.parent();
-			return p instanceof AST_New && p.expression === this;
+			var p = output.parent(), p1;
+			if (p instanceof AST_New && p.expression === this)
+				return true;
+
+			// workaround for Safari bug.
+			// https://bugs.webkit.org/show_bug.cgi?id=123506
+			return this.expression instanceof AST_Function
+				&& p instanceof AST_PropAccess
+				&& p.expression === this
+				&& (p1 = output.parent(1)) instanceof AST_Assign
+				&& p1.left === p;
 		});
 
 		PARENS(AST_New, function(output){
@@ -4346,10 +4363,14 @@
 		});
 		DEFPRINT(AST_ObjectSetter, function(self, output){
 			output.print("set");
+			output.space();
+			self.key.print(output);
 			self.value._do_print(output, true);
 		});
 		DEFPRINT(AST_ObjectGetter, function(self, output){
 			output.print("get");
+			output.space();
+			self.key.print(output);
 			self.value._do_print(output, true);
 		});
 		DEFPRINT(AST_Symbol, function(self, output){
@@ -4567,13 +4588,14 @@
 		},
 		before: function(node, descend, in_list) {
 			if (node._squeezed) return node;
+			var was_scope = false;
 			if (node instanceof AST_Scope) {
-				//node.drop_unused(this);
 				node = node.hoist_declarations(this);
+				was_scope = true;
 			}
 			descend(node, this);
 			node = node.optimize(this);
-			if (node instanceof AST_Scope) {
+			if (was_scope && node instanceof AST_Scope) {
 				node.drop_unused(this);
 				descend(node, this);
 			}
@@ -6150,10 +6172,10 @@
 									return arg.value;
 								}).join(",") + "){" + self.args[self.args.length - 1].value + "})()";
 								var ast = parse(code);
-								ast.figure_out_scope();
+								ast.figure_out_scope({ screw_ie8: compressor.option("screw_ie8") });
 								var comp = new Compressor(compressor.options);
 								ast = ast.transform(comp);
-								ast.figure_out_scope();
+								ast.figure_out_scope({ screw_ie8: compressor.option("screw_ie8") });
 								ast.mangle_names();
 								var fun;
 								try {
@@ -6347,6 +6369,14 @@
 			return self.evaluate(compressor)[0];
 		});
 
+		function has_side_effects_or_prop_access(node, compressor) {
+			var save_pure_getters = compressor.option("pure_getters");
+			compressor.options.pure_getters = false;
+			var ret = node.has_side_effects(compressor);
+			compressor.options.pure_getters = save_pure_getters;
+			return ret;
+		}
+
 		AST_Binary.DEFMETHOD("lift_sequences", function(compressor){
 			if (compressor.option("sequences")) {
 				if (this.left instanceof AST_Seq) {
@@ -6358,8 +6388,8 @@
 					return seq;
 				}
 				if (this.right instanceof AST_Seq
-					&& !(this.operator == "||" || this.operator == "&&")
-					&& !this.left.has_side_effects(compressor)) {
+					&& this instanceof AST_Assign
+					&& !has_side_effects_or_prop_access(this.left, compressor)) {
 					var seq = this.right;
 					var x = seq.to_array();
 					this.right = x.pop();
@@ -6389,7 +6419,11 @@
 					// if right is a constant, whatever side effects the
 					// left side might have could not influence the
 					// result.  hence, force switch.
-					reverse(null, true);
+
+					if (!(self.left instanceof AST_Binary
+						  && PRECEDENCE[self.left.operator] >= PRECEDENCE[self.operator])) {
+						reverse(null, true);
+					}
 				}
 				if (/^[!=]==?$/.test(self.operator)) {
 					if (self.left instanceof AST_SymbolRef && self.right instanceof AST_Conditional) {
@@ -6500,16 +6534,6 @@
 				&& self.right.getValue() === "" && self.left instanceof AST_Binary
 				&& self.left.operator == "+" && self.left.is_string(compressor)) {
 				return self.left;
-			} else if (self.operator == "+" && self.right instanceof AST_String
-				&& self.right.getValue() === "" && self.left instanceof AST_Binary
-				&& self.left.operator == "+" && self.left.right instanceof AST_Number) {
-				return make_node(AST_Binary, self, {
-					left: self.left.left,
-					operator: "+",
-					right: make_node(AST_String, self.right, {
-						value: String(self.left.right.value)
-					})
-				});
 			}
 			if (compressor.option("evaluate")) {
 				if (self.operator == "+") {
@@ -6549,7 +6573,8 @@
 						&& self.left.right instanceof AST_Constant
 						&& self.right instanceof AST_Binary
 						&& self.right.operator == "+"
-						&& self.right.left instanceof AST_Constant) {
+						&& self.right.left instanceof AST_Constant
+						&& self.right.is_string(compressor)) {
 						self = make_node(AST_Binary, self, {
 							operator: "+",
 							left: make_node(AST_Binary, self.left, {
@@ -6565,6 +6590,19 @@
 						});
 					}
 				}
+			}
+			// x * (y * z)  ==>  x * y * z
+			if (self.right instanceof AST_Binary
+				&& self.right.operator == self.operator
+				&& (self.operator == "*" || self.operator == "&&" || self.operator == "||"))
+			{
+				self.left = make_node(AST_Binary, self.left, {
+					operator : self.operator,
+					left     : self.left,
+					right    : self.right.left
+				});
+				self.right = self.right.right;
+				return self.transform(compressor);
 			}
 			return self.evaluate(compressor)[0];
 		});

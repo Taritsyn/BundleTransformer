@@ -2672,7 +2672,7 @@ var Less = (function(){
 				return this.rgba(r, g, b, 1.0);
 			},
 			rgba: function (r, g, b, a) {
-				var rgb = [r, g, b].map(function (c) { return scaled(c, 256); });
+				var rgb = [r, g, b].map(function (c) { return scaled(c, 255); });
 				a = number(a);
 				return new(tree.Color)(rgb, a);
 			},

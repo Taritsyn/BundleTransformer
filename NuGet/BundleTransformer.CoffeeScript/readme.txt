@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.12
+           README file for Bundle Transformer: CoffeeScript 1.8.14
 
    ----------------------------------------------------------------------
 
@@ -27,7 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   CoffeeScript was updated to commit f047ba52b2.
+   CoffeeScript was updated to commit 26200f4640.
    
    ====================
    POST-INSTALL ACTIONS

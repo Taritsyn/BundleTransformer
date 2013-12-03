@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Sass and SCSS 1.8.14 Beta 1
+          README file for Bundle Transformer: Sass and SCSS 1.8.14
 
    ----------------------------------------------------------------------
 

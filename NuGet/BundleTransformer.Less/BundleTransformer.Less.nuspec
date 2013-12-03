@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Less</id>
-    <version>1.8.12</version>
+    <version>1.8.14</version>
 	<title>Bundle Transformer: LESS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -14,8 +14,7 @@
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
     <summary>BundleTransformer.Less contains translator-adapter `LessTranslator` (supports LESS version 1.5.1). This adapter makes translation of LESS-code to CSS-code. Also contains debugging HTTP-handler `LessAssetHandler`, which is responsible for text output of translated LESS-asset.</summary>
-	<releaseNotes>1. Added support of LESS version 1.5.1;
-2. In configuration settings of LESS-translator added 2 new properties: `GlobalVariables` and `ModifyVariables`.</releaseNotes>
+	<releaseNotes>LESS was updated to commit a2081fb00c.</releaseNotes>
 	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling LESS Translation Translator Compilation Compiler</tags>
