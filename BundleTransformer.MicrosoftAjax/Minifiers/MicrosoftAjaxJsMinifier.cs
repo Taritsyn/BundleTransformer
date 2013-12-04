@@ -652,7 +652,7 @@
 							if (_jsParserConfiguration.Format == JavaScriptFormat.JSON)
 							{
 								// Use a JSON output visitor
-								if (!JSONOutputVisitor.Apply(stringWriter, block))
+								if (!JSONOutputVisitor.Apply(stringWriter, block, _jsParserConfiguration))
 								{
 									throw new MicrosoftAjaxParsingException(Strings.Minifiers_InvalidJsonOutput);
 								}
