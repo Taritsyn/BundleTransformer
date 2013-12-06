@@ -428,6 +428,10 @@ interface JQuery {
     stop(clearQueue?: boolean, jumpToEnd?: boolean): JQuery;
     stop(queue?: any, clearQueue?: boolean, jumpToEnd?: boolean): JQuery;
 
+    toggle(duration?: any, callback?: any): JQuery;
+    toggle(duration?: any, easing?: string, callback?: any): JQuery;
+    toggle(showOrHide: boolean): JQuery;
+
     // Events
     bind(eventType: string, eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     bind(eventType: string, eventData: any, preventBubble: boolean): JQuery;

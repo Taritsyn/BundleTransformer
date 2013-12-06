@@ -208,7 +208,6 @@
 				new JProperty("noLib", !options.UseDefaultLib),
 				new JProperty("propagateEnumConstants", options.PropagateEnumConstants),
 				new JProperty("removeComments", options.RemoveComments),
-				new JProperty("allowBool", options.AllowBool),
 				new JProperty("allowAutomaticSemicolonInsertion", options.AllowAutomaticSemicolonInsertion),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
 				new JProperty("codeGenTarget", options.CodeGenTarget.ToString())

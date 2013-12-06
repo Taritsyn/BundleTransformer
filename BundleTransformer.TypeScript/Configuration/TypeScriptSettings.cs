@@ -40,16 +40,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to allow 'bool' as a synonym for 'boolean'
-		/// </summary>
-		[ConfigurationProperty("allowBool", DefaultValue = false)]
-		public bool AllowBool
-		{
-			get { return (bool)this["allowBool"]; }
-			set { this["allowBool"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to allow automatic semicolon insertion
 		/// </summary>
 		[ConfigurationProperty("allowAutomaticSemicolonInsertion", DefaultValue = true)]

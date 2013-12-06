@@ -391,11 +391,6 @@
 				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="allowBool" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to allow 'bool' as a synonym for 'boolean'</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="allowAutomaticSemicolonInsertion" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to allow automatic semicolon insertion</xs:documentation>

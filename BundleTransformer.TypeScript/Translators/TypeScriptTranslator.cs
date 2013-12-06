@@ -175,7 +175,6 @@
 			UseDefaultLib = tsConfig.UseDefaultLib;
 			PropagateEnumConstants = tsConfig.PropagateEnumConstants;
 			RemoveComments = tsConfig.RemoveComments;
-			AllowBool = tsConfig.AllowBool;
 			AllowAutomaticSemicolonInsertion = tsConfig.AllowAutomaticSemicolonInsertion;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			CodeGenTarget = tsConfig.CodeGenTarget;
@@ -329,7 +328,6 @@
 				UseDefaultLib = UseDefaultLib,
 				PropagateEnumConstants = PropagateEnumConstants,
 				RemoveComments = RemoveComments,
-				AllowBool = AllowBool,
 				AllowAutomaticSemicolonInsertion = AllowAutomaticSemicolonInsertion,
 				NoImplicitAny = NoImplicitAny,
 				CodeGenTarget = CodeGenTarget

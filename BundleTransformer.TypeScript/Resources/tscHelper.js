@@ -1,4 +1,4 @@
-var typeScriptHelper = (function (TypeScript, FileInformation) {
+var typeScriptHelper = (function (TypeScript) {
 	"use strict";
 
 	var exports = {},
@@ -7,9 +7,7 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			removeComments: false,
 			watch: false,
 			noResolve: false,
-			allowBool: false,
 			allowAutomaticSemicolonInsertion: true,
-			allowModuleKeywordInExternalModuleReference: false,
 			noImplicitAny: false,
 			noLib: false,
 			codeGenTarget: 0 /* EcmaScript3 */,
@@ -22,7 +20,6 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			generateDeclarationFiles: false,
 			useCaseSensitiveFileResolution: false,
 			gatherDiagnostics: false,
-			updateTC: false,
 			codepage: null
 		}
 		;
@@ -138,7 +135,7 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			}
 
 			file = this._files[key];
-			fileInfo = new FileInformation(file.content, 0);
+			fileInfo = new TypeScript.FileInformation(file.content, 0);
 
 			return fileInfo;
 		};
@@ -235,20 +232,33 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			this.ioHost = ioHost;
 			this.inputFiles = [];
 			this.resolvedFiles = [];
-			this.inputFileNameToOutputFileName = new TypeScript.StringHashTable();
 			this.fileNameToSourceFile = new TypeScript.StringHashTable();
 			this.errors = [];
 			this.hasErrors = false;
 			this.logger = null;
-			this.compilationSettings = compilationSettings;
+			this.fileExistsCache = TypeScript.createIntrinsicsObject();
+			this.resolvePathCache = TypeScript.createIntrinsicsObject();
+			this.compilationSettings = TypeScript.ImmutableCompilationSettings.fromCompilationSettings(compilationSettings);
 		}
 
 		CustomCompiler.prototype.compile = function (path) {
-			var compiler,
-				anySyntacticErrors,
-				anySemanticErrors,
-				anyEmitErrors
+			var _this = this,
+				compiler,
+				resolvedFiles,
+				resolvedFileCount,
+				resolvedFileIndex,
+				resolvedFile,
+				sourceFile,
+				it,
+				diagnostics,
+				diagnosticCount,
+				diagnosticIndex,
+				result
 				;
+
+			TypeScript.CompilerDiagnostics.diagnosticWriter = {
+				Alert: function () { }
+			};
 
 			this.inputFiles.push(path);
 			this.logger = new TypeScript.NullLogger();
@@ -257,47 +267,55 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 
 			compiler = new TypeScript.TypeScriptCompiler(this.logger, this.compilationSettings);
 
-			anySyntacticErrors = this._addSourceUnit(compiler);
-			if (anySyntacticErrors) {
-				return true;
+			resolvedFiles = this.resolvedFiles;
+			resolvedFileCount = resolvedFiles.length;
+
+			for (resolvedFileIndex = 0; resolvedFileIndex < resolvedFileCount; resolvedFileIndex++) {
+				resolvedFile = resolvedFiles[resolvedFileIndex];
+				sourceFile = _this.getSourceFile(resolvedFile.path);
+				compiler.addFile(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, 0, false, resolvedFile.referencedFiles);
 			}
 
-			compiler.pullTypeCheck();
+			for (it = compiler.compile(function (path) {
+				return _this.resolvePath(path);
+			}); it.moveNext(); ) {
+				result = it.current();
+				diagnostics = result.diagnostics;
+				diagnosticCount = diagnostics.length;
 
-			anySemanticErrors = this._diagnoseSemanticErrors(compiler);
-			anyEmitErrors = this._emitAll(compiler);
+				for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
+					_this.addDiagnostic(diagnostics[diagnosticIndex]);
+				}
 
-			if (anyEmitErrors) {
-				return true;
+				if (!this.tryWriteOutputFiles(result.outputFiles)) {
+					return true;
+				}
 			}
 
-			if (anySemanticErrors) {
-				return true;
-			}
-
-			return false;
+			return this.hasErrors;
 		};
 
 		CustomCompiler.prototype._resolve = function () {
-			var includeDefaultLibrary,
+			var _this = this,
+				includeDefaultLibrary,
 				resolvedFiles,
 				resolutionResults,
 				diagnostics,
-				diagnosticIndex,
 				diagnosticCount,
+				diagnosticIndex,
 				libraryResolvedFile
 				;
 
-			resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this,
-				this.compilationSettings);
+			resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this, 
+				this.compilationSettings.useCaseSensitiveFileResolution());
 			resolvedFiles = resolutionResults.resolvedFiles;
-			includeDefaultLibrary = !this.compilationSettings.noLib && !resolutionResults.seenNoDefaultLibTag;
+			includeDefaultLibrary = !this.compilationSettings.noLib() && !resolutionResults.seenNoDefaultLibTag;
 
 			diagnostics = resolutionResults.diagnostics;
 			diagnosticCount = diagnostics.length;
 
 			for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
-				this.addDiagnostic(diagnostics[diagnosticIndex]);
+				_this.addDiagnostic(diagnostics[diagnosticIndex]);
 			}
 
 			if (includeDefaultLibrary) {
@@ -313,83 +331,16 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 			this.resolvedFiles = resolvedFiles;
 		};
 
-		CustomCompiler.prototype._addSourceUnit = function (compiler) {
-			var anySyntacticErrors = false,
-				resolvedFiles,
-				resolvedFile,
-				resolvedFileIndex,
-				resolvedFileCount,
-				sourceFile,
-				syntacticDiagnostics
-				;
-
-			resolvedFiles = this.resolvedFiles;
-			resolvedFileCount = resolvedFiles.length;
-
-			for (resolvedFileIndex = 0; resolvedFileIndex < resolvedFileCount; resolvedFileIndex++) {
-				resolvedFile = resolvedFiles[resolvedFileIndex];
-				sourceFile = this.getSourceFile(resolvedFile.path);
-				compiler.addSourceUnit(resolvedFile.path, sourceFile.scriptSnapshot,
-					sourceFile.byteOrderMark, 0, false, resolvedFile.referencedFiles);
-
-				syntacticDiagnostics = compiler.getSyntacticDiagnostics(resolvedFile.path);
-				compiler.reportDiagnostics(syntacticDiagnostics, this);
-
-				if (syntacticDiagnostics.length > 0) {
-					anySyntacticErrors = true;
-				}
-			}
-
-			return anySyntacticErrors;
-		};
-
-		CustomCompiler.prototype._diagnoseSemanticErrors = function (compiler) {
-			var anySemanticErrors = false,
-				fileNames,
-				fileName,
-				fileNameIndex,
-				fileNameCount,
-				semanticDiagnostics
-				;
-
-			fileNames = compiler.fileNameToDocument.getAllKeys();
-			fileNameCount = fileNames.length;
-
-			for (fileNameIndex = 0; fileNameIndex < fileNameCount; fileNameIndex++) {
-				fileName = fileNames[fileNameIndex];
-				semanticDiagnostics = compiler.getSemanticDiagnostics(fileName);
-				if (semanticDiagnostics.length > 0) {
-					anySemanticErrors = true;
-					compiler.reportDiagnostics(semanticDiagnostics, this);
-				}
-			}
-
-			return anySemanticErrors;
-		};
-
-		CustomCompiler.prototype._emitAll = function (compiler) {
-			var that = this,
-				anyEmitErrors,
-				mapInputToOutput,
-				emitDiagnostics
-				;
-
-			mapInputToOutput = function (inputFile, outputFile) {
-				that.inputFileNameToOutputFileName.addOrUpdate(inputFile, outputFile);
-			};
-
-			emitDiagnostics = compiler.emitAll(this, mapInputToOutput);
-			compiler.reportDiagnostics(emitDiagnostics, this);
-			anyEmitErrors = (emitDiagnostics.length > 0);
-
-			return anyEmitErrors;
-		};
-
 		CustomCompiler.prototype.getSourceFile = function (fileName) {
-			var sourceFile = this.fileNameToSourceFile.lookup(fileName);
+			var sourceFile,
+				fileInformation,
+				snapshot
+				;
+
+			sourceFile = this.fileNameToSourceFile.lookup(fileName);
 			if (!sourceFile) {
-				var fileInformation = this.ioHost.readFile(fileName);
-				var snapshot = TypeScript.ScriptSnapshot.fromString(fileInformation.contents);
+				fileInformation = this.ioHost.readFile(fileName, this.compilationSettings.codepage());
+				snapshot = TypeScript.ScriptSnapshot.fromString(fileInformation.contents);
 				sourceFile = new SourceFile(snapshot, fileInformation.byteOrderMark);
 
 				this.fileNameToSourceFile.add(fileName, sourceFile);
@@ -411,43 +362,71 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		};
 
 		CustomCompiler.prototype.fileExists = function (path) {
-			var result = this.ioHost.fileExists(path);
+			var exists = this.fileExistsCache[path];
+			if (exists === undefined) {
+				exists = this.ioHost.fileExists(path);
+				this.fileExistsCache[path] = exists;
+			}
+
+			return exists;
+		};
+
+		CustomCompiler.prototype.getParentDirectory = function (path) {
+			var result = this.ioHost.dirName(path);
 
 			return result;
 		};
 
-		CustomCompiler.prototype.getParentDirectory = function (path) {
-			return this.ioHost.dirName(path);
-		};
-
 		CustomCompiler.prototype.addDiagnostic = function (diagnostic) {
-			var lineNumber = 0,
+			var diagnosticInfo,
+				message,
+				fileName,
+				lineNumber = 0,
 				columnNumber = 0
 				;
 
-			this.hasErrors = true;
-
-			if (diagnostic.fileName()) {
-				var scriptSnapshot = this.getScriptSnapshot(diagnostic.fileName());
-				var lineMap = new TypeScript.LineMap(scriptSnapshot.getLineStartPositions(), 
-					scriptSnapshot.getLength());
-				var lineCol = { line: -1, character: -1 };
-				lineMap.fillLineAndCharacterFromPosition(diagnostic.start(), lineCol);
-
-				lineNumber = lineCol.line + 1;
-				columnNumber = lineCol.character + 1;
+			diagnosticInfo = diagnostic.info();
+			message = diagnostic.message();
+			fileName = diagnostic.fileName();
+			
+			if (fileName) {
+				lineNumber = diagnostic.line() + 1;
+				columnNumber = diagnostic.character() + 1;
 			}
 
-			this.errors.push({
-				"message": diagnostic.message(),
-				"fileName": diagnostic.fileName(),
-				"lineNumber": lineNumber,
-				"columnNumber": columnNumber
-			});
+			if (diagnosticInfo.category === 1 /* Error */) {
+				this.hasErrors = true;
+				this.errors.push({
+					"message": message,
+					"fileName": fileName,
+					"lineNumber": lineNumber,
+					"columnNumber": columnNumber
+				});
+			}
 		};
 
-		CustomCompiler.prototype.writeFile = function (fileName, contents) {
-			this.ioHost.writeFile(fileName, contents);
+		CustomCompiler.prototype.tryWriteOutputFiles = function (outputFiles) {
+			var fileCount = outputFiles.length,
+				fileIndex,
+				file
+				;
+
+			for (fileIndex = 0; fileIndex < fileCount; fileIndex++) {
+				file = outputFiles[fileIndex];
+
+				try {
+					this.writeFile(file.name, file.text, file.writeByteOrderMark);
+				} catch (e) {
+					this.addDiagnostic(new TypeScript.Diagnostic(file.name, null, 0, 0, TypeScript.DiagnosticCode.Emit_Error_0, [e.message]));
+					return false;
+				}
+			}
+
+			return true;
+		};
+
+		CustomCompiler.prototype.writeFile = function (fileName, contents, writeByteOrderMark) {
+			this.ioHost.writeFile(fileName, contents, writeByteOrderMark);
 		};
 
 		CustomCompiler.prototype.directoryExists = function (path) {
@@ -457,20 +436,25 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 		};
 
 		CustomCompiler.prototype.resolvePath = function (path) {
-			var result = this.ioHost.resolvePath(path);
+			var cachedValue = this.resolvePathCache[path];
+			if (!cachedValue) {
+				cachedValue = this.ioHost.resolvePath(path);
+				this.resolvePathCache[path] = cachedValue;
+			}
 
-			return result;
+			return cachedValue;
 		};
 
 		CustomCompiler.prototype.dispose = function () {
 			this.ioHost = null;
 			this.inputFiles = null;
 			this.resolvedFiles = null;
-			this.inputFileNameToOutputFileName = null;
 			this.fileNameToSourceFile = null;
 			this.errors = null;
 			this.hasErrors = false;
 			this.logger = null;
+			this.fileExistsCache = null;
+			this.resolvePathCache = null;
 			this.compilationSettings = null;
 		};
 
@@ -533,4 +517,4 @@ var typeScriptHelper = (function (TypeScript, FileInformation) {
 	};
 
 	return exports;
-} (TypeScript, FileInformation));
+} (TypeScript));
