@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.8.16
+           README file for Bundle Transformer: TypeScript 1.8.17
 
    ----------------------------------------------------------------------
 
@@ -30,9 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of TypeScript version 0.9.5;
-   2. From configuration settings of TypeScript-translator removed one 
-      property - `AllowBool`.
+   Improved performance.
 	  
    ====================
    POST-INSTALL ACTIONS

@@ -24,39 +24,6 @@ var typeScriptHelper = (function (TypeScript) {
 		}
 		;
 
-	function getCompilationSettings(options) {
-		var compilationSettings;
-
-		options = options || {};
-		if (typeof options.codeGenTarget === "string") {
-			options.codeGenTarget = parseCodeGenTarget(options.codeGenTarget);
-		}
-
-		compilationSettings = mix(mix({}, defaultOptions), options);
-
-		return compilationSettings;
-	}
-
-	function parseCodeGenTarget(code) {
-		var codeGenTarget;
-
-		switch (code) {
-			case "EcmaScript3":
-				codeGenTarget = 0;
-				break;
-			case "EcmaScript5":
-				codeGenTarget = 1;
-				break;
-			default:
-				throw {
-					name: "TypeError",
-					message: formatString("ECMAScript target version '{0}' not supported.", code)
-				};
-		}
-
-		return codeGenTarget;
-	}
-
 	function mix(destination, source) {
 		var propertyName;
 
@@ -88,6 +55,39 @@ var typeScriptHelper = (function (TypeScript) {
 		}
 
 		return result;
+	}
+
+	function parseCodeGenTarget(code) {
+		var codeGenTarget;
+
+		switch (code) {
+			case "EcmaScript3":
+				codeGenTarget = 0;
+				break;
+			case "EcmaScript5":
+				codeGenTarget = 1;
+				break;
+			default:
+				throw {
+					name: "TypeError",
+					message: formatString("ECMAScript target version '{0}' not supported.", code)
+				};
+		}
+
+		return codeGenTarget;
+	}
+
+	function getCompilationSettings(options) {
+		var compilationSettings;
+
+		options = options || {};
+		if (typeof options.codeGenTarget === "string") {
+			options.codeGenTarget = parseCodeGenTarget(options.codeGenTarget);
+		}
+
+		compilationSettings = mix(mix({}, defaultOptions), options);
+
+		return compilationSettings;
 	}
 
 	function generateFileCacheItemKey(path) {
@@ -224,6 +224,7 @@ var typeScriptHelper = (function (TypeScript) {
 			this.scriptSnapshot = scriptSnapshot;
 			this.byteOrderMark = byteOrderMark;
 		}
+
 		return SourceFile;
 	})();
 
@@ -241,14 +242,15 @@ var typeScriptHelper = (function (TypeScript) {
 			this.compilationSettings = TypeScript.ImmutableCompilationSettings.fromCompilationSettings(compilationSettings);
 		}
 
-		CustomCompiler.prototype.compile = function (path) {
-			var _this = this,
+		CustomCompiler.prototype.compile = function (inputFilePath) {
+			var that = this,
 				compiler,
 				resolvedFiles,
 				resolvedFileCount,
 				resolvedFileIndex,
 				resolvedFile,
 				sourceFile,
+				resolvePath,
 				it,
 				diagnostics,
 				diagnosticCount,
@@ -260,44 +262,46 @@ var typeScriptHelper = (function (TypeScript) {
 				Alert: function () { }
 			};
 
-			this.inputFiles.push(path);
-			this.logger = new TypeScript.NullLogger();
+			that.inputFiles.push(inputFilePath);
+			that.logger = new TypeScript.NullLogger();
 
-			this._resolve();
+			that._resolve();
 
-			compiler = new TypeScript.TypeScriptCompiler(this.logger, this.compilationSettings);
+			compiler = new TypeScript.TypeScriptCompiler(that.logger, that.compilationSettings);
 
-			resolvedFiles = this.resolvedFiles;
+			resolvedFiles = that.resolvedFiles;
 			resolvedFileCount = resolvedFiles.length;
 
 			for (resolvedFileIndex = 0; resolvedFileIndex < resolvedFileCount; resolvedFileIndex++) {
 				resolvedFile = resolvedFiles[resolvedFileIndex];
-				sourceFile = _this.getSourceFile(resolvedFile.path);
-				compiler.addFile(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, 0, false, resolvedFile.referencedFiles);
+				sourceFile = that.getSourceFile(resolvedFile.path);
+				compiler.addFile(resolvedFile.path, sourceFile.scriptSnapshot, sourceFile.byteOrderMark, 
+					0, false, resolvedFile.referencedFiles);
 			}
 
-			for (it = compiler.compile(function (path) {
-				return _this.resolvePath(path);
-			}); it.moveNext(); ) {
+			resolvePath = function(path) {
+				return that.resolvePath(path);
+			};
+
+			for (it = compiler.compile(resolvePath); it.moveNext(); ) {
 				result = it.current();
 				diagnostics = result.diagnostics;
 				diagnosticCount = diagnostics.length;
 
 				for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
-					_this.addDiagnostic(diagnostics[diagnosticIndex]);
+					that.addDiagnostic(diagnostics[diagnosticIndex]);
 				}
 
-				if (!this.tryWriteOutputFiles(result.outputFiles)) {
+				if (!that.tryWriteOutputFiles(result.outputFiles)) {
 					return true;
 				}
 			}
 
-			return this.hasErrors;
+			return that.hasErrors;
 		};
 
 		CustomCompiler.prototype._resolve = function () {
-			var _this = this,
-				includeDefaultLibrary,
+			var includeDefaultLibrary,
 				resolvedFiles,
 				resolutionResults,
 				diagnostics,
@@ -306,7 +310,7 @@ var typeScriptHelper = (function (TypeScript) {
 				libraryResolvedFile
 				;
 
-			resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this, 
+			resolutionResults = TypeScript.ReferenceResolver.resolve(this.inputFiles, this,
 				this.compilationSettings.useCaseSensitiveFileResolution());
 			resolvedFiles = resolutionResults.resolvedFiles;
 			includeDefaultLibrary = !this.compilationSettings.noLib() && !resolutionResults.seenNoDefaultLibTag;
@@ -315,7 +319,7 @@ var typeScriptHelper = (function (TypeScript) {
 			diagnosticCount = diagnostics.length;
 
 			for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
-				_this.addDiagnostic(diagnostics[diagnosticIndex]);
+				this.addDiagnostic(diagnostics[diagnosticIndex]);
 			}
 
 			if (includeDefaultLibrary) {
@@ -388,7 +392,7 @@ var typeScriptHelper = (function (TypeScript) {
 			diagnosticInfo = diagnostic.info();
 			message = diagnostic.message();
 			fileName = diagnostic.fileName();
-			
+
 			if (fileName) {
 				lineNumber = diagnostic.line() + 1;
 				columnNumber = diagnostic.character() + 1;
