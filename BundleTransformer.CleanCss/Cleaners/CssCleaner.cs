@@ -174,8 +174,7 @@
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
 				new JProperty("keepBreaks", options.KeepBreaks),
 				new JProperty("noAdvanced", options.NoAdvanced),
-				new JProperty("selectorsMergeMode",
-					ConvertSelectorsMergeModeEnumValueToCode(options.SelectorsMergeMode))
+				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility))
 			);
 
 			return optionsJson;
@@ -210,25 +209,25 @@
 		}
 
 		/// <summary>
-		/// Converts a selectors merge mode enum value to the code
+		/// Converts a compatibility mode enum value to the code
 		/// </summary>
-		/// <param name="selectorsMergeMode">Selectors merge mode enum value</param>
-		/// <returns>Selectors merge mode code</returns>
-		private static string ConvertSelectorsMergeModeEnumValueToCode(SelectorsMergeMode selectorsMergeMode)
+		/// <param name="compatibilityMode">Compatibility mode enum value</param>
+		/// <returns>Compatibility mode code</returns>
+		private static string ConvertCompatibilityModeEnumValueToCode(CompatibilityMode compatibilityMode)
 		{
 			string code;
 
-			switch (selectorsMergeMode)
+			switch (compatibilityMode)
 			{
-				case SelectorsMergeMode.MergeAll:
-					code = "*";
+				case CompatibilityMode.None:
+					code = string.Empty;
 					break;
-				case SelectorsMergeMode.Ie8Compatible:
+				case CompatibilityMode.Ie8:
 					code = "ie8";
 					break;
 				default:
 					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
-						selectorsMergeMode.ToString(), typeof(SelectorsMergeMode)));
+						compatibilityMode.ToString(), typeof(CompatibilityMode)));
 			}
 
 			return code;

@@ -65,9 +65,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a selectors merge mode
+		/// Gets or sets a compatibility mode
 		/// </summary>
-		public SelectorsMergeMode SelectorsMergeMode
+		public CompatibilityMode Compatibility
 		{
 			get;
 			set;
@@ -103,7 +103,7 @@
 			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
 			KeepBreaks = cssMinifierConfig.KeepBreaks;
 			NoAdvanced = cssMinifierConfig.NoAdvanced;
-			SelectorsMergeMode = cssMinifierConfig.SelectorsMergeMode;
+			Compatibility = cssMinifierConfig.Compatibility;
 			Severity = cssMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
@@ -114,7 +114,9 @@
 					throw new ConfigurationErrorsException(
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"clean",
-							"JavaScriptEngineSwitcher.V8",
+							@"
+  * JavaScriptEngineSwitcher.V8
+  * JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode)",
 							"V8JsEngine")
 					);
 				}
@@ -193,7 +195,7 @@
 				KeepSpecialComments = KeepSpecialComments,
 				KeepBreaks = KeepBreaks,
 				NoAdvanced = NoAdvanced,
-				SelectorsMergeMode = SelectorsMergeMode,
+				Compatibility = Compatibility,
 				Severity = Severity
 			};
 

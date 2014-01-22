@@ -63,8 +63,8 @@
 		private static readonly Regex _lessImportRuleRegex =
 			new Regex(@"@import\s*(?:\((?<typeList>[a-z]+(?:\s*,\s*[a-z]+\s*)*)\)\s*)?" +
 				@"(?:(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>))" +
-				@"|(?:url\(((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
-				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)))",
+                @"|(?:url\(\s*((?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+                @"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\s*\)))",
 				RegexOptions.IgnoreCase);
 
 		/// <summary>

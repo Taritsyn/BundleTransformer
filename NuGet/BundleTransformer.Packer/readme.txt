@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Packer 1.8.12
+             README file for Bundle Transformer: Packer 1.8.18
  
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

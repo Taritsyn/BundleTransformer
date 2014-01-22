@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.17
+              README file for Bundle Transformer: Core 1.8.18
 
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 		  
    ===========
@@ -33,6 +33,11 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed bug #68 "Some url strings in CSS are not resolved".
    
    =============
    DOCUMENTATION

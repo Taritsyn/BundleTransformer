@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Clean-css 1.8.12
+            README file for Bundle Transformer: Clean-css 1.8.18
  
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -14,28 +14,29 @@
    BundleTransformer.CleanCss contains one minifier-adapter for 
    minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is 
    based on the Clean-css (http://github.com/GoalSmashers/clean-css)
-   version 2.0.2.
+   version 2.0.7.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install the following 
-   NuGet package - JavaScriptEngineSwitcher.V8.
+   NuGet packages: JavaScriptEngineSwitcher.V8 or 
+   JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).
    
    =============
    RELEASE NOTES
    =============
-   1. Added support of Clean-css version 2.0.2;
+   1. Added support of Clean-css version 2.0.7;
    2. From configuration settings of CSS-minifier removed one property -
-      `RemoveEmpty`, and added 3 new properties: `NoAdvanced`,
-      `SelectorsMergeMode` and `Severity`.
+      `SelectorsMergeMode`, and added one new property - `Compatibility`.
    
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module is recommended to install the 
-   following NuGet package - JavaScriptEngineSwitcher.V8. After package 
-   is installed, need set a name of JavaScript engine (for example, 
-   `V8JsEngine`) to the `name` attribute of 
+   following NuGet packages: JavaScriptEngineSwitcher.V8 or 
+   JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode). After 
+   package is installed, need set a name of JavaScript engine (for 
+   example, `V8JsEngine`) to the `name` attribute of 
    `/configuration/bundleTransformer/clean/jsEngine` configuration 
    element.
    

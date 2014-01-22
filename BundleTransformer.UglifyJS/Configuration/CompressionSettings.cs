@@ -223,5 +223,25 @@
 			get { return (string)this["pureFunctions"]; }
 			set { this["pureFunctions"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to discard calls to <code>console.*</code> functions
+		/// </summary>
+		[ConfigurationProperty("dropConsole", DefaultValue = false)]
+		public bool DropConsole
+		{
+			get { return (bool)this["dropConsole"]; }
+			set { this["dropConsole"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable support of <code>@ngInject</code> annotations
+		/// </summary>
+		[ConfigurationProperty("angular", DefaultValue = false)]
+		public bool Angular
+		{
+			get { return (bool)this["angular"]; }
+			set { this["angular"] = value; }
+		}
 	}
 }

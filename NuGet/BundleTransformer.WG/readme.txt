@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: WebGrease 1.8.12 Beta 1 
+         README file for Bundle Transformer: WebGrease 1.8.18 Beta 1 
  
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

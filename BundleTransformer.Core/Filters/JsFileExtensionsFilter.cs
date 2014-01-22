@@ -31,22 +31,22 @@
 		/// <summary>
 		/// Extensions of JS-files for debug mode (standard style)
 		/// </summary>
-		private static readonly string[] _debugJsExtensionsForStandardStyle = new[] { ".js", ".min.js" };
+		private static readonly string[] _debugJsExtensionsForStandardStyle = { ".js", ".min.js" };
 
 		/// <summary>
 		/// Extensions of JS-files for release mode (standard style)
 		/// </summary>
-		private static readonly string[] _releaseJsExtensionsForStandardStyle = new[] { ".min.js", ".js" };
+		private static readonly string[] _releaseJsExtensionsForStandardStyle = { ".min.js", ".js" };
 
 		/// <summary>
 		/// Extensions of JS-files for debug mode (Microsoft style)
 		/// </summary>
-		private static readonly string[] _debugJsExtensionsForMicrosoftStyle = new[] { ".debug.js", ".js" };
+		private static readonly string[] _debugJsExtensionsForMicrosoftStyle = { ".debug.js", ".js" };
 
 		/// <summary>
 		/// Extensions of JS-files for release mode (Microsoft style)
 		/// </summary>
-		private static readonly string[] _releaseJsExtensionsForMicrosoftStyle = new[] { ".js", ".debug.js" };
+		private static readonly string[] _releaseJsExtensionsForMicrosoftStyle = { ".js", ".debug.js" };
 
 
 		/// <summary>

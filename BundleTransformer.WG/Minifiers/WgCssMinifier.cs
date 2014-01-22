@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Linq;
 	using System.Reflection;
 	using System.Text;
@@ -199,7 +200,7 @@
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, 
 					errorCode);
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, 
-					severity.ToString());
+					severity.ToString(CultureInfo.InvariantCulture));
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, 
 					subcategory);
 				if (!string.IsNullOrWhiteSpace(file))
@@ -209,12 +210,12 @@
 				if (lineNumber > 0)
 				{
 					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-						lineNumber.ToString());
+						lineNumber.ToString(CultureInfo.InvariantCulture));
 				}
 				if (columnNumber > 0)
 				{
 					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-						columnNumber.ToString());
+						columnNumber.ToString(CultureInfo.InvariantCulture));
 				}
 				if (!string.IsNullOrWhiteSpace(sourceFragment))
 				{

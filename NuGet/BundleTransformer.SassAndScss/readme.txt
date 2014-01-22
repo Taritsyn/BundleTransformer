@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.14
+          README file for Bundle Transformer: Sass and SCSS 1.8.18
 
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
    `SassAndScssTranslator` (supports Sass (http://sass-lang.com) 
-   version 3.2.12). This adapter makes translation of Sass- and 
+   version 3.2.13). This adapter makes translation of Sass- and 
    SCSS-code to CSS-code. Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of 
    translated Sass- or SCSS-asset.
@@ -27,7 +27,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of IronRuby version 1.1.4.0.
+   1. Added support of Sass version 3.2.13;
+   2. Fixed bug #67 "BundleTransformer.SassAndScss 1.8.14: debug info
+      line numbers in wrong format".
    
    ====================
    POST-INSTALL ACTIONS

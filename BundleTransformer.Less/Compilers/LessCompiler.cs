@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Less.Compilers
 {
 	using System;
+	using System.Globalization;
 	using System.Linq;
 	using System.Text;
 
@@ -340,12 +341,12 @@
 			if (lineNumber > 0)
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-					lineNumber.ToString());
+					lineNumber.ToString(CultureInfo.InvariantCulture));
 			}
 			if (columnNumber > 0)
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-					columnNumber.ToString());
+					columnNumber.ToString(CultureInfo.InvariantCulture));
 			}
 			if (!string.IsNullOrWhiteSpace(sourceFragment))
 			{

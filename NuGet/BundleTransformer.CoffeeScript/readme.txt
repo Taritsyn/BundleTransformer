@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.14
+           README file for Bundle Transformer: CoffeeScript 1.8.18
 
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -27,7 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   CoffeeScript was updated to commit 26200f4640.
+   CoffeeScript was updated to commit 21db08a23d.
    
    ====================
    POST-INSTALL ACTIONS

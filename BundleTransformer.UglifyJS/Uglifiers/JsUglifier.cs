@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.UglifyJs.Uglifiers
 {
 	using System;
+	using System.Globalization;
 	using System.Linq;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -95,7 +96,7 @@
 		/// <summary>
 		/// List of inbuilt constants of JavaScript language
 		/// </summary>
-		private static readonly string[] _jsInbuiltConstants = new[] { "false", "null", "true", "undefined" };
+		private static readonly string[] _jsInbuiltConstants = { "false", "null", "true", "undefined" };
 
 
 		/// <summary>
@@ -236,7 +237,9 @@
 					new JProperty("screw_ie8", options.ScrewIe8),
 					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
 					new JProperty("pure_getters", compressionOptions.PureGetters),
-					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions))
+					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions)),
+					new JProperty("drop_console", compressionOptions.DropConsole),
+					new JProperty("angular", compressionOptions.Angular)
 				));
 			}
 			else
@@ -441,12 +444,12 @@
 				if (lineNumber > 0)
 				{
 					errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-						lineNumber.ToString());
+						lineNumber.ToString(CultureInfo.InvariantCulture));
 				}
 				if (columnNumber > 0)
 				{
 					errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-						columnNumber.ToString());
+						columnNumber.ToString(CultureInfo.InvariantCulture));
 				}
 				if (!string.IsNullOrWhiteSpace(sourceFragment))
 				{

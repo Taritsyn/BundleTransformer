@@ -19,12 +19,12 @@
 		/// <summary>
 		/// Extensions of CSS-files for debug mode
 		/// </summary>
-		private static readonly string[] _debugCssExtensions = new[] { ".css", ".min.css" };
+		private static readonly string[] _debugCssExtensions = { ".css", ".min.css" };
 
 		/// <summary>
 		/// Extensions of CSS-files for release mode
 		/// </summary>
-		private static readonly string[] _releaseCssExtensions = new[] { ".min.css", ".css" };
+		private static readonly string[] _releaseCssExtensions = { ".min.css", ".css" };
 
 
 		/// <summary>

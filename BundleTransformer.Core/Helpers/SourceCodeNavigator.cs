@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Core.Helpers
 {
 	using System;
+	using System.Globalization;
 	using System.Text;
 
 	public static class SourceCodeNavigator
@@ -202,10 +203,10 @@
 				}
 				while (lineBreakPosition != -1 && lineCount <= nextLineNumber);
 
-				int lineNumberSize = (nextLineNumber).ToString().Length;
+				int lineNumberSize = (nextLineNumber).ToString(CultureInfo.InvariantCulture).Length;
 				if (currentLineNumber == lineCount)
 				{
-					lineNumberSize = currentLineNumber.ToString().Length;
+					lineNumberSize = currentLineNumber.ToString(CultureInfo.InvariantCulture).Length;
 				}
 
 				int fragmentStartPosition;
@@ -329,7 +330,7 @@
 				}
 			}
 
-			string result = string.Format("Line {0}: {1}", lineNumber.ToString().PadLeft(lineNumberSize),
+			string result = string.Format("Line {0}: {1}", lineNumber.ToString(CultureInfo.InvariantCulture).PadLeft(lineNumberSize),
 				processedLine.TabsToSpaces(tabSize));
 			if (columnNumber > 0)
 			{

@@ -34,9 +34,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a selectors merge mode
+		/// Gets or sets a compatibility mode
 		/// </summary>
-		public SelectorsMergeMode SelectorsMergeMode
+		public CompatibilityMode Compatibility
 		{
 			get;
 			set;
@@ -62,7 +62,7 @@
 			KeepSpecialComments = SpecialCommentsMode.KeepAll;
 			KeepBreaks = false;
 			NoAdvanced = false;
-			SelectorsMergeMode = SelectorsMergeMode.Ie8Compatible;
+			Compatibility = CompatibilityMode.Ie8;
 			Severity = 0;
 		}
 	}

@@ -34,7 +34,7 @@
 }
 
 .icon-disc {
-	background-image: url('../images/icons/disc.png');
+	background-image: url(	 '../images/icons/disc.png'	 );
 }
 
 .icon-envelope {
@@ -42,7 +42,7 @@
 }
 
 .icon-feed {
-	background-image: url(images/icons/feed.png);
+	background-image: url(	 images/icons/feed.png 	);
 }
 
 .icon-game {
@@ -54,7 +54,7 @@
 }
 
 .icon-inbox {
-	background-image: url("../images/icons/inbox(1).png");
+	background-image: url(	  "../images/icons/inbox(1).png"	  );
 }
 
 .icon-joystick {

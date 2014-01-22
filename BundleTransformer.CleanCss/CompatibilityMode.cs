@@ -1,18 +1,18 @@
 ﻿namespace BundleTransformer.CleanCss
 {
 	/// <summary>
-	/// Selectors merge mode
+	/// Compatibility mode
 	/// </summary>
-	public enum SelectorsMergeMode
+	public enum CompatibilityMode
 	{
 		/// <summary>
-		/// Merge all selectors
+		/// None
 		/// </summary>
-		MergeAll = 0,
+		None = 0,
 
 		/// <summary>
 		/// IE8 compatibility mode
 		/// </summary>
-		Ie8Compatible
+		Ie8
 	}
 }

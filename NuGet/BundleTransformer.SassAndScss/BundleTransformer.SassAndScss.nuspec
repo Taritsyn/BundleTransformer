@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.SassAndScss</id>
-    <version>1.8.14</version>
+    <version>1.8.18</version>
 	<title>Bundle Transformer: Sass and SCSS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,16 +10,17 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476849</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator` (supports Sass (http://sass-lang.com) version 3.2.12). This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.
+    <description>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator` (supports Sass (http://sass-lang.com) version 3.2.13). This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.
 	
 For execution of Ruby-code is used a IronRuby (http://ironruby.net) version 1.1.4.0. Assemblies `IronRuby.dll`, `IronRuby.Libraries.dll`, `Microsoft.Dynamic.dll` and `Microsoft.Scripting.dll` were builded from source code of the IronLanguages project (http://github.com/IronLanguages/main).</description>
-    <summary>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator` (supports Sass version 3.2.12). This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
-	<releaseNotes>Added support of IronRuby version 1.1.4.0.</releaseNotes>
-	<copyright>Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+    <summary>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator` (supports Sass version 3.2.13). This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
+	<releaseNotes>1. Added support of Sass version 3.2.13;
+2. Fixed bug #67 "BundleTransformer.SassAndScss 1.8.14: debug info line numbers in wrong format".</releaseNotes>
+	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.8.12" />
+      <dependency id="BundleTransformer.Core" version="1.8.18" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.SassAndScss.dll" />

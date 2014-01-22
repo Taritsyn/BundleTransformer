@@ -78,7 +78,7 @@
 	background-image: data-uri('headphone.gif');
 }
 
-@import (multiple) url(""TestLessImport.Sub1.less"");
+@import (multiple) url(		""TestLessImport.Sub1.less""	);
 .singleline-comment { content: ""//"" } .triple-slash-directive { content: '///' } @import 'TestLessImport.Sub2';
 /*@import 'TestLessImport.Sub3.less';
 @import 'TestLessImport.Sub4.less';*/

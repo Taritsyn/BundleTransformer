@@ -1179,6 +1179,16 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>String representation of the function names list, which UglifyJS will assume that those functions do not produce side effects</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="dropConsole" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to discard calls to `console.*` functions</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="angular" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable support of `@ngInject` annotations</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="UglifyManglingSettings_SchemaType">
@@ -1406,18 +1416,18 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to disable advanced optimizations (selector and property merging, reduction, etc)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="selectorsMergeMode" use="optional" default="Ie8Compatible">
+		<xs:attribute name="compatibility" use="optional" default="Ie8">
 			<xs:annotation>
-				<xs:documentation>Selectors merge mode</xs:documentation>
+				<xs:documentation>Compatibility mode</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
-					<xs:enumeration value="MergeAll">
+					<xs:enumeration value="None">
 						<xs:annotation>
-							<xs:documentation>Merge all selectors</xs:documentation>
+							<xs:documentation>None</xs:documentation>
 						</xs:annotation>
 					</xs:enumeration>
-					<xs:enumeration value="Ie8Compatible">
+					<xs:enumeration value="Ie8">
 						<xs:annotation>
 							<xs:documentation>IE8 compatibility mode</xs:documentation>
 						</xs:annotation>

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Linq;
 	using System.Net.Http;
 	using System.Text;
@@ -275,9 +276,9 @@
 			}
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				errorDetails.Value<int>("lineno").ToString());
+				errorDetails.Value<int>("lineno").ToString(CultureInfo.InvariantCulture));
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				errorDetails.Value<int>("charno").ToString());
+				errorDetails.Value<int>("charno").ToString(CultureInfo.InvariantCulture));
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineSource,
 				errorDetails.Value<string>("line"));
 

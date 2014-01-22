@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.IO;
 	using System.Reflection;
 	using System.Text;
@@ -231,7 +232,7 @@
 			if (lineNumber > 0)
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-					lineNumber.ToString());
+					lineNumber.ToString(CultureInfo.InvariantCulture));
 			}
 
 			return errorMessage.ToString();

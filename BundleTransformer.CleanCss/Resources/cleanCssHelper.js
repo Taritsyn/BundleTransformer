@@ -18,7 +18,7 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 			benchmark: false,
 			noRebase: true,
 			noAdvanced: false,
-			selectorsMergeMode: 'ie8',
+			compatibility: 'ie8',
 			debug: false
 		}
 		;

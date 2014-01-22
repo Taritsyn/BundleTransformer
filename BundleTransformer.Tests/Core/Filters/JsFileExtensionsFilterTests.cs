@@ -15,9 +15,8 @@
 	{
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
-		private readonly string[] _jsFilesWithMicrosoftStyleExtensions =
-			new[] { "MicrosoftAjax.js", "MicrosoftMvcAjax.js", 
-				"MicrosoftMvcValidation.js", "knockout-$version$.js" };
+		private readonly string[] _jsFilesWithMicrosoftStyleExtensions = { "MicrosoftAjax.js", 
+			"MicrosoftMvcAjax.js", "MicrosoftMvcValidation.js", "knockout-$version$.js" };
 		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		[TestFixtureSetUp]

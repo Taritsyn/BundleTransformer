@@ -1,8 +1,8 @@
 /*!
- * UglifyJS v2.4.6
+ * UglifyJS v2.4.11
  * http://github.com/mishoo/UglifyJS2
  *
- * Copyright 2012-2013, Mihai Bazon <mihai.bazon@gmail.com>
+ * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
  * Released under the BSD license
  */
  
@@ -53,9 +53,12 @@
 	};
 
 	function DefaultsError(msg, defs) {
+		Error.call(this, msg);
 		this.msg = msg;
 		this.defs = defs;
 	};
+	DefaultsError.prototype = Object.create(Error.prototype);
+	DefaultsError.prototype.constructor = DefaultsError;
 
 	DefaultsError.croak = function(msg, defs) {
 		throw new DefaultsError(msg, defs);
@@ -741,7 +744,7 @@
 				walk_body(this, visitor);
 			});
 		}
-	}, AST_Scope);
+	}, AST_Block);
 
 	var AST_Finally = DEFNODE("Finally", null, {
 		$documentation: "A `finally` node; only makes sense as part of a `try` statement"
@@ -1221,7 +1224,7 @@
 
 	var KEYWORDS = 'break case catch const continue debugger default delete do else finally for function if in instanceof new return switch throw try typeof var void while with';
 	var KEYWORDS_ATOM = 'false null true';
-	var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized this throws transient volatile'
+	var RESERVED_WORDS = 'abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized this throws transient volatile yield'
 		+ " " + KEYWORDS_ATOM + " " + KEYWORDS;
 	var KEYWORDS_BEFORE_EXPRESSION = 'return new delete throw else case';
 
@@ -2556,7 +2559,7 @@
 					condition   : expr,
 					consequent  : yes,
 					alternative : expression(false, no_in),
-					end         : peek()
+					end         : prev()
 				});
 			}
 			return expr;
@@ -2854,14 +2857,20 @@
 		var defun = null;
 		var nesting = 0;
 		var tw = new TreeWalker(function(node, descend){
+			if (options.screw_ie8 && node instanceof AST_Catch) {
+				var save_scope = scope;
+				scope = new AST_Scope(node);
+				scope.init_scope_vars(nesting);
+				scope.parent_scope = save_scope;
+				descend();
+				scope = save_scope;
+				return true;
+			}
 			if (node instanceof AST_Scope) {
 				node.init_scope_vars(nesting);
 				var save_scope = node.parent_scope = scope;
 				var save_defun = defun;
-				if (!(node instanceof AST_Catch)) {
-					defun = node;
-				}
-				scope = node;
+				defun = scope = node;
 				++nesting; descend(); --nesting;
 				scope = save_scope;
 				defun = save_defun;
@@ -3012,6 +3021,11 @@
 		out: while (true) {
 			var m = base54(++this.cname);
 			if (!is_identifier(m)) continue; // skip over "do"
+
+			// https://github.com/mishoo/UglifyJS2/issues/242 -- do not
+			// shadow a name excepted from mangling.
+			if (options.except.indexOf(m) >= 0) continue;
+
 			// we must ensure that the mangled name does not shadow a name
 			// from some parent scope that is referenced in this or in
 			// inner scopes.
@@ -3674,13 +3688,20 @@
 					var comments = start.comments_before || [];
 
 					// XXX: ugly fix for https://github.com/mishoo/UglifyJS2/issues/112
-					//      if this node is `return` or `throw`, we cannot allow comments before
-					//      the returned or thrown value.
-					if (self instanceof AST_Exit && self.value
-						&& self.value.start.comments_before
-						&& self.value.start.comments_before.length > 0) {
-						comments = comments.concat(self.value.start.comments_before);
-						self.value.start.comments_before = [];
+					//               and https://github.com/mishoo/UglifyJS2/issues/372
+					if (self instanceof AST_Exit && self.value) {
+						self.value.walk(new TreeWalker(function(node){
+							if (node.start && node.start.comments_before) {
+								comments = comments.concat(node.start.comments_before);
+								node.start.comments_before = [];
+							}
+							if (node instanceof AST_Function ||
+								node instanceof AST_Array ||
+								node instanceof AST_Object)
+							{
+								return true; // don't go inside.
+							}
+						}));
 					}
 
 					if (c.test) {
@@ -3744,7 +3765,7 @@
 				|| p instanceof AST_Unary            // !(foo, bar, baz)
 				|| p instanceof AST_Binary           // 1 + (2, 3) + 4 ==> 8
 				|| p instanceof AST_VarDef           // var a = (1, 2), b = a + a; ==> b == 4
-				|| p instanceof AST_Dot              // (1, {foo:2}).foo ==> 2
+				|| p instanceof AST_PropAccess       // (1, {foo:2}).foo or (1, {foo:2})["foo"] ==> 2
 				|| p instanceof AST_Array            // [ 1, (2, 3), 4 ] ==> [ 1, 3, 4 ]
 				|| p instanceof AST_ObjectProperty   // { foo: (1, 2) }.foo ==> 2
 				|| p instanceof AST_Conditional      /* (false, true) ? (a = 10, b = 20) : (c = 30)
@@ -4399,10 +4420,46 @@
 		DEFPRINT(AST_Number, function(self, output){
 			output.print(make_num(self.getValue()));
 		});
+
+		function regexp_safe_literal(code) {
+			return [
+				0x5c   , // \
+				0x2f   , // /
+				0x2e   , // .
+				0x2b   , // +
+				0x2a   , // *
+				0x3f   , // ?
+				0x28   , // (
+				0x29   , // )
+				0x5b   , // [
+				0x5d   , // ]
+				0x7b   , // {
+				0x7d   , // }
+				0x24   , // $
+				0x5e   , // ^
+				0x3a   , // :
+				0x7c   , // |
+				0x21   , // !
+				0x0a   , // \n
+				0x0d   , // \r
+				0xfeff , // Unicode BOM
+				0x2028 , // unicode "line separator"
+				0x2029 , // unicode "paragraph separator"
+			].indexOf(code) < 0;
+		};
+
 		DEFPRINT(AST_RegExp, function(self, output){
 			var str = self.getValue().toString();
-			if (output.option("ascii_only"))
+			if (output.option("ascii_only")) {
 				str = output.to_ascii(str);
+			} else {
+				str = str.split("\\\\").map(function(str){
+					return str.replace(/\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}/g, function(s){
+						var code = parseInt(s.substr(2), 16);
+						return regexp_safe_literal(code) ? String.fromCharCode(code) : s;
+					});
+				}).join("\\\\");
+			}
 			output.print(str);
 			var p = output.parent();
 			if (p instanceof AST_Binary && /^in/.test(p.operator) && p.left === self)
@@ -4573,6 +4630,8 @@
 			pure_funcs    : null,
 			negate_iife   : !false_by_default,
 			screw_ie8     : false,
+			drop_console  : false,
+			angular       : false,
 
 			warnings      : true,
 			global_defs   : {}
@@ -4700,6 +4759,9 @@
 			var CHANGED;
 			do {
 				CHANGED = false;
+				if (compressor.option("angular")) {
+					statements = process_for_angular(statements);
+				}
 				statements = eliminate_spurious_blocks(statements);
 				if (compressor.option("dead_code")) {
 					statements = eliminate_dead_code(statements, compressor);
@@ -4720,6 +4782,50 @@
 			}
 
 			return statements;
+
+			function process_for_angular(statements) {
+				function make_injector(func, name) {
+					return make_node(AST_SimpleStatement, func, {
+						body: make_node(AST_Assign, func, {
+							operator: "=",
+							left: make_node(AST_Dot, name, {
+								expression: make_node(AST_SymbolRef, name, name),
+								property: "$inject"
+							}),
+							right: make_node(AST_Array, func, {
+								elements: func.argnames.map(function(sym){
+									return make_node(AST_String, sym, { value: sym.name });
+								})
+							})
+						})
+					});
+				}
+				return statements.reduce(function(a, stat){
+					a.push(stat);
+					var token = stat.start;
+					var comments = token.comments_before;
+					if (comments && comments.length > 0) {
+						var last = comments.pop();
+						if (/@ngInject/.test(last.value)) {
+							// case 1: defun
+							if (stat instanceof AST_Defun) {
+								a.push(make_injector(stat, stat.name));
+							}
+							else if (stat instanceof AST_Definitions) {
+								stat.definitions.forEach(function(def){
+									if (def.value && def.value instanceof AST_Lambda) {
+										a.push(make_injector(def.value, def.name));
+									}
+								});
+							}
+							else {
+								compressor.warn("Unknown statement marked with @ngInject [{file}:{line},{col}]", token);
+							}
+						}
+					}
+					return a;
+				}, []);
+			}
 
 			function eliminate_spurious_blocks(statements) {
 				var seen_dirs = [];
@@ -6276,6 +6382,14 @@
 					return make_node(AST_Undefined, self).transform(compressor);
 				}
 			}
+			if (compressor.option("drop_console")) {
+				if (self.expression instanceof AST_PropAccess &&
+					self.expression.expression instanceof AST_SymbolRef &&
+					self.expression.expression.name == "console" &&
+					self.expression.expression.undeclared()) {
+					return make_node(AST_Undefined, self).transform(compressor);
+				}
+			}
 			return self.evaluate(compressor)[0];
 		});
 
@@ -6314,15 +6428,33 @@
 			}
 			if (compressor.option("cascade")) {
 				if (self.car instanceof AST_Assign
-					&& !self.car.left.has_side_effects(compressor)
-					&& self.car.left.equivalent_to(self.cdr)) {
-					return self.car;
+					&& !self.car.left.has_side_effects(compressor)) {
+					if (self.car.left.equivalent_to(self.cdr)) {
+						return self.car;
+					}
+					if (self.cdr instanceof AST_Call
+						&& self.cdr.expression.equivalent_to(self.car.left)) {
+						self.cdr.expression = self.car;
+						return self.cdr;
+					}
 				}
 				if (!self.car.has_side_effects(compressor)
 					&& !self.cdr.has_side_effects(compressor)
 					&& self.car.equivalent_to(self.cdr)) {
 					return self.car;
 				}
+			}
+			if (self.cdr instanceof AST_UnaryPrefix
+				&& self.cdr.operator == "void"
+				&& !self.cdr.expression.has_side_effects(compressor)) {
+				self.cdr.operator = self.car;
+				return self.cdr;
+			}
+			if (self.cdr instanceof AST_Undefined) {
+				return make_node(AST_UnaryPrefix, self, {
+					operator   : "void",
+					expression : self.car
+				});
 			}
 			return self;
 		});
@@ -6695,7 +6827,7 @@
 				 * ==>
 				 * exp = foo ? something : something_else;
 				 */
-				self = make_node(AST_Assign, self, {
+				return make_node(AST_Assign, self, {
 					operator: consequent.operator,
 					left: consequent.left,
 					right: make_node(AST_Conditional, self, {
@@ -6704,6 +6836,25 @@
 						alternative: alternative.right
 					})
 				});
+			}
+			if (consequent instanceof AST_Call
+				&& alternative.TYPE === consequent.TYPE
+				&& consequent.args.length == alternative.args.length
+				&& consequent.expression.equivalent_to(alternative.expression)) {
+				if (consequent.args.length == 0) {
+					return make_node(AST_Seq, self, {
+						car: self.condition,
+						cdr: consequent
+					});
+				}
+				if (consequent.args.length == 1) {
+					consequent.args[0] = make_node(AST_Conditional, self, {
+						condition: self.condition,
+						consequent: consequent.args[0],
+						alternative: alternative.args[0]
+					});
+					return consequent;
+				}
 			}
 			return self;
 		});
@@ -6742,6 +6893,12 @@
 					return make_node(AST_Dot, self, {
 						expression : self.expression,
 						property   : prop
+					});
+				}
+				var v = parseFloat(prop);
+				if (!isNaN(v) && v.toString() == prop) {
+					self.property = make_node(AST_Number, self.property, {
+						value: v
 					});
 				}
 			}

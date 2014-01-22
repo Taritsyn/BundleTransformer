@@ -178,7 +178,7 @@ $alt-bg-color: #CE4DD6")
 .translators #sass
 	border-color: $border-color
 
-@import ""AndroidIcon"", 'BatteryIcon', ""ComputerIcon"", url(DatabaseIcon.css)")
+@import ""AndroidIcon"", 'BatteryIcon', ""ComputerIcon"", url(	 DatabaseIcon.css	 )")
 				;
 
 			string testSassImportSub1ScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
@@ -540,7 +540,7 @@ $alt-bg-color: #CE4DD6;")
 	border-color: $border-color;
 }
 
-@import ""GitIcon"", 'HourglassIcon', ""ImageIcon"", url(JsonIcon.css);")
+@import ""GitIcon"", 'HourglassIcon', ""ImageIcon"", url(	JsonIcon.css	 );")
 				;
 
 			string testScssImportSub1SassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,

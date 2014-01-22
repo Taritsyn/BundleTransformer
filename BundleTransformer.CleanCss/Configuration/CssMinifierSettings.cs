@@ -39,13 +39,13 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a selectors merge mode
+		/// Gets or sets a compatibility mode
 		/// </summary>
-		[ConfigurationProperty("selectorsMergeMode", DefaultValue = SelectorsMergeMode.Ie8Compatible)]
-		public SelectorsMergeMode SelectorsMergeMode
+		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie8)]
+		public CompatibilityMode Compatibility
 		{
-			get { return (SelectorsMergeMode)this["selectorsMergeMode"]; }
-			set { this["selectorsMergeMode"] = value; }
+			get { return (CompatibilityMode)this["compatibility"]; }
+			set { this["compatibility"] = value; }
 		}
 
 		/// <summary>

@@ -202,6 +202,24 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to discard calls to <code>console.*</code> functions
+		/// </summary>
+		public bool DropConsole
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable support of <code>@ngInject</code> annotations
+		/// </summary>
+		public bool Angular
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the compression options
@@ -228,6 +246,8 @@
 			GlobalDefinitions = string.Empty;
 			PureGetters = false;
 			PureFunctions = string.Empty;
+			DropConsole = false;
+			Angular = false;
 		}
 	}
 }

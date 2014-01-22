@@ -15,7 +15,7 @@
 		/// <summary>
 		/// Regular expression for working with the CSS string values
 		/// </summary>
-		public static readonly Regex CssStringValue = new Regex(@"(?:url\((?<quote>'|"")?(?<value>[\s\S]*?)(\k<quote>)?\))" +
+        public static readonly Regex CssStringValue = new Regex(@"(?:url\(\s*(?<quote>'|"")?(?<value>[\s\S]*?)(\k<quote>)?\s*\))" +
 			@"|(?:(?<quote>'|"")(?<value>[\s\S]*?)(\k<quote>))",
 			RegexOptions.IgnoreCase);
 
@@ -23,8 +23,8 @@
 		/// Regular expression for working with CSS <code>url</code> rule
 		/// </summary>
 		public static readonly Regex CssUrlRuleRegex =
-			new Regex(@"url\((?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
-				@"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\)",
+            new Regex(@"url\(\s*(?:(?<quote>'|"")(?<url>[\w \-+.:,;/?&=%~#$@()\[\]{}]+)(\k<quote>)" +
+                @"|(?<url>[\w\-+.:,;/?&=%~#$@\[\]{}]+))\s*\)",
 				RegexOptions.IgnoreCase);
 	}
 }

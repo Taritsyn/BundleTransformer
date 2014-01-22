@@ -140,7 +140,9 @@
 				Cascade = compressionConfig.Cascade,
 				GlobalDefinitions = compressionConfig.GlobalDefinitions,
 				PureGetters = compressionConfig.PureGetters,
-				PureFunctions = compressionConfig.PureFunctions
+				PureFunctions = compressionConfig.PureFunctions,
+				DropConsole = compressionConfig.DropConsole,
+				Angular = compressionConfig.Angular
 			};
 
 			ManglingOptions = new ManglingOptions

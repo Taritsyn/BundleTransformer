@@ -1,5 +1,5 @@
 #############################################################################
-# Sass v3.2.12
+# Sass v3.2.13
 # http://sass-lang.com
 #
 # Copyright 2006-2013, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
@@ -2110,6 +2110,7 @@ module Sass::Tree
     # @return [{#to_s => #to_s}]
     def debug_info
       {:filename => filename && ("file://" + URI.escape(filename)),
+      #RG {:filename => filename && ("file://" + URI.escape(File.expand_path(filename))),
        :line => self.line}
     end
 
@@ -4420,7 +4421,8 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
         ])
       prop = Sass::Tree::PropNode.new([""], Sass::Script::String.new(''), :new)
       prop.resolved_name = "font-family"
-      prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
+	  prop.resolved_value = !(v =~ /^\d+$/).nil? ? ("\\00003" + v) : Sass::SCSS::RX.escape_ident(v.to_s)
+	  #RG prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
       rule << prop
       node << rule
     end
@@ -8174,16 +8176,17 @@ module Sass
         splat = @splat.perform(environment) if @splat
         if fn = environment.function(@name)
           keywords = Sass::Util.map_hash(@keywords) {|k, v| [k, v.perform(environment)]}
-          return perform_sass_fn(fn, args, keywords, splat)
+          return without_original(perform_sass_fn(fn, args, keywords, splat))
         end
 
         ruby_name = @name.tr('-', '_')
         args = construct_ruby_args(ruby_name, args, splat, environment)
 
         unless Functions.callable?(ruby_name)
-          opts(to_literal(args))
+          without_original(opts(to_literal(args)))
         else
-          opts(Functions::EvaluationContext.new(environment.options).send(ruby_name, *args))
+          without_original(opts(Functions::EvaluationContext.new(environment.options).
+              send(ruby_name, *args)))
         end
       rescue ArgumentError => e
         message = e.message
@@ -8243,6 +8246,13 @@ module Sass
       end
 
       private
+
+      def without_original(value)
+        return value unless value.is_a?(Number)
+        value = value.dup
+        value.original = nil
+        return value
+      end
 
       def construct_ruby_args(name, args, splat, environment)
         args += splat.to_a if splat
@@ -11545,6 +11555,7 @@ module Sass
         return unless (str = tok(STRING)) || (uri = tok?(/url\(/i))
         if uri
           str = sass_script(:parse_string)
+          ss
           media = media_query_list
           ss
           return node(Tree::CssImportNode.new(str, media.to_a))
@@ -13038,7 +13049,7 @@ module Sass
         dir = dir.gsub(File::ALT_SEPARATOR, File::SEPARATOR) unless File::ALT_SEPARATOR.nil?
 
         found = possible_files(remove_root(name)).map do |f, s|
-          path = (dir == "." || Pathname.new(f).absolute?) ? f : "#{dir}/#{f}"
+          path = (dir == "." || Pathname.new(f).absolute?) ? f : "#{escape_glob_characters(dir)}/#{f}"
           Dir[path].map do |full_path|
             full_path.gsub!(REDUNDANT_DIRECTORY, File::SEPARATOR)
             [full_path, s]

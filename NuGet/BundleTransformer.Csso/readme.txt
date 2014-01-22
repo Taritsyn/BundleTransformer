@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: CSSO 1.8.13
+              README file for Bundle Transformer: CSSO 1.8.18
  
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -19,20 +19,17 @@
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install the following 
-   NuGet package - JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of CSSO version 1.3.10.
+   NuGet packages: JavaScriptEngineSwitcher.V8 or
+   JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).
    
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module is recommended to install the 
-   following NuGet package - JavaScriptEngineSwitcher.V8. After package 
-   is installed, need set a name of JavaScript engine (for example, 
-   `V8JsEngine`) to the `name` attribute of 
+   following NuGet packages: JavaScriptEngineSwitcher.V8 or
+   JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode). After
+   package is installed, need set a name of JavaScript engine (for
+   example, `V8JsEngine`) to the `name` attribute of 
    `/configuration/bundleTransformer/csso/jsEngine` configuration 
    element.
    

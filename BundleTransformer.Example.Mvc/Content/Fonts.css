@@ -2,7 +2,7 @@
 @font-face {
 	font-family: "Bitstream Vera Sans Bold";
 	src: url("fonts/bitstream-vera-sans-bold/vera-bold-webfont.eot");
-	src: url("./fonts/bitstream-vera-sans-bold/vera-bold-webfont.eot?#iefix") format("embedded-opentype"),
+	src: url("./fonts/bitstream-vera-sans-bold/vera-bold-webfont.eot?#iefix" ) format("embedded-opentype"),
 		url("fonts/bitstream-vera-sans-bold/vera-bold-webfont.woff") format("woff"),
 		url("fonts/bitstream-vera-sans-bold/vera-bold-webfont.ttf") format("truetype"),
 		url("fonts/bitstream-vera-sans-bold/vera-bold-webfont.svg#bitstream_vera_sansbold") format("svg");

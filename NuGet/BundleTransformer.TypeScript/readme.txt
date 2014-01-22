@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.8.17
+           README file for Bundle Transformer: TypeScript 1.8.18
 
    ----------------------------------------------------------------------
 
-          Copyright 2013 Andrey Taritsyn - http://www.taritsyn.ru
+          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -26,12 +26,7 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Improved performance.
-	  
+
    ====================
    POST-INSTALL ACTIONS
    ====================
