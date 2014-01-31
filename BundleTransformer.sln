@@ -34,11 +34,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.SassAndSc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Csso", "BundleTransformer.Csso\BundleTransformer.Csso.csproj", "{E70F938E-7498-4904-8E89-445DE42D974B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.UglifyJs", "BundleTransformer.UglifyJs\BundleTransformer.UglifyJs.csproj", "{B8C2B00A-5703-475E-8D80-F353673B60A6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Less", "BundleTransformer.Less\BundleTransformer.Less.csproj", "{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.CleanCss", "BundleTransformer.CleanCss\BundleTransformer.CleanCss.csproj", "{AF409D45-61D1-4906-B7CA-92AB133F3044}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.UglifyJs", "BundleTransformer.UglifyJS\BundleTransformer.UglifyJs.csproj", "{B8C2B00A-5703-475E-8D80-F353673B60A6}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -217,18 +217,6 @@ Global
 		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x64.Build.0 = Release|x64
 		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x86.ActiveCfg = Release|x86
 		{E70F938E-7498-4904-8E89-445DE42D974B}.Release|x86.Build.0 = Release|x86
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|x64.ActiveCfg = Release|Any CPU
-		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -253,6 +241,18 @@ Global
 		{AF409D45-61D1-4906-B7CA-92AB133F3044}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AF409D45-61D1-4906-B7CA-92AB133F3044}.Release|x64.ActiveCfg = Release|Any CPU
 		{AF409D45-61D1-4906-B7CA-92AB133F3044}.Release|x86.ActiveCfg = Release|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|x64.ActiveCfg = Release|Any CPU
+		{B8C2B00A-5703-475E-8D80-F353673B60A6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
