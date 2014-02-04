@@ -139,5 +139,15 @@
 			get { return (bool)this["preserveLine"]; }
 			set { this["preserveLine"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to unescape regular expressions
+		/// </summary>
+		[ConfigurationProperty("unescapeRegexps", DefaultValue = false)]
+		public bool UnescapeRegexps
+		{
+			get { return (bool)this["unescapeRegexps"]; }
+			set { this["unescapeRegexps"] = value; }
+		}
 	}
 }

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.18
+              README file for Bundle Transformer: Core 1.8.20
 
    ----------------------------------------------------------------------
 
@@ -33,11 +33,6 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Fixed bug #68 "Some url strings in CSS are not resolved".
    
    =============
    DOCUMENTATION

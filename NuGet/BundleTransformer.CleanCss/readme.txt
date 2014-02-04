@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Clean-css 1.8.18
+            README file for Bundle Transformer: Clean-css 1.8.20
  
    ----------------------------------------------------------------------
 
@@ -25,9 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of Clean-css version 2.0.7;
-   2. From configuration settings of CSS-minifier removed one property -
-      `SelectorsMergeMode`, and added one new property - `Compatibility`.
+   Clean-css was updated to commit f9f3e0fa6d.
    
    ====================
    POST-INSTALL ACTIONS

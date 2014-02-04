@@ -125,6 +125,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to unescape regular expressions
+		/// </summary>
+		public bool UnescapeRegexps
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the options of code generation
@@ -144,6 +153,7 @@
 			Semicolons = true;
 			Comments = false;
 			PreserveLine = false;
+			UnescapeRegexps = false;
 		}
 	}
 }

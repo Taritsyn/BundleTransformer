@@ -168,7 +168,8 @@
 				Bracketize = codeGenerationConfig.Bracketize,
 				Semicolons = codeGenerationConfig.Semicolons,
 				Comments = codeGenerationConfig.Comments,
-				PreserveLine = codeGenerationConfig.PreserveLine
+				PreserveLine = codeGenerationConfig.PreserveLine,
+				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps
 			};
 
 			ScrewIe8 = jsMinifierConfig.ScrewIe8;

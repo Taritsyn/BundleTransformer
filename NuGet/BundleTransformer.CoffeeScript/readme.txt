@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.19
+           README file for Bundle Transformer: CoffeeScript 1.8.20
 
    ----------------------------------------------------------------------
 
@@ -23,11 +23,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of CoffeeScript version 1.7.1.
    
    ====================
    POST-INSTALL ACTIONS

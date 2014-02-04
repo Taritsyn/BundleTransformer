@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
+	using System.IO;
 	using System.Text.RegularExpressions;
 
 	/// <summary>
@@ -18,6 +20,16 @@
 		/// Singleline comment length
 		/// </summary>
 		const int SINGLELINE_COMMENT_LENGTH = 2;
+
+		/// <summary>
+		/// Regular expression for working with the non-ASCII characters
+		/// </summary>
+		private static readonly Regex _nonAsciiCharactersRegex = new Regex("[^\x00-\x7F]");
+
+		/// <summary>
+		/// Regular expression for working with the encoded non-ASCII characters
+		/// </summary>
+		private static readonly Regex _encodedNonAsciiCharactersRegex = new Regex(@"\\(?<value>[0-9a-fA-F]{6})");
 
 
 		/// <summary>
@@ -118,6 +130,68 @@
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// Escapes a non-ASCII characters
+		/// </summary>
+		/// <param name="value">String value</param>
+		/// <returns>Processed value</returns>
+		public static string EscapeNonAsciiCharacters(string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return value;
+			}
+
+			if (!_nonAsciiCharactersRegex.IsMatch(value))
+			{
+				return value;
+			}
+
+			string result;
+
+			using (var writer = new StringWriter())
+			{
+				int charCount = value.Length;
+
+				for (int charIndex = 0; charIndex < charCount; charIndex++)
+				{
+					char charValue = value[charIndex];
+					if (charValue > 127)
+					{
+						// This character is too big for ASCII
+						string escapedValue = "\\" + ((int)charValue).ToString("X6");
+						writer.Write(escapedValue);
+					}
+					else
+					{
+						writer.Write(charValue);
+					}
+				}
+
+				writer.Flush();
+
+				result = writer.ToString();
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Unescapes a escaped non-ASCII characters
+		/// </summary>
+		/// <param name="value">String value</param>
+		/// <returns>Processed value</returns>
+		public static string UnescapeEscapedNonAsciiCharacters(string value)
+		{
+			string result = _encodedNonAsciiCharactersRegex.Replace(value, m =>
+			{
+				var charValue = (char)int.Parse(m.Groups["value"].Value, NumberStyles.HexNumber);
+				return charValue.ToString(CultureInfo.InvariantCulture);
+			});
+
+			return result;
 		}
 	}
 }

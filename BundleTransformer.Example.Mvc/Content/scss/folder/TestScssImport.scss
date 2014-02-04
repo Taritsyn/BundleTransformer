@@ -1,1 +1,18 @@
-﻿@charset "UTF-8";.translators #scss{	background-color: $alt-bg-color;}.icon-plug{	display: inline;	background-image: url("../$plug.png");}@import 'subfolder/TestScssSubImport';
+﻿@charset "UTF-8";
+
+.translators #scss
+{
+	background-color: $alt-bg-color;
+
+	&.right-side:after {
+		content: "‽";
+	}
+}
+
+.icon-plug
+{
+	display: inline;
+	background-image: url("../$plug.png");
+}
+
+@import 'subfolder/TestScssSubImport';

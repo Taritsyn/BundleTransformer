@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.8.18
+           README file for Bundle Transformer: TypeScript 1.8.20
 
    ----------------------------------------------------------------------
 

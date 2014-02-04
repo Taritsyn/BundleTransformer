@@ -277,7 +277,8 @@
 				new JProperty("semicolons", codeGenerationOptions.Semicolons),
 				new JProperty("comments", codeGenerationOptions.Comments),
 				new JProperty("preserve_line", codeGenerationOptions.PreserveLine),
-				new JProperty("screw_ie8", options.ScrewIe8)
+				new JProperty("screw_ie8", options.ScrewIe8),
+				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps)
 			));
 
 			return optionsJson;

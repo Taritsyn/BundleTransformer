@@ -1,8 +1,8 @@
 #############################################################################
-# Sass v3.2.13
+# Sass v3.2.14
 # http://sass-lang.com
 #
-# Copyright 2006-2013, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
+# Copyright 2006-2014, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
 # Released under the MIT License
 #############################################################################
 
@@ -379,33 +379,16 @@ module Sass
       return enum.group_by(&block).to_a unless ruby1_8?
       order = {}
       arr = []
-	  #RG There is no group_by in iron monkey :-/ 
-	  #RG This can be probably optimized by some Ruby guru
-	  groupKeys = []
-	  result = []
-	  enum.each do |key|
-	    res = block[key]
-		unless order.include?(res)
-			arr[order.size] = []
-			groupKeys[order.size] = res
-			order[res] = order.size
-		end
-		arr[order[res]] = arr[order[res]] + [ key ]
-	  end
-	  arr.each_with_index do |vals,key|
-	    result[key] =  [groupKeys[key], vals]
-	  end
-	  result
-      #RG enum.group_by do |e|
-      #RG   res = block[e]
-      #RG   unless order.include?(res)
-      #RG     order[res] = order.size
-      #RG   end
-      #RG   res
-      #RG end.each do |key, vals|
-      #RG   arr[order[key]] = [key, vals]
-      #RG end
-      #RG arr
+      enum.group_by do |e|
+        res = block[e]
+        unless order.include?(res)
+          order[res] = order.size
+        end
+        res
+      end.each do |key, vals|
+        arr[order[key]] = [key, vals]
+      end
+      arr
     end
 
     # Returns a sub-array of `minuend` containing only elements that are also in
@@ -857,14 +840,8 @@ MSG
     #
     # @param enum [Enumerable] The enumerable to get the enumerator for
     # @return [Enumerator] The with-index enumerator
-    def enum_with_index(enum)		
-	  #RG find applied to the iterator doesn't get the proper index in IronRuby??
-      #RG: ruby1_8? ? enum.enum_with_index : enum.each_with_index
-	  #RG So instead we convert it to array of the pairs, this can be possibly done differently
-	  #RG but seems to work
-	  enum.each_with_index.map do |el,i|
-		[el,i]
-	  end
+    def enum_with_index(enum)
+      ruby1_8? ? enum.enum_with_index : enum.each_with_index
     end
 
     # A version of `Enumerable#enum_cons` that works in Ruby 1.8 and 1.9.
@@ -1493,7 +1470,7 @@ module Sass
       
     end
   end
-end 
+end
 
 class Sass::Logger::Base
   
@@ -3663,17 +3640,29 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
         node.children.unshift charset if charset
       end
 
-      imports = Sass::Util.extract!(node.children) do |c|
-        c.is_a?(Sass::Tree::DirectiveNode) && !c.is_a?(Sass::Tree::MediaNode) &&
-          c.resolved_value =~ /^@import /i
+      imports_to_move = []
+      import_limit = nil
+      i = -1
+      node.children.reject! do |n|
+        i += 1
+        if import_limit
+          next false unless n.is_a?(Sass::Tree::CssImportNode)
+          imports_to_move << n
+          next true
+        end
+
+        if !n.is_a?(Sass::Tree::CommentNode) &&
+            !n.is_a?(Sass::Tree::CharsetNode) &&
+            !n.is_a?(Sass::Tree::CssImportNode)
+          import_limit = i
+        end
+
+        false
       end
-      charset_and_index = Sass::Util.ruby1_8? &&
-        node.children.each_with_index.find {|c, _| c.is_a?(Sass::Tree::CharsetNode)}
-      if charset_and_index && charset_and_index.respond_to?(:last)
-        index = charset_and_index.last
-        node.children = node.children[0..index] + imports + node.children[index+1..-1]
-      else
-        node.children = imports + node.children
+
+      if import_limit
+        node.children = node.children[0...import_limit] + imports_to_move +
+          node.children[import_limit..-1]
       end
     end
 
@@ -10386,8 +10375,7 @@ module Sass
 
       TOKEN_NAMES = Sass::Util.map_hash(OPERATORS_REVERSE) {|k, v| [k, v.inspect]}.merge({
           :const => "variable (e.g. $foo)",
-          :ident => "identifier (e.g. middle)",
-          :bool => "boolean (e.g. true, false)",
+          :ident => "identifier (e.g. middle)"
         })
 
       # A list of operator strings ordered with longer names first
@@ -10407,8 +10395,6 @@ module Sass
         :ident => /(#{IDENT})(\()?/,
         :number => /(-)?(?:(\d*\.\d+)|(\d+))([a-zA-Z%]+)?/,
         :color => HEXCOLOR,
-        :bool => /(true|false)\b/,
-        :null => /null\b/,
         :ident_op => %r{(#{Regexp.union(*IDENT_OP_NAMES.map{|s| Regexp.new(Regexp.escape(s) + "(?!#{NMCHAR}|\Z)")})})},
         :op => %r{(#{Regexp.union(*OP_NAMES)})},
       }
@@ -10552,9 +10538,9 @@ module Sass
           return string(interp_type, true)
         end
 
-        variable || string(:double, false) || string(:single, false) || number ||
-          color || bool || null || string(:uri, false) || raw(UNICODERANGE) ||
-          special_fun || special_val || ident_op || ident || op
+        variable || string(:double, false) || string(:single, false) || number || color ||
+          string(:uri, false) || raw(UNICODERANGE) || special_fun || special_val || ident_op ||
+          ident || op
       end
 
       def variable
@@ -10602,16 +10588,6 @@ MESSAGE
         value = s.scan(/^#(..?)(..?)(..?)$/).first.
           map {|num| num.ljust(2, num).to_i(16)}
         [:color, Script::Color.new(value)]
-      end
-
-      def bool
-        return unless s = scan(REGULAR_EXPRESSIONS[:bool])
-        [:bool, Script::Bool.new(s == 'true')]
-      end
-
-      def null
-        return unless scan(REGULAR_EXPRESSIONS[:null])
-        [:null, Script::Null.new]
       end
 
       def special_fun
@@ -10985,9 +10961,16 @@ RUBY
 
         name = @lexer.next
         if color = Color::COLOR_NAMES[name.value.downcase]
-          return node(Color.new(color))
+          node(Color.new(color))
+        elsif name.value == "true"
+          node(Script::Bool.new(true))
+        elsif name.value == "false"
+          node(Script::Bool.new(false))
+        elsif name.value == "null"
+          node(Script::Null.new)
+        else
+          node(Script::String.new(name.value, :identifier))
         end
-        node(Script::String.new(name.value, :identifier))
       end
 
       def funcall
@@ -11117,7 +11100,7 @@ RUBY
       end
 
       def literal
-        (t = try_tok(:color, :bool, :null)) && (return t.value)
+        (t = try_tok(:color)) && (return t.value)
       end
 
       # It would be possible to have unified #assert and #try methods,
@@ -13052,7 +13035,7 @@ module Sass
           path = (dir == "." || Pathname.new(f).absolute?) ? f : "#{escape_glob_characters(dir)}/#{f}"
           Dir[path].map do |full_path|
             full_path.gsub!(REDUNDANT_DIRECTORY, File::SEPARATOR)
-            [full_path, s]
+            [Pathname.new(full_path).cleanpath.to_s, s]
           end
         end
         found = Sass::Util.flatten(found, 1)
@@ -13110,10 +13093,6 @@ WARNING
         options[:filename] = full_filename
         options[:importer] = self
         Sass::Engine.new(File.read(full_filename), options)
-      end
-
-      def join(base, path)
-        Pathname.new(base).join(path).to_s
       end
     end
   end
@@ -14304,6 +14283,8 @@ WARNING
       when 'media'
         parser = Sass::SCSS::Parser.new(value, @options[:filename], @line)
         Tree::MediaNode.new(parser.parse_media_query_list.to_a)
+      when nil
+        raise SyntaxError.new("Invalid directive: '@'.")
       else
         unprefixed_directive = directive.gsub(/^-[a-z0-9]+-/i, '')
         if unprefixed_directive == 'supports'

@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.11
+ * UglifyJS v2.4.12
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -3344,22 +3344,23 @@
 	function OutputStream(options) {
 
 		options = defaults(options, {
-			indent_start  : 0,
-			indent_level  : 4,
-			quote_keys    : false,
-			space_colon   : true,
-			ascii_only    : false,
-			inline_script : false,
-			width         : 80,
-			max_line_len  : 32000,
-			beautify      : false,
-			source_map    : null,
-			bracketize    : false,
-			semicolons    : true,
-			comments      : false,
-			preserve_line : false,
-			screw_ie8     : false,
-			preamble      : null
+			indent_start     : 0,
+			indent_level     : 4,
+			quote_keys       : false,
+			space_colon      : true,
+			ascii_only       : false,
+			unescape_regexps : false,
+			inline_script    : false,
+			width            : 80,
+			max_line_len     : 32000,
+			beautify         : false,
+			source_map       : null,
+			bracketize       : false,
+			semicolons       : true,
+			comments         : false,
+			preserve_line    : false,
+			screw_ie8        : false,
+			preamble         : null
 		}, true);
 
 		var indentation = 0;
@@ -4442,6 +4443,7 @@
 				0x21   , // !
 				0x0a   , // \n
 				0x0d   , // \r
+				0x00   , // \0
 				0xfeff , // Unicode BOM
 				0x2028 , // unicode "line separator"
 				0x2029 , // unicode "paragraph separator"
@@ -4452,7 +4454,7 @@
 			var str = self.getValue().toString();
 			if (output.option("ascii_only")) {
 				str = output.to_ascii(str);
-			} else {
+			} else if (output.option("unescape_regexps")) {
 				str = str.split("\\\\").map(function(str){
 					return str.replace(/\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}/g, function(s){
 						var code = parseInt(s.substr(2), 16);
@@ -4936,7 +4938,7 @@
 							stat = stat.clone();
 							stat.condition = stat.condition.negate(compressor);
 							stat.body = make_node(AST_BlockStatement, stat, {
-								body: ret
+								body: as_statement_array(stat.alternative).concat(ret)
 							});
 							stat.alternative = make_node(AST_BlockStatement, stat, {
 								body: body

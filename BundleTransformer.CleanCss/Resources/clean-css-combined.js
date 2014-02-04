@@ -267,20 +267,18 @@ var CleanCss = (function(){
 		function RGBToHex(data) {
 		  return {
 			process: function() {
-			  return data.replace(/rgb\((\d+),(\d+),(\d+)\)/g, function(match, red, green, blue) {
-				var redAsHex = parseInt(red, 10).toString(16);
-				var greenAsHex = parseInt(green, 10).toString(16);
-				var blueAsHex = parseInt(blue, 10).toString(16);
+			  return data.replace(/rgb\((\-?\d+),(\-?\d+),(\-?\d+)\)/g, function(match, red, green, blue) {
+				red = Math.max(0, Math.min(~~red, 255));
+				green = Math.max(0, Math.min(~~green, 255));
+				blue = Math.max(0, Math.min(~~blue, 255));
 
-				return '#' +
-				  ((redAsHex.length == 1 ? '0' : '') + redAsHex) +
-				  ((greenAsHex.length == 1 ? '0' : '') + greenAsHex) +
-				  ((blueAsHex.length == 1 ? '0' : '') + blueAsHex);
+				// Credit: Asen  http://jsbin.com/UPUmaGOc/2/edit?js,console
+				return '#' + ('00000' + (red << 16 | green << 8 | blue).toString(16)).slice(-6);
 			  });
 			}
 		  };
 		};
-		
+
 		return RGBToHex;
 	}).call(this);
 	//#endregion
@@ -641,7 +639,6 @@ var CleanCss = (function(){
 	//#region URL: ./text/comments
 	require['./text/comments'] = (function () {
 		var EscapeStore = require('./text/escape-store');
-		
 		function Comments(keepSpecialComments, keepBreaks, lineBreak) {
 		  var comments = new EscapeStore('COMMENT');
 
@@ -656,7 +653,7 @@ var CleanCss = (function(){
 			  var cursor = 0;
 
 			  for (; nextEnd < data.length;) {
-				nextStart = data.indexOf('/*', nextEnd);
+				nextStart = data.indexOf('/*', cursor);
 				nextEnd = data.indexOf('*/', nextStart + 2);
 				if (nextStart == -1 || nextEnd == -1)
 				  break;
@@ -900,11 +897,13 @@ var CleanCss = (function(){
 			},
 
 			restore: function(data) {
-			  return data.replace(urls.placeholderRegExp, urls.restore);
+			  return data.replace(urls.placeholderRegExp, function(placeholder) {
+				return urls.restore(placeholder).replace(/\s/g, '');
+			  });
 			}
 		  };
 		};
-		
+
 		return Urls;
 	}).call(this);
 	//#endregion
@@ -1584,6 +1583,11 @@ var CleanCss = (function(){
 			data = urlsProcessor.escape(data);
 		  });
 
+		  // whitespace inside attribute selectors brackets
+		  replace(/\[([^\]]+)\]/g, function(match) {
+			return match.replace(/\s/g, '');
+		  });
+
 		  // line breaks
 		  replace(/[\r]?\n/g, ' ');
 
@@ -1650,25 +1654,36 @@ var CleanCss = (function(){
 			units.push('rem');
 
 		  replace(new RegExp('(\\s|:|,)0(?:' + units.join('|') + ')', 'g'), '$1' + '0');
+		  replace(new RegExp('(\\s|:|,)(\\d)\\.(\\D)', 'g'), '$1$2$3');
 		  replace(new RegExp('rect\\(0(?:' + units.join('|') + ')', 'g'), 'rect(0');
+
+		  // zero(s) + value to value
+		  replace(/(\s|:|,)0+([1-9])/g, '$1$2');
 
 		  // round pixels to 2nd decimal place
 		  replace(/\.(\d{3,})px/g, function(match, decimalPlaces) {
 			return '.' + Math.round(parseFloat('.' + decimalPlaces) * 100) + 'px';
 		  });
 
+		  // .0 to 0
+		  replace(/(\D)\.0+(,|\}|\))/g, '$10$2');
+
 		  // fraction zeros removal
 		  replace(/\.([1-9]*)0+(\D)/g, function(match, nonZeroPart, suffix) {
-			return (nonZeroPart ? '.' : '') + nonZeroPart + suffix;
+			return (nonZeroPart.length > 0 ? '.' : '') + nonZeroPart + suffix;
 		  });
 
-		  // restore 0% in hsl/hsla
-		  replace(/(hsl|hsla)\(([^\)]+)\)/g, function(match, colorFunction, colorDef) {
+		  // restore % in rgb/rgba and hsl/hsla
+		  replace(/(rgb|rgba|hsl|hsla)\(([^\)]+)\)/g, function(match, colorFunction, colorDef) {
 			var tokens = colorDef.split(',');
-			if (tokens[1] == '0')
-			  tokens[1] = '0%';
-			if (tokens[2] == '0')
-			  tokens[2] = '0%';
+			var applies = colorFunction == 'hsl' || colorFunction == 'hsla' || tokens[0].indexOf('%') > -1;
+			if (!applies)
+			  return match;
+
+			if (tokens[1].indexOf('%') == -1)
+			  tokens[1] += '%';
+			if (tokens[2].indexOf('%') == -1)
+			  tokens[2] += '%';
 			return colorFunction + '(' + tokens.join(',') + ')';
 		  });
 
@@ -1764,7 +1779,7 @@ var CleanCss = (function(){
 			callback.call(this, this.context.errors.length > 0 ? this.context.errors : null, data) :
 			data;
 		};
-		
+
 		return exports;
 	}).call(this);
 	//#endregion

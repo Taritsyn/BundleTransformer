@@ -269,6 +269,9 @@
 						assetTypeName, OUTPUT_CODE_TYPE, assetUrl, e.Message), e);
 			}
 
+			// Unescape escaped non-ASCII characters
+			newContent = StylesheetHelpers.UnescapeEscapedNonAsciiCharacters(newContent);
+
 			asset.Content = newContent;
 			asset.Minified = enableNativeMinification;
 			asset.RelativePathsResolved = true;
@@ -316,26 +319,30 @@
 				return stylesheet;
 			}
 
+			// Escape non-ASCII characters
+			string processedContent = StylesheetHelpers.EscapeNonAsciiCharacters(assetContent);
+			stylesheet.Content = processedContent;
+
 			MatchCollection serverImportRuleMatches;
 			MatchCollection clientImportRuleMatches;
 			string assetFileExtension = Path.GetExtension(assetUrl);
 
 			if (FileExtensionHelpers.IsSass(assetFileExtension))
 			{
-				serverImportRuleMatches = _sassServerImportRuleRegex.Matches(assetContent);
-				clientImportRuleMatches = _sassClientImportRuleRegex.Matches(assetContent);
+				serverImportRuleMatches = _sassServerImportRuleRegex.Matches(processedContent);
+				clientImportRuleMatches = _sassClientImportRuleRegex.Matches(processedContent);
 			}
 			else if (FileExtensionHelpers.IsScss(assetFileExtension))
 			{
-				serverImportRuleMatches = _scssServerImportRuleRegex.Matches(assetContent);
-				clientImportRuleMatches = _scssClientImportRuleRegex.Matches(assetContent);
+				serverImportRuleMatches = _scssServerImportRuleRegex.Matches(processedContent);
+				clientImportRuleMatches = _scssClientImportRuleRegex.Matches(processedContent);
 			}
 			else
 			{
 				throw new FormatException();
 			}
 
-			MatchCollection urlRuleMatches = CommonRegExps.CssUrlRuleRegex.Matches(assetContent);
+			MatchCollection urlRuleMatches = CommonRegExps.CssUrlRuleRegex.Matches(processedContent);
 
 			if (serverImportRuleMatches.Count == 0 && clientImportRuleMatches.Count == 0 
 				&& urlRuleMatches.Count == 0)
@@ -372,7 +379,7 @@
 				nodeMatches.Add(nodeMatch);
 			}
 
-			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(assetContent);
+			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(processedContent);
 
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
@@ -408,12 +415,12 @@
 					|| nodeType == SassAndScssNodeType.ClientImportRule
 					|| nodeType == SassAndScssNodeType.UrlRule)
 				{
-					ProcessOtherContent(contentBuilder, assetContent,
+					ProcessOtherContent(contentBuilder, processedContent,
 						ref currentPosition, nodePosition);
 
 					int startLinePosition;
 					int endLinePosition;
-					string currentLine = SourceCodeNavigator.GetCurrentLine(assetContent, nodePosition,
+					string currentLine = SourceCodeNavigator.GetCurrentLine(processedContent, nodePosition,
 						out startLinePosition, out endLinePosition);
 					int localNodePosition = nodePosition - startLinePosition;
 
@@ -421,7 +428,7 @@
 					{
 						int nextPosition = (endLinePosition < endPosition) ? endLinePosition + 1 : endPosition;
 
-						ProcessOtherContent(contentBuilder, assetContent,
+						ProcessOtherContent(contentBuilder, processedContent,
 							ref currentPosition, nextPosition);
 						continue;
 					}
@@ -500,14 +507,14 @@
 				{
 					int nextPosition = nodePosition + match.Length;
 
-					ProcessOtherContent(contentBuilder, assetContent,
+					ProcessOtherContent(contentBuilder, processedContent,
 						ref currentPosition, nextPosition);
 				}
 			}
 
 			if (currentPosition > 0 && currentPosition <= endPosition)
 			{
-				ProcessOtherContent(contentBuilder, assetContent,
+				ProcessOtherContent(contentBuilder, processedContent,
 					ref currentPosition, endPosition + 1);
 			}
 
