@@ -98,6 +98,13 @@
 		/// </summary>
 		private static readonly string[] _jsInbuiltConstants = { "false", "null", "true", "undefined" };
 
+		/// <summary>
+		/// Regular expression for working with the string representation of error
+		/// </summary>
+		private static readonly Regex _errorStringRegex =
+			new Regex(@"^(?<message>.*?)\s*" + 
+				@"\[[\w \-+.:,;/?&=%~#$@()\[\]{}]*:(?<lineNumber>\d+),\s*(?<columnNumber>\d+)\]$");
+
 
 		/// <summary>
 		/// Constructs instance of JS-uglifier
@@ -141,9 +148,10 @@
 		/// "Uglifies" JS-code by using UglifyJS
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
+		/// <param name="path">Path to JS-file</param>
 		/// <param name="options">Uglification options</param>
 		/// <returns>Minified text content of JS-asset</returns>
-		public string Uglify(string content, UglificationOptions options = null)
+		public string Uglify(string content, string path, UglificationOptions options = null)
 		{
 			string newContent;
 			UglificationOptions currentOptions;
@@ -175,7 +183,7 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new JsUglifyingException(FormatErrorDetails(errors[0], true, content));
+						throw new JsUglifyingException(FormatErrorDetails(errors[0], true, content, path));
 					}
 
 					if (currentOptions.Severity > 0)
@@ -183,7 +191,7 @@
 						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
 						if (warnings != null && warnings.Count > 0)
 						{
-							throw new JsUglifyingException(FormatErrorDetails(warnings[0], false, content));
+							throw new JsUglifyingException(FormatErrorDetails(warnings[0], false, content, path));
 						}
 					}
 
@@ -230,6 +238,7 @@
 					new JProperty("loops", compressionOptions.Loops),
 					new JProperty("unused", compressionOptions.Unused),
 					new JProperty("hoist_funs", compressionOptions.HoistFunctions),
+					new JProperty("keep_fargs", compressionOptions.KeepFunctionArgs),
 					new JProperty("hoist_vars", compressionOptions.HoistVars),
 					new JProperty("if_return", compressionOptions.IfReturn),
 					new JProperty("join_vars", compressionOptions.JoinVars),
@@ -425,38 +434,62 @@
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="isError">Flag indicating that this issue is a error</param>
 		/// <param name="sourceCode">Source code</param>
+		/// <param name="currentFilePath">Path to current JS-file</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, bool isError, string sourceCode)
+		private static string FormatErrorDetails(JToken errorDetails, bool isError, string sourceCode, 
+			string currentFilePath)
 		{
-			var message = errorDetails.Value<string>("message");
+			string message;
+			string file = currentFilePath;
+			int lineNumber = 0;
+			int columnNumber = 0;
+
+			var errorString = errorDetails.Value<string>("message");
+			Match errorStringMatch = _errorStringRegex.Match(errorString);
+
+			if (errorStringMatch.Success)
+			{
+				GroupCollection errorStringGroups = errorStringMatch.Groups;
+
+				message = errorStringGroups["message"].Value;
+				lineNumber = int.Parse(errorStringGroups["lineNumber"].Value);
+				columnNumber = int.Parse(errorStringGroups["columnNumber"].Value) + 1;
+			}
+			else
+			{
+				message = errorString;
+				if (isError)
+				{
+					lineNumber = errorDetails.Value<int>("lineNumber");
+					columnNumber = errorDetails.Value<int>("columnNumber");
+				}
+			}
+
+			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
+				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
 			var errorMessage = new StringBuilder();
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 				isError ? CoreStrings.ErrorType_Error : CoreStrings.ErrorType_Warning);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
-
-			if (isError)
+			if (!string.IsNullOrWhiteSpace(file))
 			{
-				var lineNumber = errorDetails.Value<int>("lineNumber");
-				var columnNumber = errorDetails.Value<int>("columnNumber");
-				string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
-					new SourceCodeNodeCoordinates(lineNumber, columnNumber));
-
-				if (lineNumber > 0)
-				{
-					errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-						lineNumber.ToString(CultureInfo.InvariantCulture));
-				}
-				if (columnNumber > 0)
-				{
-					errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-						columnNumber.ToString(CultureInfo.InvariantCulture));
-				}
-				if (!string.IsNullOrWhiteSpace(sourceFragment))
-				{
-					errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
-						CoreStrings.ErrorDetails_SourceError, sourceFragment);
-				}
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, file);
+			}
+			if (lineNumber > 0)
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+					lineNumber.ToString(CultureInfo.InvariantCulture));
+			}
+			if (columnNumber > 0)
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+					columnNumber.ToString(CultureInfo.InvariantCulture));
+			}
+			if (!string.IsNullOrWhiteSpace(sourceFragment))
+			{
+				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					CoreStrings.ErrorDetails_SourceError, sourceFragment);
 			}
 
 			return errorMessage.ToString();

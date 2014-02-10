@@ -105,9 +105,10 @@
 		/// "Cleans" CSS-code by using Clean-css
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>
+		/// <param name="path">Path to CSS-file</param>
 		/// <param name="options">Cleaning options</param>
 		/// <returns>Minified text content of CSS-asset</returns>
-		public string Clean(string content, CleaningOptions options = null)
+		public string Clean(string content, string path, CleaningOptions options = null)
 		{
 			string newContent;
 			CleaningOptions currentOptions;
@@ -139,7 +140,8 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new CssCleaningException(FormatErrorDetails(errors[0].Value<string>(), true));
+						throw new CssCleaningException(FormatErrorDetails(errors[0].Value<string>(), true, 
+							path));
 					}
 
 					if (currentOptions.Severity > 0)
@@ -147,7 +149,8 @@
 						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
 						if (warnings != null && warnings.Count > 0)
 						{
-							throw new CssCleaningException(FormatErrorDetails(warnings[0].Value<string>(), false));
+							throw new CssCleaningException(FormatErrorDetails(warnings[0].Value<string>(), 
+								false, path));
 						}
 					}
 
@@ -238,13 +241,18 @@
 		/// </summary>
 		/// <param name="message">Message</param>
 		/// <param name="isError">Flag indicating that this issue is a error</param>
+		/// <param name="currentFilePath">Path to current CSS-file</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(string message, bool isError)
+		private static string FormatErrorDetails(string message, bool isError, string currentFilePath)
 		{
 			var errorMessage = new StringBuilder();
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 				isError ? CoreStrings.ErrorType_Error : CoreStrings.ErrorType_Warning);
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			if (!string.IsNullOrWhiteSpace(currentFilePath))
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, currentFilePath);
+			}
 
 			return errorMessage.ToString();
 		}

@@ -1,5 +1,5 @@
 /*!
- * LESS v1.6.2
+ * LESS v1.6.3
  * http://lesscss.org
  *
  * Copyright 2014, Alexis Sellier & The Core Less Team
@@ -4701,6 +4701,7 @@ var Less = (function(){
 		
 		//#region URL: ./to-css-visitor
 		(function (tree) {
+
 		tree.toCSSVisitor = function(env) {
 			this._visitor = new tree.visitor(this);
 			this._env = env;
@@ -4720,6 +4721,9 @@ var Less = (function(){
 			},
 
 			visitMixinDefinition: function (mixinNode, visitArgs) {
+				// mixin definitions do not get eval'd - this means they keep state
+				// so we have to clear that state here so it isn't used if toCSS is called twice
+				mixinNode.frames = [];
 				return [];
 			},
 
@@ -4901,14 +4905,36 @@ var Less = (function(){
 				}
 
 				Object.keys(groups).map(function (k) {
+
+					function toExpression(values) {
+						return new (tree.Expression)(values.map(function (p) {
+							return p.value;
+						}));
+					}
+
+					function toValue(values) {
+						return new (tree.Value)(values.map(function (p) {
+							return p;
+						}));
+					}
+
 					parts = groups[k];
 
 					if (parts.length > 1) {
 						rule = parts[0];
-
-						rule.value = new (tree.Value)(parts.map(function (p) {
-							return p.value;
-						}));
+						var spacedGroups = [];
+						var lastSpacedGroup = [];
+						parts.map(function (p) {
+						if (p.merge==="+") {
+							if (lastSpacedGroup.length > 0) {
+									spacedGroups.push(toExpression(lastSpacedGroup));
+								}
+								lastSpacedGroup = [];
+							}
+							lastSpacedGroup.push(p);
+						});
+						spacedGroups.push(toExpression(lastSpacedGroup));
+						rule.value = toValue(spacedGroups);
 					}
 				});
 			}
@@ -6394,7 +6420,7 @@ var Less = (function(){
 						}
 					},
 					rule: function (tryAnonymous) {
-						var name, value, c = input.charAt(i), important, merge = false;
+						var name, value, c = input.charAt(i), important, merge;
 						save();
 
 						if (c === '.' || c === '#' || c === '&') { return; }
@@ -6412,7 +6438,7 @@ var Less = (function(){
 							// a name returned by this.ruleProperty() is always an array of the form:
 							// [string-1, ..., string-n, ""] or [string-1, ..., string-n, "+"]
 							// where each item is a tree.Keyword or tree.Variable
-							merge = name.pop && (name.pop().value === "+");
+							merge = name.pop && name.pop().value;
 
 							if (value && this.end()) {
 								return new (tree.Rule)(name, value, important, merge, memo, env.currentFileInfo);
@@ -6854,7 +6880,7 @@ var Less = (function(){
 
 						match(/^(\*?)/);
 						while (match(/^((?:[\w-]+)|(?:@\{[\w-]+\}))/)); // !
-						if ((name.length > 1) && match(/^\s*(\+?)\s*:/)) {
+						if ((name.length > 1) && match(/^\s*((?:\+_|\+)?)\s*:/)) {
 							// at last, we have the complete match now. move forward, 
 							// convert name particles to tree objects and return:
 							skipWhitespace(length);

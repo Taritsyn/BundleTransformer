@@ -4623,6 +4623,7 @@
 			loops         : !false_by_default,
 			unused        : !false_by_default,
 			hoist_funs    : !false_by_default,
+			keep_fargs    : false,
 			hoist_vars    : false,
 			if_return     : !false_by_default,
 			join_vars     : !false_by_default,
@@ -5606,18 +5607,20 @@
 				var tt = new TreeTransformer(
 					function before(node, descend, in_list) {
 						if (node instanceof AST_Lambda && !(node instanceof AST_Accessor)) {
-							for (var a = node.argnames, i = a.length; --i >= 0;) {
-								var sym = a[i];
-								if (sym.unreferenced()) {
-									a.pop();
-									compressor.warn("Dropping unused function argument {name} [{file}:{line},{col}]", {
-										name : sym.name,
-										file : sym.start.file,
-										line : sym.start.line,
-										col  : sym.start.col
-									});
+							if (!compressor.option("keep_fargs")) {
+								for (var a = node.argnames, i = a.length; --i >= 0;) {
+									var sym = a[i];
+									if (sym.unreferenced()) {
+										a.pop();
+										compressor.warn("Dropping unused function argument {name} [{file}:{line},{col}]", {
+											name : sym.name,
+											file : sym.start.file,
+											line : sym.start.line,
+											col  : sym.start.col
+										});
+									}
+									else break;
 								}
-								else break;
 							}
 						}
 						if (node instanceof AST_Defun && node !== self) {
@@ -6857,6 +6860,19 @@
 					});
 					return consequent;
 				}
+			}
+			// x?y?z:a:a --> x&&y?z:a
+			if (consequent instanceof AST_Conditional
+				&& consequent.alternative.equivalent_to(alternative)) {
+				return make_node(AST_Conditional, self, {
+					condition: make_node(AST_Binary, self, {
+						left: self.condition,
+						operator: "&&",
+						right: consequent.condition
+					}),
+					consequent: consequent.consequent,
+					alternative: alternative
+				});
 			}
 			return self;
 		});

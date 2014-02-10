@@ -160,7 +160,7 @@
 
 			try
 			{
-				newContent = coffeeScriptCompiler.Compile(asset.Content, options);
+				newContent = coffeeScriptCompiler.Compile(asset.Content, assetVirtualPath, options);
 			}
 			catch (CoffeeScriptCompilingException e)
 			{

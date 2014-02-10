@@ -144,6 +144,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to drop unused function arguments
+		/// </summary>
+		[ConfigurationProperty("keepFunctionArgs", DefaultValue = false)]
+		public bool KeepFunctionArgs
+		{
+			get { return (bool)this["keepFunctionArgs"]; }
+			set { this["keepFunctionArgs"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to hoist <code>var</code> declarations
 		/// </summary>
 		[ConfigurationProperty("hoistVars", DefaultValue = false)]

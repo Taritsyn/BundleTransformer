@@ -129,6 +129,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to drop unused function arguments
+		/// </summary>
+		public bool KeepFunctionArgs
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to hoist <code>var</code> declarations
 		/// </summary>
 		public bool HoistVars
@@ -239,6 +248,7 @@
 			Loops = true;
 			Unused = true;
 			HoistFunctions = true;
+			KeepFunctionArgs = false;
 			HoistVars = false;
 			IfReturn = true;
 			JoinVars = true;

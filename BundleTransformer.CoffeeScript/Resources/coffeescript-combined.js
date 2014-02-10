@@ -5638,7 +5638,7 @@ var CoffeeScript = (function(){
 		  return "[].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; }";
 		},
 		modulo: function() {
-		  return "function(a, b) { return (a % b + +b) % b; }";
+		  return "function(a, b) { return (+a % (b = +b) + b) % b; }";
 		},
 		hasProp: function() {
 		  return '{}.hasOwnProperty';
@@ -6029,7 +6029,7 @@ var CoffeeScript = (function(){
 //	  };
 
 //	  Error.prepareStackTrace = function(err, stack) {
-//		var frame, frames, getSourceMapping, _ref;
+//		var frame, frames, getSourceMapping;
 //		getSourceMapping = function(filename, line, column) {
 //		  var answer, sourceMap;
 //		  sourceMap = getSourceMap(filename);
@@ -6054,7 +6054,7 @@ var CoffeeScript = (function(){
 //		  }
 //		  return _results;
 //		})();
-//		return "" + err.name + ": " + ((_ref = err.message) != null ? _ref : '') + "\n" + (frames.join('\n')) + "\n";
+//		return "" + (err.toString()) + "\n" + (frames.join('\n')) + "\n";
 //	  };
   
 	  return exports;

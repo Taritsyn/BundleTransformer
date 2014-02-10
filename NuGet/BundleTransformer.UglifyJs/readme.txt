@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: UglifyJS 1.8.20
+            README file for Bundle Transformer: UglifyJS 1.8.21
  
    ----------------------------------------------------------------------
 
@@ -25,9 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of UglifyJS version 2.4.12;
-   2. In code generation settings added one new property -
-      `UnescapeRegexps`.
+   1. UglifyJS was updated to commit ef2ef07cbd;
+   2. In compression settings added new property - `KeepFunctionArgs`.
    
    ====================
    POST-INSTALL ACTIONS

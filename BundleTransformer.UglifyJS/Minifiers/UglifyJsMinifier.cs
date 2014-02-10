@@ -134,6 +134,7 @@
 				Loops = compressionConfig.Loops,
 				Unused = compressionConfig.Unused,
 				HoistFunctions = compressionConfig.HoistFunctions,
+				KeepFunctionArgs = compressionConfig.KeepFunctionArgs,
 				HoistVars = compressionConfig.HoistVars,
 				IfReturn = compressionConfig.IfReturn,
 				JoinVars = compressionConfig.JoinVars,
@@ -232,7 +233,7 @@
 
 					try
 					{
-						newContent = jsUglifier.Uglify(content);
+						newContent = jsUglifier.Uglify(content, assetVirtualPath);
 					}
 					catch (JsUglifyingException e)
 					{

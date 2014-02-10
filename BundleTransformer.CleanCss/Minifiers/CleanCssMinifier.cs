@@ -161,7 +161,7 @@
 
 					try
 					{
-						newContent = cssCleaner.Clean(asset.Content, options);
+						newContent = cssCleaner.Clean(asset.Content, assetUrl, options);
 					}
 					catch (CssCleaningException e)
 					{

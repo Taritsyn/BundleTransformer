@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.0.7
+ * Clean-css v2.0.8
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1124,7 +1124,7 @@ var CleanCss = (function(){
 	require['./selectors/optimizer'] = (function () {
 		var Tokenizer = require('./selectors/tokenizer');
 		var PropertyOptimizer = require('./properties/optimizer');
-		
+
 		function Optimizer(data, context, options) {
 		  var specialSelectors = {
 			'*': /\-(moz|ms|o|webkit)\-/,
@@ -1228,7 +1228,7 @@ var CleanCss = (function(){
 				continue;
 
 			  selectors = selector.indexOf(',') > 0 ?
-				[selector].concat(selector.split(',')) :
+				selector.split(',').concat(selector) :
 				[selector];
 
 			  for (var j = 0, m = selectors.length; j < m; j++) {
@@ -1319,9 +1319,8 @@ var CleanCss = (function(){
 		  };
 
 		  var optimize = function(tokens) {
-			var firstRun = true;
 			var noChanges = function() {
-			  return !firstRun &&
+			  return minificationsMade.length > 4 &&
 				minificationsMade[0] === false &&
 				minificationsMade[1] === false;
 			};
@@ -1352,8 +1351,6 @@ var CleanCss = (function(){
 			  if (noChanges())
 				break;
 			  reduceNonAdjacent(tokens);
-
-			  firstRun = false;
 			}
 		  };
 
@@ -1387,7 +1384,7 @@ var CleanCss = (function(){
 			}
 		  };
 		};
-		
+
 		return Optimizer;
 	}).call(this);
 	//#endregion
@@ -1648,14 +1645,9 @@ var CleanCss = (function(){
 			  return match;
 		  });
 
-		  // zero + unit to zero
-		  var units = ['px', 'em', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', '%'];
-		  if ('ie8' != options.compatibility)
-			units.push('rem');
-
-		  replace(new RegExp('(\\s|:|,)0(?:' + units.join('|') + ')', 'g'), '$1' + '0');
-		  replace(new RegExp('(\\s|:|,)(\\d)\\.(\\D)', 'g'), '$1$2$3');
-		  replace(new RegExp('rect\\(0(?:' + units.join('|') + ')', 'g'), 'rect(0');
+		  // minus zero to zero
+		  replace(/(\s|:|,|\()\-0([^\.])/g, '$10$2');
+		  replace(/-0([,\)])/g, '0$1');
 
 		  // zero(s) + value to value
 		  replace(/(\s|:|,)0+([1-9])/g, '$1$2');
@@ -1673,6 +1665,15 @@ var CleanCss = (function(){
 			return (nonZeroPart.length > 0 ? '.' : '') + nonZeroPart + suffix;
 		  });
 
+		  // zero + unit to zero
+		  var units = ['px', 'em', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', '%'];
+		  if ('ie8' != options.compatibility)
+			units.push('rem');
+
+		  replace(new RegExp('(\\s|:|,)\\-?0(?:' + units.join('|') + ')', 'g'), '$1' + '0');
+		  replace(new RegExp('(\\s|:|,)\\-?(\\d)\\.(\\D)', 'g'), '$1$2$3');
+		  replace(new RegExp('rect\\(0(?:' + units.join('|') + ')', 'g'), 'rect(0');
+
 		  // restore % in rgb/rgba and hsl/hsla
 		  replace(/(rgb|rgba|hsl|hsla)\(([^\)]+)\)/g, function(match, colorFunction, colorDef) {
 			var tokens = colorDef.split(',');
@@ -1688,7 +1689,7 @@ var CleanCss = (function(){
 		  });
 
 		  // none to 0
-		  replace(/(border|border-top|border-right|border-bottom|border-left|outline):none/g, '$1:0');
+		  replace(/outline:none/g, 'outline:0');
 
 		  // background:none to background:0 0
 		  replace(/background:(?:none|transparent)([;}])/g, 'background:0 0$1');

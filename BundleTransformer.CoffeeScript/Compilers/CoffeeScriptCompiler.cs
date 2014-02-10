@@ -101,9 +101,10 @@
 		/// "Compiles" CoffeeScript-code to JS-code
 		/// </summary>
 		/// <param name="content">Text content written on CoffeeScript</param>
+		/// <param name="path">Path to CoffeeScript-file</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Translated CoffeeScript-code</returns>
-		public string Compile(string content, CompilationOptions options = null)
+		public string Compile(string content, string path, CompilationOptions options = null)
 		{
 			string newContent;
 			string currentOptionsString = (options != null) ? 
@@ -124,7 +125,7 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new CoffeeScriptCompilingException(FormatErrorDetails(errors[0], content));
+						throw new CoffeeScriptCompilingException(FormatErrorDetails(errors[0], content, path));
 					}
 
 					newContent = json.Value<string>("compiledCode");
@@ -159,10 +160,13 @@
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
+		/// <param name="currentFilePath">Path to current CoffeeScript-file</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, string sourceCode)
+		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, 
+			string currentFilePath)
 		{
 			var message = errorDetails.Value<string>("message");
+			string file = currentFilePath;
 			var lineNumber = errorDetails.Value<int>("lineNumber");
 			var columnNumber = errorDetails.Value<int>("columnNumber");
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode, 
@@ -170,6 +174,10 @@
 
 			var errorMessage = new StringBuilder();
 			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			if (!string.IsNullOrWhiteSpace(file))
+			{
+				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, file);
+			}
 			if (lineNumber > 0)
 			{
 				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
