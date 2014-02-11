@@ -1,8 +1,8 @@
 /*!
-* CSSO (CSS Optimizer) v1.3.10
+* CSSO (CSS Optimizer) v1.3.11
 * http://github.com/css/csso
 *
-* Copyright 2013, Sergey Kryzhanovsky
+* Copyright 2014, Sergey Kryzhanovsky
 * Released under the MIT License
 */
 var CSSO = (function(){
@@ -181,7 +181,7 @@ var CSSO = (function(){
 					if (c === '/' && cn === '*') {
 						parseMLComment(s);
 					} else if (!urlMode && c === '/' && cn === '/') {
-						if (blockMode > 0) parseIdentifier(s); 
+						if (blockMode > 0) parseIdentifier(s);
 						else parseSLComment(s);
 					} else if (c === '"' || c === "'") {
 						parseString(s, c);
@@ -613,8 +613,8 @@ var CSSO = (function(){
 			}
 
 			function getAttrib() {
-				if (checkAttrib1(pos)) return getAttrib1(); 
-				if (checkAttrib2(pos)) return getAttrib2(); 
+				if (checkAttrib1(pos)) return getAttrib1();
+				if (checkAttrib2(pos)) return getAttrib2();
 			}
 
 		//attrselector = (seq('=') | seq('~=') | seq('^=') | seq('$=') | seq('*=') | seq('|=')):x -> [#attrselector, x]
@@ -1352,7 +1352,7 @@ var CSSO = (function(){
 								(tokens[_i].type !== TokenType.DecimalNumber || !wasIdent)
 								) break;
 							else wasIdent = true;
-					}   
+					}
 				}
 
 				if (!wasIdent && tokens[start].type !== TokenType.Asterisk) return fail(tokens[_i]);
@@ -3208,7 +3208,7 @@ var CSSO = (function(){
 
 			if (nr === 'unknown') token[2] = '\n';
 			else {
-				if (!(container[1] === 'atrulerq' && !pr) && !this.issue16(container, i)) {
+				if (!(container[1] === 'atrulerq' && !pr) && !this.issue16(container, i) && !this.issue165(container, pr, nr)) {
 					if (nr !== null && pr !== null) {
 						if (this._cleanWhitespace(nr, false) || this._cleanWhitespace(pr, true)) return null;
 					} else return null;
@@ -3223,6 +3223,11 @@ var CSSO = (function(){
 		// See https://github.com/afelix/csso/issues/16
 		CSSOCompressor.prototype.issue16 = function(container, i) {
 			return (i !== 2 && i !== container.length - 1 && container[i - 1][1] === 'uri');
+		};
+
+		//See https://github.com/css/csso/issues/165
+		CSSOCompressor.prototype.issue165 = function(container, pr, nr) {
+			return container[1] === 'atrulerq' && pr === 'braces' && nr === 'ident';
 		};
 
 		CSSOCompressor.prototype._cleanWhitespace = function(r, left) {
@@ -3678,7 +3683,7 @@ var CSSO = (function(){
 			var vendor = string.charAt(0), i;
 			if (vendor === '-') {
 				if ((i = string.indexOf('-', 2)) !== -1) return string.substr(0, i + 1);
-			} 
+			}
 			return '';
 		};
 
