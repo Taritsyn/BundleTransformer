@@ -917,7 +917,7 @@ var CoffeeScript = (function(){
 		  var octalEsc, quote, string, trimmed;
 		  switch (quote = this.chunk.charAt(0)) {
 			case "'":
-			  string = SIMPLESTR.exec(this.chunk)[0];
+			  string = (SIMPLESTR.exec(this.chunk) || [])[0];
 			  break;
 			case '"':
 			  string = this.balancedString(this.chunk, '"');
@@ -1670,7 +1670,7 @@ var CoffeeScript = (function(){
 	  LINE_BREAK = ['INDENT', 'OUTDENT', 'TERMINATOR'];
 
 	  INDENTABLE_CLOSERS = [')', '}', ']'];
-  
+
 	  return exports;
 	}).call(this);
 	//#endregion

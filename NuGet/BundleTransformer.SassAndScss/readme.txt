@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.20
+          README file for Bundle Transformer: Sass and SCSS 1.8.23
 
    ----------------------------------------------------------------------
 
@@ -23,12 +23,6 @@
    `Microsoft.Dynamic.dll` and `Microsoft.Scripting.dll` were builded 
    from source code of the IronLanguages project
    (http://github.com/IronLanguages/main).
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of Sass version 3.2.14;
-   2. Fixed bug #29 "utf-8 characters in .scss cause execption".
    
    ====================
    POST-INSTALL ACTIONS

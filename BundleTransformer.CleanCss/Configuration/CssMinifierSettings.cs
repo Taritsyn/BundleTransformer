@@ -41,7 +41,7 @@
 		/// <summary>
 		/// Gets or sets a compatibility mode
 		/// </summary>
-		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie8)]
+		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie7)]
 		public CompatibilityMode Compatibility
 		{
 			get { return (CompatibilityMode)this["compatibility"]; }

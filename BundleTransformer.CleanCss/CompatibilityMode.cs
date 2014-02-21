@@ -11,6 +11,11 @@
 		None = 0,
 
 		/// <summary>
+		/// IE7 compatibility mode
+		/// </summary>
+		Ie7,
+
+		/// <summary>
 		/// IE8 compatibility mode
 		/// </summary>
 		Ie8

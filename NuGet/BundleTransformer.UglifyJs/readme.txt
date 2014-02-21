@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: UglifyJS 1.8.21
+            README file for Bundle Transformer: UglifyJS 1.8.23
  
    ----------------------------------------------------------------------
 
@@ -25,8 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. UglifyJS was updated to commit ef2ef07cbd;
-   2. In compression settings added new property - `KeepFunctionArgs`.
+   UglifyJS was updated to commit bf30dc3038.
    
    ====================
    POST-INSTALL ACTIONS

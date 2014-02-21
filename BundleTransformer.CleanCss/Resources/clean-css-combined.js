@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.0.8
+ * Clean-css v2.1.1
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1128,7 +1128,8 @@ var CleanCss = (function(){
 		function Optimizer(data, context, options) {
 		  var specialSelectors = {
 			'*': /\-(moz|ms|o|webkit)\-/,
-			'ie8': /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:not|:target|:visited|:empty|:first\-of|:last|:nth|:only|:root)/
+			'ie8': /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/,
+			'ie7': /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
 		  };
 
 		  var minificationsMade = [];
@@ -1136,14 +1137,46 @@ var CleanCss = (function(){
 		  var propertyOptimizer = new PropertyOptimizer();
 
 		  var cleanUpSelector = function(selectors) {
+			if (selectors.indexOf(',') == -1)
+			  return selectors;
+
 			var plain = [];
-			selectors = selectors.split(',');
+			var cursor = 0;
+			var lastComma = 0;
+			var noBrackets = selectors.indexOf('(') == -1;
+			var withinBrackets = function(idx) {
+			  if (noBrackets)
+				return false;
 
-			for (var i = 0, l = selectors.length; i < l; i++) {
-			  var sel = selectors[i];
+			  var previousOpening = selectors.lastIndexOf('(', idx);
+			  var previousClosing = selectors.lastIndexOf(')', idx);
 
-			  if (plain.indexOf(sel) == -1)
-				plain.push(sel);
+			  if (previousOpening == -1)
+				return false;
+			  if (previousClosing > 0 && previousClosing < idx)
+				return false;
+
+			  return true;
+			};
+
+			while (true) {
+			  var nextComma = selectors.indexOf(',', cursor + 1);
+			  var selector;
+
+			  if (nextComma === -1) {
+				nextComma = selectors.length;
+			  } else if (withinBrackets(nextComma)) {
+				cursor = nextComma + 1;
+				continue;
+			  }
+			  selector = selectors.substring(lastComma, nextComma);
+			  lastComma = cursor = nextComma + 1;
+
+			  if (plain.indexOf(selector) == -1)
+				plain.push(selector);
+
+			  if (nextComma === selectors.length)
+				break;
 			}
 
 			return plain.sort().join(',');
@@ -1667,7 +1700,7 @@ var CleanCss = (function(){
 
 		  // zero + unit to zero
 		  var units = ['px', 'em', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', '%'];
-		  if ('ie8' != options.compatibility)
+		  if (['ie7', 'ie8'].indexOf(options.compatibility) == -1)
 			units.push('rem');
 
 		  replace(new RegExp('(\\s|:|,)\\-?0(?:' + units.join('|') + ')', 'g'), '$1' + '0');
@@ -1722,10 +1755,13 @@ var CleanCss = (function(){
 			  replace(/\}/g, '}' + lineBreak);
 		  } else {
 			replace(function optimizeSelectors() {
+			  var mergeMode = ['ie7', 'ie8'].indexOf(options.compatibility) > -1 ?
+				options.compatibility :
+				'*';
 			  data = new SelectorsOptimizer(data, context, {
 				keepBreaks: options.keepBreaks,
 				lineBreak: lineBreak,
-				selectorsMergeMode: options.compatibility == 'ie8' ? 'ie8' : '*'
+				selectorsMergeMode: mergeMode
 			  }).process();
 			});
 		  }

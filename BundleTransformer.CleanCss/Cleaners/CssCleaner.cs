@@ -225,6 +225,9 @@
 				case CompatibilityMode.None:
 					code = string.Empty;
 					break;
+				case CompatibilityMode.Ie7:
+					code = "ie7";
+					break;
 				case CompatibilityMode.Ie8:
 					code = "ie8";
 					break;

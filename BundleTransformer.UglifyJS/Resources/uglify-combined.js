@@ -3140,6 +3140,10 @@
 				node.mangled_name = name;
 				return true;
 			}
+			if (options.screw_ie8 && node instanceof AST_SymbolCatch) {
+				to_mangle.push(node.definition());
+				return;
+			}
 		});
 		this.walk(tw);
 		to_mangle.forEach(function(def){ def.mangle(options) });

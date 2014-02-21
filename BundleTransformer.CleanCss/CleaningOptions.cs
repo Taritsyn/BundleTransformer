@@ -62,7 +62,7 @@
 			KeepSpecialComments = SpecialCommentsMode.KeepAll;
 			KeepBreaks = false;
 			NoAdvanced = false;
-			Compatibility = CompatibilityMode.Ie8;
+			Compatibility = CompatibilityMode.Ie7;
 			Severity = 0;
 		}
 	}

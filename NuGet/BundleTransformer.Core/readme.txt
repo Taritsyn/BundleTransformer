@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.20
+              README file for Bundle Transformer: Core 1.8.23
 
    ----------------------------------------------------------------------
 
@@ -33,6 +33,12 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of the Microsoft ASP.NET Web Optimization Framework
+   version 1.1.3.
    
    =============
    DOCUMENTATION
