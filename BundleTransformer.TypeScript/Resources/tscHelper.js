@@ -20,7 +20,8 @@ var typeScriptHelper = (function (TypeScript) {
 			generateDeclarationFiles: false,
 			useCaseSensitiveFileResolution: false,
 			gatherDiagnostics: false,
-			codepage: null
+			codepage: null,
+			createFileLog: false
 		}
 		;
 
@@ -122,6 +123,21 @@ var typeScriptHelper = (function (TypeScript) {
 			this.stderr = new NullTextWriter();
 			this.stdout = new NullTextWriter();
 		}
+
+		IoHost.prototype.appendFile = function (path, content) {
+			var key,
+				file
+				;
+
+			key = generateFileCacheItemKey(path);
+			if (typeof this._files[key] !== "undefined") {
+				this._files[key].content += content;
+			}
+			else {
+				file = { "path": path, "content": content };
+				this._files[key] = file;
+			}
+		};
 
 		IoHost.prototype.readFile = function (path) {
 			var key,

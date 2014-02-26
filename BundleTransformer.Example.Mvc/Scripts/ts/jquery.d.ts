@@ -21,9 +21,9 @@ and limitations under the License.
 interface JQueryAjaxSettings {
     accepts?: any;
     async?: boolean;
-    beforeSend? (jqXHR: JQueryXHR, settings: JQueryAjaxSettings);
+    beforeSend? (jqXHR: JQueryXHR, settings: JQueryAjaxSettings): any;
     cache?: boolean;
-    complete? (jqXHR: JQueryXHR, textStatus: string);
+    complete? (jqXHR: JQueryXHR, textStatus: string): any;
     contents?: { [key: string]: any; };
     contentType?: any;
     context?: any;
@@ -44,7 +44,7 @@ interface JQueryAjaxSettings {
     processData?: boolean;
     scriptCharset?: string;
     statusCode?: { [key: string]: any; };
-    success? (data: any, textStatus: string, jqXHR: JQueryXHR);
+    success? (data: any, textStatus: string, jqXHR: JQueryXHR): any;
     timeout?: number;
     traditional?: boolean;
     type?: string;
@@ -58,7 +58,7 @@ interface JQueryAjaxSettings {
     Interface for the jqXHR object
 */
 interface JQueryXHR extends XMLHttpRequest {
-    overrideMimeType();
+    overrideMimeType(): any;
 }
 
 /*
@@ -117,8 +117,8 @@ interface JQueryEventObject extends Event {
     preventDefault(): any;
     relatedTarget: Element;
     result: any;
-    stopImmediatePropagation();
-    stopPropagation();
+    stopImmediatePropagation(): void;
+    stopPropagation(): void;
     pageX: number;
     pageY: number;
     which: number;
@@ -169,13 +169,13 @@ interface JQueryTransport {
 interface JQueryStatic {
 
     // AJAX
-    ajax(settings: JQueryAjaxSettings);
-    ajax(url: string, settings: JQueryAjaxSettings);
+    ajax(settings: JQueryAjaxSettings): JQueryXHR;
+    ajax(url: string, settings: JQueryAjaxSettings): JQueryXHR;
 
-    ajaxPrefilter(dataTypes: string, handler: (opts: any, originalOpts: any, jqXHR: JQueryXHR) => any): any;
     ajaxPrefilter(handler: (opts: any, originalOpts: any, jqXHR: JQueryXHR) => any): any;
+    ajaxPrefilter(dataTypes: string, handler: (opts: any, originalOpts: any, jqXHR: JQueryXHR) => any): any;
 
-    ajaxSetup(options: any);
+    ajaxSetup(options: any): void;
     ajaxTransport(dataType: string, handler: (options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) => JQueryTransport): void;
 
     get(url: string, data?: any, success?: any, dataType?: any): JQueryXHR;
@@ -193,21 +193,21 @@ interface JQueryStatic {
     // Core
     holdReady(hold: boolean): any;
 
+    (): JQuery;
     (selector: string, context?: any): JQuery;
     (element: Element): JQuery;
-    (object: {}): JQuery;
     (elementArray: Element[]): JQuery;
     (object: JQuery): JQuery;
     (func: Function): JQuery;
-    (): JQuery;
+    (object: {}): JQuery;
 
     noConflict(removeAll?: boolean): Object;
 
     when(...deferreds: any[]): JQueryPromise;
 
     // CSS
-    css(e: any, propertyName: string, value?: any);
-    css(e: any, propertyName: any, value?: any);
+    css(e: any, propertyName: string, value?: any): any;
+    css(e: any, propertyName: any, value?: any): any;
     cssHooks: { [key: string]: any; };
 
     // Data
@@ -233,7 +233,7 @@ interface JQueryStatic {
     proxy(context: any, name: string): any;
 
     // Internals
-    error(message: any);
+    error(message: any): void;
 
     // Miscellaneous
     expr: any;
@@ -249,8 +249,8 @@ interface JQueryStatic {
 
     each(collection: any, callback: (indexInArray: any, valueOfElement: any) => any): any;
 
-    extend(target: any, ...objs: any[]): Object;
     extend(deep: boolean, target: any, ...objs: any[]): Object;
+    extend(target: any, ...objs: any[]): Object;
 
     globalEval(code: string): any;
 
@@ -308,33 +308,33 @@ interface JQuery {
 
     // Attributes
     addClass(classNames: string): JQuery;
-    addClass(func: (index: any, currentClass: any) => JQuery);
+    addClass(func: (index: any, currentClass: any) => JQuery): JQuery;
 
     attr(attributeName: string): string;
+    attr(attributeName: string, func: (index: any, attr: any) => any): JQuery;
     attr(attributeName: string, value: any): JQuery;
     attr(map: { [key: string]: any; }): JQuery;
-    attr(attributeName: string, func: (index: any, attr: any) => any): JQuery;
 
     hasClass(className: string): boolean;
 
-    html(htmlString: string): JQuery;
     html(): string;
+    html(htmlString: string): JQuery;
 
     prop(propertyName: string): any;
+    prop(propertyName: string, func: (index: any, oldPropertyValue: any) => any): JQuery;
     prop(propertyName: string, value: any): JQuery;
     prop(map: any): JQuery;
-    prop(propertyName: string, func: (index: any, oldPropertyValue: any) => any): JQuery;
 
     removeAttr(attributeName: any): JQuery;
 
-    removeClass(className?: any): JQuery;
     removeClass(func: (index: any, cls: any) => any): JQuery;
+    removeClass(className?: string): JQuery;
 
     removeProp(propertyName: any): JQuery;
 
-    toggleClass(className: any, swtch?: boolean): JQuery;
-    toggleClass(swtch?: boolean): JQuery;
     toggleClass(func: (index: any, cls: any, swtch: any) => any): JQuery;
+    toggleClass(swtch?: boolean): JQuery;
+    toggleClass(className: any, swtch?: boolean): JQuery;
 
     val(): any;
     val(value: string[]): JQuery;
@@ -355,8 +355,8 @@ interface JQuery {
     innerWidth(): number;
 
     offset(): { top: number; left: number; };
-    offset(coordinates: any): JQuery;
     offset(func: (index: any, coords: any) => any): JQuery;
+    offset(coordinates: any): JQuery;
 
     outerHeight(includeMargin?: boolean): number;
     outerWidth(includeMargin?: boolean): number;
@@ -392,110 +392,133 @@ interface JQuery {
     promise(type?: any, target?: any): JQueryPromise;
 
     // Effects
+    animate(properties: any, options: { duration?: any; easing?: string; complete?: Function; step?: Function; queue?: boolean; specialEasing?: any; }): JQuery;
+    animate(properties: any, duration?: any, easing?: "linear", complete?: Function): JQuery;
+    animate(properties: any, duration?: any, easing?: "swing", complete?: Function): JQuery;
     animate(properties: any, duration?: any, easing?: string, complete?: Function): JQuery;
-    animate(properties: any, options: { duration?: any; easing?: string; complete?: Function; step?: Function; queue?: boolean; specialEasing?: any; });
 
     delay(duration: number, queueName?: string): JQuery;
 
-    fadeIn(duration?: any, callback?: any): JQuery;
-    fadeIn(duration?: any, easing?: string, callback?: any): JQuery;
+    fadeIn(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    fadeIn(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    fadeIn(duration?: any, easing?: string, complete?: Function): JQuery;
+    fadeIn(duration?: any, complete?: Function): JQuery;
 
-    fadeOut(duration?: any, callback?: any): JQuery;
-    fadeOut(duration?: any, easing?: string, callback?: any): JQuery;
 
-    fadeTo(duration: any, opacity: number, callback?: any): JQuery;
-    fadeTo(duration: any, opacity: number, easing?: string, callback?: any): JQuery;
+    fadeOut(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    fadeOut(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    fadeOut(duration?: any, easing?: string, complete?: Function): JQuery;
+    fadeOut(duration?: any, complete?: any): JQuery;
 
-    fadeToggle(duration?: any, easing?: string, callback?: any): JQuery;
+    fadeTo(duration: any, opacity: number, easing?: "linear", complete?: Function): JQuery;
+    fadeTo(duration: any, opacity: number, easing?: "swing", complete?: Function): JQuery;
+    fadeTo(duration: any, opacity: number, easing?: string, complete?: Function): JQuery;
+    fadeTo(duration: any, opacity: number, complete?: Function): JQuery;
+
+    fadeToggle(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    fadeToggle(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    fadeToggle(duration?: any, easing?: string, complete?: Function): JQuery;
 
     finish(queue?: string): JQuery;
 
-    hide(duration?: any, callback?: any): JQuery;
-    hide(duration?: any, easing?: string, callback?: any): JQuery;
+    hide(duration?: any, easing?: "linear", callback?: Function): JQuery;
+    hide(duration?: any, easing?: "swing", callback?: Function): JQuery;
+    hide(duration?: any, easing?: string, callback?: Function): JQuery;
+    hide(duration?: any, callback?: Function): JQuery;
 
-    show(duration?: any, callback?: any): JQuery;
-    show(duration?: any, easing?: string, callback?: any): JQuery;
+    show(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    show(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    show(duration?: any, easing?: string, complete?: Function): JQuery;
+    show(duration?: any, complete?: Function): JQuery;
 
-    slideDown(duration?: any, callback?: any): JQuery;
-    slideDown(duration?: any, easing?: string, callback?: any): JQuery;
+    slideDown(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    slideDown(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    slideDown(duration?: any, easing?: string, complete?: Function): JQuery;
+    slideDown(duration?: any, complete?: Function): JQuery;
 
-    slideToggle(duration?: any, callback?: any): JQuery;
-    slideToggle(duration?: any, easing?: string, callback?: any): JQuery;
+    slideToggle(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    slideToggle(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    slideToggle(duration?: any, easing?: string, complete?: Function): JQuery;
+    slideToggle(duration?: any, complete?: Function): JQuery;
 
-    slideUp(duration?: any, callback?: any): JQuery;
-    slideUp(duration?: any, easing?: string, callback?: any): JQuery;
+    slideUp(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    slideUp(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    slideUp(duration?: any, easing?: string, complete?: Function): JQuery;
+    slideUp(duration?: any, complete?: Function): JQuery;
 
     stop(clearQueue?: boolean, jumpToEnd?: boolean): JQuery;
     stop(queue?: any, clearQueue?: boolean, jumpToEnd?: boolean): JQuery;
 
-    toggle(duration?: any, callback?: any): JQuery;
-    toggle(duration?: any, easing?: string, callback?: any): JQuery;
     toggle(showOrHide: boolean): JQuery;
+    toggle(duration?: any, easing?: "linear", complete?: Function): JQuery;
+    toggle(duration?: any, easing?: "swing", complete?: Function): JQuery;
+    toggle(duration?: any, easing?: string, complete?: Function): JQuery;
+    toggle(duration?: any, complete?: Function): JQuery;
 
     // Events
+    bind(eventType: string, preventBubble: boolean): JQuery;
     bind(eventType: string, eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     bind(eventType: string, eventData: any, preventBubble: boolean): JQuery;
-    bind(eventType: string, preventBubble: boolean): JQuery;
-    bind(...events: any[]);
+    bind(...events: any[]): JQuery;
 
-    blur(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     blur(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    blur(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    change(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     change(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    change(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    click(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     click(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    click(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    dblclick(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     dblclick(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    dblclick(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
     delegate(selector: any, eventType: string, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    focus(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     focus(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    focus(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    focusin(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     focusin(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    focusin(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    focusout(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     focusout(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    focusout(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
     hover(handlerIn: (eventObject: JQueryEventObject) => any, handlerOut: (eventObject: JQueryEventObject) => any): JQuery;
     hover(handlerInOut: (eventObject: JQueryEventObject) => any): JQuery;
 
-    keydown(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     keydown(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    keydown(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    keypress(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     keypress(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    keypress(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    keyup(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     keyup(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    keyup(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mousedown(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mousedown(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mousedown(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mouseevent(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseevent(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseevent(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mouseenter(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseenter(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseenter(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mouseleave(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseleave(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseleave(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mousemove(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mousemove(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mousemove(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mouseout(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseout(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseout(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mouseover(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseover(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseover(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
-    mouseup(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
     mouseup(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    mouseup(eventData: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
 
     off(events?: string, selector?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     off(eventsMap: { [key: string]: any; }, selector?: any): JQuery;
@@ -508,17 +531,17 @@ interface JQuery {
 
     ready(handler: any): JQuery;
 
-    resize(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     resize(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    resize(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    scroll(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     scroll(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    scroll(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    select(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     select(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    select(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
-    submit(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
     submit(handler: (eventObject: JQueryEventObject) => any): JQuery;
+    submit(eventData?: any, handler?: (eventObject: JQueryEventObject) => any): JQuery;
 
     trigger(eventType: string, ...extraParameters: any[]): JQuery;
     trigger(event: JQueryEventObject): JQuery;
@@ -541,16 +564,16 @@ interface JQuery {
     pushStack(elements: any[], name: any, arguments: any): JQuery;
 
     // Manipulation
+    after(func: (index: any) => any): JQuery;
     after(...content: any[]): JQuery;
-    after(func: (index: any) => any);
 
+    append(func: (index: any, html: any) => any): JQuery;
     append(...content: any[]): JQuery;
-    append(func: (index: any, html: any) => any);
 
     appendTo(target: any): JQuery;
 
+    before(func: (index: any) => any): JQuery;
     before(...content: any[]): JQuery;
-    before(func: (index: any) => any);
 
     clone(withDataAndEvents?: boolean, deepWithDataAndEvents?: boolean): JQuery;
 
@@ -561,8 +584,8 @@ interface JQuery {
     insertAfter(target: any): JQuery;
     insertBefore(target: any): JQuery;
 
-    prepend(...content: any[]): JQuery;
     prepend(func: (index: any, html: any) => any): JQuery;
+    prepend(...content: any[]): JQuery;
 
     prependTo(target: any): JQuery;
 
@@ -579,13 +602,13 @@ interface JQuery {
 
     unwrap(): JQuery;
 
-    wrap(wrappingElement: any): JQuery;
     wrap(func: (index: any) => any): JQuery;
+    wrap(wrappingElement: any): JQuery;
 
     wrapAll(wrappingElement: any): JQuery;
 
-    wrapInner(wrappingElement: any): JQuery;
     wrapInner(func: (index: any) => any): JQuery;
+    wrapInner(wrappingElement: any): JQuery;
 
     // Miscellaneous
     each(func: (index: any, elem: Element) => any): JQuery;
@@ -600,9 +623,9 @@ interface JQuery {
 
     // Traversing
     add(selector: string, context?: any): JQuery;
-    add(...elements: any[]): JQuery;
     add(html: string): JQuery;
     add(obj: JQuery): JQuery;
+    add(...elements: any[]): JQuery;
 
     addBack(selector?: any): JQuery;
 
@@ -622,8 +645,8 @@ interface JQuery {
 
     filter(selector: string): JQuery;
     filter(func: (index: any) => any): JQuery;
-    filter(element: any): JQuery;
     filter(obj: JQuery): JQuery;
+    filter(element: any): JQuery;
 
     find(selector: string): JQuery;
     find(element: any): JQuery;
@@ -636,8 +659,8 @@ interface JQuery {
 
     is(selector: string): boolean;
     is(func: (index: any) => any): boolean;
-    is(element: any): boolean;
     is(obj: JQuery): boolean;
+    is(element: any): boolean;
 
     last(): JQuery;
 
@@ -652,8 +675,8 @@ interface JQuery {
 
     not(selector: string): JQuery;
     not(func: (index: any) => any): JQuery;
-    not(element: any): JQuery;
     not(obj: JQuery): JQuery;
+    not(element: any): JQuery;
 
     offsetParent(): JQuery;
 
