@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.1.1
+ * Clean-css v2.1.3
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -361,7 +361,7 @@ var CleanCss = (function(){
 	
 	//#region URL: ./properties/optimizer
 	require['./properties/optimizer'] = (function () {
-		function Optimizer() {
+		function Optimizer(compatibility) {
 		  var overridable = {
 			'animation-delay': ['animation'],
 			'animation-direction': ['animation'],
@@ -459,6 +459,8 @@ var CleanCss = (function(){
 			'-webkit-transition-timing-function': ['-webkit-transition']
 		  };
 
+		  var IE_BACKSLASH_HACK = '\\9';
+
 		  var overrides = {};
 		  for (var granular in overridable) {
 			for (var i = 0; i < overridable[granular].length; i++) {
@@ -476,7 +478,7 @@ var CleanCss = (function(){
 			var tokens = body.split(';');
 			var keyValues = [];
 
-			if (tokens.length < 2)
+			if (tokens.length === 0 || (tokens.length == 1 && tokens[0].indexOf(IE_BACKSLASH_HACK) == -1))
 			  return;
 
 			for (var i = 0, l = tokens.length; i < l; i++) {
@@ -488,7 +490,8 @@ var CleanCss = (function(){
 			  keyValues.push([
 				token.substring(0, firstColon),
 				token.substring(firstColon + 1),
-				token.indexOf('!important') > -1
+				token.indexOf('!important') > -1,
+				token.indexOf(IE_BACKSLASH_HACK, firstColon + 1) > 0
 			  ]);
 			}
 
@@ -527,10 +530,14 @@ var CleanCss = (function(){
 			  var token = tokens[i];
 			  var property = token[0];
 			  var isImportant = token[2];
+			  var isIEHack = token[3];
 			  var _property = (property == '-ms-filter' || property == 'filter') ?
 				(lastProperty == 'background' || lastProperty == 'background-image' ? lastProperty : property) :
 				property;
 			  var toOverridePosition = 0;
+
+			  if (!compatibility && isIEHack)
+				continue;
 
 			  // comment is necessary - we assume that if two properties are one after another
 			  // then it is intentional way of redefining property which may not be widely supported
@@ -543,8 +550,15 @@ var CleanCss = (function(){
 				  if (toOverridePosition == -1)
 					break;
 
-				  if (merged[toOverridePosition][2] && !isImportant)
+				  var lastToken = merged[toOverridePosition];
+				  var wasImportant = lastToken[2];
+				  var wasIEHack = lastToken[3];
+
+				  if (wasImportant && !isImportant)
 					continue tokensLoop;
+
+				  if (compatibility && !wasIEHack && isIEHack)
+					break;
 
 				  merged.splice(toOverridePosition, 1);
 				  properties.splice(toOverridePosition, 1);
@@ -1134,7 +1148,7 @@ var CleanCss = (function(){
 
 		  var minificationsMade = [];
 
-		  var propertyOptimizer = new PropertyOptimizer();
+		  var propertyOptimizer = new PropertyOptimizer(options.compatibility);
 
 		  var cleanUpSelector = function(selectors) {
 			if (selectors.indexOf(',') == -1)
@@ -1183,7 +1197,7 @@ var CleanCss = (function(){
 		  };
 
 		  var isSpecial = function(selector) {
-			return specialSelectors[options.selectorsMergeMode || '*'].test(selector);
+			return specialSelectors[options.compatibility || '*'].test(selector);
 		  };
 
 		  var removeDuplicates = function(tokens) {
@@ -1247,108 +1261,152 @@ var CleanCss = (function(){
 		  };
 
 		  var reduceNonAdjacent = function(tokens) {
-			var matched = {};
-			var matchedMoreThanOnce = [];
-			var partiallyReduced = [];
-			var reduced = false;
-			var token, selector, selectors;
+			var candidates = {};
+			var moreThanOnce = [];
 
-			for (var i = 0, l = tokens.length; i < l; i++) {
-			  token = tokens[i];
-			  selector = token.selector;
+			for (var i = tokens.length - 1; i >= 0; i--) {
+			  var token = tokens[i];
 
 			  if (typeof token == 'string' || token.block)
 				continue;
 
-			  selectors = selector.indexOf(',') > 0 ?
-				selector.split(',').concat(selector) :
-				[selector];
+			  var complexSelector = token.selector;
+			  var selectors = complexSelector.indexOf(',') > -1 && !isSpecial(complexSelector) ?
+				complexSelector.split(',').concat(complexSelector) : // simplification, as :not() can have commas too
+				[complexSelector];
 
 			  for (var j = 0, m = selectors.length; j < m; j++) {
-				var sel = selectors[j];
-				var alreadyMatched = matched[sel];
-				if (alreadyMatched) {
-				  if (alreadyMatched.length == 1)
-					matchedMoreThanOnce.push(sel);
-				  alreadyMatched.push(i);
-				} else {
-				  matched[sel] = [i];
-				}
+				var selector = selectors[j];
+
+				if (!candidates[selector])
+				  candidates[selector] = [];
+				else
+				  moreThanOnce.push(selector);
+
+				candidates[selector].push({
+				  where: i,
+				  partial: selector != complexSelector
+				});
 			  }
 			}
 
-			matchedMoreThanOnce.forEach(function(selector) {
-			  var matchPositions = matched[selector];
-			  var bodies = [];
-			  var joinsAt = [];
-			  var j;
+			var reducedInSimple = _reduceSimpleNonAdjacentCases(tokens, moreThanOnce, candidates);
+			var reducedInComplex = _reduceComplexNonAdjacentCases(tokens, candidates);
 
-			  for (j = 0, m = matchPositions.length; j < m; j++) {
-				var body = tokens[matchPositions[j]].body;
-				bodies.push(body);
-				joinsAt.push((joinsAt[j - 1] || 0) + body.split(';').length);
-			  }
+			minificationsMade.unshift(reducedInSimple || reducedInComplex);
+		  };
 
-			  var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt);
-			  var optimizedTokens = optimizedBody.split(';');
+		  var _reduceSimpleNonAdjacentCases = function(tokens, matches, positions) {
+			var reduced = false;
 
-			  j = optimizedTokens.length - 1;
-			  var currentMatch = matchPositions.length - 1;
+			for (var i = 0, l = matches.length; i < l; i++) {
+			  var selector = matches[i];
+			  var data = positions[selector];
 
-			  while (currentMatch >= 0) {
-				if (bodies[currentMatch].indexOf(optimizedTokens[j]) > -1 && j > -1) {
-				  j -= 1;
-				  continue;
+			  if (data.length < 2)
+				continue;
+
+			  /* jshint loopfunc: true */
+			  _reduceSelector(tokens, selector, data, {
+				filterOut: function(idx, bodies) {
+				  return data[idx].partial && bodies.length === 0;
+				},
+				callback: function(token, newBody, processedCount, tokenIdx) {
+				  if (!data[processedCount - tokenIdx - 1].partial) {
+					token.body = newBody.join(';');
+					reduced = true;
+				  }
 				}
-
-				var tokenIndex = matchPositions[currentMatch];
-				var token = tokens[tokenIndex];
-				var newBody = optimizedTokens.splice(j + 1);
-				var reducedBody = [];
-				for (var k = 0, n = newBody.length; k < n; k++) {
-				  if (newBody[k].length > 0)
-					reducedBody.push(newBody[k]);
-				}
-
-				if (token.selector == selector) {
-				  var joinedBody = reducedBody.join(';');
-				  reduced = reduced || (token.body != joinedBody);
-				  token.body = joinedBody;
-				} else {
-				  token._partials = token._partials || [];
-				  token._partials.push(reducedBody.join(';'));
-
-				  if (partiallyReduced.indexOf(tokenIndex) == -1)
-					partiallyReduced.push(tokenIndex);
-				}
-
-				currentMatch -= 1;
-			  }
-			});
-
-			// process those tokens which were partially reduced
-			// i.e. at least one of token's selectors saw reduction
-			// if all selectors were reduced to same value we can override it
-			for (i = 0, l = partiallyReduced.length; i < l; i++) {
-			  token = tokens[partiallyReduced[i]];
-
-			  if (token.body != token._partials[0] && token._partials.length == token.selector.split(',').length) {
-				var newBody = token._partials[0];
-				for (var k = 1, n = token._partials.length; k < n; k++) {
-				  if (token._partials[k] != newBody)
-					break;
-				}
-
-				if (k == n) {
-				  token.body = newBody;
-				  reduced = reduced || true;
-				}
-			  }
-
-			  delete token._partials;
+			  });
 			}
 
-			minificationsMade.unshift(reduced);
+			return reduced;
+		  };
+
+		  var _reduceComplexNonAdjacentCases = function(tokens, positions) {
+			var reduced = false;
+
+			allSelectors:
+			for (var complexSelector in positions) {
+			  if (complexSelector.indexOf(',') == -1) // simplification, as :not() can have commas too
+				continue;
+
+			  var intoPosition = positions[complexSelector].pop().where;
+			  var intoToken = tokens[intoPosition];
+
+			  var selectors = isSpecial(complexSelector) ?
+				[complexSelector] :
+				complexSelector.split(',');
+			  var reducedBodies = [];
+
+			  for (var j = 0, m = selectors.length; j < m; j++) {
+				var selector = selectors[j];
+				var data = positions[selector];
+
+				if (data.length < 2)
+				  continue allSelectors;
+
+				/* jshint loopfunc: true */
+				_reduceSelector(tokens, selector, data, {
+				  filterOut: function(idx) {
+					return data[idx].where < intoPosition;
+				  },
+				  callback: function(token, newBody, processedCount, tokenIdx) {
+					if (tokenIdx === 0)
+					  reducedBodies.push(newBody.join(';'));
+				  }
+				});
+
+				if (reducedBodies[reducedBodies.length - 1] != reducedBodies[0])
+				  continue allSelectors;
+			  }
+
+			  intoToken.body = reducedBodies[0];
+			  reduced = true;
+			}
+
+			return reduced;
+		  };
+
+		  var _reduceSelector = function(tokens, selector, data, options) {
+			var bodies = [];
+			var joinsAt = [];
+			var processedTokens = [];
+
+			for (var j = data.length - 1, m = 0; j >= 0; j--) {
+			  if (options.filterOut(j, bodies))
+				continue;
+
+			  var where = data[j].where;
+			  var token = tokens[where];
+			  var body = token.body;
+			  bodies.push(body);
+			  processedTokens.push(where);
+			}
+
+			for (j = 0, m = bodies.length; j < m; j++) {
+			  if (bodies[j].length > 0)
+				joinsAt.push((joinsAt[j - 1] || 0) + bodies[j].split(';').length);
+			}
+
+			var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt);
+			var optimizedProperties = optimizedBody.split(';');
+
+			var processedCount = processedTokens.length;
+			var propertyIdx = optimizedProperties.length - 1;
+			var tokenIdx = processedCount - 1;
+
+			while (tokenIdx >= 0) {
+			  if ((tokenIdx === 0 || bodies[tokenIdx].indexOf(optimizedProperties[propertyIdx]) > -1) && propertyIdx > -1) {
+				propertyIdx--;
+				continue;
+			  }
+
+			  var newBody = optimizedProperties.splice(propertyIdx + 1);
+			  options.callback(tokens[processedTokens[tokenIdx]], newBody, processedCount, tokenIdx);
+
+			  tokenIdx--;
+			}
 		  };
 
 		  var optimize = function(tokens) {
@@ -1455,11 +1513,6 @@ var CleanCss = (function(){
 //		  //active by default
 //		  if (undefined === options.processImport)
 //			options.processImport = true;
-
-//		  if (options.selectorsMergeMode) {
-//			console.warn('selectorsMergeMode is deprecated and will be removed in clean-css 2.2. Please use compatibility: \'%s\' option instead.', options.selectorsMergeMode);
-//			options.compatibility = options.selectorsMergeMode;
-//		  }
 
 		  this.options = options;
 //		  this.stats = {};
@@ -1755,13 +1808,10 @@ var CleanCss = (function(){
 			  replace(/\}/g, '}' + lineBreak);
 		  } else {
 			replace(function optimizeSelectors() {
-			  var mergeMode = ['ie7', 'ie8'].indexOf(options.compatibility) > -1 ?
-				options.compatibility :
-				'*';
 			  data = new SelectorsOptimizer(data, context, {
 				keepBreaks: options.keepBreaks,
 				lineBreak: lineBreak,
-				selectorsMergeMode: mergeMode
+				compatibility: options.compatibility
 			  }).process();
 			});
 		  }
