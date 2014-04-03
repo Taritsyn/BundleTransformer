@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript 1.8.24
+           README file for Bundle Transformer: TypeScript 1.8.28
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains translator-adapter 
    `TypeScriptTranslator` (supports TypeScript
-   (http://www.typescriptlang.org) version 1.0RC). This adapter makes 
+   (http://www.typescriptlang.org) version 1.0.0). This adapter makes 
    translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text 
    output of translated TypeScript-asset.
@@ -30,8 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 1.0RC (please note: The 1.0RC
-   release is also called '0.9.7').
+   Added support of TypeScript version 1.0.0.
 
    ====================
    POST-INSTALL ACTIONS
