@@ -32,7 +32,7 @@
 		/// <summary>
 		/// Name of file, which contains a Sass library
 		/// </summary>
-		const string SASS_LIBRARY_FILE_NAME = "sass-combined.rb";
+		const string SASS_LIBRARY_FILE_NAME = "sass-combined.min.rb";
 
 		/// <summary>
 		/// Name of folder, which contains a IronRuby library
@@ -50,19 +50,14 @@
 		private readonly string _defaultOptionsString;
 
 		/// <summary>
-		/// Script engine
-		/// </summary>
-		private ScriptEngine _scriptEngine;
-
-		/// <summary>
-		/// Script scope
-		/// </summary>
-		private ScriptScope _scriptScope;
-
-		/// <summary>
 		/// Resource redirection platform adaptation layer
 		/// </summary>
 		private ResourceRedirectionPlatformAdaptationLayer _platformAdaptationLayer;
+
+		/// <summary>
+		/// Script engine
+		/// </summary>
+		private ScriptEngine _scriptEngine;
 
 		/// <summary>
 		/// Sass-engine
@@ -127,9 +122,10 @@
 						Assembly.GetExecutingAssembly()),
 					SourceCodeKind.File);
 
-				_scriptScope = _scriptEngine.CreateScope();
-				sassLibrary.Execute(_scriptScope);
-				_sassEngine = _scriptScope.Engine.Runtime.Globals.GetVariable("Sass");
+				ScriptScope scriptScope = _scriptEngine.CreateScope();
+				sassLibrary.Execute(scriptScope);
+
+				_sassEngine = scriptScope.Engine.Runtime.Globals.GetVariable("Sass");
 
 				_initialized = true;
 			}

@@ -5,7 +5,7 @@
 	/// <summary>
 	/// CSS node match
 	/// </summary>
-	internal sealed class CssNodeMatch : AssetNodeMatchBase
+	public sealed class CssNodeMatch : AssetNodeMatchBase
 	{
 		/// <summary>
 		/// Gets a type of CSS-node

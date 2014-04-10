@@ -1374,6 +1374,11 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to enable usual minification</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="ejectCharset" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to eject the `@charset` rules before minification</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /WebGrease settings -->
 	

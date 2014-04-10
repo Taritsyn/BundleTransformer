@@ -982,7 +982,6 @@ class Pathname    # * Dir *
   end
 end
 
-
 class Pathname    # * Find *
   #
   # Pathname#find is an iterator to traverse a directory tree in a depth first
@@ -1004,7 +1003,8 @@ class Pathname    # * Find *
   end
 end
 
-
+#BT
+=begin
 class Pathname    # * FileUtils *
   # See <tt>FileUtils.mkpath</tt>.  Creates a full path, including any
   # intermediate directories that don't yet exist.
@@ -1023,6 +1023,7 @@ class Pathname    # * FileUtils *
     nil
   end
 end
+=end
 
 
 class Pathname    # * mixed *

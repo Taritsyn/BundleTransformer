@@ -3186,10 +3186,8 @@ var CoffeeScript = (function(){
 	  exports.Return = Return = (function(_super) {
 		__extends(Return, _super);
 
-		function Return(expr) {
-		  if (expr && !expr.unwrap().isUndefined) {
-			this.expression = expr;
-		  }
+		function Return(expression) {
+		  this.expression = expression;
 		}
 
 		Return.prototype.children = ['expression'];

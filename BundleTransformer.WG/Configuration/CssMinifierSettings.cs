@@ -16,5 +16,15 @@
 			get { return (bool)this["shouldMinify"]; }
 			set { this["shouldMinify"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to eject the <code>@charset</code> rules before minification
+		/// </summary>
+		[ConfigurationProperty("ejectCharset", DefaultValue = true)]
+		public bool EjectCharset
+		{
+			get { return (bool)this["ejectCharset"]; }
+			set { this["ejectCharset"] = value; }
+		}
 	}
 }

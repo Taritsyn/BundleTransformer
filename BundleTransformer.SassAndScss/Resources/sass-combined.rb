@@ -1,11 +1,12 @@
 #############################################################################
-# Sass v3.2.14
+# Sass v3.2.15
 # http://sass-lang.com
 #
 # Copyright 2006-2014, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
 # Released under the MIT License
 #############################################################################
 
+#region URL: ./sass.rb
 dir = File.dirname(__FILE__)
 $LOAD_PATH.unshift dir unless $LOAD_PATH.include?(dir)
 
@@ -14,18 +15,21 @@ $LOAD_PATH.unshift dir unless $LOAD_PATH.include?(dir)
 # even if there's some crazy autoload stuff going on.
 SASS_BEGUN_TO_LOAD = true unless defined?(SASS_BEGUN_TO_LOAD)
 
-require 'date'
+#region URL: ./sass/version.rb
+#BT require 'date'
 
 # This is necessary for loading Sass when Haml is required in Rails 3.
 # Once the split is complete, we can remove it.
-#RG require File.dirname(__FILE__) + '/../sass'
-#RG require 'erb'
+#BT require File.dirname(__FILE__) + '/../sass'
+#region URL: ./sass/util.rb
+#BT require 'erb'
 require 'set'
 require 'enumerator'
 require 'stringio'
 require 'rbconfig'
-#RG require 'thread'
+#BT require 'thread'
 
+#region URL: ./sass/root.rb
 module Sass
   # The root directory of the Sass source tree.
   # This may be overridden by the package manager
@@ -33,7 +37,9 @@ module Sass
   # @api public
   ROOT_DIR = File.expand_path(File.join(__FILE__, "../../.."))
 end
+#endregion
 
+#region URL: ./sass/util/subset_map.rb
 module Sass
   module Util
     # A map from sets to values.
@@ -141,6 +147,7 @@ module Sass
     end
   end
 end
+#endregion
 
 module Sass
   # A module containing various useful functions.
@@ -1003,6 +1010,8 @@ MSG
       end
     end
 
+#BT
+=begin
     # This creates a temp file and yields it for writing. When the
     # write is complete, the file is moved into the desired location.
     # The atomicity of this operation is provided by the filesystem's
@@ -1025,6 +1034,7 @@ MSG
       tmpfile.close if tmpfile
       tmpfile.unlink if tmpfile
     end
+=end
 
     private
 
@@ -1061,11 +1071,13 @@ MSG
   end
 end
 
+#region URL: ./sass/util/multibyte_string_scanner.rb
 require 'strscan'
 
-if Sass::Util.ruby1_8?
+#BT if Sass::Util.ruby1_8?
   Sass::Util::MultibyteStringScanner = StringScanner
-else
+#BT else
+=begin
   if Sass::Util.rbx?
     # Rubinius's StringScanner class implements some of its methods in terms of
     # others, which causes us to double-count bytes in some cases if we do
@@ -1215,8 +1227,13 @@ else
       str
     end
   end
-end
+=end
+#BT end
+#endregion
+#endregion
 
+#BT
+=begin
 module Sass
   # Handles Sass version-reporting.
   # Sass not only reports the standard three version numbers,
@@ -1262,12 +1279,12 @@ module Sass
     def version
       return @@version if defined?(@@version)
 
-	  #RG numbers = File.read(scope('VERSION')).strip.split('.').
-      numbers = '3.2.9'.strip.split('.').
+      #BT numbers = File.read(scope('VERSION')).strip.split('.').
+	  numbers = '3.2.15'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
-      #RG name = File.read(scope('VERSION_NAME')).strip
+      #BT name = File.read(scope('VERSION_NAME')).strip
       name = 'Media Mark'.strip
-      @@version = {
+	  @@version = {
         :major => numbers[0],
         :minor => numbers[1],
         :teeny => numbers[2],
@@ -1338,6 +1355,8 @@ module Sass
   # @api public
   VERSION = version[:string] unless defined?(Sass::VERSION)
 end
+=end
+#endregion
 
 # The module that contains everything Sass-related:
 #
@@ -1418,6 +1437,7 @@ module Sass
   end
 end
 
+#region URL: ./sass/logger.rb
 module Sass::Logger
 
 end
@@ -1511,9 +1531,14 @@ module Sass
 
   self.logger = Sass::Logger::Base.new
 end
+#endregion
 
+#region URL: ./sass/engine.rb
 require 'digest/sha1'
 
+#BT
+=begin
+#region URL: ./sass/cache_stores.rb
 module Sass
   # Sass cache stores are in charge of storing cached information,
   # especially parse trees for Sass documents.
@@ -1523,6 +1548,7 @@ module Sass
   end
 end
 
+#region URL: ./sass/cache_stores/base.rb
 module Sass
   module CacheStores
     # An abstract base class for backends for the Sass cache.
@@ -1611,6 +1637,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/cache_stores/filesystem.rb
 require 'fileutils'
 
 module Sass
@@ -1671,6 +1700,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/cache_stores/memory.rb
 module Sass
   module CacheStores
     # A backend for the Sass cache using in-process memory.
@@ -1718,6 +1750,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/cache_stores/chain.rb
 module Sass
   module CacheStores
     # A meta-cache that chains multiple caches together.
@@ -1751,6 +1786,11 @@ module Sass
     end
   end
 end
+#endregion
+=end
+#endregion
+
+#region URL: ./sass/tree/node.rb
 module Sass
   # A namespace for nodes in the Sass parse tree.
   #
@@ -1947,6 +1987,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/root_node.rb
 module Sass
   module Tree
     # A static node that is the root node of the Sass document.
@@ -1975,6 +2018,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/rule_node.rb
 require 'pathname'
 require 'uri'
 
@@ -2086,8 +2132,8 @@ module Sass::Tree
     #
     # @return [{#to_s => #to_s}]
     def debug_info
+      #BT {:filename => filename && ("file://" + URI.escape(File.expand_path(filename))),
       {:filename => filename && ("file://" + URI.escape(filename)),
-      #RG {:filename => filename && ("file://" + URI.escape(File.expand_path(filename))),
        :line => self.line}
     end
 
@@ -2108,7 +2154,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/comment_node.rb
 module Sass::Tree
   # A static node representing a Sass comment (silent or loud).
   #
@@ -2189,6 +2237,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/prop_node.rb
 module Sass::Tree
   # A static node reprenting a CSS property.
   #
@@ -2341,6 +2392,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/directive_node.rb
 module Sass::Tree
   # A static node representing an unproccessed Sass `@`-directive.
   # Directives known to Sass, like `@for` and `@debug`,
@@ -2383,6 +2437,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/media_node.rb
 module Sass::Tree
   # A static node representing a `@media` rule.
   # `@media` rules behave differently from other directives
@@ -2441,6 +2498,9 @@ module Sass::Tree
     def bubbles?; true; end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/supports_node.rb
 module Sass::Tree
   # A static node representing a `@supports` rule.
   # `@supports` rules behave differently from other directives
@@ -2492,6 +2552,9 @@ module Sass::Tree
     def bubbles?; true; end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/css_import_node.rb
 module Sass::Tree
   # A node representing an `@import` rule that's importing plain CSS.
   #
@@ -2552,6 +2615,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/variable_node.rb
 module Sass
   module Tree
     # A dynamic node representing a variable definition.
@@ -2582,6 +2648,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/mixin_def_node.rb
 module Sass
   module Tree
     # A dynamic node representing a mixin definition.
@@ -2620,7 +2689,9 @@ module Sass
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/mixin_node.rb
 module Sass::Tree
   # A static node representing a mixin include.
   # When in a static tree, the sole purpose is to wrap exceptions
@@ -2658,7 +2729,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/trace_node.rb
 module Sass::Tree
   # A solely static node left over after a mixin include or @content has been performed.
   # Its sole purpose is to wrap exceptions to add to the backtrace.
@@ -2689,6 +2762,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/content_node.rb
 module Sass
   module Tree
     # A node representing the placement within a mixin of the include statement's content.
@@ -2698,6 +2774,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/function_node.rb
 module Sass
   module Tree
     # A dynamic node representing a function definition.
@@ -2732,6 +2811,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/return_node.rb
 module Sass
   module Tree
     # A dynamic node representing returning from a function.
@@ -2750,7 +2832,9 @@ module Sass
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/extend_node.rb
 module Sass::Tree
   # A static node reprenting an `@extend` directive.
   #
@@ -2785,7 +2869,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/if_node.rb
 module Sass::Tree
   # A dynamic node representing a Sass `@if` statement.
   #
@@ -2836,7 +2922,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/while_node.rb
 module Sass::Tree
   # A dynamic node representing a Sass `@while` loop.
   #
@@ -2853,7 +2941,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/for_node.rb
 module Sass::Tree
   # A dynamic node representing a Sass `@for` loop.
   #
@@ -2888,7 +2978,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
 
+#region URL: ./sass/tree/each_node.rb
 module Sass::Tree
   # A dynamic node representing a Sass `@each` loop.
   #
@@ -2911,6 +3003,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/debug_node.rb
 module Sass
   module Tree
     # A dynamic node representing a Sass `@debug` statement.
@@ -2929,6 +3024,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/warn_node.rb
 module Sass
   module Tree
     # A dynamic node representing a Sass `@warn` statement.
@@ -2947,6 +3045,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/import_node.rb
 module Sass
   module Tree
     # A static node that wraps the {Sass::Tree} for an `@import`ed file.
@@ -3022,6 +3123,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/charset_node.rb
 module Sass::Tree
   # A static node representing an unproccessed Sass `@charset` directive.
   #
@@ -3044,6 +3148,9 @@ module Sass::Tree
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/base.rb
 # Visitors are used to traverse the Sass parse tree.
 # Visitors should extend {Visitors::Base},
 # which provides a small amount of scaffolding for traversal.
@@ -3119,6 +3226,9 @@ module Sass::Tree::Visitors
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/perform.rb
 # A visitor for converting a dynamic Sass tree into a static Sass tree.
 class Sass::Tree::Visitors::Perform < Sass::Tree::Visitors::Base
   # @param root [Tree::Node] The root node of the tree to visit.
@@ -3565,6 +3675,9 @@ class Sass::Tree::Visitors::Perform < Sass::Tree::Visitors::Base
     raise Sass::SyntaxError.new(msg)
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/cssize.rb
 # A visitor for converting a static Sass tree into a static CSS tree.
 class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
   # @param root [Tree::Node] The root node of the tree to visit.
@@ -3806,6 +3919,9 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
     true
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/extend.rb
 # A visitor for performing selector inheritance on a static CSS tree.
 #
 # Destructively modifies the tree.
@@ -3874,6 +3990,9 @@ WARN
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/convert.rb
 # A visitor for converting a Sass tree into a source string.
 class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
   # Runs the visitor on a tree.
@@ -4190,6 +4309,9 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
     end
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/to_css.rb
 # A visitor for converting a Sass tree into CSS.
 class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
   protected
@@ -4410,8 +4532,8 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
         ])
       prop = Sass::Tree::PropNode.new([""], Sass::Script::String.new(''), :new)
       prop.resolved_name = "font-family"
-	  prop.resolved_value = !(v =~ /^\d+$/).nil? ? ("\\00003" + v) : Sass::SCSS::RX.escape_ident(v.to_s)
-	  #RG prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
+      #BT prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
+      prop.resolved_value = !(v =~ /^\d+$/).nil? ? ("\\00003" + v) : Sass::SCSS::RX.escape_ident(v.to_s)
       rule << prop
       node << rule
     end
@@ -4419,6 +4541,9 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
     node
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/deep_copy.rb
 # A visitor for copying the full structure of a Sass tree.
 class Sass::Tree::Visitors::DeepCopy < Sass::Tree::Visitors::Base
   protected
@@ -4521,6 +4646,9 @@ class Sass::Tree::Visitors::DeepCopy < Sass::Tree::Visitors::Base
     yield
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/set_options.rb
 # A visitor for setting options on the Sass tree
 class Sass::Tree::Visitors::SetOptions < Sass::Tree::Visitors::Base
   # @param root [Tree::Node] The root node of the tree to visit.
@@ -4646,6 +4774,9 @@ class Sass::Tree::Visitors::SetOptions < Sass::Tree::Visitors::Base
     yield
   end
 end
+#endregion
+
+#region URL: ./sass/tree/visitors/check_nesting.rb
 # A visitor for checking that all nodes are properly nested.
 class Sass::Tree::Visitors::CheckNesting < Sass::Tree::Visitors::Base
   protected
@@ -4793,6 +4924,10 @@ class Sass::Tree::Visitors::CheckNesting < Sass::Tree::Visitors::Base
   end
 end
 
+#endregion
+
+#region URL: ./sass/selector.rb
+#region URL: ./sass/selector/simple.rb
 module Sass
   module Selector
     # The abstract superclass for simple selectors
@@ -4912,6 +5047,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/selector/abstract_sequence.rb
 module Sass
   module Selector
     # The abstract parent class of the various selector sequence classes.
@@ -5006,6 +5144,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/selector/comma_sequence.rb
 module Sass
   module Selector
     # A comma-separated sequence of selectors.
@@ -5098,6 +5239,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/selector/sequence.rb
 module Sass
   module Selector
     # An operator-separated sequence of
@@ -5605,6 +5749,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/selector/simple_sequence.rb
 module Sass
   module Selector
     # A unseparated sequence of selectors
@@ -5686,13 +5833,16 @@ module Sass
         # Parent selector only appears as the first selector in the sequence
         return [self] unless @members.first.is_a?(Parent)
 
-        return super_seq.members if @members.size == 1
-        unless super_seq.members.last.is_a?(SimpleSequence)
+        members = super_seq.members.dup
+        newline = members.pop if members.last == "\n"
+        return members if @members.size == 1
+        unless members.last.is_a?(SimpleSequence)
           raise Sass::SyntaxError.new("Invalid parent selector: " + super_seq.to_a.join)
         end
 
-        super_seq.members[0...-1] +
-          [SimpleSequence.new(super_seq.members.last.members + @members[1..-1], subject?)]
+        members[0...-1] +
+          [SimpleSequence.new(members.last.members + @members[1..-1], subject?)] +
+          [newline].compact
       end
 
       # Non-destrucively extends this selector with the extensions specified in a hash
@@ -5817,6 +5967,7 @@ WARNING
     end
   end
 end
+#endregion
 
 module Sass
   # A namespace for nodes in the parse tree for selectors.
@@ -6264,7 +6415,9 @@ module Sass
     end
   end
 end
+#endregion
 
+#region URL: ./sass/environment.rb
 module Sass
   # The lexical environment for SassScript.
   # This keeps track of variable, mixin, and function definitions.
@@ -6364,6 +6517,10 @@ RUBY
     inherited_hash :function
   end
 end
+#endregion
+
+#region URL: ./sass/script.rb
+#region URL: ./sass/script/node.rb
 module Sass::Script
   # The abstract superclass for SassScript parse tree nodes.
   #
@@ -6463,6 +6620,9 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/variable.rb
 module Sass
   module Script
     # A SassScript parse node representing a variable.
@@ -6521,6 +6681,10 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/funcall.rb
+#region URL: ./sass/script/functions.rb
 module Sass::Script
   # Methods in this module are accessible from the SassScript context.
   # For example, you can write
@@ -8064,6 +8228,7 @@ module Sass::Script
     end
   end
 end
+#endregion
 
 module Sass
   module Script
@@ -8308,6 +8473,11 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/operation.rb
+#region URL: ./sass/script/string.rb
+#region URL: ./sass/script/literal.rb
 module Sass::Script
   # The abstract superclass for SassScript objects.
   #
@@ -8316,6 +8486,7 @@ module Sass::Script
   # The operations listed here are just the defaults.
   class Literal < Node
 
+#region URL: ./sass/script/number.rb
 module Sass::Script
   # A SassScript object representing a number.
   # SassScript numbers can have decimal values,
@@ -8767,7 +8938,9 @@ module Sass::Script
     end
   end
 end
+#endregion
 
+#region URL: ./sass/script/color.rb
 module Sass::Script
   # A SassScript object representing a CSS color.
   #
@@ -9372,7 +9545,9 @@ module Sass::Script
     end
   end
 end
+#endregion
 
+#region URL: ./sass/script/bool.rb
 module Sass::Script
   # A SassScript object representing a boolean (true or false) value.
   class Bool < Literal
@@ -9389,7 +9564,9 @@ module Sass::Script
     alias_method :to_sass, :to_s
   end
 end
+#endregion
 
+#region URL: ./sass/script/null.rb
 module Sass::Script
   # A SassScript object representing a null value.
   class Null < Literal
@@ -9425,6 +9602,9 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/list.rb
 module Sass::Script
   # A SassScript object representing a CSS list.
   # This includes both comma-separated lists and space-separated lists.
@@ -9510,6 +9690,9 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/arg_list.rb
 module Sass::Script
   # A SassScript object representing a variable argument list. This works just
   # like a normal list, but can also contain keyword arguments.
@@ -9562,6 +9745,7 @@ module Sass::Script
     end
   end
 end
+#endregion
 
     # Returns the Ruby value of the literal.
     # The type of this value varies based on the subclass.
@@ -9769,6 +9953,7 @@ MSG
     end
   end
 end
+#endregion
 
 module Sass::Script
   # A SassScript object representing a CSS string *or* a CSS identifier.
@@ -9819,6 +10004,9 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/unary_operation.rb
 module Sass::Script
   # A SassScript parse node representing a unary operation,
   # such as `-$b` or `not true`.
@@ -9888,6 +10076,9 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/interpolation.rb
 module Sass::Script
   # A SassScript object representing `#{}` interpolation outside a string.
   #
@@ -9967,6 +10158,9 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/string_interpolation.rb
 module Sass::Script
   # A SassScript object representing `#{}` interpolation within a string.
   #
@@ -10070,6 +10264,7 @@ module Sass::Script
     end
   end
 end
+#endregion
 
 module Sass::Script
   # A SassScript parse node representing a binary operation,
@@ -10172,6 +10367,11 @@ module Sass::Script
     end
   end
 end
+#endregion
+
+#region URL: ./sass/script/parser.rb
+#region URL: ./sass/script/lexer.rb
+#region URL: ./sass/scss/rx.rb
 module Sass
   module SCSS
     # A module containing regular expressions used
@@ -10254,7 +10454,8 @@ module Sass
 
       S = /[ \t\r\n\f]+/
 
-      COMMENT = /\/\*[^*]*\*+(?:[^\/][^*]*\*+)*\//
+	  #BT COMMENT = /\/\*[^*]*\*+(?:[^\/][^*]*\*+)*\//
+      COMMENT = /(?<![^\/]?\/)\/\*[^*]*\*+(?:[^\/][^*]*\*+)*\//
       SINGLE_LINE_COMMENT = /\/\/.*(\n[ \t]*\/\/.*)*/
 
       CDO            = quote("<!--")
@@ -10305,6 +10506,7 @@ module Sass
     end
   end
 end
+#endregion
 
 module Sass
   module Script
@@ -10639,6 +10841,7 @@ MESSAGE
     end
   end
 end
+#endregion
 
 module Sass
   module Script
@@ -11140,6 +11343,7 @@ RUBY
     end
   end
 end
+#endregion
 
 module Sass
   # SassScript is code that's embedded in Sass documents
@@ -11173,6 +11377,10 @@ module Sass
 
   end
 end
+#endregion
+
+#region URL: ./sass/scss.rb
+#region URL: ./sass/scss/script_lexer.rb
 module Sass
   module SCSS
     # A mixin for subclasses of {Sass::Script::Lexer}
@@ -11188,6 +11396,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/scss/script_parser.rb
 module Sass
   module SCSS
     # A mixin for subclasses of {Sass::Script::Parser}
@@ -11213,7 +11424,9 @@ module Sass
     end
   end
 end
+#endregion
 
+#region URL: ./sass/scss/parser.rb
 module Sass
   module SCSS
     # The parser for SCSS.
@@ -12378,8 +12591,8 @@ MESSAGE
           # end of the matched string. This fix makes the assumption that the
           # matched group will always occur at the end of the match.
 		  if  last_group_lookahead 
-			#RG IronRuby has the negative group index code wrong, so use regexp on 
-			#RG the matched text to get the last group
+			#BT IronRuby has the negative group index code wrong, so use regexp on 
+			#BT the matched text to get the last group
 			lastgroup = rx.match( @scanner.matched )[-1]
 			if lastgroup
 			  @scanner.pos -= lastgroup.length
@@ -12397,6 +12610,11 @@ MESSAGE
     end
   end
 end
+#endregion
+
+#region URL: ./sass/scss/static_parser.rb
+#region URL: ./sass/script/css_parser.rb
+#region URL: ./sass/script/css_lexer.rb
 module Sass
   module Script
     # This is a subclass of {Lexer} for use in parsing plain CSS properties.
@@ -12426,6 +12644,7 @@ module Sass
     end
   end
 end
+#endregion
 
 module Sass
   module Script
@@ -12455,6 +12674,7 @@ module Sass
     end
   end
 end
+#endregion
 
 module Sass
   module SCSS
@@ -12508,7 +12728,9 @@ module Sass
     end
   end
 end
+#endregion
 
+#region URL: ./sass/scss/css_parser.rb
 module Sass
   module SCSS
     # This is a subclass of {Parser} which only parses plain CSS.
@@ -12543,6 +12765,7 @@ module Sass
     end
   end
 end
+#endregion
 
 module Sass
   # SCSS is the CSS syntax for Sass.
@@ -12553,6 +12776,9 @@ module Sass
   # The evaluation is handled by the broader {Sass} module.
   module SCSS; end
 end
+#endregion
+
+#region URL: ./sass/error.rb
 module Sass
   # An exception class that keeps track of
   # the line of the Sass template it was raised on
@@ -12754,6 +12980,9 @@ END
   # in SassScript.
   class UnitConversionError < SyntaxError; end
 end
+#endregion
+
+#region URL: ./sass/importers.rb
 module Sass
   # Sass importers are in charge of taking paths passed to `@import`
   # and finding the appropriate Sass code for those paths.
@@ -12774,6 +13003,7 @@ module Sass
   end
 end
 
+#region URL: ./sass/importers/base.rb
 module Sass
   module Importers
     # The abstract base class for Sass importers.
@@ -12910,10 +13140,10 @@ module Sass
       end
     end
   end
-end
+end      
+#endregion
 
-      
-
+#region URL: ./sass/importers/filesystem.rb
 module Sass
   module Importers
     # The default importer, used for any strings found in the load path.
@@ -13097,6 +13327,10 @@ WARNING
     end
   end
 end
+#endregion
+#endregion
+
+#region URL: ./sass/shared.rb
 module Sass
   # This module contains functionality that's shared between Haml and Sass.
   module Shared
@@ -13173,6 +13407,9 @@ module Sass
     end
   end
 end
+#endregion
+
+#region URL: ./sass/media.rb
 # A namespace for the `@media` query parse tree.
 module Sass::Media
   # A comma-separated list of queries.
@@ -13386,6 +13623,9 @@ module Sass::Media
     end.join
   end
 end
+#endregion
+
+#region URL: ./sass/supports.rb
 # A namespace for the `@supports` condition parse tree.
 module Sass::Supports
   # The abstract superclass of all Supports conditions.
@@ -13615,6 +13855,7 @@ module Sass::Supports
     end
   end
 end
+#endregion
 
 module Sass
 
@@ -13748,8 +13989,8 @@ module Sass
       # Tracks the original filename of the top-level Sass file
       options[:original_filename] ||= options[:filename]
 
-      options[:cache_store] ||= Sass::CacheStores::Chain.new(
-        Sass::CacheStores::Memory.new, Sass::CacheStores::Filesystem.new(options[:cache_location]))
+      #BT options[:cache_store] ||= Sass::CacheStores::Chain.new(
+      #BT   Sass::CacheStores::Memory.new, Sass::CacheStores::Filesystem.new(options[:cache_location]))
       # Support both, because the docs said one and the other actually worked
       # for quite a long time.
       options[:line_comments] ||= options[:line_numbers]
@@ -14499,3 +14740,5 @@ WARNING
     end
   end
 end
+#endregion
+#endregion

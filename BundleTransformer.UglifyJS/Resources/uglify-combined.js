@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.12
+ * UglifyJS v2.4.13
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -530,10 +530,10 @@
 			var parameters = [];
 
 			arg_parameter_pairs.forEach(function(pair) {
-				var split = pair.split(":");
+				var splitAt = pair.lastIndexOf(":");
 
-				args.push(split[0]);
-				parameters.push(split[1]);
+				args.push(pair.substr(0, splitAt));
+				parameters.push(pair.substr(splitAt + 1));
 			});
 
 			var wrapped_tl = "(function(" + parameters.join(",") + "){ '$ORIG'; })(" + args.join(",") + ")";

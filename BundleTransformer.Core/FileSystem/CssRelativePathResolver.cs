@@ -78,7 +78,7 @@
 				nodeMatches.Add(nodeMatch);
 			}
 
-			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(content);
+			MatchCollection multilineCommentMatches = CommonRegExps.CssMultilineCommentRegex.Matches(content);
 
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{

@@ -482,6 +482,8 @@ class Set
   end
 end
 
+#BT
+=begin
 # 
 # SortedSet implements a Set that guarantees that it's element are
 # yielded in sorted order (according to the return values of their
@@ -615,6 +617,7 @@ class SortedSet < Set
     initialize(*args, &block)
   end
 end
+=end
 
 module Enumerable
   # Makes a set from the enumerable object with given arguments.
@@ -722,6 +725,8 @@ end
 
 __END__
 
+#BT
+=begin
 require 'test/unit'
 
 class TC_Set < Test::Unit::TestCase
@@ -1347,3 +1352,4 @@ end
 #     assert_equal([1,2,3,4,5,8,10], s.sort)
 #   end
 # end
+=end

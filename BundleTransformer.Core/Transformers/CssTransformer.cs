@@ -37,14 +37,6 @@
 				RegexOptions.IgnoreCase);
 
 		/// <summary>
-		/// Regular expression for working with CSS <code>@charset</code> rules
-		/// </summary>
-		private static readonly Regex _cssCharsetRuleRegex =
-			new Regex(@"@charset\s*(?<quote>'|"")(?<charset>[A-Za-z0-9\-]+)(\k<quote>)\s*;",
-				RegexOptions.IgnoreCase);
-
-
-		/// <summary>
 		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		public CssTransformer()
@@ -322,7 +314,7 @@
 				return content;
 			}
 
-			MatchCollection charsetRuleMatches = _cssCharsetRuleRegex.Matches(content);
+			MatchCollection charsetRuleMatches = CommonRegExps.CssCharsetRuleRegex.Matches(content);
 			MatchCollection importRuleMatches = _cssImportRuleRegex.Matches(content);
 
 			if (charsetRuleMatches.Count == 0 && importRuleMatches.Count == 0)
@@ -350,7 +342,7 @@
 				nodeMatches.Add(nodeMatch);
 			}
 
-			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(content);
+			MatchCollection multilineCommentMatches = CommonRegExps.CssMultilineCommentRegex.Matches(content);
 
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{
@@ -436,7 +428,7 @@
 		/// Process a other stylesheet content
 		/// </summary>
 		/// <param name="contentBuilder">Content builder</param>
-		/// <param name="assetContent">Text content of Sass-asset</param>
+		/// <param name="assetContent">Text content of CSS-asset</param>
 		/// <param name="currentPosition">Current position</param>
 		/// <param name="nextPosition">Next position</param>
 		private static void ProcessOtherContent(StringBuilder contentBuilder, string assetContent,

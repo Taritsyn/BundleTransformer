@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.23
+              README file for Bundle Transformer: Core 1.8.29
 
    ----------------------------------------------------------------------
 
@@ -37,8 +37,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Microsoft ASP.NET Web Optimization Framework
-   version 1.1.3.
+   Optimized some regular expressions.
    
    =============
    DOCUMENTATION

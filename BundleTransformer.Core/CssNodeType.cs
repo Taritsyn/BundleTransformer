@@ -3,7 +3,7 @@
 	/// <summary>
 	/// CSS node types
 	/// </summary>
-	internal enum CssNodeType
+	public enum CssNodeType
 	{
 		/// <summary>
 		/// Unknown node

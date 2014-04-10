@@ -8,6 +8,7 @@
 
 	using Core;
 	using Core.Assets;
+	using Core.Helpers;
 	using Core.Resources;
 	using Helpers;
 
@@ -117,7 +118,9 @@
 
 			if (FileExtensionHelpers.IsSassOrScss(extension))
 			{
-				fileStream = GetAssetFileStream(path);
+				string processedPath = UrlHelpers.ProcessBackSlashes(path);
+				fileStream = GetAssetFileStream(processedPath);
+
 				if (fileStream != null)
 				{
 					return fileStream;

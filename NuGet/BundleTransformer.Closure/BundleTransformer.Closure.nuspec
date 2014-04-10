@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Closure</id>
-    <version>1.8.23</version>
+    <version>1.8.29</version>
 	<title>Bundle Transformer: Closure</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,9 +16,9 @@
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Google Closure Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.8.23" />
-	  <dependency id="Microsoft.Net.Http" version="2.2.18" />
-	  <dependency id="Newtonsoft.Json" version="6.0.1" />
+      <dependency id="BundleTransformer.Core" version="1.8.29" />
+	  <dependency id="Microsoft.Net.Http" version="2.2.19" />
+	  <dependency id="Newtonsoft.Json" version="6.0.2" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.Closure.dll" />

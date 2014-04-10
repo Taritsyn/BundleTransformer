@@ -437,7 +437,15 @@
 				}
 			}
 
-			MatchCollection multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(assetContent);
+			MatchCollection multilineCommentMatches;
+			if (assetImportOptions.Less)
+			{
+				multilineCommentMatches = CommonRegExps.CStyleMultilineCommentRegex.Matches(assetContent);
+			}
+			else
+			{
+				multilineCommentMatches = CommonRegExps.CssMultilineCommentRegex.Matches(assetContent);
+			}
 
 			foreach (Match multilineCommentMatch in multilineCommentMatches)
 			{

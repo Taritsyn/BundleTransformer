@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.1.3
+ * Clean-css v2.1.8
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -302,65 +302,1380 @@ var CleanCss = (function(){
 	}).call(this);
 	//#endregion
 	
-	//#region URL: ./properties/shorthand-notations
-	require['./properties/shorthand-notations'] = (function () {
-		function ShorthandNotations(data) {
-		  // shorthand notations
-		  var shorthandRegex = function(repeats, hasSuffix) {
-			var pattern = '(padding|margin|border\\-width|border\\-color|border\\-style|border\\-radius):';
-			for (var i = 0; i < repeats; i++)
-			  pattern += '([\\d\\w\\.%#\\(\\),]+)' + (i < repeats - 1 ? ' ' : '');
-			return new RegExp(pattern + (hasSuffix ? '([;}])' : ''), 'g');
-		  };
+	//#region URL: ./properties/token
+	require['./properties/token'] = (function () {
+	  // Helper for tokenizing the contents of a CSS selector block
+	  var createTokenPrototype = function (processable) {
+		var important = '!important';
 
-		  var from4Values = function() {
-			return data.replace(shorthandRegex(4), function(match, property, size1, size2, size3, size4) {
-			  if (size1 === size2 && size1 === size3 && size1 === size4)
-				return property + ':' + size1;
-			  else if (size1 === size3 && size2 === size4)
-				return property + ':' + size1 + ' ' + size2;
-			  else if (size2 === size4)
-				return property + ':' + size1 + ' ' + size2 + ' ' + size3;
-			  else
-				return match;
-			});
-		  };
+		// Constructor for tokens
+		function Token (prop, p2, p3) {
+		  this.prop = prop;
+		  if (typeof(p2) === 'string') {
+			this.value = p2;
+			this.isImportant = p3;
+		  }
+		  else {
+			this.value = processable[prop].defaultValue;
+			this.isImportant = p2;
+		  }
+		}
 
-		  var from3Values = function() {
-			return data.replace(shorthandRegex(3, true), function(match, property, size1, size2, size3, suffix) {
-			  if (size1 === size2 && size1 === size3)
-				return property + ':' + size1 + suffix;
-			  else if (size1 === size3)
-				return property + ':' + size1 + ' ' + size2 + suffix;
-			  else
-				return match;
-			});
-		  };
+		Token.prototype.prop = null;
+		Token.prototype.value = null;
+		Token.prototype.granularValues = null;
+		Token.prototype.components = null;
+		Token.prototype.position = null;
+		Token.prototype.isImportant = false;
+		Token.prototype.isDirty = false;
+		Token.prototype.isShorthand = false;
+		Token.prototype.isIrrelevant = false;
+		Token.prototype.isReal = true;
+		Token.prototype.isMarkedForDeletion = false;
 
-		  var from2Values = function() {
-			return data.replace(shorthandRegex(2, true), function(match, property, size1, size2, suffix) {
-			  if (size1 === size2)
-				return property + ':' + size1 + suffix;
-			  else
-				return match;
-			});
-		  };
+		// Tells if this token is a component of the other one
+		Token.prototype.isComponentOf = function (other) {
+		  if (!processable[this.prop] || !processable[other.prop])
+			return false;
+		  if (!(processable[other.prop].components instanceof Array) || !processable[other.prop].components.length)
+			return false;
 
-		  return {
-			process: function() {
-			  data = from4Values();
-			  data = from3Values();
-			  return from2Values();
-			}
-		  };
+		  return processable[other.prop].components.indexOf(this.prop) >= 0;
 		};
-		
-		return ShorthandNotations;
+
+		// Clones a token
+		Token.prototype.clone = function (isImportant) {
+		  var token = new Token(this.prop, this.value, (typeof(isImportant) !== 'undefined' ? isImportant : this.isImportant));
+		  return token;
+		};
+
+		// Creates an irrelevant token with the same prop
+		Token.prototype.cloneIrrelevant = function (isImportant) {
+		  var token = Token.makeDefault(this.prop, (typeof(isImportant) !== 'undefined' ? isImportant : this.isImportant));
+		  token.isIrrelevant = true;
+		  return token;
+		};
+
+		// Creates an array of property tokens with their default values
+		Token.makeDefaults = function (props, important) {
+		  return props.map(function(prop) {
+			return new Token(prop, important);
+		  });
+		};
+
+		// Parses one CSS property declaration into a token
+		Token.tokenizeOne = function (fullProp) {
+		  // Find first colon
+		  var colonPos = fullProp.indexOf(':');
+
+		  if (colonPos < 0) {
+			// This property doesn't have a colon, it's invalid. Let's keep it intact anyway.
+			return new Token('', fullProp);
+		  }
+
+		  // Parse parts of the property
+		  var prop = fullProp.substr(0, colonPos).trim();
+		  var value = fullProp.substr(colonPos + 1).trim();
+		  var isImportant = false;
+		  var importantPos = value.indexOf(important);
+
+		  // Check if the property is important
+		  if (importantPos >= 1 && importantPos === value.length - important.length) {
+			value = value.substr(0, importantPos).trim();
+			isImportant = true;
+		  }
+
+		  // Return result
+		  var result = new Token(prop, value, isImportant);
+
+		  // If this is a shorthand, break up its values
+		  // NOTE: we need to do this for all shorthands because otherwise we couldn't remove default values from them
+		  if (processable[prop] && processable[prop].isShorthand) {
+			result.isShorthand = true;
+			result.components = processable[prop].breakUp(result);
+			result.isDirty = true;
+		  }
+
+		  return result;
+		};
+
+		// Breaks up a string of CSS property declarations into tokens so that they can be handled more easily
+		Token.tokenize = function (input) {
+		  // Split the input by semicolons and parse the parts
+		  var tokens = input.split(';').map(Token.tokenizeOne);
+		  return tokens;
+		};
+
+		// Transforms tokens back into CSS properties
+		Token.detokenize = function (tokens) {
+		  // If by mistake the input is not an array, make it an array
+		  if (!(tokens instanceof Array)) {
+			tokens = [tokens];
+		  }
+
+		  // This step takes care of putting together the components of shorthands
+		  // NOTE: this is necessary to do for every shorthand, otherwise we couldn't remove their default values
+		  for (var i = 0; i < tokens.length; i++) {
+			var t = tokens[i];
+			if (t.isShorthand && t.isDirty) {
+			  var news = processable[t.prop].putTogether(t.prop, t.components, t.isImportant);
+			  Array.prototype.splice.apply(tokens, [i, 1].concat(news));
+			  t.isDirty = false;
+			  i--;
+			}
+		  }
+
+		  // And now, simply map every token into its string representation and concat them with a semicolon
+		  var str = tokens.map(function(token) {
+			var result = '';
+
+			// NOTE: malformed tokens will not have a 'prop' property
+			if (token.prop) {
+			  result += token.prop + ':';
+			}
+			if (token.value) {
+			  result += token.value;
+			}
+			if (token.isImportant) {
+			  result += important;
+			}
+
+			return result;
+		  }).join(';');
+
+		  return str;
+		};
+
+		// Gets the final (detokenized) length of the given tokens
+		Token.getDetokenizedLength = function (tokens) {
+		  // If by mistake the input is not an array, make it an array
+		  if (!(tokens instanceof Array)) {
+			tokens = [tokens];
+		  }
+
+		  var result = 0;
+
+		  // This step takes care of putting together the components of shorthands
+		  // NOTE: this is necessary to do for every shorthand, otherwise we couldn't remove their default values
+		  for (var i = 0; i < tokens.length; i++) {
+			var t = tokens[i];
+			if (t.isShorthand && t.isDirty) {
+			  var news = processable[t.prop].putTogether(t.prop, t.components, t.isImportant);
+			  Array.prototype.splice.apply(tokens, [i, 1].concat(news));
+			  t.isDirty = false;
+			  i--;
+			  continue;
+			}
+
+			if (t.prop) {
+			  result += t.prop.length + 1;
+			}
+			if (t.value) {
+			  result += t.value.length;
+			}
+			if (t.isImportant) {
+			  result += important.length;
+			}
+		  }
+
+		  return result;
+		};
+
+		return Token;
+	  };
+
+	  return {
+		createTokenPrototype: createTokenPrototype
+	  };
 	}).call(this);
 	//#endregion
 	
+	//#region URL: ./properties/validator
+	require['./properties/validator'] = (function () {
+	  // Validates various CSS property values
+	
+	  // Regexes used for stuff
+	  var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(px|%|em|rem|in|cm|mm|ex|pt|pc|)|auto|inherit)';
+	  var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
+	  var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
+	  var cssFunctionAnyRegexStr = '(' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+	  var cssUnitAnyRegexStr = '(' + cssUnitRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+
+	  var backgroundRepeatKeywords = ['repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'inherit'];
+	  var backgroundAttachmentKeywords = ['inherit', 'scroll', 'fixed', 'local'];
+	  var backgroundPositionKeywords = ['center', 'top', 'bottom', 'left', 'right'];
+	  var listStyleTypeKeywords = ['armenian', 'circle', 'cjk-ideographic', 'decimal', 'decimal-leading-zero', 'disc', 'georgian', 'hebrew', 'hiragana', 'hiragana-iroha', 'inherit', 'katakana', 'katakana-iroha', 'lower-alpha', 'lower-greek', 'lower-latin', 'lower-roman', 'none', 'square', 'upper-alpha', 'upper-latin', 'upper-roman'];
+	  var listStylePositionKeywords = ['inside', 'outside', 'inherit'];
+	  var outlineStyleKeywords = ['inherit', 'hidden', 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
+	  var outlineWidthKeywords = ['thin', 'thick', 'medium', 'inherit'];
+
+	  var validator = {
+		isValidHexColor: function (s) {
+		  return (s.length === 4 || s.length === 7) && s[0] === '#';
+		},
+		isValidRgbaColor: function (s) {
+		  s = s.split(' ').join('');
+		  return s.length > 0 && s.indexOf('rgba(') === 0 && s.indexOf(')') === s.length - 1;
+		},
+		isValidHslaColor: function (s) {
+		  s = s.split(' ').join('');
+		  return s.length > 0 && s.indexOf('hsla(') === 0 && s.indexOf(')') === s.length - 1;
+		},
+		isValidNamedColor: function (s) {
+		  // We don't really check if it's a valid color value, but allow any letters in it
+		  return s !== 'auto' && (s === 'transparent' || s === 'inherit' || /^[a-zA-Z]+$/.test(s));
+		},
+		isValidColor: function (s) {
+		  return validator.isValidNamedColor(s) || validator.isValidHexColor(s) || validator.isValidRgbaColor(s) || validator.isValidHslaColor(s);
+		},
+		isValidUrl: function (s) {
+		  // NOTE: at this point all URLs are replaced with placeholders by clean-css, so we check for those placeholders
+		  return s.indexOf('__ESCAPED_URL_CLEAN_CSS') === 0;
+		},
+		isValidUnit: function (s) {
+		  return new RegExp('^' + cssUnitAnyRegexStr + '$', 'gi').test(s);
+		},
+		isValidUnitWithoutFunction: function (s) {
+		  return new RegExp('^' + cssUnitRegexStr + '$', 'gi').test(s);
+		},
+		isValidFunctionWithoutVendorPrefix: function (s) {
+		  return new RegExp('^' + cssFunctionNoVendorRegexStr + '$', 'gi').test(s);
+		},
+		isValidFunctionWithVendorPrefix: function (s) {
+		  return new RegExp('^' + cssFunctionVendorRegexStr + '$', 'gi').test(s);
+		},
+		isValidFunction: function (s) {
+		  return new RegExp('^' + cssFunctionAnyRegexStr + '$', 'gi').test(s);
+		},
+		isValidBackgroundRepeat: function (s) {
+		  return backgroundRepeatKeywords.indexOf(s) >= 0;
+		},
+		isValidBackgroundAttachment: function (s) {
+		  return backgroundAttachmentKeywords.indexOf(s) >= 0;
+		},
+		isValidBackgroundPositionPart: function (s) {
+		  if (backgroundPositionKeywords.indexOf(s) >= 0)
+			return true;
+
+		  return new RegExp('^' + cssUnitRegexStr + '$', 'gi').test(s);
+		},
+		isValidBackgroundPosition: function (s) {
+		  if (s === 'inherit')
+			return true;
+
+		  return s.split(' ').filter(function (p) {
+			return p !== '';
+		  }).every(function(p) {
+			return validator.isValidBackgroundPositionPart(p);
+		  });
+		},
+		isValidListStyleType: function (s) {
+		  return listStyleTypeKeywords.indexOf(s) >= 0;
+		},
+		isValidListStylePosition: function (s) {
+		  return listStylePositionKeywords.indexOf(s) >= 0;
+		},
+		isValidOutlineColor: function (s) {
+		  return s === 'invert' || validator.isValidColor(s) || validator.isValidVendorPrefixedValue(s);
+		},
+		isValidOutlineStyle: function (s) {
+		  return outlineStyleKeywords.indexOf(s) >= 0;
+		},
+		isValidOutlineWidth: function (s) {
+		  return validator.isValidUnit(s) || outlineWidthKeywords.indexOf(s) >= 0;
+		},
+		isValidVendorPrefixedValue: function (s) {
+		  return /^-([A-Za-z0-9]|-)*$/gi.test(s);
+		},
+		areSameFunction: function (a, b) {
+		  if (!validator.isValidFunction(a) || !validator.isValidFunction(b)) {
+			return false;
+		  }
+		  var f1name = a.substring(0, a.indexOf('('));
+		  var f2name = b.substring(0, b.indexOf('('));
+
+		  return f1name === f2name;
+		}
+	  };
+
+	  validator.cssUnitRegexStr = cssUnitRegexStr;
+	  validator.cssFunctionNoVendorRegexStr = cssFunctionNoVendorRegexStr;
+	  validator.cssFunctionVendorRegexStr = cssFunctionVendorRegexStr;
+	  validator.cssFunctionAnyRegexStr = cssFunctionAnyRegexStr;
+	  validator.cssUnitAnyRegexStr = cssUnitAnyRegexStr;
+
+	  return validator;
+	}).call(this);
+	//#endregion
+	
+	//#region URL: ./properties/processable
+	require['./properties/processable'] = (function () {
+	  // Contains the interpretation of CSS properties, as used by the property optimizer
+	
+	  var tokenModule = require('./properties/token');
+	  var validator = require('./properties/validator');
+
+	  // Functions that decide what value can override what.
+	  // The main purpose is to disallow removing CSS fallbacks.
+	  // A separate implementation is needed for every different kind of CSS property.
+	  // -----
+	  // The generic idea is that properties that have wider browser support are 'more understandable'
+	  // than others and that 'less understandable' values can't override more understandable ones.
+	  var canOverride = {
+		// Use when two tokens of the same property can always be merged
+		always: function () {
+		  // NOTE: We could have (val1, val2) parameters here but jshint complains because we don't use them
+		  return true;
+		},
+		// Use when two tokens of the same property can only be merged if they have the same value
+		sameValue: function(val1, val2) {
+		  return val1 === val2;
+		},
+		sameFunctionOrValue: function(val1, val2) {
+		  // Functions with the same name can override each other
+		  if (validator.areSameFunction(val1, val2)) {
+			return true;
+		  }
+
+		  return val1 === val2;
+		},
+		// Use for properties containing CSS units (margin-top, padding-left, etc.)
+		unit: function(val1, val2) {
+		  // The idea here is that 'more understandable' values override 'less understandable' values, but not vice versa
+		  // Understandability: (unit without functions) > (same functions | standard functions) > anything else
+		  // NOTE: there is no point in having different vendor-specific functions override each other or standard functions,
+		  //       or having standard functions override vendor-specific functions, but standard functions can override each other
+		  // NOTE: vendor-specific property values are not taken into consideration here at the moment
+
+		  if (validator.isValidUnitWithoutFunction(val2))
+			return true;
+		  if (validator.isValidUnitWithoutFunction(val1))
+			return false;
+
+		  // Standard non-vendor-prefixed functions can override each other
+		  if (validator.isValidFunctionWithoutVendorPrefix(val2) && validator.isValidFunctionWithoutVendorPrefix(val1)) {
+			return true;
+		  }
+
+		  // Functions with the same name can override each other; same values can override each other
+		  return canOverride.sameFunctionOrValue(val1, val2);
+		},
+		// Use for color properties (color, background-color, border-color, etc.)
+		color: function(val1, val2) {
+		  // The idea here is that 'more understandable' values override 'less understandable' values, but not vice versa
+		  // Understandability: (hex | named) > (rgba | hsla) > (same function name) > anything else
+		  // NOTE: at this point rgb and hsl are replaced by hex values by clean-css
+
+		  // (hex | named)
+		  if (validator.isValidNamedColor(val2) || validator.isValidHexColor(val2))
+			return true;
+		  if (validator.isValidNamedColor(val1) || validator.isValidHexColor(val1))
+			return false;
+
+		  // (rgba|hsla)
+		  if (validator.isValidRgbaColor(val2) || validator.isValidHslColor(val2) || validator.isValidHslaColor(val2))
+			return true;
+		  if (validator.isValidRgbaColor(val1) || validator.isValidHslColor(val1) || validator.isValidHslaColor(val1))
+			return false;
+
+		  // Functions with the same name can override each other; same values can override each other
+		  return canOverride.sameFunctionOrValue(val1, val2);
+		},
+		// Use for background-image
+		backgroundImage: function(val1, val2) {
+		  // The idea here is that 'more understandable' values override 'less understandable' values, but not vice versa
+		  // Understandability: (none | url | inherit) > (same function) > (same value)
+
+		  // (none | url)
+		  if (val2 === 'none' || val2 === 'inherit' || validator.isValidUrl(val2))
+			return true;
+		  if (val1 === 'none' || val1 === 'inherit' || validator.isValidUrl(val1))
+			return false;
+
+		  // Functions with the same name can override each other; same values can override each other
+		  return canOverride.sameFunctionOrValue(val1, val2);
+		}
+	  };
+	  canOverride = Object.freeze(canOverride);
+
+	  // Functions for breaking up shorthands to components
+	  var breakUp = {};
+	  breakUp.takeCareOfFourValues = function (splitfunc) {
+		return function (token) {
+		  var descriptor = processable[token.prop];
+		  var result = [];
+		  var splitval = splitfunc(token.value);
+
+		  if (splitval.length === 0 || (splitval.length < descriptor.components.length && descriptor.components.length > 4)) {
+			// This token is malformed and we have no idea how to fix it. So let's just keep it intact
+			return [token];
+		  }
+
+		  // Fix those that we do know how to fix
+		  if (splitval.length < descriptor.components.length && splitval.length < 2) {
+			// foo{margin:1px} -> foo{margin:1px 1px}
+			splitval[1] = splitval[0];
+		  }
+		  if (splitval.length < descriptor.components.length && splitval.length < 3) {
+			// foo{margin:1px 2px} -> foo{margin:1px 2px 1px}
+			splitval[2] = splitval[0];
+		  }
+		  if (splitval.length < descriptor.components.length && splitval.length < 4) {
+			// foo{margin:1px 2px 3px} -> foo{margin:1px 2px 3px 2px}
+			splitval[3] = splitval[1];
+		  }
+
+		  // Now break it up to its components
+		  for (var i = 0; i < descriptor.components.length; i++) {
+			var t = new Token(descriptor.components[i], splitval[i], token.isImportant);
+			result.push(t);
+		  }
+
+		  return result;
+		};
+	  };
+	  // Use this for properties with 4 unit values (like margin or padding)
+	  // NOTE: it handles shorter forms of these properties too (like, only 1, 2, or 3 units)
+	  breakUp.fourUnits = breakUp.takeCareOfFourValues(function (val) {
+		return val.match(new RegExp(validator.cssUnitAnyRegexStr, 'gi'));
+	  });
+	  // Use this when you simply want to break up four values along spaces
+	  breakUp.fourBySpaces = breakUp.takeCareOfFourValues(function (val) {
+		return val.split(' ').filter(function (v) { return v; });
+	  });
+	  // Use this for non-length values that can also contain functions
+	  breakUp.fourBySpacesOrFunctions = breakUp.takeCareOfFourValues(function (val) {
+		var result = [];
+		var curr = '';
+		var parenthesisLevel = 0;
+		var valLength = val.length;
+
+		for (var i = 0; i < valLength; i++) {
+		  var c = val[i];
+		  curr += c;
+
+		  if (c === '(') {
+			parenthesisLevel++;
+		  } else if (c === ')') {
+			parenthesisLevel--;
+			if (parenthesisLevel === 0) {
+			  result.push(curr.trim());
+			  curr = '';
+			}
+		  } else if (c === ' ' && parenthesisLevel === 0) {
+			result.push(curr.trim());
+			curr = '';
+		  }
+		}
+
+		if (curr) {
+		  result.push(curr.trim());
+		  curr = '';
+		}
+
+		return result;
+	  });
+	  // Breaks up a background property value
+	  breakUp.background = function (token) {
+		// Default values
+		var result = Token.makeDefaults(['background-color', 'background-image', 'background-repeat', 'background-position', 'background-attachment'], token.isImportant);
+		var color = result[0], image = result[1], repeat = result[2], position = result[3], attachment = result[4];
+
+		// Take care of inherit
+		if (token.value === 'inherit') {
+		  // NOTE: 'inherit' is not a valid value for background-attachment so there we'll leave the default value
+		  color.value = image.value =  repeat.value = position.value = attachment.value = 'inherit';
+		  return result;
+		}
+
+		// Break the background up into parts
+		var parts = token.value.split(' ');
+		if (parts.length === 0)
+		  return result;
+
+		// The trick here is that we start going through the parts from the end, then stop after background repeat,
+		// then start from the from the beginning until we find a valid color value. What remains will be treated as background-image.
+
+		var currentIndex = parts.length - 1;
+		var current = parts[currentIndex];
+		// Attachment
+		if (validator.isValidBackgroundAttachment(current)) {
+		  // Found attachment
+		  attachment.value = current;
+		  currentIndex--;
+		  current = parts[currentIndex];
+		}
+		// Position
+		var pos = parts[currentIndex - 1] + ' ' + parts[currentIndex];
+		if (currentIndex >= 1 && validator.isValidBackgroundPosition(pos)) {
+		  // Found position (containing two parts)
+		  position.value = pos;
+		  currentIndex -= 2;
+		  current = parts[currentIndex];
+		} else if (currentIndex >= 0 && validator.isValidBackgroundPosition(current)) {
+		  // Found position (containing just one part)
+		  position.value = current;
+		  currentIndex--;
+		  current = parts[currentIndex];
+		}
+		// Repeat
+		if (currentIndex >= 0 && validator.isValidBackgroundRepeat(current)) {
+		  // Found repeat
+		  repeat.value = current;
+		  currentIndex--;
+		  current = parts[currentIndex];
+		}
+		// Color
+		var fromBeginning = 0;
+		if (validator.isValidColor(parts[0])) {
+		  // Found color
+		  color.value = parts[0];
+		  fromBeginning = 1;
+		}
+		// Image
+		image.value = (parts.splice(fromBeginning, currentIndex - fromBeginning + 1).join(' ')) || 'none';
+
+		return result;
+	  };
+	  // Breaks up a list-style property value
+	  breakUp.listStyle = function (token) {
+		// Default values
+		var result = Token.makeDefaults(['list-style-type', 'list-style-position', 'list-style-image'], token.isImportant);
+		var type = result[0], position = result[1], image = result[2];
+
+		if (token.value === 'inherit') {
+		  type.value = position.value = image.value = 'inherit';
+		  return result;
+		}
+
+		var parts = token.value.split(' ');
+		var ci = 0;
+
+		// Type
+		if (ci < parts.length && validator.isValidListStyleType(parts[ci])) {
+		  type.value = parts[ci];
+		  ci++;
+		}
+		// Position
+		if (ci < parts.length && validator.isValidListStylePosition(parts[ci])) {
+		  position.value = parts[ci];
+		  ci++;
+		}
+		// Image
+		if (ci < parts.length) {
+		  image.value = parts.splice(ci, parts.length - ci + 1).join(' ');
+		}
+
+		return result;
+	  };
+	  // Breaks up outline
+	  breakUp.outline = function (token) {
+		// Default values
+		var result = Token.makeDefaults(['outline-color', 'outline-style', 'outline-width'], token.isImportant);
+		var color = result[0], style = result[1], width = result[2];
+
+		// Take care of inherit
+		if (token.value === 'inherit' || token.value === 'inherit inherit inherit') {
+		  color.value = style.value = width.value = 'inherit';
+		  return result;
+		}
+
+		// NOTE: usually users don't follow the required order of parts in this shorthand,
+		// so we'll try to parse it caring as little about order as possible
+
+		var parts = token.value.split(' '), w;
+
+		if (parts.length === 0) {
+		  return result;
+		}
+
+		if (parts.length >= 1) {
+		  // Try to find outline-width, excluding inherit because that can be anything
+		  w = parts.filter(function(p) { return p !== 'inherit' && validator.isValidOutlineWidth(p); });
+		  if (w.length) {
+			width.value = w[0];
+			parts.splice(parts.indexOf(w[0]), 1);
+		  }
+		}
+		if (parts.length >= 1) {
+		  // Try to find outline-style, excluding inherit because that can be anything
+		  w = parts.filter(function(p) { return p !== 'inherit' && validator.isValidOutlineStyle(p); });
+		  if (w.length) {
+			style.value = w[0];
+			parts.splice(parts.indexOf(w[0]), 1);
+		  }
+		}
+		if (parts.length >= 1) {
+		  // Find outline-color but this time can catch inherit
+		  w = parts.filter(function(p) { return validator.isValidOutlineColor(p); });
+		  if (w.length) {
+			color.value = w[0];
+			parts.splice(parts.indexOf(w[0]), 1);
+		  }
+		}
+
+		return result;
+	  };
+
+	  // Contains functions that can put together shorthands from their components
+	  // NOTE: correct order of tokens is assumed inside these functions!
+	  var putTogether = {
+		// Use this for properties which have four unit values (margin, padding, etc.)
+		// NOTE: optimizes to shorter forms too (that only specify 1, 2, or 3 values)
+		fourUnits: function (prop, tokens, isImportant) {
+		  // See about irrelevant tokens
+		  // NOTE: This will enable some crazy optimalizations for us.
+		  if (tokens[0].isIrrelevant)
+			tokens[0].value = tokens[2].value;
+		  if (tokens[2].isIrrelevant)
+			tokens[2].value = tokens[0].value;
+		  if (tokens[1].isIrrelevant)
+			tokens[1].value = tokens[3].value;
+		  if (tokens[3].isIrrelevant)
+			tokens[3].value = tokens[1].value;
+
+		  if (tokens[0].isIrrelevant && tokens[2].isIrrelevant) {
+			if (tokens[1].value === tokens[3].value)
+			  tokens[0].value = tokens[2].value = tokens[1].value;
+			else
+			  tokens[0].value = tokens[2].value = '0';
+		  }
+		  if (tokens[1].isIrrelevant && tokens[3].isIrrelevant) {
+			if (tokens[0].value === tokens[2].value)
+			  tokens[1].value = tokens[3].value = tokens[0].value;
+			else
+			  tokens[1].value = tokens[3].value = '0';
+		  }
+
+		  var result = new Token(prop, tokens[0].value, isImportant);
+		  result.granularValues = [];
+		  result.granularValues[tokens[0].prop] = tokens[0].value;
+		  result.granularValues[tokens[1].prop] = tokens[1].value;
+		  result.granularValues[tokens[2].prop] = tokens[2].value;
+		  result.granularValues[tokens[3].prop] = tokens[3].value;
+
+		  // If all of them are irrelevant
+		  if (tokens[0].isIrrelevant && tokens[1].isIrrelevant && tokens[2].isIrrelevant && tokens[3].isIrrelevant) {
+			result.value = processable[prop].shortestValue || processable[prop].defaultValue;
+			return result;
+		  }
+
+		  // 1-value short form: all four components are equal
+		  if (tokens[0].value === tokens[1].value && tokens[0].value === tokens[2].value && tokens[0].value === tokens[3].value) {
+			return result;
+		  }
+		  result.value += ' ' + tokens[1].value;
+		  // 2-value short form: first and third; second and fourth values are equal
+		  if (tokens[0].value === tokens[2].value && tokens[1].value === tokens[3].value) {
+			return result;
+		  }
+		  result.value += ' ' + tokens[2].value;
+		  // 3-value short form: second and fourth values are equal
+		  if (tokens[1].value === tokens[3].value) {
+			return result;
+		  }
+		  // 4-value form (none of the above optimalizations could be accomplished)
+		  result.value += ' ' + tokens[3].value;
+		  return result;
+		},
+		// Puts together the components by spaces and omits default values (this is the case for most shorthands)
+		bySpacesOmitDefaults: function (prop, tokens, isImportant) {
+		  var result = new Token(prop, '', isImportant);
+		  // Get irrelevant tokens
+		  var irrelevantTokens = tokens.filter(function (t) { return t.isIrrelevant; });
+
+		  // If every token is irrelevant, return shortest possible value, fallback to default value
+		  if (irrelevantTokens.length === tokens.length) {
+			result.isIrrelevant = true;
+			result.value = processable[prop].shortestValue || processable[prop].defaultValue;
+			return result;
+		  }
+
+		  // This will be the value of the shorthand if all the components are default
+		  var valueIfAllDefault = processable[prop].defaultValue;
+
+		  // Go through all tokens and concatenate their values as necessary
+		  for (var i = 0; i < tokens.length; i++) {
+			var token = tokens[i];
+
+			// Set granular value so that other parts of the code can use this for optimalization opportunities
+			result.granularValues = result.granularValues || { };
+			result.granularValues[token.prop] = token.value;
+
+			// Use irrelevant tokens for optimalization opportunity
+			if (token.isIrrelevant) {
+			  // Get shortest possible value, fallback to default value
+			  var tokenShortest = processable[token.prop].shortestValue || processable[token.prop].defaultValue;
+			  // If the shortest possible value of this token is shorter than the default value of the shorthand, use it instead
+			  if (tokenShortest.length < valueIfAllDefault.length) {
+				valueIfAllDefault = tokenShortest;
+			  }
+			}
+
+			// Omit default / irrelevant value
+			if (token.isIrrelevant || (processable[token.prop] && processable[token.prop].defaultValue === token.value)) {
+			  continue;
+			}
+
+			result.value += ' ' + token.value;
+		  }
+
+		  result.value = result.value.trim();
+		  if (!result.value) {
+			result.value = valueIfAllDefault;
+		  }
+
+		  return result;
+		},
+		// Handles the cases when some or all the fine-grained properties are set to inherit
+		takeCareOfInherit: function (innerFunc) {
+		  return function (prop, tokens, isImportant) {
+			// Filter out the inheriting and non-inheriting tokens in one iteration
+			var inheritingTokens = [];
+			var nonInheritingTokens = [];
+			var result2Shorthandable = [];
+			var i;
+			for (i = 0; i < tokens.length; i++) {
+			  if (tokens[i].value === 'inherit') {
+				inheritingTokens.push(tokens[i]);
+
+				// Indicate that this property is irrelevant and its value can safely be set to anything else
+				var r2s = new Token(tokens[i].prop, tokens[i].isImportant);
+				r2s.isIrrelevant = true;
+				result2Shorthandable.push(r2s);
+			  } else {
+				nonInheritingTokens.push(tokens[i]);
+				result2Shorthandable.push(tokens[i]);
+			  }
+			}
+
+			if (nonInheritingTokens.length === 0) {
+			  // When all the tokens are 'inherit'
+			  return new Token(prop, 'inherit', isImportant);
+			} else if (inheritingTokens.length > 0) {
+			  // When some (but not all) of the tokens are 'inherit'
+
+			  // Result 1. Shorthand just the inherit values and have it overridden with the non-inheriting ones
+			  var result1 = [new Token(prop, 'inherit', isImportant)].concat(nonInheritingTokens);
+
+			  // Result 2. Shorthand every non-inherit value and then have it overridden with the inheriting ones
+			  var result2 = [innerFunc(prop, result2Shorthandable, isImportant)].concat(inheritingTokens);
+
+			  // Return whichever is shorter
+			  var dl1 = Token.getDetokenizedLength(result1);
+			  var dl2 = Token.getDetokenizedLength(result2);
+
+			  return dl1 < dl2 ? result1 : result2;
+			} else {
+			  // When none of tokens are 'inherit'
+			  return innerFunc(prop, tokens, isImportant);
+			}
+		  };
+		}
+	  };
+
+	  // Properties to process
+	  // Extend this object in order to add support for more properties in the optimizer.
+	  //
+	  // Each key in this object represents a CSS property and should be an object.
+	  // Such an object contains properties that describe how the represented CSS property should be handled.
+	  // Possible options:
+	  //
+	  // * components: array (Only specify for shorthand properties.)
+	  //   Contains the names of the granular properties this shorthand compacts.
+	  //
+	  // * canOverride: function (Default is canOverride.sameValue - meaning that they'll only be merged if they have the same value.)
+	  //   Returns whether two tokens of this property can be merged with each other.
+	  //   This property has no meaning for shorthands.
+	  //
+	  // * defaultValue: string
+	  //   Specifies the default value of the property according to the CSS standard.
+	  //   For shorthand, this is used when every component is set to its default value, therefore it should be the shortest possible default value of all the components.
+	  //
+	  // * shortestValue: string
+	  //   Specifies the shortest possible value the property can possibly have.
+	  //   (Falls back to defaultValue if unspecified.)
+	  //
+	  // * breakUp: function (Only specify for shorthand properties.)
+	  //   Breaks the shorthand up to its components.
+	  //
+	  // * putTogether: function (Only specify for shorthand properties.)
+	  //   Puts the shorthand together from its components.
+	  //
+	  var processable = {
+		'color': {
+		  canOverride: canOverride.color,
+		  defaultValue: 'transparent',
+		  shortestValue: 'red'
+		},
+		// background ------------------------------------------------------------------------------
+		'background': {
+		  components: [
+			'background-color',
+			'background-image',
+			'background-repeat',
+			'background-position',
+			'background-attachment'
+		  ],
+		  breakUp: breakUp.background,
+		  putTogether: putTogether.takeCareOfInherit(putTogether.bySpacesOmitDefaults),
+		  defaultValue: '0 0',
+		  shortestValue: '0'
+		},
+		'background-color': {
+		  canOverride: canOverride.color,
+		  defaultValue: 'transparent',
+		  shortestValue: 'red'
+		},
+		'background-image': {
+		  canOverride: canOverride.backgroundImage,
+		  defaultValue: 'none'
+		},
+		'background-repeat': {
+		  canOverride: canOverride.always,
+		  defaultValue: 'repeat'
+		},
+		'background-position': {
+		  canOverride: canOverride.always,
+		  defaultValue: '0 0',
+		  shortestValue: '0'
+		},
+		'background-attachment': {
+		  canOverride: canOverride.always,
+		  defaultValue: 'scroll'
+		},
+		// list-style ------------------------------------------------------------------------------
+		'list-style': {
+		  components: [
+			'list-style-type',
+			'list-style-position',
+			'list-style-image'
+		  ],
+		  canOverride: canOverride.always,
+		  breakUp: breakUp.listStyle,
+		  putTogether: putTogether.takeCareOfInherit(putTogether.bySpacesOmitDefaults),
+		  defaultValue: 'outside', // can't use 'disc' because that'd override default 'decimal' for <ol>
+		  shortestValue: 'none'
+		},
+		'list-style-type' : {
+		  canOverride: canOverride.always,
+		  shortestValue: 'none',
+		  defaultValue: '__hack'
+		  // NOTE: we can't tell the real default value here, it's 'disc' for <ul> and 'decimal' for <ol>
+		  //       -- this is a hack, but it doesn't matter because this value will be either overridden or it will disappear at the final step anyway
+		},
+		'list-style-position' : {
+		  canOverride: canOverride.always,
+		  defaultValue: 'outside',
+		  shortestValue: 'inside'
+		},
+		'list-style-image' : {
+		  canOverride: canOverride.always,
+		  defaultValue: 'none'
+		},
+		// outline ------------------------------------------------------------------------------
+		'outline': {
+		  components: [
+			'outline-color',
+			'outline-style',
+			'outline-width'
+		  ],
+		  breakUp: breakUp.outline,
+		  putTogether: putTogether.takeCareOfInherit(putTogether.bySpacesOmitDefaults),
+		  defaultValue: '0'
+		},
+		'outline-color': {
+		  canOverride: canOverride.color,
+		  defaultValue: 'invert',
+		  shortestValue: 'red'
+		},
+		'outline-style': {
+		  canOverride: canOverride.always,
+		  defaultValue: 'none'
+		},
+		'outline-width': {
+		  canOverride: canOverride.unit,
+		  defaultValue: 'medium',
+		  shortestValue: '0'
+		}
+	  };
+
+	  var addFourValueShorthand = function (prop, components, breakup, puttogether, canoverride, defaultValue, shortestValue) {
+		processable[prop] = {
+		  components: components,
+		  breakUp: breakup || breakUp.fourUnits,
+		  putTogether: puttogether || putTogether.takeCareOfInherit(putTogether.fourUnits),
+		  defaultValue: defaultValue || '0',
+		  shortestValue: shortestValue
+		};
+		for (var i = 0; i < components.length; i++) {
+		  processable[components[i]] = {
+			canOverride: canoverride || canOverride.unit,
+			defaultValue: defaultValue || '0',
+			shortestValue: shortestValue
+		  };
+		}
+	  };
+
+	  addFourValueShorthand('border-radius', [
+		'border-top-left-radius',
+		'border-top-right-radius',
+		'border-bottom-right-radius',
+		'border-bottom-left-radius'
+	  ]);
+
+	  addFourValueShorthand('-moz-border-radius', [
+		'-moz-border-top-left-radius',
+		'-moz-border-top-right-radius',
+		'-moz-border-bottom-right-radius',
+		'-moz-border-bottom-left-radius'
+	  ]);
+
+	  addFourValueShorthand('-webkit-border-radius', [
+		'-webkit-border-top-left-radius',
+		'-webkit-border-top-right-radius',
+		'-webkit-border-bottom-right-radius',
+		'-webkit-border-bottom-left-radius'
+	  ]);
+
+	  addFourValueShorthand('-o-border-radius', [
+		'-o-border-top-left-radius',
+		'-o-border-top-right-radius',
+		'-o-border-bottom-right-radius',
+		'-o-border-bottom-left-radius'
+	  ]);
+
+	  addFourValueShorthand('border-color', [
+		'border-top-color',
+		'border-right-color',
+		'border-bottom-color',
+		'border-left-color'
+	  ], breakUp.fourBySpacesOrFunctions, null, canOverride.color, 'currentColor', 'red');
+
+	  addFourValueShorthand('border-style', [
+		'border-top-style',
+		'border-right-style',
+		'border-bottom-style',
+		'border-left-style'
+	  ], breakUp.fourBySpaces, null, canOverride.always, 'none');
+
+	  addFourValueShorthand('border-width', [
+		'border-top-width',
+		'border-right-width',
+		'border-bottom-width',
+		'border-left-width'
+	  ], null, null, null, 'medium', '0');
+
+	  addFourValueShorthand('padding', [
+		'padding-top',
+		'padding-right',
+		'padding-bottom',
+		'padding-left'
+	  ]);
+
+	  addFourValueShorthand('margin', [
+		'margin-top',
+		'margin-right',
+		'margin-bottom',
+		'margin-left'
+	  ]);
+
+	  // Set some stuff iteratively
+	  for (var proc in processable) {
+		if (!processable.hasOwnProperty(proc))
+		  continue;
+
+		var currDesc = processable[proc];
+
+		if (!(currDesc.components instanceof Array) || currDesc.components.length === 0)
+		  continue;
+
+		currDesc.isShorthand = true;
+
+		for (var cI = 0; cI < currDesc.components.length; cI++) {
+		  if (!processable[currDesc.components[cI]]) {
+			throw new Error('"' + currDesc.components[cI] + '" is defined as a component of "' + proc + '" but isn\'t defined in processable.');
+		  }
+		  processable[currDesc.components[cI]].componentOf = proc;
+		}
+	  }
+
+	  var Token = tokenModule.createTokenPrototype(processable);
+
+	  return {
+		processable: processable,
+		Token: Token
+	  };
+	}).call(this);
+	//#endregion
+	
+	//#region URL: ./properties/override-compactor
+	require['./properties/override-compactor'] = (function () {
+	  // Compacts the given tokens according to their ability to override each other.
+	
+	  // Default override function: only allow overrides when the two values are the same
+	  var sameValue = function (val1, val2) {
+		return val1 === val2;
+	  };
+
+	  var compactOverrides = function (tokens, processable) {
+		var result, can, token, t, i, ii, oldResult, matchingComponent;
+
+		// Used when searching for a component that matches token
+		var nameMatchFilter1 = function (x) {
+		  return x.prop === token.prop;
+		};
+		// Used when searching for a component that matches t
+		var nameMatchFilter2 = function (x) {
+		  return x.prop === t.prop;
+		};
+
+		// Go from the end and always take what the current token can't override as the new result set
+		// NOTE: can't cache result.length here because it will change with every iteration
+		for (result = tokens, i = 0; (ii = result.length - 1 - i) >= 0; i++) {
+		  token = result[ii];
+		  can = (processable[token.prop] && processable[token.prop].canOverride) || sameValue;
+		  oldResult = result;
+		  result = [];
+
+		  // Special flag which indicates that the current token should be removed
+		  var removeSelf = false;
+		  var oldResultLength = oldResult.length;
+
+		  for (var iii = 0; iii < oldResultLength; iii++) {
+			t = oldResult[iii];
+
+			// A token can't override itself (checked by reference, not by value)
+			// NOTE: except when we explicitly tell it to remove itself
+			if (t === token && !removeSelf) {
+			  result.push(t);
+			  continue;
+			}
+
+			// Only an important token can even try to override tokens that come after it
+			if (iii > ii && !token.isImportant) {
+			  result.push(t);
+			  continue;
+			}
+
+			// A nonimportant token can never override an important one
+			if (t.isImportant && !token.isImportant) {
+			  result.push(t);
+			  continue;
+			}
+
+			if (token.isShorthand && !t.isShorthand && t.isComponentOf(token)) {
+			  // token (a shorthand) is trying to override t (a component)
+
+			  // Find the matching component in the shorthand
+			  matchingComponent = token.components.filter(nameMatchFilter2)[0];
+			  can = (processable[t.prop] && processable[t.prop].canOverride) || sameValue;
+			  if (!can(t.value, matchingComponent.value)) {
+				// The shorthand can't override the component
+				result.push(t);
+			  }
+			} else if (t.isShorthand && !token.isShorthand && token.isComponentOf(t)) {
+			  // token (a component) is trying to override a component of t (a shorthand)
+
+			  // Find the matching component in the shorthand
+			  matchingComponent = t.components.filter(nameMatchFilter1)[0];
+			  if (can(matchingComponent.value, token.value)) {
+				// The component can override the matching component in the shorthand
+
+				if (!token.isImportant) {
+				  // The overriding component is non-important which means we can simply include it into the shorthand
+				  // NOTE: stuff that can't really be included, like inherit, is taken care of at the final step, not here
+				  matchingComponent.value = token.value;
+				  // We use the special flag to get rid of the component
+				  removeSelf = true;
+				} else {
+				  // The overriding component is important; sadly we can't get rid of it,
+				  // but we can still mark the matching component in the shorthand as irrelevant
+				  matchingComponent.isIrrelevant = true;
+				}
+				t.isDirty = true;
+			  }
+			  result.push(t);
+			} else if (token.isShorthand && t.isShorthand && token.prop === t.prop) {
+			  // token is a shorthand and is trying to override another instance of the same shorthand
+
+			  // Can only override other shorthand when each of its components can override each of the other's components
+			  for (var iiii = 0; iiii < t.components.length; iiii++) {
+				can = (processable[t.components[iiii].prop] && processable[t.components[iiii].prop].canOverride) || sameValue;
+				if (!can(t.components[iiii].value, token.components[iiii].value)) {
+				  result.push(t);
+				  break;
+				}
+			  }
+			} else if (t.prop !== token.prop || !can(t.value, token.value)) {
+			  // in every other case, use the override mechanism
+			  result.push(t);
+			}
+		  }
+		  if (removeSelf) {
+			i--;
+		  }
+		}
+
+		return result;
+	  };
+
+	  return {
+		compactOverrides: compactOverrides
+	  };
+	}).call(this);
+	//#endregion
+	
+	//#region URL: ./properties/shorthand-compactor
+	require['./properties/shorthand-compactor'] = (function () {
+	  // Compacts the tokens by transforming properties into their shorthand notations when possible
+	
+	  var isHackValue = function (t) { return t.value === '__hack'; };
+
+	  var compactShorthands = function(tokens, isImportant, processable, Token) {
+		// Contains the components found so far, grouped by shorthand name
+		var componentsSoFar = { };
+
+		// Initializes a prop in componentsSoFar
+		var initSoFar = function (shprop, last, clearAll) {
+		  var found = {};
+		  var shorthandPosition;
+
+		  if (!clearAll && componentsSoFar[shprop]) {
+			for (var i = 0; i < processable[shprop].components.length; i++) {
+			  var prop = processable[shprop].components[i];
+			  found[prop] = [];
+
+			  if (!(componentsSoFar[shprop].found[prop]))
+				continue;
+
+			  for (var ii = 0; ii < componentsSoFar[shprop].found[prop].length; ii++) {
+				var comp = componentsSoFar[shprop].found[prop][ii];
+
+				if (comp.isMarkedForDeletion)
+				  continue;
+
+				found[prop].push(comp);
+
+				if (comp.position && (!shorthandPosition || comp.position < shorthandPosition))
+				  shorthandPosition = comp.position;
+			  }
+			}
+		  }
+		  componentsSoFar[shprop] = {
+			lastShorthand: last,
+			found: found,
+			shorthandPosition: shorthandPosition
+		  };
+		};
+
+		// Adds a component to componentsSoFar
+		var addComponentSoFar = function (token, index) {
+		  var shprop = processable[token.prop].componentOf;
+		  if (!componentsSoFar[shprop])
+			initSoFar(shprop);
+		  if (!componentsSoFar[shprop].found[token.prop])
+			componentsSoFar[shprop].found[token.prop] = [];
+
+		  // Add the newfound component to componentsSoFar
+		  componentsSoFar[shprop].found[token.prop].push(token);
+
+		  if (!componentsSoFar[shprop].shorthandPosition && index) {
+			// If the haven't decided on where the shorthand should go, put it in the place of this component
+			componentsSoFar[shprop].shorthandPosition = index;
+		  }
+		};
+
+		// Tries to compact a prop in componentsSoFar
+		var compactSoFar = function (prop) {
+		  var i;
+
+		  // Check basics
+		  if (!componentsSoFar[prop] || !componentsSoFar[prop].found)
+			return false;
+
+		  // Find components for the shorthand
+		  var components = [];
+		  var realComponents = [];
+		  for (i = 0; i < processable[prop].components.length; i++) {
+			// Get property name
+			var pp = processable[prop].components[i];
+
+			if (componentsSoFar[prop].found[pp] && componentsSoFar[prop].found[pp].length) {
+			  // We really found it
+			  var foundRealComp = componentsSoFar[prop].found[pp][0];
+			  components.push(foundRealComp);
+			  if (foundRealComp.isReal !== false) {
+				realComponents.push(foundRealComp);
+			  }
+			} else if (componentsSoFar[prop].lastShorthand) {
+			  // It's defined in the previous shorthand
+			  var c = componentsSoFar[prop].lastShorthand.components[i].clone(isImportant);
+			  components.push(c);
+			} else {
+			  // Couldn't find this component at all
+			  return false;
+			}
+		  }
+
+		  if (realComponents.length === 0) {
+			// Couldn't find enough components, sorry
+			return false;
+		  }
+
+		  if (realComponents.length === processable[prop].components.length) {
+			// When all the components are from real values, only allow shorthanding if their understandability allows it
+			// This is the case when every component can override their default values, or when all of them use the same function
+
+			var canOverrideDefault = true;
+			var functionNameMatches = true;
+			var functionName;
+
+			for (var ci = 0; ci < realComponents.length; ci++) {
+			  var rc = realComponents[ci];
+
+			  if (!processable[rc.prop].canOverride(processable[rc.prop].defaultValue, rc.value)) {
+				canOverrideDefault = false;
+			  }
+			  var iop = rc.value.indexOf('(');
+			  if (iop >= 0) {
+				var otherFunctionName = rc.value.substring(0, iop);
+				if (functionName)
+				  functionNameMatches = functionNameMatches && otherFunctionName === functionName;
+				else
+				  functionName = otherFunctionName;
+			  }
+			}
+
+			if (!canOverrideDefault || !functionNameMatches)
+			  return false;
+		  }
+
+		  // Compact the components into a shorthand
+		  var compacted = processable[prop].putTogether(prop, components, isImportant);
+		  if (!(compacted instanceof Array)) {
+			compacted = [compacted];
+		  }
+
+		  var compactedLength = Token.getDetokenizedLength(compacted);
+		  var authenticLength = Token.getDetokenizedLength(realComponents);
+
+		  if (realComponents.length === processable[prop].components.length || compactedLength < authenticLength || components.some(isHackValue)) {
+			compacted[0].isShorthand = true;
+			compacted[0].components = processable[prop].breakUp(compacted[0]);
+
+			// Mark the granular components for deletion
+			for (i = 0; i < realComponents.length; i++) {
+			  realComponents[i].isMarkedForDeletion = true;
+			}
+
+			// Mark the position of the new shorthand
+			tokens[componentsSoFar[prop].shorthandPosition].replaceWith = compacted;
+
+			// Reinitialize the thing for further compacting
+			initSoFar(prop, compacted[0]);
+			for (i = 1; i < compacted.length; i++) {
+			  addComponentSoFar(compacted[i]);
+			}
+
+			// Yes, we can keep the new shorthand!
+			return true;
+		  }
+
+		  return false;
+		};
+
+		// Tries to compact all properties currently in componentsSoFar
+		var compactAllSoFar = function () {
+		  for (var i in componentsSoFar) {
+			if (componentsSoFar.hasOwnProperty(i)) {
+			  while (compactSoFar(i)) { }
+			}
+		  }
+		};
+
+		var i, token;
+
+		// Go through each token and collect components for each shorthand as we go on
+		for (i = 0; i < tokens.length; i++) {
+		  token = tokens[i];
+		  if (token.isMarkedForDeletion) {
+			continue;
+		  }
+		  if (!processable[token.prop]) {
+			// We don't know what it is, move on
+			continue;
+		  }
+		  if (processable[token.prop].isShorthand) {
+			// Found an instance of a full shorthand
+			// NOTE: we should NOT mix together tokens that come before and after the shorthands
+
+			if (token.isImportant === isImportant || (token.isImportant && !isImportant)) {
+			  // Try to compact what we've found so far
+			  while (compactSoFar(token.prop)) { }
+			  // Reset
+			  initSoFar(token.prop, token, true);
+			}
+
+			// TODO: when the old optimizer is removed, take care of this corner case:
+			//   div{background-color:#111;background-image:url(aaa);background:linear-gradient(aaa);background-repeat:no-repeat;background-position:1px 2px;background-attachment:scroll}
+			//   -> should not be shorthanded / minified at all because the result wouldn't be equivalent to the original in any browser
+		  } else if (processable[token.prop].componentOf) {
+			// Found a component of a shorthand
+			if (token.isImportant === isImportant) {
+			  // Same importantness
+			  token.position = i;
+			  addComponentSoFar(token, i);
+			} else if (!isImportant && token.isImportant) {
+			  // Use importants for optimalization opportunities
+			  // https://github.com/GoalSmashers/clean-css/issues/184
+			  var importantTrickComp = new Token(token.prop, token.value, isImportant);
+			  importantTrickComp.isIrrelevant = true;
+			  importantTrickComp.isReal = false;
+			  addComponentSoFar(importantTrickComp);
+			}
+		  } else {
+			// This is not a shorthand and not a component, don't care about it
+			continue;
+		  }
+		}
+
+		// Perform all possible compactions
+		compactAllSoFar();
+
+		// Process the results - throw away stuff marked for deletion, insert compacted things, etc.
+		var result = [];
+		for (i = 0; i < tokens.length; i++) {
+		  token = tokens[i];
+
+		  if (token.replaceWith) {
+			for (var ii = 0; ii < token.replaceWith.length; ii++) {
+			  result.push(token.replaceWith[ii]);
+			}
+		  }
+		  if (!token.isMarkedForDeletion) {
+			result.push(token);
+		  }
+
+		  token.isMarkedForDeletion = false;
+		  token.replaceWith = null;
+		}
+
+		return result;
+	  };
+
+	  return {
+		compactShorthands: compactShorthands
+	  };
+	}).call(this);
+	//#endregion
+
 	//#region URL: ./properties/optimizer
 	require['./properties/optimizer'] = (function () {
+		var processableInfo = require('./properties/processable');
+		var overrideCompactor = require('./properties/override-compactor');
+		var shorthandCompactor = require('./properties/shorthand-compactor');
+
 		function Optimizer(compatibility) {
 		  var overridable = {
 			'animation-delay': ['animation'],
@@ -588,6 +1903,7 @@ var CleanCss = (function(){
 		  var rebuild = function(tokens) {
 			var flat = [];
 
+
 			for (var i = 0, l = tokens.length; i < l; i++) {
 			  flat.push(tokens[i][0] + ':' + tokens[i][1]);
 			}
@@ -595,19 +1911,62 @@ var CleanCss = (function(){
 			return flat.join(';');
 		  };
 
-		  return {
-			process: function(body, allowAdjacent) {
-			  var tokens = tokenize(body);
-			  if (!tokens)
-				return body;
+		  var compact = function (input) {
+			var processable = processableInfo.processable;
+			var Token = processableInfo.Token;
 
-			  var optimized = optimize(tokens, allowAdjacent);
-			  return rebuild(optimized);
+			var tokens = Token.tokenize(input);
+
+			tokens = overrideCompactor.compactOverrides(tokens, processable);
+			tokens = shorthandCompactor.compactShorthands(tokens, false, processable, Token);
+			tokens = shorthandCompactor.compactShorthands(tokens, true, processable, Token);
+
+			return Token.detokenize(tokens);
+		  };
+
+		  return {
+			process: function(body, allowAdjacent, skipCompacting) {
+			  var result = body;
+
+			  var tokens = tokenize(body);
+			  if (tokens) {
+				var optimized = optimize(tokens, allowAdjacent);
+				result = rebuild(optimized);
+			  }
+
+			  if (!skipCompacting) {
+				result = compact(result);
+			  }
+
+			  return result;
 			}
 		  };
 		};
 
 		return Optimizer;
+	}).call(this);
+	//#endregion
+	
+	//#region URL: ./properties/scanner
+	require['./properties/scanner'] = (function () {
+	  var OPEN_BRACE = '{';
+	  var SEMICOLON = ';';
+	  var COLON = ':';
+
+	  var PropertyScanner = function PropertyScanner(data) {
+		this.data = data;
+	  };
+
+	  PropertyScanner.prototype.nextAt = function(cursor) {
+		var lastColon = this.data.lastIndexOf(COLON, cursor);
+		var lastOpenBrace = this.data.lastIndexOf(OPEN_BRACE, cursor);
+		var lastSemicolon = this.data.lastIndexOf(SEMICOLON, cursor);
+		var startAt = Math.max(lastOpenBrace, lastSemicolon);
+
+		return this.data.substring(startAt + 1, lastColon).trim();
+	  };
+
+	  return PropertyScanner;
 	}).call(this);
 	//#endregion
 	
@@ -791,86 +2150,145 @@ var CleanCss = (function(){
 	}).call(this);
 	//#endregion
 	
+	//#region URL: ./text/quote-scanner
+	require['./text/quote-scanner'] = (function () {
+	  var QuoteScanner = function QuoteScanner(data) {
+		this.data = data;
+	  };
+
+	  var findNonEscapedEnd = function(data, matched, start) {
+		var end = start;
+		while (true) {
+		  end = data.indexOf(matched, end);
+
+		  if (end > -1 && data[end - 1] == '\\') {
+			end += 1;
+			continue;
+		  } else {
+			break;
+		  }
+		}
+
+		return end;
+	  };
+
+	  QuoteScanner.prototype.each = function(callback) {
+		var data = this.data;
+		var tempData = [];
+		var nextStart = 0;
+		var nextEnd = 0;
+		var cursor = 0;
+		var matchedMark = null;
+		var singleMark = '\'';
+		var doubleMark = '"';
+		var dataLength = data.length;
+
+		for (; nextEnd < data.length;) {
+		  var nextStartSingle = data.indexOf(singleMark, nextEnd + 1);
+		  var nextStartDouble = data.indexOf(doubleMark, nextEnd + 1);
+
+		  if (nextStartSingle == -1)
+			nextStartSingle = dataLength;
+		  if (nextStartDouble == -1)
+			nextStartDouble = dataLength;
+
+		  if (nextStartSingle < nextStartDouble) {
+			nextStart = nextStartSingle;
+			matchedMark = singleMark;
+		  } else {
+			nextStart = nextStartDouble;
+			matchedMark = doubleMark;
+		  }
+
+		  if (nextStart == -1)
+			break;
+
+		  nextEnd = findNonEscapedEnd(data, matchedMark, nextStart + 1);
+		  if (nextEnd == -1)
+			break;
+
+		  var text = data.substring(nextStart, nextEnd + 1);
+		  tempData.push(data.substring(cursor, nextStart));
+		  callback(text, tempData, nextStart);
+
+		  cursor = nextEnd + 1;
+		}
+
+		return tempData.length > 0 ?
+		  tempData.join('') + data.substring(cursor, data.length) :
+		  data;
+	  };
+	  
+	  return QuoteScanner;
+	}).call(this);
+	//#endregion
+	
+	//#region URL: ./text/name-quotes
+	require['./text/name-quotes'] = (function () {
+	  var QuoteScanner = require('./text/quote-scanner');
+	  var PropertyScanner = require('./properties/scanner');
+
+	  var NameQuotes = function NameQuotes() {};
+
+	  var STRIPPABLE = /^['"][a-zA-Z][a-zA-Z\d\-_]+['"]$/;
+
+	  var properties = [
+		'animation',
+		'-moz-animation',
+		'-o-animation',
+		'-webkit-animation',
+		'animation-name',
+		'-moz-animation-name',
+		'-o-animation-name',
+		'-webkit-animation-name',
+		'font',
+		'font-family'
+	  ];
+
+	  NameQuotes.prototype.process = function(data) {
+		var scanner = new PropertyScanner(data);
+
+		return new QuoteScanner(data).each(function(match, store, cursor) {
+		  var lastProperty = scanner.nextAt(cursor);
+		  if (properties.indexOf(lastProperty) > -1) {
+			if (STRIPPABLE.test(match))
+			  match = match.substring(1, match.length - 1);
+		  }
+
+		  store.push(match);
+		});
+	  };
+	  
+	  return NameQuotes;
+	}).call(this);
+	//#endregion
+	
 	//#region URL: ./text/free
 	require['./text/free'] = (function () {
-		var EscapeStore = require('./text/escape-store');
-		
-		function Free() {
-		  var texts = new EscapeStore('FREE_TEXT');
+	  var EscapeStore = require('./text/escape-store');
+	  var QuoteScanner = require('./text/quote-scanner');
 
-		  var findNonEscapedEnd = function(data, matched, start) {
-			var end = start;
-			while (true) {
-			  end = data.indexOf(matched, end);
+	  var Free = function Free() {
+		this.matches = new EscapeStore('FREE_TEXT');
+	  };
 
-			  if (end > -1 && data[end - 1] == '\\') {
-				end += 1;
-				continue;
-			  } else {
-				break;
-			  }
-			}
+	  // Strip content tags by replacing them by the a special
+	  // marker for further restoring. It's done via string scanning
+	  // instead of regexps to speed up the process.
+	  Free.prototype.escape = function(data) {
+		var self = this;
 
-			return end;
-		  };
+		return new QuoteScanner(data).each(function(match, store) {
+		  var placeholder = self.matches.store(match);
+		  store.push(placeholder);
+		});
+	  };
 
-		  return {
-			// Strip content tags by replacing them by the a special
-			// marker for further restoring. It's done via string scanning
-			// instead of regexps to speed up the process.
-			escape: function(data) {
-			  var tempData = [];
-			  var nextStart = 0;
-			  var nextEnd = 0;
-			  var cursor = 0;
-			  var matchedParenthesis = null;
-			  var singleParenthesis = '\'';
-			  var doubleParenthesis = '"';
-			  var dataLength = data.length;
+	  Free.prototype.restore = function(data) {
+		return data.replace(this.matches.placeholderRegExp, this.matches.restore);
+	  };
 
-			  for (; nextEnd < data.length;) {
-				var nextStartSingle = data.indexOf(singleParenthesis, nextEnd + 1);
-				var nextStartDouble = data.indexOf(doubleParenthesis, nextEnd + 1);
-
-				if (nextStartSingle == -1)
-				  nextStartSingle = dataLength;
-				if (nextStartDouble == -1)
-				  nextStartDouble = dataLength;
-
-				if (nextStartSingle < nextStartDouble) {
-				  nextStart = nextStartSingle;
-				  matchedParenthesis = singleParenthesis;
-				} else {
-				  nextStart = nextStartDouble;
-				  matchedParenthesis = doubleParenthesis;
-				}
-
-				if (nextStart == -1)
-				  break;
-
-				nextEnd = findNonEscapedEnd(data, matchedParenthesis, nextStart + 1);
-				if (nextEnd == -1)
-				  break;
-
-				var text = data.substring(nextStart, nextEnd + 1);
-				var placeholder = texts.store(text);
-				tempData.push(data.substring(cursor, nextStart));
-				tempData.push(placeholder);
-				cursor = nextEnd + 1;
-			  }
-
-			  return tempData.length > 0 ?
-				tempData.join('') + data.substring(cursor, data.length) :
-				data;
-			},
-
-			restore: function(data) {
-			  return data.replace(texts.placeholderRegExp, texts.restore);
-			}
-		  };
-		};
-		
-		return Free;
+	  return Free;
 	}).call(this);
 	//#endregion
 	
@@ -936,7 +2354,7 @@ var CleanCss = (function(){
 				break;
 
 			  var startsAt = nextEmpty - 1;
-			  while (cssData[startsAt] && cssData[startsAt] != '}' && cssData[startsAt] != '{')
+			  while (cssData[startsAt] && cssData[startsAt] != '}' && cssData[startsAt] != '{' && cssData[startsAt] != ';')
 				startsAt--;
 
 			  tempData.push(cssData.substring(cursor, startsAt + 1));
@@ -961,7 +2379,6 @@ var CleanCss = (function(){
 	
 	//#region URL: ./selectors/tokenizer
 	require['./selectors/tokenizer'] = (function () {
-		/* jshint latedef: false */
 		function Tokenizer(data, minifyContext) {
 		  var chunker = new Chunker(data, 128);
 		  var chunk = chunker.next();
@@ -1371,6 +2788,7 @@ var CleanCss = (function(){
 		  var _reduceSelector = function(tokens, selector, data, options) {
 			var bodies = [];
 			var joinsAt = [];
+			var splitBodies = [];
 			var processedTokens = [];
 
 			for (var j = data.length - 1, m = 0; j >= 0; j--) {
@@ -1381,15 +2799,16 @@ var CleanCss = (function(){
 			  var token = tokens[where];
 			  var body = token.body;
 			  bodies.push(body);
+			  splitBodies.push(body.split(';'));
 			  processedTokens.push(where);
 			}
 
 			for (j = 0, m = bodies.length; j < m; j++) {
 			  if (bodies[j].length > 0)
-				joinsAt.push((joinsAt[j - 1] || 0) + bodies[j].split(';').length);
+				joinsAt.push((joinsAt[j - 1] || 0) + splitBodies[j].length);
 			}
 
-			var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt);
+			var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt, true);
 			var optimizedProperties = optimizedBody.split(';');
 
 			var processedCount = processedTokens.length;
@@ -1397,7 +2816,7 @@ var CleanCss = (function(){
 			var tokenIdx = processedCount - 1;
 
 			while (tokenIdx >= 0) {
-			  if ((tokenIdx === 0 || bodies[tokenIdx].indexOf(optimizedProperties[propertyIdx]) > -1) && propertyIdx > -1) {
+			  if ((tokenIdx === 0 || splitBodies[tokenIdx].indexOf(optimizedProperties[propertyIdx]) > -1) && propertyIdx > -1) {
 				propertyIdx--;
 				continue;
 			  }
@@ -1489,7 +2908,6 @@ var CleanCss = (function(){
 		var ColorRGBToHex = require('./colors/rgb-to-hex');
 		var ColorLongToShortHex = require('./colors/long-to-short-hex');
 
-		var ShorthandNotations = require('./properties/shorthand-notations');
 //		var ImportInliner = require('./imports/inliner');
 //		var UrlRebase = require('./images/url-rebase');
 		var EmptyRemoval = require('./selectors/empty-removal');
@@ -1498,6 +2916,7 @@ var CleanCss = (function(){
 		var ExpressionsProcessor = require('./text/expressions');
 		var FreeTextProcessor = require('./text/free');
 		var UrlsProcessor = require('./text/urls');
+		var NameQuotesProcessor = require('./text/name-quotes');
 
 		var SelectorsOptimizer = require('./selectors/optimizer');
 
@@ -1569,6 +2988,7 @@ var CleanCss = (function(){
 		  var expressionsProcessor = new ExpressionsProcessor();
 		  var freeTextProcessor = new FreeTextProcessor();
 		  var urlsProcessor = new UrlsProcessor();
+		  var nameQuotesProcessor = new NameQuotesProcessor();
 
 //		  if (options.debug) {
 //			this.startedAt = process.hrtime();
@@ -1620,8 +3040,8 @@ var CleanCss = (function(){
 		  });
 
 		  // strip parentheses in animation & font names
-		  replace(/(animation|animation\-name|font|font\-family):([^;}]+)/g, function(match, propertyName, def) {
-			return propertyName + ':' + def.replace(/['"]([a-zA-Z][a-zA-Z\d\-_]+)['"]/g, '$1');
+		  replace(function removeQuotes() {
+			data = nameQuotesProcessor.process(data);
 		  });
 
 		  // strip parentheses in @keyframes
@@ -1732,8 +3152,10 @@ var CleanCss = (function(){
 		  });
 
 		  // minus zero to zero
-		  replace(/(\s|:|,|\()\-0([^\.])/g, '$10$2');
-		  replace(/-0([,\)])/g, '0$1');
+		  // repeated twice on purpose as if not it doesn't process rgba(-0,-0,-0,-0) correctly
+		  var zerosRegexp = /(\s|:|,|\()\-0([^\.])/g;
+		  replace(zerosRegexp, '$10$2');
+		  replace(zerosRegexp, '$10$2');
 
 		  // zero(s) + value to value
 		  replace(/(\s|:|,)0+([1-9])/g, '$1$2');
@@ -1781,13 +3203,9 @@ var CleanCss = (function(){
 		  replace(/background:(?:none|transparent)([;}])/g, 'background:0 0$1');
 
 		  // multiple zeros into one
-		  replace(/box-shadow:0 0 0 0([^\.])/g, 'box-shadow:0 0$1');
+		  replace(/box-shadow:0 0 0( 0)?([^\.])/g, 'box-shadow:0 0$2');
 		  replace(/:0 0 0 0([^\.])/g, ':0$1');
 		  replace(/([: ,=\-])0\.(\d)/g, '$1.$2');
-
-		  replace(function shorthandNotations() {
-			data = new ShorthandNotations(data).process();
-		  });
 
 		  // restore rect(...) zeros syntax for 4 zeros
 		  replace(/rect\(\s?0(\s|,)0[ ,]0[ ,]0\s?\)/g, 'rect(0$10$10$10)');

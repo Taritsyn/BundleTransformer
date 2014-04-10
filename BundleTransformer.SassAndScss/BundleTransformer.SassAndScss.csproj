@@ -86,41 +86,73 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ironruby\digest.rb" />
-    <EmbeddedResource Include="Resources\ironruby\digest\md5.rb" />
-    <EmbeddedResource Include="Resources\ironruby\digest\sha1.rb" />
-    <EmbeddedResource Include="Resources\ironruby\enumerator.rb" />
-    <EmbeddedResource Include="Resources\ironruby\etc.rb" />
-    <EmbeddedResource Include="Resources\ironruby\rbconfig.rb" />
-    <EmbeddedResource Include="Resources\ironruby\stringio.rb" />
-    <EmbeddedResource Include="Resources\ironruby\strscan.rb" />
-    <EmbeddedResource Include="Resources\ironruby\zlib.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\fileutils.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\pathname.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\set.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\common.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ftp.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\generic.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\http.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\https.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldap.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldaps.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\mailto.rb" />
-    <EmbeddedResource Include="Resources\sass-combined.rb" />
+    <Content Include="Resources\ironruby\digest.rb" />
+    <Content Include="Resources\ironruby\digest\sha1.rb" />
+    <Content Include="Resources\ironruby\enumerator.rb" />
+    <Content Include="Resources\ironruby\rbconfig.rb" />
+    <Content Include="Resources\ironruby\stringio.rb" />
+    <Content Include="Resources\ironruby\strscan.rb" />
+    <Content Include="Resources\ruby\1.9.1\find.rb" />
+    <Content Include="Resources\ruby\1.9.1\pathname.rb" />
+    <Content Include="Resources\ruby\1.9.1\set.rb" />
+    <Content Include="Resources\ruby\1.9.1\tsort.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\common.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\ftp.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\generic.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\http.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\https.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\ldap.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\ldaps.rb" />
+    <Content Include="Resources\ruby\1.9.1\uri\mailto.rb" />
+    <EmbeddedResource Include="Resources\ironruby\digest.min.rb" />
+    <EmbeddedResource Include="Resources\ironruby\digest\sha1.min.rb" />
+    <EmbeddedResource Include="Resources\ironruby\enumerator.min.rb" />
+    <EmbeddedResource Include="Resources\ironruby\rbconfig.min.rb" />
+    <EmbeddedResource Include="Resources\ironruby\stringio.min.rb" />
+    <EmbeddedResource Include="Resources\ironruby\strscan.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\find.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\pathname.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\set.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\tsort.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\common.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ftp.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\generic.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\http.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\https.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldap.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldaps.min.rb" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\mailto.min.rb" />
+    <Content Include="Resources\sass-combined.rb" />
     <None Include="..\BundleTransformer.snk">
       <Link>BundleTransformer.snk</Link>
     </None>
-    <EmbeddedResource Include="Resources\ruby\1.9.1\date.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\date\format.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\delegate.rb" />
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\LICENSE.txt" />
+    <EmbeddedResource Include="Resources\sass-combined.min.rb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>@echo off
+setlocal enabledelayedexpansion
+
+cd "$(ProjectDir)..\Binaries\RubyMin\"
+
+for /f "delims=" %25%25A in ('dir "$(ProjectDir)\Resources\*.rb" /b/s') do (
+	set inputFilePath=%25%25A
+	set inputFileExtension=!inputFilePath:~-7!
+	set outputFileExtension=.min.rb
+	set outputFilePath=!inputFilePath:~0,-3!!outputFileExtension!
+	
+	if /i not !inputFileExtension!==!outputFileExtension! (
+		del "!outputFilePath!"
+		start /b/wait RBMin.exe "!inputFilePath!" -o "!outputFilePath!" -k -r
+	)
+)</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

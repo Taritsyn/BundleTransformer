@@ -62,6 +62,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to eject the <code>@charset</code> rules before minification
+		/// </summary>
+		public bool EjectCharset
+		{
+			get;
+			set;
+		}
+
 		
 		/// <summary>
 		/// Loads a information about <code>WebGrease.Configuration.WebGreaseConfiguration</code> type
@@ -87,7 +96,9 @@
 		/// <param name="wgConfig">Configuration settings of WebGrease Minifier</param>
 		public WgCssMinifier(WgSettings wgConfig)
 		{
-			ShouldMinify = wgConfig.CssMinifier.ShouldMinify;
+			CssMinifierSettings cssMinifierConfig = wgConfig.CssMinifier;
+			ShouldMinify = cssMinifierConfig.ShouldMinify;
+			EjectCharset = cssMinifierConfig.EjectCharset;
 
 			_wgConfiguration = CreateWebGreaseConfiguration();
 		}
@@ -124,17 +135,28 @@
 			foreach (var asset in assetsToProcessing)
 			{
 				string content = asset.Content;
+				string topCharset = string.Empty;
+				string preprocessedContent = content;
+				if (EjectCharset)
+				{
+					preprocessedContent = EjectCssCharset(preprocessedContent, ref topCharset);
+				}
 				string newContent;
 				string assetUrl = asset.Url;
 
 				try
 				{
-					newContent = wgCssMinifier.Minify(content);
+					newContent = wgCssMinifier.Minify(preprocessedContent);
+					if (EjectCharset && !string.IsNullOrWhiteSpace(topCharset))
+					{
+						string separator = ShouldMinify ? string.Empty : Environment.NewLine;
+						newContent = topCharset + separator + newContent;
+					}
 
 					IList<string> errors = wgCssMinifier.Errors;
 					if (errors.Count > 0)
 					{
-						throw new WgMinificationException(FormatErrorDetails(errors[0], content, assetUrl));
+						throw new WgMinificationException(FormatErrorDetails(errors[0], preprocessedContent, assetUrl));
 					}
 				}
 				catch (WgMinificationException e)
@@ -166,6 +188,122 @@
 			object wgConfigurationObj = _wgConfigurationConstructorInfo.Invoke(null);
 
 			return (WebGreaseConfiguration)wgConfigurationObj;
+		}
+
+		/// <summary>
+		/// Ejects a <code>@charset</code> rules
+		/// </summary>
+		/// <param name="content">Text content of CSS-asset</param>
+		/// <param name="topCharset">Processed top <code>@charset</code> rule</param>
+		/// <returns>Text content of CSS-asset without <code>@charset</code> rules</returns>
+		private static string EjectCssCharset(string content, ref string topCharset)
+		{
+			int contentLength = content.Length;
+			if (contentLength == 0)
+			{
+				return content;
+			}
+
+			MatchCollection charsetRuleMatches = CommonRegExps.CssCharsetRuleRegex.Matches(content);
+			if (charsetRuleMatches.Count == 0)
+			{
+				return content;
+			}
+
+			var nodeMatches = new List<CssNodeMatch>();
+
+			foreach (Match charsetRuleMatch in charsetRuleMatches)
+			{
+				var nodeMatch = new CssNodeMatch(charsetRuleMatch.Index,
+					charsetRuleMatch.Length,
+					CssNodeType.CharsetRule,
+					charsetRuleMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+
+			MatchCollection multilineCommentMatches = CommonRegExps.CssMultilineCommentRegex.Matches(content);
+
+			foreach (Match multilineCommentMatch in multilineCommentMatches)
+			{
+				var nodeMatch = new CssNodeMatch(multilineCommentMatch.Index,
+					multilineCommentMatch.Length,
+					CssNodeType.MultilineComment,
+					multilineCommentMatch);
+				nodeMatches.Add(nodeMatch);
+			}
+
+			nodeMatches = nodeMatches
+				.OrderBy(n => n.Position)
+				.ThenByDescending(n => n.Length)
+				.ToList()
+				;
+
+			var contentBuilder = new StringBuilder();
+			int endPosition = contentLength - 1;
+			int currentPosition = 0;
+
+			foreach (CssNodeMatch nodeMatch in nodeMatches)
+			{
+				CssNodeType nodeType = nodeMatch.NodeType;
+				int nodePosition = nodeMatch.Position;
+				Match match = nodeMatch.Match;
+
+				if (nodePosition < currentPosition)
+				{
+					continue;
+				}
+
+				if (nodeType == CssNodeType.MultilineComment)
+				{
+					int nextPosition = nodePosition + match.Length;
+
+					ProcessOtherContent(contentBuilder, content,
+						ref currentPosition, nextPosition);
+				}
+				else if (nodeType == CssNodeType.CharsetRule)
+				{
+					ProcessOtherContent(contentBuilder, content,
+						ref currentPosition, nodePosition);
+
+					string charset = match.Groups["charset"].Value;
+
+					string charsetRule = match.Value;
+					if (string.IsNullOrWhiteSpace(topCharset))
+					{
+						topCharset = string.Format(@"@charset ""{0}"";", charset);
+					}
+
+					currentPosition += charsetRule.Length;
+				}
+			}
+
+			if (currentPosition > 0 && currentPosition <= endPosition)
+			{
+				ProcessOtherContent(contentBuilder, content,
+					ref currentPosition, endPosition + 1);
+			}
+
+			return contentBuilder.ToString();
+		}
+
+		/// <summary>
+		/// Process a other stylesheet content
+		/// </summary>
+		/// <param name="contentBuilder">Content builder</param>
+		/// <param name="assetContent">Text content of CSS-asset</param>
+		/// <param name="currentPosition">Current position</param>
+		/// <param name="nextPosition">Next position</param>
+		private static void ProcessOtherContent(StringBuilder contentBuilder, string assetContent,
+			ref int currentPosition, int nextPosition)
+		{
+			if (nextPosition > currentPosition)
+			{
+				string otherContent = assetContent.Substring(currentPosition,
+					nextPosition - currentPosition);
+
+				contentBuilder.Append(otherContent);
+				currentPosition = nextPosition;
+			}
 		}
 
 		/// <summary>
