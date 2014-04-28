@@ -506,6 +506,11 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 						<xs:documentation>Flag indicating whether to always escape non-ASCII characters as \uXXXX or to let the output encoding object handle that via the JsEncoderFallback object for the specified output encoding format</xs:documentation>
 					</xs:annotation>				
 				</xs:attribute>
+				<xs:attribute name="amdSupport" type="Boolean_SchemaType" use="optional" default="false">
+					<xs:annotation>
+						<xs:documentation>Flag indicating whether to perform extra tasks on AMD-style defines</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
 				<xs:attribute name="collapseToLiteral" type="Boolean_SchemaType" use="optional" default="true">
 					<xs:annotation>
 						<xs:documentation>Flag for whether to collapse new Array() to [] and new Object() to {} (true) or leave as-is (false)</xs:documentation>

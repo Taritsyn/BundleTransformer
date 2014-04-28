@@ -20,6 +20,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag indicating whether to perform extra tasks on AMD-style defines
+		/// </summary>
+		[ConfigurationProperty("amdSupport", DefaultValue = false)]
+		public bool AmdSupport
+		{
+			get { return (bool)this["amdSupport"]; }
+			set { this["amdSupport"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to collapse <code>new Array()</code>
 		/// to <code>[]</code> and <code>new Object()</code> to <code>{}</code>
 		/// (true) or leave as-is (false)

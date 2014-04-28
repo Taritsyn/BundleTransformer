@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: Core 1.8.29
+              README file for Bundle Transformer: Core 1.8.30
 
    ----------------------------------------------------------------------
 
@@ -33,11 +33,6 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Optimized some regular expressions.
    
    =============
    DOCUMENTATION

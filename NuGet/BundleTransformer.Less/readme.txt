@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.29
+              README file for Bundle Transformer: LESS 1.8.30
 
    ----------------------------------------------------------------------
 
@@ -17,11 +17,19 @@
    HTTP-handler `LessAssetHandler`, which is responsible for text output 
    of translated LESS-asset.
    
+   BundleTransformer.Less does not support the string interpolation in
+   file paths. 
+   
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   LESS was updated to commit d6d983f727.
    
    ====================
    POST-INSTALL ACTIONS

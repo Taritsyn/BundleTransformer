@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.WG</id>
-    <version>1.8.29-Beta3</version>
+    <version>1.8.30-Beta3</version>
 	<title>Bundle Transformer: WebGrease</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -12,12 +12,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BundleTransformer.WG contains one minifier-adapter for minification of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS-minifier (http://webgrease.codeplex.com) version 1.6.0.</description>
     <summary>BundleTransformer.WG contains one minifier-adapter for minification of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS-minifier version 1.6.0.</summary>
-	<releaseNotes>In CSS minification settings added new property - `EjectCharset` (default `true`).</releaseNotes>
 	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify WebGrease</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.8.29" />
+      <dependency id="BundleTransformer.Core" version="1.8.30" />
 	  <dependency id="WebGrease" version="1.6.0" />
     </dependencies>
     <references>

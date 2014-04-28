@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Clean-css 1.8.29
+            README file for Bundle Transformer: Clean-css 1.8.30
  
    ----------------------------------------------------------------------
 
@@ -21,11 +21,6 @@
    working of this module is recommended to install the following 
    NuGet packages: JavaScriptEngineSwitcher.V8 or 
    JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Clean-css version 2.1.8.
    
    ====================
    POST-INSTALL ACTIONS

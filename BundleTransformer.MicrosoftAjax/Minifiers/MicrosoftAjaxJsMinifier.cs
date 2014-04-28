@@ -210,6 +210,21 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag indicating whether to perform extra tasks on AMD-style defines
+		/// </summary>
+		public bool AmdSupport
+		{
+			get
+			{
+				return _jsParserConfiguration.AmdSupport;
+			}
+			set
+			{
+				_jsParserConfiguration.AmdSupport = value;
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to collapse <code>new Array()</code>
 		/// to <code>[]</code> and <code>new Object()</code> to <code>{}</code>
 		/// (true) or leave as-is (false)
@@ -575,6 +590,7 @@
 			JsMinifierSettings jsMinifierConfiguration = microsoftAjaxConfig.JsMinifier;
 			MapCommonSettings(this, jsMinifierConfiguration);
 			AlwaysEscapeNonAscii = jsMinifierConfiguration.AlwaysEscapeNonAscii;
+			AmdSupport = jsMinifierConfiguration.AmdSupport;
 			CollapseToLiteral = jsMinifierConfiguration.CollapseToLiteral;
 			ConstStatementsMozilla = jsMinifierConfiguration.ConstStatementsMozilla;
 			DebugLookupList = jsMinifierConfiguration.DebugLookupList;

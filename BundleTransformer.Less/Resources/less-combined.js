@@ -2264,7 +2264,7 @@ var Less = (function(){
 			eval: function (env) {
 				var mixins, mixin, args, rules = [], match = false, i, m, f, isRecursive, isOneFound, rule,
 					candidates = [], candidate, conditionResult = [], defaultFunc = tree.defaultFunc,
-					defaultResult, defNone = 0, defTrue = 1, defFalse = 2, count; 
+					defaultResult, defNone = 0, defTrue = 1, defFalse = 2, count, originalRuleset; 
 
 				args = this.arguments && this.arguments.map(function (a) {
 					return { name: a.name, value: a.value.eval(env) };
@@ -2342,8 +2342,9 @@ var Less = (function(){
 								try {
 									mixin = candidates[m].mixin;
 									if (!(mixin instanceof tree.mixin.Definition)) {
+										originalRuleset = mixin.originalRuleset || mixin;
 										mixin = new tree.mixin.Definition("", [], mixin.rules, null, false);
-										mixin.originalRuleset = mixins[m].originalRuleset || mixins[m];
+										mixin.originalRuleset = originalRuleset;
 									}
 									Array.prototype.push.apply(
 										  rules, mixin.evalCall(env, args, this.important).rules);

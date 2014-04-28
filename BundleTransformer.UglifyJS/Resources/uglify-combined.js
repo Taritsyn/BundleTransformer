@@ -1346,14 +1346,7 @@
 	};
 
 	function is_identifier_string(str){
-		var i = str.length;
-		if (i == 0) return false;
-		if (!is_identifier_start(str.charCodeAt(0))) return false;
-		while (--i >= 0) {
-			if (!is_identifier_char(str.charAt(i)))
-				return false;
-		}
-		return true;
+		return /^[a-z_$][a-z0-9_$]*$/i.test(str);
 	};
 
 	function parse_js_number(num) {
@@ -4302,8 +4295,12 @@
 		DEFPRINT(AST_UnaryPrefix, function(self, output){
 			var op = self.operator;
 			output.print(op);
-			if (/^[a-z]/i.test(op))
+			if (/^[a-z]/i.test(op)
+				|| (/[+-]$/.test(op)
+					&& self.expression instanceof AST_UnaryPrefix
+					&& /^[+-]/.test(self.expression.operator))) {
 				output.space();
+			}
 			self.expression.print(output);
 		});
 		DEFPRINT(AST_UnaryPostfix, function(self, output){
@@ -6951,7 +6948,7 @@
 					start    : my_start_token(M),
 					end      : my_end_token(M),
 					body     : from_moz(M.block).body,
-					bcatch   : from_moz(M.handlers[0]),
+					bcatch   : from_moz(M.handlers ? M.handlers[0] : M.handler),
 					bfinally : M.finalizer ? new AST_Finally(from_moz(M.finalizer)) : null
 				});
 			},

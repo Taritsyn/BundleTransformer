@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.8.29
+          README file for Bundle Transformer: Sass and SCSS 1.8.30
 
    ----------------------------------------------------------------------
 
@@ -18,19 +18,14 @@
    `SassAndScssAssetHandler`, which is responsible for text output of 
    translated Sass- or SCSS-asset.
    
+   BundleTransformer.SassAndScss does not support the string interpolation
+   in file paths. 
+   
    For execution of Ruby-code is used a IronRuby
    (http://github.com/IronLanguages/main) version 1.1.4.0. Assemblies
    `IronRuby.dll`, `IronRuby.Libraries.dll`, `Microsoft.Dynamic.dll`
    and `Microsoft.Scripting.dll` were builded from source code of the
    IronLanguages project.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of Sass version 3.2.15;
-   2. IronRuby was updated to commit 6e767994da;
-   3. Fixed bug #69 "Page does not load, IISExpress cpu usage climbs";
-   4. Slightly increased performance.
    
    ====================
    POST-INSTALL ACTIONS

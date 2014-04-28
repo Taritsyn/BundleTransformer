@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: Microsoft Ajax 1.8.29
+         README file for Bundle Transformer: Microsoft Ajax 1.8.30
  
    ----------------------------------------------------------------------
 
@@ -16,6 +16,13 @@
    `MicrosoftAjaxJsMinifier` (for minification of JS-code). These adapters 
    perform minification using the Microsoft Ajax Minifier 
    (http://ajaxmin.codeplex.com).
+   
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of the Microsoft Ajax Minifier version 5.9;
+   2. In JS minification settings added new property - `AmdSupport`
+      (default `false`).
    
    ====================
    POST-INSTALL ACTIONS
