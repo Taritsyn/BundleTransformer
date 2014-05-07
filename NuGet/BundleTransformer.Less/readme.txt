@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS 1.8.30
+              README file for Bundle Transformer: LESS 1.8.31
 
    ----------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   LESS was updated to commit d6d983f727.
+   LESS was updated to commit 028fe1a4ca.
    
    ====================
    POST-INSTALL ACTIONS

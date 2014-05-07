@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Closure 1.8.30
+             README file for Bundle Transformer: Closure 1.8.31
  
    ----------------------------------------------------------------------
 

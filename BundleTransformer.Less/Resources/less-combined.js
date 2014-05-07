@@ -1785,14 +1785,22 @@ var Less = (function(){
 				if (!x.toCSS) {
 					return -1;
 				}
-				
-				var left = this.toCSS(),
+
+				var left, right;
+
+				// when comparing quoted strings allow the quote to differ
+				if (x.type === "Quoted" && !this.escaped && !x.escaped) {
+					left = x.value;
+					right = this.value;
+				} else {
+					left = this.toCSS();
 					right = x.toCSS();
-				
+				}
+
 				if (left === right) {
 					return 0;
 				}
-				
+
 				return left < right ? -1 : 1;
 			}
 		};
@@ -3557,7 +3565,7 @@ var Less = (function(){
 						continue;
 					}
 					currentUnified = current.unit.toString() === "" && unitClone !== undefined ? new(tree.Dimension)(current.value, unitClone).unify() : current.unify();
-					unit = currentUnified.unit.toString() === "" && unitStatic !== undefined ? unitStatic : currentUnified.unit.toString();			
+					unit = currentUnified.unit.toString() === "" && unitStatic !== undefined ? unitStatic : currentUnified.unit.toString();
 					unitStatic = unit !== "" && unitStatic === undefined || unit !== "" && order[0].unify().unit.toString() === "" ? unit : unitStatic;
 					unitClone = unit !== "" && unitClone === undefined ? current.unit.toString() : unitClone;
 					j = values[""] !== undefined && unit !== "" && unit === unitStatic ? values[""] : values[unit];
@@ -3647,12 +3655,12 @@ var Less = (function(){
 			},
 			shade: function(color, amount) {
 				return this.mix(this.rgb(0, 0, 0), color, amount);
-			},   
+			},
 			extract: function(values, index) {
-				index = index.value - 1; // (1-based index)       
+				index = index.value - 1; // (1-based index)
 				// handle non-array values as an array of length 1
 				// return 'undefined' if index is invalid
-				return Array.isArray(values.value) 
+				return Array.isArray(values.value)
 					? values.value[index] : Array(values)[index];
 			},
 			length: function(values) {
@@ -3773,15 +3781,15 @@ var Less = (function(){
 
 		var mathFunctions = {
 		 // name,  unit
-			ceil:  null, 
-			floor: null, 
-			sqrt:  null, 
+			ceil:  null,
+			floor: null,
+			sqrt:  null,
 			abs:   null,
-			tan:   "", 
-			sin:   "", 
+			tan:   "",
+			sin:   "",
 			cos:   "",
-			atan:  "rad", 
-			asin:  "rad", 
+			atan:  "rad",
+			asin:  "rad",
 			acos:  "rad"
 		};
 
@@ -3806,19 +3814,19 @@ var Less = (function(){
 			var ab = color1.alpha, cb, // backdrop
 				as = color2.alpha, cs, // source
 				ar, cr, r = [];        // result
-				
+
 			ar = as + ab * (1 - as);
 			for (var i = 0; i < 3; i++) {
 				cb = color1.rgb[i] / 255;
 				cs = color2.rgb[i] / 255;
 				cr = mode(cb, cs);
 				if (ar) {
-					cr = (as * cs + ab * (cb 
+					cr = (as * cs + ab * (cb
 						- as * (cb + cs - cr))) / ar;
 				}
 				r[i] = cr * 255;
 			}
-			
+
 			return new(tree.Color)(r, ar);
 		}
 
@@ -3828,7 +3836,7 @@ var Less = (function(){
 			},
 			screen: function(cb, cs) {
 				return cb + cs - cb * cs;
-			},   
+			},
 			overlay: function(cb, cs) {
 				cb *= 2;
 				return (cb <= 1)
@@ -3841,7 +3849,7 @@ var Less = (function(){
 					e = 1;
 					d = (cb > 0.25) ? Math.sqrt(cb)
 						: ((16 * cb - 12) * cb + 4) * cb;
-				}            
+				}
 				return cb - (1 - 2 * cs) * e * (d - cb);
 			},
 			hardlight: function(cb, cs) {
@@ -3888,25 +3896,25 @@ var Less = (function(){
 
 		function initFunctions() {
 			var f, tf = tree.functions;
-			
+
 			// math
 			for (f in mathFunctions) {
 				if (mathFunctions.hasOwnProperty(f)) {
 					tf[f] = _math.bind(null, Math[f], mathFunctions[f]);
 				}
 			}
-			
+
 			// color blending
 			for (f in colorBlendMode) {
 				if (colorBlendMode.hasOwnProperty(f)) {
 					tf[f] = colorBlend.bind(null, colorBlendMode[f]);
 				}
 			}
-			
+
 			// default
 			f = tree.defaultFunc;
 			tf["default"] = f.eval.bind(f);
-			
+
 		} initFunctions();
 
 		function hsla(color) {
@@ -3939,13 +3947,9 @@ var Less = (function(){
 		}
 
 		tree.fround = function(env, value) {
-			var p;
-			if (env && (env.numPrecision != null)) {
-				p = Math.pow(10, env.numPrecision);
-				return Math.round(value * p) / p;
-			} else {
-				return value;
-			}
+			var p = env && env.numPrecision;
+			//add "epsilon" to ensure numbers like 1.000000005 (represented as 1.000000004999....) are properly rounded...
+			return (p == null) ? value : Number((value + 2e-16).toFixed(p));
 		};
 
 		tree.functionCall = function(env, currentFileInfo) {
