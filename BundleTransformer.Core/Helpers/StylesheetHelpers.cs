@@ -31,6 +31,11 @@
 		/// </summary>
 		private static readonly Regex _encodedNonAsciiCharactersRegex = new Regex(@"\\(?<value>[0-9a-fA-F]{6})");
 
+		/// <summary>
+		/// Regular expression for working with the line number from <code>-sass-debug-info</code> fake media query
+		/// </summary>
+		private static readonly Regex _debugInfoLineNumberRegex = new Regex(@"^\\00003[0-9]+$");
+
 
 		/// <summary>
 		/// Checks whether a position is included in the singleline comment
@@ -187,6 +192,12 @@
 		{
 			string result = _encodedNonAsciiCharactersRegex.Replace(value, m =>
 			{
+				string matchingValue = m.Value;
+				if (_debugInfoLineNumberRegex.IsMatch(matchingValue))
+				{
+					return matchingValue;
+				}
+
 				var charValue = (char)int.Parse(m.Groups["value"].Value, NumberStyles.HexNumber);
 				return charValue.ToString(CultureInfo.InvariantCulture);
 			});
