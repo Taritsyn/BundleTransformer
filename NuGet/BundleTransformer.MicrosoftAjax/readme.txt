@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: Microsoft Ajax 1.8.30
+         README file for Bundle Transformer: Microsoft Ajax 1.8.33
  
    ----------------------------------------------------------------------
 
@@ -20,9 +20,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the Microsoft Ajax Minifier version 5.9;
-   2. In JS minification settings added new property - `AmdSupport`
-      (default `false`).
+   Added support of the Microsoft Ajax Minifier version 5.10.
    
    ====================
    POST-INSTALL ACTIONS

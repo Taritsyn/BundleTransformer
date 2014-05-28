@@ -2601,8 +2601,8 @@ var Less = (function(){
 		//#region URL: ./tree/anonymous
 		(function (tree) {
 		
-		tree.Anonymous = function (string, index, currentFileInfo, mapLines) {
-			this.value = string.value || string;
+		tree.Anonymous = function (value, index, currentFileInfo, mapLines) {
+			this.value = value;
 			this.index = index;
 			this.mapLines = mapLines;
 			this.currentFileInfo = currentFileInfo;
@@ -3484,7 +3484,7 @@ var Less = (function(){
 				}
 			},
 			e: function (str) {
-				return new(tree.Anonymous)(str instanceof tree.JavaScript ? str.evaluated : str);
+				return new(tree.Anonymous)(str instanceof tree.JavaScript ? str.evaluated : str.value);
 			},
 			escape: function (str) {
 				return new(tree.Anonymous)(encodeURI(str.value).replace(/=/g, "%3D").replace(/:/g, "%3A").replace(/#/g, "%23").replace(/;/g, "%3B").replace(/\(/g, "%28").replace(/\)/g, "%29"));
