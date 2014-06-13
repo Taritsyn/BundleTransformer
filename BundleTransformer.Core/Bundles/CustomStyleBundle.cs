@@ -25,7 +25,7 @@
 		/// <param name="cdnPath">Path of bundle on CDN</param>
 		public CustomStyleBundle(string virtualPath, string cdnPath)
 			: base(virtualPath, cdnPath, 
-				new IBundleTransform[] { BundleTransformerContext.Current.GetCssTransformerInstance() })
+				new IBundleTransform[] { BundleTransformerContext.Current.Css.GetTransformerInstance() })
 		{
 			Builder = new NullBuilder();
 		}

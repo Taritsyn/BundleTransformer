@@ -240,7 +240,7 @@
 		/// Constructs instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		public MicrosoftAjaxCssMinifier()
-			: this(BundleTransformerContext.Current.GetMicrosoftAjaxConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>

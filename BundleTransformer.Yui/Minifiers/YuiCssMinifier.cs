@@ -75,8 +75,8 @@
 		/// <summary>
 		/// Constructs instance of YUI CSS-minifier
 		/// </summary>
-		public YuiCssMinifier() 
-			: this(BundleTransformerContext.Current.GetYuiConfiguration())
+		public YuiCssMinifier()
+			: this(BundleTransformerContext.Current.Configuration.GetYuiSettings())
 		{ }
 
 		/// <summary>

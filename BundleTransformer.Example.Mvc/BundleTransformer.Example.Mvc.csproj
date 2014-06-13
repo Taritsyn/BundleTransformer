@@ -367,6 +367,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj">
+      <Project>{05911325-5BF6-4845-98AF-4AEF698993AE}</Project>
+      <Name>BundleTransformer.Autoprefixer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.CleanCss\BundleTransformer.CleanCss.csproj">
       <Project>{AF409D45-61D1-4906-B7CA-92AB133F3044}</Project>
       <Name>BundleTransformer.CleanCss</Name>

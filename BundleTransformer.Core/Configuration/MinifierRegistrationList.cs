@@ -8,7 +8,7 @@
 	public sealed class MinifierRegistrationList : ConfigurationElementCollection
 	{
 		/// <summary>
-		/// Creates new minifier registration
+		/// Creates a new minifier registration
 		/// </summary>
 		/// <returns>Minifier registration</returns>
 		protected override ConfigurationElement CreateNewElement()
@@ -17,7 +17,7 @@
 		}
 
 		/// <summary>
-		/// Gets key of the specified minifier registration
+		/// Gets a key of the specified minifier registration
 		/// </summary>
 		/// <param name="element">Minifier registration</param>
 		/// <returns>Key</returns>
@@ -27,7 +27,7 @@
 		}
 
 		/// <summary>
-		/// Gets minifier registration by minifier name
+		/// Gets a minifier registration by minifier name
 		/// </summary>
 		/// <param name="name">Minifier name</param>
 		/// <returns>Minifier registration</returns>

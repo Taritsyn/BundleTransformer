@@ -3,11 +3,89 @@
 	using System;
 	using System.Globalization;
 	using System.Text;
+	using System.Text.RegularExpressions;
 
 	public static class SourceCodeNavigator
 	{
 		private const byte DEFAULT_TAB_SIZE = 4;
 		private const int DEFAULT_MAX_FRAGMENT_LENGTH = 95;
+
+		/// <summary>
+		/// Regular expression for working with a next line break
+		/// </summary>
+		private static readonly Regex _nextLineBreakRegex = new Regex("\r\n|\n|\r");
+
+		/// <summary>
+		/// Regular expression for working with a previous line break
+		/// </summary>
+		private static readonly Regex _previousLineBreakRegex = new Regex("\r\n|\n|\r", RegexOptions.RightToLeft);
+
+
+		/// <summary>
+		/// Finds a next line break
+		/// </summary>
+		/// <param name="sourceCode">Source code</param>
+		/// <param name="startPosition">Position in the input string that defines the leftmost 
+		/// position to be searched</param>
+		/// <param name="lineBreakPosition">Position of line break</param>
+		/// <param name="lineBreakLength">Length of line break</param>
+		private static void FindNextLineBreak(string sourceCode, int startPosition,
+			out int lineBreakPosition, out int lineBreakLength)
+		{
+			int length = sourceCode.Length - startPosition;
+
+			FindNextLineBreak(sourceCode, startPosition, length,
+				out lineBreakPosition, out lineBreakLength);
+		}
+
+		/// <summary>
+		/// Finds a next line break
+		/// </summary>
+		/// <param name="sourceCode">Source code</param>
+		/// <param name="startPosition">Position in the input string that defines the leftmost 
+		/// position to be searched</param>
+		/// <param name="length">Number of characters in the substring to include in the search</param>
+		/// <param name="lineBreakPosition">Position of line break</param>
+		/// <param name="lineBreakLength">Length of line break</param>
+		private static void FindNextLineBreak(string sourceCode, int startPosition, int length,
+			out int lineBreakPosition, out int lineBreakLength)
+		{
+			Match lineBreakMatch = _nextLineBreakRegex.Match(sourceCode, startPosition, length);
+			if (lineBreakMatch.Success)
+			{
+				lineBreakPosition = lineBreakMatch.Index;
+				lineBreakLength = lineBreakMatch.Length;
+			}
+			else
+			{
+				lineBreakPosition = -1;
+				lineBreakLength = 0;
+			}
+		}
+
+		/// <summary>
+		/// Finds a previous line break
+		/// </summary>
+		/// <param name="sourceCode">Source code</param>
+		/// <param name="startPosition">Position in the input string that defines the leftmost 
+		/// position to be searched</param>
+		/// <param name="lineBreakPosition">Position of line break</param>
+		/// <param name="lineBreakLength">Length of line break</param>
+		private static void FindPreviousLineBreak(string sourceCode, int startPosition,
+			out int lineBreakPosition, out int lineBreakLength)
+		{
+			Match lineBreakMatch = _previousLineBreakRegex.Match(sourceCode, startPosition);
+			if (lineBreakMatch.Success)
+			{
+				lineBreakPosition = lineBreakMatch.Index;
+				lineBreakLength = lineBreakMatch.Length;
+			}
+			else
+			{
+				lineBreakPosition = -1;
+				lineBreakLength = 0;
+			}
+		}
 
 		/// <summary>
 		/// Calculates a line break count
@@ -58,25 +136,27 @@
 
 			if (fragmentStartPosition < 0)
 			{
-				throw new ArgumentException(string.Empty, "fragmentStartPosition");
+				throw new ArgumentException("", "fragmentStartPosition");
 			}
 
 			if (fragmentLength > sourceCodeLength - fragmentStartPosition)
 			{
-				throw new ArgumentException(string.Empty, "fragmentLength");
+				throw new ArgumentException("", "fragmentLength");
 			}
 
 			int fragmentEndPosition = fragmentStartPosition + fragmentLength - 1;
-			int lineBreakPosition = -1;
+			int lineBreakPosition = int.MinValue;
+			int lineBreakLength = 0;
 			int startLinePosition;
 
 			do
 			{
-				startLinePosition = (lineBreakPosition == -1) ? fragmentStartPosition : lineBreakPosition + 1;
+				startLinePosition = (lineBreakPosition == int.MinValue) ?
+					fragmentStartPosition : lineBreakPosition + lineBreakLength;
 				int lineLength = fragmentEndPosition - startLinePosition + 1;
 
-				lineBreakPosition = sourceCode.IndexOf("\n", startLinePosition, lineLength, 
-					StringComparison.Ordinal);
+				FindNextLineBreak(sourceCode, startLinePosition, lineLength, 
+					out lineBreakPosition, out lineBreakLength);
 
 				if (lineBreakPosition != -1)
 				{
@@ -92,11 +172,6 @@
 			else
 			{
 				charRemainderCount = fragmentLength;
-			}
-
-			if (charRemainderCount > 0 && sourceCode.IndexOf('\r', charRemainderCount - 1) == 0)
-			{
-				charRemainderCount--;
 			}
 		}
 
@@ -168,14 +243,16 @@
 				string nextLine = string.Empty;
 
 				int lineCount = 0;
-				int lineBreakPosition = 0;
+				int lineBreakPosition = int.MinValue;
+				int lineBreakLength = 0;
 
 				do
 				{
 					string line;
-					int startLinePosition = (lineBreakPosition == 0) ? 0 : lineBreakPosition + 1;
+					int startLinePosition = (lineBreakPosition == int.MinValue) ? 0 : lineBreakPosition + lineBreakLength;
 
-					lineBreakPosition = sourceCode.IndexOf("\n", startLinePosition, StringComparison.Ordinal);
+					FindNextLineBreak(sourceCode, startLinePosition, out lineBreakPosition, out lineBreakLength);
+					
 					if (lineBreakPosition != -1)
 					{
 						line = sourceCode.Substring(startLinePosition, lineBreakPosition - startLinePosition);
@@ -184,7 +261,6 @@
 					{
 						line = sourceCode.Substring(startLinePosition);
 					}
-					line = line.TrimEnd('\r');
 
 					lineCount++;
 
@@ -221,18 +297,18 @@
 				{
 					if (previousLine.Length > 0)
 					{
-						sourceFragmentBuilder.AppendFormatLine(FormatSourceCodeLine(previousLine, 
+						sourceFragmentBuilder.AppendLine(FormatSourceCodeLine(previousLine, 
 							new SourceCodeNodeCoordinates(previousLineNumber, 0),
 							lineNumberSize, fragmentStartPosition, fragmentLength, tabSize));
 					}
 
-					sourceFragmentBuilder.AppendFormatLine(FormatSourceCodeLine(currentLine,
+					sourceFragmentBuilder.AppendLine(FormatSourceCodeLine(currentLine,
 						new SourceCodeNodeCoordinates(currentLineNumber, columnNumber),
 						lineNumberSize, fragmentStartPosition, fragmentLength, tabSize));
 
 					if (nextLine.Length > 0)
 					{
-						sourceFragmentBuilder.AppendFormatLine(FormatSourceCodeLine(nextLine,
+						sourceFragmentBuilder.AppendLine(FormatSourceCodeLine(nextLine,
 							new SourceCodeNodeCoordinates(nextLineNumber, 0),
 							lineNumberSize, fragmentStartPosition, fragmentLength, tabSize));
 					}
@@ -286,7 +362,7 @@
 			int lineNumberSize, int fragmentStartPosition = 0, int fragmentLength = 0, byte tabSize = 4)
 		{
 			const string ellipsisSymbol = "…";
-			const byte leftPaddingSize = 8;
+			const byte leftPaddingSize = 7;
 
 			int lineNumber = nodeCoordinates.LineNumber;
 			int columnNumber = nodeCoordinates.ColumnNumber;
@@ -330,7 +406,8 @@
 				}
 			}
 
-			string result = string.Format("Line {0}: {1}", lineNumber.ToString(CultureInfo.InvariantCulture).PadLeft(lineNumberSize),
+			string result = string.Format("Line {0}: {1}",
+				lineNumber.ToString(CultureInfo.InvariantCulture).PadLeft(lineNumberSize),
 				processedLine.TabsToSpaces(tabSize));
 			if (columnNumber > 0)
 			{
@@ -340,7 +417,8 @@
 					cursorOffset++;
 				}
 
-				result += "\n".PadRight(processedLine.Substring(0, cursorOffset - 1)
+				result += Environment.NewLine + string.Empty
+					.PadRight(processedLine.Substring(0, cursorOffset - 1)
 					.TabsToSpaces(tabSize).Length + lineNumberSize + leftPaddingSize)
 					.Replace(" ", "-") + "^"
 					;
@@ -508,40 +586,35 @@
 			int sourceCodeLength = sourceCode.Length;
 			if (currentPosition >= sourceCodeLength)
 			{
-				throw new ArgumentException(string.Empty, "currentPosition");
+				throw new ArgumentException("", "currentPosition");
 			}
 
 			string currentChar = sourceCode.Substring(currentPosition, 1);
-			if (currentChar == "\n" || currentChar == "\r")
+			if (_nextLineBreakRegex.IsMatch(currentChar))
 			{
 				return string.Empty;
 			}
 
-			startLinePosition = sourceCode.LastIndexOf("\n", currentPosition, StringComparison.Ordinal);
-			if (startLinePosition != -1)
+			int startLineBreakPosition;
+			int startLineBreakLength;
+
+			FindPreviousLineBreak(sourceCode, currentPosition, out startLineBreakPosition, out startLineBreakLength);
+			if (startLineBreakPosition != -1)
 			{
-				if (startLinePosition + 1 < sourceCodeLength)
-				{
-					startLinePosition += 1;
-				}
+				startLinePosition = startLineBreakPosition + startLineBreakLength;
 			}
 			else
 			{
 				startLinePosition = 0;
 			}
 
-			endLinePosition = sourceCode.IndexOf("\n", currentPosition, StringComparison.Ordinal);
-			if (endLinePosition != -1)
+			int endLineBreakPosition;
+			int endLineBreakLength;
+
+			FindNextLineBreak(sourceCode, currentPosition, out endLineBreakPosition, out endLineBreakLength);
+			if (endLineBreakPosition != -1)
 			{
-				if (endLinePosition > 0)
-				{
-					endLinePosition -= 1;
-					if (endLinePosition > 0 
-						&& sourceCode.IndexOf("\r", endLinePosition, 1, StringComparison.Ordinal) == endLinePosition)
-					{
-						endLinePosition -= 1;
-					}
-				}
+				endLinePosition = endLineBreakPosition - 1;
 			}
 			else
 			{

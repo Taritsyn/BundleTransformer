@@ -59,7 +59,7 @@
 		/// Constructs instance of Closure Remote JS-minifier
 		/// </summary>
 		public ClosureRemoteJsMinifier()
-			: this(BundleTransformerContext.Current.GetClosureConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetClosureSettings())
 		{ }
 
 		/// <summary>

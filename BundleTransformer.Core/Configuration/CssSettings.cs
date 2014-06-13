@@ -2,20 +2,21 @@
 {
 	using System.Configuration;
 
+	using Constants;
+
 	/// <summary>
 	/// Configuration settings of processing CSS-assets
 	/// </summary>
 	public sealed class CssSettings : AssetTypeSettingsBase
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to disable native 
-		/// transformation of relative paths to absolute in CSS-files
+		/// Gets or sets a ordered comma-separated list of names of default postprocessors
 		/// </summary>
-		[ConfigurationProperty("disableNativeCssRelativePathTransformation", DefaultValue = false)]
-		public bool DisableNativeCssRelativePathTransformation
+		[ConfigurationProperty("defaultPostProcessors", DefaultValue = PostProcessorName.UrlRewritingCssPostProcessor)]
+		public override string DefaultPostProcessors
 		{
-			get { return (bool)this["disableNativeCssRelativePathTransformation"]; }
-			set { this["disableNativeCssRelativePathTransformation"] = value; }
+			get { return (string)this["defaultPostProcessors"]; }
+			set { this["defaultPostProcessors"] = value; }
 		}
 	}
 }

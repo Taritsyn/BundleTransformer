@@ -13,12 +13,12 @@
 		/// <summary>
 		/// Regular expression to find first slash
 		/// </summary>
-		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:\/|\\)*", RegexOptions.IgnoreCase);
+		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:/|\\)");
 
 		/// <summary>
 		/// Regular expression to find last slash
 		/// </summary>
-		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:\/|\\)*$", RegexOptions.IgnoreCase);
+		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:/|\\)$");
 
 		/// <summary>
 		/// Regular expression for determine protocol in URL
@@ -28,7 +28,7 @@
 
 
 		/// <summary>
-		/// Processes back slashes in URL
+		/// Process a back slashes in URL
 		/// </summary>
 		/// <param name="url">URL</param>
 		/// <returns>Processed URL</returns>
@@ -36,16 +36,16 @@
 		{
 			if (string.IsNullOrWhiteSpace(url))
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
+				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
 			}
 
-			string result = url.Trim().Replace(@"\", @"/");
+			string result = url.Replace(@"\", @"/");
 
 			return result;
 		}
 
 		/// <summary>
-		/// Removes first slash from URL
+		/// Removes a first slash from URL
 		/// </summary>
 		/// <param name="url">URL</param>
 		/// <returns>URL without the first slash</returns>
@@ -53,16 +53,16 @@
 		{
 			if (string.IsNullOrWhiteSpace(url))
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
+				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
 			}
 
-			string result = _firstSlashRegExp.Replace(url.Trim(), string.Empty);
+			string result = _firstSlashRegExp.Replace(url, string.Empty);
 
 			return result;
 		}
 
 		/// <summary>
-		/// Removes last slash from URL
+		/// Removes a last slash from URL
 		/// </summary>
 		/// <param name="url">URL</param>
 		/// <returns>URL without the last slash</returns>
@@ -70,16 +70,16 @@
 		{
 			if (string.IsNullOrWhiteSpace(url))
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "url");
+				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
 			}
 
-			string result = _lastSlashRegExp.Replace(url.Trim(), string.Empty);
+			string result = _lastSlashRegExp.Replace(url, string.Empty);
 
 			return result;
 		}
 
 		/// <summary>
-		/// Combines two URLs
+		/// Combines a two URLs
 		/// </summary>
 		/// <param name="baseUrl">The base URL</param>
 		/// <param name="relativeUrl">The relative URL to add to the base URL</param>

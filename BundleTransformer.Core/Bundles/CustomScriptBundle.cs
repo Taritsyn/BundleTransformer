@@ -25,7 +25,7 @@
 		/// <param name="cdnPath">Path of bundle on CDN</param>
 		public CustomScriptBundle(string virtualPath, string cdnPath)
 			: base(virtualPath, cdnPath, 
-				new IBundleTransform[] { BundleTransformerContext.Current.GetJsTransformerInstance() })
+				new IBundleTransform[] { BundleTransformerContext.Current.Js.GetTransformerInstance() })
 		{
 			Builder = new NullBuilder();
 		}

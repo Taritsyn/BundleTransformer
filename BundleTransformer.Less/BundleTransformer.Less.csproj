@@ -53,7 +53,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="ConfigurationContextExtensions.cs" />
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\LessCompiler.cs" />
     <Compile Include="Compilers\LessCompilingException.cs" />
@@ -62,7 +62,6 @@
     <Compile Include="Constants\ImportType.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\LessAssetHandler.cs" />
-    <Compile Include="HttpHandlers\LessAssetHandlerBase.cs" />
     <Compile Include="LessImport.cs" />
     <Compile Include="LessImportOptions.cs" />
     <Compile Include="LessNodeMatch.cs" />

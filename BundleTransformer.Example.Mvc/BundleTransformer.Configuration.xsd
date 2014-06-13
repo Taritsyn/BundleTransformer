@@ -17,6 +17,7 @@
 				<xs:element name="sassAndScss" type="SassAndScssSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="coffeeScript" type="CoffeeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="typeScript" type="TypeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="autoprefixer" type="AutoprefixerSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="microsoftAjax" type="MicrosoftAjaxSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="yui" type="YuiSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="closure" type="ClosureSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -75,26 +76,33 @@
 
 	<xs:complexType name="CssSettings_SchemaType">
 		<xs:complexContent>
-		<xs:extension base="AssetTypeSettings_SchemaType">
-			<xs:attribute name="disableNativeCssRelativePathTransformation" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to disable native transformation of relative paths to absolute in CSS-files</xs:documentation>
-			</xs:annotation>
-			</xs:attribute>
-		</xs:extension>
+			<xs:extension base="AssetTypeSettings_SchemaType">
+				<xs:attribute name="defaultPostProcessors" type="xs:string" use="optional" default="UrlRewritingCssPostProcessor">
+					<xs:annotation>
+						<xs:documentation>Ordered comma-separated list of names of default postprocessors</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>				
+			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 
 	<xs:complexType name="JsSettings_SchemaType">
 		<xs:complexContent>
-		<xs:extension base="AssetTypeSettings_SchemaType" />
+			<xs:extension base="AssetTypeSettings_SchemaType">
+				<xs:attribute name="defaultPostProcessors" type="xs:string" use="optional" default="">
+					<xs:annotation>
+						<xs:documentation>Ordered comma-separated list of names of default postprocessors</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	
 	<xs:complexType name="AssetTypeSettings_SchemaType">
 		<xs:all>
-			<xs:element name="minifiers" type="MinifierRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
 			<xs:element name="translators" type="TranslatorRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="postProcessors" type="PostProcessorRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="minifiers" type="MinifierRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 		<xs:attribute name="defaultMinifier" type="xs:string" use="optional" default="NullMinifier">
 			<xs:annotation>
@@ -106,44 +114,6 @@
 				<xs:documentation>Flag for whether to allow usage of pre-minified files</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-	</xs:complexType>
-
-	<xs:complexType name="MinifierRegistrationList_SchemaType">
-		<xs:annotation>
-			<xs:documentation>List of registered minifiers</xs:documentation>
-		</xs:annotation>
-		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="add" type="AddMinifierRegistration_SchemaType" />
-			<xs:element name="remove" type="RemoveMinifierRegistration_SchemaType" />
-			<xs:element name="clear" type="ClearMinifierRegistration_SchemaType" />
-		</xs:choice>
-	</xs:complexType>
-
-	<xs:complexType name="AddMinifierRegistration_SchemaType">
-		<xs:annotation>
-			<xs:documentation>Adds minifier registration</xs:documentation>
-		</xs:annotation>
-		<xs:complexContent>
-			<xs:extension base="AddAssetProcessorRegistrationBase_SchemaType" />
-		</xs:complexContent>
-	</xs:complexType>
-
-	<xs:complexType name="RemoveMinifierRegistration_SchemaType">
-		<xs:annotation>
-			<xs:documentation>Removes minifier registration</xs:documentation>
-		</xs:annotation>
-		<xs:complexContent>
-			<xs:extension base="RemoveAssetProcessorRegistrationBase_SchemaType" />
-		</xs:complexContent>
-	</xs:complexType>
-
-	<xs:complexType name="ClearMinifierRegistration_SchemaType">
-		<xs:annotation>
-			<xs:documentation>Removes all minifier registrations, that specified above</xs:documentation>
-		</xs:annotation>
-		<xs:complexContent>
-			<xs:extension base="ClearAssetProcessorRegistrationBase_SchemaType" />
-		</xs:complexContent>
 	</xs:complexType>
 
 	<xs:complexType name="TranslatorRegistrationList_SchemaType">
@@ -159,7 +129,7 @@
 
 	<xs:complexType name="AddTranslatorRegistration_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Adds translator registration</xs:documentation>
+			<xs:documentation>Adds a translator registration</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="AddAssetProcessorRegistrationBase_SchemaType">
@@ -174,7 +144,7 @@
 
 	<xs:complexType name="RemoveTranslatorRegistration_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Removes translator registration</xs:documentation>
+			<xs:documentation>Removes a translator registration</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="RemoveAssetProcessorRegistrationBase_SchemaType" />
@@ -184,6 +154,88 @@
 	<xs:complexType name="ClearTranslatorRegistration_SchemaType">
 		<xs:annotation>
 			<xs:documentation>Removes all translator registrations, that specified above</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ClearAssetProcessorRegistrationBase_SchemaType" />
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="PostProcessorRegistrationList_SchemaType">
+		<xs:annotation>
+			<xs:documentation>List of registered postprocessors</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddPostProcessorRegistration_SchemaType" />
+			<xs:element name="remove" type="RemovePostProcessorRegistration_SchemaType" />
+			<xs:element name="clear" type="ClearPostProcessorRegistration_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddPostProcessorRegistration_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Adds a postprocessor registration</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AddAssetProcessorRegistrationBase_SchemaType">
+				<xs:attribute name="useInDebugMode" type="Boolean_SchemaType" use="optional" default="false">
+					<xs:annotation>
+						<xs:documentation>Flag for whether to use postprocessor in the debugging HTTP-handlers</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="RemovePostProcessorRegistration_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Removes a postprocessor registration</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="RemoveAssetProcessorRegistrationBase_SchemaType" />
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="ClearPostProcessorRegistration_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Removes all postProcessor registrations, that specified above</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="ClearAssetProcessorRegistrationBase_SchemaType" />
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="MinifierRegistrationList_SchemaType">
+		<xs:annotation>
+			<xs:documentation>List of registered minifiers</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddMinifierRegistration_SchemaType" />
+			<xs:element name="remove" type="RemoveMinifierRegistration_SchemaType" />
+			<xs:element name="clear" type="ClearMinifierRegistration_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddMinifierRegistration_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Adds a minifier registration</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="AddAssetProcessorRegistrationBase_SchemaType" />
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="RemoveMinifierRegistration_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Removes a minifier registration</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="RemoveAssetProcessorRegistrationBase_SchemaType" />
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="ClearMinifierRegistration_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Removes all minifier registrations, that specified above</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="ClearAssetProcessorRegistrationBase_SchemaType" />
@@ -414,6 +466,52 @@
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /TypeScript settings -->
+
+	<!-- Autoprefixer settings -->
+	<xs:complexType name="AutoprefixerSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="browsers" type="BrowserConditionalExpressionList_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+		<xs:attribute name="cascade" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to create nice visual cascade of prefixes</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="BrowserConditionalExpressionList_SchemaType">
+		<xs:annotation>
+			<xs:documentation>List of browser conditional expressions</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddBrowserConditionalExpression_SchemaType" />
+			<xs:element name="remove" type="RemoveBrowserConditionalExpression_SchemaType" />
+			<xs:element name="clear" type="ClearBrowserConditionalExpression_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddBrowserConditionalExpression_SchemaType">
+		<xs:attribute name="conditionalExpression" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Conditional expression</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RemoveBrowserConditionalExpression_SchemaType">
+		<xs:attribute name="conditionalExpression" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Conditional expression</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="ClearBrowserConditionalExpression_SchemaType" />
+	<!-- /Autoprefixer settings -->
 
 	<!-- Microsoft Ajax settings -->
 	<xs:complexType name="MicrosoftAjaxSettings_SchemaType">

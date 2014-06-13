@@ -99,7 +99,7 @@
 		/// Constructs instance of Closure Local JS-minifier
 		/// </summary>
 		public ClosureLocalJsMinifier()
-			: this(BundleTransformerContext.Current.GetClosureConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetClosureSettings())
 		{ }
 
 		/// <summary>

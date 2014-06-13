@@ -5,6 +5,7 @@
 	using Core.Builders;
 	using Core.Bundles;
 	using Core.Orderers;
+	using Core.Resolvers;
 	using Core.Transformers;
 
 	public class BundleConfig
@@ -16,6 +17,10 @@
 
 			var nullBuilder = new NullBuilder();
 			var nullOrderer = new NullOrderer();
+
+			// Replace a default bundle resolver in order to the debugging HTTP-handler can use 
+			// transformations of the corresponding bundle
+			BundleResolver.Current = new CustomBundleResolver();
 
 			var commonStylesBundle = new CustomStyleBundle("~/Bundles/CommonStyles");
 			commonStylesBundle.Include(

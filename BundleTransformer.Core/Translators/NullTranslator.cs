@@ -36,7 +36,6 @@
 			return asset;
 		}
 
-
 		/// <summary>
 		/// Do not performs operations with assets
 		/// </summary>

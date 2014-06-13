@@ -152,9 +152,9 @@
 		/// </summary>
 		public TypeScriptTranslator()
 			: this(null,
-				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
-				BundleTransformerContext.Current.GetTypeScriptConfiguration())
+				BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.FileSystem.GetCommonRelativePathResolver(),
+				BundleTransformerContext.Current.Configuration.GetTypeScriptSettings())
 		{ }
 
 		/// <summary>

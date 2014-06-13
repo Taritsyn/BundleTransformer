@@ -117,15 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AssetHandler_DependencyNotFoundError" xml:space="preserve">
+  <data name="AssetHandler_BundleFileNotFound" xml:space="preserve">
+    <value>Не удалось найти файл "{0}" в "{1}" бандле!</value>
+  </data>
+  <data name="AssetHandler_BundleNotFound" xml:space="preserve">
+    <value>Бандл "{0}" не существует!</value>
+  </data>
+  <data name="AssetHandler_DependencyNotFound" xml:space="preserve">
     <value>Во время вывода текстового содержимого обработанного ресурса не была найдена одна из его зависимостей!
 Смотрите более подробную информацию об ошибке:
 {0}</value>
   </data>
-  <data name="AssetHandler_TranslationError" xml:space="preserve">
-    <value>Во время вывода текстового содержимого транслированного ресурса произошла ошибка!
-Смотрите более подробную информацию об ошибке:
-{0}</value>
+  <data name="AssetHandler_TransformerNotFound" xml:space="preserve">
+    <value>Не удалось найти трансформер в "{0}" бандле!</value>
+  </data>
+  <data name="AssetHandler_TranslatorNotFound" xml:space="preserve">
+    <value>Не удалось найти транслятор типа `{0}` для файла "{1}"!</value>
   </data>
   <data name="AssetHandler_UnknownError" xml:space="preserve">
     <value>Во время вывода текстового содержимого обработанного ресурса произошла неизвестная ошибка!
@@ -192,6 +199,9 @@
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>Минимизатор {0}-кода с именем `{1}` не зарегистрирован в конфигурационном файле!</value>
+  </data>
+  <data name="Configuration_PostProcessorNotRegistered" xml:space="preserve">
+    <value>Постпроцессор {0}-кода с именем `{1}` не зарегистрирован в конфигурационном файле!</value>
   </data>
   <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
     <value>Транслятор, компилирующий код на промежуточном языке в {0}, и имеющий имя `{1}` не зарегистрирован в конфигурационном файле!</value>
@@ -268,6 +278,18 @@
 
 {3}</value>
   </data>
+  <data name="PostProcessors_PostprocessingFailed" xml:space="preserve">
+    <value>Во время постобработки {0}-кода, считанного из файла "{1}", с помощью {2} произошла ошибка!	
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
+  <data name="PostProcessors_PostprocessingSyntaxError" xml:space="preserve">
+    <value>Во время постобработки {0}-кода, считанного из файла "{1}", с помощью {2} произошла синтаксическая ошибка!
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
   <data name="Resources_ResourceIsNull" xml:space="preserve">
     <value>Ресурс с именем "{0}" содержит значение равное null!</value>
   </data>
@@ -282,5 +304,8 @@
 Смотрите более подробную информацию об ошибке:
 
 {3}</value>
+  </data>
+  <data name="UrlMappings_OnlyAppRelativeUrlAllowed" xml:space="preserve">
+    <value>URL "{0}" является недопустимым. Разрешено использовать только URL'ы, заданные относительно приложения (~/url).</value>
   </data>
 </root>

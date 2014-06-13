@@ -31,7 +31,7 @@
 		/// Constructs instance of CSS-file extensions filter
 		/// </summary>
 		public CssFileExtensionsFilter()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>

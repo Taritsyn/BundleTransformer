@@ -8,13 +8,22 @@
 	public abstract class AssetTypeSettingsBase : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets name of default minifier
+		/// Gets or sets a name of default minifier
 		/// </summary>
 		[ConfigurationProperty("defaultMinifier", DefaultValue = Constants.MinifierName.NullMinifier)]
 		public string DefaultMinifier
 		{
 			get { return (string)this["defaultMinifier"]; }
 			set { this["defaultMinifier"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a ordered comma-separated list of names of default postprocessors
+		/// </summary>
+		public abstract string DefaultPostProcessors
+		{
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -28,21 +37,30 @@
 		}
 
 		/// <summary>
-		/// Gets list of registered minifiers
-		/// </summary>
-		[ConfigurationProperty("minifiers", IsRequired = true)]
-		public MinifierRegistrationList Minifiers
-		{
-			get { return (MinifierRegistrationList)this["minifiers"]; }
-		}
-
-		/// <summary>
-		/// Gets list of registered translators
+		/// Gets a list of registered translators
 		/// </summary>
 		[ConfigurationProperty("translators", IsRequired = true)]
 		public TranslatorRegistrationList Translators
 		{
 			get { return (TranslatorRegistrationList)this["translators"]; }
+		}
+
+		/// <summary>
+		/// Gets a list of registered postprocessors
+		/// </summary>
+		[ConfigurationProperty("postProcessors", IsRequired = true)]
+		public PostProcessorRegistrationList PostProcessors
+		{
+			get { return (PostProcessorRegistrationList)this["postProcessors"]; }
+		}
+
+		/// <summary>
+		/// Gets a list of registered minifiers
+		/// </summary>
+		[ConfigurationProperty("minifiers", IsRequired = true)]
+		public MinifierRegistrationList Minifiers
+		{
+			get { return (MinifierRegistrationList)this["minifiers"]; }
 		}
 	}
 }

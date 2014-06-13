@@ -89,7 +89,7 @@
 		/// Constructs instance of Clean CSS-minifier
 		/// </summary>
 		public CleanCssMinifier()
-			: this(null, BundleTransformerContext.Current.GetCleanConfiguration())
+			: this(null, BundleTransformerContext.Current.Configuration.GetCleanSettings())
 		{ }
 
 		/// <summary>

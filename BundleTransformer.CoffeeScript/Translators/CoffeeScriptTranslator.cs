@@ -59,7 +59,7 @@
 		/// Constructs instance of CoffeeScript-translator
 		/// </summary>
 		public CoffeeScriptTranslator()
-			: this(null, BundleTransformerContext.Current.GetCoffeeScriptConfiguration())
+			: this(null, BundleTransformerContext.Current.Configuration.GetCoffeeScriptSettings())
 		{ }
 
 		/// <summary>

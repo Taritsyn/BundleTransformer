@@ -8,7 +8,7 @@
 	public sealed class TranslatorRegistrationList : ConfigurationElementCollection
 	{
 		/// <summary>
-		/// Creates new translator registration
+		/// Creates a new translator registration
 		/// </summary>
 		/// <returns>Translator registration</returns>
 		protected override ConfigurationElement CreateNewElement()
@@ -17,7 +17,7 @@
 		}
 
 		/// <summary>
-		/// Gets key of the specified translator registration
+		/// Gets a key of the specified translator registration
 		/// </summary>
 		/// <param name="element">Translator registration</param>
 		/// <returns>Key</returns>
@@ -27,7 +27,7 @@
 		}
 
 		/// <summary>
-		/// Gets translator registration by translator name
+		/// Gets a translator registration by translator name
 		/// </summary>
 		/// <param name="name">Translator name</param>
 		/// <returns>Translator registration</returns>

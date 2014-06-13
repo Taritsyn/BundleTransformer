@@ -34,7 +34,7 @@
 		/// <summary>
 		/// JS engine
 		/// </summary>
-		private readonly IJsEngine _jsEngine;
+		private IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of optimization
@@ -132,6 +132,7 @@
 				if (_jsEngine != null)
 				{
 					_jsEngine.Dispose();
+					_jsEngine = null;
 				}
 			}
 		}

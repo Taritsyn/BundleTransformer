@@ -54,7 +54,7 @@
 		/// </summary>
 		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions)
-			: this(jsFilesWithMsStyleExtensions, BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+			: this(jsFilesWithMsStyleExtensions, BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>

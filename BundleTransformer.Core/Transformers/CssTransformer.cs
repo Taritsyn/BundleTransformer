@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Configuration;
 	using System.Linq;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -14,7 +13,7 @@
 	using Configuration;
 	using Filters;
 	using Minifiers;
-	using Resources;
+	using PostProcessors;
 	using Translators;
 	using Validators;
 
@@ -40,7 +39,7 @@
 		/// Constructs a instance of CSS-transformer
 		/// </summary>
 		public CssTransformer()
-			: this(null, null, new string[0])
+			: this(null, null, null, new string[0])
 		{ }
 
 		/// <summary>
@@ -48,7 +47,7 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		public CssTransformer(IMinifier minifier)
-			: this(minifier, null, new string[0])
+			: this(minifier, null, null, new string[0])
 		{ }
 
 		/// <summary>
@@ -56,7 +55,15 @@
 		/// </summary>
 		/// <param name="translators">List of translators</param>
 		public CssTransformer(IList<ITranslator> translators)
-			: this(null, translators, new string[0])
+			: this(null, translators, null, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of CSS-transformer
+		/// </summary>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public CssTransformer(IList<IPostProcessor> postProcessors)
+			: this(null, null, postProcessors, new string[0])
 		{ }
 
 		/// <summary>
@@ -65,7 +72,35 @@
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		public CssTransformer(IMinifier minifier, IList<ITranslator> translators)
-			: this(minifier, translators, new string[0])
+			: this(minifier, translators, null, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of CSS-transformer
+		/// </summary>
+		/// <param name="minifier">Minifier</param>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public CssTransformer(IMinifier minifier, IList<IPostProcessor> postProcessors)
+			: this(minifier, null, postProcessors, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of CSS-transformer
+		/// </summary>
+		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public CssTransformer(IList<ITranslator> translators, IList<IPostProcessor> postProcessors)
+			: this(null, translators, postProcessors, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of CSS-transformer
+		/// </summary>
+		/// <param name="minifier">Minifier</param>
+		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors)
+			: this(minifier, translators, postProcessors, new string[0])
 		{ }
 
 		/// <summary>
@@ -74,7 +109,7 @@
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		public CssTransformer(string[] ignorePatterns)
-			: this(null, null, ignorePatterns)
+			: this(null, null, null, ignorePatterns)
 		{ }
 
 		/// <summary>
@@ -82,10 +117,13 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns)
-			: this(minifier, translators, ignorePatterns, BundleTransformerContext.Current.GetCoreConfiguration())
+		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
+			string[] ignorePatterns)
+			: this(minifier, translators, postProcessors, ignorePatterns,
+				BundleTransformerContext.Current.Configuration.GetCoreSettings())
 		{ }
 
 		/// <summary>
@@ -93,61 +131,21 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
-		public CssTransformer(IMinifier minifier, IList<ITranslator> translators,
+		public CssTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
 			string[] ignorePatterns, CoreSettings coreConfig)
 			: base(ignorePatterns, coreConfig)
 		{
-			_minifier = minifier ?? CreateDefaultMinifier();
-			_translators = translators ?? CreateDefaultTranslators();
+			CssContext cssContext = BundleTransformerContext.Current.Css;
+
+			_minifier = minifier ?? cssContext.GetDefaultMinifierInstance();
+			_translators = translators ?? cssContext.GetDefaultTranslatorInstances();
+			_postProcessors = postProcessors ?? cssContext.GetDefaultPostProcessorInstances();
 		}
 
-
-		/// <summary>
-		/// Creates a instance of default CSS-minifier
-		/// </summary>
-		/// <returns>Default CSS-minifier</returns>
-		private IMinifier CreateDefaultMinifier()
-		{
-			string defaultMinifierName = _coreConfig.Css.DefaultMinifier;
-			if (string.IsNullOrWhiteSpace(defaultMinifierName))
-			{
-				throw new ConfigurationErrorsException(
-					string.Format(Strings.Configuration_DefaultMinifierNotSpecified, "CSS"));
-			}
-
-			IMinifier defaultMinifier = 
-				BundleTransformerContext.Current.GetCssMinifierInstance(defaultMinifierName);
-
-			return defaultMinifier;
-		}
-
-		/// <summary>
-		/// Creates a list of default CSS-translators
-		/// </summary>
-		/// <returns>List of default CSS-translators</returns>
-		private IList<ITranslator> CreateDefaultTranslators()
-		{
-			var defaultTranslators = new List<ITranslator>();
-			TranslatorRegistrationList translatorRegistrations = _coreConfig.Css.Translators;
-
-			foreach (TranslatorRegistration translatorRegistration in translatorRegistrations)
-			{
-				if (translatorRegistration.Enabled)
-				{
-					string defaultTranslatorName = translatorRegistration.Name;
-					ITranslator defaultTranslator = 
-						BundleTransformerContext.Current.GetCssTranslatorInstance(defaultTranslatorName);
-
-					defaultTranslators.Add(defaultTranslator);
-				}
-			}
-
-			return defaultTranslators;
-		}
-		
 		/// <summary>
 		/// Transforms CSS-assets
 		/// </summary>
@@ -164,10 +162,7 @@
 			assets = RemoveUnnecessaryAssets(assets);
 			assets = ReplaceFileExtensions(assets, isDebugMode);
 			assets = Translate(assets, isDebugMode);
-			if (!_coreConfig.Css.DisableNativeCssRelativePathTransformation)
-			{
-				assets = ResolveRelativePaths(assets);
-			}
+			assets = PostProcess(assets);
 			if (!isDebugMode)
 			{
 				assets = Minify(assets);
@@ -229,19 +224,6 @@
 			};
 
 			IList<IAsset> processedAssets = cssFileExtensionsFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Resolves a relative paths in CSS-assets
-		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of CSS-assets with a fixed relative paths</returns>
-		private IList<IAsset> ResolveRelativePaths(IList<IAsset> assets)
-		{
-			var cssRelativePathProcessor = new CssRelativePathFilter();
-			IList<IAsset> processedAssets = cssRelativePathProcessor.Transform(assets);
 
 			return processedAssets;
 		}

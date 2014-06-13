@@ -14,5 +14,10 @@
 		/// Pattern of cache item key, which stores text content of the processed asset
 		/// </summary>
 		internal const string ProcessedAssetContentCacheItemKeyPattern = "BT:ProcessedAssetContent_{0}";
+
+		/// <summary>
+		/// Name of QueryString-parameter that contains the virtual path of the bundle
+		/// </summary>
+		internal const string BundleVirtualPathQueryStringParameterName = "bundleVirtualPath";
 	}
 }

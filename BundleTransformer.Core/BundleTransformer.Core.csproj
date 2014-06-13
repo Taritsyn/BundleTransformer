@@ -82,13 +82,18 @@
   <ItemGroup>
     <Compile Include="Assets\Dependency.cs" />
     <Compile Include="Assets\DependencyCollection.cs" />
+    <Compile Include="AssetTypeContextBase.cs" />
     <Compile Include="Builders\NullBuilder.cs" />
     <Compile Include="Bundles\CustomScriptBundle.cs" />
     <Compile Include="Bundles\CustomStyleBundle.cs" />
+    <Compile Include="ConfigurationContext.cs" />
     <Compile Include="Configuration\AssetHandlerSettings.cs" />
     <Compile Include="Configuration\JsEngineSettings.cs" />
+    <Compile Include="Configuration\PostProcessorRegistration.cs" />
+    <Compile Include="Configuration\PostProcessorRegistrationList.cs" />
     <Compile Include="Constants\ContentType.cs" />
     <Compile Include="Constants\MinifierName.cs" />
+    <Compile Include="Constants\PostProcessorName.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="CssNodeMatch.cs" />
     <Compile Include="CssNodeType.cs" />
@@ -107,7 +112,7 @@
     <Compile Include="Configuration\TranslatorRegistration.cs" />
     <Compile Include="Configuration\TranslatorRegistrationList.cs" />
     <Compile Include="Constants\Common.cs" />
-    <Compile Include="FileSystem\CssRelativePathResolver.cs" />
+    <Compile Include="FileSystemContext.cs" />
     <Compile Include="FileSystem\VirtualFileSystemWrapper.cs" />
     <Compile Include="FileSystem\IRelativePathResolver.cs" />
     <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
@@ -117,11 +122,23 @@
     <Compile Include="Helpers\UrlHelpers.cs" />
     <Compile Include="Helpers\SourceCodeNavigator.cs" />
     <Compile Include="Helpers\SourceCodeNodeCoordinates.cs" />
+    <Compile Include="HttpHandlers\JsAssetHandler.cs" />
+    <Compile Include="HttpHandlers\CssAssetHandler.cs" />
+    <Compile Include="HttpHandlers\ScriptAssetHandlerBase.cs" />
+    <Compile Include="HttpHandlers\StyleAssetHandlerBase.cs" />
+    <Compile Include="JsContext.cs" />
+    <Compile Include="PostProcessors\AssetPostProcessingException.cs" />
+    <Compile Include="PostProcessors\IPostProcessor.cs" />
+    <Compile Include="PostProcessors\NullPostProcessor.cs" />
+    <Compile Include="PostProcessors\PostProcessorBase.cs" />
+    <Compile Include="PostProcessors\PostProcessorNotFoundException.cs" />
+    <Compile Include="Resolvers\CustomBundleResolver.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="AssetNodeMatchBase.cs" />
+    <Compile Include="CssContext.cs" />
+    <Compile Include="Transformers\ITransformer.cs" />
     <Compile Include="UnknownMimeTypeException.cs" />
     <Compile Include="FileSystem\IVirtualFileSystemWrapper.cs" />
-    <Compile Include="FileSystem\ICssRelativePathResolver.cs" />
     <Compile Include="Filters\CssUnnecessaryAssetsFilter.cs" />
     <Compile Include="Filters\CssDuplicateAssetsFilter.cs" />
     <Compile Include="Filters\CssFileExtensionsFilter.cs" />
@@ -136,7 +153,7 @@
     <Compile Include="Minifiers\MinifierNotFoundException.cs" />
     <Compile Include="Minifiers\NullMinifier.cs" />
     <Compile Include="Orderers\NullOrderer.cs" />
-    <Compile Include="Filters\CssRelativePathFilter.cs" />
+    <Compile Include="PostProcessors\UrlRewritingCssPostProcessor.cs" />
     <Compile Include="Filters\IFilter.cs" />
     <Compile Include="Resources\Strings.ru-ru.Designer.cs">
       <DependentUpon>Strings.ru-ru.resx</DependentUpon>
@@ -185,6 +202,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

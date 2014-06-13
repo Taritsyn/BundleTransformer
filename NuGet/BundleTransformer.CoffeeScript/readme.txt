@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.8.30
+       README file for Bundle Transformer: CoffeeScript 1.9.0 Beta 1
 
    ----------------------------------------------------------------------
 

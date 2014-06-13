@@ -3,15 +3,21 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Linq;
+	using System.Reflection;
 	using System.Security.Cryptography;
 	using System.Text;
 	using System.Web;
 	using System.Web.Caching;
+	using System.Web.Optimization;
 
 	using Assets;
 	using Configuration;
 	using FileSystem;
+	using Helpers;
+	using PostProcessors;
 	using Resources;
+	using Transformers;
 	using Translators;
 
 	/// <summary>
@@ -20,6 +26,11 @@
 	/// </summary>
 	public abstract class AssetHandlerBase : IHttpHandler
 	{
+		/// <summary>
+		/// HTTP context
+		/// </summary>
+		protected HttpContextBase _context;
+
 		/// <summary>
 		/// Server cache
 		/// </summary>
@@ -36,19 +47,35 @@
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		/// <summary>
-		/// Configuration settings of the debugging HTTP-handler, that responsible 
-		/// for text output of processed asset
+		/// Configuration settings of the debugging HTTP-handler
 		/// </summary>
 		private readonly AssetHandlerSettings _assetHandlerConfig;
 
 		/// <summary>
-		/// Asset content type
+		/// Static file handler
 		/// </summary>
-		public abstract string ContentType
+		private static readonly Lazy<IHttpHandler> _staticFileHandler = new Lazy<IHttpHandler>(
+			CreateStaticFileHandlerInstance);
+
+		/// <summary>
+		/// Gets a asset content type
+		/// </summary>
+		protected abstract string ContentType
 		{
 			get;
 		}
 
+		/// <summary>
+		/// Gets a value indicating whether asset is static
+		/// </summary>
+		protected abstract bool IsStaticAsset
+		{
+			get;
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether another request can use the instance of HTTP-handler
+		/// </summary>
 		public bool IsReusable
 		{
 			get { return true; }
@@ -60,10 +87,9 @@
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler,
-		/// that responsible for text output of processed asset</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
 		protected AssetHandlerBase(Cache cache,
-			IVirtualFileSystemWrapper virtualFileSystemWrapper, 
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
 		{
 			_cache = cache;
@@ -79,20 +105,33 @@
 
 		public void ProcessRequest(HttpContextBase context)
 		{
+			_context = context;
+
 			var request = context.Request; 
 			var response = context.Response;
 
 			Uri assetUri = request.Url;
 			if (assetUri == null)
 			{
-				ThrowHttpNotFoundError(response);
-				return;
+				throw new HttpException(500, Strings.Common_ValueIsNull);
 			}
 
-			string assetUrl = assetUri.LocalPath;
-			if (!_virtualFileSystemWrapper.FileExists(assetUrl))
+			string assetVirtualPath = assetUri.LocalPath;
+			if (string.IsNullOrWhiteSpace(assetVirtualPath))
 			{
-				ThrowHttpNotFoundError(response);
+				throw new HttpException(500, Strings.Common_ValueIsEmpty);
+			}
+
+			if (!_virtualFileSystemWrapper.FileExists(assetVirtualPath))
+			{
+				throw new HttpException(404, string.Format(Strings.Common_FileNotExist, assetVirtualPath));
+			}
+
+			string bundleVirtualPath = request.QueryString[Constants.Common.BundleVirtualPathQueryStringParameterName];
+			if (string.IsNullOrWhiteSpace(bundleVirtualPath) && IsStaticAsset)
+			{
+				// Delegate a processing of asset to the instance of `System.Web.StaticFileHandler` type
+				ProcessStaticAssetRequest(context);
 				return;
 			}
 
@@ -100,25 +139,27 @@
 
 			try
 			{
-				content = GetProcessedAssetContent(assetUrl);
+				content = GetProcessedAssetContent(assetVirtualPath, bundleVirtualPath);
+			}
+			catch (HttpException)
+			{
+				throw;
 			}
 			catch (AssetTranslationException e)
 			{
-				ThrowHttpInternalServerError(response,
-					string.Format(Strings.AssetHandler_TranslationError, e.Message));
-				return;
+				throw new HttpException(500, e.Message, e);
+			}
+			catch (AssetPostProcessingException e)
+			{
+				throw new HttpException(500, e.Message, e);
 			}
 			catch (FileNotFoundException e)
 			{
-				ThrowHttpInternalServerError(response,
-					string.Format(Strings.AssetHandler_DependencyNotFoundError, e.Message));
-				return;
+				throw new HttpException(500, string.Format(Strings.AssetHandler_DependencyNotFound, e.Message, e));
 			}
 			catch (Exception e)
 			{
-				ThrowHttpInternalServerError(response, 
-					string.Format(Strings.AssetHandler_UnknownError, e.Message));
-				return;
+				throw new HttpException(500, string.Format(Strings.AssetHandler_UnknownError, e.Message, e));
 			}
 
 			var clientCache = response.Cache;
@@ -160,6 +201,9 @@
 					response.AddHeader("Content-Length", "0");
 				}
 
+				// Add a Bundle Transformer's copyright HTTP header
+				response.AddHeader("X-Asset-Transformation-Powered-By", "Bundle Transformer");
+
 				clientCache.SetCacheability(HttpCacheability.Public);
 				clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
 				clientCache.SetValidUntilExpires(true);
@@ -180,11 +224,41 @@
 		}
 
 		/// <summary>
-		/// Returns a cache key to use for the specified URL
+		/// Process a request of static asset
 		/// </summary>
-		/// <param name="assetUrl">URL to the asset</param>
-		/// <returns>Cache key for the specified asset</returns>
-		public virtual string GetCacheKey(string assetUrl)
+		/// <param name="context">HTTP context</param>
+		private static void ProcessStaticAssetRequest(HttpContextBase context)
+		{
+			_staticFileHandler.Value.ProcessRequest(context.ApplicationInstance.Context);
+		}
+
+		/// <summary>
+		/// Creates a instance of static file handler
+		/// </summary>
+		/// <returns>Instance of static file handler</returns>
+		private static IHttpHandler CreateStaticFileHandlerInstance()
+		{
+			const string fullTypeName = "System.Web.StaticFileHandler";
+			Assembly assembly = typeof(HttpApplication).Assembly;
+			Type type = assembly.GetType(fullTypeName, true);
+
+			var handler = (IHttpHandler)Activator.CreateInstance(type, true);
+			if (handler == null)
+			{
+				throw new HttpException(500, string.Format(Strings.Common_InstanceCreationFailed,
+					fullTypeName, assembly.FullName));
+			}
+
+			return handler;
+		}
+
+		/// <summary>
+		/// Gets a cache key
+		/// </summary>
+		/// <param name="assetUrl">URL of asset</param>
+		/// <param name="bundleUrl">URL of bundle</param>
+		/// <returns>Cache key for specified asset</returns>
+		protected virtual string GetCacheKey(string assetUrl, string bundleUrl)
 		{
 			if (string.IsNullOrWhiteSpace(assetUrl))
 			{
@@ -192,37 +266,49 @@
 					string.Format(Strings.Common_ArgumentIsEmpty, "assetUrl"), "assetUrl");
 			}
 
-			return string.Format(
-				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, assetUrl.ToLowerInvariant());
+			string processedAssetUrl = UrlHelpers.ProcessBackSlashes(assetUrl);
+			string key = string.Format(
+				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, processedAssetUrl.ToLowerInvariant());
+			if (!string.IsNullOrWhiteSpace(bundleUrl))
+			{
+				string processedBundleUrl = UrlHelpers.ProcessBackSlashes(bundleUrl);
+				processedBundleUrl = UrlHelpers.RemoveLastSlash(processedBundleUrl);
+
+				key += "_" + processedBundleUrl.ToLowerInvariant();
+			}
+
+			return key;
 		}
 
 		/// <summary>
 		/// Gets a processed asset content
 		/// </summary>
-		/// <param name="assetUrl">URL to the asset</param>
+		/// <param name="assetVirtualPath">Virtual path of asset</param>
+		/// <param name="bundleVirtualPath">Virtual path of bundle</param>
 		/// <returns>Text content of asset</returns>
-		private string GetProcessedAssetContent(string assetUrl)
+		private string GetProcessedAssetContent(string assetVirtualPath, string bundleVirtualPath)
 		{
-			if (string.IsNullOrWhiteSpace(assetUrl))
+			if (string.IsNullOrWhiteSpace(assetVirtualPath))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assetUrl"), "assetUrl");
+					string.Format(Strings.Common_ArgumentIsEmpty, "assetVirtualPath"), "assetVirtualPath");
 			}
 
+			string assetUrl = _virtualFileSystemWrapper.ToAbsolutePath(assetVirtualPath);
 			string content;
-			var asset = new Asset(assetUrl);
 			
 			if (_assetHandlerConfig.DisableServerCache)
 			{
-				IAsset processedAsset = ProcessAsset(asset);
+				IAsset processedAsset = ProcessAsset(assetUrl, bundleVirtualPath);
 				content = processedAsset.Content;
 			}
 			else
 			{
 				lock (_cacheSynchronizer)
 				{
-					string processedAssetUrl = asset.Url;
-					string cacheItemKey = GetCacheKey(processedAssetUrl);
+					string bundleUrl = !string.IsNullOrWhiteSpace(bundleVirtualPath) ?
+						_virtualFileSystemWrapper.ToAbsolutePath(bundleVirtualPath) : string.Empty;
+					string cacheItemKey = GetCacheKey(assetUrl, bundleUrl);
 					object cacheItem = _cache.Get(cacheItemKey);
 
 					if (cacheItem != null)
@@ -231,7 +317,7 @@
 					}
 					else
 					{
-						IAsset processedAsset = ProcessAsset(asset);
+						IAsset processedAsset = ProcessAsset(assetUrl, bundleVirtualPath);
 						content = processedAsset.Content;
 
 						DateTime utcStart = DateTime.UtcNow;
@@ -239,10 +325,10 @@
 							_assetHandlerConfig.ServerCacheDurationInMinutes);
 						TimeSpan slidingExpiration = Cache.NoSlidingExpiration;
 
-						var fileDependencies = new List<string> { processedAssetUrl };
+						var fileDependencies = new List<string> { assetUrl };
 						fileDependencies.AddRange(processedAsset.VirtualPathDependencies);
 
-						var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(processedAssetUrl,
+						var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(assetUrl,
 							fileDependencies.ToArray(), utcStart);
 
 						_cache.Insert(cacheItemKey, content, cacheDep,
@@ -319,43 +405,202 @@
 		/// <summary>
 		/// Process a asset
 		/// </summary>
-		/// <param name="asset">Asset</param>
+		/// <param name="assetUrl">URL of asset</param>
+		/// <param name="bundleVirtualPath">Virtual path of bundle</param>
 		/// <returns>Processed asset</returns>
-		protected IAsset ProcessAsset(IAsset asset)
+		private IAsset ProcessAsset(string assetUrl, string bundleVirtualPath)
 		{
-			return ProcessAsset(asset, BundleTransformerContext.Current.IsDebugMode);
+			BundleFile bundleFile = null;
+			ITransformer transformer = null;
+			
+			if (!string.IsNullOrWhiteSpace(bundleVirtualPath))
+			{
+				Bundle bundle = GetBundleByVirtualPath(bundleVirtualPath);
+				if (bundle == null)
+				{
+					throw new HttpException(500, string.Format(Strings.AssetHandler_BundleNotFound, bundleVirtualPath));
+				}
+
+				bundleFile = GetBundleFileByVirtualPath(bundle, assetUrl);
+				if (bundleFile == null)
+				{
+					throw new HttpException(500, string.Format(Strings.AssetHandler_BundleFileNotFound,
+						assetUrl, bundleVirtualPath));
+				}
+
+				transformer = GetTransformer(bundle);
+				if (transformer == null)
+				{
+					throw new HttpException(500, string.Format(Strings.AssetHandler_TransformerNotFound, bundleVirtualPath));
+				}
+			}
+
+			IAsset asset = new Asset(assetUrl, bundleFile);
+
+			if (!IsStaticAsset)
+			{
+				asset = TranslateAsset(asset, transformer, BundleTransformerContext.Current.IsDebugMode);
+			}
+
+			if (transformer != null)
+			{
+				asset = PostProcessAsset(asset, transformer);
+			}
+
+			return asset;
 		}
 
 		/// <summary>
-		/// Process a asset
+		/// Gets a bundle by virtual path
+		/// </summary>
+		/// <param name="virtualPath">Virtual path</param>
+		/// <returns>Bundle</returns>
+		protected virtual Bundle GetBundleByVirtualPath(string virtualPath)
+		{
+			Bundle bundle = BundleTable.Bundles.GetBundleFor(virtualPath);
+
+			return bundle;
+		}
+
+		/// <summary>
+		/// Gets a bundle file by virtual path
+		/// </summary>
+		/// <param name="bundle">Bundle</param>
+		/// <param name="virtualPath">Virtual path</param>
+		/// <returns>Bundle</returns>
+		protected virtual BundleFile GetBundleFileByVirtualPath(Bundle bundle, string virtualPath)
+		{
+			BundleFile file = null;
+			string url = _virtualFileSystemWrapper.ToAbsolutePath(virtualPath);
+			url = UrlHelpers.ProcessBackSlashes(url);
+			url = RemoveAdditionalFileExtension(url);
+
+			var bundleContext = new BundleContext(_context, BundleTable.Bundles, bundle.Path);
+			IEnumerable<BundleFile> bundleFiles = bundle.EnumerateFiles(bundleContext);
+
+			foreach (BundleFile bundleFile in bundleFiles)
+			{
+				string bundleFileUrl = _virtualFileSystemWrapper.ToAbsolutePath(bundleFile.VirtualFile.VirtualPath);
+				bundleFileUrl = UrlHelpers.ProcessBackSlashes(bundleFileUrl);
+				bundleFileUrl = RemoveAdditionalFileExtension(bundleFileUrl);
+
+				if (string.Equals(bundleFileUrl, url, StringComparison.OrdinalIgnoreCase))
+				{
+					file = bundleFile;
+					break;
+				}
+			}
+
+			return file;
+		}
+
+		/// <summary>
+		/// Removes a additional file extension from path of specified asset
+		/// </summary>
+		/// <param name="assetPath">Path of asset</param>
+		/// <returns>Path of asset without additional file extension</returns>
+		protected virtual string RemoveAdditionalFileExtension(string assetPath)
+		{
+			return assetPath;
+		}
+
+		/// <summary>
+		/// Gets a transformer from bundle
+		/// </summary>
+		/// <param name="bundle">Bundle</param>
+		/// <returns>Transformer</returns>
+		protected abstract ITransformer GetTransformer(Bundle bundle);
+
+		/// <summary>
+		/// Translates code of asset written on intermediate language
 		/// </summary>
 		/// <param name="asset">Asset</param>
+		/// <param name="transformer">Transformer</param>
 		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		/// <returns>Processed asset</returns>
-		protected abstract IAsset ProcessAsset(IAsset asset, bool isDebugMode);
-
-		/// <summary>
-		/// Throw 404 error (page not found)
-		/// </summary>
-		/// <param name="response">HttpResponse object</param>
-		private static void ThrowHttpNotFoundError(HttpResponseBase response)
+		/// <returns>Translated asset</returns>
+		protected virtual IAsset TranslateAsset(IAsset asset, ITransformer transformer, bool isDebugMode)
 		{
-			response.Clear();
-			response.StatusCode = 404;
-			response.End();
+			return asset;
 		}
 
 		/// <summary>
-		/// Throw 500 error (internal server error)
+		/// Helper method to facilitate a translation of asset
 		/// </summary>
-		/// <param name="response">HttpResponse object</param>
-		/// <param name="errorMessage">Error message text</param>
-		private static void ThrowHttpInternalServerError(HttpResponseBase response, string errorMessage)
+		/// <typeparam name="T">Type of translator</typeparam>
+		/// <param name="translatorName">Name of translator</param>
+		/// <param name="asset">Asset</param>
+		/// <param name="transformer">Transformer</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
+		/// <returns>Translated asset</returns>
+		protected IAsset InnerTranslateAsset<T>(string translatorName, IAsset asset, ITransformer transformer,
+			bool isDebugMode) where T : class, ITranslator
 		{
-			response.Clear();
-			response.StatusCode = 500;
-			response.Write(string.Format("/*{0}{1}{0}*/", Environment.NewLine, errorMessage));
-			response.End();
+			IAsset processedAsset = asset;
+			T translator;
+
+			if (transformer != null)
+			{
+				translator = GetTranslatorByType<T>(transformer);
+				if (translator == null)
+				{
+					throw new HttpException(500, string.Format(Strings.AssetHandler_TranslatorNotFound,
+						typeof(T).FullName, asset.Url));
+				}
+			}
+			else
+			{
+				translator = GetTranslatorByName<T>(translatorName);
+			}
+
+			if (translator != null)
+			{
+				processedAsset = translator.Translate(processedAsset);
+				translator.IsDebugMode = isDebugMode;
+			}
+
+			return processedAsset;
+		}
+
+		/// <summary>
+		/// Gets a translator by name
+		/// </summary>
+		/// <typeparam name="T">Type of translator</typeparam>
+		/// <param name="translatorName">Name of translator</param>
+		/// <returns>Translator</returns>
+		protected abstract T GetTranslatorByName<T>(string translatorName) where T : class, ITranslator;
+
+		/// <summary>
+		/// Gets a translator by type from transformer
+		/// </summary>
+		/// <typeparam name="T">Type of translator</typeparam>
+		/// <param name="transformer">Transformer</param>
+		/// <returns>Translator</returns>
+		protected T GetTranslatorByType<T>(ITransformer transformer) where T : class, ITranslator
+		{
+			ITranslator translator = transformer.Translators.FirstOrDefault(t => t is T);
+
+			return (T)translator;
+		}
+
+		/// <summary>
+		/// Postprocess a text content of asset
+		/// </summary>
+		/// <param name="asset">Asset</param>
+		/// <param name="transformer">Transformer</param>
+		/// <returns>Postprocessed asset</returns>
+		protected virtual IAsset PostProcessAsset(IAsset asset, ITransformer transformer)
+		{
+			IList<IPostProcessor> availablePostProcessors = transformer.PostProcessors
+				.Where(p => p.UseInDebugMode)
+				.ToList()
+				;
+
+			foreach (IPostProcessor postProcessor in availablePostProcessors)
+			{
+				postProcessor.PostProcess(asset);
+			}
+
+			return asset;
 		}
 	}
 }

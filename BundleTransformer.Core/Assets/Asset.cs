@@ -239,42 +239,45 @@
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
 		public Asset(string virtualPath)
-			: this(virtualPath, string.Empty, null, 
-				BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+			: this(virtualPath, null, BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
-		/// <param name="virtualFileSystemWrapper">file system wrapper</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		public Asset(string virtualPath, IVirtualFileSystemWrapper virtualFileSystemWrapper)
-			: this(virtualPath, string.Empty, null, virtualFileSystemWrapper)
+			: this(virtualPath, null, virtualFileSystemWrapper)
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
-		/// <param name="includedVirtualPath">Included virtual path</param>
-		/// <param name="transforms">List of asset transformations</param>
-		public Asset(string virtualPath, string includedVirtualPath, IList<IItemTransform> transforms)
-			: this(virtualPath, includedVirtualPath, transforms, 
-				BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+		/// <param name="bundleFile">Bundle file</param>
+		public Asset(string virtualPath, BundleFile bundleFile)
+			: this(virtualPath, bundleFile, BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
 		/// Constructs instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
-		/// <param name="includedVirtualPath">Included virtual path</param>
-		/// <param name="transforms">List of asset transformations</param>
-		/// <param name="virtualFileSystemWrapper">file system wrapper</param>
-		public Asset(string virtualPath, string includedVirtualPath, IList<IItemTransform> transforms, 
-			IVirtualFileSystemWrapper virtualFileSystemWrapper)
+		/// <param name="bundleFile">Bundle file</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		public Asset(string virtualPath, BundleFile bundleFile, IVirtualFileSystemWrapper virtualFileSystemWrapper)
 		{
-			_includedVirtualPath = includedVirtualPath;
-			_transforms = transforms ?? new List<IItemTransform>();
+			if (bundleFile != null)
+			{
+				_includedVirtualPath = bundleFile.IncludedVirtualPath;
+				_transforms = bundleFile.Transforms;
+			}
+			else
+			{
+				_includedVirtualPath = string.Empty;
+				_transforms = new List<IItemTransform>();
+			}
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 
 			VirtualPath = virtualPath;
@@ -310,7 +313,7 @@
 		/// </summary>
 		/// <param name="assetVirtualPath">Virtual path to asset file</param>
 		/// <returns>Asset type</returns>
-		public static AssetType GetAssetType(string assetVirtualPath)
+		private static AssetType GetAssetType(string assetVirtualPath)
 		{
 			var assetType = AssetType.Unknown;
 

@@ -61,14 +61,13 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="ConfigurationContextExtensions.cs" />
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
     <Compile Include="Constants\FileExtension.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
-    <Compile Include="HttpHandlers\SassAndScssAssetHandlerBase.cs" />
     <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />
     <Compile Include="Compilers\SassAndScssCompiler.cs" />
     <Compile Include="Compilers\SassAndScssCompilerScriptHost.cs" />

@@ -10,13 +10,14 @@
 	using Assets;
 	using Configuration;
 	using Minifiers;
+	using PostProcessors;
 	using Resources;
 	using Translators;
 
 	/// <summary>
 	/// Base class of transformer that responsible for processing assets
 	/// </summary>
-	public abstract class TransformerBase : IBundleTransform
+	public abstract class TransformerBase : ITransformer, IBundleTransform
 	{
 		/// <summary>
 		/// List of patterns of files and directories that 
@@ -35,9 +36,38 @@
 		protected IList<ITranslator> _translators;
 
 		/// <summary>
+		/// List of postprocessors
+		/// </summary>
+		protected IList<IPostProcessor> _postProcessors;
+
+		/// <summary>
 		/// Minifier
 		/// </summary>
 		protected IMinifier _minifier;
+
+		/// <summary>
+		/// Gets a list of translators (LESS, Sass, SCSS, CoffeeScript and TypeScript)
+		/// </summary>
+		public IList<ITranslator> Translators
+		{
+			get { return _translators; }
+		}
+
+		/// <summary>
+		/// Gets a list of postprocessors
+		/// </summary>
+		public IList<IPostProcessor> PostProcessors
+		{
+			get { return _postProcessors; }
+		}
+
+		/// <summary>
+		/// Gets a minifier
+		/// </summary>
+		public IMinifier Minifier
+		{
+			get { return _minifier; }
+		}
 
 
 		/// <summary>
@@ -88,8 +118,7 @@
 
 				foreach (var bundleFile in bundleFiles)
 				{
-					assets.Add(new Asset(bundleFile.VirtualFile.VirtualPath, bundleFile.IncludedVirtualPath, 
-						bundleFile.Transforms));
+					assets.Add(new Asset(bundleFile.VirtualFile.VirtualPath, bundleFile));
 				}
 
 				Transform(assets, response, BundleTable.VirtualPathProvider, context.HttpContext, isDebugMode);
@@ -154,6 +183,23 @@
 		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		/// <returns>Set of assets with a modified extension</returns>
 		protected abstract IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets, bool isDebugMode);
+
+		/// <summary>
+		/// Process a text content of assets
+		/// </summary>
+		/// <param name="assets">Set of assets</param>
+		/// <returns>Set of assets with processed code</returns>
+		protected virtual IList<IAsset> PostProcess(IList<IAsset> assets)
+		{
+			IList<IAsset> processedAssets = assets;
+
+			foreach (var postProcessor in _postProcessors)
+			{
+				processedAssets = postProcessor.PostProcess(processedAssets);
+			}
+
+			return processedAssets;
+		}
 
 		/// <summary>
 		/// Minify a text content of assets

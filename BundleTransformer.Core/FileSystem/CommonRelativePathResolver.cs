@@ -22,7 +22,7 @@
 		/// Constructs instance of common relative path resolver
 		/// </summary>
 		public CommonRelativePathResolver()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
@@ -44,12 +44,12 @@
 		{
 			if (string.IsNullOrWhiteSpace(basePath))
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "basePath");
+				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "basePath"), "basePath");
 			}
 
 			if (string.IsNullOrWhiteSpace(relativePath))
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "relativePath");
+				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "relativePath"), "relativePath");
 			}
 
 			string newRelativePath = UrlHelpers.ProcessBackSlashes(relativePath);

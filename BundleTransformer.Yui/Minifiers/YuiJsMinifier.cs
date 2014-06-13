@@ -146,7 +146,7 @@
 		/// Constructs instance of YUI JS-minifier
 		/// </summary>
 		public YuiJsMinifier()
-			: this(BundleTransformerContext.Current.GetYuiConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetYuiSettings())
 		{ }
 
 		/// <summary>

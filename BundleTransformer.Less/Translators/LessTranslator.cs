@@ -176,9 +176,9 @@
 		/// </summary>
 		public LessTranslator()
 			: this(null,
-				BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
-				BundleTransformerContext.Current.GetLessConfiguration())
+				BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.FileSystem.GetCommonRelativePathResolver(),
+				BundleTransformerContext.Current.Configuration.GetLessSettings())
 		{ }
 
 		/// <summary>

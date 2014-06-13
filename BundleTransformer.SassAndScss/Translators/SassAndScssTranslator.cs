@@ -130,9 +130,9 @@
 		/// Constructs instance of Sass- and SCSS-translator
 		/// </summary>
 		public SassAndScssTranslator()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
-				BundleTransformerContext.Current.GetSassAndScssConfiguration())
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.FileSystem.GetCommonRelativePathResolver(),
+				BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>

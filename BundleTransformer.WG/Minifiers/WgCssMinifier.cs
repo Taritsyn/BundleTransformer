@@ -87,7 +87,7 @@
 		/// Constructs instance of WebGrease Semantic CSS-minifier
 		/// </summary>
 		public WgCssMinifier()
-			: this(BundleTransformerContext.Current.GetWgConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetWgSettings())
 		{ }
 
 		/// <summary>

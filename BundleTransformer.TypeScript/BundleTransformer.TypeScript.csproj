@@ -52,7 +52,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BundleTransformerContextExtensions.cs" />
+    <Compile Include="ConfigurationContextExtensions.cs" />
     <Compile Include="CodeGenTarget.cs" />
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\TypeScriptCompiler.cs" />
@@ -61,7 +61,6 @@
     <Compile Include="Constants\FileExtension.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\TypeScriptAssetHandler.cs" />
-    <Compile Include="HttpHandlers\TypeScriptAssetHandlerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translators\TypeScriptTranslator.cs" />
     <Compile Include="TsNodeMatch.cs" />

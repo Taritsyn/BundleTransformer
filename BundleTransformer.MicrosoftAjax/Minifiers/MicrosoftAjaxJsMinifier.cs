@@ -575,8 +575,8 @@
 		/// <summary>
 		/// Constructs instance of Microsoft Ajax JS-minifier
 		/// </summary>
-		public MicrosoftAjaxJsMinifier() 
-			: this(BundleTransformerContext.Current.GetMicrosoftAjaxConfiguration())
+		public MicrosoftAjaxJsMinifier()
+			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>
