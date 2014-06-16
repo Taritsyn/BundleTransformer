@@ -73,6 +73,11 @@
 				RegexOptions.IgnoreCase);
 
 		/// <summary>
+		/// Regular expression for working with Ruby string interpolation placeholder
+		/// </summary>
+		private static readonly Regex _rubyStringInterpolationPlaceholder = new Regex(@"(?<![^\\]?\\)#\{[^}]+?\}");
+
+		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
@@ -505,10 +510,14 @@
 				}
 				else if (nodeType == SassAndScssNodeType.MultilineComment)
 				{
-					int nextPosition = nodePosition + match.Length;
-
 					ProcessOtherContent(contentBuilder, processedContent,
-						ref currentPosition, nextPosition);
+						ref currentPosition, nodePosition);
+
+					string comment = match.Value;
+					string processedComment = EscapeRubyStringInterpolationPlaceholders(comment);
+
+					contentBuilder.Append(processedComment);
+					currentPosition += comment.Length;
 				}
 			}
 
@@ -521,6 +530,21 @@
 			stylesheet.Content = contentBuilder.ToString();
 
 			return stylesheet;
+		}
+
+		/// <summary>
+		/// Escapes a Ruby string interpolation placeholder
+		/// </summary>
+		/// <param name="value">String value</param>
+		/// <returns>Processed value</returns>
+		private static string EscapeRubyStringInterpolationPlaceholders(string value)
+		{
+			return _rubyStringInterpolationPlaceholder.Replace(value, m =>
+			{
+				string result = "\\" + m.Value;
+
+				return result;
+			});
 		}
 
 		/// <summary>

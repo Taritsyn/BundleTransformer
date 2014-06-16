@@ -65,6 +65,24 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to disable properties merging based on their order
+		/// </summary>
+		public bool NoAggressiveMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a rounding precision
+		/// </summary>
+		public int RoundingPrecision
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a compatibility mode
 		/// </summary>
 		public CompatibilityMode Compatibility
@@ -103,6 +121,8 @@
 			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
 			KeepBreaks = cssMinifierConfig.KeepBreaks;
 			NoAdvanced = cssMinifierConfig.NoAdvanced;
+			NoAggressiveMerging = cssMinifierConfig.NoAggressiveMerging;
+			RoundingPrecision = cssMinifierConfig.RoundingPrecision;
 			Compatibility = cssMinifierConfig.Compatibility;
 			Severity = cssMinifierConfig.Severity;
 
@@ -195,6 +215,8 @@
 				KeepSpecialComments = KeepSpecialComments,
 				KeepBreaks = KeepBreaks,
 				NoAdvanced = NoAdvanced,
+				NoAggressiveMerging = NoAggressiveMerging,
+				RoundingPrecision = RoundingPrecision,
 				Compatibility = Compatibility,
 				Severity = Severity
 			};

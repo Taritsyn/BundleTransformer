@@ -18,6 +18,8 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 			benchmark: false,
 			noRebase: true,
 			noAdvanced: false,
+			noAggressiveMerging: false,
+			roundingPrecision: 2,
 			compatibility: 'ie8',
 			debug: false
 		}

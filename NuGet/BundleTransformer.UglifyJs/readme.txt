@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: UglifyJS 1.9.0 Beta 1
+         README file for Bundle Transformer: UglifyJS 1.9.0 Beta 2
  
    ----------------------------------------------------------------------
 
@@ -14,13 +14,18 @@
    BundleTransformer.UglifyJs contains one minifier-adapter for 
    minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is 
    based on the Mihai Bazon's UglifyJS 
-   (http://github.com/mishoo/UglifyJS2) version 2.4.13.
+   (http://github.com/mishoo/UglifyJS2) version 2.4.14.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of UglifyJS version 2.4.14.
    
    ====================
    POST-INSTALL ACTIONS

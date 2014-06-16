@@ -1534,6 +1534,22 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to disable advanced optimizations (selector and property merging, reduction, etc)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noAggressiveMerging" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disable properties merging based on their order</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="roundingPrecision" use="optional" default="2">
+			<xs:annotation>
+				<xs:documentation>Rounding precision</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="0" />
+					<xs:maxInclusive value="2147483647" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 		<xs:attribute name="compatibility" use="optional" default="Ie7">
 			<xs:annotation>
 				<xs:documentation>Compatibility mode</xs:documentation>

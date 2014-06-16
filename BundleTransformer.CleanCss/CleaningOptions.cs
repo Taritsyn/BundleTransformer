@@ -34,6 +34,24 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to disable properties merging based on their order
+		/// </summary>
+		public bool NoAggressiveMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a rounding precision
+		/// </summary>
+		public int RoundingPrecision
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a compatibility mode
 		/// </summary>
 		public CompatibilityMode Compatibility
@@ -62,6 +80,8 @@
 			KeepSpecialComments = SpecialCommentsMode.KeepAll;
 			KeepBreaks = false;
 			NoAdvanced = false;
+			NoAggressiveMerging = false;
+			RoundingPrecision = 2;
 			Compatibility = CompatibilityMode.Ie7;
 			Severity = 0;
 		}

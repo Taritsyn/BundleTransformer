@@ -147,6 +147,7 @@
 				contentBuilder.Append(content);
 				if (!string.IsNullOrWhiteSpace(modifyVariables))
 				{
+					contentBuilder.AppendLine();
 					contentBuilder.Append(ParseVariables(modifyVariables, "ModifyVariables"));
 				}
 

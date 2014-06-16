@@ -177,6 +177,8 @@
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
 				new JProperty("keepBreaks", options.KeepBreaks),
 				new JProperty("noAdvanced", options.NoAdvanced),
+				new JProperty("noAggressiveMerging", options.NoAggressiveMerging),
+				new JProperty("roundingPrecision", options.RoundingPrecision),
 				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility))
 			);
 

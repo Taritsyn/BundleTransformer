@@ -255,26 +255,26 @@
 		/// <summary>
 		/// Gets a cache key
 		/// </summary>
-		/// <param name="assetUrl">URL of asset</param>
-		/// <param name="bundleUrl">URL of bundle</param>
+		/// <param name="assetVirtualPath">Virtual path of asset</param>
+		/// <param name="bundleVirtualPath">Virtual path of bundle</param>
 		/// <returns>Cache key for specified asset</returns>
-		protected virtual string GetCacheKey(string assetUrl, string bundleUrl)
+		protected virtual string GetCacheKey(string assetVirtualPath, string bundleVirtualPath)
 		{
-			if (string.IsNullOrWhiteSpace(assetUrl))
+			if (string.IsNullOrWhiteSpace(assetVirtualPath))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assetUrl"), "assetUrl");
+					string.Format(Strings.Common_ArgumentIsEmpty, "assetVirtualPath"), "assetVirtualPath");
 			}
 
-			string processedAssetUrl = UrlHelpers.ProcessBackSlashes(assetUrl);
+			string processedAssetVirtualPath = UrlHelpers.ProcessBackSlashes(assetVirtualPath);
 			string key = string.Format(
-				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, processedAssetUrl.ToLowerInvariant());
-			if (!string.IsNullOrWhiteSpace(bundleUrl))
+				Constants.Common.ProcessedAssetContentCacheItemKeyPattern, processedAssetVirtualPath.ToLowerInvariant());
+			if (!string.IsNullOrWhiteSpace(bundleVirtualPath))
 			{
-				string processedBundleUrl = UrlHelpers.ProcessBackSlashes(bundleUrl);
-				processedBundleUrl = UrlHelpers.RemoveLastSlash(processedBundleUrl);
+				string processedBundleVirtualPath = UrlHelpers.ProcessBackSlashes(bundleVirtualPath);
+				processedBundleVirtualPath = UrlHelpers.RemoveLastSlash(processedBundleVirtualPath);
 
-				key += "_" + processedBundleUrl.ToLowerInvariant();
+				key += "_" + processedBundleVirtualPath.ToLowerInvariant();
 			}
 
 			return key;
@@ -294,21 +294,18 @@
 					string.Format(Strings.Common_ArgumentIsEmpty, "assetVirtualPath"), "assetVirtualPath");
 			}
 
-			string assetUrl = _virtualFileSystemWrapper.ToAbsolutePath(assetVirtualPath);
 			string content;
 			
 			if (_assetHandlerConfig.DisableServerCache)
 			{
-				IAsset processedAsset = ProcessAsset(assetUrl, bundleVirtualPath);
+				IAsset processedAsset = ProcessAsset(assetVirtualPath, bundleVirtualPath);
 				content = processedAsset.Content;
 			}
 			else
 			{
 				lock (_cacheSynchronizer)
 				{
-					string bundleUrl = !string.IsNullOrWhiteSpace(bundleVirtualPath) ?
-						_virtualFileSystemWrapper.ToAbsolutePath(bundleVirtualPath) : string.Empty;
-					string cacheItemKey = GetCacheKey(assetUrl, bundleUrl);
+					string cacheItemKey = GetCacheKey(assetVirtualPath, bundleVirtualPath);
 					object cacheItem = _cache.Get(cacheItemKey);
 
 					if (cacheItem != null)
@@ -317,7 +314,7 @@
 					}
 					else
 					{
-						IAsset processedAsset = ProcessAsset(assetUrl, bundleVirtualPath);
+						IAsset processedAsset = ProcessAsset(assetVirtualPath, bundleVirtualPath);
 						content = processedAsset.Content;
 
 						DateTime utcStart = DateTime.UtcNow;
@@ -325,10 +322,10 @@
 							_assetHandlerConfig.ServerCacheDurationInMinutes);
 						TimeSpan slidingExpiration = Cache.NoSlidingExpiration;
 
-						var fileDependencies = new List<string> { assetUrl };
+						var fileDependencies = new List<string> { assetVirtualPath };
 						fileDependencies.AddRange(processedAsset.VirtualPathDependencies);
 
-						var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(assetUrl,
+						var cacheDep = _virtualFileSystemWrapper.GetCacheDependency(assetVirtualPath,
 							fileDependencies.ToArray(), utcStart);
 
 						_cache.Insert(cacheItemKey, content, cacheDep,
@@ -405,10 +402,10 @@
 		/// <summary>
 		/// Process a asset
 		/// </summary>
-		/// <param name="assetUrl">URL of asset</param>
+		/// <param name="assetVirtualPath">Virtual path of asset</param>
 		/// <param name="bundleVirtualPath">Virtual path of bundle</param>
 		/// <returns>Processed asset</returns>
-		private IAsset ProcessAsset(string assetUrl, string bundleVirtualPath)
+		private IAsset ProcessAsset(string assetVirtualPath, string bundleVirtualPath)
 		{
 			BundleFile bundleFile = null;
 			ITransformer transformer = null;
@@ -421,11 +418,11 @@
 					throw new HttpException(500, string.Format(Strings.AssetHandler_BundleNotFound, bundleVirtualPath));
 				}
 
-				bundleFile = GetBundleFileByVirtualPath(bundle, assetUrl);
+				bundleFile = GetBundleFileByVirtualPath(bundle, assetVirtualPath);
 				if (bundleFile == null)
 				{
 					throw new HttpException(500, string.Format(Strings.AssetHandler_BundleFileNotFound,
-						assetUrl, bundleVirtualPath));
+						assetVirtualPath, bundleVirtualPath));
 				}
 
 				transformer = GetTransformer(bundle);
@@ -435,7 +432,7 @@
 				}
 			}
 
-			IAsset asset = new Asset(assetUrl, bundleFile);
+			IAsset asset = new Asset(assetVirtualPath, bundleFile);
 
 			if (!IsStaticAsset)
 			{

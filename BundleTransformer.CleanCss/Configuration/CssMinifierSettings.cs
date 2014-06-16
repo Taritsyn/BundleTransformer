@@ -39,6 +39,27 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to disable properties merging based on their order
+		/// </summary>
+		[ConfigurationProperty("noAggressiveMerging", DefaultValue = false)]
+		public bool NoAggressiveMerging
+		{
+			get { return (bool)this["noAggressiveMerging"]; }
+			set { this["noAggressiveMerging"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a rounding precision
+		/// </summary>
+		[ConfigurationProperty("roundingPrecision", DefaultValue = 2)]
+		[IntegerValidator(MinValue = 0, MaxValue = int.MaxValue, ExcludeRange = false)]
+		public int RoundingPrecision
+		{
+			get { return (int)this["roundingPrecision"]; }
+			set { this["roundingPrecision"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a compatibility mode
 		/// </summary>
 		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie7)]

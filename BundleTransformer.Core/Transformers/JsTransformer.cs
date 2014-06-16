@@ -148,7 +148,7 @@
 			assets = RemoveUnnecessaryAssets(assets);
 			assets = ReplaceFileExtensions(assets, isDebugMode);
 			assets = Translate(assets, isDebugMode);
-			assets = PostProcess(assets);
+			assets = PostProcess(assets, isDebugMode);
 			if (!isDebugMode)
 			{
 				assets = Minify(assets);

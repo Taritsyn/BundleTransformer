@@ -18,8 +18,8 @@
 			var nullBuilder = new NullBuilder();
 			var nullOrderer = new NullOrderer();
 
-			// Replace a default bundle resolver in order to the debugging HTTP-handler can use 
-			// transformations of the corresponding bundle
+			// Replace a default bundle resolver in order to the debugging HTTP-handler
+			// can use transformations of the corresponding bundle
 			BundleResolver.Current = new CustomBundleResolver();
 
 			var commonStylesBundle = new CustomStyleBundle("~/Bundles/CommonStyles");

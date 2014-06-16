@@ -1,5 +1,5 @@
 /*!
- * LESS v1.7.0
+ * LESS v1.7.1
  * http://lesscss.org
  *
  * Copyright 2014, Alexis Sellier & The Core Less Team
@@ -6078,6 +6078,11 @@ var Less = (function(){
 							var rgb;
 
 							if (input.charAt(i) === '#' && (rgb = $re(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/))) {
+								var colorCandidateString = rgb.input.match(/^#([\w]+).*/); // strip colons, brackets, whitespaces and other characters that should not definitely be part of color string
+								colorCandidateString = colorCandidateString[1];
+								if (!colorCandidateString.match(/^[A-Fa-f0-9]+$/)) { // verify if candidate consists only of allowed HEX characters
+									error("Invalid HEX color code");
+								} 
 								return new(tree.Color)(rgb[1]);
 							}
 						},

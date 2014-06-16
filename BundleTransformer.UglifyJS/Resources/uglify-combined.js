@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.13
+ * UglifyJS v2.4.14
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>

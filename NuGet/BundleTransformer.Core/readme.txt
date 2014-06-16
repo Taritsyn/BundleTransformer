@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Core 1.9.0 Beta 1
+           README file for Bundle Transformer: Core 1.9.0 Beta 2
 
    ----------------------------------------------------------------------
 
@@ -33,14 +33,6 @@
 
    This extension will help your web applications successfully pass a 
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Appeared a new type of modules - postprocessor (runs after
-      translators and before minifier);
-   2. Debugging HTTP-handlers can now apply a item transformations,
-      postprocessors and other configuration settings from bundles.
 
    ====================
    POST-INSTALL ACTIONS

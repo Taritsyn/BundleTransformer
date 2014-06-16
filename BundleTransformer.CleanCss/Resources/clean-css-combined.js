@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.1.8
+ * Clean-css v2.2.1
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -413,6 +413,8 @@ var CleanCss = (function(){
 			tokens = [tokens];
 		  }
 
+		  var result = '';
+
 		  // This step takes care of putting together the components of shorthands
 		  // NOTE: this is necessary to do for every shorthand, otherwise we couldn't remove their default values
 		  for (var i = 0; i < tokens.length; i++) {
@@ -422,28 +424,22 @@ var CleanCss = (function(){
 			  Array.prototype.splice.apply(tokens, [i, 1].concat(news));
 			  t.isDirty = false;
 			  i--;
+			  continue;
 			}
+
+			if (t.prop)
+			  result += t.prop + ':';
+
+			if (t.value)
+			  result += t.value;
+
+			if (t.isImportant)
+			  result += important;
+
+			result += ';';
 		  }
 
-		  // And now, simply map every token into its string representation and concat them with a semicolon
-		  var str = tokens.map(function(token) {
-			var result = '';
-
-			// NOTE: malformed tokens will not have a 'prop' property
-			if (token.prop) {
-			  result += token.prop + ':';
-			}
-			if (token.value) {
-			  result += token.value;
-			}
-			if (token.isImportant) {
-			  result += important;
-			}
-
-			return result;
-		  }).join(';');
-
-		  return str;
+		  return result.substr(0, result.length - 1);
 		};
 
 		// Gets the final (detokenized) length of the given tokens
@@ -493,13 +489,13 @@ var CleanCss = (function(){
 	//#region URL: ./properties/validator
 	require['./properties/validator'] = (function () {
 	  // Validates various CSS property values
-	
+
 	  // Regexes used for stuff
 	  var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(px|%|em|rem|in|cm|mm|ex|pt|pc|)|auto|inherit)';
 	  var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
 	  var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
 	  var cssFunctionAnyRegexStr = '(' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
-	  var cssUnitAnyRegexStr = '(' + cssUnitRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+	  var cssUnitAnyRegexStr = '(none|' + cssUnitRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
 
 	  var backgroundRepeatKeywords = ['repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'inherit'];
 	  var backgroundAttachmentKeywords = ['inherit', 'scroll', 'fixed', 'local'];
@@ -611,7 +607,7 @@ var CleanCss = (function(){
 	//#region URL: ./properties/processable
 	require['./properties/processable'] = (function () {
 	  // Contains the interpretation of CSS properties, as used by the property optimizer
-	
+
 	  var tokenModule = require('./properties/token');
 	  var validator = require('./properties/validator');
 
@@ -673,9 +669,9 @@ var CleanCss = (function(){
 			return false;
 
 		  // (rgba|hsla)
-		  if (validator.isValidRgbaColor(val2) || validator.isValidHslColor(val2) || validator.isValidHslaColor(val2))
+		  if (validator.isValidRgbaColor(val2) || validator.isValidHslaColor(val2))
 			return true;
-		  if (validator.isValidRgbaColor(val1) || validator.isValidHslColor(val1) || validator.isValidHslaColor(val1))
+		  if (validator.isValidRgbaColor(val1) || validator.isValidHslaColor(val1))
 			return false;
 
 		  // Functions with the same name can override each other; same values can override each other
@@ -694,6 +690,12 @@ var CleanCss = (function(){
 
 		  // Functions with the same name can override each other; same values can override each other
 		  return canOverride.sameFunctionOrValue(val1, val2);
+		},
+		border: function(val1, val2) {
+		  var brokenUp1 = breakUp.border(Token.tokenizeOne(val1));
+		  var brokenUp2 = breakUp.border(Token.tokenizeOne(val2));
+
+		  return canOverride.color(brokenUp1[2].value, brokenUp2[2].value);
 		}
 	  };
 	  canOverride = Object.freeze(canOverride);
@@ -763,8 +765,11 @@ var CleanCss = (function(){
 			  curr = '';
 			}
 		  } else if (c === ' ' && parenthesisLevel === 0) {
-			result.push(curr.trim());
-			curr = '';
+			curr = curr.trim();
+			if (curr !== '') {
+			  result.push(curr);
+			  curr = '';
+			}
 		  }
 		}
 
@@ -868,11 +873,16 @@ var CleanCss = (function(){
 
 		return result;
 	  };
-	  // Breaks up outline
-	  breakUp.outline = function (token) {
+
+	  breakUp._widthStyleColor = function(token, prefix, order) {
 		// Default values
-		var result = Token.makeDefaults(['outline-color', 'outline-style', 'outline-width'], token.isImportant);
-		var color = result[0], style = result[1], width = result[2];
+		var components = order.map(function(prop) {
+		  return prefix + '-' + prop;
+		});
+		var result = Token.makeDefaults(components, token.isImportant);
+		var color = result[order.indexOf('color')];
+		var style = result[order.indexOf('style')];
+		var width = result[order.indexOf('width')];
 
 		// Take care of inherit
 		if (token.value === 'inherit' || token.value === 'inherit inherit inherit') {
@@ -890,7 +900,7 @@ var CleanCss = (function(){
 		}
 
 		if (parts.length >= 1) {
-		  // Try to find outline-width, excluding inherit because that can be anything
+		  // Try to find -width, excluding inherit because that can be anything
 		  w = parts.filter(function(p) { return p !== 'inherit' && validator.isValidOutlineWidth(p); });
 		  if (w.length) {
 			width.value = w[0];
@@ -898,7 +908,7 @@ var CleanCss = (function(){
 		  }
 		}
 		if (parts.length >= 1) {
-		  // Try to find outline-style, excluding inherit because that can be anything
+		  // Try to find -style, excluding inherit because that can be anything
 		  w = parts.filter(function(p) { return p !== 'inherit' && validator.isValidOutlineStyle(p); });
 		  if (w.length) {
 			style.value = w[0];
@@ -906,7 +916,7 @@ var CleanCss = (function(){
 		  }
 		}
 		if (parts.length >= 1) {
-		  // Find outline-color but this time can catch inherit
+		  // Find -color but this time can catch inherit
 		  w = parts.filter(function(p) { return validator.isValidOutlineColor(p); });
 		  if (w.length) {
 			color.value = w[0];
@@ -915,6 +925,14 @@ var CleanCss = (function(){
 		}
 
 		return result;
+	  };
+
+	  breakUp.outline = function(token) {
+		return breakUp._widthStyleColor(token, 'outline', ['color', 'style', 'width']);
+	  };
+
+	  breakUp.border = function(token) {
+		return breakUp._widthStyleColor(token, 'border', ['width', 'style', 'color']);
 	  };
 
 	  // Contains functions that can put together shorthands from their components
@@ -1144,6 +1162,30 @@ var CleanCss = (function(){
 		  canOverride: canOverride.always,
 		  defaultValue: 'scroll'
 		},
+		'border': {
+		  breakUp: breakUp.border,
+		  canOverride: canOverride.border,
+		  components: [
+			'border-width',
+			'border-style',
+			'border-color'
+		  ],
+		  defaultValue: 'none',
+		  putTogether: putTogether.takeCareOfInherit(putTogether.bySpacesOmitDefaults)
+		},
+		'border-color': {
+		  canOverride: canOverride.color,
+		  defaultValue: 'none'
+		},
+		'border-style': {
+		  canOverride: canOverride.always,
+		  defaultValue: 'none'
+		},
+		'border-width': {
+		  canOverride: canOverride.unit,
+		  defaultValue: 'medium',
+		  shortestValue: '0'
+		},
 		// list-style ------------------------------------------------------------------------------
 		'list-style': {
 		  components: [
@@ -1197,6 +1239,19 @@ var CleanCss = (function(){
 		  canOverride: canOverride.unit,
 		  defaultValue: 'medium',
 		  shortestValue: '0'
+		},
+		// transform
+		'-moz-transform': {
+		  canOverride: canOverride.sameFunctionOrValue
+		},
+		'-ms-transform': {
+		  canOverride: canOverride.sameFunctionOrValue
+		},
+		'-webkit-transform': {
+		  canOverride: canOverride.sameFunctionOrValue
+		},
+		'transform': {
+		  canOverride: canOverride.sameFunctionOrValue
 		}
 	  };
 
@@ -1303,6 +1358,7 @@ var CleanCss = (function(){
 	  var Token = tokenModule.createTokenPrototype(processable);
 
 	  return {
+		implementedFor: /background|border|color|list|margin|outline|padding|transform/,
 		processable: processable,
 		Token: Token
 	  };
@@ -1429,7 +1485,7 @@ var CleanCss = (function(){
 	//#region URL: ./properties/shorthand-compactor
 	require['./properties/shorthand-compactor'] = (function () {
 	  // Compacts the tokens by transforming properties into their shorthand notations when possible
-	
+
 	  var isHackValue = function (t) { return t.value === '__hack'; };
 
 	  var compactShorthands = function(tokens, isImportant, processable, Token) {
@@ -1489,6 +1545,7 @@ var CleanCss = (function(){
 		// Tries to compact a prop in componentsSoFar
 		var compactSoFar = function (prop) {
 		  var i;
+		  var componentsCount = processable[prop].components.length;
 
 		  // Check basics
 		  if (!componentsSoFar[prop] || !componentsSoFar[prop].found)
@@ -1497,7 +1554,7 @@ var CleanCss = (function(){
 		  // Find components for the shorthand
 		  var components = [];
 		  var realComponents = [];
-		  for (i = 0; i < processable[prop].components.length; i++) {
+		  for (i = 0 ; i < componentsCount; i++) {
 			// Get property name
 			var pp = processable[prop].components[i];
 
@@ -1523,7 +1580,7 @@ var CleanCss = (function(){
 			return false;
 		  }
 
-		  if (realComponents.length === processable[prop].components.length) {
+		  if (realComponents.length === componentsCount) {
 			// When all the components are from real values, only allow shorthanding if their understandability allows it
 			// This is the case when every component can override their default values, or when all of them use the same function
 
@@ -1560,7 +1617,7 @@ var CleanCss = (function(){
 		  var compactedLength = Token.getDetokenizedLength(compacted);
 		  var authenticLength = Token.getDetokenizedLength(realComponents);
 
-		  if (realComponents.length === processable[prop].components.length || compactedLength < authenticLength || components.some(isHackValue)) {
+		  if (realComponents.length === componentsCount || compactedLength < authenticLength || components.some(isHackValue)) {
 			compacted[0].isShorthand = true;
 			compacted[0].components = processable[prop].breakUp(compacted[0]);
 
@@ -1676,7 +1733,7 @@ var CleanCss = (function(){
 		var overrideCompactor = require('./properties/override-compactor');
 		var shorthandCompactor = require('./properties/shorthand-compactor');
 
-		function Optimizer(compatibility) {
+		function Optimizer(compatibility, aggressiveMerging) {
 		  var overridable = {
 			'animation-delay': ['animation'],
 			'animation-direction': ['animation'],
@@ -1742,9 +1799,9 @@ var CleanCss = (function(){
 			'font-style': ['font'],
 			'font-variant': ['font'],
 			'font-weight': ['font'],
-			'list-style-image': ['list'],
-			'list-style-position': ['list'],
-			'list-style-type': ['list'],
+			'list-style-image': ['list-style'],
+			'list-style-position': ['list-style'],
+			'list-style-type': ['list-style'],
 			'margin-bottom': ['margin'],
 			'margin-left': ['margin'],
 			'margin-right': ['margin'],
@@ -1806,7 +1863,7 @@ var CleanCss = (function(){
 				token.substring(0, firstColon),
 				token.substring(firstColon + 1),
 				token.indexOf('!important') > -1,
-				token.indexOf(IE_BACKSLASH_HACK, firstColon + 1) > 0
+				token.indexOf(IE_BACKSLASH_HACK, firstColon + 1) === token.length - IE_BACKSLASH_HACK.length
 			  ]);
 			}
 
@@ -1844,6 +1901,7 @@ var CleanCss = (function(){
 			for (var i = 0, l = tokens.length; i < l; i++) {
 			  var token = tokens[i];
 			  var property = token[0];
+			  var value = token[1];
 			  var isImportant = token[2];
 			  var isIEHack = token[3];
 			  var _property = (property == '-ms-filter' || property == 'filter') ?
@@ -1859,7 +1917,7 @@ var CleanCss = (function(){
 			  // e.g. a{display:inline-block;display:-moz-inline-box}
 			  // however if `mergeablePosition` yields true then the rule does not apply
 			  // (e.g merging two adjacent selectors: `a{display:block}a{display:block}`)
-			  if (_property != lastProperty || mergeablePosition(i)) {
+			  if (aggressiveMerging && _property != lastProperty || mergeablePosition(i)) {
 				while (true) {
 				  toOverridePosition = properties.indexOf(_property, toOverridePosition);
 				  if (toOverridePosition == -1)
@@ -1873,6 +1931,10 @@ var CleanCss = (function(){
 					continue tokensLoop;
 
 				  if (compatibility && !wasIEHack && isIEHack)
+					break;
+
+				  var _info = processableInfo.processable[_property];
+				  if (!isIEHack && !wasIEHack && _info && _info.canOverride && !_info.canOverride(tokens[toOverridePosition][1], value))
 					break;
 
 				  merged.splice(toOverridePosition, 1);
@@ -1934,7 +1996,7 @@ var CleanCss = (function(){
 				result = rebuild(optimized);
 			  }
 
-			  if (!skipCompacting) {
+			  if (!skipCompacting && processableInfo.implementedFor.test(result)) {
 				result = compact(result);
 			  }
 
@@ -2077,7 +2139,7 @@ var CleanCss = (function(){
 	//#region URL: ./text/expressions
 	require['./text/expressions'] = (function () {
 		var EscapeStore = require('./text/escape-store');
-		
+
 		function Expressions() {
 		  var expressions = new EscapeStore('EXPRESSION');
 
@@ -2104,8 +2166,12 @@ var CleanCss = (function(){
 				}
 			  }
 
-			  if (level === 0 || !next)
+			  if (level === 0 && next == ')')
 				break;
+			  if (!next) {
+				end = data.substring(0, end).lastIndexOf('}');
+				break;
+			  }
 			}
 
 			return end;
@@ -2382,7 +2448,7 @@ var CleanCss = (function(){
 		function Tokenizer(data, minifyContext) {
 		  var chunker = new Chunker(data, 128);
 		  var chunk = chunker.next();
-		  var flatBlock = /^@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport)/;
+		  var flatBlock = /(^@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport)|\\@.+?)/;
 
 		  var whatsNext = function(context) {
 			var cursor = context.cursor;
@@ -2565,7 +2631,7 @@ var CleanCss = (function(){
 
 		  var minificationsMade = [];
 
-		  var propertyOptimizer = new PropertyOptimizer(options.compatibility);
+		  var propertyOptimizer = new PropertyOptimizer(options.compatibility, options.aggressiveMerging);
 
 		  var cleanUpSelector = function(selectors) {
 			if (selectors.indexOf(',') == -1)
@@ -2901,7 +2967,6 @@ var CleanCss = (function(){
 	
 	//#region URL: ./clean
 	require['./clean'] = (function () {
-		/* jshint latedef: false */		
 		var exports;
 		var ColorShortener = require('./colors/shortener');
 		var ColorHSLToHex = require('./colors/hsl-to-hex');
@@ -2951,7 +3016,7 @@ var CleanCss = (function(){
 //		  if (Buffer.isBuffer(data))
 //			data = data.toString();
 
-//		  if (options.processImport) {
+//		  if (options.processImport || data.indexOf('@shallow') > 0) {
 //			// inline all imports
 //			var self = this;
 //			var runner = callback ?
@@ -3161,8 +3226,12 @@ var CleanCss = (function(){
 		  replace(/(\s|:|,)0+([1-9])/g, '$1$2');
 
 		  // round pixels to 2nd decimal place
-		  replace(/\.(\d{3,})px/g, function(match, decimalPlaces) {
-			return '.' + Math.round(parseFloat('.' + decimalPlaces) * 100) + 'px';
+		  var precision = 'roundingPrecision' in options ? options.roundingPrecision : 2;
+		  var decimalMultiplier = Math.pow(10, precision);
+		  replace(new RegExp('\\.(\\d{' + (precision + 1) + ',})px', 'g'), function(match, decimalPlaces) {
+			return precision === 0 ?
+			  'px' :
+			  '.' + Math.round(parseFloat('.' + decimalPlaces) * decimalMultiplier) / decimalMultiplier + 'px';
 		  });
 
 		  // .0 to 0
@@ -3196,6 +3265,10 @@ var CleanCss = (function(){
 			return colorFunction + '(' + tokens.join(',') + ')';
 		  });
 
+		  // transparent rgba/hsla to 'transparent' unless in compatibility mode
+		  if (!options.compatibility)
+			replace(/(rgba|hsla)\(\d+,\d+%?,\d+%?,0\)/g, 'transparent');
+
 		  // none to 0
 		  replace(/outline:none/g, 'outline:0');
 
@@ -3218,8 +3291,9 @@ var CleanCss = (function(){
 			return match.replace(/\+/g, ' + ');
 		  });
 
-		  // remove space after (rgba|hsla) declaration - see #165
-		  replace(/(rgba|hsla)\(([^\)]+)\) /g, '$1($2)');
+		  // get rid of IE hacks if not in compatibility mode
+		  if (!options.compatibility)
+			replace(/([;\{])[\*_][\w\-]+:[^;\}]+/g, '$1');
 
 		  if (options.noAdvanced) {
 			if (options.keepBreaks)
@@ -3229,7 +3303,8 @@ var CleanCss = (function(){
 			  data = new SelectorsOptimizer(data, context, {
 				keepBreaks: options.keepBreaks,
 				lineBreak: lineBreak,
-				compatibility: options.compatibility
+				compatibility: options.compatibility,
+				aggressiveMerging: !options.noAggressiveMerging
 			  }).process();
 			});
 		  }

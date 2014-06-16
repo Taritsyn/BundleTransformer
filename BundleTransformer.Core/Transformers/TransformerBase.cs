@@ -188,14 +188,18 @@
 		/// Process a text content of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
 		/// <returns>Set of assets with processed code</returns>
-		protected virtual IList<IAsset> PostProcess(IList<IAsset> assets)
+		protected virtual IList<IAsset> PostProcess(IList<IAsset> assets, bool isDebugMode)
 		{
 			IList<IAsset> processedAssets = assets;
 
 			foreach (var postProcessor in _postProcessors)
 			{
-				processedAssets = postProcessor.PostProcess(processedAssets);
+				if (!isDebugMode || postProcessor.UseInDebugMode)
+				{
+					processedAssets = postProcessor.PostProcess(processedAssets);
+				}
 			}
 
 			return processedAssets;
