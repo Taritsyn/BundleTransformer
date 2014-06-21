@@ -58,7 +58,7 @@
     <Compile Include="ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\AutoprefixerSettings.cs" />
     <Compile Include="Configuration\BrowserConditionalExpression.cs" />
-    <Compile Include="Configuration\BrowserConditionalExpressionList.cs" />
+    <Compile Include="Configuration\BrowserConditionalExpressionCollection.cs" />
     <Compile Include="PostProcessors\AutoprefixCssPostProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

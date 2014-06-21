@@ -65,7 +65,9 @@
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
+    <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\FileExtension.cs" />
+    <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
     <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />

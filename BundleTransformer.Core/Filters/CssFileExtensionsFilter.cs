@@ -61,7 +61,7 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.AssetType == AssetType.Css 
+			foreach (var asset in assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.Css 
 				&& !a.Minified))
 			{
 				bool isMinified;

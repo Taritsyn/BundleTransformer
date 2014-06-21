@@ -3,31 +3,45 @@
 	using System;
 	using System.Web.Optimization;
 
+	using Assets;
+	using FileSystem;
 	using Configuration;
 
 	/// <summary>
 	/// Bundle transformer context
 	/// </summary>
-	public sealed class BundleTransformerContext
+	public sealed class BundleTransformerContext : IBundleTransformerContext
 	{
 		/// <summary>
-		/// Instance of bundle transformer context
+		/// Instance of default bundle transformer context
 		/// </summary>
-		private static readonly Lazy<BundleTransformerContext> _instance =
+		private static readonly Lazy<BundleTransformerContext> _default =
 			new Lazy<BundleTransformerContext>(() => new BundleTransformerContext());
+
+		/// <summary>
+		/// Instance of current bundle transformer context
+		/// </summary>
+		private static IBundleTransformerContext _current;
 
 		/// <summary>
 		/// Gets a instance of bundle transformer context
 		/// </summary>
-		public static BundleTransformerContext Current
+		public static IBundleTransformerContext Current
 		{
-			get { return _instance.Value; }
+			get
+			{
+				return _current ?? _default.Value;
+			}
+			set
+			{
+				_current = value;
+			}
 		}
 
 		/// <summary>
 		/// Gets a configuration context
 		/// </summary>
-		public ConfigurationContext Configuration
+		public IConfigurationContext Configuration
 		{
 			get;
 			private set;
@@ -36,30 +50,29 @@
 		/// <summary>
 		/// Gets a file system context
 		/// </summary>
-		public FileSystemContext FileSystem
+		public IFileSystemContext FileSystem
 		{
 			get;
 			private set;
 		}
 
 		/// <summary>
-		/// Gets a CSS-context
+		/// Gets a style context
 		/// </summary>
-		public CssContext Css
+		public IAssetContext Styles
 		{
 			get;
 			private set;
 		}
 
 		/// <summary>
-		/// Gets a JS-context
+		/// Gets a script context
 		/// </summary>
-		public JsContext Js
+		public IAssetContext Scripts
 		{
 			get;
 			private set;
 		}
-
 
 		/// <summary>
 		/// Gets a flag that web application is in debug mode
@@ -80,8 +93,8 @@
 
 			Configuration = configContext;
 			FileSystem = new FileSystemContext();
-			Css = new CssContext(coreConfig);
-			Js = new JsContext(coreConfig);
+			Styles = new StyleContext(coreConfig.Styles);
+			Scripts = new ScriptContext(coreConfig.Scripts);
 		}
 	}
 }

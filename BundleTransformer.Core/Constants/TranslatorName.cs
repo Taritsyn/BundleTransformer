@@ -1,9 +1,9 @@
 ﻿namespace BundleTransformer.Core.Constants
 {
 	/// <summary>
-	/// Translators names constants
+	/// Translator names constants
 	/// </summary>
-	public static class TranslatorName
+	internal static class TranslatorName
 	{
 		/// <summary>
 		/// Name (key) of null translator

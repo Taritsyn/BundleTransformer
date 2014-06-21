@@ -111,7 +111,7 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.AssetType == AssetType.JavaScript && !a.Minified))
+			foreach (var asset in assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.JavaScript && !a.Minified))
 			{
 				bool isMinified;
 				string newAssetVirtualPath = GetAppropriateAssetFilePath(asset.VirtualPath, out isMinified);

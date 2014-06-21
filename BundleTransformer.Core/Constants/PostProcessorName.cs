@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Postprocessor names constants
 	/// </summary>
-	public static class PostProcessorName
+	internal static class PostProcessorName
 	{
 		/// <summary>
 		/// Name (key) of null postprocessor

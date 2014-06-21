@@ -59,7 +59,7 @@
 		protected override IAsset TranslateAsset(IAsset asset, ITransformer transformer, bool isDebugMode)
 		{
 			IAsset processedAsset = InnerTranslateAsset<CoffeeScriptTranslator>(
-				"CoffeeScriptTranslator", asset, transformer, isDebugMode);
+				Constants.TranslatorName.CoffeeScriptTranslator, asset, transformer, isDebugMode);
 
 			return processedAsset;
 		}

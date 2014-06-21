@@ -10,6 +10,9 @@
 				<translators>
 					<add name="LessTranslator" type="BundleTransformer.Less.Translators.LessTranslator, BundleTransformer.Less" />
 				</translators>
+				<fileExtensions>
+					<add fileExtension=".less" assetTypeCode="Less" />
+				</fileExtensions>
 			</css>
 		</core>
 	</bundleTransformer>

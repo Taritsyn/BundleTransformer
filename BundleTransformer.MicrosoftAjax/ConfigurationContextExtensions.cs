@@ -3,7 +3,8 @@
 	using System;
 	using System.Configuration;
 
-	using Core;
+	using Core.Configuration;
+
 	using Configuration;
 
 	/// <summary>
@@ -22,7 +23,7 @@
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Microsoft Ajax Minifier</returns>
-		public static MicrosoftAjaxSettings GetMicrosoftAjaxSettings(this ConfigurationContext context)
+		public static MicrosoftAjaxSettings GetMicrosoftAjaxSettings(this IConfigurationContext context)
 		{
 			return _microsoftAjaxConfig.Value;
 		}

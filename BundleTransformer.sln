@@ -49,6 +49,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{0FD357
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Autoprefixer", "BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj", "{05911325-5BF6-4845-98AF-4AEF698993AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Handlebars", "BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj", "{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BundleTransformer.vsmdi
@@ -274,6 +276,18 @@ Global
 		{05911325-5BF6-4845-98AF-4AEF698993AE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{05911325-5BF6-4845-98AF-4AEF698993AE}.Release|x64.ActiveCfg = Release|Any CPU
 		{05911325-5BF6-4845-98AF-4AEF698993AE}.Release|x86.ActiveCfg = Release|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|x64.ActiveCfg = Release|Any CPU
+		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

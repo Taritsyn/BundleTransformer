@@ -10,6 +10,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
@@ -35,6 +36,11 @@
 		/// CSS-compressor
 		/// </summary>
 		private readonly CssCompressor _cssCompressor;
+
+		/// <summary>
+		/// Synchronizer of minification
+		/// </summary>
+		private readonly object _minificationSynchronizer = new object();
 
 		/// <summary>
 		/// Gets or sets a code compression type
@@ -117,24 +123,27 @@
 				return assets;
 			}
 
-			foreach (var asset in assetsToProcessing)
+			lock (_minificationSynchronizer)
 			{
-				string newContent;
-				string assetVirtualPath = asset.VirtualPath;
-
-				try
+				foreach (var asset in assetsToProcessing)
 				{
-					newContent = _cssCompressor.Compress(asset.Content);
-				}
-				catch(Exception e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-				}
+					string newContent;
+					string assetVirtualPath = asset.VirtualPath;
 
-				asset.Content = newContent;
-				asset.Minified = true;
+					try
+					{
+						newContent = _cssCompressor.Compress(asset.Content);
+					}
+					catch (Exception e)
+					{
+						throw new AssetMinificationException(
+							string.Format(CoreStrings.Minifiers_MinificationFailed,
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+					}
+
+					asset.Content = newContent;
+					asset.Minified = true;
+				}
 			}
 
 			return assets;

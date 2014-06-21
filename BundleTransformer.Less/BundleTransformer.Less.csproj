@@ -58,8 +58,10 @@
     <Compile Include="Compilers\LessCompiler.cs" />
     <Compile Include="Compilers\LessCompilingException.cs" />
     <Compile Include="Configuration\LessSettings.cs" />
+    <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\FileExtension.cs" />
     <Compile Include="Constants\ImportType.cs" />
+    <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\LessAssetHandler.cs" />
     <Compile Include="LessImport.cs" />

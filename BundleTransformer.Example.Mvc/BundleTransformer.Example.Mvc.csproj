@@ -164,6 +164,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Scripts\coffee\TestLiterateCoffeeScript.litcoffee" />
+    <None Include="Scripts\handlebars\HandlebarsTranslatorBadge.handlebars" />
     <None Include="Scripts\jquery-1.11.0.min.map" />
   </ItemGroup>
   <ItemGroup>
@@ -302,6 +303,10 @@
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
     <None Include="Scripts\coffee\TestCoffeeScriptMarkdown.coffee.md" />
+    <Content Include="Scripts\handlebars.runtime.js" />
+    <Content Include="Scripts\handlebars.runtime.min.js" />
+    <Content Include="Scripts\handlebars\HandlebarsHelpers.js" />
+    <Content Include="Scripts\handlebars\TestHandlebars.js" />
     <Content Include="Scripts\jquery-1.11.0-vsdoc.js" />
     <Content Include="Scripts\jquery-1.11.0.js" />
     <Content Include="Scripts\jquery-1.11.0.min.js" />
@@ -389,6 +394,10 @@
     <ProjectReference Include="..\BundleTransformer.Csso\BundleTransformer.Csso.csproj">
       <Project>{E70F938E-7498-4904-8E89-445DE42D974B}</Project>
       <Name>BundleTransformer.Csso</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj">
+      <Project>{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}</Project>
+      <Name>BundleTransformer.Handlebars</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj">
       <Project>{141FCB8B-27E9-459F-9057-F411107D6E48}</Project>

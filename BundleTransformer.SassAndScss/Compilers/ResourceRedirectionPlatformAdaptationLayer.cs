@@ -6,11 +6,12 @@
 
 	using Microsoft.Scripting;
 
-	using Core;
 	using Core.Assets;
 	using Core.Helpers;
 	using Core.Resources;
-	using Helpers;
+	using Core.Utilities;
+
+	using SassAndScssFileExtensionHelpers = Helpers.FileExtensionHelpers;
 
 	/// <summary>
 	/// Resource redirection platform adaptation layer
@@ -58,7 +59,7 @@
 		{
 			string extension = Path.GetExtension(path);
 
-			if (FileExtensionHelpers.IsRuby(extension))
+			if (SassAndScssFileExtensionHelpers.IsRuby(extension))
 			{
 				Stream rubyResourceStream = GetResourceStream(path);
 				if (rubyResourceStream != null)
@@ -66,7 +67,7 @@
 					return true;
 				}
 			}
-			else if (FileExtensionHelpers.IsSassOrScss(extension))
+			else if (SassAndScssFileExtensionHelpers.IsSassOrScss(extension))
 			{
 				if (_dependencies.ContainsUrl(path))
 				{
@@ -104,7 +105,7 @@
 			Stream fileStream;
 			string extension = Path.GetExtension(path);
 
-			if (FileExtensionHelpers.IsRuby(extension))
+			if (SassAndScssFileExtensionHelpers.IsRuby(extension))
 			{
 				fileStream = GetResourceStream(path);
 				if (fileStream != null)
@@ -116,7 +117,7 @@
 					string.Format(Strings.Common_FileNotExist, path));
 			}
 
-			if (FileExtensionHelpers.IsSassOrScss(extension))
+			if (SassAndScssFileExtensionHelpers.IsSassOrScss(extension))
 			{
 				string processedPath = UrlHelpers.ProcessBackSlashes(path);
 				fileStream = GetAssetFileStream(processedPath);

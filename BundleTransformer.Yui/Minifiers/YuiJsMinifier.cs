@@ -13,6 +13,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 	
 	using Configuration;
@@ -39,6 +40,11 @@
 		/// JS-compressor
 		/// </summary>
 		private readonly JavaScriptCompressor _jsCompressor;
+
+		/// <summary>
+		/// Synchronizer of minification
+		/// </summary>
+		private readonly object _minificationSynchronizer = new object();
 
 		/// <summary>
 		/// Gets or sets a code compression type
@@ -193,57 +199,60 @@
 				return assets;
 			}
 
-			foreach (var asset in assetsToProcessing)
+			lock (_minificationSynchronizer)
 			{
-				string newContent;
-				string assetVirtualPath = asset.VirtualPath;
-
-				try
+				foreach (var asset in assetsToProcessing)
 				{
-					newContent = _jsCompressor.Compress(asset.Content);
+					string newContent;
+					string assetVirtualPath = asset.VirtualPath;
 
-					var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
-					if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
+					try
 					{
-						var errorMessage = new StringBuilder();
-						foreach(var errorDetail in errorReporter.ErrorMessages)
+						newContent = _jsCompressor.Compress(asset.Content);
+
+						var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
+						if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
 						{
-							errorMessage.AppendLine(errorDetail);
-							errorMessage.AppendLine();
+							var errorMessage = new StringBuilder();
+							foreach (var errorDetail in errorReporter.ErrorMessages)
+							{
+								errorMessage.AppendLine(errorDetail);
+								errorMessage.AppendLine();
+							}
+
+							errorReporter.ErrorMessages.Clear();
+
+							throw new YuiCompressingException(errorMessage.ToString());
 						}
-
-						errorReporter.ErrorMessages.Clear();
-
-						throw new YuiCompressingException(errorMessage.ToString());
 					}
-				}
-				catch (EcmaScriptRuntimeException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-				}
-				catch (EcmaScriptException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-				}
-				catch (YuiCompressingException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-				}
-				catch (Exception e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-				}
+					catch (EcmaScriptRuntimeException e)
+					{
+						throw new AssetMinificationException(
+							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+					}
+					catch (EcmaScriptException e)
+					{
+						throw new AssetMinificationException(
+							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+					}
+					catch (YuiCompressingException e)
+					{
+						throw new AssetMinificationException(
+							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+					}
+					catch (Exception e)
+					{
+						throw new AssetMinificationException(
+							string.Format(CoreStrings.Minifiers_MinificationFailed,
+								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+					}
 
-				asset.Content = newContent;
-				asset.Minified = true;
+					asset.Content = newContent;
+					asset.Minified = true;
+				}
 			}
 
 			return assets;

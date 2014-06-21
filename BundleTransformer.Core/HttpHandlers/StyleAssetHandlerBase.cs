@@ -47,7 +47,7 @@
 			IBundleTransform transformer = null;
 			if (bundle != null)
 			{
-				transformer = bundle.Transforms.FirstOrDefault(t => t is CssTransformer);
+				transformer = bundle.Transforms.FirstOrDefault(t => t is StyleTransformer);
 			}
 
 			return (ITransformer)transformer;
@@ -61,7 +61,7 @@
 		/// <returns>Translator</returns>
 		protected override T GetTranslatorByName<T>(string translatorName)
 		{
-			ITranslator translator = BundleTransformerContext.Current.Css.GetTranslatorInstance(translatorName);
+			ITranslator translator = BundleTransformerContext.Current.Styles.GetTranslatorInstance(translatorName);
 
 			return (T)translator;
 		}

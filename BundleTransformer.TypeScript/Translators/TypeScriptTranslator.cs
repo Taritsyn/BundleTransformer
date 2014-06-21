@@ -15,11 +15,12 @@
 	using Core.FileSystem;
 	using Core.Helpers;
 	using Core.Translators;
+	using CoreFileExtensionHelpers = Core.Helpers.FileExtensionHelpers;
 	using CoreStrings = Core.Resources.Strings;
-
+	
 	using Compilers;
 	using Configuration;
-	using Helpers;
+	using TypeScriptFileExtensionHelpers = Helpers.FileExtensionHelpers;
 
 	/// <summary>
 	/// Translator that responsible for translation of TypeScript-code to JS-code
@@ -251,7 +252,7 @@
 				return assets;
 			}
 
-			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.TypeScript).ToList();
+			var assetsToProcessing = assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.TypeScript).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
@@ -523,8 +524,8 @@
 				if (!dependencies.ContainsUrl(dependencyUrl))
 				{
 					string dependencyExtension = Path.GetExtension(dependencyUrl);
-					if (FileExtensionHelpers.IsTypeScript(dependencyExtension)
-						|| FileExtensionHelpers.IsJavaScript(dependencyExtension))
+					if (TypeScriptFileExtensionHelpers.IsTypeScript(dependencyExtension)
+						|| CoreFileExtensionHelpers.IsJavaScript(dependencyExtension))
 					{
 						if (TsScriptExists(dependencyUrl))
 						{

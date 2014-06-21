@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.ObjectModel;
 	using System.Linq;
 	using System.Web;
 	using System.Web.Hosting;
@@ -31,14 +32,14 @@
 		protected readonly CoreSettings _coreConfig;
 
 		/// <summary>
-		/// List of translators (LESS, Sass, SCSS, CoffeeScript and TypeScript)
+		/// List of translators
 		/// </summary>
-		protected IList<ITranslator> _translators;
+		protected ReadOnlyCollection<ITranslator> _translators;
 
 		/// <summary>
 		/// List of postprocessors
 		/// </summary>
-		protected IList<IPostProcessor> _postProcessors;
+		protected ReadOnlyCollection<IPostProcessor> _postProcessors;
 
 		/// <summary>
 		/// Minifier
@@ -48,7 +49,7 @@
 		/// <summary>
 		/// Gets a list of translators (LESS, Sass, SCSS, CoffeeScript and TypeScript)
 		/// </summary>
-		public IList<ITranslator> Translators
+		public ReadOnlyCollection<ITranslator> Translators
 		{
 			get { return _translators; }
 		}
@@ -56,7 +57,7 @@
 		/// <summary>
 		/// Gets a list of postprocessors
 		/// </summary>
-		public IList<IPostProcessor> PostProcessors
+		public ReadOnlyCollection<IPostProcessor> PostProcessors
 		{
 			get { return _postProcessors; }
 		}

@@ -58,6 +58,8 @@
     <Compile Include="Compilers\CoffeeScriptCompilingException.cs" />
     <Compile Include="Compilers\CoffeeScriptCompiler.cs" />
     <Compile Include="Configuration\CoffeeScriptSettings.cs" />
+    <Compile Include="Constants\AssetTypeCode.cs" />
+    <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="HttpHandlers\CoffeeScriptAssetHandler.cs" />
     <Compile Include="Translators\CoffeeScriptTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

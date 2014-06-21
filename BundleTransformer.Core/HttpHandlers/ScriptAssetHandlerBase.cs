@@ -47,7 +47,7 @@
 			IBundleTransform transformer = null;
 			if (bundle != null)
 			{
-				transformer = bundle.Transforms.FirstOrDefault(t => t is JsTransformer);
+				transformer = bundle.Transforms.FirstOrDefault(t => t is ScriptTransformer);
 			}
 
 			return (ITransformer)transformer;
@@ -61,7 +61,7 @@
 		/// <returns>Translator</returns>
 		protected override T GetTranslatorByName<T>(string translatorName)
 		{
-			ITranslator translator = BundleTransformerContext.Current.Js.GetTranslatorInstance(translatorName);
+			ITranslator translator = BundleTransformerContext.Current.Scripts.GetTranslatorInstance(translatorName);
 
 			return (T)translator;
 		}

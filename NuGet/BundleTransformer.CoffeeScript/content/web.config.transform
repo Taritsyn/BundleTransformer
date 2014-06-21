@@ -10,6 +10,11 @@
 				<translators>
 					<add name="CoffeeScriptTranslator" type="BundleTransformer.CoffeeScript.Translators.CoffeeScriptTranslator, BundleTransformer.CoffeeScript" />
 				</translators>
+				<fileExtensions>
+					<add fileExtension=".coffee" assetTypeCode="CoffeeScript" />
+					<add fileExtension=".litcoffee" assetTypeCode="LiterateCoffeeScript" />
+					<add fileExtension=".coffee.md" assetTypeCode="LiterateCoffeeScript" />
+				</fileExtensions>
 			</js>
 		</core>
 	</bundleTransformer>

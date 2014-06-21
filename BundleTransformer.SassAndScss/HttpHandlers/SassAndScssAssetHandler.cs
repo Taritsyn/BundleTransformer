@@ -59,7 +59,7 @@
 		protected override IAsset TranslateAsset(IAsset asset, ITransformer transformer, bool isDebugMode)
 		{
 			IAsset processedAsset = InnerTranslateAsset<SassAndScssTranslator>(
-				"SassAndScssTranslator", asset, transformer, isDebugMode);
+				Constants.TranslatorName.SassAndScssTranslator, asset, transformer, isDebugMode);
 
 			return processedAsset;
 		}

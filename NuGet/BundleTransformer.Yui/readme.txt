@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: YUI 1.9.0 Beta 1
+            README file for Bundle Transformer: YUI 1.9.0 Beta 3
  
    ----------------------------------------------------------------------
 
@@ -15,6 +15,11 @@
    (for minification of CSS-code) and `YuiJsMinifier` (for minification of 
    JS-code). These adapters perform minification using the YUI Compressor 
    for .NET (http://yuicompressor.codeplex.com).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed bug #76 "Yui Compressor Not Thread Safe".
 
    ====================
    POST-INSTALL ACTIONS

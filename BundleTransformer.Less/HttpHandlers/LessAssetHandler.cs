@@ -59,7 +59,7 @@
 		protected override IAsset TranslateAsset(IAsset asset, ITransformer transformer, bool isDebugMode)
 		{
 			IAsset processedAsset = InnerTranslateAsset<LessTranslator>(
-				"LessTranslator", asset, transformer, isDebugMode);
+				Constants.TranslatorName.LessTranslator, asset, transformer, isDebugMode);
 
 			return processedAsset;
 		}

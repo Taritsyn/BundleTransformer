@@ -3,7 +3,8 @@
 	using System;
 	using System.Configuration;
 
-	using Core;
+	using Core.Configuration;
+
 	using Configuration;
 
 	/// <summary>
@@ -22,7 +23,7 @@
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of WebGrease Minifier</returns>
-		public static WgSettings GetWgSettings(this ConfigurationContext context)
+		public static WgSettings GetWgSettings(this IConfigurationContext context)
 		{
 			return _wgConfig.Value;
 		}

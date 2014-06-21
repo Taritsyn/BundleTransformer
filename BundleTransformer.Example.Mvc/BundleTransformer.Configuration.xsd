@@ -17,6 +17,7 @@
 				<xs:element name="sassAndScss" type="SassAndScssSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="coffeeScript" type="CoffeeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="typeScript" type="TypeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="handlebars" type="HandlebarsSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="autoprefixer" type="AutoprefixerSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="microsoftAjax" type="MicrosoftAjaxSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="yui" type="YuiSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -45,14 +46,14 @@
 			<xs:documentation>Configuration settings of core</xs:documentation>
 		</xs:annotation>
 		<xs:all>
-			<xs:element name="css" type="CssSettings_SchemaType" minOccurs="0" maxOccurs="1">
+			<xs:element name="css" type="StyleSettings_SchemaType" minOccurs="0" maxOccurs="1">
 				<xs:annotation>
-					<xs:documentation>Configuration settings of processing CSS-assets</xs:documentation>
+					<xs:documentation>Configuration settings of processing style assets</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="js" type="JsSettings_SchemaType" minOccurs="0" maxOccurs="1">
+			<xs:element name="js" type="ScriptSettings_SchemaType" minOccurs="0" maxOccurs="1">
 				<xs:annotation>
-					<xs:documentation>Configuration settings of processing JS-assets</xs:documentation>
+					<xs:documentation>Configuration settings of processing script assets</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="assetHandler" type="AssetHandlerSettings_SchemaType" minOccurs="0" maxOccurs="1">
@@ -74,9 +75,9 @@
 		</xs:attribute>
 	</xs:complexType>
 
-	<xs:complexType name="CssSettings_SchemaType">
+	<xs:complexType name="StyleSettings_SchemaType">
 		<xs:complexContent>
-			<xs:extension base="AssetTypeSettings_SchemaType">
+			<xs:extension base="AssetSettings_SchemaType">
 				<xs:attribute name="defaultPostProcessors" type="xs:string" use="optional" default="UrlRewritingCssPostProcessor">
 					<xs:annotation>
 						<xs:documentation>Ordered comma-separated list of names of default postprocessors</xs:documentation>
@@ -86,9 +87,9 @@
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:complexType name="JsSettings_SchemaType">
+	<xs:complexType name="ScriptSettings_SchemaType">
 		<xs:complexContent>
-			<xs:extension base="AssetTypeSettings_SchemaType">
+			<xs:extension base="AssetSettings_SchemaType">
 				<xs:attribute name="defaultPostProcessors" type="xs:string" use="optional" default="">
 					<xs:annotation>
 						<xs:documentation>Ordered comma-separated list of names of default postprocessors</xs:documentation>
@@ -98,11 +99,12 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:complexType name="AssetTypeSettings_SchemaType">
+	<xs:complexType name="AssetSettings_SchemaType">
 		<xs:all>
-			<xs:element name="translators" type="TranslatorRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
-			<xs:element name="postProcessors" type="PostProcessorRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
-			<xs:element name="minifiers" type="MinifierRegistrationList_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="translators" type="TranslatorRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="postProcessors" type="PostProcessorRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="minifiers" type="MinifierRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="fileExtensions" type="FileExtensionRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 		<xs:attribute name="defaultMinifier" type="xs:string" use="optional" default="NullMinifier">
 			<xs:annotation>
@@ -116,9 +118,9 @@
 		</xs:attribute>
 	</xs:complexType>
 
-	<xs:complexType name="TranslatorRegistrationList_SchemaType">
+	<xs:complexType name="TranslatorRegistrationCollection_SchemaType">
 		<xs:annotation>
-			<xs:documentation>List of registered translators</xs:documentation>
+			<xs:documentation>Collection of registered translators</xs:documentation>
 		</xs:annotation>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="add" type="AddTranslatorRegistration_SchemaType" />
@@ -160,9 +162,9 @@
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:complexType name="PostProcessorRegistrationList_SchemaType">
+	<xs:complexType name="PostProcessorRegistrationCollection_SchemaType">
 		<xs:annotation>
-			<xs:documentation>List of registered postprocessors</xs:documentation>
+			<xs:documentation>Collection of registered postprocessors</xs:documentation>
 		</xs:annotation>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="add" type="AddPostProcessorRegistration_SchemaType" />
@@ -204,9 +206,9 @@
 		</xs:complexContent>
 	</xs:complexType>
 
-	<xs:complexType name="MinifierRegistrationList_SchemaType">
+	<xs:complexType name="MinifierRegistrationCollection_SchemaType">
 		<xs:annotation>
-			<xs:documentation>List of registered minifiers</xs:documentation>
+			<xs:documentation>Collection of registered minifiers</xs:documentation>
 		</xs:annotation>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="add" type="AddMinifierRegistration_SchemaType" />
@@ -264,6 +266,40 @@
 	</xs:complexType>
 
 	<xs:complexType name="ClearAssetProcessorRegistrationBase_SchemaType" abstract="true" />
+	
+	<xs:complexType name="FileExtensionRegistrationCollection_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Collection of registered file extensions</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddFileExtensionRegistration_SchemaType" />
+			<xs:element name="remove" type="RemoveFileExtensionRegistration_SchemaType" />
+			<xs:element name="clear" type="ClearFileExtensionRegistration_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddFileExtensionRegistration_SchemaType">
+		<xs:attribute name="fileExtension" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>File extension</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="assetTypeCode" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Asset type code</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RemoveFileExtensionRegistration_SchemaType">
+		<xs:attribute name="fileExtension" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>File extension</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="ClearFileExtensionRegistration_SchemaType" />
 
 	<xs:complexType name="JsEngineSettings_SchemaType">
 		<xs:annotation>
@@ -467,13 +503,44 @@
 	</xs:complexType>
 	<!-- /TypeScript settings -->
 
+	<!-- Handlebars settings -->
+	<xs:complexType name="HandlebarsSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Handlebars-translator</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+		<xs:attribute name="namespace" type="xs:string" use="optional" default="Handlebars.templates">
+			<xs:annotation>
+				<xs:documentation>Template namespace</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="rootPath" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>Template root. Base value that will be stripped from template names.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="knownHelpers" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>Comma-separated list of known helpers</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="knownHelpersOnly" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to use only known helpers</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<!-- /Handlebars settings -->
+
 	<!-- Autoprefixer settings -->
 	<xs:complexType name="AutoprefixerSettings_SchemaType">
 		<xs:annotation>
 			<xs:documentation>Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor</xs:documentation>
 		</xs:annotation>
 		<xs:all>
-			<xs:element name="browsers" type="BrowserConditionalExpressionList_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="browsers" type="BrowserConditionalExpressionCollection_SchemaType" minOccurs="0" maxOccurs="1" />
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 		<xs:attribute name="cascade" type="Boolean_SchemaType" use="optional" default="false">
@@ -483,9 +550,9 @@
 		</xs:attribute>
 	</xs:complexType>
 
-	<xs:complexType name="BrowserConditionalExpressionList_SchemaType">
+	<xs:complexType name="BrowserConditionalExpressionCollection_SchemaType">
 		<xs:annotation>
-			<xs:documentation>List of browser conditional expressions</xs:documentation>
+			<xs:documentation>Collection of browser conditional expressions</xs:documentation>
 		</xs:annotation>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="add" type="AddBrowserConditionalExpression_SchemaType" />

@@ -131,9 +131,8 @@
 				return assets;
 			}
 
-			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.CoffeeScript
-				|| a.AssetType == AssetType.LiterateCoffeeScript
-				|| a.AssetType == AssetType.CoffeeScriptMarkdown).ToList();
+			var assetsToProcessing = assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.CoffeeScript
+				|| a.AssetTypeCode == Constants.AssetTypeCode.LiterateCoffeeScript).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
@@ -154,8 +153,7 @@
 		{
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
-			bool isLiterate = (asset.AssetType == AssetType.LiterateCoffeeScript
-				|| asset.AssetType == AssetType.CoffeeScriptMarkdown);
+			bool isLiterate = (asset.AssetTypeCode == Constants.AssetTypeCode.LiterateCoffeeScript);
 			CompilationOptions options = CreateCompilationOptions(isLiterate);
 
 			try

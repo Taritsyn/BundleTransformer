@@ -8,6 +8,7 @@
 	using System.Web.Optimization;
 
 	using Resources;
+	using Utilities;
 
 	/// <summary>
 	/// Virtual file system wrapper

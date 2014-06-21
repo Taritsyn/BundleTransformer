@@ -1,26 +1,60 @@
 ﻿namespace BundleTransformer.Core.Transformers
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Text;
-	using System.Web;
-	using System.Web.Hosting;
+	using System.Collections.ObjectModel;
 	using System.Web.Optimization;
 
-	using Assets;
 	using Configuration;
-	using Filters;
 	using Minifiers;
 	using PostProcessors;
-	using Resources;
 	using Translators;
-	using Validators;
 
 	/// <summary>
-	/// Transformer that responsible for processing JS-assets
+	/// Obsolete transformer that responsible for processing of script assets
 	/// </summary>
-	public sealed class JsTransformer : TransformerBase
+	[Obsolete("Use class `ScriptTransformer`")]
+	public sealed class JsTransformer : ITransformer, IBundleTransform
 	{
+		/// <summary>
+		/// Script transformer
+		/// </summary>
+		private readonly ScriptTransformer _scriptTransformer;
+
+		/// <summary>
+		/// Gets a list of translators
+		/// </summary>
+		public ReadOnlyCollection<ITranslator> Translators
+		{
+			get
+			{
+				return _scriptTransformer.Translators;
+			}
+		}
+
+		/// <summary>
+		/// Gets a list of postprocessors
+		/// </summary>
+		public ReadOnlyCollection<IPostProcessor> PostProcessors
+		{
+			get
+			{
+				return _scriptTransformer.PostProcessors;
+			}
+		}
+
+		/// <summary>
+		/// Gets a minifier
+		/// </summary>
+		public IMinifier Minifier
+		{
+			get
+			{
+				return _scriptTransformer.Minifier;
+			}
+		}
+
+
 		/// <summary>
 		/// Constructs a instance of JS-transformer
 		/// </summary>
@@ -123,139 +157,19 @@
 		/// <param name="coreConfig">Configuration settings of core</param>
 		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
 			string[] ignorePatterns, CoreSettings coreConfig)
-			: base(ignorePatterns, coreConfig)
 		{
-			JsContext jsContext = BundleTransformerContext.Current.Js;
-
-			_minifier = minifier ?? jsContext.GetDefaultMinifierInstance();
-			_translators = translators ?? jsContext.GetDefaultTranslatorInstances();
-			_postProcessors = postProcessors ?? jsContext.GetDefaultPostProcessorInstances();
+			_scriptTransformer = new ScriptTransformer(minifier, translators, postProcessors, ignorePatterns, coreConfig);
 		}
 
-		/// <summary>
-		/// Transforms a JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="bundleResponse">Object BundleResponse</param>
-		/// <param name="virtualPathProvider">Virtual path provider</param>
-		/// <param name="httpContext">Object HttpContext</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext, bool isDebugMode)
-		{
-			ValidateAssetTypes(assets);
-			assets = RemoveDuplicateAssets(assets);
-			assets = RemoveUnnecessaryAssets(assets);
-			assets = ReplaceFileExtensions(assets, isDebugMode);
-			assets = Translate(assets, isDebugMode);
-			assets = PostProcess(assets, isDebugMode);
-			if (!isDebugMode)
-			{
-				assets = Minify(assets);
-			}
-
-			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
-			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider, isDebugMode);
-			bundleResponse.ContentType = Constants.ContentType.Js;
-		}
 
 		/// <summary>
-		/// Validates whether the specified assets are JS-asset
+		/// Starts a processing of assets
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		protected override void ValidateAssetTypes(IList<IAsset> assets)
+		/// <param name="context">Object BundleContext</param>
+		/// <param name="response">Object BundleResponse</param>
+		public void Process(BundleContext context, BundleResponse response)
 		{
-			var jsAssetTypesValidator = new JsAssetTypesValidator();
-			jsAssetTypesValidator.Validate(assets);
-		}
-
-		/// <summary>
-		/// Removes a duplicate JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of unique JS-assets</returns>
-		protected override IList<IAsset> RemoveDuplicateAssets(IList<IAsset> assets)
-		{
-			var jsDuplicateFilter = new JsDuplicateAssetsFilter();
-			IList<IAsset> processedAssets = jsDuplicateFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Removes a unnecessary JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of necessary JS-assets</returns>
-		protected override IList<IAsset> RemoveUnnecessaryAssets(IList<IAsset> assets)
-		{
-			var jsUnnecessaryAssetsFilter = new JsUnnecessaryAssetsFilter(_ignorePatterns);
-			IList<IAsset> processedAssets = jsUnnecessaryAssetsFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Replaces a file extensions of JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		/// <returns>Set of JS-assets with a modified extension</returns>
-		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets, bool isDebugMode)
-		{
-			var jsFileExtensionsFilter = new JsFileExtensionsFilter(
-				Utils.ConvertToStringCollection(
-					_coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','), 
-					',', true, true))
-			{
-			    IsDebugMode = isDebugMode,
-				UsePreMinifiedFiles = _coreConfig.Js.UsePreMinifiedFiles
-			};
-
-			IList<IAsset> processedAssets = jsFileExtensionsFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Combines a code of JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="enableTracing">Enables tracing</param>
-		protected override string Combine(IList<IAsset> assets, bool enableTracing)
-		{
-			var content = new StringBuilder();
-
-			int assetCount = assets.Count;
-			int lastAssetIndex = assetCount - 1;
-
-			for (int assetIndex = 0; assetIndex < assetCount; assetIndex++)
-			{
-				IAsset asset = assets[assetIndex];
-				string assetContent = asset.Content.TrimEnd();
-
-				if (enableTracing)
-				{
-					content.AppendFormatLine("//#region URL: {0}", asset.Url);
-				}
-				content.Append(assetContent);
-				if (!assetContent.EndsWith(";"))
-				{
-					content.Append(";");
-				}
-				if (enableTracing)
-				{
-					content.AppendLine();
-					content.AppendLine("//#endregion");
-				}
-
-				if (assetIndex != lastAssetIndex)
-				{
-					content.AppendLine();
-				}
-			}
-
-			return content.ToString();
+			_scriptTransformer.Process(context, response);
 		}
 	}
 }

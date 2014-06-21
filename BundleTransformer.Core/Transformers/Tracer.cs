@@ -4,6 +4,8 @@
 	using System.Text;
 	using System.Web.Optimization;
 
+	using Utilities;
+
 	/// <summary>
 	/// Transformer that responsible to output trace information
 	/// </summary>

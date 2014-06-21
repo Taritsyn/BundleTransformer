@@ -15,12 +15,13 @@
 	using Core.FileSystem;
 	using Core.Helpers;
 	using Core.Translators;
+	using Core.Utilities;
+	using CoreFileExtensionHelpers = Core.Helpers.FileExtensionHelpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Compilers;
 	using Configuration;
-	using Constants;
-	using Helpers;
+	using LessFileExtensionHelpers = Helpers.FileExtensionHelpers;
 
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
@@ -279,7 +280,7 @@
 				return assets;
 			}
 
-			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.Less).ToList();
+			var assetsToProcessing = assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.Less).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
@@ -629,22 +630,22 @@
 			{
 				switch (importType)
 				{
-					case ImportType.Less:
+					case Constants.ImportType.Less:
 						importOptions.Less = true;
 						break;
-					case ImportType.Css:
+					case Constants.ImportType.Css:
 						importOptions.Less = false;
 						break;
-					case ImportType.Multiple:
+					case Constants.ImportType.Multiple:
 						importOptions.Multiple = true;
 						break;
-					case ImportType.Once:
+					case Constants.ImportType.Once:
 						importOptions.Multiple = false;
 						break;
-					case ImportType.Inline:
+					case Constants.ImportType.Inline:
 						importOptions.Inline = true;
 						break;
-					case ImportType.Reference:
+					case Constants.ImportType.Reference:
 						importOptions.Reference = true;
 						break;
 				}
@@ -653,17 +654,18 @@
 			}
 
 			string absoluteUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
-			
-			if (!FileExtensionHelpers.IsLess(extension) && !FileExtensionHelpers.IsCss(extension))
+
+			if (!LessFileExtensionHelpers.IsLess(extension) 
+				&& !CoreFileExtensionHelpers.IsCss(extension))
 			{
 				string newExtension;
 				if (importOptions.Less)
 				{
-					newExtension = FileExtension.Less;
+					newExtension = Constants.FileExtension.Less;
 				}
 				else
 				{
-					newExtension = FileExtension.Css;
+					newExtension = Core.Constants.FileExtension.Css;
 					importTypes.Remove(newExtension);
 				}
 

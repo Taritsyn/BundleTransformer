@@ -139,14 +139,14 @@ See more details:
 See more details:
 {0}</value>
   </data>
-  <data name="Assets_CssAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
-    <value>These assets are not style sheets: {0}.</value>
-  </data>
   <data name="Assets_InvalidIgnorePattern" xml:space="preserve">
     <value>Pure wildcard ignore patterns `*` and `*.*` are not supported.</value>
   </data>
-  <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
+  <data name="Assets_ScriptAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>These assets are not scripts: {0}.</value>
+  </data>
+  <data name="Assets_StyleAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
+    <value>These assets are not style sheets: {0}.</value>
   </data>
   <data name="Common_ArgumentIsEmpty" xml:space="preserve">
     <value>The parameter `{0}` must be a non-empty string.</value>
@@ -265,6 +265,9 @@ After package is installed, need set a name of JavaScript engine (for example, `
   </data>
   <data name="ErrorType_Warning" xml:space="preserve">
     <value>warning</value>
+  </data>
+  <data name="FileExtensionMapping_DuplicateFileExtension" xml:space="preserve">
+    <value>File extension '{0}' has already been added to mapping collection.</value>
   </data>
   <data name="Minifiers_MinificationFailed" xml:space="preserve">
     <value>During minification of {0}-code, readed from the file '{1}', by {2} error has occurred.	

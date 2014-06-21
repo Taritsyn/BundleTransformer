@@ -3,7 +3,8 @@
 	using System;
 	using System.Configuration;
 
-	using Core;
+	using Core.Configuration;
+
 	using Configuration;
 
 	/// <summary>
@@ -22,7 +23,7 @@
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor</returns>
-		public static AutoprefixerSettings GetAutoprefixerSettings(this ConfigurationContext context)
+		public static AutoprefixerSettings GetAutoprefixerSettings(this IConfigurationContext context)
 		{
 			return _autoprefixerConfig.Value;
 		}

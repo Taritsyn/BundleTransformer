@@ -44,6 +44,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.1.3\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -77,21 +78,22 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationSetup.cs" />
     <Compile Include="Core\Assets\AssetTests.cs" />
-    <Compile Include="Core\Filters\CssDuplicateAssetsFilterTests.cs">
+    <Compile Include="Core\Filters\StyleDuplicateAssetsFilterTests.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\Filters\CssFileExtensionsFilterTests.cs" />
-    <Compile Include="Core\Filters\CssUnnecessaryAssetsFilterTests.cs" />
-    <Compile Include="Core\Filters\JsDuplicateAssetsFilterTests.cs">
+    <Compile Include="Core\Filters\StyleUnnecessaryAssetsFilterTests.cs" />
+    <Compile Include="Core\Filters\ScriptDuplicateAssetsFilterTests.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\Filters\JsFileExtensionsFilterTests.cs" />
-    <Compile Include="Core\Filters\JsUnnecessaryAssetsFilterTests.cs" />
-    <Compile Include="Core\Validators\CssAssetTypesValidatorTests.cs">
+    <Compile Include="Core\Filters\ScriptUnnecessaryAssetsFilterTests.cs" />
+    <Compile Include="Core\Validators\StyleAssetTypesValidatorTests.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\Validators\JsAssetTypesValidatorTests.cs">
+    <Compile Include="Core\Validators\ScriptAssetTypesValidatorTests.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\MockVirtualFileSystemWrapper.cs" />
@@ -107,9 +109,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj">
+      <Project>{0648FFE9-2A1A-4E17-AF5D-AE0048378617}</Project>
+      <Name>BundleTransformer.CoffeeScript</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
       <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
       <Name>BundleTransformer.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj">
+      <Project>{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}</Project>
+      <Name>BundleTransformer.Handlebars</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Less\BundleTransformer.Less.csproj">
       <Project>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</Project>

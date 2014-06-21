@@ -15,7 +15,10 @@
 				</postProcessors>
 				<minifiers>
 					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
-				</minifiers>		
+				</minifiers>
+				<fileExtensions>
+					<add fileExtension=".css" assetTypeCode="Css" />
+				</fileExtensions>
 			</css>
 			<js>
 				<translators>
@@ -24,6 +27,9 @@
 				<minifiers>
 					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
 				</minifiers>
+				<fileExtensions>
+					<add fileExtension=".js" assetTypeCode="JavaScript" />
+				</fileExtensions>
 			</js>
 		</core>
 	</bundleTransformer>

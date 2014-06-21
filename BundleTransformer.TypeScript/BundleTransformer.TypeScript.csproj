@@ -58,7 +58,9 @@
     <Compile Include="Compilers\TypeScriptCompiler.cs" />
     <Compile Include="Compilers\TypeScriptCompilingException.cs" />
     <Compile Include="Configuration\TypeScriptSettings.cs" />
+    <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\FileExtension.cs" />
+    <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="Helpers\FileExtensionHelper.cs" />
     <Compile Include="HttpHandlers\TypeScriptAssetHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

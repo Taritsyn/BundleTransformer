@@ -1,6 +1,6 @@
 ﻿namespace BundleTransformer.Core.Transformers
 {
-	using System.Collections.Generic;
+	using System.Collections.ObjectModel;
 
 	using Minifiers;
 	using PostProcessors;
@@ -12,9 +12,9 @@
 	public interface ITransformer
 	{
 		/// <summary>
-		/// Gets a list of translators (LESS, Sass, SCSS, CoffeeScript and TypeScript)
+		/// Gets a list of translators
 		/// </summary>
-		IList<ITranslator> Translators
+		ReadOnlyCollection<ITranslator> Translators
 		{
 			get;
 		}
@@ -22,7 +22,7 @@
 		/// <summary>
 		/// Gets a list of postprocessors
 		/// </summary>
-		IList<IPostProcessor> PostProcessors
+		ReadOnlyCollection<IPostProcessor> PostProcessors
 		{
 			get;
 		}

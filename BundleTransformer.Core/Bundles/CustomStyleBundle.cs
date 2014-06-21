@@ -5,7 +5,7 @@
 	using Builders;
 
 	/// <summary>
-	/// Bundle that uses CssTransformer as transformation by default 
+	/// Bundle that uses StyleTransformer as transformation by default 
 	/// and NullBuilder as builder by default
 	/// </summary>
 	public sealed class CustomStyleBundle : Bundle
@@ -24,8 +24,8 @@
 		/// <param name="virtualPath">Virtual path of bundle</param>
 		/// <param name="cdnPath">Path of bundle on CDN</param>
 		public CustomStyleBundle(string virtualPath, string cdnPath)
-			: base(virtualPath, cdnPath, 
-				new IBundleTransform[] { BundleTransformerContext.Current.Css.GetTransformerInstance() })
+			: base(virtualPath, cdnPath,
+				new [] { BundleTransformerContext.Current.Styles.GetDefaultTransformInstance() })
 		{
 			Builder = new NullBuilder();
 		}

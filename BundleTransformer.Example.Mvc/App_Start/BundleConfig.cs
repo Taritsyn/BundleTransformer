@@ -73,13 +73,21 @@
 
 			bundles.Add(commonScriptsBundle);
 
+			var сommonTemplatesBundle = new CustomScriptBundle("~/Bundles/CommonTemplates");
+			сommonTemplatesBundle.Include("~/Scripts/handlebars.runtime.js",
+				"~/Scripts/handlebars/HandlebarsHelpers.js",
+				"~/Scripts/handlebars/HandlebarsTranslatorBadge.handlebars",
+				"~/Scripts/handlebars/TestHandlebars.js");
+			сommonTemplatesBundle.Orderer = nullOrderer;
+
+			bundles.Add(сommonTemplatesBundle);
 			
 			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")
 			{
 				Builder = nullBuilder
 			};
 			jqueryUiStylesDirectoryBundle.IncludeDirectory("~/Content/themes/base/", "*.css");
-			jqueryUiStylesDirectoryBundle.Transforms.Add(new CssTransformer(
+			jqueryUiStylesDirectoryBundle.Transforms.Add(new StyleTransformer(
 				new[] { "*.all.css", "jquery.ui.base.css" }));
 			bundles.Add(jqueryUiStylesDirectoryBundle);
 
@@ -88,7 +96,7 @@
 				Builder = nullBuilder
 			};
 			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js", true);
-			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
+			scriptsDirectoryBundle.Transforms.Add(new ScriptTransformer(
 				new[] { "*.all.js", "_references.js" }));
 			bundles.Add(scriptsDirectoryBundle);
 		}

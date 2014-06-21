@@ -9,8 +9,7 @@
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
-	using Core;
-	using Core.Helpers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>

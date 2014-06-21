@@ -13,9 +13,9 @@
 		/// Gets a list of browser conditional expressions
 		/// </summary>
 		[ConfigurationProperty("browsers", IsRequired = false)]
-		public BrowserConditionalExpressionList Browsers
+		public BrowserConditionalExpressionCollection Browsers
 		{
-			get { return (BrowserConditionalExpressionList)this["browsers"]; }
+			get { return (BrowserConditionalExpressionCollection)this["browsers"]; }
 		}
 
 		/// <summary>

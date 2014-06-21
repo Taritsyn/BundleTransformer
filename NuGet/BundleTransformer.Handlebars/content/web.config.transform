@@ -1,0 +1,26 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="handlebars" type="BundleTransformer.Handlebars.Configuration.HandlebarsSettings, BundleTransformer.Handlebars" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<js>
+				<translators>
+					<add name="HandlebarsTranslator" type="BundleTransformer.Handlebars.Translators.HandlebarsTranslator, BundleTransformer.Handlebars" enabled="true" />
+				</translators>
+				<fileExtensions>
+					<add fileExtension=".handlebars" assetTypeCode="Handlebars" />
+					<add fileExtension=".hbs" assetTypeCode="Handlebars" />
+				</fileExtensions>
+			</js>
+		</core>
+	</bundleTransformer>
+	<system.webServer>
+		<handlers>
+			<add name="HandlebarsAssetHandler" path="*.handlebars" verb="GET" type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" resourceType="File" preCondition="" />
+			<add name="HbsAssetHandler" path="*.hbs" verb="GET" type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" resourceType="File" preCondition="" />
+		</handlers>
+	</system.webServer>
+</configuration>

@@ -2,7 +2,7 @@
 {
 	using System;
 
-	using Helpers;
+	using Core.Helpers;
 
 	/// <summary>
 	/// LESS-import options

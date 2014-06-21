@@ -3,7 +3,8 @@
 	using System;
 	using System.Configuration;
 
-	using Core;
+	using Core.Configuration;
+
 	using Configuration;
 
 	/// <summary>
@@ -22,7 +23,7 @@
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Sass- and SCSS-translator</returns>
-		public static SassAndScssSettings GetSassAndScssSettings(this ConfigurationContext context)
+		public static SassAndScssSettings GetSassAndScssSettings(this IConfigurationContext context)
 		{
 			return _sassAndScssConfig.Value;
 		}

@@ -119,15 +119,6 @@ namespace BundleTransformer.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to These assets are not style sheets: {0}..
-        /// </summary>
-        public static string Assets_CssAssetsContainAssetsWithInvalidTypes {
-            get {
-                return ResourceManager.GetString("Assets_CssAssetsContainAssetsWithInvalidTypes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Pure wildcard ignore patterns `*` and `*.*` are not supported..
         /// </summary>
         public static string Assets_InvalidIgnorePattern {
@@ -139,9 +130,18 @@ namespace BundleTransformer.Core.Resources {
         /// <summary>
         ///   Looks up a localized string similar to These assets are not scripts: {0}..
         /// </summary>
-        public static string Assets_JsAssetsContainAssetsWithInvalidTypes {
+        public static string Assets_ScriptAssetsContainAssetsWithInvalidTypes {
             get {
-                return ResourceManager.GetString("Assets_JsAssetsContainAssetsWithInvalidTypes", resourceCulture);
+                return ResourceManager.GetString("Assets_ScriptAssetsContainAssetsWithInvalidTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to These assets are not style sheets: {0}..
+        /// </summary>
+        public static string Assets_StyleAssetsContainAssetsWithInvalidTypes {
+            get {
+                return ResourceManager.GetString("Assets_StyleAssetsContainAssetsWithInvalidTypes", resourceCulture);
             }
         }
         
@@ -488,6 +488,15 @@ namespace BundleTransformer.Core.Resources {
         public static string ErrorType_Warning {
             get {
                 return ResourceManager.GetString("ErrorType_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File extension &apos;{0}&apos; has already been added to mapping collection..
+        /// </summary>
+        public static string FileExtensionMapping_DuplicateFileExtension {
+            get {
+                return ResourceManager.GetString("FileExtensionMapping_DuplicateFileExtension", resourceCulture);
             }
         }
         
