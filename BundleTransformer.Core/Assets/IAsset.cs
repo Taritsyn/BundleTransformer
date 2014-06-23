@@ -34,9 +34,9 @@
 		}
 
 		/// <summary>
-		/// Gets a asset type
+		/// Gets a asset type code
 		/// </summary>
-		AssetType AssetType { get; }
+		string AssetTypeCode { get; }
 
 		/// <summary>
 		/// Gets or sets a flag indicating what text content of asset is minified

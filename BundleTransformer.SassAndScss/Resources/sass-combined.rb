@@ -1,5 +1,5 @@
 #############################################################################
-# Sass v3.3.7
+# Sass v3.3.8
 # http://sass-lang.com
 #
 # Copyright 2006-2014, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
@@ -299,6 +299,43 @@ module Sass
         end
         a
       end
+    end
+
+    # Non-destructively replaces all occurrences of a subsequence in an array
+    # with another subsequence.
+    #
+    # @example
+    #   replace_subseq([1, 2, 3, 4, 5], [2, 3], [:a, :b])
+    #     #=> [1, :a, :b, 4, 5]
+    #
+    # @param arr [Array] The array whose subsequences will be replaced.
+    # @param subseq [Array] The subsequence to find and replace.
+    # @param replacement [Array] The sequence that `subseq` will be replaced with.
+    # @return [Array] `arr` with `subseq` replaced with `replacement`.
+    def replace_subseq(arr, subseq, replacement)
+      new = []
+      matched = []
+      i = 0
+      arr.each do |elem|
+        if elem != subseq[i]
+          new.push(*matched)
+          matched = []
+          i = 0
+          new << elem
+          next
+        end
+
+        if i == subseq.length - 1
+          matched = []
+          i = 0
+          new.push(*replacement)
+        else
+          matched << elem
+          i += 1
+        end
+      end
+      new.push(*matched)
+      new
     end
 
     # Intersperses a value in an enumerable, as would be done with `Array#join`
@@ -1506,6 +1543,42 @@ MSG
       tmpfile.close if tmpfile
       tmpfile.unlink if tmpfile
     end
+
+    def load_listen!
+      if defined?(gem)
+        begin
+          gem 'listen', '>= 1.1.0', '< 3.0.0'
+          require 'listen'
+        rescue Gem::LoadError
+          dir = scope("vendor/listen/lib")
+          $LOAD_PATH.unshift dir
+          begin
+          rescue LoadError => e
+            if version_geq(RUBY_VERSION, "1.9.3")
+              version_constraint = "~> 2.7"
+            else
+              version_constraint = "~> 1.1"
+            end
+            e.message << "\n" <<
+              "Run \"gem install listen --version '#{version_constraint}'\" to get it."
+            raise e
+          end
+        end
+      else
+        begin
+        rescue LoadError => e
+          dir = scope("vendor/listen/lib")
+          if $LOAD_PATH.include?(dir)
+            raise e unless File.exists?(scope(".git"))
+            e.message << "\n" <<
+              'Run "git submodule update --init" to get the bundled version.'
+          else
+            $LOAD_PATH.unshift dir
+            retry
+          end
+        end
+      end
+    end
 =end
 
     private
@@ -1914,7 +1987,7 @@ module Sass
       return @@version if defined?(@@version)
 
 	  #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.3.7'.strip.split('.').
+	  numbers = '3.3.8'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
 	  #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Maptastic Maple'.strip
@@ -4822,7 +4895,7 @@ WARNING
 
   def visit_cssimport(node)
     node.resolved_uri = run_interp([node.uri])
-    if node.query
+    if node.query && !node.query.empty?
       parser = Sass::SCSS::StaticParser.new(run_interp(node.query),
         node.filename, node.options[:importer], node.line)
       node.resolved_query ||= parser.parse_media_query_list
@@ -5180,19 +5253,31 @@ class Sass::Tree::Visitors::Cssize < Sass::Tree::Visitors::Base
   #   omitted.
   # @return [List<Sass::Tree::Node, Bubble>]
   def debubble(children, parent = nil)
+    # Keep track of the previous parent so that we don't divide `parent`
+    # unnecessarily if the `@at-root` doesn't produce any new nodes (e.g.
+    # `@at-root {@extend %foo}`).
+    previous_parent = nil
+
     Sass::Util.slice_by(children) {|c| c.is_a?(Bubble)}.map do |(is_bubble, slice)|
       unless is_bubble
         next slice unless parent
-        new_parent = parent.dup
-        new_parent.children = slice
-        next new_parent
+        if previous_parent
+          previous_parent.children.push(*slice)
+          next []
+        else
+          previous_parent = new_parent = parent.dup
+          new_parent.children = slice
+          next new_parent
+        end
       end
 
-      next slice.map do |bubble|
+      slice.map do |bubble|
         next unless (node = block_given? ? yield(bubble.node) : bubble.node)
         node.tabs += bubble.tabs
         node.group_end = bubble.group_end
-        [visit(node)].flatten
+        results = [visit(node)].flatten
+        previous_parent = nil unless results.empty?
+        results
       end.compact
     end.flatten
   end
@@ -5544,12 +5629,13 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
   end
 
   def visit_rule(node)
+    rule = node.parsed_rules ? node.parsed_rules.to_a : node.rule
     if @format == :sass
-      name = selector_to_sass(node.rule)
+      name = selector_to_sass(rule)
       name = "\\" + name if name[0] == ?:
       name.gsub(/^/, tab_str) + yield
     elsif @format == :scss
-      name = selector_to_scss(node.rule)
+      name = selector_to_scss(rule)
       res = name + yield
       if node.children.last.is_a?(Sass::Tree::CommentNode) && node.children.last.type == :silent
         res.slice!(-3..-1)
@@ -6742,8 +6828,7 @@ module Sass
       # @see Simple#to_a
       def to_a
         arr = Sass::Util.intersperse(@members.map {|m| m.to_a}, ", ").flatten
-        arr.delete("\n")
-        arr
+        Sass::Util.replace_subseq(arr, [", ", "\n"], [",\n"])
       end
 
       private
@@ -6882,7 +6967,9 @@ module Sass
         ary = @members.map do |seq_or_op|
           seq_or_op.is_a?(SimpleSequence) ? seq_or_op.to_a : seq_or_op
         end
-        Sass::Util.intersperse(ary, " ").flatten.compact
+        ary = Sass::Util.intersperse(ary, " ").flatten.compact
+        ary = Sass::Util.replace_subseq(ary, ["\n", " "], ["\n"])
+        Sass::Util.replace_subseq(ary, [" ", "\n"], ["\n"])
       end
 
       # Returns a string representation of the sequence.
@@ -10577,7 +10664,7 @@ module Sass::Script
     # @raise [ArgumentError] if `$args` isn't a variable argument list
     def keywords(args)
       assert_type args, :ArgList, :args
-      map(Sass::Util.map_keys(args.keywords.as_stored) {|k| Sass::Script::String.new(k)})
+      map(Sass::Util.map_keys(args.keywords.as_stored) {|k| Sass::Script::Value::String.new(k)})
     end
     declare :keywords, [:args]
 
@@ -10647,31 +10734,29 @@ module Sass::Script
     end
     declare :call, [:name], :var_args => true, :var_kwargs => true
 
-    # This function only exists as a workaround for IE7's [`content: counter`
-    # bug][bug]. It works identically to any other plain-CSS function, except it
+    # This function only exists as a workaround for IE7's [`content:
+    # counter` bug](http://jes.st/2013/ie7s-css-breaking-content-counter-bug/).
+    # It works identically to any other plain-CSS function, except it
     # avoids adding spaces between the argument commas.
-    #
-    # [bug]: http://jes.st/2013/ie7s-css-breaking-content-counter-bug/
     #
     # @example
     #   counter(item, ".") => counter(item,".")
     # @overload counter($args...)
-    # @return [String]
+    # @return [Sass::Script::Value::String]
     def counter(*args)
       identifier("counter(#{args.map {|a| a.to_s(options)}.join(',')})")
     end
     declare :counter, [], :var_args => true
 
-    # This function only exists as a workaround for IE7's [`content: counters`
-    # bug][bug]. It works identically to any other plain-CSS function, except it
+    # This function only exists as a workaround for IE7's [`content:
+    # counter` bug](http://jes.st/2013/ie7s-css-breaking-content-counter-bug/).
+    # It works identically to any other plain-CSS function, except it
     # avoids adding spaces between the argument commas.
-    #
-    # [bug]: http://jes.st/2013/ie7s-css-breaking-content-counter-bug/
     #
     # @example
     #   counters(item, ".") => counters(item,".")
     # @overload counters($args...)
-    # @return [String]
+    # @return [Sass::Script::Value::String]
     def counters(*args)
       identifier("counters(#{args.map {|a| a.to_s(options)}.join(',')})")
     end
@@ -10685,9 +10770,11 @@ module Sass::Script
     #   variable-exists(a-false-value) => true
     #
     #   variable-exists(nonexistent) => false
-    # @param name [Sass::Script::String] The name of the variable to
-    #   check. The name should not include the `$`.
-    # @return [Sass::Script::Bool] Whether the variable is defined in
+    #
+    # @overload variable_exists($name)
+    #   @param $name [Sass::Script::Value::String] The name of the variable to
+    #     check. The name should not include the `$`.
+    # @return [Sass::Script::Value::Bool] Whether the variable is defined in
     #   the current scope.
     def variable_exists(name)
       assert_type name, :String, :name
@@ -10706,9 +10793,11 @@ module Sass::Script
     #     $some-var: false;
     #     @if global-variable-exists(some-var) { /* false, doesn't run */ }
     #   }
-    # @param name [Sass::Script::String] The name of the variable to
-    #   check.  The name should not include the `$`.
-    # @return [Sass::Script::Bool] Whether the variable is defined in
+    #
+    # @overload global_variable_exists($name)
+    #   @param $name [Sass::Script::Value::String] The name of the variable to
+    #     check. The name should not include the `$`.
+    # @return [Sass::Script::Value::Bool] Whether the variable is defined in
     #   the global scope.
     def global_variable_exists(name)
       assert_type name, :String, :name
@@ -10723,9 +10812,11 @@ module Sass::Script
     #
     #   @function myfunc { @return "something"; }
     #   function-exists(myfunc) => true
-    # @param name [Sass::Script::String] The name of the function to
-    #   check.
-    # @return [Sass::Script::Bool] Whether the function is defined.
+    #
+    # @overload function_exists($name)
+    #   @param name [Sass::Script::Value::String] The name of the function to
+    #     check.
+    # @return [Sass::Script::Value::Bool] Whether the function is defined.
     def function_exists(name)
       assert_type name, :String, :name
       exists = Sass::Script::Functions.callable?(name.value.tr("-", "_"))
@@ -10741,9 +10832,11 @@ module Sass::Script
     #
     #   @mixin red-text { color: red; }
     #   mixin-exists(red-text) => true
-    # @param name [Sass::Script::String] The name of the mixin to
-    #   check.
-    # @return [Sass::Script::Bool] Whether the mixin is defined.
+    #
+    # @overload mixin_exists($name)
+    #   @param name [Sass::Script::Value::String] The name of the mixin to
+    #     check.
+    # @return [Sass::Script::Value::Bool] Whether the mixin is defined.
     def mixin_exists(name)
       assert_type name, :String, :name
       bool(environment.mixin(name.value))
@@ -10752,7 +10845,8 @@ module Sass::Script
 
     # Return a string containing the value as its Sass representation.
     #
-    # @param value [Sass::Script::Value::Base] The value to inspect.
+    # @overload inspect($value)
+    #   @param $value [Sass::Script::Value::Base] The value to inspect.
     # @return [Sass::Script::Value::String] A representation of the value as
     #   it would be written in Sass.
     def inspect(value)
@@ -10762,12 +10856,12 @@ module Sass::Script
 
     # @overload random()
     #   Return a decimal between 0 and 1, inclusive of 0 but not 1.
-    #   @return [Sass::Script::Number] A decimal value.
+    #   @return [Sass::Script::Value::Number] A decimal value.
     # @overload random($limit)
     #   Return an integer between 1 and `$limit`, inclusive of 1 but not `$limit`.
     #   @param $limit [Sass::Script::Value::Number] The maximum of the random integer to be
     #     returned, a positive integer.
-    #   @return [Sass::Script::Number] An integer.
+    #   @return [Sass::Script::Value::Number] An integer.
     #   @raise [ArgumentError] if the `$limit` is not 1 or greater
     def random(limit = nil)
       generator = Sass::Script::Functions.random_number_generator
@@ -14882,7 +14976,7 @@ module Sass
       def parse
         init_scanner!
         root = stylesheet
-        expected("selector or at-rule") unless @scanner.eos?
+        expected("selector or at-rule") unless root && @scanner.eos?
         root
       end
 
@@ -14905,7 +14999,7 @@ module Sass
       def parse_media_query_list
         init_scanner!
         ql = media_query_list
-        expected("media query list") unless @scanner.eos?
+        expected("media query list") unless ql && @scanner.eos?
         ql
       end
 
@@ -14917,7 +15011,7 @@ module Sass
       def parse_at_root_query
         init_scanner!
         query = at_root_query
-        expected("@at-root query list") unless @scanner.eos?
+        expected("@at-root query list") unless query && @scanner.eos?
         query
       end
 
@@ -14929,7 +15023,7 @@ module Sass
       def parse_supports_condition
         init_scanner!
         condition = supports_condition
-        expected("supports condition") unless @scanner.eos?
+        expected("supports condition") unless condition && @scanner.eos?
         condition
       end
 
@@ -18696,15 +18790,16 @@ WARNING
         script_parser = Sass::Script::Parser.new(scanner, @line, to_parser_offset(offset), @options)
         str = script_parser.parse_string
 
-        media_parser = Sass::SCSS::Parser.new(scanner,
-          @options[:filename], @options[:importer],
-          @line, str.source_range.end_pos.offset)
-        if (media = media_parser.parse_media_query_list)
-          end_pos = Sass::Source::Position.new(@line, media_parser.offset + 1)
-          node = Tree::CssImportNode.new(str, media.to_a)
-        else
+        if scanner.eos?
           end_pos = str.source_range.end_pos
           node = Tree::CssImportNode.new(str)
+        else
+          media_parser = Sass::SCSS::Parser.new(scanner,
+            @options[:filename], @options[:importer],
+            @line, str.source_range.end_pos.offset)
+          media = media_parser.parse_media_query_list
+          end_pos = Sass::Source::Position.new(@line, media_parser.offset + 1)
+          node = Tree::CssImportNode.new(str, media.to_a)
         end
 
         node.source_range = Sass::Source::Range.new(

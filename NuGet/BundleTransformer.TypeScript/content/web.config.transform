@@ -10,6 +10,9 @@
 				<translators>
 					<add name="TypeScriptTranslator" type="BundleTransformer.TypeScript.Translators.TypeScriptTranslator, BundleTransformer.TypeScript" enabled="true" />
 				</translators>
+				<fileExtensions>
+					<add fileExtension=".ts" assetTypeCode="TypeScript" />
+				</fileExtensions>
 			</js>
 		</core>
 	</bundleTransformer>

@@ -12,6 +12,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
@@ -59,7 +60,7 @@
 		/// Constructs instance of Closure Remote JS-minifier
 		/// </summary>
 		public ClosureRemoteJsMinifier()
-			: this(BundleTransformerContext.Current.GetClosureConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetClosureSettings())
 		{ }
 
 		/// <summary>

@@ -50,7 +50,7 @@
 		/// Constructs instance of Sergey Kryzhanovsky's CSS-minifier
 		/// </summary>
 		public KryzhanovskyCssMinifier()
-			: this(null, BundleTransformerContext.Current.GetCssoConfiguration())
+			: this(null, BundleTransformerContext.Current.Configuration.GetCssoSettings())
 		{ }
 
 		/// <summary>

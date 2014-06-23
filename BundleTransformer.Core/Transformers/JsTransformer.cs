@@ -1,30 +1,65 @@
 ﻿namespace BundleTransformer.Core.Transformers
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Text;
-	using System.Web;
-	using System.Web.Hosting;
+	using System.Collections.ObjectModel;
 	using System.Web.Optimization;
 
-	using Assets;
 	using Configuration;
-	using Filters;
 	using Minifiers;
-	using Resources;
+	using PostProcessors;
 	using Translators;
-	using Validators;
 
 	/// <summary>
-	/// Transformer that responsible for processing JS-assets
+	/// Obsolete transformer that responsible for processing of script assets
 	/// </summary>
-	public sealed class JsTransformer : TransformerBase
+	[Obsolete("Use class `ScriptTransformer`")]
+	public sealed class JsTransformer : ITransformer, IBundleTransform
 	{
+		/// <summary>
+		/// Script transformer
+		/// </summary>
+		private readonly ScriptTransformer _scriptTransformer;
+
+		/// <summary>
+		/// Gets a list of translators
+		/// </summary>
+		public ReadOnlyCollection<ITranslator> Translators
+		{
+			get
+			{
+				return _scriptTransformer.Translators;
+			}
+		}
+
+		/// <summary>
+		/// Gets a list of postprocessors
+		/// </summary>
+		public ReadOnlyCollection<IPostProcessor> PostProcessors
+		{
+			get
+			{
+				return _scriptTransformer.PostProcessors;
+			}
+		}
+
+		/// <summary>
+		/// Gets a minifier
+		/// </summary>
+		public IMinifier Minifier
+		{
+			get
+			{
+				return _scriptTransformer.Minifier;
+			}
+		}
+
+
 		/// <summary>
 		/// Constructs a instance of JS-transformer
 		/// </summary>
 		public JsTransformer()
-			: this(null, null, new string[0])
+			: this(null, null, null, new string[0])
 		{ }
 
 		/// <summary>
@@ -32,7 +67,7 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		public JsTransformer(IMinifier minifier)
-			: this(minifier, null, new string[0])
+			: this(minifier, null, null, new string[0])
 		{ }
 
 		/// <summary>
@@ -40,7 +75,15 @@
 		/// </summary>
 		/// <param name="translators">List of translators</param>
 		public JsTransformer(IList<ITranslator> translators)
-			: this(null, translators, new string[0])
+			: this(null, translators, null, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of JS-transformer
+		/// </summary>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public JsTransformer(IList<IPostProcessor> postProcessors)
+			: this(null, null, postProcessors, new string[0])
 		{ }
 
 		/// <summary>
@@ -49,7 +92,35 @@
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		public JsTransformer(IMinifier minifier, IList<ITranslator> translators)
-			: this(minifier, translators, new string[0])
+			: this(minifier, translators, null, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of JS-transformer
+		/// </summary>
+		/// <param name="minifier">Minifier</param>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public JsTransformer(IMinifier minifier, IList<IPostProcessor> postProcessors)
+			: this(minifier, null, postProcessors, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of JS-transformer
+		/// </summary>
+		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public JsTransformer(IList<ITranslator> translators, IList<IPostProcessor> postProcessors)
+			: this(null, translators, postProcessors, new string[0])
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of JS-transformer
+		/// </summary>
+		/// <param name="minifier">Minifier</param>
+		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
+		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors)
+			: this(minifier, translators, postProcessors, new string[0])
 		{ }
 
 		/// <summary>
@@ -58,7 +129,7 @@
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		public JsTransformer(string[] ignorePatterns)
-			: this(null, null, ignorePatterns)
+			: this(null, null, null, ignorePatterns)
 		{ }
 
 		/// <summary>
@@ -66,10 +137,13 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
-		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, string[] ignorePatterns)
-			: this(minifier, translators, ignorePatterns, BundleTransformerContext.Current.GetCoreConfiguration())
+		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
+			string[] ignorePatterns)
+			: this(minifier, translators, postProcessors, ignorePatterns,
+				BundleTransformerContext.Current.Configuration.GetCoreSettings())
 		{ }
 
 		/// <summary>
@@ -77,184 +151,25 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
+		/// <param name="postProcessors">List of postprocessors</param>
 		/// <param name="ignorePatterns">List of patterns of files and directories that 
 		/// should be ignored when processing</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
-		public JsTransformer(IMinifier minifier, IList<ITranslator> translators,
+		public JsTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
 			string[] ignorePatterns, CoreSettings coreConfig)
-			: base(ignorePatterns, coreConfig)
 		{
-			_minifier = minifier ?? CreateDefaultMinifier();
-			_translators = translators ?? CreateDefaultTranslators();
+			_scriptTransformer = new ScriptTransformer(minifier, translators, postProcessors, ignorePatterns, coreConfig);
 		}
 
 
 		/// <summary>
-		/// Creates a instance of default JS-minifier
+		/// Starts a processing of assets
 		/// </summary>
-		/// <returns>Default JS-minifier</returns>
-		private IMinifier CreateDefaultMinifier()
+		/// <param name="context">Object BundleContext</param>
+		/// <param name="response">Object BundleResponse</param>
+		public void Process(BundleContext context, BundleResponse response)
 		{
-			string defaultMinifierName = _coreConfig.Js.DefaultMinifier;
-			if (string.IsNullOrWhiteSpace(defaultMinifierName))
-			{
-				throw new ConfigurationErrorsException(
-					string.Format(Strings.Configuration_DefaultMinifierNotSpecified, "JS"));
-			}
-
-			IMinifier defaultMinifier = 
-				BundleTransformerContext.Current.GetJsMinifierInstance(defaultMinifierName);
-
-			return defaultMinifier;
-		}
-
-		/// <summary>
-		/// Creates a list of default JS-translators
-		/// </summary>
-		/// <returns>List of default JS-translators</returns>
-		private IList<ITranslator> CreateDefaultTranslators()
-		{
-			var defaultTranslators = new List<ITranslator>();
-			TranslatorRegistrationList translatorRegistrations = _coreConfig.Js.Translators;
-
-			foreach (TranslatorRegistration translatorRegistration in translatorRegistrations)
-			{
-				if (translatorRegistration.Enabled)
-				{
-					string defaultTranslatorName = translatorRegistration.Name;
-					ITranslator defaultTranslator = 
-						BundleTransformerContext.Current.GetJsTranslatorInstance(defaultTranslatorName);
-
-					defaultTranslators.Add(defaultTranslator);
-				}
-			}
-
-			return defaultTranslators;
-		}
-
-		/// <summary>
-		/// Transforms a JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="bundleResponse">Object BundleResponse</param>
-		/// <param name="virtualPathProvider">Virtual path provider</param>
-		/// <param name="httpContext">Object HttpContext</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext, bool isDebugMode)
-		{
-			ValidateAssetTypes(assets);
-			assets = RemoveDuplicateAssets(assets);
-			assets = RemoveUnnecessaryAssets(assets);
-			assets = ReplaceFileExtensions(assets, isDebugMode);
-			assets = Translate(assets, isDebugMode);
-			if (!isDebugMode)
-			{
-				assets = Minify(assets);
-			}
-
-			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
-			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider, isDebugMode);
-			bundleResponse.ContentType = Constants.ContentType.Js;
-		}
-
-		/// <summary>
-		/// Validates whether the specified assets are JS-asset
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		protected override void ValidateAssetTypes(IList<IAsset> assets)
-		{
-			var jsAssetTypesValidator = new JsAssetTypesValidator();
-			jsAssetTypesValidator.Validate(assets);
-		}
-
-		/// <summary>
-		/// Removes a duplicate JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of unique JS-assets</returns>
-		protected override IList<IAsset> RemoveDuplicateAssets(IList<IAsset> assets)
-		{
-			var jsDuplicateFilter = new JsDuplicateAssetsFilter();
-			IList<IAsset> processedAssets = jsDuplicateFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Removes a unnecessary JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of necessary JS-assets</returns>
-		protected override IList<IAsset> RemoveUnnecessaryAssets(IList<IAsset> assets)
-		{
-			var jsUnnecessaryAssetsFilter = new JsUnnecessaryAssetsFilter(_ignorePatterns);
-			IList<IAsset> processedAssets = jsUnnecessaryAssetsFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Replaces a file extensions of JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		/// <returns>Set of JS-assets with a modified extension</returns>
-		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets, bool isDebugMode)
-		{
-			var jsFileExtensionsFilter = new JsFileExtensionsFilter(
-				Utils.ConvertToStringCollection(
-					_coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','), 
-					',', true, true))
-			{
-			    IsDebugMode = isDebugMode,
-				UsePreMinifiedFiles = _coreConfig.Js.UsePreMinifiedFiles
-			};
-
-			IList<IAsset> processedAssets = jsFileExtensionsFilter.Transform(assets);
-
-			return processedAssets;
-		}
-
-		/// <summary>
-		/// Combines a code of JS-assets
-		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <param name="enableTracing">Enables tracing</param>
-		protected override string Combine(IList<IAsset> assets, bool enableTracing)
-		{
-			var content = new StringBuilder();
-
-			int assetCount = assets.Count;
-			int lastAssetIndex = assetCount - 1;
-
-			for (int assetIndex = 0; assetIndex < assetCount; assetIndex++)
-			{
-				IAsset asset = assets[assetIndex];
-				string assetContent = asset.Content.TrimEnd();
-
-				if (enableTracing)
-				{
-					content.AppendFormatLine("//#region URL: {0}", asset.Url);
-				}
-				content.Append(assetContent);
-				if (!assetContent.EndsWith(";"))
-				{
-					content.Append(";");
-				}
-				if (enableTracing)
-				{
-					content.AppendLine();
-					content.AppendLine("//#endregion");
-				}
-
-				if (assetIndex != lastAssetIndex)
-				{
-					content.AppendLine();
-				}
-			}
-
-			return content.ToString();
+			_scriptTransformer.Process(context, response);
 		}
 	}
 }

@@ -31,7 +31,7 @@
 		/// Constructs instance of CSS-file extensions filter
 		/// </summary>
 		public CssFileExtensionsFilter()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper())
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
@@ -61,7 +61,7 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.AssetType == AssetType.Css 
+			foreach (var asset in assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.Css 
 				&& !a.Minified))
 			{
 				bool isMinified;

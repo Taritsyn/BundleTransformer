@@ -8,11 +8,11 @@
 		/// <summary>
 		/// CSS content type
 		/// </summary>
-		public const string Css = "text/css";
+		public static readonly string Css = "text/css";
 
 		/// <summary>
 		/// JavaScript content type
 		/// </summary>
-		public const string Js = "application/x-javascript";
+		public static readonly string Js = "application/x-javascript";
 	}
 }

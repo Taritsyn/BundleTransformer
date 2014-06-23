@@ -5,6 +5,7 @@
 	using Core.Builders;
 	using Core.Bundles;
 	using Core.Orderers;
+	using Core.Resolvers;
 	using Core.Transformers;
 
 	public class BundleConfig
@@ -16,6 +17,10 @@
 
 			var nullBuilder = new NullBuilder();
 			var nullOrderer = new NullOrderer();
+
+			// Replace a default bundle resolver in order to the debugging HTTP-handler
+			// can use transformations of the corresponding bundle
+			BundleResolver.Current = new CustomBundleResolver();
 
 			var commonStylesBundle = new CustomStyleBundle("~/Bundles/CommonStyles");
 			commonStylesBundle.Include(
@@ -33,22 +38,18 @@
 				"~/Content/sass/TestSass.sass",
 				"~/Content/scss/TestScss.scss");
 			commonStylesBundle.Orderer = nullOrderer;
-
 			bundles.Add(commonStylesBundle);
-
 
 			var modernizrBundle = new CustomScriptBundle("~/Bundles/Modernizr");
 			modernizrBundle.Include("~/Scripts/modernizr-2.*");
 			modernizrBundle.Orderer = nullOrderer;
-
 			bundles.Add(modernizrBundle);
 
 			var jQueryBundle = new CustomScriptBundle("~/Bundles/Jquery",
-				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js");
+				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js");
 			jQueryBundle.Include("~/Scripts/jquery-{version}.js");
 			jQueryBundle.Orderer = nullOrderer;
 			jQueryBundle.CdnFallbackExpression = "window.jquery";
-
 			bundles.Add(jQueryBundle);
 
 			var commonScriptsBundle = new CustomScriptBundle("~/Bundles/CommonScripts");
@@ -65,16 +66,22 @@
 				"~/Scripts/ts/ColoredTranslatorBadge.ts",
 				"~/Scripts/ts/TestTypeScript.ts");
 			commonScriptsBundle.Orderer = nullOrderer;
-
 			bundles.Add(commonScriptsBundle);
 
+			var сommonTemplatesBundle = new CustomScriptBundle("~/Bundles/CommonTemplates");
+			сommonTemplatesBundle.Include("~/Scripts/handlebars.runtime.js",
+				"~/Scripts/handlebars/HandlebarsHelpers.js",
+				"~/Scripts/handlebars/HandlebarsTranslatorBadge.handlebars",
+				"~/Scripts/handlebars/TestHandlebars.js");
+			сommonTemplatesBundle.Orderer = nullOrderer;
+			bundles.Add(сommonTemplatesBundle);
 			
 			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")
 			{
 				Builder = nullBuilder
 			};
 			jqueryUiStylesDirectoryBundle.IncludeDirectory("~/Content/themes/base/", "*.css");
-			jqueryUiStylesDirectoryBundle.Transforms.Add(new CssTransformer(
+			jqueryUiStylesDirectoryBundle.Transforms.Add(new StyleTransformer(
 				new[] { "*.all.css", "jquery.ui.base.css" }));
 			bundles.Add(jqueryUiStylesDirectoryBundle);
 
@@ -83,7 +90,7 @@
 				Builder = nullBuilder
 			};
 			scriptsDirectoryBundle.IncludeDirectory("~/Scripts/", "*.js", true);
-			scriptsDirectoryBundle.Transforms.Add(new JsTransformer(
+			scriptsDirectoryBundle.Transforms.Add(new ScriptTransformer(
 				new[] { "*.all.js", "_references.js" }));
 			bundles.Add(scriptsDirectoryBundle);
 		}

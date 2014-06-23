@@ -59,7 +59,7 @@
 		/// Constructs instance of Dean Edwards' JS-minifier
 		/// </summary>
 		public EdwardsJsMinifier()
-			: this(null, BundleTransformerContext.Current.GetPackerConfiguration())
+			: this(null, BundleTransformerContext.Current.Configuration.GetPackerSettings())
 		{ }
 
 		/// <summary>

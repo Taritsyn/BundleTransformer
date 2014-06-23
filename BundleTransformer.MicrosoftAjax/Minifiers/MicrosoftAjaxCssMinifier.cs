@@ -13,6 +13,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
@@ -240,7 +241,7 @@
 		/// Constructs instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		public MicrosoftAjaxCssMinifier()
-			: this(BundleTransformerContext.Current.GetMicrosoftAjaxConfiguration())
+			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>

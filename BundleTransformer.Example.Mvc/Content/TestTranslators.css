@@ -68,3 +68,24 @@
 {
 	color: #000;
 }
+
+.translators #handlebars {
+	float: left;
+	display: none;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	border : 1px solid #f38709;
+	background-color: #f38709;
+	font-weight: bold;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+.translators #handlebars A,
+.translators #handlebars A:link,
+.translators #handlebars A:visited,
+.translators #handlebars A:hover,
+.translators #handlebars A:active
+{
+	color: white;
+}

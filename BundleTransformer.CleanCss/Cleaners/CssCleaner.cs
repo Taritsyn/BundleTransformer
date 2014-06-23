@@ -8,7 +8,7 @@
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
-	using Core;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -45,7 +45,7 @@
 		/// <summary>
 		/// JS engine
 		/// </summary>
-		private readonly IJsEngine _jsEngine;
+		private IJsEngine _jsEngine;
 
 		/// <summary>
 		/// Synchronizer of cleaning
@@ -177,6 +177,8 @@
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
 				new JProperty("keepBreaks", options.KeepBreaks),
 				new JProperty("noAdvanced", options.NoAdvanced),
+				new JProperty("noAggressiveMerging", options.NoAggressiveMerging),
+				new JProperty("roundingPrecision", options.RoundingPrecision),
 				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility))
 			);
 
@@ -272,6 +274,7 @@
 				if (_jsEngine != null)
 				{
 					_jsEngine.Dispose();
+					_jsEngine = null;
 				}
 			}
 		}

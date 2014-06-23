@@ -1,0 +1,16 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="autoprefixer" type="BundleTransformer.Autoprefixer.Configuration.AutoprefixerSettings, BundleTransformer.Autoprefixer" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<css>
+				<postProcessors>
+					<add name="AutoprefixCssPostProcessor" type="BundleTransformer.Autoprefixer.PostProcessors.AutoprefixCssPostProcessor, BundleTransformer.Autoprefixer" useInDebugMode="true" />
+				</postProcessors>
+			</css>
+		</core>
+	</bundleTransformer>
+</configuration>

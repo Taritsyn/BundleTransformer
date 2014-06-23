@@ -1,9 +1,9 @@
 ﻿namespace BundleTransformer.Core.Constants
 {
 	/// <summary>
-	/// Minifiers names constants
+	/// Minifier names constants
 	/// </summary>
-	public static class MinifierName
+	internal static class MinifierName
 	{
 		/// <summary>
 		/// Name (key) of null minifier

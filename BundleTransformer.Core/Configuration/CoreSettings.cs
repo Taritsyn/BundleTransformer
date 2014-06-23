@@ -28,21 +28,21 @@
 		}
 
 		/// <summary>
-		/// Gets configuration settings of processing CSS-assets
+		/// Gets configuration settings of processing style assets
 		/// </summary>
 		[ConfigurationProperty("css")]
-		public CssSettings Css
+		public StyleSettings Styles
 		{
-			get { return this["css"] as CssSettings; }
+			get { return this["css"] as StyleSettings; }
 		}
 
 		/// <summary>
-		/// Gets configuration settings of processing JS-assets
+		/// Gets configuration settings of processing script assets
 		/// </summary>
 		[ConfigurationProperty("js")]
-		public JsSettings Js
+		public ScriptSettings Scripts
 		{
-			get { return this["js"] as JsSettings; }
+			get { return this["js"] as ScriptSettings; }
 		}
 
 		/// <summary>

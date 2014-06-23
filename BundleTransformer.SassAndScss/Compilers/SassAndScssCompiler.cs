@@ -11,8 +11,8 @@
 	using Microsoft.Scripting;
 	using Microsoft.Scripting.Hosting;
 
-	using Core;
 	using Core.Assets;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	/* This compiler based on code of the SassAndCoffee.Ruby library

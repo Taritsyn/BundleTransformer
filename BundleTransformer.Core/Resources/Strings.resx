@@ -117,29 +117,36 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AssetHandler_DependencyNotFoundError" xml:space="preserve">
+  <data name="AssetHandler_BundleFileNotFound" xml:space="preserve">
+    <value>Could not find the '{0}' file in the '{1}' bundle.</value>
+  </data>
+  <data name="AssetHandler_BundleNotFound" xml:space="preserve">
+    <value>Bundle '{0}' not exist.</value>
+  </data>
+  <data name="AssetHandler_DependencyNotFound" xml:space="preserve">
     <value>During the output text content of processed asset is not found one of its dependencies.
 See more details:
 {0}</value>
   </data>
-  <data name="AssetHandler_TranslationError" xml:space="preserve">
-    <value>During the output text content of translated asset an error has occurred.
-See more details:
-{0}</value>
+  <data name="AssetHandler_TransformerNotFound" xml:space="preserve">
+    <value>Could not find the transformer in the '{0}' bundle.</value>
+  </data>
+  <data name="AssetHandler_TranslatorNotFound" xml:space="preserve">
+    <value>Could not find the translator of `{0}` type for the '{1}' asset.</value>
   </data>
   <data name="AssetHandler_UnknownError" xml:space="preserve">
     <value>During the output text content of processed asset an unknown error has occurred.
 See more details:
 {0}</value>
   </data>
-  <data name="Assets_CssAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
-    <value>These assets are not style sheets: {0}.</value>
-  </data>
   <data name="Assets_InvalidIgnorePattern" xml:space="preserve">
     <value>Pure wildcard ignore patterns `*` and `*.*` are not supported.</value>
   </data>
-  <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
+  <data name="Assets_ScriptAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>These assets are not scripts: {0}.</value>
+  </data>
+  <data name="Assets_StyleAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
+    <value>These assets are not style sheets: {0}.</value>
   </data>
   <data name="Common_ArgumentIsEmpty" xml:space="preserve">
     <value>The parameter `{0}` must be a non-empty string.</value>
@@ -192,6 +199,9 @@ After package is installed, need set a name of JavaScript engine (for example, `
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>{0}-minifier with name `{1}` is not registered in configuration file.</value>
+  </data>
+  <data name="Configuration_PostProcessorNotRegistered" xml:space="preserve">
+    <value>{0}-postprocessor with name `{1}` is not registered in configuration file.</value>
   </data>
   <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
     <value>Translator, which compiles the code on intermediate language to {0}, and has the name `{1}` is not registered in  configuration file.</value>
@@ -256,6 +266,9 @@ After package is installed, need set a name of JavaScript engine (for example, `
   <data name="ErrorType_Warning" xml:space="preserve">
     <value>warning</value>
   </data>
+  <data name="FileExtensionMapping_DuplicateFileExtension" xml:space="preserve">
+    <value>File extension '{0}' has already been added to mapping collection.</value>
+  </data>
   <data name="Minifiers_MinificationFailed" xml:space="preserve">
     <value>During minification of {0}-code, readed from the file '{1}', by {2} error has occurred.	
 See more details:
@@ -264,6 +277,18 @@ See more details:
   </data>
   <data name="Minifiers_MinificationSyntaxError" xml:space="preserve">
     <value>During minification of {0}-code, readed from the file '{1}', by {2} syntax error has occurred. 
+See more details:
+
+{3}</value>
+  </data>
+  <data name="PostProcessors_PostprocessingFailed" xml:space="preserve">
+    <value>During postprocessing of {0}-code, readed from the file '{1}', by {2} error has occurred.	
+See more details:
+
+{3}</value>
+  </data>
+  <data name="PostProcessors_PostprocessingSyntaxError" xml:space="preserve">
+    <value>During postprocessing of {0}-code, readed from the file '{1}', by {2} syntax error has occurred. 
 See more details:
 
 {3}</value>
@@ -282,5 +307,8 @@ See more details:
 See more details:
 
 {3}</value>
+  </data>
+  <data name="UrlMappings_OnlyAppRelativeUrlAllowed" xml:space="preserve">
+    <value>The URL '{0}' is not valid. Only application relative URLs (~/url) are allowed.</value>
   </data>
 </root>

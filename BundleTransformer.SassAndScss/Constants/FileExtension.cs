@@ -3,26 +3,21 @@
 	/// <summary>
 	/// File extensions constants
 	/// </summary>
-	internal static class FileExtension
+	public static class FileExtension
 	{
-		/// <summary>
-		/// CSS-file extension
-		/// </summary>
-		public const string Css = ".css";
-
 		/// <summary>
 		/// Sass-file extension
 		/// </summary>
-		public const string Sass = ".sass";
+		public static readonly string Sass = ".sass";
 
 		/// <summary>
 		/// SCSS-file extension
 		/// </summary>
-		public const string Scss = ".scss";
+		public static readonly string Scss = ".scss";
 
 		/// <summary>
 		/// Ruby-file extension
 		/// </summary>
-		public const string Ruby = ".rb";
+		public static readonly string Ruby = ".rb";
 	}
 }

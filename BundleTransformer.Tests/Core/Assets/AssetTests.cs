@@ -6,6 +6,13 @@
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Helpers;
 
+	using CoffeeScriptAssetTypeCodes = BundleTransformer.CoffeeScript.Constants.AssetTypeCode;
+	using CoreAssetTypeCodes = BundleTransformer.Core.Constants.AssetTypeCode;
+	using HandlebarsAssetTypeCodes = BundleTransformer.Handlebars.Constants.AssetTypeCode;
+	using LessAssetTypeCodes = BundleTransformer.Less.Constants.AssetTypeCode;
+	using SassAndScssAssetTypeCodes = BundleTransformer.SassAndScss.Constants.AssetTypeCode;
+	using TypeScriptAssetTypeCodes = BundleTransformer.TypeScript.Constants.AssetTypeCode;
+
 	[TestFixture]
 	public class AssetTests
 	{
@@ -89,18 +96,18 @@
 				_virtualFileSystemWrapper);
 
 			// Assert
-			Assert.AreEqual(AssetType.Css, siteCssAsset.AssetType);
-			Assert.AreEqual(AssetType.JavaScript, jqueryJsAsset.AssetType);
-			Assert.AreEqual(AssetType.Less, testLessAsset.AssetType);
-			Assert.AreEqual(AssetType.Sass, testSassAsset.AssetType);
-			Assert.AreEqual(AssetType.Scss, testScssAsset.AssetType);
-			Assert.AreEqual(AssetType.CoffeeScript, testCoffeeAsset.AssetType);
-			Assert.AreEqual(AssetType.LiterateCoffeeScript, testLitCoffeeAsset.AssetType);
-			Assert.AreEqual(AssetType.CoffeeScriptMarkdown, testCoffeeMdAsset.AssetType);
-			Assert.AreEqual(AssetType.TypeScript, testTsAsset.AssetType);
-			Assert.AreEqual(AssetType.Handlebars, testHandlebarsAsset.AssetType);
-			Assert.AreEqual(AssetType.Handlebars, testShortHandlebarsAsset.AssetType);
-			Assert.AreEqual(AssetType.Unknown, testPlainTextAsset.AssetType);
+			Assert.AreEqual(CoreAssetTypeCodes.Css, siteCssAsset.AssetTypeCode);
+			Assert.AreEqual(CoreAssetTypeCodes.JavaScript, jqueryJsAsset.AssetTypeCode);
+			Assert.AreEqual(LessAssetTypeCodes.Less, testLessAsset.AssetTypeCode);
+			Assert.AreEqual(SassAndScssAssetTypeCodes.Sass, testSassAsset.AssetTypeCode);
+			Assert.AreEqual(SassAndScssAssetTypeCodes.Scss, testScssAsset.AssetTypeCode);
+			Assert.AreEqual(CoffeeScriptAssetTypeCodes.CoffeeScript, testCoffeeAsset.AssetTypeCode);
+			Assert.AreEqual(CoffeeScriptAssetTypeCodes.LiterateCoffeeScript, testLitCoffeeAsset.AssetTypeCode);
+			Assert.AreEqual(CoffeeScriptAssetTypeCodes.LiterateCoffeeScript, testCoffeeMdAsset.AssetTypeCode);
+			Assert.AreEqual(TypeScriptAssetTypeCodes.TypeScript, testTsAsset.AssetTypeCode);
+			Assert.AreEqual(HandlebarsAssetTypeCodes.Handlebars, testHandlebarsAsset.AssetTypeCode);
+			Assert.AreEqual(HandlebarsAssetTypeCodes.Handlebars, testShortHandlebarsAsset.AssetTypeCode);
+			Assert.AreEqual(CoreAssetTypeCodes.Unknown, testPlainTextAsset.AssetTypeCode);
 
 			Assert.AreEqual(siteCssAsset.IsStylesheet, true);
 			Assert.AreEqual(siteCssAsset.IsScript, false);

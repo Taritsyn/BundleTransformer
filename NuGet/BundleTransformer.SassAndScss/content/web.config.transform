@@ -10,6 +10,10 @@
 				<translators>
 					<add name="SassAndScssTranslator" type="BundleTransformer.SassAndScss.Translators.SassAndScssTranslator, BundleTransformer.SassAndScss" />
 				</translators>
+				<fileExtensions>
+					<add fileExtension=".sass" assetTypeCode="Sass" />
+					<add fileExtension=".scss" assetTypeCode="Scss" />
+				</fileExtensions>
 			</css>
 		</core>
 	</bundleTransformer>

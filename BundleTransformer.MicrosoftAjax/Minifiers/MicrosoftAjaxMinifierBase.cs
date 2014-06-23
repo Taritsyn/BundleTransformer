@@ -5,9 +5,9 @@
 
 	using Microsoft.Ajax.Utilities;
 
-	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;

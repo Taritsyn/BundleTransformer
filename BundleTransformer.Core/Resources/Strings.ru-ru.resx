@@ -117,29 +117,36 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AssetHandler_DependencyNotFoundError" xml:space="preserve">
+  <data name="AssetHandler_BundleFileNotFound" xml:space="preserve">
+    <value>Не удалось найти файл "{0}" в "{1}" бандле!</value>
+  </data>
+  <data name="AssetHandler_BundleNotFound" xml:space="preserve">
+    <value>Бандл "{0}" не существует!</value>
+  </data>
+  <data name="AssetHandler_DependencyNotFound" xml:space="preserve">
     <value>Во время вывода текстового содержимого обработанного ресурса не была найдена одна из его зависимостей!
 Смотрите более подробную информацию об ошибке:
 {0}</value>
   </data>
-  <data name="AssetHandler_TranslationError" xml:space="preserve">
-    <value>Во время вывода текстового содержимого транслированного ресурса произошла ошибка!
-Смотрите более подробную информацию об ошибке:
-{0}</value>
+  <data name="AssetHandler_TransformerNotFound" xml:space="preserve">
+    <value>Не удалось найти трансформер в "{0}" бандле!</value>
+  </data>
+  <data name="AssetHandler_TranslatorNotFound" xml:space="preserve">
+    <value>Не удалось найти транслятор типа `{0}` для файла "{1}"!</value>
   </data>
   <data name="AssetHandler_UnknownError" xml:space="preserve">
     <value>Во время вывода текстового содержимого обработанного ресурса произошла неизвестная ошибка!
 Смотрите более подробную информацию об ошибке:
 {0}</value>
   </data>
-  <data name="Assets_CssAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
-    <value>Перечисленные ресурсы не являются таблицами стилей: {0}!</value>
-  </data>
   <data name="Assets_InvalidIgnorePattern" xml:space="preserve">
     <value>Шаблоны для исключения ненужных ресурсов вида `*` и `*.*` не поддерживаются!</value>
   </data>
-  <data name="Assets_JsAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
+  <data name="Assets_ScriptAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
     <value>Перечисленные ресурсы не являются скриптами: {0}!</value>
+  </data>
+  <data name="Assets_StyleAssetsContainAssetsWithInvalidTypes" xml:space="preserve">
+    <value>Перечисленные ресурсы не являются таблицами стилей: {0}!</value>
   </data>
   <data name="Common_ArgumentIsEmpty" xml:space="preserve">
     <value>Параметр с именем `{0}` не должен содержать пустую строку!</value>
@@ -192,6 +199,9 @@
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>Минимизатор {0}-кода с именем `{1}` не зарегистрирован в конфигурационном файле!</value>
+  </data>
+  <data name="Configuration_PostProcessorNotRegistered" xml:space="preserve">
+    <value>Постпроцессор {0}-кода с именем `{1}` не зарегистрирован в конфигурационном файле!</value>
   </data>
   <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
     <value>Транслятор, компилирующий код на промежуточном языке в {0}, и имеющий имя `{1}` не зарегистрирован в конфигурационном файле!</value>
@@ -256,6 +266,9 @@
   <data name="ErrorType_Warning" xml:space="preserve">
     <value>предупреждение</value>
   </data>
+  <data name="FileExtensionMapping_DuplicateFileExtension" xml:space="preserve">
+    <value>Расширение "{0}" уже присутствует в списке сопоставлений!</value>
+  </data>
   <data name="Minifiers_MinificationFailed" xml:space="preserve">
     <value>Во время минимизации {0}-кода, считанного из файла "{1}", с помощью {2} произошла ошибка!	
 Смотрите более подробную информацию об ошибке:
@@ -264,6 +277,18 @@
   </data>
   <data name="Minifiers_MinificationSyntaxError" xml:space="preserve">
     <value>Во время минимизации {0}-кода, считанного из файла "{1}", с помощью {2} произошла синтаксическая ошибка!
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
+  <data name="PostProcessors_PostprocessingFailed" xml:space="preserve">
+    <value>Во время постобработки {0}-кода, считанного из файла "{1}", с помощью {2} произошла ошибка!	
+Смотрите более подробную информацию об ошибке:
+
+{3}</value>
+  </data>
+  <data name="PostProcessors_PostprocessingSyntaxError" xml:space="preserve">
+    <value>Во время постобработки {0}-кода, считанного из файла "{1}", с помощью {2} произошла синтаксическая ошибка!
 Смотрите более подробную информацию об ошибке:
 
 {3}</value>
@@ -282,5 +307,8 @@
 Смотрите более подробную информацию об ошибке:
 
 {3}</value>
+  </data>
+  <data name="UrlMappings_OnlyAppRelativeUrlAllowed" xml:space="preserve">
+    <value>URL "{0}" является недопустимым. Разрешено использовать только URL'ы, заданные относительно приложения (~/url).</value>
   </data>
 </root>

@@ -10,9 +10,8 @@
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
-	using Core;
 	using Core.Assets;
-	using Core.Helpers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Resources;
@@ -147,6 +146,7 @@
 				contentBuilder.Append(content);
 				if (!string.IsNullOrWhiteSpace(modifyVariables))
 				{
+					contentBuilder.AppendLine();
 					contentBuilder.Append(ParseVariables(modifyVariables, "ModifyVariables"));
 				}
 

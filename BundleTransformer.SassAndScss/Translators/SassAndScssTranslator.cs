@@ -11,14 +11,15 @@
 	using Core.Assets;
 	using Core.FileSystem;
 	using Core.Helpers;
-	using CoreStrings = Core.Resources.Strings;
 	using Core.Resources;
 	using Core.Translators;
+	using Core.Utilities;
+	using CoreFileExtensionHelpers = Core.Helpers.FileExtensionHelpers;
+	using CoreStrings = Core.Resources.Strings;
 
 	using Compilers;
 	using Configuration;
-	using Constants;
-	using Helpers;
+	using SassAndScssFileExtensionHelpers = Helpers.FileExtensionHelpers;
 	
 	/// <summary>
 	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
@@ -71,6 +72,11 @@
 				@"\s*(?<media>(?:[A-Za-z]+|\([A-Za-z][^,;()""']+?\))(?:[A-Za-z]*\s+and\s+\([A-Za-z][^,;()""']+?\))*" +
 				@"(?:\s*,\s*(?:[A-Za-z]+|\([A-Za-z][^,;()""']+?\))(?:[A-Za-z]*\s+and\s+\([A-Za-z][^,;()""']+?\))*\s*)*)))",
 				RegexOptions.IgnoreCase);
+
+		/// <summary>
+		/// Regular expression for working with Ruby string interpolation placeholder
+		/// </summary>
+		private static readonly Regex _rubyStringInterpolationPlaceholder = new Regex(@"(?<![^\\]?\\)#\{[^}]+?\}");
 
 		/// <summary>
 		/// Virtual file system wrapper
@@ -130,9 +136,9 @@
 		/// Constructs instance of Sass- and SCSS-translator
 		/// </summary>
 		public SassAndScssTranslator()
-			: this(BundleTransformerContext.Current.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.GetCommonRelativePathResolver(),
-				BundleTransformerContext.Current.GetSassAndScssConfiguration())
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.FileSystem.GetCommonRelativePathResolver(),
+				BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>
@@ -205,8 +211,8 @@
 				return assets;
 			}
 
-			var assetsToProcessing = assets.Where(a => a.AssetType == AssetType.Sass 
-				|| a.AssetType == AssetType.Scss).ToList();
+			var assetsToProcessing = assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.Sass
+				|| a.AssetTypeCode == Constants.AssetTypeCode.Scss).ToList();
 			if (assetsToProcessing.Count == 0)
 			{
 				return assets;
@@ -236,12 +242,12 @@
 
 		private void InnerTranslate(IAsset asset, bool enableNativeMinification)
 		{
-			string assetTypeName = (asset.AssetType == AssetType.Scss) ? "SCSS" : "Sass";
+			string assetTypeName = (asset.AssetTypeCode == Constants.AssetTypeCode.Scss) ? "SCSS" : "Sass";
 			string newContent;
 			string assetUrl = asset.Url;
 			var dependencies = new DependencyCollection();
 			CompilationOptions options = CreateCompilationOptions(
-				(asset.AssetType == AssetType.Scss) ? SyntaxType.Scss : SyntaxType.Sass,
+				(asset.AssetTypeCode == Constants.AssetTypeCode.Scss) ? SyntaxType.Scss : SyntaxType.Sass,
 				enableNativeMinification);
 
 			try
@@ -327,12 +333,12 @@
 			MatchCollection clientImportRuleMatches;
 			string assetFileExtension = Path.GetExtension(assetUrl);
 
-			if (FileExtensionHelpers.IsSass(assetFileExtension))
+			if (SassAndScssFileExtensionHelpers.IsSass(assetFileExtension))
 			{
 				serverImportRuleMatches = _sassServerImportRuleRegex.Matches(processedContent);
 				clientImportRuleMatches = _sassClientImportRuleRegex.Matches(processedContent);
 			}
-			else if (FileExtensionHelpers.IsScss(assetFileExtension))
+			else if (SassAndScssFileExtensionHelpers.IsScss(assetFileExtension))
 			{
 				serverImportRuleMatches = _scssServerImportRuleRegex.Matches(processedContent);
 				clientImportRuleMatches = _scssClientImportRuleRegex.Matches(processedContent);
@@ -442,8 +448,8 @@
 
 						foreach (Match urlMatch in urlMatches)
 						{
-							string url = urlMatch.Groups["value"].Value;
-							if (!string.IsNullOrWhiteSpace(url))
+							string url = urlMatch.Groups["value"].Value.Trim();
+							if (url.Length > 0)
 							{
 								urlList.Add(url);
 							}
@@ -477,7 +483,7 @@
 					{
 						GroupCollection clientImportRuleGroups = match.Groups;
 
-						string url = clientImportRuleGroups["url"].Value;
+						string url = clientImportRuleGroups["url"].Value.Trim();
 						string quote = clientImportRuleGroups["quote"].Success ?
 							clientImportRuleGroups["quote"].Value : @"""";
 						string media = clientImportRuleGroups["media"].Value;
@@ -505,10 +511,14 @@
 				}
 				else if (nodeType == SassAndScssNodeType.MultilineComment)
 				{
-					int nextPosition = nodePosition + match.Length;
-
 					ProcessOtherContent(contentBuilder, processedContent,
-						ref currentPosition, nextPosition);
+						ref currentPosition, nodePosition);
+
+					string comment = match.Value;
+					string processedComment = EscapeRubyStringInterpolationPlaceholders(comment);
+
+					contentBuilder.Append(processedComment);
+					currentPosition += comment.Length;
 				}
 			}
 
@@ -521,6 +531,21 @@
 			stylesheet.Content = contentBuilder.ToString();
 
 			return stylesheet;
+		}
+
+		/// <summary>
+		/// Escapes a Ruby string interpolation placeholder
+		/// </summary>
+		/// <param name="value">String value</param>
+		/// <returns>Processed value</returns>
+		private static string EscapeRubyStringInterpolationPlaceholders(string value)
+		{
+			return _rubyStringInterpolationPlaceholder.Replace(value, m =>
+			{
+				string result = "\\" + m.Value;
+
+				return result;
+			});
 		}
 
 		/// <summary>
@@ -547,8 +572,8 @@
 					string partialImportUrl;
 					bool partialImportExists;
 
-					if (FileExtensionHelpers.IsSass(importExtension)
-						|| FileExtensionHelpers.IsScss(importExtension))
+					if (SassAndScssFileExtensionHelpers.IsSass(importExtension)
+						|| SassAndScssFileExtensionHelpers.IsScss(importExtension))
 					{
 						bool importExists = SassAndScssStylesheetExists(importUrl);
 
@@ -576,7 +601,7 @@
 								string.Format(Strings.Common_FileNotExist, importUrl));
 						}
 					}
-					else if (FileExtensionHelpers.IsCss(importExtension))
+					else if (CoreFileExtensionHelpers.IsCss(importExtension))
 					{
 						importUrls.Add(importUrl);
 					}
@@ -599,8 +624,8 @@
 
 						if (!newImportExists)
 						{
-							newImportExtension = FileExtensionHelpers.IsSass(newImportExtension) ?
-								FileExtension.Scss : FileExtension.Sass;
+							newImportExtension = SassAndScssFileExtensionHelpers.IsSass(newImportExtension) ?
+								Constants.FileExtension.Scss : Constants.FileExtension.Sass;
 							newImportUrl = importUrl + newImportExtension;
 
 							newImportExists = SassAndScssStylesheetExists(newImportUrl);
@@ -623,7 +648,7 @@
 						}
 						else
 						{
-							newImportExtension = FileExtension.Css;
+							newImportExtension = Core.Constants.FileExtension.Css;
 							newImportUrl = importUrl + newImportExtension;
 
 							newImportExists = SassAndScssStylesheetExists(newImportUrl);

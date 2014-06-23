@@ -16,6 +16,7 @@
 	using Core;
 	using Core.Assets;
 	using Core.Minifiers;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
@@ -575,8 +576,8 @@
 		/// <summary>
 		/// Constructs instance of Microsoft Ajax JS-minifier
 		/// </summary>
-		public MicrosoftAjaxJsMinifier() 
-			: this(BundleTransformerContext.Current.GetMicrosoftAjaxConfiguration())
+		public MicrosoftAjaxJsMinifier()
+			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>

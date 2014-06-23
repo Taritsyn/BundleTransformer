@@ -46,8 +46,7 @@
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="ClearScript, Version=5.3.11.0, Culture=neutral, PublicKeyToken=935d0c957da47c73, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.1.1.8\lib\net40\ClearScript.dll</HintPath>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.1.1.9\lib\net40\ClearScript.dll</HintPath>
     </Reference>
     <Reference Include="JavaScriptEngineSwitcher.Core, Version=1.1.3.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -57,9 +56,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JavaScriptEngineSwitcher.Msie.1.1.6\lib\net40\JavaScriptEngineSwitcher.Msie.dll</HintPath>
     </Reference>
-    <Reference Include="JavaScriptEngineSwitcher.V8, Version=1.1.8.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
+    <Reference Include="JavaScriptEngineSwitcher.V8, Version=1.1.9.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.1.1.8\lib\net40\JavaScriptEngineSwitcher.V8.dll</HintPath>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.V8.1.1.9\lib\net40\JavaScriptEngineSwitcher.V8.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="MsieJavaScriptEngine, Version=1.4.3.0, Culture=neutral, PublicKeyToken=a3a2846a37ac0d3e, processorArchitecture=MSIL">
@@ -165,7 +164,8 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Scripts\coffee\TestLiterateCoffeeScript.litcoffee" />
-    <None Include="Scripts\jquery-1.11.0.min.map" />
+    <None Include="Scripts\handlebars\HandlebarsTranslatorBadge.handlebars" />
+    <None Include="Scripts\jquery-1.11.1.min.map" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AlternativeContent\css\images\icons\feed.png" />
@@ -303,9 +303,13 @@
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
     <None Include="Scripts\coffee\TestCoffeeScriptMarkdown.coffee.md" />
-    <Content Include="Scripts\jquery-1.11.0-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.11.0.js" />
-    <Content Include="Scripts\jquery-1.11.0.min.js" />
+    <Content Include="Scripts\handlebars.runtime.js" />
+    <Content Include="Scripts\handlebars.runtime.min.js" />
+    <Content Include="Scripts\handlebars\HandlebarsHelpers.js" />
+    <Content Include="Scripts\handlebars\TestHandlebars.js" />
+    <Content Include="Scripts\jquery-1.11.1-vsdoc.js" />
+    <Content Include="Scripts\jquery-1.11.1.js" />
+    <Content Include="Scripts\jquery-1.11.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.10.4.js" />
     <Content Include="Scripts\jquery-ui-1.10.4.min.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
@@ -367,6 +371,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj">
+      <Project>{05911325-5BF6-4845-98AF-4AEF698993AE}</Project>
+      <Name>BundleTransformer.Autoprefixer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.CleanCss\BundleTransformer.CleanCss.csproj">
       <Project>{AF409D45-61D1-4906-B7CA-92AB133F3044}</Project>
       <Name>BundleTransformer.CleanCss</Name>
@@ -386,6 +394,10 @@
     <ProjectReference Include="..\BundleTransformer.Csso\BundleTransformer.Csso.csproj">
       <Project>{E70F938E-7498-4904-8E89-445DE42D974B}</Project>
       <Name>BundleTransformer.Csso</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj">
+      <Project>{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}</Project>
+      <Name>BundleTransformer.Handlebars</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj">
       <Project>{141FCB8B-27E9-459F-9057-F411107D6E48}</Project>

@@ -97,8 +97,8 @@
 		/// <summary>
 		/// Constructs instance of Uglify JS-minifier
 		/// </summary>
-		public UglifyJsMinifier() 
-			: this(null, BundleTransformerContext.Current.GetUglifyJsConfiguration())
+		public UglifyJsMinifier()
+			: this(null, BundleTransformerContext.Current.Configuration.GetUglifySettings())
 		{ }
 
 		/// <summary>
