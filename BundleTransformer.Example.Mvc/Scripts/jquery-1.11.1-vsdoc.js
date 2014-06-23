@@ -4,11 +4,11 @@
 * intended to be used only for design-time IntelliSense.  Please use the
 * standard jQuery library for all runtime use.
 *
-* Comment version: 1.11.0
+* Comment version: 1.11.1
 */
 
 /*!
-* jQuery JavaScript Library v1.11.0
+* jQuery JavaScript Library v1.11.1
 * http://jquery.com/
 *
 * Includes Sizzle.js
@@ -1784,7 +1784,7 @@
         return select(selector.replace(rtrim, "$1"), context, results, seed);
     };
     jQuery.fn = {
-        "jquery": '1.11.0',
+        "jquery": '1.11.1',
         "selector": '',
         "length": 0
     };

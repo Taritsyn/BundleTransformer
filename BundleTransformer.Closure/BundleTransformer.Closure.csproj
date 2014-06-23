@@ -77,7 +77,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="CompilationLevel.cs" />
     <Compile Include="Configuration\ClosureSettings.cs" />
     <Compile Include="Configuration\JsMinifierSettingsBase.cs" />

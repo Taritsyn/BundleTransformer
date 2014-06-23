@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Yui</id>
-    <version>1.9.0-Beta3</version>
+    <version>1.9.0</version>
 	<title>Bundle Transformer: YUI</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -17,7 +17,7 @@
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation YUICompressor</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.0-Beta3" />
+      <dependency id="BundleTransformer.Core" version="1.9.0" />
 	  <dependency id="YUICompressor.NET" version="2.4.0.0" />
     </dependencies>
     <references>

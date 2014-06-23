@@ -448,8 +448,8 @@
 
 						foreach (Match urlMatch in urlMatches)
 						{
-							string url = urlMatch.Groups["value"].Value;
-							if (!string.IsNullOrWhiteSpace(url))
+							string url = urlMatch.Groups["value"].Value.Trim();
+							if (url.Length > 0)
 							{
 								urlList.Add(url);
 							}
@@ -483,7 +483,7 @@
 					{
 						GroupCollection clientImportRuleGroups = match.Groups;
 
-						string url = clientImportRuleGroups["url"].Value;
+						string url = clientImportRuleGroups["url"].Value.Trim();
 						string quote = clientImportRuleGroups["quote"].Success ?
 							clientImportRuleGroups["quote"].Value : @"""";
 						string media = clientImportRuleGroups["media"].Value;

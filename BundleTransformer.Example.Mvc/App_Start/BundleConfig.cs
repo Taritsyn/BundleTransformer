@@ -38,22 +38,18 @@
 				"~/Content/sass/TestSass.sass",
 				"~/Content/scss/TestScss.scss");
 			commonStylesBundle.Orderer = nullOrderer;
-
 			bundles.Add(commonStylesBundle);
-
 
 			var modernizrBundle = new CustomScriptBundle("~/Bundles/Modernizr");
 			modernizrBundle.Include("~/Scripts/modernizr-2.*");
 			modernizrBundle.Orderer = nullOrderer;
-
 			bundles.Add(modernizrBundle);
 
 			var jQueryBundle = new CustomScriptBundle("~/Bundles/Jquery",
-				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js");
+				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js");
 			jQueryBundle.Include("~/Scripts/jquery-{version}.js");
 			jQueryBundle.Orderer = nullOrderer;
 			jQueryBundle.CdnFallbackExpression = "window.jquery";
-
 			bundles.Add(jQueryBundle);
 
 			var commonScriptsBundle = new CustomScriptBundle("~/Bundles/CommonScripts");
@@ -70,7 +66,6 @@
 				"~/Scripts/ts/ColoredTranslatorBadge.ts",
 				"~/Scripts/ts/TestTypeScript.ts");
 			commonScriptsBundle.Orderer = nullOrderer;
-
 			bundles.Add(commonScriptsBundle);
 
 			var сommonTemplatesBundle = new CustomScriptBundle("~/Bundles/CommonTemplates");
@@ -79,7 +74,6 @@
 				"~/Scripts/handlebars/HandlebarsTranslatorBadge.handlebars",
 				"~/Scripts/handlebars/TestHandlebars.js");
 			сommonTemplatesBundle.Orderer = nullOrderer;
-
 			bundles.Add(сommonTemplatesBundle);
 			
 			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")

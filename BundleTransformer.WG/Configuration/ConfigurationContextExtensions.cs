@@ -1,11 +1,9 @@
-﻿namespace BundleTransformer.WG
+﻿namespace BundleTransformer.WG.Configuration
 {
 	using System;
 	using System.Configuration;
 
 	using Core.Configuration;
-
-	using Configuration;
 
 	/// <summary>
 	/// Configuration context extensions

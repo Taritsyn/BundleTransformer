@@ -21,12 +21,12 @@
 			// Arrange
 			var virtualFileSystemWrapper = (new Mock<IVirtualFileSystemWrapper>()).Object;
 
-			var jqueryMinAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"),
-				virtualFileSystemWrapper);
-			var jqueryAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),
-				virtualFileSystemWrapper);
-			var ajaxLoginAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "AjaxLogin.js"),
-				virtualFileSystemWrapper);
+			var jqueryMinAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"jquery-1.6.2.min.js"), virtualFileSystemWrapper);
+			var jqueryAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"jquery-1.6.2.js"), virtualFileSystemWrapper);
+			var ajaxLoginAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"AjaxLogin.js"), virtualFileSystemWrapper);
 			var microsoftAjaxDebugAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
 				"MicrosoftAjax.debug.js"), virtualFileSystemWrapper);
 			var microsoftAjaxAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
@@ -35,6 +35,12 @@
 				"modernizr-2.0.6-development-only.js"), virtualFileSystemWrapper);
 			var ajaxLoginDuplicateAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
 				"ajaxlogin.js"), virtualFileSystemWrapper);
+			var testCoffeeAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"coffee/TestCoffeeScript.coffee"), virtualFileSystemWrapper);
+			var testTsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"ts/TestTypeScript.ts"), virtualFileSystemWrapper);
+			var duplicateTestCoffeeAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"coffee/TestCoffeescript.coffee"), virtualFileSystemWrapper);
 
 			IList<IAsset> assets = new List<IAsset>
 			{
@@ -44,7 +50,10 @@
 				microsoftAjaxDebugAsset,
 				microsoftAjaxAsset,
 				modernizrAsset,
-				ajaxLoginDuplicateAsset
+				ajaxLoginDuplicateAsset,
+				testCoffeeAsset,
+				testTsAsset,
+				duplicateTestCoffeeAsset
 			};
 
 			var scriptDuplicateFilter = new ScriptDuplicateAssetsFilter();
@@ -53,14 +62,19 @@
 			IList<IAsset> processedAssets = scriptDuplicateFilter.Transform(assets);
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"), 
-				processedAssets[0].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "AjaxLogin.js"), 
-				processedAssets[1].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"), 
-				processedAssets[2].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "modernizr-2.0.6-development-only.js"), 
-				processedAssets[3].VirtualPath);
+			Assert.AreEqual(6, processedAssets.Count);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"jquery-1.6.2.min.js"), processedAssets[0].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"AjaxLogin.js"), processedAssets[1].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"MicrosoftAjax.debug.js"), processedAssets[2].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"modernizr-2.0.6-development-only.js"), processedAssets[3].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"coffee/TestCoffeeScript.coffee"), processedAssets[4].VirtualPath);
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+				"ts/TestTypeScript.ts"), processedAssets[5].VirtualPath);
 		}
 	}
 }

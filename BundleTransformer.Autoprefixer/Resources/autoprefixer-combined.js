@@ -1,5 +1,5 @@
 /*!
- * Autoprefixer v1.3.0
+ * Autoprefixer v1.3.1
  * https://github.com/ai/autoprefixer
  * https://github.com/ai/autoprefixer-rails
  *
@@ -1774,8 +1774,7 @@ var Autoprefixer = (function(){var define,module,exports;return (function e(t,n,
     Gradient.names = ['linear-gradient', 'repeating-linear-gradient', 'radial-gradient', 'repeating-radial-gradient'];
 
     Gradient.prototype.replace = function(string, prefix) {
-      var values;
-      values = list.comma(string).map((function(_this) {
+      return list.space(string).map((function(_this) {
         return function(value) {
           var after, args, close, params;
           if (value.slice(0, +_this.name.length + 1 || 9e9) !== _this.name + '(') {
@@ -1793,8 +1792,7 @@ var Autoprefixer = (function(){var define,module,exports;return (function e(t,n,
             return prefix + _this.name + '(' + params.join(', ') + ')' + after;
           }
         };
-      })(this));
-      return values.join(', ');
+      })(this)).join(' ');
     };
 
     Gradient.prototype.directions = {

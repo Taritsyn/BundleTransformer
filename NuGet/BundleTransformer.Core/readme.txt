@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Core 1.9.0 Beta 3
+               README file for Bundle Transformer: Core 1.9.0
 
    ----------------------------------------------------------------------
 
@@ -11,38 +11,48 @@
    ===========
    DESCRIPTION
    ===========   
-   Bundle Transformer - a modular extension for System.Web.Optimization 
-   (aka Microsoft ASP.NET Web Optimization Framework). Classes 
-   `StyleTransformer` and `ScriptTransformer`, included in the core of
-   Bundle Transformer, implement interface `IBundleTransform`. They are
-   intended to replace the standard classes `CssMinify` and `JsMinify`.
+   Bundle Transformer - a modular extension for System.Web.Optimization
+   (also known as the Microsoft ASP.NET Web Optimization Framework).
+   Classes `StyleTransformer` and `ScriptTransformer`, included in the
+   core of Bundle Transformer and implement interface `IBundleTransform`.
+   They are intended to replace the standard classes `CssMinify` and
+   `JsMinify`.
 
-   The main differences classes `StyleTransformer` and `ScriptTransformer`
-   from standard implementations: ability to exclude unnecessary assets
-   when adding assets from a directory, does not produce the
-   re-minification of code of pre-minified assets, support automatic
-   transformation of relative paths to absolute in CSS-code (for 
-   `StyleTransformer`), etc. These classes do not produce the minification
-   of code in runtime, but this feature can be added by installing of
-   minifier-adapter (now available adapters based on Microsoft Ajax
-   Minifier, YUI Compressor for .NET, Google Closure Compiler, Douglas
-   Crockford's JSMin, Dean Edwards' Packer, Mihai Bazon's UglifyJS,
-   Sergey Kryzhanovsky's CSSO (CSS Optimizer), WebGrease and Clean-css).
-   In addition, you can also install translator-adapters that implement
-   the translation of code on intermediate languages (LESS, Sass, SCSS,
-   CoffeeScript, TypeScript and Handlebars).
+   The main differences of `StyleTransformer` and `ScriptTransformer`
+   classes from a standard implementations: ability to exclude unnecessary
+   assets when adding assets from a directory, does not produce the
+   re-minification of pre-minified assets, support automatic
+   transformation of relative paths to absolute in CSS-code (by using
+   `UrlRewritingCssPostProcessor`), etc. These classes do not produce the
+   minification of code in runtime, but this feature can be added by
+   installing of minifier-modules (now available modules based on
+   Microsoft Ajax Minifier, YUI Compressor for .NET, Google Closure
+   Compiler, Douglas Crockford's JSMin, Dean Edwards' Packer, Mihai
+   Bazon's UglifyJS, Sergey Kryzhanovsky's CSSO (CSS Optimizer),
+   WebGrease and Clean-css). In addition, you can also install
+   translator-modules that implement the translation of code on
+   intermediate languages (LESS, Sass, SCSS, CoffeeScript, TypeScript
+   and Handlebars). Apart from this, in the Bundle Transformer there is
+   a third type of modules - postprocessors. Postprocessors runs after
+   translators and before minifiers. Now available following
+   postprocessors: URL rewriting CSS-postprocessor (included in core)
+   and postprocessor-module based on the Andrey Sitnik's Autoprefixer.
 
-   This extension will help your web applications successfully pass a 
-   most part of the tests in YSlow.
+   This extension will help your web applications successfully pass a
+   most part of the tests in YSlow. 
    
    =============
    RELEASE NOTES
    =============
-   1. Classes `CssTransformer` and `JsTransformer` are deprecated.
+   1. Appeared a new type of modules - postprocessor (runs after
+      translators and before minifiers);
+   2. Debugging HTTP-handlers can now use a item transformations,
+      postprocessors and other configuration settings from bundles;
+   3. Classes `CssTransformer` and `JsTransformer` are deprecated.
       Instead, should use classes `StyleTransformer` and
-      `ScriptTransformer` respectively.
-   2. Earlier file extension mappings were hard coded in the `Asset` class,
-      and now it are specified in the Web.config file.
+	  `ScriptTransformer` respectively.
+   4. Earlier file extension mappings were hard coded in the `Asset`
+      class, and now it are specified in the Web.config file.
 
    ====================
    POST-INSTALL ACTIONS

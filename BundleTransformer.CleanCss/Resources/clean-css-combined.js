@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.1
+ * Clean-css v2.2.2
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -3276,7 +3276,7 @@ var CleanCss = (function(){
 		  replace(/background:(?:none|transparent)([;}])/g, 'background:0 0$1');
 
 		  // multiple zeros into one
-		  replace(/box-shadow:0 0 0( 0)?([^\.])/g, 'box-shadow:0 0$2');
+		  replace(/box-shadow:0 0 0 0([^\.])/g, 'box-shadow:0 0$1');
 		  replace(/:0 0 0 0([^\.])/g, ':0$1');
 		  replace(/([: ,=\-])0\.(\d)/g, '$1.$2');
 

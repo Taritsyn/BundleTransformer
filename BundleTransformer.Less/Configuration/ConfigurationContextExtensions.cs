@@ -1,11 +1,9 @@
-﻿namespace BundleTransformer.Less
+﻿namespace BundleTransformer.Less.Configuration
 {
 	using System;
 	using System.Configuration;
 
 	using Core.Configuration;
-
-	using Configuration;
 
 	/// <summary>
 	/// Configuration context extensions

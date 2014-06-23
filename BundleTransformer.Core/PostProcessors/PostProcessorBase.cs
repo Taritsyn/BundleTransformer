@@ -5,7 +5,7 @@
 	using Assets;
 
 	/// <summary>
-	/// Base class of asset postprocessor (runs after translators and before minifier)
+	/// Base class of asset postprocessor (runs after translators and before minifiers)
 	/// </summary>
 	public abstract class PostProcessorBase : IPostProcessor
 	{

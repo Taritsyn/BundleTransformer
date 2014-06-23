@@ -94,7 +94,7 @@
 			// Assert
 			Assert.IsNotNull(currentException);
 			Assert.IsInstanceOf<ArgumentException>(currentException);
-			Assert.AreEqual((currentException as ArgumentException).ParamName, "ignorePatterns");
+			Assert.AreEqual(((ArgumentException)currentException).ParamName, "ignorePatterns");
 		}
 
 		[Test]
@@ -116,7 +116,7 @@
 			// Assert
 			Assert.IsNotNull(currentException);
 			Assert.IsInstanceOf<ArgumentException>(currentException);
-			Assert.AreEqual((currentException as ArgumentException).ParamName, "ignorePatterns");
+			Assert.AreEqual(((ArgumentException)currentException).ParamName, "ignorePatterns");
 		}
 	}
 }

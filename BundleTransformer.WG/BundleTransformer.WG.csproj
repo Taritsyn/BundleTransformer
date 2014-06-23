@@ -55,7 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\CssMinifierSettings.cs" />
     <Compile Include="Configuration\WgSettings.cs" />
     <Compile Include="Minifiers\WgCssMinifier.cs" />

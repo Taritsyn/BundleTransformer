@@ -61,7 +61,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />

@@ -20,7 +20,7 @@
 
 		public string ToAbsolutePath(string virtualPath)
 		{
-			return UrlHelpers.Combine(_applicationRootUrl, virtualPath.TrimStart('~'));
+			return UrlHelpers.Combine(_applicationRootUrl, virtualPath.TrimStart('~').TrimStart('/'));
 		}
 
 		#region Not implemented methods

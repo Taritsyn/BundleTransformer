@@ -1,11 +1,9 @@
-﻿namespace BundleTransformer.TypeScript
+﻿namespace BundleTransformer.TypeScript.Configuration
 {
 	using System;
 	using System.Configuration;
 
 	using Core.Configuration;
-
-	using Configuration;
 
 	/// <summary>
 	/// Configuration context extensions

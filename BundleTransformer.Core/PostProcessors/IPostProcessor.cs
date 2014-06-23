@@ -5,7 +5,7 @@
 	using Assets;
 
 	/// <summary>
-	/// Defines interface of asset postprocessor (runs after translators and before minifier)
+	/// Defines interface of asset postprocessor (runs after translators and before minifiers)
 	/// </summary>
 	public interface IPostProcessor
 	{

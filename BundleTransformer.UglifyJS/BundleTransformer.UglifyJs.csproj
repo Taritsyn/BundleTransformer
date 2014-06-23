@@ -51,7 +51,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="CodeGenerationOptions.cs" />
     <Compile Include="CompressionOptions.cs" />
     <Compile Include="Configuration\CodeGenerationSettings.cs" />

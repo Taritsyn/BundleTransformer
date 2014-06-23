@@ -32,6 +32,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="JavaScriptEngineSwitcher.Core">
       <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.1.3\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
@@ -50,7 +56,7 @@
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\HandlebarsCompilingException.cs" />
     <Compile Include="Compilers\HandlebarsCompiler.cs" />
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\HandlebarsSettings.cs" />
     <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
@@ -87,6 +93,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.ru-ru.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="..\BundleTransformer.snk">
+      <Link>BundleTransformer.snk</Link>
+    </None>
     <None Include="app.config" />
     <None Include="packages.config" />
     <Content Include="Resources\LICENSE.txt" />

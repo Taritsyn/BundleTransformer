@@ -1,5 +1,5 @@
 /*!
- * LESS v1.7.1
+ * LESS v1.7.3
  * http://lesscss.org
  *
  * Copyright 2014, Alexis Sellier & The Core Less Team
@@ -144,9 +144,9 @@ var Less = (function(){
 
 		tree.jsify = function (obj) {
 			if (Array.isArray(obj.value) && (obj.value.length > 1)) {
-				return '[' + obj.value.map(function (v) { return v.toCSS(false); }).join(', ') + ']';
+				return '[' + obj.value.map(function (v) { return v.toCSS(); }).join(', ') + ']';
 			} else {
-				return obj.toCSS(false);
+				return obj.toCSS();
 			}
 		};
 
@@ -3160,6 +3160,8 @@ var Less = (function(){
 			if (!this.contentsIgnoredChars) { this.contentsIgnoredChars = {}; }
 			if (!this.files) { this.files = {}; }
 
+			if (typeof this.paths === "string") { this.paths = [this.paths]; }
+
 			if (!this.currentFileInfo) {
 				var filename = (options && options.filename) || "input";
 				var entryPath = filename.replace(/[^\/\\]*$/, "");
@@ -3326,22 +3328,22 @@ var Less = (function(){
 			},
 
 			hue: function (color) {
-				return new(tree.Dimension)(Math.round(color.toHSL().h));
+				return new(tree.Dimension)(color.toHSL().h);
 			},
 			saturation: function (color) {
-				return new(tree.Dimension)(Math.round(color.toHSL().s * 100), '%');
+				return new(tree.Dimension)(color.toHSL().s * 100, '%');
 			},
 			lightness: function (color) {
-				return new(tree.Dimension)(Math.round(color.toHSL().l * 100), '%');
+				return new(tree.Dimension)(color.toHSL().l * 100, '%');
 			},
 			hsvhue: function(color) {
-				return new(tree.Dimension)(Math.round(color.toHSV().h));
+				return new(tree.Dimension)(color.toHSV().h);
 			},
 			hsvsaturation: function (color) {
-				return new(tree.Dimension)(Math.round(color.toHSV().s * 100), '%');
+				return new(tree.Dimension)(color.toHSV().s * 100, '%');
 			},
 			hsvvalue: function (color) {
-				return new(tree.Dimension)(Math.round(color.toHSV().v * 100), '%');
+				return new(tree.Dimension)(color.toHSV().v * 100, '%');
 			},
 			red: function (color) {
 				return new(tree.Dimension)(color.rgb[0]);
@@ -3356,7 +3358,7 @@ var Less = (function(){
 				return new(tree.Dimension)(color.toHSL().a);
 			},
 			luma: function (color) {
-				return new(tree.Dimension)(Math.round(color.luma() * color.alpha * 100), '%');
+				return new(tree.Dimension)(color.luma() * color.alpha * 100, '%');
 			},
 			luminance: function (color) {
 				var luminance =
@@ -3364,7 +3366,7 @@ var Less = (function(){
 				  + (0.7152 * color.rgb[1] / 255)
 				  + (0.0722 * color.rgb[2] / 255);
 
-				return new(tree.Dimension)(Math.round(luminance * color.alpha * 100), '%');
+				return new(tree.Dimension)(luminance * color.alpha * 100, '%');
 			},
 			saturate: function (color, amount) {
 				// filter: saturate(3.2);
@@ -5537,8 +5539,8 @@ var Less = (function(){
 
 							switch (cc) {
 								case 40:                        // (
-									parenLevel++; 
-									lastOpeningParen = parserCurrentIndex; 
+									parenLevel++;
+									lastOpeningParen = parserCurrentIndex;
 									continue;
 								case 41:                        // )
 									if (--parenLevel < 0) {
@@ -5549,8 +5551,8 @@ var Less = (function(){
 									if (!parenLevel) { emitChunk(); }
 									continue;
 								case 123:                       // {
-									level++; 
-									lastOpening = parserCurrentIndex; 
+									level++;
+									lastOpening = parserCurrentIndex;
 									continue;
 								case 125:                       // }
 									if (--level < 0) {
@@ -5649,7 +5651,7 @@ var Less = (function(){
 							var evaldRoot,
 								css,
 								evalEnv = new tree.evalEnv(options);
-								
+
 							//
 							// Allows setting variables with a hash, so:
 							//
@@ -6082,7 +6084,7 @@ var Less = (function(){
 								colorCandidateString = colorCandidateString[1];
 								if (!colorCandidateString.match(/^[A-Fa-f0-9]+$/)) { // verify if candidate consists only of allowed HEX characters
 									error("Invalid HEX color code");
-								} 
+								}
 								return new(tree.Color)(rgb[1]);
 							}
 						},
@@ -6161,8 +6163,8 @@ var Less = (function(){
 					rulesetCall: function () {
 						var name;
 
-						if (input.charAt(i) === '@' && (name = $re(/^(@[\w-]+)\s*\(\s*\)\s*;/))) { 
-							return new tree.RulesetCall(name[1]); 
+						if (input.charAt(i) === '@' && (name = $re(/^(@[\w-]+)\s*\(\s*\)\s*;/))) {
+							return new tree.RulesetCall(name[1]);
 						}
 					},
 
@@ -6189,7 +6191,7 @@ var Less = (function(){
 							if (extendList) { extendList.push(extend); } else { extendList = [ extend ]; }
 
 						} while($char(","));
-						
+
 						expect(/^\)/);
 
 						if (isRule) {
@@ -6205,7 +6207,7 @@ var Less = (function(){
 					extendRule: function() {
 						return this.extend(true);
 					},
-					
+
 					//
 					// Mixins
 					//
@@ -6411,7 +6413,7 @@ var Less = (function(){
 								variadic = argInfo.variadic;
 
 								// .mixincall("@{a}");
-								// looks a bit like a mixin definition.. 
+								// looks a bit like a mixin definition..
 								// also
 								// .mixincall(@a: {rule: set;});
 								// so we have to be nice and restore
@@ -6420,7 +6422,7 @@ var Less = (function(){
 									restore();
 									return;
 								}
-								
+
 								parsers.comments();
 
 								if ($re(/^when/)) { // Guard
@@ -6527,7 +6529,7 @@ var Less = (function(){
 					//
 					combinator: function () {
 						var c = input.charAt(i);
-						
+
 						if (c === '>' || c === '+' || c === '~' || c === '|' || c === '^') {
 							i++;
 							if (input.charAt(i) === '^') {
@@ -6620,7 +6622,7 @@ var Less = (function(){
 						}
 						return block;
 					},
-					
+
 					detachedRuleset: function() {
 						var blockRuleset = this.blockRuleset();
 						if (blockRuleset) {
@@ -6633,7 +6635,7 @@ var Less = (function(){
 					//
 					ruleset: function () {
 						var selectors, s, rules, debugInfo;
-						
+
 						save();
 
 						if (env.dumpLineNumbers) {
@@ -6680,20 +6682,20 @@ var Less = (function(){
 						name = this.variable() || this.ruleProperty();
 						if (name) {
 							isVariable = typeof name === "string";
-							
+
 							if (isVariable) {
 								value = this.detachedRuleset();
 							}
-							
+
 							if (!value) {
 								// prefer to try to parse first if its a variable or we are compressing
 								// but always fallback on the other one
 								value = !tryAnonymous && (env.compress || isVariable) ?
 									(this.value() || this.anonymousValue()) :
 									(this.anonymousValue() || this.value());
-			
+
 								important = this.important();
-								
+
 								// a name returned by this.ruleProperty() is always an array of the form:
 								// [string-1, ..., string-n, ""] or [string-1, ..., string-n, "+"]
 								// where each item is a tree.Keyword or tree.Variable
@@ -6874,7 +6876,7 @@ var Less = (function(){
 						save();
 
 						name = $re(/^@[a-z-]+/);
-						
+
 						if (!name) { return; }
 
 						nonVendorSpecificName = name;
@@ -6947,7 +6949,7 @@ var Less = (function(){
 
 						if (rules || (!hasBlock && value && $char(';'))) {
 							forget();
-							return new(tree.Directive)(name, value, rules, index, env.currentFileInfo, 
+							return new(tree.Directive)(name, value, rules, index, env.currentFileInfo,
 								env.dumpLineNumbers ? getDebugInfo(index, input, env) : null);
 						}
 
@@ -7004,13 +7006,17 @@ var Less = (function(){
 								if (peek(/^\/[*\/]/)) {
 									break;
 								}
+
+								save();
+
 								op = $char('/') || $char('*');
 
-								if (!op) { break; }
+								if (!op) { forget(); break; }
 
 								a = this.operand();
 
-								if (!a) { break; }
+								if (!a) { restore(); break; }
+								forget();
 
 								m.parensInOp = true;
 								a.parensInOp = true;
@@ -7034,7 +7040,7 @@ var Less = (function(){
 								if (!a) {
 									break;
 								}
-								
+
 								m.parensInOp = true;
 								a.parensInOp = true;
 								operation = new(tree.Operation)(op, [operation || m, a], isSpaced);
@@ -7141,7 +7147,7 @@ var Less = (function(){
 					},
 					ruleProperty: function () {
 						var c = current, name = [], index = [], length = 0, s, k;
-						
+
 						function match(re) {
 							var a = re.exec(c);
 							if (a) {
@@ -7155,7 +7161,7 @@ var Less = (function(){
 						match(/^(\*?)/);
 						while (match(/^((?:[\w-]+)|(?:@\{[\w-]+\}))/)); // !
 						if ((name.length > 1) && match(/^\s*((?:\+_|\+)?)\s*:/)) {
-							// at last, we have the complete match now. move forward, 
+							// at last, we have the complete match now. move forward,
 							// convert name particles to tree objects and return:
 							skipWhitespace(length);
 							if (name[0] === '') {
@@ -7166,7 +7172,7 @@ var Less = (function(){
 								s = name[k];
 								name[k] = (s.charAt(0) !== '@')
 									? new(tree.Keyword)(s)
-									: new(tree.Variable)('@' + s.slice(2, -1), 
+									: new(tree.Variable)('@' + s.slice(2, -1),
 										index[k], env.currentFileInfo);
 							}
 							return name;

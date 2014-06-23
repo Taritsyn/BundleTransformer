@@ -55,7 +55,7 @@
     <Compile Include="Autoprefixers\CssAutoprefixer.cs" />
     <Compile Include="Autoprefixers\CssAutoprefixingException.cs" />
     <Compile Include="AutoprefixingOptions.cs" />
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\AutoprefixerSettings.cs" />
     <Compile Include="Configuration\BrowserConditionalExpression.cs" />
     <Compile Include="Configuration\BrowserConditionalExpressionCollection.cs" />

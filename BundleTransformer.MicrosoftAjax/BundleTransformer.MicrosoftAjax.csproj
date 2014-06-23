@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlockStart.cs" />
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\CssMinifierSettings.cs" />
     <Compile Include="Configuration\JsMinifierSettings.cs" />
     <Compile Include="Configuration\MicrosoftAjaxSettings.cs" />

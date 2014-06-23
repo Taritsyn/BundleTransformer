@@ -165,7 +165,7 @@
     </None>
     <None Include="Scripts\coffee\TestLiterateCoffeeScript.litcoffee" />
     <None Include="Scripts\handlebars\HandlebarsTranslatorBadge.handlebars" />
-    <None Include="Scripts\jquery-1.11.0.min.map" />
+    <None Include="Scripts\jquery-1.11.1.min.map" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AlternativeContent\css\images\icons\feed.png" />
@@ -307,9 +307,9 @@
     <Content Include="Scripts\handlebars.runtime.min.js" />
     <Content Include="Scripts\handlebars\HandlebarsHelpers.js" />
     <Content Include="Scripts\handlebars\TestHandlebars.js" />
-    <Content Include="Scripts\jquery-1.11.0-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.11.0.js" />
-    <Content Include="Scripts\jquery-1.11.0.min.js" />
+    <Content Include="Scripts\jquery-1.11.1-vsdoc.js" />
+    <Content Include="Scripts\jquery-1.11.1.js" />
+    <Content Include="Scripts\jquery-1.11.1.min.js" />
     <Content Include="Scripts\jquery-ui-1.10.4.js" />
     <Content Include="Scripts\jquery-ui-1.10.4.min.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />

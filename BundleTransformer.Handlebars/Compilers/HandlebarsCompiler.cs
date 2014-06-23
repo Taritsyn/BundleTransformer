@@ -219,11 +219,13 @@
 				string processedRootPath = UrlHelpers.RemoveLastSlash(rootPath);
 				string fileExtension = Path.GetExtension(path);
 
-				templateName = templateName.Substring(processedRootPath.Length + 1);
-				if (!string.IsNullOrWhiteSpace(fileExtension))
-				{
-					templateName = templateName.Replace(fileExtension, string.Empty);
-				}
+				int rootPathLength = processedRootPath.Length;
+				int fileExtensionLength = fileExtension != null ? fileExtension.Length : 0;
+
+				int templateNameStartPosition = rootPathLength + 1;
+				int templateNameLength = templateName.Length - (rootPathLength + 1) - fileExtensionLength;
+
+				templateName = templateName.Substring(templateNameStartPosition, templateNameLength);
 			}
 
 			return templateName;

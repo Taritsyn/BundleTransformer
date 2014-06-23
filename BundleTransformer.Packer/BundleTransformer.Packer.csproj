@@ -48,7 +48,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\JsMinifierSettings.cs" />
     <Compile Include="Configuration\PackerSettings.cs" />
     <Compile Include="Minifiers\EdwardsJsMinifier.cs" />

@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 
 	using Assets;
 	using Resources;
@@ -24,27 +23,32 @@
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "assets");
 			}
 
-			if (assets.Count == 0)
+			if (assets.Count <= 1)
 			{
 				return assets;
 			}
 
 			var processedAssets = new List<IAsset>();
+			var processedAssetVirtualPaths = new List<string>();
 
 			foreach (var asset in assets)
 			{
-				string newAssetVirtualPath = Asset.RemoveAdditionalJsFileExtension(asset.VirtualPath);
-				string newAssetVirtualPathInUppercase = newAssetVirtualPath.ToUpperInvariant();
-				bool assetExist = processedAssets
-					.Count(a =>
-						Asset.RemoveAdditionalJsFileExtension(a.VirtualPath).ToUpperInvariant() == newAssetVirtualPathInUppercase
-					) > 0;
+				string processedAssetVirtualPath = asset.VirtualPath;
+				if (asset.AssetTypeCode == Constants.AssetTypeCode.JavaScript)
+				{
+					processedAssetVirtualPath = Asset.RemoveAdditionalJsFileExtension(processedAssetVirtualPath);
+				}
+				processedAssetVirtualPath = processedAssetVirtualPath.ToUpperInvariant();
 
+				bool assetExist = processedAssetVirtualPaths.Contains(processedAssetVirtualPath);
 				if (!assetExist)
 				{
 					processedAssets.Add(asset);
+					processedAssetVirtualPaths.Add(processedAssetVirtualPath);
 				}
 			}
+
+			processedAssetVirtualPaths.Clear();
 
 			return processedAssets;
 		}

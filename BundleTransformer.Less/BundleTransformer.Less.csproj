@@ -53,7 +53,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\LessCompiler.cs" />
     <Compile Include="Compilers\LessCompilingException.cs" />

@@ -47,9 +47,8 @@
             </div>
         </footer>
 		
-		@Scripts.Render("~/Bundles/Jquery")
-	    @Scripts.Render("~/Bundles/CommonScripts")
-		@Scripts.Render("~/Bundles/CommonTemplates")
+		@Scripts.Render("~/Bundles/Jquery", "~/Bundles/CommonScripts",
+			"~/Bundles/CommonTemplates")
         @RenderSection("scripts", required: false)
     </body>
 </html>

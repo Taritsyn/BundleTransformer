@@ -52,46 +52,26 @@
 				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "relativePath"), "relativePath");
 			}
 
-			string newRelativePath = UrlHelpers.ProcessBackSlashes(relativePath);
+			string processedRelativePath = UrlHelpers.ProcessBackSlashes(relativePath);
 
-			if (newRelativePath.StartsWith("/") || UrlHelpers.StartsWithProtocol(newRelativePath))
+			if (processedRelativePath.StartsWith("/") || UrlHelpers.StartsWithProtocol(processedRelativePath))
 			{
-				return newRelativePath;
+				return processedRelativePath;
 			}
 
-			if (newRelativePath.StartsWith("~/"))
+			if (processedRelativePath.StartsWith("~/"))
 			{
-				return _virtualFileSystemWrapper.ToAbsolutePath(newRelativePath);
+				return _virtualFileSystemWrapper.ToAbsolutePath(processedRelativePath);
 			}
 
-			string absolutePath;
-			string newBasePath = UrlHelpers.ProcessBackSlashes(
-				_virtualFileSystemWrapper.ToAbsolutePath(Path.GetDirectoryName(basePath)) + @"/");
+			string processedBasePath = UrlHelpers.ProcessBackSlashes(Path.GetDirectoryName(basePath));
 
-			if (newRelativePath.StartsWith("../") || newRelativePath.StartsWith("./"))
+			string absolutePath = UrlHelpers.Combine(processedBasePath, processedRelativePath);
+			if (absolutePath.IndexOf("./", StringComparison.Ordinal) != -1)
 			{
-				string hash = string.Empty;
-				int hashPosition = newRelativePath.IndexOf('#');
-				if (hashPosition != -1)
-				{
-					hash = newRelativePath.Substring(hashPosition + 1);
-					newRelativePath = newRelativePath.Substring(0, hashPosition);
-				}
-
-				const string fakeSiteUrl = "http://bundletransformer.codeplex.com/";
-				var baseUri = new Uri(UrlHelpers.Combine(fakeSiteUrl, newBasePath), UriKind.Absolute);
-
-				var absoluteUri = new Uri(baseUri, newRelativePath);
-				absolutePath = absoluteUri.PathAndQuery;
-				if (hash.Length > 0)
-				{
-					absolutePath += "#" + hash;
-				}
+				absolutePath = UrlHelpers.Normalize(absolutePath);
 			}
-			else
-			{
-				absolutePath = UrlHelpers.Combine(newBasePath, newRelativePath);
-			}
+			absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(absolutePath);
 
 			return absolutePath;
 		}
