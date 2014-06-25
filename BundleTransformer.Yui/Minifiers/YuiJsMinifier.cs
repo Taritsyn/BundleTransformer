@@ -177,6 +177,31 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of JS-asset by using YUI Compressor for .NET
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public override IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			lock (_minificationSynchronizer)
+			{
+				InnerMinify(asset);
+			}
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of JS-assets by using YUI Compressor for .NET
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
@@ -203,59 +228,64 @@
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					string newContent;
-					string assetVirtualPath = asset.VirtualPath;
-
-					try
-					{
-						newContent = _jsCompressor.Compress(asset.Content);
-
-						var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
-						if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
-						{
-							var errorMessage = new StringBuilder();
-							foreach (var errorDetail in errorReporter.ErrorMessages)
-							{
-								errorMessage.AppendLine(errorDetail);
-								errorMessage.AppendLine();
-							}
-
-							errorReporter.ErrorMessages.Clear();
-
-							throw new YuiCompressingException(errorMessage.ToString());
-						}
-					}
-					catch (EcmaScriptRuntimeException e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-					}
-					catch (EcmaScriptException e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-					}
-					catch (YuiCompressingException e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-					}
-					catch (Exception e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-					}
-
-					asset.Content = newContent;
-					asset.Minified = true;
+					InnerMinify(asset);
 				}
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset)
+		{
+			string newContent;
+			string assetVirtualPath = asset.VirtualPath;
+
+			try
+			{
+				newContent = _jsCompressor.Compress(asset.Content);
+
+				var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
+				if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
+				{
+					var errorMessage = new StringBuilder();
+					foreach (var errorDetail in errorReporter.ErrorMessages)
+					{
+						errorMessage.AppendLine(errorDetail);
+						errorMessage.AppendLine();
+					}
+
+					errorReporter.ErrorMessages.Clear();
+
+					throw new YuiCompressingException(errorMessage.ToString());
+				}
+			}
+			catch (EcmaScriptRuntimeException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+			}
+			catch (EcmaScriptException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+			}
+			catch (YuiCompressingException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

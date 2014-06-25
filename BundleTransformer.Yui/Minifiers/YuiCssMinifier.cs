@@ -101,6 +101,31 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of CSS-asset by using YUI Compressor for .NET
+		/// </summary>
+		/// <param name="asset">CSS-asset</param>
+		/// <returns>CSS-asset with minified text content</returns>
+		public override IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			lock (_minificationSynchronizer)
+			{
+				InnerMinify(asset);
+			}
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of CSS-assets by using YUI Compressor for .NET
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
@@ -127,26 +152,31 @@
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					string newContent;
-					string assetVirtualPath = asset.VirtualPath;
-
-					try
-					{
-						newContent = _cssCompressor.Compress(asset.Content);
-					}
-					catch (Exception e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
-					}
-
-					asset.Content = newContent;
-					asset.Minified = true;
+					InnerMinify(asset);
 				}
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset)
+		{
+			string newContent;
+			string assetVirtualPath = asset.VirtualPath;
+
+			try
+			{
+				newContent = _cssCompressor.Compress(asset.Content);
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.9.0
+          README file for Bundle Transformer: Sass and SCSS 1.9.1
 
    ----------------------------------------------------------------------
 
@@ -26,11 +26,6 @@
    `IronRuby.dll`, `IronRuby.Libraries.dll`, `Microsoft.Dynamic.dll`
    and `Microsoft.Scripting.dll` were builded from source code of the
    IronLanguages project.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Sass version 3.3.8.
    
    ====================
    POST-INSTALL ACTIONS

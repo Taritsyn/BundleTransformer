@@ -96,6 +96,31 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of JS-asset by using Dean Edwards' Packer
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			using (var jsPacker = new JsPacker(_createJsEngineInstance))
+			{
+				InnerMinify(asset, jsPacker, ShrinkVariables, Base62Encode);
+			}
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of JS-assets by using Dean Edwards' Packer
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
@@ -125,32 +150,37 @@
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					string newContent;
-					string assetVirtualPath = asset.VirtualPath;
-
-					try
-					{
-						newContent = jsPacker.Pack(asset.Content, base62Encode, shrinkVariables);
-					}
-					catch (JsPackingException e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
-					}
-					catch (Exception e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
-					}
-
-					asset.Content = newContent;
-					asset.Minified = true;
+					InnerMinify(asset, jsPacker, shrinkVariables, base62Encode);
 				}
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset, JsPacker jsPacker, bool shrinkVariables, bool base62Encode)
+		{
+			string newContent;
+			string assetVirtualPath = asset.VirtualPath;
+
+			try
+			{
+				newContent = jsPacker.Pack(asset.Content, base62Encode, shrinkVariables);
+			}
+			catch (JsPackingException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 	}
 }

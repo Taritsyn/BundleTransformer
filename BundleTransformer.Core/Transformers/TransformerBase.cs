@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Linq;
-	using System.Web;
 	using System.Web.Hosting;
 	using System.Web.Optimization;
 
@@ -27,11 +26,6 @@
 		protected readonly string[] _ignorePatterns;
 
 		/// <summary>
-		/// Configuration settings of core
-		/// </summary>
-		protected readonly CoreSettings _coreConfig;
-
-		/// <summary>
 		/// List of translators
 		/// </summary>
 		protected ReadOnlyCollection<ITranslator> _translators;
@@ -45,6 +39,29 @@
 		/// Minifier
 		/// </summary>
 		protected IMinifier _minifier;
+
+		/// <summary>
+		/// Flag for whether to enable tracing
+		/// </summary>
+		protected bool _enableTracing;
+
+		/// <summary>
+		/// Flag for whether to allow usage of pre-minified files
+		/// </summary>
+		protected bool _usePreMinifiedFiles;
+
+		/// <summary>
+		/// Flag for whether to allow combine files before minification
+		/// </summary>
+		protected bool _combineFilesBeforeMinification;
+
+		/// <summary>
+		/// Gets a asset content type
+		/// </summary>
+		protected abstract string ContentType
+		{
+			get;
+		}
 
 		/// <summary>
 		/// Gets a list of translators (LESS, Sass, SCSS, CoffeeScript and TypeScript)
@@ -80,49 +97,49 @@
 		protected TransformerBase(string[] ignorePatterns, CoreSettings coreConfig)
 		{
 			_ignorePatterns = ignorePatterns;
-			_coreConfig = coreConfig;
+			_enableTracing = coreConfig.EnableTracing;
 		}
 
 
 		/// <summary>
 		/// Starts a processing of assets
 		/// </summary>
-		/// <param name="context">Object BundleContext</param>
-		/// <param name="response">Object BundleResponse</param>
-		public void Process(BundleContext context, BundleResponse response)
+		/// <param name="bundleContext">Object BundleContext</param>
+		/// <param name="bundleResponse">Object BundleResponse</param>
+		public void Process(BundleContext bundleContext, BundleResponse bundleResponse)
 		{
-			Process(context, response, BundleTransformerContext.Current.IsDebugMode);
+			Process(bundleContext, bundleResponse, BundleTransformerContext.Current.IsDebugMode);
 		}
 
 		/// <summary>
 		/// Starts a processing of assets
 		/// </summary>
-		/// <param name="context">Object BundleContext</param>
-		/// <param name="response">Object BundleResponse</param>
+		/// <param name="bundleContext">Object BundleContext</param>
+		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		public void Process(BundleContext context, BundleResponse response, bool isDebugMode)
+		public void Process(BundleContext bundleContext, BundleResponse bundleResponse, bool isDebugMode)
 		{
-			if (context == null)
+			if (bundleContext == null)
 			{
-				throw new ArgumentNullException("context", Strings.Common_ValueIsNull);
+				throw new ArgumentNullException("bundleContext", Strings.Common_ValueIsNull);
 			}
 
-			if (response == null)
+			if (bundleResponse == null)
 			{
-				throw new ArgumentNullException("response", Strings.Common_ValueIsNull);
+				throw new ArgumentNullException("bundleResponse", Strings.Common_ValueIsNull);
 			}
 
-			if (!context.EnableInstrumentation)
+			if (!bundleContext.EnableInstrumentation)
 			{
 				var assets = new List<IAsset>();
-				IEnumerable<BundleFile> bundleFiles = response.Files;
+				IEnumerable<BundleFile> bundleFiles = bundleResponse.Files;
 
 				foreach (var bundleFile in bundleFiles)
 				{
 					assets.Add(new Asset(bundleFile.VirtualFile.VirtualPath, bundleFile));
 				}
 
-				Transform(assets, response, BundleTable.VirtualPathProvider, context.HttpContext, isDebugMode);
+				Transform(assets, bundleContext, bundleResponse, BundleTable.VirtualPathProvider, isDebugMode);
 			}
 		}
 
@@ -130,12 +147,40 @@
 		/// Transforms a assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
+		/// <param name="bundleContext">Object BundleContext</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="virtualPathProvider">Virtual path provider</param>
-		/// <param name="httpContext">Object HttpContext</param>
 		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		protected abstract void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext, bool isDebugMode);
+		protected virtual void Transform(IList<IAsset> assets, BundleContext bundleContext,
+			BundleResponse bundleResponse, VirtualPathProvider virtualPathProvider, bool isDebugMode)
+		{
+			ValidateAssetTypes(assets);
+			assets = RemoveDuplicateAssets(assets);
+			assets = RemoveUnnecessaryAssets(assets);
+			assets = ReplaceFileExtensions(assets, isDebugMode);
+			assets = Translate(assets, isDebugMode);
+			assets = PostProcess(assets, isDebugMode);
+
+			IAsset combinedAsset;
+			if (_combineFilesBeforeMinification)
+			{
+				combinedAsset = Combine(assets, bundleContext.BundleVirtualPath, isDebugMode);
+				if (!isDebugMode)
+				{
+					combinedAsset = Minify(combinedAsset);
+				}
+			}
+			else
+			{
+				if (!isDebugMode)
+				{
+					assets = Minify(assets);
+				}
+				combinedAsset = Combine(assets, bundleContext.BundleVirtualPath, isDebugMode);
+			}
+
+			ConfigureBundleResponse(combinedAsset, bundleResponse, virtualPathProvider);
+		}
 
 		/// <summary>
 		/// Validates a assets for compliance with a valid types
@@ -207,6 +252,18 @@
 		}
 
 		/// <summary>
+		/// Minify a text content of asset
+		/// </summary>
+		/// <param name="asset">Asset</param>
+		/// <returns>Asset with minified code</returns>
+		protected virtual IAsset Minify(IAsset asset)
+		{
+			IAsset processedAsset = _minifier.Minify(asset);
+
+			return processedAsset;
+		}
+
+		/// <summary>
 		/// Minify a text content of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
@@ -222,35 +279,26 @@
 		/// Combines a code of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
-		/// <param name="enableTracing">Enables tracing</param>
-		protected abstract string Combine(IList<IAsset> assets, bool enableTracing);
+		/// <param name="bundleVirtualPath">Virtual path of bundle</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
+		/// <returns>Combined asset</returns>
+		protected abstract IAsset Combine(IList<IAsset> assets, string bundleVirtualPath, bool isDebugMode);
 
 		/// <summary>
-		/// Configures a bundle response
+		/// Configures a bundle bundleResponse
 		/// </summary>
-		/// <param name="assets">Set of assets</param>
+		/// <param name="combinedAsset">Combined asset</param>
 		/// <param name="bundleResponse">Object BundleResponse</param>
 		/// <param name="virtualPathProvider">Virtual path provider</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		protected virtual void ConfigureBundleResponse(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, bool isDebugMode)
+		protected virtual void ConfigureBundleResponse(IAsset combinedAsset, BundleResponse bundleResponse,
+			VirtualPathProvider virtualPathProvider)
 		{
-			var assetVirtualPaths = new List<string>();
+			var bundleFiles = combinedAsset.VirtualPathDependencies.Select(assetVirtualPath => 
+				new BundleFile(assetVirtualPath, virtualPathProvider.GetFile(assetVirtualPath))).ToList();
 
-			foreach (var asset in assets)
-			{
-				assetVirtualPaths.Add(asset.VirtualPath);
-				if (!isDebugMode && asset.VirtualPathDependencies.Count > 0)
-				{
-					assetVirtualPaths.AddRange(asset.VirtualPathDependencies);
-				}
-			}
-
-			assetVirtualPaths = assetVirtualPaths.Distinct().ToList();
-
-			var bundleFiles = assetVirtualPaths.Select(assetVirtualPath => new BundleFile(assetVirtualPath,
-				virtualPathProvider.GetFile(assetVirtualPath))).ToList();
+			bundleResponse.Content = combinedAsset.Content;
 			bundleResponse.Files = bundleFiles;
+			bundleResponse.ContentType = ContentType;
 		}
 	}
 }

@@ -89,6 +89,13 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of asset
+		/// </summary>
+		/// <param name="asset">Asset</param>
+		/// <returns>Asset with minified text content</returns>
+		public abstract IAsset Minify(IAsset asset);
+
+		/// <summary>
 		/// Produces code minifiction of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>

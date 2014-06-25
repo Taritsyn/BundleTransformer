@@ -10,6 +10,13 @@
 	public interface IMinifier
 	{
 		/// <summary>
+		/// Minify text content of asset
+		/// </summary>
+		/// <param name="asset">Asset</param>
+		/// <returns>Asset with minified text content</returns>
+		IAsset Minify(IAsset asset);
+
+		/// <summary>
 		/// Minify text content of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>

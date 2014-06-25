@@ -619,6 +619,33 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of JS-asset by using Microsoft Ajax Minifier
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public override IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			var jsParser = new JSParser
+			{
+				Settings = _jsParserConfiguration
+			};
+
+			InnerMinify(asset, jsParser);
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of JS-assets by using Microsoft Ajax Minifier
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
@@ -641,71 +668,77 @@
 				return assets;
 			}
 
+			var jsParser = new JSParser
+			{
+				Settings = _jsParserConfiguration
+			};
+
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent;
-				string assetUrl = asset.Url;
-
-				var documentContext = new DocumentContext(asset.Content)
-				{
-					FileContext = assetUrl
-				};
-
-				var jsParser = new JSParser
-				{
-					Settings = _jsParserConfiguration
-				};
-				jsParser.CompilerError += ParserErrorHandler;
-
-				try
-				{
-					var stringBuilder = new StringBuilder();
-
-					using (var stringWriter = new StringWriter(stringBuilder, CultureInfo.InvariantCulture))
-					{
-						Block block = jsParser.Parse(documentContext);
-						if (block != null)
-						{
-							if (_jsParserConfiguration.Format == JavaScriptFormat.JSON)
-							{
-								// Use a JSON output visitor
-								if (!JSONOutputVisitor.Apply(stringWriter, block, _jsParserConfiguration))
-								{
-									throw new MicrosoftAjaxParsingException(Strings.Minifiers_InvalidJsonOutput);
-								}
-							}
-							else
-							{
-								// Use normal output visitor
-								OutputVisitor.Apply(stringWriter, block, _jsParserConfiguration);
-							}
-						}
-					}
-
-					newContent = stringBuilder.ToString();
-				}
-				catch (MicrosoftAjaxParsingException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-				}
-				catch (Exception e)
-				{
-				    throw new AssetMinificationException(
-				        string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-				}
-				finally
-				{
-					jsParser.CompilerError -= ParserErrorHandler;
-				}
-				
-				asset.Content = newContent;
-				asset.Minified = true;
+				InnerMinify(asset, jsParser);
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset, JSParser jsParser)
+		{
+			string newContent;
+			string assetUrl = asset.Url;
+
+			var documentContext = new DocumentContext(asset.Content)
+			{
+				FileContext = assetUrl
+			};
+
+			jsParser.CompilerError += ParserErrorHandler;
+
+			try
+			{
+				var stringBuilder = new StringBuilder();
+
+				using (var stringWriter = new StringWriter(stringBuilder, CultureInfo.InvariantCulture))
+				{
+					Block block = jsParser.Parse(documentContext);
+					if (block != null)
+					{
+						if (_jsParserConfiguration.Format == JavaScriptFormat.JSON)
+						{
+							// Use a JSON output visitor
+							if (!JSONOutputVisitor.Apply(stringWriter, block, _jsParserConfiguration))
+							{
+								throw new MicrosoftAjaxParsingException(Strings.Minifiers_InvalidJsonOutput);
+							}
+						}
+						else
+						{
+							// Use normal output visitor
+							OutputVisitor.Apply(stringWriter, block, _jsParserConfiguration);
+						}
+					}
+				}
+
+				newContent = stringBuilder.ToString();
+			}
+			catch (MicrosoftAjaxParsingException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+			}
+			finally
+			{
+				jsParser.CompilerError -= ParserErrorHandler;
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

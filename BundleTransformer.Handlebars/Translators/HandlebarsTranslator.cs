@@ -103,6 +103,11 @@
 			KnownHelpers = handlebarsConfig.KnownHelpers;
 			KnownHelpersOnly = handlebarsConfig.KnownHelpersOnly;
 
+			if (string.IsNullOrWhiteSpace(Namespace))
+			{
+				throw new Core.EmptyValueException(Strings.Translators_TemplateNamespaceNotSpecified);
+			}
+
 			if (createJsEngineInstance == null)
 			{
 				string jsEngineName = handlebarsConfig.JsEngine.Name;
@@ -134,11 +139,6 @@
 			if (asset == null)
 			{
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
-			}
-
-			if (string.IsNullOrWhiteSpace(Namespace))
-			{
-				throw new Core.EmptyValueException(Strings.Translators_TemplateNamespaceNotSpecified);
 			}
 
 			using (var handlebarsCompiler = new HandlebarsCompiler(_createJsEngineInstance))

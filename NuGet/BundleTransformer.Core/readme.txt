@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.0
+               README file for Bundle Transformer: Core 1.9.1
 
    ----------------------------------------------------------------------
 
@@ -39,20 +39,16 @@
    and postprocessor-module based on the Andrey Sitnik's Autoprefixer.
 
    This extension will help your web applications successfully pass a
-   most part of the tests in YSlow. 
+   most part of the tests in YSlow.
    
    =============
    RELEASE NOTES
    =============
-   1. Appeared a new type of modules - postprocessor (runs after
-      translators and before minifiers);
-   2. Debugging HTTP-handlers can now use a item transformations,
-      postprocessors and other configuration settings from bundles;
-   3. Classes `CssTransformer` and `JsTransformer` are deprecated.
-      Instead, should use classes `StyleTransformer` and
-	  `ScriptTransformer` respectively.
-   4. Earlier file extension mappings were hard coded in the `Asset`
-      class, and now it are specified in the Web.config file.
+   Added possibility to combine assets before minification. To do this
+   need in `combineFilesBeforeMinification` attribute of configuration
+   elements `configuration/bundleTransformer/core/css` and
+   `configuration/bundleTransformer/core/js` set value equals to
+   `true`.
 
    ====================
    POST-INSTALL ACTIONS

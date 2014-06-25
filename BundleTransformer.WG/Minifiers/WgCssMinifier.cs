@@ -105,6 +105,33 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of CSS-asset by using WebGrease Semantic CSS-minifier
+		/// </summary>
+		/// <param name="asset">CSS-asset</param>
+		/// <returns>CSS-asset with minified text content</returns>
+		public IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			var wgCssMinifier = new CssMinifier(new WebGreaseContext(_wgConfiguration))
+			{
+				ShouldMinify = ShouldMinify
+			};
+
+			InnerMinify(asset, wgCssMinifier);
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of CSS-assets by using WebGrease Semantic CSS-minifier
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
@@ -134,49 +161,54 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string content = asset.Content;
-				string topCharset = string.Empty;
-				string preprocessedContent = content;
-				if (EjectCharset)
-				{
-					preprocessedContent = EjectCssCharset(preprocessedContent, ref topCharset);
-				}
-				string newContent;
-				string assetUrl = asset.Url;
-
-				try
-				{
-					newContent = wgCssMinifier.Minify(preprocessedContent);
-					if (EjectCharset && !string.IsNullOrWhiteSpace(topCharset))
-					{
-						string separator = ShouldMinify ? string.Empty : Environment.NewLine;
-						newContent = topCharset + separator + newContent;
-					}
-
-					IList<string> errors = wgCssMinifier.Errors;
-					if (errors.Count > 0)
-					{
-						throw new WgMinificationException(FormatErrorDetails(errors[0], preprocessedContent, assetUrl));
-					}
-				}
-				catch (WgMinificationException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
-				}
-				catch (Exception e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-				}
-
-				asset.Content = newContent;
-				asset.Minified = true;
+				InnerMinify(asset, wgCssMinifier);
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset, CssMinifier wgCssMinifier)
+		{
+			string content = asset.Content;
+			string topCharset = string.Empty;
+			string preprocessedContent = content;
+			if (EjectCharset)
+			{
+				preprocessedContent = EjectCssCharset(preprocessedContent, ref topCharset);
+			}
+			string newContent;
+			string assetUrl = asset.Url;
+
+			try
+			{
+				newContent = wgCssMinifier.Minify(preprocessedContent);
+				if (EjectCharset && !string.IsNullOrWhiteSpace(topCharset))
+				{
+					string separator = ShouldMinify ? string.Empty : Environment.NewLine;
+					newContent = topCharset + separator + newContent;
+				}
+
+				IList<string> errors = wgCssMinifier.Errors;
+				if (errors.Count > 0)
+				{
+					throw new WgMinificationException(FormatErrorDetails(errors[0], preprocessedContent, assetUrl));
+				}
+			}
+			catch (WgMinificationException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

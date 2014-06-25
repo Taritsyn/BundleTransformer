@@ -64,7 +64,8 @@
 				"~/Scripts/coffee/TestCoffeeScriptMarkdown.coffee.md",
 				"~/Scripts/ts/TranslatorBadge.ts",
 				"~/Scripts/ts/ColoredTranslatorBadge.ts",
-				"~/Scripts/ts/TestTypeScript.ts");
+				"~/Scripts/ts/TestTypeScript.ts",
+				"~/Scripts/BadScript.js");
 			commonScriptsBundle.Orderer = nullOrderer;
 			bundles.Add(commonScriptsBundle);
 

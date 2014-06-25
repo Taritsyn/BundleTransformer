@@ -65,6 +65,7 @@
 		/// </summary>
 		private bool _disposed;
 
+
 		/// <summary>
 		/// Constructs instance of Handlebars-compiler
 		/// </summary>
@@ -242,11 +243,9 @@
 			string templateName)
 		{
 			var contentBuilder = new StringBuilder();
-			contentBuilder.AppendLine("(function() {");
-			contentBuilder.Append("	var template = Handlebars.template, ");
-			contentBuilder.AppendFormatLine("templates = {0} = {0} || {{}};", templateNamespace);
-			contentBuilder.AppendFormatLine("	templates['{0}'] = template({1});", templateName, compiledCode);
-			contentBuilder.AppendLine("})();");
+			contentBuilder.AppendLine("(function(handlebars, templates) {");
+			contentBuilder.AppendFormatLine("	templates['{0}'] = handlebars.template({1});", templateName, compiledCode);
+			contentBuilder.AppendFormatLine("}})(Handlebars, {0} = {0} || {{}});", templateNamespace);
 
 			return contentBuilder.ToString();
 		}

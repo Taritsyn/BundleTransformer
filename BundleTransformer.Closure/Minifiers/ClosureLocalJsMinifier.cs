@@ -129,8 +129,57 @@
 			ProcessJqueryPrimitives = localJsMinifierConfig.ProcessJqueryPrimitives;
 			ProcessClosurePrimitives = localJsMinifierConfig.ProcessClosurePrimitives;
 			Severity = localJsMinifierConfig.Severity;
+
+			string javaVirtualMachinePath = JavaVirtualMachinePath;
+			if (string.IsNullOrWhiteSpace(javaVirtualMachinePath))
+			{
+				throw new EmptyValueException(Strings.Minifiers_JavaVirtualMachinePathNotSpecified);
+			}
+			if (!File.Exists(javaVirtualMachinePath))
+			{
+				throw new FileNotFoundException(
+					string.Format(Strings.Minifiers_JavaVirtualMachineNotFound, javaVirtualMachinePath));
+			}
+
+			string closureCompilerApplicationPath = ClosureCompilerApplicationPath;
+			if (string.IsNullOrWhiteSpace(closureCompilerApplicationPath))
+			{
+				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerApplicationPathNotSpecified);
+			}
+			if (!File.Exists(closureCompilerApplicationPath))
+			{
+				throw new FileNotFoundException(
+					string.Format(Strings.Minifiers_ClosureCompilerApplicationNotFound, closureCompilerApplicationPath));
+			}
 		}
 
+
+		/// <summary>
+		/// Produces code minifiction of JS-asset by using Google Closure Compiler Application
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public override IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			if (!Directory.Exists(_tempFilesDirectoryPath))
+			{
+				Directory.CreateDirectory(_tempFilesDirectoryPath);
+			}
+
+			InnerMinify(asset);
+
+			return asset;
+		}
 
 		/// <summary>
 		/// Produces code minifiction of JS-assets by using Google Closure Compiler Application
@@ -155,28 +204,6 @@
 				return assets;
 			}
 
-			string javaVirtualMachinePath = JavaVirtualMachinePath;
-			if (string.IsNullOrWhiteSpace(javaVirtualMachinePath))
-			{
-				throw new EmptyValueException(Strings.Minifiers_JavaVirtualMachinePathNotSpecified);
-			}
-			if (!File.Exists(javaVirtualMachinePath))
-			{
-				throw new FileNotFoundException(
-					string.Format(Strings.Minifiers_JavaVirtualMachineNotFound, javaVirtualMachinePath));
-			}
-
-			string closureCompilerApplicationPath = ClosureCompilerApplicationPath;
-			if (string.IsNullOrWhiteSpace(closureCompilerApplicationPath))
-			{
-				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerApplicationPathNotSpecified);
-			}
-			if (!File.Exists(closureCompilerApplicationPath))
-			{
-				throw new FileNotFoundException(
-					string.Format(Strings.Minifiers_ClosureCompilerApplicationNotFound, closureCompilerApplicationPath));
-			}
-
 			if (!Directory.Exists(_tempFilesDirectoryPath))
 			{
 				Directory.CreateDirectory(_tempFilesDirectoryPath);
@@ -184,24 +211,16 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent = Compile(asset.Content, asset.VirtualPath);
-
-				asset.Content = newContent;
-				asset.Minified = true;
+				InnerMinify(asset);
 			}
 
 			return assets;
 		}
 
-		/// <summary>
-		/// "Compiles" JS-code by using Google Closure Compiler Application
-		/// </summary>
-		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="assetVirtualPath">Virtual path to JS-asset file</param>
-		/// <returns>Minified text content of JS-asset</returns>
-		private string Compile(string content, string assetVirtualPath)
+		private void InnerMinify(IAsset asset)
 		{
 			string newContent;
+			string assetUrl = asset.Url;
 			string uniqueId = Guid.NewGuid().ToString();
 			string inputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + ".tmp");
 			string outputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + "-min.tmp");
@@ -209,7 +228,7 @@
 
 			using (var file = new StreamWriter(inputFilePath))
 			{
-				file.Write(content);
+				file.Write(asset.Content);
 			}
 
 			var args = new StringBuilder();
@@ -319,13 +338,13 @@
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 			finally
 			{
@@ -333,7 +352,8 @@
 				File.Delete(inputFilePath);
 			}
 
-			return newContent;
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

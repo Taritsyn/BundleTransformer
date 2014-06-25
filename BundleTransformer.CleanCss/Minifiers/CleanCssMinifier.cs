@@ -148,6 +148,33 @@
 		}
 
 		/// <summary>
+		/// Produces code minifiction of CSS-asset by using Clean-css
+		/// </summary>
+		/// <param name="asset">CSS-asset</param>
+		/// <returns>CSS-asset with minified text content</returns>
+		public IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			CleaningOptions options = CreateCleaningOptions();
+
+			using (var cssCleaner = new CssCleaner(_createJsEngineInstance, options))
+			{
+				InnerMinify(asset, cssCleaner);
+			}
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of CSS-assets by using Clean-css
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
@@ -172,36 +199,41 @@
 
 			CleaningOptions options = CreateCleaningOptions();
 
-			using (var cssCleaner = new CssCleaner(_createJsEngineInstance))
+			using (var cssCleaner = new CssCleaner(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					string newContent;
-					string assetUrl = asset.Url;
-
-					try
-					{
-						newContent = cssCleaner.Clean(asset.Content, assetUrl, options);
-					}
-					catch (CssCleaningException e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
-					}
-					catch (Exception e)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-					}
-
-					asset.Content = newContent;
-					asset.Minified = true;
+					InnerMinify(asset, cssCleaner);
 				}
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset, CssCleaner cssCleaner)
+		{
+			string newContent;
+			string assetUrl = asset.Url;
+
+			try
+			{
+				newContent = cssCleaner.Clean(asset.Content, assetUrl);
+			}
+			catch (CssCleaningException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

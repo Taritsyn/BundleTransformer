@@ -116,6 +116,11 @@
 				<xs:documentation>Flag for whether to allow usage of pre-minified files</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="combineFilesBeforeMinification" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow combine files before minification</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="TranslatorRegistrationCollection_SchemaType">

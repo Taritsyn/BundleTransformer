@@ -26,6 +26,32 @@
 		/// </summary>
 		const string CODE_TYPE = "JS";
 
+
+		/// <summary>
+		/// Produces code minifiction of JS-asset by using C# port of 
+		/// Douglas Crockford's JSMin
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			var jsMin = new JsMinifier();
+
+			InnerMinify(asset, jsMin);
+
+			return asset;
+		}
+
 		/// <summary>
 		/// Produces code minifiction of JS-assets by using C# port of 
 		/// Douglas Crockford's JSMin
@@ -54,31 +80,36 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent;
-				string assetUrl = asset.Url;
-				
-				try
-				{
-					newContent = jsMin.Minify(asset.Content);
-				}
-				catch (JsMinificationException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
-				}
-				catch (Exception e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
-				}
-
-				asset.Content = newContent;
-				asset.Minified = true;
+				InnerMinify(asset, jsMin);
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset, JsMinifier jsMin)
+		{
+			string newContent;
+			string assetUrl = asset.Url;
+
+			try
+			{
+				newContent = jsMin.Minify(asset.Content);
+			}
+			catch (JsMinificationException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 	}
 }

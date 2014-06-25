@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.0
+               README file for Bundle Transformer: LESS 1.9.1
 
    ----------------------------------------------------------------------
 
@@ -25,11 +25,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of LESS version 1.7.3.
    
    ====================
    POST-INSTALL ACTIONS

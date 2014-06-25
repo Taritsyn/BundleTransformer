@@ -2,12 +2,9 @@
 {
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Text;
-	using System.Web;
-	using System.Web.Hosting;
-	using System.Web.Optimization;
 
 	using Assets;
+	using Combiners;
 	using Configuration;
 	using Filters;
 	using Minifiers;
@@ -21,6 +18,19 @@
 	/// </summary>
 	public sealed class ScriptTransformer : TransformerBase
 	{
+		/// <summary>
+		/// list of JS-files with Microsoft-style extensions
+		/// </summary>
+		private readonly string[] _jsFilesWithMsStyleExtensions;
+
+		/// <summary>
+		/// Gets a asset content type
+		/// </summary>
+		protected override string ContentType
+		{
+			get { return Constants.ContentType.Js; }
+		}
+
 		/// <summary>
 		/// Constructs a instance of script transformer
 		/// </summary>
@@ -125,6 +135,14 @@
 			string[] ignorePatterns, CoreSettings coreConfig)
 			: base(ignorePatterns, coreConfig)
 		{
+			ScriptSettings scriptConfig = coreConfig.Scripts;
+			_usePreMinifiedFiles = scriptConfig.UsePreMinifiedFiles;
+			_combineFilesBeforeMinification = scriptConfig.CombineFilesBeforeMinification;
+
+			_jsFilesWithMsStyleExtensions = Utils.ConvertToStringCollection(
+				coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','),
+				',', true, true);
+
 			IAssetContext scriptContext = BundleTransformerContext.Current.Scripts;
 
 			_minifier = minifier ?? scriptContext.GetDefaultMinifierInstance();
@@ -138,32 +156,6 @@
 				;
 		}
 
-		/// <summary>
-		/// Transforms a script assets
-		/// </summary>
-		/// <param name="assets">Set of script assets</param>
-		/// <param name="bundleResponse">Object BundleResponse</param>
-		/// <param name="virtualPathProvider">Virtual path provider</param>
-		/// <param name="httpContext">Object HttpContext</param>
-		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
-		protected override void Transform(IList<IAsset> assets, BundleResponse bundleResponse,
-			VirtualPathProvider virtualPathProvider, HttpContextBase httpContext, bool isDebugMode)
-		{
-			ValidateAssetTypes(assets);
-			assets = RemoveDuplicateAssets(assets);
-			assets = RemoveUnnecessaryAssets(assets);
-			assets = ReplaceFileExtensions(assets, isDebugMode);
-			assets = Translate(assets, isDebugMode);
-			assets = PostProcess(assets, isDebugMode);
-			if (!isDebugMode)
-			{
-				assets = Minify(assets);
-			}
-
-			bundleResponse.Content = Combine(assets, _coreConfig.EnableTracing);
-			ConfigureBundleResponse(assets, bundleResponse, virtualPathProvider, isDebugMode);
-			bundleResponse.ContentType = Constants.ContentType.Js;
-		}
 
 		/// <summary>
 		/// Validates whether the specified assets are script asset
@@ -209,13 +201,10 @@
 		/// <returns>Set of script assets with a modified extension</returns>
 		protected override IList<IAsset> ReplaceFileExtensions(IList<IAsset> assets, bool isDebugMode)
 		{
-			var jsFileExtensionsFilter = new JsFileExtensionsFilter(
-				Utils.ConvertToStringCollection(
-					_coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','), 
-					',', true, true))
+			var jsFileExtensionsFilter = new JsFileExtensionsFilter(_jsFilesWithMsStyleExtensions)
 			{
 			    IsDebugMode = isDebugMode,
-				UsePreMinifiedFiles = _coreConfig.Scripts.UsePreMinifiedFiles
+				UsePreMinifiedFiles = _usePreMinifiedFiles
 			};
 
 			IList<IAsset> processedAssets = jsFileExtensionsFilter.Transform(assets);
@@ -227,41 +216,20 @@
 		/// Combines a code of script assets
 		/// </summary>
 		/// <param name="assets">Set of script assets</param>
-		/// <param name="enableTracing">Enables tracing</param>
-		protected override string Combine(IList<IAsset> assets, bool enableTracing)
+		/// <param name="bundleVirtualPath">Virtual path of bundle</param>
+		/// <param name="isDebugMode">Flag that web application is in debug mode</param>
+		/// /// <returns>Combined asset</returns>
+		protected override IAsset Combine(IList<IAsset> assets, string bundleVirtualPath, bool isDebugMode)
 		{
-			var content = new StringBuilder();
-
-			int assetCount = assets.Count;
-			int lastAssetIndex = assetCount - 1;
-
-			for (int assetIndex = 0; assetIndex < assetCount; assetIndex++)
+			var scriptCombiner = new ScriptCombiner
 			{
-				IAsset asset = assets[assetIndex];
-				string assetContent = asset.Content.TrimEnd();
+				IsDebugMode = isDebugMode,
+				EnableTracing = _enableTracing
+			};
 
-				if (enableTracing)
-				{
-					content.AppendFormatLine("//#region URL: {0}", asset.Url);
-				}
-				content.Append(assetContent);
-				if (!assetContent.EndsWith(";"))
-				{
-					content.Append(";");
-				}
-				if (enableTracing)
-				{
-					content.AppendLine();
-					content.AppendLine("//#endregion");
-				}
+			IAsset combinedAsset = scriptCombiner.Combine(assets, bundleVirtualPath);
 
-				if (assetIndex != lastAssetIndex)
-				{
-					content.AppendLine();
-				}
-			}
-
-			return content.ToString();
+			return combinedAsset;
 		}
 	}
 }

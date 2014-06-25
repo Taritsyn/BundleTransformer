@@ -55,12 +55,18 @@
 			set;
 		}
 
+		/// <summary>
+		/// Produces code minifiction of JS-asset
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public abstract IAsset Minify(IAsset asset);
 
 		/// <summary>
-		/// Produces code minifiction of assets
+		/// Produces code minifiction of JS-assets
 		/// </summary>
-		/// <param name="assets">Set of assets</param>
-		/// <returns>Set of assets with minified text content</returns>
+		/// <param name="assets">Set of JS-assets</param>
+		/// <returns>Set of JS-assets with minified text content</returns>
 		public abstract IList<IAsset> Minify(IList<IAsset> assets);
 
 		/// <summary>

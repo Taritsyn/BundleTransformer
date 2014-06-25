@@ -79,6 +79,28 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of JS-asset by using Google Closure Compiler Service API
+		/// </summary>
+		/// <param name="asset">JS-asset</param>
+		/// <returns>JS-asset with minified text content</returns>
+		public override IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			InnerMinify(asset);
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of JS-assets by using Google Closure Compiler Service API
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
@@ -108,30 +130,22 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent = Compile(asset.Content, asset.VirtualPath);
-
-				asset.Content = newContent;
-				asset.Minified = true;
+				InnerMinify(asset);
 			}
 
 			return assets;
 		}
-		
-		/// <summary>
-		/// "Compiles" JS-code by using Google Closure Compiler Service API
-		/// </summary>
-		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="assetVirtualPath">Virtual path to JS-asset file</param>
-		/// <returns>Minified text content of JS-asset</returns>
-		private string Compile(string content, string assetVirtualPath)
+
+		private void InnerMinify(IAsset asset)
 		{
 			string newContent;
+			string assetUrl = asset.Url;
 			string serviceUrl = ClosureCompilerServiceApiUrl;
 			int severity = Severity;
 			
 			var formItems = new List<FormItem>();
 			formItems.Add(new FormItem("compilation_level", ConvertCompilationLevelEnumValueToCode(CompilationLevel)));
-			formItems.Add(new FormItem("js_code", content));
+			formItems.Add(new FormItem("js_code", asset.Content));
 			formItems.Add(new FormItem("output_format", "json"));
 			formItems.Add(new FormItem("output_info", "compiled_code"));
 			formItems.Add(new FormItem("output_info", "errors"));
@@ -185,7 +199,7 @@
 
 						throw new AssetMinificationException(
 							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME, innerException.Message), innerException);
+								CODE_TYPE, assetUrl, MINIFIER_NAME, innerException.Message), innerException);
 					}
 
 					throw;
@@ -194,7 +208,7 @@
 				{
 					throw new AssetMinificationException(
 						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 				}
 
 				if (response.IsSuccessStatusCode)
@@ -207,8 +221,8 @@
 					{
 						throw new AssetMinificationException(
 							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME,
-								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetVirtualPath)));
+								CODE_TYPE, assetUrl, MINIFIER_NAME,
+								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetUrl)));
 					}
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
@@ -216,8 +230,8 @@
 					{
 						throw new AssetMinificationException(
 							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetVirtualPath, MINIFIER_NAME,
-								FormatErrorDetails(errors[0], ErrorType.Error, assetVirtualPath)));
+								CODE_TYPE, assetUrl, MINIFIER_NAME,
+								FormatErrorDetails(errors[0], ErrorType.Error, assetUrl)));
 					}
 
 					if (severity > 0)
@@ -227,8 +241,8 @@
 						{
 							throw new AssetMinificationException(
 								string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-									CODE_TYPE, assetVirtualPath, MINIFIER_NAME,
-									FormatErrorDetails(warnings[0], ErrorType.Warning, assetVirtualPath)));
+									CODE_TYPE, assetUrl, MINIFIER_NAME,
+									FormatErrorDetails(warnings[0], ErrorType.Warning, assetUrl)));
 						}
 					}
 
@@ -242,7 +256,8 @@
 				}
 			}
 
-			return newContent;
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

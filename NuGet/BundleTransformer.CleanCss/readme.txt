@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Clean-css 1.9.0
+             README file for Bundle Transformer: Clean-css 1.9.1
  
    ----------------------------------------------------------------------
 
@@ -21,13 +21,6 @@
    working of this module is recommended to install the following 
    NuGet packages: JavaScriptEngineSwitcher.V8 or 
    JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of Clean-css version 2.2.2;
-   2. In configuration settings of CSS-minifier added 2 new properties:
-      `NoAggressiveMerging` and `RoundingPrecision`.
    
    ====================
    POST-INSTALL ACTIONS

@@ -261,6 +261,33 @@
 
 
 		/// <summary>
+		/// Produces code minifiction of CSS-asset by using Microsoft Ajax Minifier
+		/// </summary>
+		/// <param name="asset">CSS-asset</param>
+		/// <returns>CSS-asset with minified text content</returns>
+		public override IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+			}
+
+			if (asset.Minified)
+			{
+				return asset;
+			}
+
+			var cssParser = new CssParser
+			{
+			    Settings = _cssParserConfiguration
+			};
+
+			InnerMinify(asset, cssParser);
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Produces code minifiction of CSS-assets by using Microsoft Ajax Minifier
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
@@ -290,39 +317,44 @@
 			
 			foreach (var asset in assetsToProcessing)
 			{
-				string newContent;
-				string assetUrl = asset.Url;
-
-				cssParser.FileContext = assetUrl;
-				cssParser.CssError += ParserErrorHandler;
-
-				try
-				{
-					newContent = cssParser.Parse(asset.Content);
-				}
-				catch (MicrosoftAjaxParsingException e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-				}
-				catch (Exception e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-				}
-				finally
-				{
-					cssParser.CssError -= ParserErrorHandler;
-					cssParser.FileContext = null;
-				}
-
-				asset.Content = newContent;
-				asset.Minified = true;
+				InnerMinify(asset, cssParser);
 			}
 
 			return assets;
+		}
+
+		private void InnerMinify(IAsset asset, CssParser cssParser)
+		{
+			string newContent;
+			string assetUrl = asset.Url;
+
+			cssParser.FileContext = assetUrl;
+			cssParser.CssError += ParserErrorHandler;
+
+			try
+			{
+				newContent = cssParser.Parse(asset.Content);
+			}
+			catch (MicrosoftAjaxParsingException e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
+			}
+			finally
+			{
+				cssParser.CssError -= ParserErrorHandler;
+				cssParser.FileContext = null;
+			}
+
+			asset.Content = newContent;
+			asset.Minified = true;
 		}
 
 		/// <summary>

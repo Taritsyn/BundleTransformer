@@ -59,7 +59,7 @@
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
 			}
 
-			InnerTranslate(asset);
+			InnerPostProcess(asset);
 
 			return asset;
 		}
@@ -89,18 +89,19 @@
 
 			foreach (var asset in assetsToProcessing)
 			{
-				InnerTranslate(asset);
+				InnerPostProcess(asset);
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset)
+		private void InnerPostProcess(IAsset asset)
 		{
 			string url = asset.Url;
 			string content = ResolveAllRelativePaths(asset.Content, url);
 
 			asset.Content = content;
+			asset.RelativePathsResolved = true;
 		}
 
 		/// <summary>

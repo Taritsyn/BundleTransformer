@@ -12,6 +12,21 @@
 	public sealed class NullMinifier : IMinifier
 	{
 		/// <summary>
+		/// Do not performs operations with asset
+		/// </summary>
+		/// <param name="asset">Asset</param>
+		/// <returns>Asset</returns>
+		public IAsset Minify(IAsset asset)
+		{
+			if (asset == null)
+			{
+				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+			}
+
+			return asset;
+		}
+
+		/// <summary>
 		/// Do not performs operations with assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>

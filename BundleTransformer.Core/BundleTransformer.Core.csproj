@@ -89,6 +89,10 @@
     <Compile Include="Builders\NullBuilder.cs" />
     <Compile Include="Bundles\CustomScriptBundle.cs" />
     <Compile Include="Bundles\CustomStyleBundle.cs" />
+    <Compile Include="Combiners\CombinerBase.cs" />
+    <Compile Include="Combiners\ICombiner.cs" />
+    <Compile Include="Combiners\ScriptCombiner.cs" />
+    <Compile Include="Combiners\StyleCombiner.cs" />
     <Compile Include="Configuration\ConfigurationContext.cs" />
     <Compile Include="Configuration\AssetHandlerSettings.cs" />
     <Compile Include="Configuration\FileExtensionRegistration.cs" />

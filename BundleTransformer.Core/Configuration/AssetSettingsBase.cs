@@ -37,6 +37,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to allow combine files before minification
+		/// </summary>
+		[ConfigurationProperty("combineFilesBeforeMinification", DefaultValue = false)]
+		public bool CombineFilesBeforeMinification
+		{
+			get { return (bool)this["combineFilesBeforeMinification"]; }
+			set { this["combineFilesBeforeMinification"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a list of registered translators
 		/// </summary>
 		[ConfigurationProperty("translators", IsRequired = true)]
