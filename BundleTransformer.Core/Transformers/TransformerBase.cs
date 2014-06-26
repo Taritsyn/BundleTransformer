@@ -41,21 +41,6 @@
 		protected IMinifier _minifier;
 
 		/// <summary>
-		/// Flag for whether to enable tracing
-		/// </summary>
-		protected bool _enableTracing;
-
-		/// <summary>
-		/// Flag for whether to allow usage of pre-minified files
-		/// </summary>
-		protected bool _usePreMinifiedFiles;
-
-		/// <summary>
-		/// Flag for whether to allow combine files before minification
-		/// </summary>
-		protected bool _combineFilesBeforeMinification;
-
-		/// <summary>
 		/// Gets a asset content type
 		/// </summary>
 		protected abstract string ContentType
@@ -87,6 +72,34 @@
 			get { return _minifier; }
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to enable tracing
+		/// </summary>
+		public bool EnableTracing
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow usage of pre-minified files
+		/// </summary>
+		public bool UsePreMinifiedFiles
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow combine files before minification
+		/// </summary>
+		public bool CombineFilesBeforeMinification
+		{
+			get;
+			set;
+		}
+
+
 
 		/// <summary>
 		/// Constructs a instance of transformer
@@ -97,7 +110,7 @@
 		protected TransformerBase(string[] ignorePatterns, CoreSettings coreConfig)
 		{
 			_ignorePatterns = ignorePatterns;
-			_enableTracing = coreConfig.EnableTracing;
+			EnableTracing = coreConfig.EnableTracing;
 		}
 
 
@@ -162,7 +175,7 @@
 			assets = PostProcess(assets, isDebugMode);
 
 			IAsset combinedAsset;
-			if (_combineFilesBeforeMinification)
+			if (CombineFilesBeforeMinification)
 			{
 				combinedAsset = Combine(assets, bundleContext.BundleVirtualPath, isDebugMode);
 				if (!isDebugMode)

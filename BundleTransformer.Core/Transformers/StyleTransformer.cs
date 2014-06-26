@@ -131,8 +131,8 @@
 			: base(ignorePatterns, coreConfig)
 		{
 			StyleSettings styleConfig = coreConfig.Styles;
-			_usePreMinifiedFiles = styleConfig.UsePreMinifiedFiles;
-			_combineFilesBeforeMinification = styleConfig.CombineFilesBeforeMinification;
+			UsePreMinifiedFiles = styleConfig.UsePreMinifiedFiles;
+			CombineFilesBeforeMinification = styleConfig.CombineFilesBeforeMinification;
 
 			IAssetContext styleContext = BundleTransformerContext.Current.Styles;
 
@@ -195,7 +195,7 @@
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter
 			{
 			    IsDebugMode = isDebugMode,
-				UsePreMinifiedFiles = _usePreMinifiedFiles
+				UsePreMinifiedFiles = UsePreMinifiedFiles
 			};
 
 			IList<IAsset> processedAssets = cssFileExtensionsFilter.Transform(assets);
@@ -214,7 +214,7 @@
 			var styleCombiner = new StyleCombiner
 			{
 				IsDebugMode = isDebugMode,
-				EnableTracing = _enableTracing
+				EnableTracing = EnableTracing
 			};
 
 			IAsset combinedAsset = styleCombiner.Combine(assets, bundleVirtualPath);

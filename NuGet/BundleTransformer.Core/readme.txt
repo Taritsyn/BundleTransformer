@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.1
+               README file for Bundle Transformer: Core 1.9.2
 
    ----------------------------------------------------------------------
 
@@ -44,11 +44,9 @@
    =============
    RELEASE NOTES
    =============
-   Added possibility to combine assets before minification. To do this
-   need in `combineFilesBeforeMinification` attribute of configuration
-   elements `configuration/bundleTransformer/core/css` and
-   `configuration/bundleTransformer/core/js` set value equals to
-   `true`.
+   In `StyleTransformer` and `ScriptTransformer` classes added 3 new
+   properties: `EnableTracing`, `UsePreMinifiedFiles` and
+   `CombineFilesBeforeMinification`.
 
    ====================
    POST-INSTALL ACTIONS

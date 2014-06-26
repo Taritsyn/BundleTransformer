@@ -136,8 +136,8 @@
 			: base(ignorePatterns, coreConfig)
 		{
 			ScriptSettings scriptConfig = coreConfig.Scripts;
-			_usePreMinifiedFiles = scriptConfig.UsePreMinifiedFiles;
-			_combineFilesBeforeMinification = scriptConfig.CombineFilesBeforeMinification;
+			UsePreMinifiedFiles = scriptConfig.UsePreMinifiedFiles;
+			CombineFilesBeforeMinification = scriptConfig.CombineFilesBeforeMinification;
 
 			_jsFilesWithMsStyleExtensions = Utils.ConvertToStringCollection(
 				coreConfig.JsFilesWithMicrosoftStyleExtensions.Replace(';', ','),
@@ -204,7 +204,7 @@
 			var jsFileExtensionsFilter = new JsFileExtensionsFilter(_jsFilesWithMsStyleExtensions)
 			{
 			    IsDebugMode = isDebugMode,
-				UsePreMinifiedFiles = _usePreMinifiedFiles
+				UsePreMinifiedFiles = UsePreMinifiedFiles
 			};
 
 			IList<IAsset> processedAssets = jsFileExtensionsFilter.Transform(assets);
@@ -224,7 +224,7 @@
 			var scriptCombiner = new ScriptCombiner
 			{
 				IsDebugMode = isDebugMode,
-				EnableTracing = _enableTracing
+				EnableTracing = EnableTracing
 			};
 
 			IAsset combinedAsset = scriptCombiner.Combine(assets, bundleVirtualPath);
