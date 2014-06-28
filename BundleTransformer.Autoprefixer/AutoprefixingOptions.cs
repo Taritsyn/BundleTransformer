@@ -32,7 +32,7 @@
 		public AutoprefixingOptions()
 		{
 			Browsers = new List<string>();
-			Cascade = false;
+			Cascade = true;
 		}
 	}
 }

@@ -2,12 +2,31 @@
 	"use strict";
 
 	var exports = {},
+		defaultOptions = {
+			knownHelpers: null,
+			knownHelpersOnly: false,
+			data: true
+		},
 		parseErrorMessageRegex = /^Parse error on line (\d+):/
 		;
 
-	exports.precompile = function (code, options) {
+	function mix(destination, source) {
+		var propertyName;
 
-		var compiledCode = "",
+		destination = destination || {};
+
+		for (propertyName in source) {
+			if (source.hasOwnProperty(propertyName)) {
+				destination[propertyName] = source[propertyName];
+			}
+		}
+
+		return destination;
+	}
+
+	exports.precompile = function (code, options) {
+		var compilationOptions,
+			compiledCode = "",
 			result = {},
 			errors = [],
 			message,
@@ -16,8 +35,11 @@
 			isSyntaxError
 			;
 
+		options = options || {};
+		compilationOptions = mix(mix({}, defaultOptions), options);
+
 		try {
-			compiledCode = handlebars.precompile(code, options);
+			compiledCode = handlebars.precompile(code, compilationOptions);
 		}
 		catch (e) {
 			message = e.message;

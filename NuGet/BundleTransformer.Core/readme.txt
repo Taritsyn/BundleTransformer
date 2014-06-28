@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.2
+               README file for Bundle Transformer: Core 1.9.3
 
    ----------------------------------------------------------------------
 
@@ -31,12 +31,13 @@
    Bazon's UglifyJS, Sergey Kryzhanovsky's CSSO (CSS Optimizer),
    WebGrease and Clean-css). In addition, you can also install
    translator-modules that implement the translation of code on
-   intermediate languages (LESS, Sass, SCSS, CoffeeScript, TypeScript
-   and Handlebars). Apart from this, in the Bundle Transformer there is
-   a third type of modules - postprocessors. Postprocessors runs after
-   translators and before minifiers. Now available following
-   postprocessors: URL rewriting CSS-postprocessor (included in core)
-   and postprocessor-module based on the Andrey Sitnik's Autoprefixer.
+   intermediate languages (LESS, Sass, SCSS, CoffeeScript, TypeScript,
+   Mustache (by using Hogan) and Handlebars). Apart from this, in the
+   Bundle Transformer there is a third type of modules - postprocessors.
+   Postprocessors runs after translators and before minifiers. Now
+   available following postprocessors: URL rewriting CSS-postprocessor
+   (included in core) and postprocessor-module based on the Andrey
+   Sitnik's Autoprefixer.
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.

@@ -82,6 +82,16 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to include data when compiling
+		/// (<code>@data</code> variables)
+		/// </summary>
+		public bool Data
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of Handlebars-translator
@@ -102,6 +112,7 @@
 			RootPath = handlebarsConfig.RootPath;
 			KnownHelpers = handlebarsConfig.KnownHelpers;
 			KnownHelpersOnly = handlebarsConfig.KnownHelpersOnly;
+			Data = handlebarsConfig.Data;
 
 			if (string.IsNullOrWhiteSpace(Namespace))
 			{
@@ -141,7 +152,9 @@
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			using (var handlebarsCompiler = new HandlebarsCompiler(_createJsEngineInstance))
+			CompilationOptions options = CreateCompilationOptions();
+
+			using (var handlebarsCompiler = new HandlebarsCompiler(_createJsEngineInstance, options))
 			{
 				InnerTranslate(asset, handlebarsCompiler);
 			}
@@ -172,12 +185,9 @@
 				return assets;
 			}
 
-			if (string.IsNullOrWhiteSpace(Namespace))
-			{
-				throw new Core.EmptyValueException(Strings.Translators_TemplateNamespaceNotSpecified);
-			}
+			CompilationOptions options = CreateCompilationOptions();
 
-			using (var handlebarsCompiler = new HandlebarsCompiler(_createJsEngineInstance))
+			using (var handlebarsCompiler = new HandlebarsCompiler(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
@@ -192,11 +202,10 @@
 		{
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
-			CompilationOptions options = CreateCompilationOptions();
-
+			
 			try
 			{
-				newContent = handlebarsCompiler.Compile(asset.Content, assetVirtualPath, options);
+				newContent = handlebarsCompiler.Compile(asset.Content, assetVirtualPath);
 			}
 			catch (HandlebarsCompilingException e)
 			{
@@ -225,7 +234,8 @@
 				Namespace = Namespace,
 				RootPath = RootPath,
 				KnownHelpers = KnownHelpers,
-				KnownHelpersOnly = KnownHelpersOnly
+				KnownHelpersOnly = KnownHelpersOnly,
+				Data = Data
 			};
 
 			return options;

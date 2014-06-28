@@ -21,7 +21,7 @@
 		/// <summary>
 		/// Gets or sets a flag for whether to create nice visual cascade of prefixes
 		/// </summary>
-		[ConfigurationProperty("cascade", DefaultValue = false)]
+		[ConfigurationProperty("cascade", DefaultValue = true)]
 		public bool Cascade
 		{
 			get { return (bool)this["cascade"]; }

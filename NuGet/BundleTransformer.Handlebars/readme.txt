@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Handlebars 1.9.1
+            README file for Bundle Transformer: Handlebars 1.9.3
 
    ----------------------------------------------------------------------
 
@@ -24,6 +24,15 @@
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
    
+   =============
+   RELEASE NOTES
+   =============
+   1. In configuration settings of Handlebars-translator added one new
+      property - `Data` (default `true`);
+   2. Files whose names start with an underscore are now compiled as the
+      globally defined partials (first underscore are removed from the
+      template name).
+   
    ====================
    POST-INSTALL ACTIONS
    ====================
@@ -39,11 +48,11 @@
    Web.config file a following code:
    
    <add
-	path="*.handlebars" verb="GET"
-	type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" />
+      path="*.handlebars" verb="GET"
+      type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" />
    <add
-	path="*.hbs" verb="GET"
-	type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" />
+      path="*.hbs" verb="GET"
+      type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" />
    
    =============
    DOCUMENTATION

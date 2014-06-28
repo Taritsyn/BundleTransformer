@@ -69,6 +69,27 @@
 	color: #000;
 }
 
+.translators #hogan {
+	float: left;
+	display: none;
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	border : 1px solid #dfd52e;
+	background-color: #dfd52e;
+	font-weight: bold;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+.translators #hogan A,
+.translators #hogan A:link,
+.translators #hogan A:visited,
+.translators #hogan A:hover,
+.translators #hogan A:active
+{
+	color: black;
+}
+
 .translators #handlebars {
 	float: left;
 	display: none;

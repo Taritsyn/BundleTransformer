@@ -42,6 +42,16 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to include data when compiling
+		/// (<code>@data</code> variables)
+		/// </summary>
+		public bool Data
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the Handlebars compilation options
@@ -52,6 +62,7 @@
 			RootPath = string.Empty;
 			KnownHelpers = string.Empty;
 			KnownHelpersOnly = false;
+			Data = true;
 		}
 	}
 }

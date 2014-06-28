@@ -61,7 +61,7 @@ namespace BundleTransformer.Handlebars.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You have not specified namespace for Handlebars-templates..
+        ///   Looks up a localized string similar to You have not specified the namespace for Handlebars-templates..
         /// </summary>
         public static string Translators_TemplateNamespaceNotSpecified {
             get {

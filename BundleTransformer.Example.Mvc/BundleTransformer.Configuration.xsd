@@ -17,6 +17,7 @@
 				<xs:element name="sassAndScss" type="SassAndScssSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="coffeeScript" type="CoffeeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="typeScript" type="TypeScriptSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+				<xs:element name="hogan" type="HoganSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="handlebars" type="HandlebarsSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="autoprefixer" type="AutoprefixerSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="microsoftAjax" type="MicrosoftAjaxSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -508,6 +509,77 @@
 	</xs:complexType>
 	<!-- /TypeScript settings -->
 
+	<!-- Hogan settings -->
+	<xs:complexType name="HoganSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of Hogan-translator</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="sectionTags" type="SectionTagRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+		<xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="variable" type="xs:string" use="optional" default="templates">
+			<xs:annotation>
+				<xs:documentation>Variable name for wrapper</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="namespace" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>Prefix to template names</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="delimiters" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>String that overrides the default delimiters (for example, `&lt;% %&gt;`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="SectionTagRegistrationCollection_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Collection of registered custom section tags</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddSectionTagRegistration_SchemaType" />
+			<xs:element name="remove" type="RemoveSectionTagRegistration_SchemaType" />
+			<xs:element name="clear" type="ClearSectionTagRegistration_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddSectionTagRegistration_SchemaType">
+		<xs:attribute name="sectionName" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Custom section name (used as a key)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="openingTagName" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Name of opening tag</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="closingTagName" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Name of closing tag</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RemoveSectionTagRegistration_SchemaType">
+		<xs:attribute name="sectionName" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Custom section name (used as a key)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="ClearSectionTagRegistration_SchemaType" />
+	<!-- /Hogan settings -->
+
 	<!-- Handlebars settings -->
 	<xs:complexType name="HandlebarsSettings_SchemaType">
 		<xs:annotation>
@@ -536,6 +608,11 @@
 				<xs:documentation>Flag for whether to use only known helpers</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="data" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to include data when compiling (`@data` variables)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /Handlebars settings -->
 
@@ -548,7 +625,7 @@
 			<xs:element name="browsers" type="BrowserConditionalExpressionCollection_SchemaType" minOccurs="0" maxOccurs="1" />
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
-		<xs:attribute name="cascade" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="cascade" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to create nice visual cascade of prefixes</xs:documentation>
 			</xs:annotation>

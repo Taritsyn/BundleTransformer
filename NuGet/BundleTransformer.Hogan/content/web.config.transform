@@ -1,0 +1,24 @@
+<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="hogan" type="BundleTransformer.Hogan.Configuration.HoganSettings, BundleTransformer.Hogan" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<js>
+				<translators>
+					<add name="HoganTranslator" type="BundleTransformer.Hogan.Translators.HoganTranslator, BundleTransformer.Hogan" enabled="true" />
+				</translators>
+				<fileExtensions>
+					<add fileExtension=".mustache" assetTypeCode="Mustache" />
+				</fileExtensions>
+			</js>
+		</core>
+	</bundleTransformer>
+	<system.webServer>
+		<handlers>
+			<add name="MustacheAssetHandler" path="*.mustache" verb="GET" type="BundleTransformer.Hogan.HttpHandlers.HoganAssetHandler, BundleTransformer.Hogan" resourceType="File" preCondition="" />
+		</handlers>
+	</system.webServer>
+</configuration>

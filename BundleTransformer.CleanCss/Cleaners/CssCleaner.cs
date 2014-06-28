@@ -79,9 +79,8 @@
 		public CssCleaner(Func<IJsEngine> createJsEngineInstance, CleaningOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
-			_defaultOptions = defaultOptions;
-			_defaultOptionsString = (defaultOptions != null) ?
-				ConvertCleaningOptionsToJson(defaultOptions).ToString() : "null";
+			_defaultOptions = defaultOptions ?? new CleaningOptions();
+			_defaultOptionsString = ConvertCleaningOptionsToJson(_defaultOptions).ToString();
 		}
 
 

@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Translators_TemplateNamespaceNotSpecified" xml:space="preserve">
-    <value>You have not specified namespace for Handlebars-templates.</value>
+    <value>You have not specified the namespace for Handlebars-templates.</value>
   </data>
 </root>

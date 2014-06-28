@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Autoprefi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Handlebars", "BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj", "{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Hogan", "BundleTransformer.Hogan\BundleTransformer.Hogan.csproj", "{19A1A37D-14AF-487F-A968-45CCADC78768}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BundleTransformer.vsmdi
@@ -288,6 +290,18 @@ Global
 		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|x64.ActiveCfg = Release|Any CPU
 		{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}.Release|x86.ActiveCfg = Release|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Release|x64.ActiveCfg = Release|Any CPU
+		{19A1A37D-14AF-487F-A968-45CCADC78768}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

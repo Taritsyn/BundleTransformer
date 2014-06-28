@@ -33,7 +33,7 @@
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"handlebarsHelper.precompile({0}, {1});";
+		const string COMPILATION_FUNCTION_CALL_TEMPLATE = "handlebarsHelper.precompile({0}, {1});";
 
 		/// <summary>
 		/// Default compilation options
@@ -82,9 +82,8 @@
 		public HandlebarsCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
-			_defaultOptions = defaultOptions;
-			_defaultOptionsString = (defaultOptions != null) ?
-				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
+			_defaultOptions = defaultOptions ?? new CompilationOptions();
+			_defaultOptionsString = ConvertCompilationOptionsToJson(_defaultOptions).ToString();
 		}
 
 
@@ -147,10 +146,11 @@
 					}
 
 					var compiledCode = json.Value<string>("compiledCode");
-					string templateNamespace = (options != null) ? options.Namespace : string.Empty;
-					string templateName = GetTemplateName(path, currentOptions.RootPath);
+					bool isPartial;
+					string templateName = GetTemplateName(path, currentOptions.RootPath, out isPartial);
 
-					newContent = WrapCompiledTemplateCode(compiledCode, templateNamespace, templateName);
+					newContent = WrapCompiledTemplateCode(compiledCode, currentOptions.Namespace, 
+						templateName, isPartial);
 				}
 				catch (JsRuntimeException e)
 				{
@@ -171,7 +171,8 @@
 		{
 			var optionsJson = new JObject(
 				new JProperty("knownHelpers", ParseKnownHelpers(options.KnownHelpers)),
-				new JProperty("knownHelpersOnly", options.KnownHelpersOnly)
+				new JProperty("knownHelpersOnly", options.KnownHelpersOnly),
+				new JProperty("data", options.Data)
 			);
 
 			return optionsJson;
@@ -206,9 +207,15 @@
 		/// </summary>
 		/// <param name="path">Template path</param>
 		/// <param name="rootPath">Template root path</param>
+		/// <param name="isPartial">Flag indicating whether template is partial</param>
 		/// <returns>Template name</returns>
-		private static string GetTemplateName(string path, string rootPath)
+		private static string GetTemplateName(string path, string rootPath, out bool isPartial)
 		{
+			if (string.IsNullOrWhiteSpace(path))
+			{
+				throw new ArgumentException(string.Format(CoreStrings.Common_ArgumentIsEmpty, "path"), "path");
+			}
+
 			string templateName = path;
 
 			if (string.IsNullOrWhiteSpace(rootPath))
@@ -221,12 +228,18 @@
 				string fileExtension = Path.GetExtension(path);
 
 				int rootPathLength = processedRootPath.Length;
-				int fileExtensionLength = fileExtension != null ? fileExtension.Length : 0;
+				int fileExtensionLength = fileExtension.Length;
 
 				int templateNameStartPosition = rootPathLength + 1;
 				int templateNameLength = templateName.Length - (rootPathLength + 1) - fileExtensionLength;
 
 				templateName = templateName.Substring(templateNameStartPosition, templateNameLength);
+			}
+
+			isPartial = templateName.StartsWith("_");
+			if (isPartial)
+			{
+				templateName = templateName.TrimStart('_');
 			}
 
 			return templateName;
@@ -238,14 +251,26 @@
 		/// <param name="compiledCode">Compiled code</param>
 		/// <param name="templateNamespace">Template namespace</param>
 		/// <param name="templateName">Template name</param>
+		/// <param name="isPartial">Flag indicating whether template is partial</param>
 		/// <returns>Wrapped code</returns>
 		private static string WrapCompiledTemplateCode(string compiledCode, string templateNamespace,
-			string templateName)
+			string templateName, bool isPartial)
 		{
 			var contentBuilder = new StringBuilder();
-			contentBuilder.AppendLine("(function(handlebars, templates) {");
-			contentBuilder.AppendFormatLine("	templates['{0}'] = handlebars.template({1});", templateName, compiledCode);
-			contentBuilder.AppendFormatLine("}})(Handlebars, {0} = {0} || {{}});", templateNamespace);
+			if (!isPartial)
+			{
+				contentBuilder.AppendLine("(function(handlebars, templates) {");
+				contentBuilder.AppendFormatLine("	templates['{0}'] = handlebars.template({1});", 
+					templateName, compiledCode);
+				contentBuilder.AppendFormatLine("}})(Handlebars, {0} = {0} || {{}});", templateNamespace);
+			}
+			else
+			{
+				contentBuilder.AppendLine("(function(handlebars) {");
+				contentBuilder.AppendFormatLine("	handlebars.partials['{0}'] = handlebars.template({1});", 
+					templateName, compiledCode);
+				contentBuilder.AppendLine("})(Handlebars);");	
+			}
 
 			return contentBuilder.ToString();
 		}

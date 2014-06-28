@@ -53,7 +53,8 @@
 			bundles.Add(jQueryBundle);
 
 			var commonScriptsBundle = new CustomScriptBundle("~/Bundles/CommonScripts");
-			commonScriptsBundle.Include("~/Scripts/MicrosoftAjax.js",
+			commonScriptsBundle.Include(
+				"~/Scripts/MicrosoftAjax.js",
 				"~/Scripts/jquery-ui-{version}.js",
 				"~/Scripts/jquery.validate.js",
 				"~/Scripts/jquery.validate.unobtrusive.js",
@@ -69,7 +70,11 @@
 			bundles.Add(commonScriptsBundle);
 
 			var сommonTemplatesBundle = new CustomScriptBundle("~/Bundles/CommonTemplates");
-			сommonTemplatesBundle.Include("~/Scripts/handlebars.runtime.js",
+			сommonTemplatesBundle.Include(
+				"~/Scripts/hogan/template-{version}.js",
+				"~/Scripts/hogan/HoganTranslatorBadge.mustache",
+				"~/Scripts/hogan/TestHogan.js",
+				"~/Scripts/handlebars/handlebars.runtime.js",
 				"~/Scripts/handlebars/HandlebarsHelpers.js",
 				"~/Scripts/handlebars/HandlebarsTranslatorBadge.handlebars",
 				"~/Scripts/handlebars/TestHandlebars.js");

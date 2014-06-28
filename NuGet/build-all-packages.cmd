@@ -15,6 +15,9 @@ call build-package.cmd
 cd %packages_directory%\BundleTransformer.TypeScript
 call build-package.cmd
 
+cd %packages_directory%\BundleTransformer.Hogan
+call build-package.cmd
+
 cd %packages_directory%\BundleTransformer.Handlebars
 call build-package.cmd
 

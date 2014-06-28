@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.2
+ * Clean-css v2.2.4
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -491,7 +491,7 @@ var CleanCss = (function(){
 	  // Validates various CSS property values
 
 	  // Regexes used for stuff
-	  var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(px|%|em|rem|in|cm|mm|ex|pt|pc|)|auto|inherit)';
+	  var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(px|%|em|rem|in|cm|mm|ex|pt|pc|vw|vh|vmin|vmax|)|auto|inherit)';
 	  var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
 	  var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
 	  var cssFunctionAnyRegexStr = '(' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
@@ -502,7 +502,7 @@ var CleanCss = (function(){
 	  var backgroundPositionKeywords = ['center', 'top', 'bottom', 'left', 'right'];
 	  var listStyleTypeKeywords = ['armenian', 'circle', 'cjk-ideographic', 'decimal', 'decimal-leading-zero', 'disc', 'georgian', 'hebrew', 'hiragana', 'hiragana-iroha', 'inherit', 'katakana', 'katakana-iroha', 'lower-alpha', 'lower-greek', 'lower-latin', 'lower-roman', 'none', 'square', 'upper-alpha', 'upper-latin', 'upper-roman'];
 	  var listStylePositionKeywords = ['inside', 'outside', 'inherit'];
-	  var outlineStyleKeywords = ['inherit', 'hidden', 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
+	  var outlineStyleKeywords = ['auto', 'inherit', 'hidden', 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
 	  var outlineWidthKeywords = ['thin', 'thick', 'medium', 'inherit'];
 
 	  var validator = {
@@ -935,6 +935,27 @@ var CleanCss = (function(){
 		return breakUp._widthStyleColor(token, 'border', ['width', 'style', 'color']);
 	  };
 
+	  breakUp.borderRadius = function(token) {
+		var parts = token.value.split('/');
+		if (parts.length == 1)
+		  return breakUp.fourUnits(token);
+
+		var horizontalPart = token.clone();
+		var verticalPart = token.clone();
+
+		horizontalPart.value = parts[0];
+		verticalPart.value = parts[1];
+
+		var horizontalBreakUp = breakUp.fourUnits(horizontalPart);
+		var verticalBreakUp = breakUp.fourUnits(verticalPart);
+
+		for (var i = 0; i < 4; i++) {
+		  horizontalBreakUp[i].value = [horizontalBreakUp[i].value, verticalBreakUp[i].value];
+		}
+
+		return horizontalBreakUp;
+	  };
+
 	  // Contains functions that can put together shorthands from their components
 	  // NOTE: correct order of tokens is assumed inside these functions!
 	  var putTogether = {
@@ -1089,6 +1110,33 @@ var CleanCss = (function(){
 			  return innerFunc(prop, tokens, isImportant);
 			}
 		  };
+		},
+		borderRadius: function (prop, tokens, isImportant) {
+		  var verticalTokens = [];
+
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+			if (!Array.isArray(token.value))
+			  continue;
+
+			if (token.value.length > 1) {
+			  verticalTokens.push({
+				prop: token.prop,
+				value: token.value[1],
+				isImportant: token.isImportant
+			  });
+			}
+
+			token.value = token.value[0];
+		  }
+
+		  var result = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, tokens, isImportant);
+		  if (verticalTokens.length > 0) {
+			var verticalResult = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, verticalTokens, isImportant);
+			result.value += ' / ' + verticalResult.value;
+		  }
+
+		  return result;
 		}
 	  };
 
@@ -1265,6 +1313,7 @@ var CleanCss = (function(){
 		};
 		for (var i = 0; i < components.length; i++) {
 		  processable[components[i]] = {
+			breakUp: breakup || breakUp.fourUnits,
 			canOverride: canoverride || canOverride.unit,
 			defaultValue: defaultValue || '0',
 			shortestValue: shortestValue
@@ -1277,28 +1326,28 @@ var CleanCss = (function(){
 		'border-top-right-radius',
 		'border-bottom-right-radius',
 		'border-bottom-left-radius'
-	  ]);
+	  ], breakUp.borderRadius, putTogether.borderRadius);
 
 	  addFourValueShorthand('-moz-border-radius', [
 		'-moz-border-top-left-radius',
 		'-moz-border-top-right-radius',
 		'-moz-border-bottom-right-radius',
 		'-moz-border-bottom-left-radius'
-	  ]);
+	  ], breakUp.borderRadius, putTogether.borderRadius);
 
 	  addFourValueShorthand('-webkit-border-radius', [
 		'-webkit-border-top-left-radius',
 		'-webkit-border-top-right-radius',
 		'-webkit-border-bottom-right-radius',
 		'-webkit-border-bottom-left-radius'
-	  ]);
+	  ], breakUp.borderRadius, putTogether.borderRadius);
 
 	  addFourValueShorthand('-o-border-radius', [
 		'-o-border-top-left-radius',
 		'-o-border-top-right-radius',
 		'-o-border-bottom-right-radius',
 		'-o-border-bottom-left-radius'
-	  ]);
+	  ], breakUp.borderRadius, putTogether.borderRadius);
 
 	  addFourValueShorthand('border-color', [
 		'border-top-color',

@@ -51,6 +51,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to include data when compiling
+		/// (<code>@data</code> variables)
+		/// </summary>
+		[ConfigurationProperty("data", DefaultValue = true)]
+		public bool Data
+		{
+			get { return (bool)this["data"]; }
+			set { this["data"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
