@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Clean-css 1.9.3
+             README file for Bundle Transformer: Clean-css 1.9.4
  
    ----------------------------------------------------------------------
 
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 2.2.4.
+   Clean-css was updated to commit b9eb5c17c9.
    
    ====================
    POST-INSTALL ACTIONS

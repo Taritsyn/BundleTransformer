@@ -41,13 +41,6 @@
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   In `StyleTransformer` and `ScriptTransformer` classes added 3 new
-   properties: `EnableTracing`, `UsePreMinifiedFiles` and
-   `CombineFilesBeforeMinification`.
 
    ====================
    POST-INSTALL ACTIONS

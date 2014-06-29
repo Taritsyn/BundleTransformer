@@ -1,5 +1,5 @@
 #############################################################################
-# Sass v3.3.8
+# Sass v3.3.9
 # http://sass-lang.com
 #
 # Copyright 2006-2014, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
@@ -1533,7 +1533,12 @@ MSG
       result = yield tmpfile
       tmpfile.close
       ATOMIC_WRITE_MUTEX.synchronize do
-        File.chmod(perms & ~File.umask, tmpfile.path)
+        begin
+          File.chmod(perms & ~File.umask, tmpfile.path)
+        rescue Errno::EPERM
+          # If we don't have permissions to chmod the file, don't let that crash
+          # the compilation. See issue 1215.
+        end
         File.rename tmpfile.path, filename
       end
       result
@@ -1569,7 +1574,7 @@ MSG
         rescue LoadError => e
           dir = scope("vendor/listen/lib")
           if $LOAD_PATH.include?(dir)
-            raise e unless File.exists?(scope(".git"))
+            raise e unless File.exist?(scope(".git"))
             e.message << "\n" <<
               'Run "git submodule update --init" to get the bundled version.'
           else
@@ -1987,7 +1992,7 @@ module Sass
       return @@version if defined?(@@version)
 
 	  #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.3.8'.strip.split('.').
+	  numbers = '3.3.9'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
 	  #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Maptastic Maple'.strip
@@ -2026,20 +2031,20 @@ module Sass
     private
 
     def revision_number
-      if File.exists?(Sass::Util.scope('REVISION'))
+      if File.exist?(Sass::Util.scope('REVISION'))
         rev = File.read(Sass::Util.scope('REVISION')).strip
         return rev unless rev =~ /^([a-f0-9]+|\(.*\))$/ || rev == '(unknown)'
       end
 
-      return unless File.exists?(Sass::Util.scope('.git/HEAD'))
+      return unless File.exist?(Sass::Util.scope('.git/HEAD'))
       rev = File.read(Sass::Util.scope('.git/HEAD')).strip
       return rev unless rev =~ /^ref: (.*)$/
 
       ref_name = $1
       ref_file = Sass::Util.scope(".git/#{ref_name}")
       info_file = Sass::Util.scope(".git/info/refs")
-      return File.read(ref_file).strip if File.exists?(ref_file)
-      return unless File.exists?(info_file)
+      return File.read(ref_file).strip if File.exist?(ref_file)
+      return unless File.exist?(info_file)
       File.open(info_file) do |f|
         f.each do |l|
           sha, ref = l.strip.split("\t", 2)
@@ -2051,7 +2056,7 @@ module Sass
     end
 
     def version_date
-      return unless File.exists?(Sass::Util.scope('VERSION_DATE'))
+      return unless File.exist?(Sass::Util.scope('VERSION_DATE'))
       DateTime.parse(File.read(Sass::Util.scope('VERSION_DATE')).strip)
     end
   end
@@ -3895,6 +3900,10 @@ module Sass
         @args = args
         @splat = splat
         super()
+
+        if %w[and or not].include?(name)
+          raise Sass::SyntaxError.new("Invalid function name \"#{name}\".")
+        end
       end
     end
   end
@@ -6388,17 +6397,34 @@ class Sass::Tree::Visitors::CheckNesting < Sass::Tree::Visitors::Base
   SCRIPT_NODES = [Sass::Tree::ImportNode] + CONTROL_NODES
   def visit_children(parent)
     old_parent = @parent
-    unless is_any_of?(parent, SCRIPT_NODES) ||
-        (parent.bubbles? &&
-        !old_parent.is_a?(Sass::Tree::RootNode) &&
-        !old_parent.is_a?(Sass::Tree::AtRootNode))
+
+    # When checking a static tree, resolve at-roots to be sure they won't send
+    # nodes where they don't belong.
+    if parent.is_a?(Sass::Tree::AtRootNode) && parent.resolved_value
+      old_parents = @parents
+      @parents = @parents.reject {|p| parent.exclude_node?(p)}
+      @parent = Sass::Util.enum_with_index(@parents.reverse).
+        find {|p, i| !transparent_parent?(p, @parents[-i - 2])}.first
+
+      begin
+        return super
+      ensure
+        @parents = old_parents
+        @parent = old_parent
+      end
+    end
+
+    unless transparent_parent?(parent, old_parent)
       @parent = parent
     end
+
     @parents.push parent
-    super
-  ensure
-    @parent = old_parent
-    @parents.pop
+    begin
+      super
+    ensure
+      @parent = old_parent
+      @parents.pop
+    end
   end
 
   def visit_root(node)
@@ -6503,6 +6529,14 @@ class Sass::Tree::Visitors::CheckNesting < Sass::Tree::Visitors::Base
   end
 
   private
+
+  # Whether `parent` should be assigned to `@parent`.
+  def transparent_parent?(parent, grandparent)
+    is_any_of?(parent, SCRIPT_NODES) ||
+      (parent.bubbles? &&
+       !grandparent.is_a?(Sass::Tree::RootNode) &&
+       !grandparent.is_a?(Sass::Tree::AtRootNode))
+  end
 
   def is_any_of?(val, classes)
     classes.each do |c|
@@ -17961,7 +17995,7 @@ module Sass
       options[:original_filename] ||= options[:filename]
 
       #BT options[:cache_store] ||= Sass::CacheStores::Chain.new(
-      #BT  Sass::CacheStores::Memory.new, Sass::CacheStores::Filesystem.new(options[:cache_location]))
+        #BT Sass::CacheStores::Memory.new, Sass::CacheStores::Filesystem.new(options[:cache_location]))
       # Support both, because the docs said one and the other actually worked
       # for quite a long time.
       options[:line_comments] ||= options[:line_numbers]

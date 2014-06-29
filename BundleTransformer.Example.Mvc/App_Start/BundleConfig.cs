@@ -69,8 +69,8 @@
 			commonScriptsBundle.Orderer = nullOrderer;
 			bundles.Add(commonScriptsBundle);
 
-			var сommonTemplatesBundle = new CustomScriptBundle("~/Bundles/CommonTemplates");
-			сommonTemplatesBundle.Include(
+			var commonTemplatesBundle = new CustomScriptBundle("~/Bundles/CommonTemplates");
+			commonTemplatesBundle.Include(
 				"~/Scripts/hogan/template-{version}.js",
 				"~/Scripts/hogan/HoganTranslatorBadge.mustache",
 				"~/Scripts/hogan/TestHogan.js",
@@ -78,8 +78,8 @@
 				"~/Scripts/handlebars/HandlebarsHelpers.js",
 				"~/Scripts/handlebars/HandlebarsTranslatorBadge.handlebars",
 				"~/Scripts/handlebars/TestHandlebars.js");
-			сommonTemplatesBundle.Orderer = nullOrderer;
-			bundles.Add(сommonTemplatesBundle);
+			commonTemplatesBundle.Orderer = nullOrderer;
+			bundles.Add(commonTemplatesBundle);
 			
 			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")
 			{
