@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.4
+ * Clean-css v2.2.5
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1133,7 +1133,8 @@ var CleanCss = (function(){
 		  var result = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, tokens, isImportant);
 		  if (verticalTokens.length > 0) {
 			var verticalResult = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, verticalTokens, isImportant);
-			result.value += ' / ' + verticalResult.value;
+			if (result.value != verticalResult.value)
+			  result.value += '/' + verticalResult.value;
 		  }
 
 		  return result;
@@ -1303,72 +1304,69 @@ var CleanCss = (function(){
 		}
 	  };
 
-	  var addFourValueShorthand = function (prop, components, breakup, puttogether, canoverride, defaultValue, shortestValue) {
+	  var addFourValueShorthand = function (prop, components, options) {
+		options = options || {};
 		processable[prop] = {
 		  components: components,
-		  breakUp: breakup || breakUp.fourUnits,
-		  putTogether: puttogether || putTogether.takeCareOfInherit(putTogether.fourUnits),
-		  defaultValue: defaultValue || '0',
-		  shortestValue: shortestValue
+		  breakUp: options.breakUp || breakUp.fourUnits,
+		  putTogether: options.putTogether || putTogether.takeCareOfInherit(putTogether.fourUnits),
+		  defaultValue: options.defaultValue || '0',
+		  shortestValue: options.shortestValue
 		};
 		for (var i = 0; i < components.length; i++) {
 		  processable[components[i]] = {
-			breakUp: breakup || breakUp.fourUnits,
-			canOverride: canoverride || canOverride.unit,
-			defaultValue: defaultValue || '0',
-			shortestValue: shortestValue
+			breakUp: options.breakUp || breakUp.fourUnits,
+			canOverride: options.canOverride || canOverride.unit,
+			defaultValue: options.defaultValue || '0',
+			shortestValue: options.shortestValue
 		  };
 		}
 	  };
 
-	  addFourValueShorthand('border-radius', [
-		'border-top-left-radius',
-		'border-top-right-radius',
-		'border-bottom-right-radius',
-		'border-bottom-left-radius'
-	  ], breakUp.borderRadius, putTogether.borderRadius);
-
-	  addFourValueShorthand('-moz-border-radius', [
-		'-moz-border-top-left-radius',
-		'-moz-border-top-right-radius',
-		'-moz-border-bottom-right-radius',
-		'-moz-border-bottom-left-radius'
-	  ], breakUp.borderRadius, putTogether.borderRadius);
-
-	  addFourValueShorthand('-webkit-border-radius', [
-		'-webkit-border-top-left-radius',
-		'-webkit-border-top-right-radius',
-		'-webkit-border-bottom-right-radius',
-		'-webkit-border-bottom-left-radius'
-	  ], breakUp.borderRadius, putTogether.borderRadius);
-
-	  addFourValueShorthand('-o-border-radius', [
-		'-o-border-top-left-radius',
-		'-o-border-top-right-radius',
-		'-o-border-bottom-right-radius',
-		'-o-border-bottom-left-radius'
-	  ], breakUp.borderRadius, putTogether.borderRadius);
+	  ['', '-moz-', '-o-', '-webkit-'].forEach(function (prefix) {
+		addFourValueShorthand(prefix + 'border-radius', [
+		  prefix + 'border-top-left-radius',
+		  prefix + 'border-top-right-radius',
+		  prefix + 'border-bottom-right-radius',
+		  prefix + 'border-bottom-left-radius'
+		], {
+		  breakUp: breakUp.borderRadius,
+		  putTogether: putTogether.borderRadius
+		});
+	  });
 
 	  addFourValueShorthand('border-color', [
 		'border-top-color',
 		'border-right-color',
 		'border-bottom-color',
 		'border-left-color'
-	  ], breakUp.fourBySpacesOrFunctions, null, canOverride.color, 'currentColor', 'red');
+	  ], {
+		breakUp: breakUp.fourBySpacesOrFunctions,
+		canOverride: canOverride.color,
+		defaultValue: 'currentColor',
+		shortestValue: 'red'
+	  });
 
 	  addFourValueShorthand('border-style', [
 		'border-top-style',
 		'border-right-style',
 		'border-bottom-style',
 		'border-left-style'
-	  ], breakUp.fourBySpaces, null, canOverride.always, 'none');
+	  ], {
+		breakUp: breakUp.fourBySpaces,
+		canOverride: canOverride.always,
+		defaultValue: 'none'
+	  });
 
 	  addFourValueShorthand('border-width', [
 		'border-top-width',
 		'border-right-width',
 		'border-bottom-width',
 		'border-left-width'
-	  ], null, null, null, 'medium', '0');
+	  ], {
+		defaultValue: 'medium',
+		shortestValue: '0'
+	  });
 
 	  addFourValueShorthand('padding', [
 		'padding-top',
@@ -3357,6 +3355,19 @@ var CleanCss = (function(){
 			  }).process();
 			});
 		  }
+
+		  // replace ' / ' in border-*-radius with '/'
+		  replace(/(border-\w+-\w+-radius:\S+)\s+\/\s+/g, '$1/');
+
+		  // replace same H/V values in border-radius
+		  replace(/(border-\w+-\w+-radius):([^;\}]+)/g, function (match, property, value) {
+			var parts = value.split('/');
+
+			if (parts.length > 1 && parts[0] == parts[1])
+			  return property + ':' + parts[0];
+			else
+			  return match;
+		  });
 
 		  replace(function restoreUrls() {
 			data = urlsProcessor.restore(data);

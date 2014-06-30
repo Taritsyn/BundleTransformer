@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.CleanCss</id>
-    <version>1.9.4</version>
+    <version>1.9.5</version>
 	<title>Bundle Transformer: Clean-css</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,16 +10,16 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=725495</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (http://github.com/GoalSmashers/clean-css) version 2.2.4.
+    <description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (http://github.com/GoalSmashers/clean-css) version 2.2.5.
    
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).</description>
-    <summary>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (http://github.com/GoalSmashers/clean-css) version 2.2.4.</summary>
-	<releaseNotes>Clean-css was updated to commit b9eb5c17c9.</releaseNotes>
+    <summary>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (http://github.com/GoalSmashers/clean-css) version 2.2.5.</summary>
+	<releaseNotes>Added support of Clean-css version 2.2.5.</releaseNotes>
 	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 	<language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Clean-css</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.3" />
+      <dependency id="BundleTransformer.Core" version="1.9.5" />
 	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.1.3" />
 	  <dependency id="Newtonsoft.Json" version="6.0.3" />
     </dependencies>

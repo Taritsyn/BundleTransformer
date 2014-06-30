@@ -33,10 +33,4 @@
 			</js>
 		</core>
 	</bundleTransformer>
-	<system.webServer>
-		<handlers>
-			<add name="CssAssetHandler" path="*.css" verb="GET" type="BundleTransformer.Core.HttpHandlers.CssAssetHandler, BundleTransformer.Core" resourceType="File" preCondition="" />
-			<add name="JsAssetHandler" path="*.js" verb="GET" type="BundleTransformer.Core.HttpHandlers.JsAssetHandler, BundleTransformer.Core" resourceType="File" preCondition="" />
-		</handlers>
-	</system.webServer>
 </configuration>

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.3
+               README file for Bundle Transformer: Core 1.9.5
 
    ----------------------------------------------------------------------
 
@@ -19,9 +19,9 @@
    `JsMinify`.
 
    The main differences of `StyleTransformer` and `ScriptTransformer`
-   classes from a standard implementations: ability to exclude unnecessary
-   assets when adding assets from a directory, does not produce the
-   re-minification of pre-minified assets, support automatic
+   classes from a standard implementations: ability to exclude
+   unnecessary assets when adding assets from a directory, does not
+   produce the re-minification of pre-minified assets, support automatic
    transformation of relative paths to absolute in CSS-code (by using
    `UrlRewritingCssPostProcessor`), etc. These classes do not produce the
    minification of code in runtime, but this feature can be added by
@@ -41,6 +41,12 @@
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Was turned off automatic registration of the following debugging
+   HTTP-handlers: `CssAssetHandler` and `JsAssetHandler`.
 
    ====================
    POST-INSTALL ACTIONS
@@ -50,17 +56,32 @@
    `App_Start/BundleConfig.cs` file the following code:
 
    BundleResolver.Current = new CustomBundleResolver();
+
+   In order to these settings can be applied to CSS- and JS-assets need
+   to register the debugging HTTP-handlers `CssAssetHandler` and
+   `JsAssetHandler` in Web.config file.
+
+   To do this in the IIS Integrated mode, you need add to the
+   `/configuration/system.webServer/handlers` element the following code:
    
-   To use a debugging HTTP-handlers in the IIS Classic mode, you need add
-   to the `/configuration/system.web/httpHandlers` element of the 
-   Web.config file a following code:
+   <add name="CssAssetHandler"
+      path="*.css" verb="GET"
+      type="BundleTransformer.Core.HttpHandlers.CssAssetHandler, BundleTransformer.Core"
+      resourceType="File" preCondition="" />
+   <add name="JsAssetHandler"
+      path="*.js" verb="GET"
+      type="BundleTransformer.Core.HttpHandlers.JsAssetHandler, BundleTransformer.Core"
+      resourceType="File" preCondition="" />
    
+   To do this in the IIS Classic mode, you need add to the
+   `/configuration/system.web/httpHandlers` element the following code:
+ 
    <add
-	path="*.css" verb="GET"
-	type="BundleTransformer.Core.HttpHandlers.CssAssetHandler, BundleTransformer.Core" />
+      path="*.css" verb="GET"
+      type="BundleTransformer.Core.HttpHandlers.CssAssetHandler, BundleTransformer.Core" />
    <add
-	path="*.js" verb="GET"
-	type="BundleTransformer.Core.HttpHandlers.JsAssetHandler, BundleTransformer.Core" />
+      path="*.js" verb="GET"
+      type="BundleTransformer.Core.HttpHandlers.JsAssetHandler, BundleTransformer.Core" />
    
    =============
    DOCUMENTATION
