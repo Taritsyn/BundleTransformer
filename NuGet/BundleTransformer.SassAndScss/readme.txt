@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.9.4
+          README file for Bundle Transformer: Sass and SCSS 1.9.7
 
    ----------------------------------------------------------------------
 
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Sass version 3.3.9.
+   Fixed bug #77 "UTF-8 in SCSS comments cause exception".
    
    ====================
    POST-INSTALL ACTIONS

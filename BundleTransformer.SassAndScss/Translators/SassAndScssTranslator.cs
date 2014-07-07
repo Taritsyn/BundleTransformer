@@ -319,8 +319,7 @@
 		{
 			var stylesheet = new SassAndScssStylesheet(assetUrl, assetContent);
 
-			int contentLength = assetContent.Length;
-			if (contentLength == 0)
+			if (string.IsNullOrWhiteSpace(assetContent))
 			{
 				return stylesheet;
 			}
@@ -403,7 +402,7 @@
 				;
 
 			var contentBuilder = new StringBuilder();
-			int endPosition = contentLength - 1;
+			int endPosition = processedContent.Length - 1;
 			int currentPosition = 0;
 
 			foreach (SassAndScssNodeMatch nodeMatch in nodeMatches)
