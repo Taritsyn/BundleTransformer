@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.14
+ * UglifyJS v2.4.15
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -3955,7 +3955,7 @@
 			output.print("for");
 			output.space();
 			output.with_parens(function(){
-				if (self.init) {
+				if (self.init && !(self.init instanceof AST_EmptyStatement)) {
 					if (self.init instanceof AST_Definitions) {
 						self.init.print(output);
 					} else {
@@ -5336,6 +5336,14 @@
 			def(AST_SymbolRef, function(compressor){
 				var d = this.definition();
 				if (d && d.constant && d.init) return ev(d.init, compressor);
+				throw def;
+			});
+			def(AST_Dot, function(compressor){
+				if (compressor.option("unsafe") && this.property == "length") {
+					var str = ev(this.expression, compressor);
+					if (typeof str == "string")
+						return str.length;
+				}
 				throw def;
 			});
 		})(function(node, func){
@@ -6912,7 +6920,7 @@
 					return make_node(AST_Dot, self, {
 						expression : self.expression,
 						property   : prop
-					});
+					}).optimize(compressor);
 				}
 				var v = parseFloat(prop);
 				if (!isNaN(v) && v.toString() == prop) {
@@ -6922,6 +6930,10 @@
 				}
 			}
 			return self;
+		});
+
+		OPT(AST_Dot, function(self, compressor){
+			return self.evaluate(compressor)[0];
 		});
 
 		function literals_in_boolean_context(self, compressor) {

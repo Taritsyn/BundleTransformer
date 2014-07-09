@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.5
+ * Clean-css v2.2.6
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -2118,9 +2118,91 @@ var CleanCss = (function(){
 	}).call(this);
 	//#endregion
 	
+	//#region URL: ./text/quote-scanner
+	require['./text/quote-scanner'] = (function () {
+	  var QuoteScanner = function QuoteScanner(data) {
+		this.data = data;
+	  };
+
+	  var findCommentEnd = function(data, matched, cursor) {
+		var commentStartMark = '/*';
+		var commentEndMark = '*/';
+		var escapeMark = '\\';
+		var commentStarted = false;
+
+		while (true) {
+		  if (data[cursor] === undefined)
+			break;
+		  if (!commentStarted && data[cursor] == commentEndMark[1] && data[cursor - 1] == commentEndMark[0])
+			break;
+		  if (data[cursor] == matched && data[cursor - 1] != escapeMark)
+			break;
+		  if (data[cursor] == commentStartMark[1] && data[cursor - 1] == commentStartMark[0])
+			commentStarted = true;
+
+		  cursor++;
+		}
+
+		return cursor;
+	  };
+
+	  QuoteScanner.prototype.each = function(callback) {
+		var data = this.data;
+		var tempData = [];
+		var nextStart = 0;
+		var nextEnd = 0;
+		var cursor = 0;
+		var matchedMark = null;
+		var singleMark = '\'';
+		var doubleMark = '"';
+		var dataLength = data.length;
+
+		for (; nextEnd < data.length;) {
+		  var nextStartSingle = data.indexOf(singleMark, nextEnd + 1);
+		  var nextStartDouble = data.indexOf(doubleMark, nextEnd + 1);
+
+		  if (nextStartSingle == -1)
+			nextStartSingle = dataLength;
+		  if (nextStartDouble == -1)
+			nextStartDouble = dataLength;
+
+		  if (nextStartSingle < nextStartDouble) {
+			nextStart = nextStartSingle;
+			matchedMark = singleMark;
+		  } else {
+			nextStart = nextStartDouble;
+			matchedMark = doubleMark;
+		  }
+
+		  if (nextStart == -1)
+			break;
+
+		  nextEnd = findCommentEnd(data, matchedMark, nextStart + 1);
+		  if (nextEnd == -1)
+			break;
+
+		  var text = data.substring(nextStart, nextEnd + 1);
+		  tempData.push(data.substring(cursor, nextStart));
+		  if (text.length > 0)
+			callback(text, tempData, nextStart);
+
+		  cursor = nextEnd + 1;
+		}
+
+		return tempData.length > 0 ?
+		  tempData.join('') + data.substring(cursor, data.length) :
+		  data;
+	  };
+	  
+	  return QuoteScanner;
+	}).call(this);
+	//#endregion
+	
 	//#region URL: ./text/comments
 	require['./text/comments'] = (function () {
 		var EscapeStore = require('./text/escape-store');
+		var QuoteScanner = require('./text/quote-scanner');
+
 		function Comments(keepSpecialComments, keepBreaks, lineBreak) {
 		  var comments = new EscapeStore('COMMENT');
 
@@ -2133,11 +2215,34 @@ var CleanCss = (function(){
 			  var nextStart = 0;
 			  var nextEnd = 0;
 			  var cursor = 0;
+			  var isQuotedAt = (function () {
+				var quoteMap = [];
+				new QuoteScanner(data).each(function (quotedString, _, startsAt) {
+				  quoteMap.push([startsAt, startsAt + quotedString.length]);
+				});
+
+				return function (position) {
+				  for (var i = 0, l = quoteMap.length; i < l; i++) {
+					if (quoteMap[i][0] < position && quoteMap[i][1] > position)
+					  return true;
+				  }
+
+				  return false;
+				};
+			  })();
 
 			  for (; nextEnd < data.length;) {
 				nextStart = data.indexOf('/*', cursor);
+				if (nextStart == -1)
+				  break;
+				if (isQuotedAt(nextStart)) {
+				  tempData.push(data.substring(cursor, nextStart + 2));
+				  cursor = nextStart + 2;
+				  continue;
+				}
+
 				nextEnd = data.indexOf('*/', nextStart + 2);
-				if (nextStart == -1 || nextEnd == -1)
+				if (nextEnd == -1)
 				  break;
 
 				tempData.push(data.substring(cursor, nextStart));
@@ -2260,79 +2365,6 @@ var CleanCss = (function(){
 		};
 		
 		return Expressions;
-	}).call(this);
-	//#endregion
-	
-	//#region URL: ./text/quote-scanner
-	require['./text/quote-scanner'] = (function () {
-	  var QuoteScanner = function QuoteScanner(data) {
-		this.data = data;
-	  };
-
-	  var findNonEscapedEnd = function(data, matched, start) {
-		var end = start;
-		while (true) {
-		  end = data.indexOf(matched, end);
-
-		  if (end > -1 && data[end - 1] == '\\') {
-			end += 1;
-			continue;
-		  } else {
-			break;
-		  }
-		}
-
-		return end;
-	  };
-
-	  QuoteScanner.prototype.each = function(callback) {
-		var data = this.data;
-		var tempData = [];
-		var nextStart = 0;
-		var nextEnd = 0;
-		var cursor = 0;
-		var matchedMark = null;
-		var singleMark = '\'';
-		var doubleMark = '"';
-		var dataLength = data.length;
-
-		for (; nextEnd < data.length;) {
-		  var nextStartSingle = data.indexOf(singleMark, nextEnd + 1);
-		  var nextStartDouble = data.indexOf(doubleMark, nextEnd + 1);
-
-		  if (nextStartSingle == -1)
-			nextStartSingle = dataLength;
-		  if (nextStartDouble == -1)
-			nextStartDouble = dataLength;
-
-		  if (nextStartSingle < nextStartDouble) {
-			nextStart = nextStartSingle;
-			matchedMark = singleMark;
-		  } else {
-			nextStart = nextStartDouble;
-			matchedMark = doubleMark;
-		  }
-
-		  if (nextStart == -1)
-			break;
-
-		  nextEnd = findNonEscapedEnd(data, matchedMark, nextStart + 1);
-		  if (nextEnd == -1)
-			break;
-
-		  var text = data.substring(nextStart, nextEnd + 1);
-		  tempData.push(data.substring(cursor, nextStart));
-		  callback(text, tempData, nextStart);
-
-		  cursor = nextEnd + 1;
-		}
-
-		return tempData.length > 0 ?
-		  tempData.join('') + data.substring(cursor, data.length) :
-		  data;
-	  };
-	  
-	  return QuoteScanner;
 	}).call(this);
 	//#endregion
 	
@@ -3282,7 +3314,10 @@ var CleanCss = (function(){
 		  });
 
 		  // .0 to 0
-		  replace(/(\D)\.0+(,|\}|\))/g, '$10$2');
+		  // repeated twice on purpose as if not it doesn't process {padding: .0 .0 .0 .0} correctly
+		  var leadingDecimalRegexp = /(\D)\.0+(\D)/g;
+		  replace(leadingDecimalRegexp, '$10$2');
+		  replace(leadingDecimalRegexp, '$10$2');
 
 		  // fraction zeros removal
 		  replace(/\.([1-9]*)0+(\D)/g, function(match, nonZeroPart, suffix) {
@@ -3295,7 +3330,7 @@ var CleanCss = (function(){
 			units.push('rem');
 
 		  replace(new RegExp('(\\s|:|,)\\-?0(?:' + units.join('|') + ')', 'g'), '$1' + '0');
-		  replace(new RegExp('(\\s|:|,)\\-?(\\d)\\.(\\D)', 'g'), '$1$2$3');
+		  replace(new RegExp('(\\s|:|,)\\-?(\\d+)\\.(\\D)', 'g'), '$1$2$3');
 		  replace(new RegExp('rect\\(0(?:' + units.join('|') + ')', 'g'), 'rect(0');
 
 		  // restore % in rgb/rgba and hsl/hsla
