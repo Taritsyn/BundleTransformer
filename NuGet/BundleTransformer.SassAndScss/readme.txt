@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.9.7
+          README file for Bundle Transformer: Sass and SCSS 1.9.10
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
    `SassAndScssTranslator` (supports Sass (http://sass-lang.com) 
-   version 3.3.9). This adapter makes translation of Sass- and 
+   version 3.3.10). This adapter makes translation of Sass- and 
    SCSS-code to CSS-code. Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of 
    translated Sass- or SCSS-asset.
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #77 "UTF-8 in SCSS comments cause exception".
+   Added support of Sass version 3.3.10.
    
    ====================
    POST-INSTALL ACTIONS

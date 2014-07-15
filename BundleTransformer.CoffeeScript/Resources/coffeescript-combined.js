@@ -1038,7 +1038,8 @@ var CoffeeScript = (function(){
 		  this.token('CALL_START', '(', 0, 0);
 		  tokens = [];
 		  _ref2 = this.interpolateString(body, {
-			regex: true
+			regex: true,
+			strOffset: 3
 		  });
 		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
 			token = _ref2[_i];

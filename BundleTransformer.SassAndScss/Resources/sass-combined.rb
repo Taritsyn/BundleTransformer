@@ -1,5 +1,5 @@
 #############################################################################
-# Sass v3.3.9
+# Sass v3.3.10
 # http://sass-lang.com
 #
 # Copyright 2006-2014, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
@@ -156,7 +156,7 @@ module Sass
 
     # An array of ints representing the Ruby version number.
     # @api public
-    RUBY_VERSION = ::RUBY_VERSION.split(".").map {|s| s.to_i}
+    RUBY_VERSION_COMPONENTS = RUBY_VERSION.split(".").map {|s| s.to_i}
 
     # The Ruby engine we're running under. Defaults to `"ruby"`
     # if the top-level constant is undefined.
@@ -787,6 +787,19 @@ module Sass
       pathname(path.cleanpath.to_s)
     end
 
+    # Converts `path` to a "file:" URI. This handles Windows paths correctly.
+    #
+    # @param path [String, Pathname]
+    # @return [String]
+    def file_uri_from_path(path)
+      path = path.to_s if path.is_a?(Pathname)
+      path = Sass::Util.escape_uri(path)
+      return path.start_with?('/') ? "file://" + path : path unless windows?
+      return "file:///" + path.tr("\\", "/") if path =~ /^[a-zA-Z]:[\/\\]/
+      return "file://" + path.tr("\\", "/") if path =~ /\\\\[^\\]+\\[^\\\/]+/
+      path.tr("\\", "/")
+    end
+
     # Prepare a value for a destructuring assignment (e.g. `a, b =
     # val`). This works around a performance bug when using
     # ActiveSupport, and only needs to be called when `val` is likely
@@ -807,7 +820,7 @@ module Sass
     # @return [Boolean]
     def ruby1?
       return @ruby1 if defined?(@ruby1)
-      @ruby1 = Sass::Util::RUBY_VERSION[0] <= 1
+      @ruby1 = RUBY_VERSION_COMPONENTS[0] <= 1
     end
 
     # Whether or not this is running under Ruby 1.8 or lower.
@@ -821,7 +834,7 @@ module Sass
       # We have to fall back to 1.8 behavior.
       return @ruby1_8 if defined?(@ruby1_8)
       @ruby1_8 = ironruby? ||
-                   (Sass::Util::RUBY_VERSION[0] == 1 && Sass::Util::RUBY_VERSION[1] < 9)
+                   (RUBY_VERSION_COMPONENTS[0] == 1 && RUBY_VERSION_COMPONENTS[1] < 9)
     end
 
     # Whether or not this is running under Ruby 1.8.6 or lower.
@@ -830,7 +843,7 @@ module Sass
     # @return [Boolean]
     def ruby1_8_6?
       return @ruby1_8_6 if defined?(@ruby1_8_6)
-      @ruby1_8_6 = ruby1_8? && Sass::Util::RUBY_VERSION[2] < 7
+      @ruby1_8_6 = ruby1_8? && RUBY_VERSION_COMPONENTS[2] < 7
     end
 
     # Wehter or not this is running under JRuby 1.6 or lower.
@@ -1309,7 +1322,7 @@ MSG
     # @param obj {Object}
     # @return {String}
     def inspect_obj(obj)
-      return obj.inspect unless version_geq(::RUBY_VERSION, "1.9.2")
+      return obj.inspect unless version_geq(RUBY_VERSION, "1.9.2")
       return ':' + inspect_obj(obj.to_s) if obj.is_a?(Symbol)
       return obj.inspect unless obj.is_a?(String)
       '"' + obj.gsub(/[\x00-\x7F]+/) {|s| s.inspect[1...-1]} + '"'
@@ -1992,7 +2005,7 @@ module Sass
       return @@version if defined?(@@version)
 
 	  #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.3.9'.strip.split('.').
+	  numbers = '3.3.10'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
 	  #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Maptastic Maple'.strip
@@ -2694,7 +2707,7 @@ module Sass::Source
       end
       css_path &&= Sass::Util.pathname(Sass::Util.absolute_path(css_path))
       sourcemap_path &&= Sass::Util.pathname(Sass::Util.absolute_path(sourcemap_path))
-      css_uri ||= css_path.relative_path_from(sourcemap_path.dirname).to_s.tr('\\', '/')
+      css_uri ||= Sass::Util.file_uri_from_path(css_path.relative_path_from(sourcemap_path.dirname))
 
       result = "{\n"
       write_json_field(result, "version", 3, true)
@@ -17007,7 +17020,8 @@ module Sass
       #   may return a relative URL. This may be `nil` if the sourcemap's
       #   eventual location is unknown.
       # @return [String?] The publicly-visible URL for this file, or `nil`
-      #   indicating that no publicly-visible URL exists.
+      #   indicating that no publicly-visible URL exists. This should be
+      #   appropriately URL-escaped.
       def public_url(uri, sourcemap_directory = nil)
         return if @public_url_warning_issued
         @public_url_warning_issued = true
@@ -17125,7 +17139,7 @@ module Sass
           file_pathname = Sass::Util.cleanpath(Sass::Util.absolute_path(name, @root))
           sourcemap_pathname = Sass::Util.cleanpath(sourcemap_directory)
           begin
-            file_pathname.relative_path_from(sourcemap_pathname).to_s
+            Sass::Util.file_uri_from_path(file_pathname.relative_path_from(sourcemap_pathname))
           rescue ArgumentError # when a relative path cannot be constructed
             warn_about_public_url(name)
             nil

@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.6
+ * Clean-css v2.2.8
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -604,12 +604,53 @@ var CleanCss = (function(){
 	}).call(this);
 	//#endregion
 	
+	//#region URL: ./text/comma-splitter
+	require['./text/comma-splitter'] = (function () {
+		var Splitter = function CommaSplitter (value) {
+		  this.value = value;
+		};
+
+		Splitter.prototype.split = function () {
+		  if (this.value.indexOf(',') === -1)
+			return [this.value];
+
+		  if (this.value.indexOf('(') === -1)
+			return this.value.split(',');
+
+		  var level = 0;
+		  var cursor = 0;
+		  var lastStart = 0;
+		  var len = this.value.length;
+		  var tokens = [];
+
+		  while (cursor++ < len) {
+			if (this.value[cursor] == '(') {
+			  level++;
+			} else if (this.value[cursor] == ')') {
+			  level--;
+			} else if (this.value[cursor] == ',' && level === 0) {
+			  tokens.push(this.value.substring(lastStart, cursor));
+			  lastStart = cursor + 1;
+			}
+		  }
+
+		  if (lastStart < cursor + 1)
+			tokens.push(this.value.substring(lastStart));
+
+		  return tokens;
+		};
+		
+		return Splitter;
+	}).call(this);
+	//#endregion
+	
 	//#region URL: ./properties/processable
 	require['./properties/processable'] = (function () {
 	  // Contains the interpretation of CSS properties, as used by the property optimizer
 
 	  var tokenModule = require('./properties/token');
 	  var validator = require('./properties/validator');
+	  var CommaSplitter = require('./text/comma-splitter');
 
 	  // Functions that decide what value can override what.
 	  // The main purpose is to disallow removing CSS fallbacks.
@@ -781,6 +822,30 @@ var CleanCss = (function(){
 		return result;
 	  });
 	  // Breaks up a background property value
+	  breakUp.commaSeparatedMulitpleValues = function (splitfunc) {
+		return function (token) {
+		  if (token.value.indexOf(',') === -1)
+			return splitfunc(token);
+
+		  var values = new CommaSplitter(token.value).split();
+		  var components = [];
+
+		  for (var i = 0, l = values.length; i < l; i++) {
+			token.value = values[i];
+			components.push(splitfunc(token));
+		  }
+
+		  for (var j = 0, m = components[0].length; j < m; j++) {
+			for (var k = 0, n = components.length, newValues = []; k < n; k++) {
+			  newValues.push(components[k][j].value);
+			}
+
+			components[0][j].value = newValues.join(',');
+		  }
+
+		  return components[0];
+		};
+	  };
 	  breakUp.background = function (token) {
 		// Default values
 		var result = Token.makeDefaults(['background-color', 'background-image', 'background-repeat', 'background-position', 'background-attachment'], token.isImportant);
@@ -1066,6 +1131,45 @@ var CleanCss = (function(){
 
 		  return result;
 		},
+		commaSeparatedMulitpleValues: function (assembleFunction) {
+		  return function(prop, tokens, isImportant) {
+			var tokenSplitLengths = tokens.map(function (token) {
+			  return new CommaSplitter(token.value).split().length;
+			});
+			var partsCount = Math.max.apply(Math, tokenSplitLengths);
+
+			if (partsCount == 1)
+			  return assembleFunction(prop, tokens, isImportant);
+
+			var merged = [];
+
+			for (var i = 0; i < partsCount; i++) {
+			  merged.push([]);
+
+			  for (var j = 0; j < tokens.length; j++) {
+				var split = new CommaSplitter(tokens[j].value).split();
+				merged[i].push(split[i] || split[0]);
+			  }
+			}
+
+			var mergedValues = [];
+			var firstProcessed;
+			for (i = 0; i < partsCount; i++) {
+			  for (var k = 0, n = merged[i].length; k < n; k++) {
+				tokens[k].value = merged[i][k];
+			  }
+
+			  var processed = assembleFunction(prop, tokens, isImportant);
+			  mergedValues.push(processed.value);
+
+			  if (!firstProcessed)
+				firstProcessed = processed;
+			}
+
+			firstProcessed.value = mergedValues.join(',');
+			return firstProcessed;
+		  };
+		},
 		// Handles the cases when some or all the fine-grained properties are set to inherit
 		takeCareOfInherit: function (innerFunc) {
 		  return function (prop, tokens, isImportant) {
@@ -1184,8 +1288,10 @@ var CleanCss = (function(){
 			'background-position',
 			'background-attachment'
 		  ],
-		  breakUp: breakUp.background,
-		  putTogether: putTogether.takeCareOfInherit(putTogether.bySpacesOmitDefaults),
+		  breakUp: breakUp.commaSeparatedMulitpleValues(breakUp.background),
+		  putTogether: putTogether.commaSeparatedMulitpleValues(
+			putTogether.takeCareOfInherit(putTogether.bySpacesOmitDefaults)
+		  ),
 		  defaultValue: '0 0',
 		  shortestValue: '0'
 		},
@@ -2124,21 +2230,35 @@ var CleanCss = (function(){
 		this.data = data;
 	  };
 
-	  var findCommentEnd = function(data, matched, cursor) {
+	  var findQuoteEnd = function(data, matched, cursor, oldCursor) {
 		var commentStartMark = '/*';
 		var commentEndMark = '*/';
 		var escapeMark = '\\';
+		var blockEndMark = '}';
+		var dataPrefix = data.substring(oldCursor, cursor);
+		var commentEndedAt = dataPrefix.lastIndexOf(commentEndMark, cursor);
+		var commentStartedAt = dataPrefix.lastIndexOf(commentStartMark, cursor);
 		var commentStarted = false;
+
+		if (commentEndedAt >= cursor && commentStartedAt > -1)
+		  commentStarted = true;
+		if (commentStartedAt < cursor && commentStartedAt > commentEndedAt)
+		  commentStarted = true;
+
+		if (commentStarted) {
+		  var commentEndsAt = data.indexOf(commentEndMark, cursor);
+		  if (commentEndsAt > -1)
+			return commentEndsAt;
+
+		  commentEndsAt = data.indexOf(blockEndMark, cursor);
+		  return commentEndsAt > -1 ? commentEndsAt - 1 : data.length;
+		}
 
 		while (true) {
 		  if (data[cursor] === undefined)
 			break;
-		  if (!commentStarted && data[cursor] == commentEndMark[1] && data[cursor - 1] == commentEndMark[0])
-			break;
 		  if (data[cursor] == matched && data[cursor - 1] != escapeMark)
 			break;
-		  if (data[cursor] == commentStartMark[1] && data[cursor - 1] == commentStartMark[0])
-			commentStarted = true;
 
 		  cursor++;
 		}
@@ -2177,7 +2297,7 @@ var CleanCss = (function(){
 		  if (nextStart == -1)
 			break;
 
-		  nextEnd = findCommentEnd(data, matchedMark, nextStart + 1);
+		  nextEnd = findQuoteEnd(data, matchedMark, nextStart + 1, cursor);
 		  if (nextEnd == -1)
 			break;
 
@@ -3061,6 +3181,7 @@ var CleanCss = (function(){
 		var FreeTextProcessor = require('./text/free');
 		var UrlsProcessor = require('./text/urls');
 		var NameQuotesProcessor = require('./text/name-quotes');
+		var CommaSplitter = require('./text/comma-splitter');
 
 		var SelectorsOptimizer = require('./selectors/optimizer');
 
@@ -3348,8 +3469,14 @@ var CleanCss = (function(){
 		  });
 
 		  // transparent rgba/hsla to 'transparent' unless in compatibility mode
-		  if (!options.compatibility)
-			replace(/(rgba|hsla)\(\d+,\d+%?,\d+%?,0\)/g, 'transparent');
+		  if (!options.compatibility) {
+			replace(/:([^;]*)(?:rgba|hsla)\(\d+,\d+%?,\d+%?,0\)/g, function (match, prefix) {
+			  if (new CommaSplitter(match).split().pop().indexOf('gradient(') > -1)
+				return match;
+
+			  return ':' + prefix + 'transparent';
+			});
+		  }
 
 		  // none to 0
 		  replace(/outline:none/g, 'outline:0');
