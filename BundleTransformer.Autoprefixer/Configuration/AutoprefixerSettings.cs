@@ -29,6 +29,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable the special safe mode to parse broken CSS
+		/// </summary>
+		[ConfigurationProperty("safe", DefaultValue = false)]
+		public bool Safe
+		{
+			get { return (bool)this["safe"]; }
+			set { this["safe"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

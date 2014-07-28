@@ -630,6 +630,11 @@
 				<xs:documentation>Flag for whether to create nice visual cascade of prefixes</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="safe" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable the special safe mode to parse broken CSS</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="BrowserConditionalExpressionCollection_SchemaType">

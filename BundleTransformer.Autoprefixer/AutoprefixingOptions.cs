@@ -25,6 +25,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to enable the special safe mode to parse broken CSS
+		/// </summary>
+		public bool Safe
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of autoprefixing options
@@ -33,6 +42,7 @@
 		{
 			Browsers = new List<string>();
 			Cascade = true;
+			Safe = false;
 		}
 	}
 }

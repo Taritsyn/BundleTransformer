@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.5
+               README file for Bundle Transformer: Core 1.9.11
 
    ----------------------------------------------------------------------
 
@@ -41,12 +41,6 @@
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Was turned off automatic registration of the following debugging
-   HTTP-handlers: `CssAssetHandler` and `JsAssetHandler`.
 
    ====================
    POST-INSTALL ACTIONS

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Autoprefixer 1.9.9
+           README file for Bundle Transformer: Autoprefixer 1.9.11
  
    ----------------------------------------------------------------------
 
@@ -25,7 +25,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 2.1.1.
+   1. Standalone version of Autoprefixer was updated to commit 86788d2c90;
+   2. In configuration settings added new property - `Safe` (default
+      `false`).
    
    ====================
    POST-INSTALL ACTIONS

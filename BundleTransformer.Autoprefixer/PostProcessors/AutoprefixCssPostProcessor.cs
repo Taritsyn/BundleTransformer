@@ -54,6 +54,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to enable the special safe mode to parse broken CSS
+		/// </summary>
+		public bool Safe
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
@@ -75,6 +84,7 @@
 				.ToList()
 				;
 			Cascade = autoprefixerConfig.Cascade;
+			Safe = autoprefixerConfig.Safe;
 
 			if (createJsEngineInstance == null)
 			{
@@ -190,7 +200,8 @@
 			var options = new AutoprefixingOptions
 			{
 				Browsers = Browsers,
-				Cascade = Cascade
+				Cascade = Cascade,
+				Safe = Safe
 			};
 
 			return options;

@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.8
+ * Clean-css v2.2.10
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -485,22 +485,72 @@ var CleanCss = (function(){
 	  };
 	}).call(this);
 	//#endregion
-	
+
+	//#region URL: ./text/splitter
+	require['./text/splitter'] = (function () {
+		var Splitter = function Splitter (separator) {
+		  this.separator = separator;
+		};
+
+		Splitter.prototype.split = function (value) {
+		  if (value.indexOf(this.separator) === -1)
+			return [value];
+
+		  if (value.indexOf('(') === -1)
+			return value.split(this.separator);
+
+		  var level = 0;
+		  var cursor = 0;
+		  var lastStart = 0;
+		  var len = value.length;
+		  var tokens = [];
+
+		  while (cursor++ < len) {
+			if (value[cursor] == '(') {
+			  level++;
+			} else if (value[cursor] == ')') {
+			  level--;
+			} else if (value[cursor] == this.separator && level === 0) {
+			  tokens.push(value.substring(lastStart, cursor));
+			  lastStart = cursor + 1;
+			}
+		  }
+
+		  if (lastStart < cursor + 1)
+			tokens.push(value.substring(lastStart));
+
+		  return tokens;
+		};
+		
+		return Splitter;
+	}).call(this);
+	//#endregion
+
 	//#region URL: ./properties/validator
 	require['./properties/validator'] = (function () {
 	  // Validates various CSS property values
+	  var Splitter = require('./text/splitter');
 
 	  // Regexes used for stuff
 	  var widthKeywords = ['thin', 'thick', 'medium', 'inherit', 'initial'];
 	  var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(px|%|em|rem|in|cm|mm|ex|pt|pc|vw|vh|vmin|vmax|)|auto|inherit)';
-	  var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
-	  var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.)*\\)';
-	  var cssFunctionAnyRegexStr = '(' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
-	  var cssUnitAnyRegexStr = '(none|' + widthKeywords.join('|') + '|' + cssUnitRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+	  var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
+	  var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
+	  var cssVariableRegexStr = 'var\\(\\-\\-[^\\)]+\\)';
+	  var cssFunctionAnyRegexStr = '(' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+	  var cssUnitAnyRegexStr = '(none|' + widthKeywords.join('|') + '|' + cssUnitRegexStr + '|' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+
+	  var cssFunctionNoVendorRegex = new RegExp('^' + cssFunctionNoVendorRegexStr + '$', 'i');
+	  var cssFunctionVendorRegex = new RegExp('^' + cssFunctionVendorRegexStr + '$', 'i');
+	  var cssVariableRegex = new RegExp('^' + cssVariableRegexStr + '$', 'i');
+	  var cssFunctionAnyRegex = new RegExp('^' + cssFunctionAnyRegexStr + '$', 'i');
+	  var cssUnitRegex = new RegExp('^' + cssUnitRegexStr + '$', 'i');
+	  var cssUnitAnyRegex = new RegExp('^' + cssUnitAnyRegexStr + '$', 'i');
 
 	  var backgroundRepeatKeywords = ['repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'inherit'];
 	  var backgroundAttachmentKeywords = ['inherit', 'scroll', 'fixed', 'local'];
 	  var backgroundPositionKeywords = ['center', 'top', 'bottom', 'left', 'right'];
+	  var backgroundSizeKeywords = ['contain', 'cover'];
 	  var listStyleTypeKeywords = ['armenian', 'circle', 'cjk-ideographic', 'decimal', 'decimal-leading-zero', 'disc', 'georgian', 'hebrew', 'hiragana', 'hiragana-iroha', 'inherit', 'katakana', 'katakana-iroha', 'lower-alpha', 'lower-greek', 'lower-latin', 'lower-roman', 'none', 'square', 'upper-alpha', 'upper-latin', 'upper-roman'];
 	  var listStylePositionKeywords = ['inside', 'outside', 'inherit'];
 	  var outlineStyleKeywords = ['auto', 'inherit', 'hidden', 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
@@ -521,72 +571,91 @@ var CleanCss = (function(){
 		  // We don't really check if it's a valid color value, but allow any letters in it
 		  return s !== 'auto' && (s === 'transparent' || s === 'inherit' || /^[a-zA-Z]+$/.test(s));
 		},
+		isValidVariable: function(s) {
+		  return cssVariableRegex.test(s);
+		},
 		isValidColor: function (s) {
-		  return validator.isValidNamedColor(s) || validator.isValidHexColor(s) || validator.isValidRgbaColor(s) || validator.isValidHslaColor(s);
+		  return validator.isValidNamedColor(s) || validator.isValidHexColor(s) || validator.isValidRgbaColor(s) || validator.isValidHslaColor(s) || validator.isValidVariable(s);
 		},
 		isValidUrl: function (s) {
 		  // NOTE: at this point all URLs are replaced with placeholders by clean-css, so we check for those placeholders
 		  return s.indexOf('__ESCAPED_URL_CLEAN_CSS') === 0;
 		},
 		isValidUnit: function (s) {
-		  return new RegExp('^' + cssUnitAnyRegexStr + '$', 'gi').test(s);
+		  return cssUnitAnyRegex.test(s);
 		},
 		isValidUnitWithoutFunction: function (s) {
-		  return new RegExp('^' + cssUnitRegexStr + '$', 'gi').test(s);
+		  return cssUnitRegex.test(s);
 		},
 		isValidFunctionWithoutVendorPrefix: function (s) {
-		  return new RegExp('^' + cssFunctionNoVendorRegexStr + '$', 'gi').test(s);
+		  return cssFunctionNoVendorRegex.test(s);
 		},
 		isValidFunctionWithVendorPrefix: function (s) {
-		  return new RegExp('^' + cssFunctionVendorRegexStr + '$', 'gi').test(s);
+		  return cssFunctionVendorRegex.test(s);
 		},
 		isValidFunction: function (s) {
-		  return new RegExp('^' + cssFunctionAnyRegexStr + '$', 'gi').test(s);
+		  return cssFunctionAnyRegex.test(s);
 		},
 		isValidBackgroundRepeat: function (s) {
-		  return backgroundRepeatKeywords.indexOf(s) >= 0;
+		  return backgroundRepeatKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 		},
 		isValidBackgroundAttachment: function (s) {
-		  return backgroundAttachmentKeywords.indexOf(s) >= 0;
+		  return backgroundAttachmentKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 		},
 		isValidBackgroundPositionPart: function (s) {
 		  if (backgroundPositionKeywords.indexOf(s) >= 0)
 			return true;
 
-		  return new RegExp('^' + cssUnitRegexStr + '$', 'gi').test(s);
+		  return cssUnitRegex.test(s) || validator.isValidVariable(s);
 		},
 		isValidBackgroundPosition: function (s) {
 		  if (s === 'inherit')
 			return true;
 
-		  return s.split(' ').filter(function (p) {
-			return p !== '';
-		  }).every(function(p) {
-			return validator.isValidBackgroundPositionPart(p);
-		  });
+		  var parts = s.split(' ');
+		  for (var i = 0, l = parts.length; i < l; i++) {
+			if (parts[i] === '')
+			  continue;
+			if (validator.isValidBackgroundPositionPart(parts[i]) || validator.isValidVariable(parts[i]))
+			  continue;
+
+			return false;
+		  }
+
+		  return true;
+		},
+		isValidBackgroundSizePart: function(s) {
+		  return backgroundSizeKeywords.indexOf(s) >= 0 || cssUnitRegex.test(s) || validator.isValidVariable(s);
+		},
+		isValidBackgroundPositionAndSize: function(s) {
+		  if (s.indexOf('/') < 0)
+			return false;
+
+		  var twoParts = new Splitter('/').split(s);
+		  return validator.isValidBackgroundSizePart(twoParts.pop()) && validator.isValidBackgroundPositionPart(twoParts.pop());
 		},
 		isValidListStyleType: function (s) {
-		  return listStyleTypeKeywords.indexOf(s) >= 0;
+		  return listStyleTypeKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 		},
 		isValidListStylePosition: function (s) {
-		  return listStylePositionKeywords.indexOf(s) >= 0;
+		  return listStylePositionKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 		},
 		isValidOutlineColor: function (s) {
 		  return s === 'invert' || validator.isValidColor(s) || validator.isValidVendorPrefixedValue(s);
 		},
 		isValidOutlineStyle: function (s) {
-		  return outlineStyleKeywords.indexOf(s) >= 0;
+		  return outlineStyleKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 		},
 		isValidOutlineWidth: function (s) {
-		  return validator.isValidUnit(s) || widthKeywords.indexOf(s) >= 0;
+		  return validator.isValidUnit(s) || widthKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 		},
 		isValidVendorPrefixedValue: function (s) {
 		  return /^-([A-Za-z0-9]|-)*$/gi.test(s);
 		},
 		areSameFunction: function (a, b) {
-		  if (!validator.isValidFunction(a) || !validator.isValidFunction(b)) {
+		  if (!validator.isValidFunction(a) || !validator.isValidFunction(b))
 			return false;
-		  }
+
 		  var f1name = a.substring(0, a.indexOf('('));
 		  var f2name = b.substring(0, b.indexOf('('));
 
@@ -594,63 +663,17 @@ var CleanCss = (function(){
 		}
 	  };
 
-	  validator.cssUnitRegexStr = cssUnitRegexStr;
-	  validator.cssFunctionNoVendorRegexStr = cssFunctionNoVendorRegexStr;
-	  validator.cssFunctionVendorRegexStr = cssFunctionVendorRegexStr;
-	  validator.cssFunctionAnyRegexStr = cssFunctionAnyRegexStr;
-	  validator.cssUnitAnyRegexStr = cssUnitAnyRegexStr;
-
 	  return validator;
 	}).call(this);
 	//#endregion
-	
-	//#region URL: ./text/comma-splitter
-	require['./text/comma-splitter'] = (function () {
-		var Splitter = function CommaSplitter (value) {
-		  this.value = value;
-		};
 
-		Splitter.prototype.split = function () {
-		  if (this.value.indexOf(',') === -1)
-			return [this.value];
-
-		  if (this.value.indexOf('(') === -1)
-			return this.value.split(',');
-
-		  var level = 0;
-		  var cursor = 0;
-		  var lastStart = 0;
-		  var len = this.value.length;
-		  var tokens = [];
-
-		  while (cursor++ < len) {
-			if (this.value[cursor] == '(') {
-			  level++;
-			} else if (this.value[cursor] == ')') {
-			  level--;
-			} else if (this.value[cursor] == ',' && level === 0) {
-			  tokens.push(this.value.substring(lastStart, cursor));
-			  lastStart = cursor + 1;
-			}
-		  }
-
-		  if (lastStart < cursor + 1)
-			tokens.push(this.value.substring(lastStart));
-
-		  return tokens;
-		};
-		
-		return Splitter;
-	}).call(this);
-	//#endregion
-	
 	//#region URL: ./properties/processable
 	require['./properties/processable'] = (function () {
 	  // Contains the interpretation of CSS properties, as used by the property optimizer
 
 	  var tokenModule = require('./properties/token');
 	  var validator = require('./properties/validator');
-	  var CommaSplitter = require('./text/comma-splitter');
+	  var Splitter = require('./text/splitter');
 
 	  // Functions that decide what value can override what.
 	  // The main purpose is to disallow removing CSS fallbacks.
@@ -777,49 +800,9 @@ var CleanCss = (function(){
 		  return result;
 		};
 	  };
-	  // Use this for properties with 4 unit values (like margin or padding)
-	  // NOTE: it handles shorter forms of these properties too (like, only 1, 2, or 3 units)
-	  breakUp.fourUnits = breakUp.takeCareOfFourValues(function (val) {
-		return val.match(new RegExp(validator.cssUnitAnyRegexStr, 'gi'));
-	  });
 	  // Use this when you simply want to break up four values along spaces
 	  breakUp.fourBySpaces = breakUp.takeCareOfFourValues(function (val) {
-		return val.split(' ').filter(function (v) { return v; });
-	  });
-	  // Use this for non-length values that can also contain functions
-	  breakUp.fourBySpacesOrFunctions = breakUp.takeCareOfFourValues(function (val) {
-		var result = [];
-		var curr = '';
-		var parenthesisLevel = 0;
-		var valLength = val.length;
-
-		for (var i = 0; i < valLength; i++) {
-		  var c = val[i];
-		  curr += c;
-
-		  if (c === '(') {
-			parenthesisLevel++;
-		  } else if (c === ')') {
-			parenthesisLevel--;
-			if (parenthesisLevel === 0) {
-			  result.push(curr.trim());
-			  curr = '';
-			}
-		  } else if (c === ' ' && parenthesisLevel === 0) {
-			curr = curr.trim();
-			if (curr !== '') {
-			  result.push(curr);
-			  curr = '';
-			}
-		  }
-		}
-
-		if (curr) {
-		  result.push(curr.trim());
-		  curr = '';
-		}
-
-		return result;
+		return new Splitter(' ').split(val).filter(function (v) { return v; });
 	  });
 	  // Breaks up a background property value
 	  breakUp.commaSeparatedMulitpleValues = function (splitfunc) {
@@ -827,7 +810,7 @@ var CleanCss = (function(){
 		  if (token.value.indexOf(',') === -1)
 			return splitfunc(token);
 
-		  var values = new CommaSplitter(token.value).split();
+		  var values = new Splitter(',').split(token.value);
 		  var components = [];
 
 		  for (var i = 0, l = values.length; i < l; i++) {
@@ -848,62 +831,66 @@ var CleanCss = (function(){
 	  };
 	  breakUp.background = function (token) {
 		// Default values
-		var result = Token.makeDefaults(['background-color', 'background-image', 'background-repeat', 'background-position', 'background-attachment'], token.isImportant);
-		var color = result[0], image = result[1], repeat = result[2], position = result[3], attachment = result[4];
+		var result = Token.makeDefaults(['background-image', 'background-position', 'background-size', 'background-repeat', 'background-attachment', 'background-color'], token.isImportant);
+		var image = result[0];
+		var position = result[1];
+		var size = result[2];
+		var repeat = result[3];
+		var attachment = result[4];
+		var color = result[5];
 
 		// Take care of inherit
 		if (token.value === 'inherit') {
 		  // NOTE: 'inherit' is not a valid value for background-attachment so there we'll leave the default value
-		  color.value = image.value =  repeat.value = position.value = attachment.value = 'inherit';
+		  color.value = image.value =  repeat.value = position.value = size.value = attachment.value = 'inherit';
 		  return result;
 		}
 
 		// Break the background up into parts
-		var parts = token.value.split(' ');
+		var parts = new Splitter(' ').split(token.value);
 		if (parts.length === 0)
 		  return result;
 
-		// The trick here is that we start going through the parts from the end, then stop after background repeat,
-		// then start from the from the beginning until we find a valid color value. What remains will be treated as background-image.
+		// Iterate over all parts and try to fit them into positions
+		for (var i = parts.length - 1; i >= 0; i--) {
+		  var currentPart = parts[i];
 
-		var currentIndex = parts.length - 1;
-		var current = parts[currentIndex];
-		// Attachment
-		if (validator.isValidBackgroundAttachment(current)) {
-		  // Found attachment
-		  attachment.value = current;
-		  currentIndex--;
-		  current = parts[currentIndex];
+		  if (validator.isValidBackgroundAttachment(currentPart)) {
+			attachment.value = currentPart;
+		  } else if (validator.isValidBackgroundRepeat(currentPart)) {
+			repeat.value = currentPart;
+		  } else if (validator.isValidBackgroundPositionPart(currentPart) || validator.isValidBackgroundSizePart(currentPart)) {
+			if (i > 0) {
+			  var previousPart = parts[i - 1];
+
+			  if (previousPart.indexOf('/') > 0) {
+				var twoParts = new Splitter('/').split(previousPart);
+				size.value = twoParts.pop() + ' ' + currentPart;
+				parts[i - 1] = twoParts.pop();
+			  } else if (i > 1 && parts[i - 2] == '/') {
+				size.value = previousPart + ' ' + currentPart;
+				i -= 2;
+			  } else if (parts[i - 1] == '/') {
+				size.value = currentPart;
+				position.value = previousPart;
+				i--;
+			  } else {
+				position.value = previousPart + ' ' + currentPart;
+				i--;
+			  }
+			} else {
+			  position.value = currentPart;
+			}
+		  } else if (validator.isValidBackgroundPositionAndSize(currentPart)) {
+			var sizeValue = new Splitter('/').split(currentPart);
+			size.value = sizeValue.pop();
+			position.value = sizeValue.pop();
+		  } else if (validator.isValidColor(currentPart)) {
+			color.value = currentPart;
+		  } else if (validator.isValidUrl(currentPart) || validator.isValidFunction(currentPart)) {
+			image.value = currentPart;
+		  }
 		}
-		// Position
-		var pos = parts[currentIndex - 1] + ' ' + parts[currentIndex];
-		if (currentIndex >= 1 && validator.isValidBackgroundPosition(pos)) {
-		  // Found position (containing two parts)
-		  position.value = pos;
-		  currentIndex -= 2;
-		  current = parts[currentIndex];
-		} else if (currentIndex >= 0 && validator.isValidBackgroundPosition(current)) {
-		  // Found position (containing just one part)
-		  position.value = current;
-		  currentIndex--;
-		  current = parts[currentIndex];
-		}
-		// Repeat
-		if (currentIndex >= 0 && validator.isValidBackgroundRepeat(current)) {
-		  // Found repeat
-		  repeat.value = current;
-		  currentIndex--;
-		  current = parts[currentIndex];
-		}
-		// Color
-		var fromBeginning = 0;
-		if (validator.isValidColor(parts[0])) {
-		  // Found color
-		  color.value = parts[0];
-		  fromBeginning = 1;
-		}
-		// Image
-		image.value = (parts.splice(fromBeginning, currentIndex - fromBeginning + 1).join(' ')) || 'none';
 
 		return result;
 	  };
@@ -918,7 +905,7 @@ var CleanCss = (function(){
 		  return result;
 		}
 
-		var parts = token.value.split(' ');
+		var parts = new Splitter(' ').split(token.value);
 		var ci = 0;
 
 		// Type
@@ -958,7 +945,7 @@ var CleanCss = (function(){
 		// NOTE: usually users don't follow the required order of parts in this shorthand,
 		// so we'll try to parse it caring as little about order as possible
 
-		var parts = token.value.split(' '), w;
+		var parts = new Splitter(' ').split(token.value), w;
 
 		if (parts.length === 0) {
 		  return result;
@@ -1003,7 +990,7 @@ var CleanCss = (function(){
 	  breakUp.borderRadius = function(token) {
 		var parts = token.value.split('/');
 		if (parts.length == 1)
-		  return breakUp.fourUnits(token);
+		  return breakUp.fourBySpaces(token);
 
 		var horizontalPart = token.clone();
 		var verticalPart = token.clone();
@@ -1011,8 +998,8 @@ var CleanCss = (function(){
 		horizontalPart.value = parts[0];
 		verticalPart.value = parts[1];
 
-		var horizontalBreakUp = breakUp.fourUnits(horizontalPart);
-		var verticalBreakUp = breakUp.fourUnits(verticalPart);
+		var horizontalBreakUp = breakUp.fourBySpaces(horizontalPart);
+		var verticalBreakUp = breakUp.fourBySpaces(verticalPart);
 
 		for (var i = 0; i < 4; i++) {
 		  horizontalBreakUp[i].value = [horizontalBreakUp[i].value, verticalBreakUp[i].value];
@@ -1083,8 +1070,9 @@ var CleanCss = (function(){
 		  return result;
 		},
 		// Puts together the components by spaces and omits default values (this is the case for most shorthands)
-		bySpacesOmitDefaults: function (prop, tokens, isImportant) {
+		bySpacesOmitDefaults: function (prop, tokens, isImportant, meta) {
 		  var result = new Token(prop, '', isImportant);
+
 		  // Get irrelevant tokens
 		  var irrelevantTokens = tokens.filter(function (t) { return t.isIrrelevant; });
 
@@ -1121,7 +1109,10 @@ var CleanCss = (function(){
 			  continue;
 			}
 
-			result.value += ' ' + token.value;
+			if (meta && meta.partsCount && meta.position < meta.partsCount - 1 && processable[token.prop].multiValueLastOnly)
+			  continue;
+
+			result.value += (processable[token.prop].prefixShorthandValueWith || ' ') + token.value;
 		  }
 
 		  result.value = result.value.trim();
@@ -1134,7 +1125,7 @@ var CleanCss = (function(){
 		commaSeparatedMulitpleValues: function (assembleFunction) {
 		  return function(prop, tokens, isImportant) {
 			var tokenSplitLengths = tokens.map(function (token) {
-			  return new CommaSplitter(token.value).split().length;
+			  return new Splitter(',').split(token.value).length;
 			});
 			var partsCount = Math.max.apply(Math, tokenSplitLengths);
 
@@ -1147,7 +1138,7 @@ var CleanCss = (function(){
 			  merged.push([]);
 
 			  for (var j = 0; j < tokens.length; j++) {
-				var split = new CommaSplitter(tokens[j].value).split();
+				var split = new Splitter(',').split(tokens[j].value);
 				merged[i].push(split[i] || split[0]);
 			  }
 			}
@@ -1159,7 +1150,11 @@ var CleanCss = (function(){
 				tokens[k].value = merged[i][k];
 			  }
 
-			  var processed = assembleFunction(prop, tokens, isImportant);
+			  var meta = {
+				partsCount: partsCount,
+				position: i
+			  };
+			  var processed = assembleFunction(prop, tokens, isImportant, meta);
 			  mergedValues.push(processed.value);
 
 			  if (!firstProcessed)
@@ -1172,7 +1167,7 @@ var CleanCss = (function(){
 		},
 		// Handles the cases when some or all the fine-grained properties are set to inherit
 		takeCareOfInherit: function (innerFunc) {
-		  return function (prop, tokens, isImportant) {
+		  return function (prop, tokens, isImportant, meta) {
 			// Filter out the inheriting and non-inheriting tokens in one iteration
 			var inheritingTokens = [];
 			var nonInheritingTokens = [];
@@ -1202,7 +1197,7 @@ var CleanCss = (function(){
 			  var result1 = [new Token(prop, 'inherit', isImportant)].concat(nonInheritingTokens);
 
 			  // Result 2. Shorthand every non-inherit value and then have it overridden with the inheriting ones
-			  var result2 = [innerFunc(prop, result2Shorthandable, isImportant)].concat(inheritingTokens);
+			  var result2 = [innerFunc(prop, result2Shorthandable, isImportant, meta)].concat(inheritingTokens);
 
 			  // Return whichever is shorter
 			  var dl1 = Token.getDetokenizedLength(result1);
@@ -1211,7 +1206,7 @@ var CleanCss = (function(){
 			  return dl1 < dl2 ? result1 : result2;
 			} else {
 			  // When none of tokens are 'inherit'
-			  return innerFunc(prop, tokens, isImportant);
+			  return innerFunc(prop, tokens, isImportant, meta);
 			}
 		  };
 		},
@@ -1282,11 +1277,12 @@ var CleanCss = (function(){
 		// background ------------------------------------------------------------------------------
 		'background': {
 		  components: [
-			'background-color',
 			'background-image',
-			'background-repeat',
 			'background-position',
-			'background-attachment'
+			'background-size',
+			'background-repeat',
+			'background-attachment',
+			'background-color'
 		  ],
 		  breakUp: breakUp.commaSeparatedMulitpleValues(breakUp.background),
 		  putTogether: putTogether.commaSeparatedMulitpleValues(
@@ -1298,6 +1294,7 @@ var CleanCss = (function(){
 		'background-color': {
 		  canOverride: canOverride.color,
 		  defaultValue: 'transparent',
+		  multiValueLastOnly: true,
 		  shortestValue: 'red'
 		},
 		'background-image': {
@@ -1312,6 +1309,12 @@ var CleanCss = (function(){
 		  canOverride: canOverride.always,
 		  defaultValue: '0 0',
 		  shortestValue: '0'
+		},
+		'background-size': {
+		  canOverride: canOverride.always,
+		  defaultValue: 'auto',
+		  shortestValue: '0 0',
+		  prefixShorthandValueWith: '/'
 		},
 		'background-attachment': {
 		  canOverride: canOverride.always,
@@ -1414,14 +1417,14 @@ var CleanCss = (function(){
 		options = options || {};
 		processable[prop] = {
 		  components: components,
-		  breakUp: options.breakUp || breakUp.fourUnits,
+		  breakUp: options.breakUp || breakUp.fourBySpaces,
 		  putTogether: options.putTogether || putTogether.takeCareOfInherit(putTogether.fourUnits),
 		  defaultValue: options.defaultValue || '0',
 		  shortestValue: options.shortestValue
 		};
 		for (var i = 0; i < components.length; i++) {
 		  processable[components[i]] = {
-			breakUp: options.breakUp || breakUp.fourUnits,
+			breakUp: options.breakUp || breakUp.fourBySpaces,
 			canOverride: options.canOverride || canOverride.unit,
 			defaultValue: options.defaultValue || '0',
 			shortestValue: options.shortestValue
@@ -1447,7 +1450,7 @@ var CleanCss = (function(){
 		'border-bottom-color',
 		'border-left-color'
 	  ], {
-		breakUp: breakUp.fourBySpacesOrFunctions,
+		breakUp: breakUp.fourBySpaces,
 		canOverride: canOverride.color,
 		defaultValue: 'currentColor',
 		shortestValue: 'red'
@@ -3181,7 +3184,7 @@ var CleanCss = (function(){
 		var FreeTextProcessor = require('./text/free');
 		var UrlsProcessor = require('./text/urls');
 		var NameQuotesProcessor = require('./text/name-quotes');
-		var CommaSplitter = require('./text/comma-splitter');
+		var Splitter = require('./text/splitter');
 
 		var SelectorsOptimizer = require('./selectors/optimizer');
 
@@ -3351,6 +3354,9 @@ var CleanCss = (function(){
 			data = urlsProcessor.escape(data);
 		  });
 
+		  // remove invalid special declarations
+		  replace(/@(?:IMPORT|CHARSET) [^;]+;/g, '');
+
 		  // whitespace inside attribute selectors brackets
 		  replace(/\[([^\]]+)\]/g, function(match) {
 			return match.replace(/\s/g, '');
@@ -3471,7 +3477,7 @@ var CleanCss = (function(){
 		  // transparent rgba/hsla to 'transparent' unless in compatibility mode
 		  if (!options.compatibility) {
 			replace(/:([^;]*)(?:rgba|hsla)\(\d+,\d+%?,\d+%?,0\)/g, function (match, prefix) {
-			  if (new CommaSplitter(match).split().pop().indexOf('gradient(') > -1)
+			  if (new Splitter(',').split(match).pop().indexOf('gradient(') > -1)
 				return match;
 
 			  return ':' + prefix + 'transparent';

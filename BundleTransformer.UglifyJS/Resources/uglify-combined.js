@@ -3733,7 +3733,13 @@
 		/* -----[ PARENTHESES ]----- */
 
 		function PARENS(nodetype, func) {
-			nodetype.DEFMETHOD("needs_parens", func);
+			if (Array.isArray(nodetype)) {
+				nodetype.forEach(function(nodetype){
+					PARENS(nodetype, func);
+				});
+			} else {
+				nodetype.DEFMETHOD("needs_parens", func);
+			}
 		};
 
 		PARENS(AST_Node, function(){
@@ -3752,7 +3758,7 @@
 			return first_in_statement(output);
 		});
 
-		PARENS(AST_Unary, function(output){
+		PARENS([ AST_Unary, AST_Undefined ], function(output){
 			var p = output.parent();
 			return p instanceof AST_PropAccess && p.expression === this;
 		});
@@ -3848,7 +3854,7 @@
 				return true;
 		});
 
-		function assign_and_conditional_paren_rules(output) {
+		PARENS([ AST_Assign, AST_Conditional ], function (output){
 			var p = output.parent();
 			// !(a = false) → true
 			if (p instanceof AST_Unary)
@@ -3865,10 +3871,7 @@
 			// (a = foo)["prop"] —or— (a = foo).prop
 			if (p instanceof AST_PropAccess && p.expression === this)
 				return true;
-		};
-
-		PARENS(AST_Assign, assign_and_conditional_paren_rules);
-		PARENS(AST_Conditional, assign_and_conditional_paren_rules);
+		});
 
 		/* -----[ PRINTERS ]----- */
 

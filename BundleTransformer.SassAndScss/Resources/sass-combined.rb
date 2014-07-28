@@ -1,8 +1,8 @@
 #############################################################################
-# Sass v3.3.10
+# Sass v3.3.11
 # http://sass-lang.com
 #
-# Copyright 2006-2014, Hampton Catlin, Nathan Weizenbaum and Chris Eppstein
+# Copyright 2006-2013 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
 # Released under the MIT License
 #############################################################################
 
@@ -2004,10 +2004,10 @@ module Sass
     def version
       return @@version if defined?(@@version)
 
-	  #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.3.10'.strip.split('.').
+      #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
+	  numbers = '3.3.11'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
-	  #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
+      #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Maptastic Maple'.strip
       @@version = {
         :major => numbers[0],
@@ -3208,7 +3208,7 @@ module Sass::Tree
     #
     # @return [{#to_s => #to_s}]
     def debug_info
-	  #BT {:filename => filename && ("file://" + Sass::Util.escape_uri(File.expand_path(filename))),
+      #BT {:filename => filename && ("file://" + Sass::Util.escape_uri(File.expand_path(filename))),
 	  {:filename => filename && ("file://" + Sass::Util.escape_uri(filename)),
        :line => line}
     end
@@ -6129,7 +6129,7 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
         ])
       prop = Sass::Tree::PropNode.new([""], Sass::Script::Value::String.new(''), :new)
       prop.resolved_name = "font-family"
-	  #BT prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
+      #BT prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
 	  prop.resolved_value = !(v =~ /^\d+$/).nil? ? ("\\00003" + v) : Sass::SCSS::RX.escape_ident(v.to_s)
       rule << prop
       node << rule
@@ -10140,6 +10140,7 @@ module Sass::Script
       end_at = number(-1) if end_at.nil?
       assert_unit end_at, nil, "end-at"
 
+      return Sass::Script::Value::String.new("", string.type) if end_at.value == 0
       s = start_at.value > 0 ? start_at.value - 1 : start_at.value
       e = end_at.value > 0 ? end_at.value - 1 : end_at.value
       s = string.value.length + s if s < 0
@@ -16312,7 +16313,7 @@ MESSAGE
           # group, but then rewinds the scanner and removes the group from the
           # end of the matched string. This fix makes the assumption that the
           # matched group will always occur at the end of the match.
-		  if  last_group_lookahead 
+          if  last_group_lookahead 
 			#BT IronRuby has the negative group index code wrong, so use regexp on 
 			#BT the matched text to get the last group
 			lastgroup = rx.match( @scanner.matched )[-1]
@@ -17285,8 +17286,8 @@ WARNING
       def _find(dir, name, options)
         full_filename, syntax = Sass::Util.destructure(find_real_file(dir, name, options))
         #BT return unless full_filename && File.readable?(full_filename)
-		full_filename = full_filename.gsub(/\\/, "/")
-		return unless full_filename
+        full_filename = full_filename.gsub(/\\/, "/")
+        return unless full_filename
 
         options[:syntax] = syntax
         options[:filename] = full_filename

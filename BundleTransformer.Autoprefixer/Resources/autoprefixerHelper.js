@@ -19,6 +19,7 @@
 
 	exports.process = function (code, options) {
 		var browsers,
+			safe,
 			autoprefixOptions,
 			postProcessor,
 			result = {},
@@ -30,13 +31,17 @@
 			;
 
 		options = options || {};
+
 		browsers = options.browsers || [];
+		safe = options.safe;
+
 		autoprefixOptions = mix({}, options);
 		delete autoprefixOptions.browsers;
+		delete autoprefixOptions.safe;
 
 		try {
 			postProcessor = autoprefixer.apply(this, browsers.concat([autoprefixOptions]));
-			processedCode = postProcessor.process(code).css;
+			processedCode = postProcessor.process(code, { "safe": safe }).css;
 		}
 		catch (e) {
 			if (typeof e.line !== "undefined" || typeof e.autoprefixer !== "undefined") {

@@ -156,7 +156,8 @@
 		{
 			var optionsJson = new JObject(
 				new JProperty("browsers", new JArray(options.Browsers)),
-				new JProperty("cascade", options.Cascade)
+				new JProperty("cascade", options.Cascade),
+				new JProperty("safe", options.Safe)
 			);
 
 			return optionsJson;
