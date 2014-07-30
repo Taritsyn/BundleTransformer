@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.10
+ * Clean-css v2.2.11
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1112,6 +1112,11 @@ var CleanCss = (function(){
 			if (meta && meta.partsCount && meta.position < meta.partsCount - 1 && processable[token.prop].multiValueLastOnly)
 			  continue;
 
+			var requiresPreceeding = processable[token.prop].shorthandFollows;
+			if (requiresPreceeding && (tokens[i - 1].value == processable[requiresPreceeding].defaultValue)) {
+			  result.value += ' ' + tokens[i - 1].value;
+			}
+
 			result.value += (processable[token.prop].prefixShorthandValueWith || ' ') + token.value;
 		  }
 
@@ -1314,7 +1319,8 @@ var CleanCss = (function(){
 		  canOverride: canOverride.always,
 		  defaultValue: 'auto',
 		  shortestValue: '0 0',
-		  prefixShorthandValueWith: '/'
+		  prefixShorthandValueWith: '/',
+		  shorthandFollows: 'background-position'
 		},
 		'background-attachment': {
 		  canOverride: canOverride.always,
