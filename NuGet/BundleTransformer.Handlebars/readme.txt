@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Handlebars 1.9.3
+            README file for Bundle Transformer: Handlebars 1.9.13
 
    ----------------------------------------------------------------------
 
@@ -23,15 +23,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. In configuration settings of Handlebars-translator added one new
-      property - `Data` (default `true`);
-   2. Files whose names start with an underscore are now compiled as the
-      globally defined partials (first underscore are removed from the
-      template name).
    
    ====================
    POST-INSTALL ACTIONS

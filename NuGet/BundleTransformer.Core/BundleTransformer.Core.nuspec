@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Core</id>
-    <version>1.9.11</version>
+    <version>1.9.13</version>
 	<title>Bundle Transformer: Core</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>

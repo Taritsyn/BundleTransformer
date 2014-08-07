@@ -1,7 +1,19 @@
 var lessHelper = (function (less) {
 	"use strict";
 
-	var exports = {};
+	var exports = {},
+		defaultOptions = {
+			compress: false,
+			optimization: 1,
+			paths: [],
+			strictImports: false,
+			ieCompat: true,
+			strictMath: false,
+			strictUnits: false,
+			dumpLineNumbers: '',
+			javascriptEnabled: true,
+			urlArgs: ''
+		};
 
 	function mix(destination, source) {
 		var propertyName;
@@ -137,6 +149,7 @@ var lessHelper = (function (less) {
 				compiledCode: '',
 				errors: []
 			},
+			compilationOptions,
 			inputFilePath = path,
 			inputFileKey,
 			files,
@@ -150,6 +163,9 @@ var lessHelper = (function (less) {
 			env,
 			errors = []
 			;
+
+		options = options || {};
+		compilationOptions = mix(mix({}, defaultOptions), options);
 
 		// Fill file cache
 		files = {};
@@ -185,7 +201,6 @@ var lessHelper = (function (less) {
 				rootFilename: path
 			},
 			insecure: false,
-            cleancss: false,
             sourceMap: false,
             sourceMapFilename: '',
 			sourceMapURL: '',
@@ -196,7 +211,7 @@ var lessHelper = (function (less) {
             outputSourceFiles: false,
             writeSourceMap: false
 		};
-		mix(env, options);
+		mix(env, compilationOptions);
 
 		var parser = new less.Parser(env);
 		less.ioHost = ioHost;
@@ -215,7 +230,7 @@ var lessHelper = (function (less) {
 					return;
 				}
 
-				result.compiledCode = tree.toCSS(options);
+				result.compiledCode = tree.toCSS(compilationOptions);
 			});
 		}
 		catch (e) {

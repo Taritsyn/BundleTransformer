@@ -83,7 +83,7 @@
 		public LessCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
-			_defaultOptions = defaultOptions;
+			_defaultOptions = defaultOptions ?? new CompilationOptions();
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
 		}

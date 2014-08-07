@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.11
+ * Clean-css v2.2.12
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -885,7 +885,7 @@ var CleanCss = (function(){
 			var sizeValue = new Splitter('/').split(currentPart);
 			size.value = sizeValue.pop();
 			position.value = sizeValue.pop();
-		  } else if (validator.isValidColor(currentPart)) {
+		  } else if ((color.value == processable[color.prop].defaultValue || color.value == 'none') && validator.isValidColor(currentPart)) {
 			color.value = currentPart;
 		  } else if (validator.isValidUrl(currentPart) || validator.isValidFunction(currentPart)) {
 			image.value = currentPart;
@@ -2725,8 +2725,9 @@ var CleanCss = (function(){
 			  var oldMode;
 
 			  if (what == 'special') {
-				var fragment = chunk.substring(nextSpecial, context.cursor + '@font-face'.length + 1);
-				var isSingle = fragment.indexOf('@import') === 0 || fragment.indexOf('@charset') === 0;
+				var firstOpenBraceAt = chunk.indexOf('{', nextSpecial);
+				var firstSemicolonAt = chunk.indexOf(';', nextSpecial);
+				var isSingle = firstSemicolonAt > -1 && (firstOpenBraceAt == -1 || firstSemicolonAt < firstOpenBraceAt);
 				if (isSingle) {
 				  nextEnd = chunk.indexOf(';', nextSpecial + 1);
 				  tokenized.push(chunk.substring(context.cursor, nextEnd + 1));
@@ -3361,7 +3362,9 @@ var CleanCss = (function(){
 		  });
 
 		  // remove invalid special declarations
-		  replace(/@(?:IMPORT|CHARSET) [^;]+;/g, '');
+		  replace(/@charset [^;]+;/ig, function (match) {
+			return match.indexOf('@charset') > -1 ? match : '';
+		  });
 
 		  // whitespace inside attribute selectors brackets
 		  replace(/\[([^\]]+)\]/g, function(match) {
@@ -3417,7 +3420,7 @@ var CleanCss = (function(){
 
 		  // replace font weight with numerical value
 		  replace(/(font\-weight|font):(normal|bold)([ ;\}!])(\w*)/g, function(match, property, weight, suffix, next) {
-			if (suffix == ' ' && next.length > 0 && !/[.\d]/.test(next))
+			if (suffix == ' ' && (next.indexOf('/') > -1 || next == 'normal' || /[1-9]00/.test(next)))
 			  return match;
 
 			if (weight == 'normal')

@@ -2049,13 +2049,13 @@ var Less = (function(){
 
 			toCSS: tree.toCSS
 		};
-		
+
 		})(Tree);
 		//#endregion
 		
 		//#region URL: ./tree/url
 		(function (tree) {
-		
+
 		tree.URL = function (val, currentFileInfo, isEvald) {
 			this.value = val;
 			this.currentFileInfo = currentFileInfo;
@@ -2111,7 +2111,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/alpha
 		(function (tree) {
-		
+
 		tree.Alpha = function (val) {
 			this.value = val;
 		};
@@ -2271,7 +2271,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/mixin
 		(function (tree) {
-		
+
 		tree.mixin = {};
 		tree.mixin.Call = function (elements, args, index, currentFileInfo, important) {
 			this.selector = new(tree.Selector)(elements);
@@ -2590,7 +2590,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/comment
 		(function (tree) {
-		
+
 		tree.Comment = function (value, silent, index, currentFileInfo) {
 			this.value = value;
 			this.silent = !!silent;
@@ -2621,7 +2621,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/anonymous
 		(function (tree) {
-		
+
 		tree.Anonymous = function (value, index, currentFileInfo, mapLines, rulesetLike) {
 			this.value = value;
 			this.index = index;
@@ -2662,7 +2662,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/value
 		(function (tree) {
-		
+
 		tree.Value = function (value) {
 			this.value = value;
 		};
@@ -2753,13 +2753,13 @@ var Less = (function(){
 				}
 			}
 		};
-		
+
 		})(Tree);
 		//#endregion
 		
 		//#region URL: ./tree/assignment
 		(function (tree) {
-		
+
 		tree.Assignment = function (key, val) {
 			this.key = key;
 			this.value = val;
@@ -2791,7 +2791,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/condition
 		(function (tree) {
-		
+
 		tree.Condition = function (op, l, r, i, negate) {
 			this.op = op.trim();
 			this.lvalue = l;
@@ -2843,7 +2843,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/paren
 		(function (tree) {
-		
+
 		tree.Paren = function (node) {
 			this.value = node;
 		};
@@ -2868,7 +2868,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/media
 		(function (tree) {
-		
+
 		tree.Media = function (value, features, index, currentFileInfo) {
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
@@ -3040,13 +3040,13 @@ var Less = (function(){
 			toCSS: tree.toCSS,
 			eval: function () { return this; }
 		};
-		
+
 		})(Tree);
 		//#endregion
 		
 		//#region URL: ./tree/negative
 		(function (tree) {
-		
+
 		tree.Negative = function (node) {
 			this.value = node;
 		};
@@ -3073,7 +3073,7 @@ var Less = (function(){
 		
 		//#region URL: ./tree/extend
 		(function (tree) {
-		
+
 		tree.Extend = function Extend(selector, option, index) {
 			this.selector = selector;
 			this.option = option;
@@ -3148,7 +3148,7 @@ var Less = (function(){
 
 		//#region URL: ./env
 		(function (tree) {
-		
+
 		var parseCopyProperties = [
 			'paths',            // option - unmodified - paths to search for imports on
 			'optimization',     // option - optimization level (for the chunker)
@@ -3289,7 +3289,7 @@ var Less = (function(){
 
 		//#region URL: ./functions
 		(function (tree) {
-		
+
 		tree.functions = {
 			rgb: function (r, g, b) {
 				return this.rgba(r, g, b, 1.0);
@@ -3991,7 +3991,7 @@ var Less = (function(){
 
 		//#region URL: ./colors
 		(function (tree) {
-		
+
 		tree.colors = {
 			'aliceblue':'#f0f8ff',
 			'antiquewhite':'#faebd7',
@@ -4147,7 +4147,7 @@ var Less = (function(){
 
 		//#region URL: ./visitor
 		(function (tree) {
-		
+
 		var _visitArgs = { visitDeeper: true },
 			_hasIndexed = false;
 
@@ -4296,7 +4296,7 @@ var Less = (function(){
 
 		//#region URL: ./import-visitor
 		(function (tree) {
-		
+
 		tree.importVisitor = function(importer, finish, evalEnv, onceFileDetectionMap, recursionDetector) {
 			this._visitor = new tree.visitor(this);
 			this._importer = importer;
@@ -4444,7 +4444,7 @@ var Less = (function(){
 
 		//#region URL: ./extend-visitor
 		(function (tree) {
-		
+
 		/*jshint loopfunc:true */
 
 		tree.extendFinderVisitor = function() {
@@ -4864,7 +4864,7 @@ var Less = (function(){
 
 		//#region URL: ./join-selector-visitor
 		(function (tree) {
-		
+
 		tree.joinSelectorVisitor = function() {
 			this.contexts = [[]];
 			this._visitor = new tree.visitor(this);
@@ -7231,8 +7231,6 @@ var Less = (function(){
 //
 //			return s;
 //		};
-		
-		var isUrlRe = /^(?:https?:)?\/\//i;
 
 		less.Parser.fileLoader = function (filePath, currentFileInfo, callback, env) {
 			var ioHost = less.ioHost,

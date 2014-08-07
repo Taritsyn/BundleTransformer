@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Autoprefixer 1.9.12
+           README file for Bundle Transformer: Autoprefixer 1.9.13
  
    ----------------------------------------------------------------------
 
@@ -21,11 +21,6 @@
    working of this module is recommended to install the following NuGet
    packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie
    (only in the `ChakraJsRt` mode).
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Autoprefixer version 2.2.0.
    
    ====================
    POST-INSTALL ACTIONS

@@ -1,5 +1,5 @@
 #############################################################################
-# Sass v3.3.11
+# Sass v3.3.14
 # http://sass-lang.com
 #
 # Copyright 2006-2013 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
@@ -2005,7 +2005,7 @@ module Sass
       return @@version if defined?(@@version)
 
       #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.3.11'.strip.split('.').
+	  numbers = '3.3.14'.strip.split('.').
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
       #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Maptastic Maple'.strip
@@ -3209,7 +3209,7 @@ module Sass::Tree
     # @return [{#to_s => #to_s}]
     def debug_info
       #BT {:filename => filename && ("file://" + Sass::Util.escape_uri(File.expand_path(filename))),
-	  {:filename => filename && ("file://" + Sass::Util.escape_uri(filename)),
+      {:filename => filename && ("file://" + Sass::Util.escape_uri(filename)),
        :line => line}
     end
 
@@ -11215,8 +11215,14 @@ module Sass
       end
 
       def token
-        if after_interpolation? && (interp_type = @interpolation_stack.pop)
-          return string(interp_type, true)
+        if after_interpolation? && (interp = @interpolation_stack.pop)
+          interp_type, interp_value = interp
+          if interp_type == :special_fun
+            return special_fun_body(interp_value)
+          else
+            raise "[BUG]: Unknown interp_type #{interp_type}" unless interp_type == :string
+            return string(interp_value, true)
+          end
         end
 
         variable || string(:double, false) || string(:single, false) || number || color ||
@@ -11244,7 +11250,7 @@ module Sass
         if @scanner[2] == '#{' # '
           @scanner.pos -= 2 # Don't actually consume the #{
           @offset -= 2
-          @interpolation_stack << re
+          @interpolation_stack << [:string, re]
         end
         str =
           if re == :uri
@@ -11296,18 +11302,34 @@ MESSAGE
       end
 
       def special_fun
-        str1 = scan(/((-[\w-]+-)?(calc|element)|expression|progid:[a-z\.]*)\(/i)
-        return unless str1
-        str2, _ = Sass::Shared.balance(@scanner, ?(, ?), 1)
-        c = str2.count("\n")
-        old_line = @line
-        old_offset = @offset
-        @line += c
-        @offset = c == 0 ? @offset + str2.size : str2[/\n([^\n]*)/, 1].size + 1
-        [:special_fun,
-         Sass::Util.merge_adjacent_strings(
-            [str1] + Sass::Engine.parse_interp(str2, old_line, old_offset, @options)),
-         str1.size + str2.size]
+        prefix = scan(/((-[\w-]+-)?(calc|element)|expression|progid:[a-z\.]*)\(/i)
+        return unless prefix
+        special_fun_body(1, prefix)
+      end
+
+      def special_fun_body(parens, prefix = nil)
+        str = prefix || ''
+        while (scanned = scan(/.*?([()]|\#{)/m))
+          str << scanned
+          if scanned[-1] == ?(
+            parens += 1
+            next
+          elsif scanned[-1] == ?)
+            parens -= 1
+            next unless parens == 0
+          else
+            raise "[BUG] Unreachable" unless @scanner[1] == '#{' # '
+            str.slice!(-2..-1)
+            @scanner.pos -= 2 # Don't actually consume the #{
+            @offset -= 2
+            @interpolation_stack << [:special_fun, parens]
+          end
+
+          return [:special_fun, Sass::Script::Value::String.new(str)]
+        end
+
+        scan(/.*/)
+        expected!('")"')
       end
 
       def special_val
@@ -11842,22 +11864,14 @@ RUBY
       end
 
       def special_fun
-        start_pos = source_position
-        tok = try_tok(:special_fun)
-        return paren unless tok
-        first = literal_node(Script::Value::String.new(tok.value.first),
-          start_pos, start_pos.after(tok.value.first))
-        Sass::Util.enum_slice(tok.value[1..-1], 2).inject(first) do |l, (i, r)|
-          end_pos = i.source_range.end_pos
-          end_pos = end_pos.after(r) if r
-          node(
-            Script::Tree::Interpolation.new(
-              l, i,
-              r && literal_node(Script::Value::String.new(r),
-                i.source_range.end_pos, end_pos),
-              false, false),
-            start_pos, end_pos)
-        end
+        first = try_tok(:special_fun)
+        return paren unless first
+        str = literal_node(first.value, first.source_range)
+        return str unless try_tok(:begin_interpolation)
+        mid = parse_interpolated
+        last = assert_expr(:special_fun)
+        node(Tree::Interpolation.new(str, mid, last, false, false),
+            first.source_range.start_pos)
       end
 
       def paren
@@ -11918,6 +11932,7 @@ RUBY
         :mixin_arglist => "mixin argument",
         :fn_arglist => "function argument",
         :splat => "...",
+        :special_fun => '")"',
       }
 
       def assert_expr(name, expected = nil)
@@ -16313,7 +16328,7 @@ MESSAGE
           # group, but then rewinds the scanner and removes the group from the
           # end of the matched string. This fix makes the assumption that the
           # matched group will always occur at the end of the match.
-          if  last_group_lookahead 
+          if last_group_lookahead
 			#BT IronRuby has the negative group index code wrong, so use regexp on 
 			#BT the matched text to get the last group
 			lastgroup = rx.match( @scanner.matched )[-1]
@@ -17401,7 +17416,7 @@ module Sass
         str << scanner.matched
         count += 1 if scanner.matched[-1] == start
         count -= 1 if scanner.matched[-1] == finish
-        return [str.strip, scanner.rest] if count == 0
+        return [str, scanner.rest] if count == 0
       end
     end
 

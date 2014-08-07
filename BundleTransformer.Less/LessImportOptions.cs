@@ -18,7 +18,7 @@
 		public LessImportOptions(string extension)
 		{
 			Less = !FileExtensionHelpers.IsCss(extension);
-			Multiple = true;
+			Multiple = false;
 			Inline = false;
 			Reference = false;
 		}
