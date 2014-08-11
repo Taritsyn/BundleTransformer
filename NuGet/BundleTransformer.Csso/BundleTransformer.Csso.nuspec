@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Csso</id>
-    <version>1.9.13</version>
+    <version>1.9.14</version>
 	<title>Bundle Transformer: CSSO</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -14,6 +14,7 @@
    
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).</description>
     <summary>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO version 1.3.11.</summary>
+	<releaseNotes>CSSO was updated to commit dde91e5f41.</releaseNotes>
 	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>

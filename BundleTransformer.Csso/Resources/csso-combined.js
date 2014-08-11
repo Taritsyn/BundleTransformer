@@ -1399,7 +1399,7 @@ var CSSO = (function(){
 
 				if (l = checkSC(_i)) _i += l;
 
-				if (tokens[_i].value !== 'important') return fail(tokens[_i]);
+				if (tokens[_i].value.toLowerCase() !== 'important') return fail(tokens[_i]);
 
 				return _i - start + 1;
 			}
