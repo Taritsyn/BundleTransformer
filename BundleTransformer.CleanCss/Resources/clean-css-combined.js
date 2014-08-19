@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.12
+ * Clean-css v2.2.13
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1600,7 +1600,7 @@ var CleanCss = (function(){
 			  if (can(matchingComponent.value, token.value)) {
 				// The component can override the matching component in the shorthand
 
-				if (!token.isImportant) {
+				if (!token.isImportant || token.isImportant && matchingComponent.isImportant) {
 				  // The overriding component is non-important which means we can simply include it into the shorthand
 				  // NOTE: stuff that can't really be included, like inherit, is taken care of at the final step, not here
 				  matchingComponent.value = token.value;

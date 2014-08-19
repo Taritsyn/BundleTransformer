@@ -418,7 +418,10 @@ var Less = (function(){
 				}
 			},
 			isRulesetLike: function() {
-				return "@charset" !== this.name;
+				return !this.isCharset();
+			},
+			isCharset: function() {
+				return "@charset" === this.name;
 			},
 			genCSS: function (env, output) {
 				var value = this.value, rules = this.rules;
@@ -1220,6 +1223,7 @@ var Less = (function(){
 			},
 			genCSS: function (env, output) {
 				var i, j,
+					charsetRuleNodes = [],
 					ruleNodes = [],
 					rulesetNodes = [],
 					rulesetNodeCnt,
@@ -1260,9 +1264,15 @@ var Less = (function(){
 					if (isRulesetLikeNode(rule, this.root)) {
 						rulesetNodes.push(rule);
 					} else {
-						ruleNodes.push(rule);
+						//charsets should float on top of everything
+						if (rule.isCharset && rule.isCharset()) {
+							charsetRuleNodes.push(rule);
+						} else {
+							ruleNodes.push(rule);
+						}
 					}
 				}
+				ruleNodes = charsetRuleNodes.concat(ruleNodes);
 
 				// If this is the root node, we don't render
 				// a selector, or {}.
@@ -1607,30 +1617,14 @@ var Less = (function(){
 		};
 		tree.Combinator.prototype = {
 			type: "Combinator",
-			_outputMap: {
-				''  : '',
-				' ' : ' ',
-				':' : ' :',
-				'+' : ' + ',
-				'~' : ' ~ ',
-				'>' : ' > ',
-				'|' : '|',
-				'^' : ' ^ ',
-				'^^' : ' ^^ '
-			},
-			_outputMapCompressed: {
-				''  : '',
-				' ' : ' ',
-				':' : ' :',
-				'+' : '+',
-				'~' : '~',
-				'>' : '>',
-				'|' : '|',
-				'^' : '^',
-				'^^' : '^^'
+			_noSpaceCombinators: {
+				'': true,
+				' ': true,
+				'|': true
 			},
 			genCSS: function (env, output) {
-				output.add((env.compress ? this._outputMapCompressed : this._outputMap)[this.value]);
+				var spaceOrEmpty = (env.compress || this._noSpaceCombinators[this.value]) ? '' : ' ';
+				output.add(spaceOrEmpty + this.value + spaceOrEmpty);
 			},
 			toCSS: tree.toCSS
 		};
@@ -1714,7 +1708,7 @@ var Less = (function(){
 						css += v.value.value;
 					}
 
-					this._elements = css.match(/[,&#\.\w-]([\w-]|(\\.))*/g);
+					this._elements = css.match(/[,&#\*\.\w-]([\w-]|(\\.))*/g);
 
 					if (this._elements) {
 						if (this._elements[0] === "&") {
@@ -6561,9 +6555,19 @@ var Less = (function(){
 					combinator: function () {
 						var c = input.charAt(i);
 
+						if (c === '/') {
+							save();
+							var slashedCombinator = $re(/\/[a-z]+\//i);
+							if (slashedCombinator) {
+								forget();
+								return new(tree.Combinator)(slashedCombinator);
+							}
+							restore();
+						}
+
 						if (c === '>' || c === '+' || c === '~' || c === '|' || c === '^') {
 							i++;
-							if (input.charAt(i) === '^') {
+							if (c === '^' && input.charAt(i) === '^') {
 								c = '^^';
 								i++;
 							}

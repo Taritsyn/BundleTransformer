@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Autoprefixer 1.9.14
+           README file for Bundle Transformer: Autoprefixer 1.9.15
  
    ----------------------------------------------------------------------
 
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 2.2.20140804.
+   Standalone version of Autoprefixer was updated to commit d22b1cc70c.
    
    ====================
    POST-INSTALL ACTIONS

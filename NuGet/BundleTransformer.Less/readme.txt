@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.13
+               README file for Bundle Transformer: LESS 1.9.15
 
    ----------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed minor bugs.
+   LESS was updated to commit 466bc39a10.
    
    ====================
    POST-INSTALL ACTIONS
