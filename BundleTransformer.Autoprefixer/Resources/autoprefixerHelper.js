@@ -18,9 +18,8 @@
 	}
 
 	exports.process = function (code, options) {
-		var browsers,
-			safe,
-			autoprefixOptions,
+		var autoprefixOptions,
+			browsers,
 			postProcessor,
 			result = {},
 			processedCode = "",
@@ -32,16 +31,24 @@
 
 		options = options || {};
 
-		browsers = options.browsers || [];
-		safe = options.safe;
-
 		autoprefixOptions = mix({}, options);
-		delete autoprefixOptions.browsers;
 		delete autoprefixOptions.safe;
 
+		browsers = autoprefixOptions.browsers;
+		if (browsers && browsers.length > 0) {
+			if (browsers[0].toLowerCase() === "none") {
+				browsers = [];
+			}
+		}
+		else {
+			browsers = null;
+		}
+
+		autoprefixOptions.browsers = browsers;
+
 		try {
-			postProcessor = autoprefixer.apply(this, browsers.concat([autoprefixOptions]));
-			processedCode = postProcessor.process(code, { "safe": safe }).css;
+			postProcessor = autoprefixer(autoprefixOptions);
+			processedCode = postProcessor.process(code, { "safe": options.safe }).css;
 		}
 		catch (e) {
 			if (typeof e.line !== "undefined" || typeof e.autoprefixer !== "undefined") {
