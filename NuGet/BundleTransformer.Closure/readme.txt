@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Closure 1.9.13
+             README file for Bundle Transformer: Closure 1.9.17
  
    ----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@
    `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application 
    (https://developers.google.com/closure/compiler/docs/gettingstarted_app) 
    and for their work requires the latest version of file compiler.jar.
-   
+
    ====================
    POST-INSTALL ACTIONS
    ====================

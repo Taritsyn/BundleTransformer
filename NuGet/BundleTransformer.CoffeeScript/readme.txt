@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.9.13
+           README file for Bundle Transformer: CoffeeScript 1.9.17
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.CoffeeScript contains translator-adapter 
    `CoffeeScriptTranslator` (supports CoffeeScript (http://coffeescript.org) 
-   version 1.7.1). This adapter makes translation of CoffeeScript-code 
+   version 1.8.0). This adapter makes translation of CoffeeScript-code 
    to JS-code. Also contains debugging HTTP-handler 
    `CoffeeScriptAssetHandler`, which is responsible for text output of 
    translated CoffeeScript-asset.
@@ -23,6 +23,11 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of CoffeeScript version 1.8.0.
    
    ====================
    POST-INSTALL ACTIONS

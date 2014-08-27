@@ -6311,6 +6311,7 @@
 								} catch(ex) {
 									if (ex !== ast) throw ex;
 								};
+								if (!fun) return self;
 								var args = fun.argnames.map(function(arg, i){
 									return make_node(AST_String, self.args[i], {
 										value: arg.print_to_string()
@@ -6936,6 +6937,15 @@
 		});
 
 		OPT(AST_Dot, function(self, compressor){
+			var prop = self.property;
+			if (RESERVED_WORDS(prop) && !compressor.option("screw_ie8")) {
+				return make_node(AST_Sub, self, {
+					expression : self.expression,
+					property   : make_node(AST_String, self, {
+						value: prop
+					})
+				}).optimize(compressor);
+			}
 			return self.evaluate(compressor)[0];
 		});
 

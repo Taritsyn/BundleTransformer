@@ -6557,7 +6557,7 @@ var Less = (function(){
 
 						if (c === '/') {
 							save();
-							var slashedCombinator = $re(/\/[a-z]+\//i);
+							var slashedCombinator = $re(/^\/[a-z]+\//i);
 							if (slashedCombinator) {
 								forget();
 								return new(tree.Combinator)(slashedCombinator);

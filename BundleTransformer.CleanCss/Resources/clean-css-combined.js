@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.13
+ * Clean-css v2.2.14
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1151,15 +1151,18 @@ var CleanCss = (function(){
 			var mergedValues = [];
 			var firstProcessed;
 			for (i = 0; i < partsCount; i++) {
+			  var newTokens = [];
 			  for (var k = 0, n = merged[i].length; k < n; k++) {
-				tokens[k].value = merged[i][k];
+				var newToken = tokens[k].clone();
+				newToken.value = merged[i][k];
+				newTokens.push(newToken);
 			  }
 
 			  var meta = {
 				partsCount: partsCount,
 				position: i
 			  };
-			  var processed = assembleFunction(prop, tokens, isImportant, meta);
+			  var processed = assembleFunction(prop, newTokens, isImportant, meta);
 			  mergedValues.push(processed.value);
 
 			  if (!firstProcessed)
@@ -1217,9 +1220,12 @@ var CleanCss = (function(){
 		},
 		borderRadius: function (prop, tokens, isImportant) {
 		  var verticalTokens = [];
+		  var newTokens = [];
 
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
+			var newToken = token.clone();
+			newTokens.push(newToken);
 			if (!Array.isArray(token.value))
 			  continue;
 
@@ -1231,10 +1237,10 @@ var CleanCss = (function(){
 			  });
 			}
 
-			token.value = token.value[0];
+			newToken.value = token.value[0];
 		  }
 
-		  var result = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, tokens, isImportant);
+		  var result = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, newTokens, isImportant);
 		  if (verticalTokens.length > 0) {
 			var verticalResult = putTogether.takeCareOfInherit(putTogether.fourUnits)(prop, verticalTokens, isImportant);
 			if (result.value != verticalResult.value)
@@ -1536,7 +1542,7 @@ var CleanCss = (function(){
 		return val1 === val2;
 	  };
 
-	  var compactOverrides = function (tokens, processable) {
+	  var compactOverrides = function (tokens, processable, Token) {
 		var result, can, token, t, i, ii, oldResult, matchingComponent;
 
 		// Used when searching for a component that matches token
@@ -1547,6 +1553,23 @@ var CleanCss = (function(){
 		var nameMatchFilter2 = function (x) {
 		  return x.prop === t.prop;
 		};
+
+		function willResultInShorterValue (shorthand, token) {
+		  var shorthandCopy = shorthand.clone();
+		  shorthandCopy.isDirty = true;
+		  shorthandCopy.isShorthand = true;
+		  shorthandCopy.components = [];
+
+		  shorthand.components.forEach(function (component) {
+			var componentCopy = component.clone();
+			if (component.prop == token.prop)
+			  componentCopy.value = token.value;
+
+			shorthandCopy.components.push(componentCopy);
+		  });
+
+		  return Token.getDetokenizedLength([shorthand, token]) >= Token.getDetokenizedLength([shorthandCopy]);
+		}
 
 		// Go from the end and always take what the current token can't override as the new result set
 		// NOTE: can't cache result.length here because it will change with every iteration
@@ -1600,7 +1623,7 @@ var CleanCss = (function(){
 			  if (can(matchingComponent.value, token.value)) {
 				// The component can override the matching component in the shorthand
 
-				if (!token.isImportant || token.isImportant && matchingComponent.isImportant) {
+				if ((!token.isImportant || token.isImportant && matchingComponent.isImportant) && willResultInShorterValue(t, token)) {
 				  // The overriding component is non-important which means we can simply include it into the shorthand
 				  // NOTE: stuff that can't really be included, like inherit, is taken care of at the final step, not here
 				  matchingComponent.value = token.value;
@@ -1847,7 +1870,7 @@ var CleanCss = (function(){
 			  addComponentSoFar(token, i);
 			} else if (!isImportant && token.isImportant) {
 			  // Use importants for optimalization opportunities
-			  // https://github.com/GoalSmashers/clean-css/issues/184
+			  // https://github.com/jakubpawlowicz/clean-css/issues/184
 			  var importantTrickComp = new Token(token.prop, token.value, isImportant);
 			  importantTrickComp.isIrrelevant = true;
 			  importantTrickComp.isReal = false;
@@ -1895,7 +1918,7 @@ var CleanCss = (function(){
 		var overrideCompactor = require('./properties/override-compactor');
 		var shorthandCompactor = require('./properties/shorthand-compactor');
 
-		function Optimizer(compatibility, aggressiveMerging) {
+		function Optimizer(compatibility, aggressiveMerging, context) {
 		  var overridable = {
 			'animation-delay': ['animation'],
 			'animation-direction': ['animation'],
@@ -2008,11 +2031,11 @@ var CleanCss = (function(){
 			}
 		  }
 
-		  var tokenize = function(body) {
+		  var tokenize = function(body, selector) {
 			var tokens = body.split(';');
 			var keyValues = [];
 
-			if (tokens.length === 0 || (tokens.length == 1 && tokens[0].indexOf(IE_BACKSLASH_HACK) == -1))
+			if (tokens.length === 0 || (tokens.length == 1 && tokens[0].indexOf(IE_BACKSLASH_HACK) == -1 && tokens[0][tokens[0].length - 1] != ':'))
 			  return;
 
 			for (var i = 0, l = tokens.length; i < l; i++) {
@@ -2021,9 +2044,16 @@ var CleanCss = (function(){
 				continue;
 
 			  var firstColon = token.indexOf(':');
+			  var property = token.substring(0, firstColon);
+			  var value = token.substring(firstColon + 1);
+			  if (value === '') {
+				context.warnings.push('Empty property \'' + property + '\' inside \'' + selector + '\' selector. Ignoring.');
+				continue;
+			  }
+
 			  keyValues.push([
-				token.substring(0, firstColon),
-				token.substring(firstColon + 1),
+				property,
+				value,
 				token.indexOf('!important') > -1,
 				token.indexOf(IE_BACKSLASH_HACK, firstColon + 1) === token.length - IE_BACKSLASH_HACK.length
 			  ]);
@@ -2141,7 +2171,7 @@ var CleanCss = (function(){
 
 			var tokens = Token.tokenize(input);
 
-			tokens = overrideCompactor.compactOverrides(tokens, processable);
+			tokens = overrideCompactor.compactOverrides(tokens, processable, Token);
 			tokens = shorthandCompactor.compactShorthands(tokens, false, processable, Token);
 			tokens = shorthandCompactor.compactShorthands(tokens, true, processable, Token);
 
@@ -2149,10 +2179,10 @@ var CleanCss = (function(){
 		  };
 
 		  return {
-			process: function(body, allowAdjacent, skipCompacting) {
+			process: function(body, allowAdjacent, skipCompacting, selector) {
 			  var result = body;
 
-			  var tokens = tokenize(body);
+			  var tokens = tokenize(body, selector);
 			  if (tokens) {
 				var optimized = optimize(tokens, allowAdjacent);
 				result = rebuild(optimized);
@@ -2840,7 +2870,7 @@ var CleanCss = (function(){
 
 		  var minificationsMade = [];
 
-		  var propertyOptimizer = new PropertyOptimizer(options.compatibility, options.aggressiveMerging);
+		  var propertyOptimizer = new PropertyOptimizer(options.compatibility, options.aggressiveMerging, context);
 
 		  var cleanUpSelector = function(selectors) {
 			if (selectors.indexOf(',') == -1)
@@ -2935,7 +2965,7 @@ var CleanCss = (function(){
 
 			  if (token.selector == lastToken.selector) {
 				var joinAt = [lastToken.body.split(';').length];
-				lastToken.body = propertyOptimizer.process(lastToken.body + ';' + token.body, joinAt);
+				lastToken.body = propertyOptimizer.process(lastToken.body + ';' + token.body, joinAt, false, token.selector);
 				forRemoval.push(i);
 			  } else if (token.body == lastToken.body && !isSpecial(token.selector) && !isSpecial(lastToken.selector)) {
 				lastToken.selector = cleanUpSelector(lastToken.selector + ',' + token.selector);
@@ -3083,7 +3113,7 @@ var CleanCss = (function(){
 				joinsAt.push((joinsAt[j - 1] || 0) + splitBodies[j].length);
 			}
 
-			var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt, true);
+			var optimizedBody = propertyOptimizer.process(bodies.join(';'), joinsAt, true, selector);
 			var optimizedProperties = optimizedBody.split(';');
 
 			var processedCount = processedTokens.length;
@@ -3116,7 +3146,7 @@ var CleanCss = (function(){
 
 			  if (token.selector) {
 				token.selector = cleanUpSelector(token.selector);
-				token.body = propertyOptimizer.process(token.body, false);
+				token.body = propertyOptimizer.process(token.body, false, false, token.selector);
 			  } else if (token.block) {
 				optimize(token.body);
 			  }
@@ -3485,7 +3515,7 @@ var CleanCss = (function(){
 
 		  // transparent rgba/hsla to 'transparent' unless in compatibility mode
 		  if (!options.compatibility) {
-			replace(/:([^;]*)(?:rgba|hsla)\(\d+,\d+%?,\d+%?,0\)/g, function (match, prefix) {
+			replace(/:([^;]*)(?:rgba|hsla)\(0,0%?,0%?,0\)/g, function (match, prefix) {
 			  if (new Splitter(',').split(match).pop().indexOf('gradient(') > -1)
 				return match;
 
