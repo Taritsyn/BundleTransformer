@@ -6722,6 +6722,7 @@ var Less = (function(){
 								value = this.detachedRuleset();
 							}
 
+							this.comments();
 							if (!value) {
 								// prefer to try to parse first if its a variable or we are compressing
 								// but always fallback on the other one
@@ -6966,6 +6967,8 @@ var Less = (function(){
 								break;
 						}
 
+						this.comments();
+
 						if (hasIdentifier) {
 							value = this.entity();
 							if (!value) {
@@ -6982,6 +6985,8 @@ var Less = (function(){
 								value = new(tree.Anonymous)(value);
 							}
 						}
+
+						this.comments();
 
 						if (hasBlock) {
 							rules = this.blockRuleset();
@@ -7197,9 +7202,20 @@ var Less = (function(){
 								return name.push(a[1]);
 							}
 						}
+						function cutOutBlockComments() {
+							//match block comments
+							var a = /^\s*\/\*(?:[^*]|\*+[^\/*])*\*+\//.exec(c);
+							if (a) {
+								length += a[0].length;
+								c = c.slice(a[0].length);
+								return true;
+							}
+							return false;
+						}
 
 						match(/^(\*?)/);
 						while (match(/^((?:[\w-]+)|(?:@\{[\w-]+\}))/)); // !
+						while (cutOutBlockComments());
 						if ((name.length > 1) && match(/^\s*((?:\+_|\+)?)\s*:/)) {
 							// at last, we have the complete match now. move forward,
 							// convert name particles to tree objects and return:
