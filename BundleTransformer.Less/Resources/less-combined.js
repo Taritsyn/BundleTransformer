@@ -1,5 +1,5 @@
 /*!
- * LESS v1.7.4
+ * LESS v1.7.5
  * http://lesscss.org
  *
  * Copyright 2014, Alexis Sellier & The Core Less Team
@@ -1883,7 +1883,7 @@ var Less = (function(){
 		//#region URL: ./tree/rule
 		(function (tree) {
 
-		tree.Rule = function (name, value, important, merge, index, currentFileInfo, inline) {
+		tree.Rule = function (name, value, important, merge, index, currentFileInfo, inline, variable) {
 			this.name = name;
 			this.value = (value instanceof tree.Value || value instanceof tree.Ruleset) ? value : new(tree.Value)([value]);
 			this.important = important ? ' ' + important.trim() : '';
@@ -1891,7 +1891,8 @@ var Less = (function(){
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
 			this.inline = inline || false;
-			this.variable = name.charAt && (name.charAt(0) === '@');
+			this.variable = (variable !== undefined) ? variable
+				: (name.charAt && (name.charAt(0) === '@'));
 		};
 
 		tree.Rule.prototype = {
@@ -1913,13 +1914,14 @@ var Less = (function(){
 			},
 			toCSS: tree.toCSS,
 			eval: function (env) {
-				var strictMathBypass = false, name = this.name, evaldValue;
+				var strictMathBypass = false, name = this.name, variable = this.variable, evaldValue;
 				if (typeof name !== "string") {
 					// expand 'primitive' name directly to get
 					// things faster (~10% for benchmark.less):
 					name = (name.length === 1) 
 						&& (name[0] instanceof tree.Keyword)
 							? name[0].value : evalName(env, name);
+					variable = false; // never treat expanded interpolation as new variable name
 				}
 				if (name === "font" && !env.strictMath) {
 					strictMathBypass = true;
@@ -1937,7 +1939,8 @@ var Less = (function(){
 									  evaldValue,
 									  this.important,
 									  this.merge,
-									  this.index, this.currentFileInfo, this.inline);
+									  this.index, this.currentFileInfo, this.inline,
+									  variable);
 				}
 				catch(e) {
 					if (typeof e.index !== 'number') {

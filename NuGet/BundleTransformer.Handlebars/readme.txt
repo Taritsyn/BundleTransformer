@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Handlebars 1.9.13
+            README file for Bundle Transformer: Handlebars 1.9.20
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.Handlebars contains translator-adapter
    `HandlebarsTranslator` (supports Handlebars (http://handlebarsjs.com)
-   version 1.3.0). This adapter makes translation of Handlebars-templates
+   version 2.0.0). This adapter makes translation of Handlebars-templates
    to JS-code. Also contains debugging HTTP-handler
    `HandlebarsAssetHandler`, which is responsible for text output of
    translated Handlebars-asset.
@@ -23,6 +23,11 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of Handlebars version 2.0.0.
    
    ====================
    POST-INSTALL ACTIONS

@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.14
+ * Clean-css v2.2.15
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -1536,7 +1536,9 @@ var CleanCss = (function(){
 	//#region URL: ./properties/override-compactor
 	require['./properties/override-compactor'] = (function () {
 	  // Compacts the given tokens according to their ability to override each other.
-	
+
+	  var validator = require('./properties/validator');
+
 	  // Default override function: only allow overrides when the two values are the same
 	  var sameValue = function (val1, val2) {
 		return val1 === val2;
@@ -1650,6 +1652,8 @@ var CleanCss = (function(){
 			  }
 			} else if (t.prop !== token.prop || !can(t.value, token.value)) {
 			  // in every other case, use the override mechanism
+			  result.push(t);
+			} else if (t.isImportant && token.isImportant && (validator.isValidFunction(t.value) ^ validator.isValidFunction(token.value))) {
 			  result.push(t);
 			}
 		  }
