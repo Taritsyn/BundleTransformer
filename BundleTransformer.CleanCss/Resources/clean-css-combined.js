@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.15
+ * Clean-css v2.2.16
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -40,6 +40,7 @@ var CleanCss = (function(){
 			darkgoldenrod: '#b8860b',
 			darkgray: '#a9a9a9',
 			darkgreen: '#006400',
+			darkgrey: '#a9a9a9',
 			darkkhaki: '#bdb76b',
 			darkmagenta: '#8b008b',
 			darkolivegreen: '#556b2f',
@@ -50,11 +51,13 @@ var CleanCss = (function(){
 			darkseagreen: '#8fbc8f',
 			darkslateblue: '#483d8b',
 			darkslategray: '#2f4f4f',
+			darkslategrey: '#2f4f4f',
 			darkturquoise: '#00ced1',
 			darkviolet: '#9400d3',
 			deeppink: '#ff1493',
 			deepskyblue: '#00bfff',
 			dimgray: '#696969',
+			dimgrey: '#696969',
 			dodgerblue: '#1e90ff',
 			firebrick: '#b22222',
 			floralwhite: '#fffaf0',
@@ -67,6 +70,7 @@ var CleanCss = (function(){
 			gray: '#808080',
 			green: '#008000',
 			greenyellow: '#adff2f',
+			grey: '#808080',
 			honeydew: '#f0fff0',
 			hotpink: '#ff69b4',
 			indianred: '#cd5c5c',
@@ -83,11 +87,13 @@ var CleanCss = (function(){
 			lightgoldenrodyellow: '#fafad2',
 			lightgray: '#d3d3d3',
 			lightgreen: '#90ee90',
+			lightgrey: '#d3d3d3',
 			lightpink: '#ffb6c1',
 			lightsalmon: '#ffa07a',
 			lightseagreen: '#20b2aa',
 			lightskyblue: '#87cefa',
 			lightslategray: '#778899',
+			lightslategrey: '#778899',
 			lightsteelblue: '#b0c4de',
 			lightyellow: '#ffffe0',
 			lime: '#0f0',
@@ -127,6 +133,7 @@ var CleanCss = (function(){
 			plum: '#dda0dd',
 			powderblue: '#b0e0e6',
 			purple: '#800080',
+			rebeccapurple: '#663399',
 			red: '#f00',
 			rosybrown: '#bc8f8f',
 			royalblue: '#4169e1',
@@ -140,6 +147,7 @@ var CleanCss = (function(){
 			skyblue: '#87ceeb',
 			slateblue: '#6a5acd',
 			slategray: '#708090',
+			slategrey: '#708090',
 			snow: '#fffafa',
 			springgreen: '#00ff7f',
 			steelblue: '#4682b4',
@@ -1544,8 +1552,8 @@ var CleanCss = (function(){
 		return val1 === val2;
 	  };
 
-	  var compactOverrides = function (tokens, processable, Token) {
-		var result, can, token, t, i, ii, oldResult, matchingComponent;
+	  var compactOverrides = function (tokens, processable, Token, compatibility) {
+		var result, can, token, t, i, ii, iiii, oldResult, matchingComponent;
 
 		// Used when searching for a component that matches token
 		var nameMatchFilter1 = function (x) {
@@ -1625,6 +1633,25 @@ var CleanCss = (function(){
 			  if (can(matchingComponent.value, token.value)) {
 				// The component can override the matching component in the shorthand
 
+				if (compatibility) {
+				  // in compatibility mode check if shorthand in not less understandable than merged-in value
+				  var wouldBreakCompatibility = false;
+				  for (iiii = 0; iiii < t.components.length; iiii++) {
+					var o = processable[t.components[iiii].prop];
+					can = (o && o.canOverride) || sameValue;
+
+					if (!can(o.defaultValue, t.components[iiii].value)) {
+					  wouldBreakCompatibility = true;
+					  break;
+					}
+				  }
+
+				  if (wouldBreakCompatibility) {
+					result.push(t);
+					continue;
+				  }
+				}
+
 				if ((!token.isImportant || token.isImportant && matchingComponent.isImportant) && willResultInShorterValue(t, token)) {
 				  // The overriding component is non-important which means we can simply include it into the shorthand
 				  // NOTE: stuff that can't really be included, like inherit, is taken care of at the final step, not here
@@ -1643,9 +1670,13 @@ var CleanCss = (function(){
 			  // token is a shorthand and is trying to override another instance of the same shorthand
 
 			  // Can only override other shorthand when each of its components can override each of the other's components
-			  for (var iiii = 0; iiii < t.components.length; iiii++) {
+			  for (iiii = 0; iiii < t.components.length; iiii++) {
 				can = (processable[t.components[iiii].prop] && processable[t.components[iiii].prop].canOverride) || sameValue;
 				if (!can(t.components[iiii].value, token.components[iiii].value)) {
+				  result.push(t);
+				  break;
+				}
+				if (t.components[iiii].isImportant && token.components[iiii].isImportant && (validator.isValidFunction(t.components[iiii].value) ^ validator.isValidFunction(token.components[iiii].value))) {
 				  result.push(t);
 				  break;
 				}
@@ -2175,7 +2206,7 @@ var CleanCss = (function(){
 
 			var tokens = Token.tokenize(input);
 
-			tokens = overrideCompactor.compactOverrides(tokens, processable, Token);
+			tokens = overrideCompactor.compactOverrides(tokens, processable, Token, compatibility);
 			tokens = shorthandCompactor.compactShorthands(tokens, false, processable, Token);
 			tokens = shorthandCompactor.compactShorthands(tokens, true, processable, Token);
 
@@ -2300,7 +2331,7 @@ var CleanCss = (function(){
 		while (true) {
 		  if (data[cursor] === undefined)
 			break;
-		  if (data[cursor] == matched && data[cursor - 1] != escapeMark)
+		  if (data[cursor] == matched && (data[cursor - 1] != escapeMark || data[cursor - 2] == escapeMark))
 			break;
 
 		  cursor++;
@@ -3542,7 +3573,19 @@ var CleanCss = (function(){
 		  replace(/rect\(\s?0(\s|,)0[ ,]0[ ,]0\s?\)/g, 'rect(0$10$10$10)');
 
 		  // remove universal selector when not needed (*#id, *.class etc)
-		  replace(/\*([\.#:\[])/g, '$1');
+		  // pending a better fix
+		  if (options.compatibility != 'ie7') {
+			replace(/([^,]?)(\*[^ \+\{]*\+html[^\{]*)(\{[^\}]*\})/g, function (match, prefix, selector, body) {
+			  var notHackedSelectors = new Splitter(',').split(selector).filter(function (m) {
+				return !/^\*[^ \+\{]*\+html/.test(m);
+			  });
+
+			  return notHackedSelectors.length > 0 ?
+				prefix + notHackedSelectors.join(',') + body :
+				prefix;
+			});
+			replace(/\*([\.#:\[])/g, '$1');
+		  }
 
 		  // Restore spaces inside calc back
 		  replace(/calc\([^\}]+\}/g, function(match) {
