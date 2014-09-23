@@ -152,7 +152,10 @@
 					assets.Add(new Asset(bundleFile.VirtualFile.VirtualPath, bundleFile));
 				}
 
-				Transform(assets, bundleContext, bundleResponse, BundleTable.VirtualPathProvider, isDebugMode);
+				if (assets.Count > 0)
+				{
+					Transform(assets, bundleContext, bundleResponse, BundleTable.VirtualPathProvider, isDebugMode);
+				}
 			}
 		}
 
