@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: YUI 1.9.15
+               README file for Bundle Transformer: YUI 1.9.23
  
    ----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of YUI Compressor for .NET 2.5.0.
+   Added support of the YUI Compressor for .NET 2.7.0.
 
    ====================
    POST-INSTALL ACTIONS
