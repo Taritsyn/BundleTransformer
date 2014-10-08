@@ -15,27 +15,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to propagate enum constants to emitted code
-		/// </summary>
-		public bool PropagateEnumConstants
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to do not emit comments to output
 		/// </summary>
 		public bool RemoveComments
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow automatic semicolon insertion
-		/// </summary>
-		public bool AllowAutomaticSemicolonInsertion
 		{
 			get;
 			set;
@@ -67,9 +49,7 @@
 		public CompilationOptions()
 		{
 			UseDefaultLib = true;
-			PropagateEnumConstants = false;
 			RemoveComments = false;
-			AllowAutomaticSemicolonInsertion = true;
 			NoImplicitAny = false;
 			CodeGenTarget = CodeGenTarget.EcmaScript3;
 		}

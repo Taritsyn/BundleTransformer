@@ -475,19 +475,9 @@
 				<xs:documentation>Flag for whether to include a default lib.d.ts with global declarations</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="propagateEnumConstants" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to propagate enum constants to emitted code</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="allowAutomaticSemicolonInsertion" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to allow automatic semicolon insertion</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="noImplicitAny" type="Boolean_SchemaType" use="optional" default="false">

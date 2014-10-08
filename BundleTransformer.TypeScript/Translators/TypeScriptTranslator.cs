@@ -93,36 +93,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to propagate enum constants to emitted code
-		/// </summary>
-		public bool PropagateEnumConstants
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to do not emit comments to output
 		/// </summary>
 		public bool RemoveComments
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow 'bool' as a synonym for 'boolean'
-		/// </summary>
-		public bool AllowBool
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow automatic semicolon insertion
-		/// </summary>
-		public bool AllowAutomaticSemicolonInsertion
 		{
 			get;
 			set;
@@ -174,9 +147,7 @@
 			_tsScriptCache = new Dictionary<string, TsScript>();
 
 			UseDefaultLib = tsConfig.UseDefaultLib;
-			PropagateEnumConstants = tsConfig.PropagateEnumConstants;
 			RemoveComments = tsConfig.RemoveComments;
-			AllowAutomaticSemicolonInsertion = tsConfig.AllowAutomaticSemicolonInsertion;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			CodeGenTarget = tsConfig.CodeGenTarget;
 
@@ -327,9 +298,7 @@
 			var options = new CompilationOptions
 			{
 				UseDefaultLib = UseDefaultLib,
-				PropagateEnumConstants = PropagateEnumConstants,
 				RemoveComments = RemoveComments,
-				AllowAutomaticSemicolonInsertion = AllowAutomaticSemicolonInsertion,
 				NoImplicitAny = NoImplicitAny,
 				CodeGenTarget = CodeGenTarget
 			};

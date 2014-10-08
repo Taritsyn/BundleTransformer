@@ -79,12 +79,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\typescript-combined.min.js" />
+    <Content Include="Resources\typescript-combined.js" />
     <EmbeddedResource Include="Resources\lib.d.ts" />
     <Content Include="Resources\LICENSE.txt" />
     <Content Include="Resources\tscHelper.js" />
     <EmbeddedResource Include="Resources\tscHelper.min.js" />
-    <Content Include="Resources\typescript.js" />
-    <EmbeddedResource Include="Resources\typescript.min.js" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
@@ -96,8 +96,8 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
 
-del "$(ProjectDir)Resources\typescript.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\typescript.js" -out:"$(ProjectDir)Resources\typescript.min.js"
+del "$(ProjectDir)Resources\typescript-combined.min.js"
+wg.exe -m -in:"$(ProjectDir)Resources\typescript-combined.js" -out:"$(ProjectDir)Resources\typescript-combined.min.js"
 
 del "$(ProjectDir)Resources\tscHelper.min.js"
 wg.exe -m -in:"$(ProjectDir)Resources\tscHelper.js" -out:"$(ProjectDir)Resources\tscHelper.min.js"</PreBuildEvent>

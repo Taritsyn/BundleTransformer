@@ -20,16 +20,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to propagate enum constants to emitted code
-		/// </summary>
-		[ConfigurationProperty("propagateEnumConstants", DefaultValue = false)]
-		public bool PropagateEnumConstants
-		{
-			get { return (bool)this["propagateEnumConstants"]; }
-			set { this["propagateEnumConstants"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to do not emit comments to output
 		/// </summary>
 		[ConfigurationProperty("removeComments", DefaultValue = false)]
@@ -37,16 +27,6 @@
 		{
 			get { return (bool)this["removeComments"]; }
 			set { this["removeComments"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to allow automatic semicolon insertion
-		/// </summary>
-		[ConfigurationProperty("allowAutomaticSemicolonInsertion", DefaultValue = true)]
-		public bool AllowAutomaticSemicolonInsertion
-		{
-			get { return (bool)this["allowAutomaticSemicolonInsertion"]; }
-			set { this["allowAutomaticSemicolonInsertion"] = value; }
 		}
 
 		/// <summary>

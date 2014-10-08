@@ -22,7 +22,7 @@
 		/// <summary>
 		/// Name of resource, which contains a TypeScript-library
 		/// </summary>
-		private const string TYPESCRIPT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.typescript.min.js";
+		private const string TYPESCRIPT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.typescript-combined.min.js";
 
 		/// <summary>
 		/// Name of resource, which contains a TypeScript-compiler helper
@@ -206,11 +206,9 @@
 		{
 			var optionsJson = new JObject(
 				new JProperty("noLib", !options.UseDefaultLib),
-				new JProperty("propagateEnumConstants", options.PropagateEnumConstants),
 				new JProperty("removeComments", options.RemoveComments),
-				new JProperty("allowAutomaticSemicolonInsertion", options.AllowAutomaticSemicolonInsertion),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
-				new JProperty("codeGenTarget", options.CodeGenTarget.ToString())
+				new JProperty("target", options.CodeGenTarget)
 			);
 
 			return optionsJson;
