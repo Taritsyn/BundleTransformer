@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: CSSO 1.9.14
+               README file for Bundle Transformer: CSSO 1.9.25
  
    ----------------------------------------------------------------------
 
@@ -21,11 +21,6 @@
    working of this module is recommended to install the following 
    NuGet packages: JavaScriptEngineSwitcher.V8 or
    JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).
-   
-   =============
-   RELEASE NOTES
-   =============
-   CSSO was updated to commit dde91e5f41.
    
    ====================
    POST-INSTALL ACTIONS

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.9.17
+             README file for Bundle Transformer: UglifyJS 1.9.25
  
    ----------------------------------------------------------------------
 
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   UglifyJS was updated to commit 4c64554808.
+   UglifyJS was updated to commit a64bdda9ae.
    
    ====================
    POST-INSTALL ACTIONS

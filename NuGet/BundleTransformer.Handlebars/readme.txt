@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Handlebars 1.9.20
+            README file for Bundle Transformer: Handlebars 1.9.25
 
    ----------------------------------------------------------------------
 
@@ -23,11 +23,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Handlebars version 2.0.0.
    
    ====================
    POST-INSTALL ACTIONS

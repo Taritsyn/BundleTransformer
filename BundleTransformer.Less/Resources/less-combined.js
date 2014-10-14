@@ -780,7 +780,7 @@ var Less = (function(){
 			},
 
 			is: function (unitString) {
-				return this.toString() === unitString;
+				return this.toString().toUpperCase() === unitString.toUpperCase();
 			},
 
 			isLength: function () {
@@ -6128,7 +6128,7 @@ var Less = (function(){
 								return;
 							}
 
-							value = $re(/^([+-]?\d*\.?\d+)(%|[a-z]+)?/);
+							value = $re(/^([+-]?\d*\.?\d+)(%|[a-zA-Z]+)?/);
 							if (value) {
 								return new(tree.Dimension)(value[1], value[2]);
 							}

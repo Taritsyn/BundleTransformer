@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.24
+            README file for Bundle Transformer: TypeScript 1.9.25
 
    ----------------------------------------------------------------------
 
@@ -26,14 +26,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of TypeScript version 1.1 CTP (please note: 
-      The 1.1 CTP release is also called '1.1.0.1');
-   2. From configuration settings of TypeScript-translator removed two
-      properties - `PropagateEnumConstants` and `AllowAutomaticSemicolonInsertion`.
    
    ====================
    POST-INSTALL ACTIONS

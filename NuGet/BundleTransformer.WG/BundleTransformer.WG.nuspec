@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.WG</id>
-    <version>1.9.13-Beta4</version>
+    <version>1.9.25-Beta4</version>
 	<title>Bundle Transformer: WebGrease</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -16,7 +16,7 @@
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify WebGrease</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.13" />
+      <dependency id="BundleTransformer.Core" version="1.9.25" />
 	  <dependency id="WebGrease" version="1.6.0" />
     </dependencies>
     <references>

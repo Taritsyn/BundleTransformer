@@ -1393,7 +1393,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:attribute>
 		<xs:attribute name="keepFunctionArgs" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to drop unused function arguments</xs:documentation>
+				<xs:documentation>Flag for whether to prevent the compressor from discarding unused function arguments</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="hoistVars" type="Boolean_SchemaType" use="optional" default="false">

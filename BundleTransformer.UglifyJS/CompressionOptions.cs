@@ -129,7 +129,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to drop unused function arguments
+		/// Gets or sets a flag for whether to prevent the compressor from discarding
+		/// unused function arguments
 		/// </summary>
 		public bool KeepFunctionArgs
 		{

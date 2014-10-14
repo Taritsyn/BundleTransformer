@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>	
     <id>BundleTransformer.CoffeeScript</id>
-    <version>1.9.17</version>
+    <version>1.9.25</version>
 	<title>Bundle Transformer: CoffeeScript</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -14,14 +14,14 @@
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
     <summary>BundleTransformer.CoffeeScript contains translator-adapter `CoffeeScriptTranslator` (supports CoffeeScript version 1.8.0). This adapter makes translation of CoffeeScript-code to JS-code. Also contains debugging HTTP-handler `CoffeeScriptAssetHandler`, which is responsible for text output of translated CoffeeScript-asset.</summary>
-	<releaseNotes>Added support of CoffeeScript version 1.8.0.</releaseNotes>
+	<releaseNotes>CoffeeScript was updated to commit 4f82e5912e.</releaseNotes>
 	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling CoffeeScript Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.13" />
-	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.1.3" />
-	  <dependency id="Newtonsoft.Json" version="6.0.4" />
+      <dependency id="BundleTransformer.Core" version="1.9.25" />
+	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.2.0" />
+	  <dependency id="Newtonsoft.Json" version="6.0.5" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.CoffeeScript.dll" />

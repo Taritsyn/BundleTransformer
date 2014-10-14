@@ -3300,6 +3300,7 @@
 			}
 			if (options.unreferenced
 				&& (node instanceof AST_SymbolDeclaration || node instanceof AST_Label)
+				&& !(node instanceof AST_SymbolCatch)
 				&& node.unreferenced()) {
 				AST_Node.warn("{type} {name} is declared but not referenced [{file}:{line},{col}]", {
 					type: node instanceof AST_Label ? "Label" : "Symbol",
@@ -5463,7 +5464,9 @@
 					|| this.operator == "--"
 					|| this.expression.has_side_effects(compressor);
 			});
-			def(AST_SymbolRef, function(compressor){ return false });
+			def(AST_SymbolRef, function(compressor){
+				return this.global() && this.undeclared();
+			});
 			def(AST_Object, function(compressor){
 				for (var i = this.properties.length; --i >= 0;)
 					if (this.properties[i].has_side_effects(compressor))
@@ -6886,6 +6889,17 @@
 					consequent: consequent.consequent,
 					alternative: alternative
 				});
+			}
+			// x=y?1:1 --> x=1
+			if (consequent instanceof AST_Constant
+				&& alternative instanceof AST_Constant
+				&& consequent.equivalent_to(alternative)) {
+				if (self.condition.has_side_effects(compressor)) {
+					return AST_Seq.from_array([self.condition, make_node_from_constant(compressor, consequent.value, self)]);
+				} else {
+					return make_node_from_constant(compressor, consequent.value, self);
+
+				}
 			}
 			return self;
 		});
