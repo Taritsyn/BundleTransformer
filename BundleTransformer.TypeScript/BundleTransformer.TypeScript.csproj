@@ -94,13 +94,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
 del "$(ProjectDir)Resources\typescript-combined.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\typescript-combined.js" -out:"$(ProjectDir)Resources\typescript-combined.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources\typescript-combined.js" –out "$(ProjectDir)Resources\typescript-combined.min.js"
 
 del "$(ProjectDir)Resources\tscHelper.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\tscHelper.js" -out:"$(ProjectDir)Resources\tscHelper.min.js"</PreBuildEvent>
+AjaxMinifier.exe "$(ProjectDir)Resources\tscHelper.js" –out "$(ProjectDir)Resources\tscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

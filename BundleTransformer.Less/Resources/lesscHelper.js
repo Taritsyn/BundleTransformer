@@ -1,18 +1,27 @@
+/*global Less */
 var lessHelper = (function (less) {
 	"use strict";
 
 	var exports = {},
 		defaultOptions = {
 			compress: false,
-			optimization: 1,
 			paths: [],
 			strictImports: false,
+			insecure: false,
+			filename: '',
+			rootpath: '',
+			relativeUrls: false,
 			ieCompat: true,
 			strictMath: false,
 			strictUnits: false,
+			urlArgs: '',
+			plugins: [],
+			javascriptEnabled: false,
 			dumpLineNumbers: '',
-			javascriptEnabled: true,
-			urlArgs: ''
+			sourceMap: false,
+			syncImport: true,
+			chunkInput: false,
+			processImports: true
 		};
 
 	function mix(destination, source) {
@@ -54,95 +63,180 @@ var lessHelper = (function (less) {
 		return key;
 	}
 
-	var IoHost = (function () {
-		function IoHost(files) {
-			this._files = files;
-		}
+	function getEnvironment() {
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'environment.{0}' is not implemented.",
+			symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+			;
 
-		function removeLastSlash(path) {
-			var newPath = path.replace(/[\/]+$/g, '');
-
-			return newPath;
-		}
-
-		function buildAbsolutePath(absolutePathParts, path) {
-			var pathParts,
-				pathPart,
-				pathPartIndex,
-				pathPartCount
+		//#region Internal Methods
+		function encodeUtf8(value) {
+			var result,
+				processedValue,
+				charIndex,
+				charCount,
+				charCode,
+				strFromCharCode = String.fromCharCode
 				;
 
-			pathParts = path.split('/');
-			pathPartCount = pathParts.length;
+			result = '';
+			processedValue = value.replace(/\r\n/g, '\n');
+			charCount = processedValue.length;
 
-			for (pathPartIndex = 0; pathPartIndex < pathPartCount; pathPartIndex++) {
-				pathPart = pathParts[pathPartIndex];
+			for (charIndex = 0; charIndex < charCount; charIndex++) {
+				charCode = processedValue.charCodeAt(charIndex);
 
-				if (pathPart === '..') {
-					absolutePathParts.pop();
+				if (charCode < 128) {
+					result += strFromCharCode(charCode);
 				}
-				else if (pathPart === '.') {
-					continue;
+				else if ((charCode > 127) && (charCode < 2048)) {
+					result += strFromCharCode((charCode >> 6) | 192);
+					result += strFromCharCode((charCode & 63) | 128);
 				}
 				else {
-					absolutePathParts.push(pathPart);
+					result += strFromCharCode((charCode >> 12) | 224);
+					result += strFromCharCode(((charCode >> 6) & 63) | 128);
+					result += strFromCharCode((charCode & 63) | 128);
 				}
 			}
+
+			return result;
+		}
+		//#endregion
+
+		function encodeBase64(value) {
+			var result,
+				processedValue,
+				charIndex,
+				charCount,
+				charCode1,
+				charCode2,
+				charCode3,
+				encodedCharCode1,
+				encodedCharCode2,
+				encodedCharCode3,
+				encodedCharCode4
+				;
+
+			result = '';
+			processedValue = encodeUtf8(value);
+			charCount = processedValue.length;
+
+			for (charIndex = 0; charIndex < charCount;) {
+				charCode1 = processedValue.charCodeAt(charIndex++);
+				charCode2 = processedValue.charCodeAt(charIndex++);
+				charCode3 = processedValue.charCodeAt(charIndex++);
+
+				encodedCharCode1 = charCode1 >> 2;
+				encodedCharCode2 = ((charCode1 & 3) << 4) | (charCode2 >> 4);
+				encodedCharCode3 = ((charCode2 & 15) << 2) | (charCode3 >> 6);
+				encodedCharCode4 = charCode3 & 63;
+
+				if (isNaN(charCode2)) {
+					encodedCharCode3 = encodedCharCode4 = 64;
+				} else if (isNaN(charCode3)) {
+					encodedCharCode4 = 64;
+				}
+
+				result += symbols.charAt(encodedCharCode1);
+				result += symbols.charAt(encodedCharCode2);
+				result += symbols.charAt(encodedCharCode3);
+				result += symbols.charAt(encodedCharCode4);
+			}
+
+			return result;
 		}
 
-		IoHost.prototype.readFile = function (path) {
+		function mimeLookup() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'mimeLookup'));
+		}
+
+		function charsetLookup() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'charsetLookup'));
+		}
+
+		function getSourceMapGenerator() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getSourceMapGenerator'));
+		}
+
+		return {
+			encodeBase64: encodeBase64,
+			mimeLookup: mimeLookup,
+			charsetLookup: charsetLookup,
+			getSourceMapGenerator: getSourceMapGenerator
+		};
+	}
+
+	function getFileManager(AbstractFileManager, files) {
+		var FileManager = function () { },
+			ERROR_MSG_PATTERN_FILE_NOT_FOUND = "File '{0}' does not exist."
+			;
+
+		//#region Internal Methods
+		function readFile(path) {
 			var key,
 				file
 				;
 
 			key = generateFileCacheItemKey(path);
-			if (typeof this._files[key] === 'undefined') {
-				throw new Error(formatString("File '{0}' does not exist.", path));
+			if (typeof files[key] === 'undefined') {
+				throw new Error(formatString(ERROR_MSG_PATTERN_FILE_NOT_FOUND, path));
 			}
 
-			file = this._files[key];
+			file = files[key];
 
 			return file.content;
-		};
+		}
 
-		IoHost.prototype.dirName = function (path) {
-			var directoryName = '',
-				lastSlashPosition = path.lastIndexOf('/')
+		function fileExists(path) {
+			var key,
+				isFileExists
 				;
 
-			if (lastSlashPosition !== -1) {
-				directoryName = path.substring(0, lastSlashPosition + 1);
+			key = generateFileCacheItemKey(path);
+			isFileExists = (typeof files[key] !== 'undefined');
+
+			return isFileExists;
+		}
+		//#endregion
+
+		FileManager.prototype = new AbstractFileManager();
+
+		FileManager.prototype.supports = function () {
+			return true;
+		};
+
+		FileManager.prototype.supportsSync = function () {
+			return true;
+		};
+
+		FileManager.prototype.loadFile = function (filename, currentDirectory, options, environment,
+			fulfill, reject) {
+			var data;
+
+			if (fileExists(filename)) {
+				data = readFile(filename);
+				fulfill({
+					contents: data,
+					filename: filename
+				});
 			}
-
-			return directoryName;
-		};
-
-		IoHost.prototype.resolveRelativePath = function (basePath, relativePath) {
-			var absolutePathParts = [],
-				absolutePath,
-				baseDirectoryPath
-				;
-
-			if (relativePath.indexOf('/') === 0) {
-				return relativePath;
+			else {
+				reject({
+					type: 'File',
+					message: formatString(ERROR_MSG_PATTERN_FILE_NOT_FOUND, filename)
+				});
 			}
-
-			baseDirectoryPath = this.dirName(basePath);
-
-			buildAbsolutePath(absolutePathParts, removeLastSlash(baseDirectoryPath));
-			buildAbsolutePath(absolutePathParts, relativePath);
-
-			absolutePath = absolutePathParts.join('/');
-
-			return absolutePath;
 		};
 
-		IoHost.prototype.dispose = function () {
-			this._files = null;
+		FileManager.prototype.loadFileSync = function (filename) {
+			return {
+				contents: readFile(filename),
+				filename: filename
+			};
 		};
 
-		return IoHost;
-	})();
+		return FileManager;
+	}
 
 	exports.compile = function (code, path, dependencies, options) {
 		var result = {
@@ -157,15 +251,14 @@ var lessHelper = (function (less) {
 			dependencyIndex,
 			dependencyCount,
 			dependencyKey,
-			ioHost,
-			currentDirectoryPath,
-			relativeUrls,
-			env,
-			errors = []
+			errors = [],
+			environment,
+			FileManager,
+			fileManager,
+			lessCompiler
 			;
 
 		options = options || {};
-		compilationOptions = mix(mix({}, defaultOptions), options);
 
 		// Fill file cache
 		files = {};
@@ -185,53 +278,37 @@ var lessHelper = (function (less) {
 		files[inputFileKey] = { path: inputFilePath, content: code };
 
 		// Compile code
-		ioHost = new IoHost(files);
+		environment = getEnvironment();
+		FileManager = getFileManager(less.AbstractFileManager, files);
+		fileManager = new FileManager();
 
-		currentDirectoryPath = ioHost.dirName(path);
-		relativeUrls = true;
-		env = {
-			rootpath: currentDirectoryPath,
-			relativeUrls: relativeUrls,
-			currentFileInfo: {
-				filename: path,
-				relativeUrls: relativeUrls,
-				rootpath: currentDirectoryPath,
-				currentDirectory: currentDirectoryPath,
-				entryPath: currentDirectoryPath,
-				rootFilename: path
-			},
-			insecure: false,
-            sourceMap: false,
-            sourceMapFilename: '',
-			sourceMapURL: '',
-            sourceMapOutputFilename: '',
-			sourceMapFullFilename: '',
-            sourceMapBasepath: '',
-            sourceMapRootpath: '',
-            outputSourceFiles: false,
-            writeSourceMap: false
-		};
-		mix(env, compilationOptions);
+		compilationOptions = mix(mix(defaultOptions), options);
+		compilationOptions.filename = inputFilePath;
+		compilationOptions.rootpath = fileManager.getPath(inputFilePath);
+		compilationOptions.relativeUrls = true;
 
-		var parser = new less.Parser(env);
-		less.ioHost = ioHost;
-
+		lessCompiler = less.createFromEnvironment(environment, [fileManager]);
+		lessCompiler.createFromEnvironment = less.createFromEnvironment;
+		lessCompiler.FileManager = FileManager;
+		
 		try {
-			parser.parse(code, function (err, tree) {
-				if (err) {
-					errors.push({
-						type: err.type,
-						message: err.message,
-						fileName: err.filename,
-						lineNumber: (err.line || 0),
-						columnNumber: (err.column || 0)
+			lessCompiler.render(code, compilationOptions, 
+				function(err, stylesheet){
+					if (err) {
+						errors.push({
+							type: err.type,
+							message: err.message,
+							fileName: err.filename,
+							lineNumber: (err.line || 0),
+							columnNumber: (err.column ? err.column + 1 : 0)
 					});
 
-					return;
-				}
+						return;
+					}
 
-				result.compiledCode = tree.toCSS(compilationOptions);
-			});
+					result.compiledCode = stylesheet.css;
+				}
+			);
 		}
 		catch (e) {
 			if (typeof e.line !== 'undefined') {
@@ -240,7 +317,7 @@ var lessHelper = (function (less) {
 					message: e.message,
 					fileName: e.filename,
 					lineNumber: (e.line || 0),
-					columnNumber: (e.column || 0)
+					columnNumber: (e.column ? e.column + 1 : 0)
 				});
 			}
 			else {
@@ -251,9 +328,6 @@ var lessHelper = (function (less) {
 		if (errors.length > 0) {
 			result.errors = errors;
 		}
-
-		less.ioHost = undefined;
-		ioHost.dispose();
 
 		return JSON.stringify(result);
 	};

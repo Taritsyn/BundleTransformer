@@ -216,9 +216,9 @@
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"less",
 							@"
-  * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8",
-							"MsieJsEngine")
+  * JavaScriptEngineSwitcher.V8
+  * JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode)",
+							"V8JsEngine")
 					);
 				}
 
