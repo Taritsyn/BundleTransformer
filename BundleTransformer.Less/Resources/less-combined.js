@@ -279,13 +279,15 @@ var Less = (function(){
 			'importMultiple', // whether we are currently importing multiple copies
 			'urlArgs',        // whether to add args into url tokens
 			'javascriptEnabled',// option - whether JavaScript is enabled. if undefined, defaults to true
-			'pluginManager'     // Used as the plugin manager for the session
+			'pluginManager',  // Used as the plugin manager for the session
+			'importantScope'  // used to bubble up !important statements
 			];
 
 		contexts.Eval = function(options, frames) {
 			copyFromOriginal(options, this, evalCopyProperties);
 
 			this.frames = frames || [];
+			this.importantScope = this.importantScope || [];
 		};
 
 		contexts.Eval.prototype.inParenthesis = function () {
@@ -807,16 +809,22 @@ var Less = (function(){
 				context.strictMath = true;
 			}
 			try {
+				context.importantScope.push({});
 				evaldValue = this.value.eval(context);
 
 				if (!this.variable && evaldValue.type === "DetachedRuleset") {
 					throw { message: "Rulesets cannot be evaluated on a property.",
 							index: this.index, filename: this.currentFileInfo.filename };
 				}
+				var important = this.important,
+					importantResult = context.importantScope.pop();
+				if (!important && importantResult.important) {
+					important = importantResult.important;
+				}
 
 				return new Rule(name,
 								  evaldValue,
-								  this.important,
+								  important,
 								  this.merge,
 								  this.index, this.currentFileInfo, this.inline,
 									  variable);
@@ -2253,6 +2261,10 @@ var Less = (function(){
 			variable = this.find(context.frames, function (frame) {
 				var v = frame.variable(name);
 				if (v) {
+					if (v.important) {
+						var importantScope = context.importantScope[context.importantScope.length-1];
+						importantScope.important = v.important;
+					}
 					return v.value.eval(context);
 				}
 			});
@@ -5246,7 +5258,7 @@ var Less = (function(){
 					c = inp.charCodeAt(parserInput.i);
 
 					if (parserInput.autoCommentAbsorb && c === CHARCODE_FORWARD_SLASH) {
-						nextChar = inp[parserInput.i + 1];
+						nextChar = inp.charAt(parserInput.i + 1);
 						if (nextChar === '/') {
 							comment = {index: parserInput.i, isLineComment: true};
 							var nextNewLine = inp.indexOf("\n", parserInput.i + 1);
@@ -7844,6 +7856,13 @@ var Less = (function(){
 //				if (options.sourceMap) {
 //					result.map = sourceMapBuilder.getExternalSourceMap();
 //				}
+
+				result.imports = [];
+				for(var file in this.imports.files) {
+					if (this.imports.files.hasOwnProperty(file) && file !== this.imports.rootFilename) {
+						result.imports.push(file);
+					}
+				}
 				return result;
 			};
 			return ParseTree;
@@ -7879,7 +7898,7 @@ var Less = (function(){
 				this.context = context;
 				// Deprecated? Unused outside of here, could be useful.
 				this.queue = [];        // Files which haven't been imported yet
-				this.files = [];        // Holds the imported parse trees.
+				this.files = {};        // Holds the imported parse trees.
 			};
 			/**
 			 * Add an import to be imported
@@ -7965,7 +7984,7 @@ var Less = (function(){
 					function(error) {
 						fileParsedFunc(error);
 					}
-				)
+				);
 			};
 			return ImportManager;
 		};

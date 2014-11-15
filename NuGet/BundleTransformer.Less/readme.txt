@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.27
+               README file for Bundle Transformer: LESS 1.9.28
 
    ----------------------------------------------------------------------
 
@@ -23,23 +23,25 @@
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install one of the following 
-   NuGet packages: JavaScriptEngineSwitcher.V8 or
-   JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).
+   NuGet packages: JavaScriptEngineSwitcher.Msie or 
+   JavaScriptEngineSwitcher.V8.
    
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 2.0.0.
+   1. LESS was updated to commit 41346e1543;
+   2. This module is again compatible with the `ChakraActiveScript` mode
+      of JavaScriptEngineSwitcher.Msie.
    
    ====================
    POST-INSTALL ACTIONS
    ====================
-   For correct working of this module is recommended to install the 
-   following NuGet packages: JavaScriptEngineSwitcher.V8 or
-   JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode). After
-   package is installed, need set a name of JavaScript engine (for
-   example, `V8JsEngine`) to the `name` attribute of
-   `/configuration/bundleTransformer/less/jsEngine` configuration element.
+   For correct working of this module is recommended to install one of 
+   the following NuGet packages: JavaScriptEngineSwitcher.Msie or 
+   JavaScriptEngineSwitcher.V8. After package is installed, need set a 
+   name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
+   attribute of `/configuration/bundleTransformer/less/jsEngine` 
+   configuration element.
 
    To use a debugging HTTP-handler in the IIS Classic mode, you need add
    to the `/configuration/system.web/httpHandlers` element of the 
