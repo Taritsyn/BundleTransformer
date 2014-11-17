@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.28
+               README file for Bundle Transformer: LESS 1.9.29
 
    ----------------------------------------------------------------------
 
@@ -29,9 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   1. LESS was updated to commit 41346e1543;
-   2. This module is again compatible with the `ChakraActiveScript` mode
-      of JavaScriptEngineSwitcher.Msie.
+   LESS was updated to commit 59b763a10c.
    
    ====================
    POST-INSTALL ACTIONS

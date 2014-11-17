@@ -115,10 +115,10 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
 del "$(ProjectDir)Resources\hoganHelper.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\hoganHelper.js" -out:"$(ProjectDir)Resources\hoganHelper.min.js"</PreBuildEvent>
+AjaxMinifier.exe "$(ProjectDir)Resources\hoganHelper.js" –out "$(ProjectDir)Resources\hoganHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

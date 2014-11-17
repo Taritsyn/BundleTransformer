@@ -306,7 +306,7 @@ var Less = (function(){
 		};
 
 		contexts.Eval.prototype.isPathRelative = function (path) {
-			return !/^(?:[a-z-]+:|\/)/.test(path);
+			return !/^(?:[a-z-]+:|\/)/i.test(path);
 		};
 
 		contexts.Eval.prototype.normalizePath = function( path ) {

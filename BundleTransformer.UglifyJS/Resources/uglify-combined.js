@@ -11,7 +11,7 @@
  
 	var exports = {};
  
-	//#region URL: ./lib/utils.js
+	//#region URL: /lib/utils
 	//"use strict";
 
 	function array_to_hash(a) {
@@ -275,7 +275,7 @@
 	exports.DefaultsError = DefaultsError;
 	//#endregion
 	
-	//#region URL: ./lib/ast.js
+	//#region URL: /lib/ast
 	//"use strict";
 
 	function DEFNODE(type, props, methods, base) {
@@ -1219,7 +1219,7 @@
 	};
 	//#endregion
 	
-	//#region URL: ./lib/parse.js
+	//#region URL: /lib/parse
 	//"use strict";
 
 	var KEYWORDS = 'break case catch const continue debugger default delete do else finally for function if in instanceof new return switch throw try typeof var void while with';
@@ -2630,7 +2630,7 @@
 	exports.JS_Parse_Error = JS_Parse_Error;
 	//#endregion
 	
-	//#region URL: ./lib/transform.js
+	//#region URL: /lib/transform
 	//"use strict";
 
 	// Tree transformer helpers.
@@ -2808,7 +2808,7 @@
 	})();
 	//#endregion
 	
-	//#region URL: ./lib/scope.js
+	//#region URL: /lib/scope
 	//"use strict";
 
 	function SymbolDef(scope, index, orig) {
@@ -3336,7 +3336,7 @@
 	});
 	//#endregion
 	
-	//#region URL: ./lib/output.js
+	//#region URL: /lib/output
 	//"use strict";
 
 	function OutputStream(options) {
@@ -4607,7 +4607,7 @@
 	})();
 	//#endregion
 	
-	//#region URL: ./lib/compress.js
+	//#region URL: /lib/compress
 	//"use strict";
 
 	function Compressor(options, false_by_default) {
@@ -6976,7 +6976,7 @@
 	})();
 	//#endregion
 	
-	//#region URL: ./lib/mozilla-ast.js
+	//#region URL: /lib/mozilla-ast
 	//"use strict";
 
 	(function(){
@@ -7448,7 +7448,7 @@
 	exports.AST_Node = AST_Node;
 	//#endregion
 	
-	//#region URL: ./tools/node.js
+	//#region URL: /tools/node
 	exports.minify = function(code, options) {
 		options = defaults(options, {
 			outSourceMap : null,

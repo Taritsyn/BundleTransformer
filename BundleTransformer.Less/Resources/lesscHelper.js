@@ -166,40 +166,42 @@ var lessHelper = (function (less) {
 		};
 	}
 
-	function getFileManager(AbstractFileManager, files) {
-		var FileManager = function () { },
-			ERROR_MSG_PATTERN_FILE_NOT_FOUND = "File '{0}' does not exist."
-			;
+	var FileManager = (function(AbstractFileManager) {
+		var ERROR_MSG_PATTERN_FILE_NOT_FOUND = "File '{0}' does not exist.";
+
+		function FileManager(files) {
+			this._files = files;
+		}
+
+		FileManager.prototype = new AbstractFileManager();
 
 		//#region Internal Methods
-		function readFile(path) {
+		FileManager.prototype._readFile = function(path) {
 			var key,
 				file
 				;
 
 			key = generateFileCacheItemKey(path);
-			if (typeof files[key] === 'undefined') {
+			if (typeof this._files[key] === 'undefined') {
 				throw new Error(formatString(ERROR_MSG_PATTERN_FILE_NOT_FOUND, path));
 			}
 
-			file = files[key];
+			file = this._files[key];
 
 			return file.content;
-		}
+		};
 
-		function fileExists(path) {
+		FileManager.prototype._fileExists = function(path) {
 			var key,
 				isFileExists
 				;
 
 			key = generateFileCacheItemKey(path);
-			isFileExists = (typeof files[key] !== 'undefined');
+			isFileExists = (typeof this._files[key] !== 'undefined');
 
 			return isFileExists;
-		}
+		};
 		//#endregion
-
-		FileManager.prototype = new AbstractFileManager();
 
 		FileManager.prototype.supports = function () {
 			return true;
@@ -213,8 +215,8 @@ var lessHelper = (function (less) {
 			fulfill, reject) {
 			var data;
 
-			if (fileExists(filename)) {
-				data = readFile(filename);
+			if (this._fileExists(filename)) {
+				data = this._readFile(filename);
 				fulfill({
 					contents: data,
 					filename: filename
@@ -230,13 +232,17 @@ var lessHelper = (function (less) {
 
 		FileManager.prototype.loadFileSync = function (filename) {
 			return {
-				contents: readFile(filename),
+				contents: this._readFile(filename),
 				filename: filename
 			};
 		};
 
+		FileManager.prototype.dispose = function () {
+			this._files = null;
+		};
+
 		return FileManager;
-	}
+	})(less.AbstractFileManager);
 
 	exports.compile = function (code, path, dependencies, options) {
 		var result = {
@@ -253,7 +259,6 @@ var lessHelper = (function (less) {
 			dependencyKey,
 			errors = [],
 			environment,
-			FileManager,
 			fileManager,
 			lessCompiler
 			;
@@ -279,8 +284,7 @@ var lessHelper = (function (less) {
 
 		// Compile code
 		environment = getEnvironment();
-		FileManager = getFileManager(less.AbstractFileManager, files);
-		fileManager = new FileManager();
+		fileManager = new FileManager(files);
 
 		compilationOptions = mix(mix(defaultOptions), options);
 		compilationOptions.filename = inputFilePath;
@@ -288,8 +292,6 @@ var lessHelper = (function (less) {
 		compilationOptions.relativeUrls = true;
 
 		lessCompiler = less.createFromEnvironment(environment, [fileManager]);
-		lessCompiler.createFromEnvironment = less.createFromEnvironment;
-		lessCompiler.FileManager = FileManager;
 		
 		try {
 			lessCompiler.render(code, compilationOptions, 
@@ -328,6 +330,8 @@ var lessHelper = (function (less) {
 		if (errors.length > 0) {
 			result.errors = errors;
 		}
+
+		fileManager.dispose();
 
 		return JSON.stringify(result);
 	};

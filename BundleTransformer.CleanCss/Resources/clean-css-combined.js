@@ -1,17 +1,37 @@
 /*!
- * Clean-css v2.2.16
+ * Clean-css v2.2.17
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
  * Released under the terms of MIT license
  */
 var CleanCss = (function(){
-	var require = function(name) {
-		return require[name];
-	};
+	var modules = {},
+		loadedModules = {},
+		require = function(name) {
+			var result;
+		
+			if (typeof loadedModules[name] !== 'undefined') {
+				result = loadedModules[name];
+			}
+			else {
+				if (typeof modules[name] !== 'undefined') {
+					result = modules[name].call(this);
+					
+					loadedModules[name] = (typeof result !== 'undefined') ? result : null;
+					modules[name] = undefined;
+				}
+				else {
+					throw new Error("Can't load '" + name + "' module.");
+				}
+			}
+		
+			return result;
+		}
+		;
 	
-	//#region URL: ./colors/shortener
-	require['./colors/shortener'] = (function () {
+	//#region URL: /colors/shortener
+	modules['/colors/shortener'] = function () {
 		function Shortener(data) {
 		  var COLORS = {
 			aliceblue: '#f0f8ff',
@@ -40,7 +60,6 @@ var CleanCss = (function(){
 			darkgoldenrod: '#b8860b',
 			darkgray: '#a9a9a9',
 			darkgreen: '#006400',
-			darkgrey: '#a9a9a9',
 			darkkhaki: '#bdb76b',
 			darkmagenta: '#8b008b',
 			darkolivegreen: '#556b2f',
@@ -51,13 +70,11 @@ var CleanCss = (function(){
 			darkseagreen: '#8fbc8f',
 			darkslateblue: '#483d8b',
 			darkslategray: '#2f4f4f',
-			darkslategrey: '#2f4f4f',
 			darkturquoise: '#00ced1',
 			darkviolet: '#9400d3',
 			deeppink: '#ff1493',
 			deepskyblue: '#00bfff',
 			dimgray: '#696969',
-			dimgrey: '#696969',
 			dodgerblue: '#1e90ff',
 			firebrick: '#b22222',
 			floralwhite: '#fffaf0',
@@ -70,7 +87,6 @@ var CleanCss = (function(){
 			gray: '#808080',
 			green: '#008000',
 			greenyellow: '#adff2f',
-			grey: '#808080',
 			honeydew: '#f0fff0',
 			hotpink: '#ff69b4',
 			indianred: '#cd5c5c',
@@ -87,13 +103,11 @@ var CleanCss = (function(){
 			lightgoldenrodyellow: '#fafad2',
 			lightgray: '#d3d3d3',
 			lightgreen: '#90ee90',
-			lightgrey: '#d3d3d3',
 			lightpink: '#ffb6c1',
 			lightsalmon: '#ffa07a',
 			lightseagreen: '#20b2aa',
 			lightskyblue: '#87cefa',
 			lightslategray: '#778899',
-			lightslategrey: '#778899',
 			lightsteelblue: '#b0c4de',
 			lightyellow: '#ffffe0',
 			lime: '#0f0',
@@ -133,7 +147,6 @@ var CleanCss = (function(){
 			plum: '#dda0dd',
 			powderblue: '#b0e0e6',
 			purple: '#800080',
-			rebeccapurple: '#663399',
 			red: '#f00',
 			rosybrown: '#bc8f8f',
 			royalblue: '#4169e1',
@@ -147,7 +160,6 @@ var CleanCss = (function(){
 			skyblue: '#87ceeb',
 			slateblue: '#6a5acd',
 			slategray: '#708090',
-			slategrey: '#708090',
 			snow: '#fffafa',
 			springgreen: '#00ff7f',
 			steelblue: '#4682b4',
@@ -196,11 +208,11 @@ var CleanCss = (function(){
 		};
 		
 		return Shortener;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./colors/hsl-to-hex
-	require['./colors/hsl-to-hex'] = (function () {
+	//#region URL: /colors/hsl-to-hex
+	modules['/colors/hsl-to-hex'] = function () {
 		function HSLToHex(data) {
 		  // HSL to RGB converter. Both methods adapted from:
 		  // http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
@@ -267,11 +279,11 @@ var CleanCss = (function(){
 		};
 		
 		return HSLToHex;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./colors/rgb-to-hex
-	require['./colors/rgb-to-hex'] = (function () {
+	//#region URL: /colors/rgb-to-hex
+	modules['/colors/rgb-to-hex'] = function () {
 		function RGBToHex(data) {
 		  return {
 			process: function() {
@@ -288,11 +300,11 @@ var CleanCss = (function(){
 		};
 
 		return RGBToHex;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./colors/long-to-short-hex
-	require['./colors/long-to-short-hex'] = (function () {
+	//#region URL: /colors/long-to-short-hex
+	modules['/colors/long-to-short-hex'] = function () {
 		function LongToShortHex(data) {
 		  return {
 			process: function() {
@@ -307,11 +319,11 @@ var CleanCss = (function(){
 		};
 		
 		return LongToShortHex;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./properties/token
-	require['./properties/token'] = (function () {
+	//#region URL: /properties/token
+	modules['/properties/token'] = function () {
 	  // Helper for tokenizing the contents of a CSS selector block
 	  var createTokenPrototype = function (processable) {
 		var important = '!important';
@@ -491,11 +503,11 @@ var CleanCss = (function(){
 	  return {
 		createTokenPrototype: createTokenPrototype
 	  };
-	}).call(this);
+	};
 	//#endregion
 
-	//#region URL: ./text/splitter
-	require['./text/splitter'] = (function () {
+	//#region URL: /text/splitter
+	modules['/text/splitter'] = function () {
 		var Splitter = function Splitter (separator) {
 		  this.separator = separator;
 		};
@@ -531,13 +543,13 @@ var CleanCss = (function(){
 		};
 		
 		return Splitter;
-	}).call(this);
+	};
 	//#endregion
 
-	//#region URL: ./properties/validator
-	require['./properties/validator'] = (function () {
+	//#region URL: /properties/validator
+	modules['/properties/validator'] = function () {
 	  // Validates various CSS property values
-	  var Splitter = require('./text/splitter');
+	  var Splitter = require('/text/splitter');
 
 	  // Regexes used for stuff
 	  var widthKeywords = ['thin', 'thick', 'medium', 'inherit', 'initial'];
@@ -672,16 +684,16 @@ var CleanCss = (function(){
 	  };
 
 	  return validator;
-	}).call(this);
+	};
 	//#endregion
 
-	//#region URL: ./properties/processable
-	require['./properties/processable'] = (function () {
+	//#region URL: /properties/processable
+	modules['/properties/processable'] = function () {
 	  // Contains the interpretation of CSS properties, as used by the property optimizer
 
-	  var tokenModule = require('./properties/token');
-	  var validator = require('./properties/validator');
-	  var Splitter = require('./text/splitter');
+	  var tokenModule = require('/properties/token');
+	  var validator = require('/properties/validator');
+	  var Splitter = require('/text/splitter');
 
 	  // Functions that decide what value can override what.
 	  // The main purpose is to disallow removing CSS fallbacks.
@@ -1538,14 +1550,14 @@ var CleanCss = (function(){
 		processable: processable,
 		Token: Token
 	  };
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./properties/override-compactor
-	require['./properties/override-compactor'] = (function () {
+	//#region URL: /properties/override-compactor
+	modules['/properties/override-compactor'] = function () {
 	  // Compacts the given tokens according to their ability to override each other.
 
-	  var validator = require('./properties/validator');
+	  var validator = require('/properties/validator');
 
 	  // Default override function: only allow overrides when the two values are the same
 	  var sameValue = function (val1, val2) {
@@ -1699,11 +1711,11 @@ var CleanCss = (function(){
 	  return {
 		compactOverrides: compactOverrides
 	  };
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./properties/shorthand-compactor
-	require['./properties/shorthand-compactor'] = (function () {
+	//#region URL: /properties/shorthand-compactor
+	modules['/properties/shorthand-compactor'] = function () {
 	  // Compacts the tokens by transforming properties into their shorthand notations when possible
 
 	  var isHackValue = function (t) { return t.value === '__hack'; };
@@ -1905,7 +1917,7 @@ var CleanCss = (function(){
 			  addComponentSoFar(token, i);
 			} else if (!isImportant && token.isImportant) {
 			  // Use importants for optimalization opportunities
-			  // https://github.com/jakubpawlowicz/clean-css/issues/184
+			  // https://github.com/GoalSmashers/clean-css/issues/184
 			  var importantTrickComp = new Token(token.prop, token.value, isImportant);
 			  importantTrickComp.isIrrelevant = true;
 			  importantTrickComp.isReal = false;
@@ -1944,14 +1956,14 @@ var CleanCss = (function(){
 	  return {
 		compactShorthands: compactShorthands
 	  };
-	}).call(this);
+	};
 	//#endregion
 
-	//#region URL: ./properties/optimizer
-	require['./properties/optimizer'] = (function () {
-		var processableInfo = require('./properties/processable');
-		var overrideCompactor = require('./properties/override-compactor');
-		var shorthandCompactor = require('./properties/shorthand-compactor');
+	//#region URL: /properties/optimizer
+	modules['/properties/optimizer'] = function () {
+		var processableInfo = require('/properties/processable');
+		var overrideCompactor = require('/properties/override-compactor');
+		var shorthandCompactor = require('/properties/shorthand-compactor');
 
 		function Optimizer(compatibility, aggressiveMerging, context) {
 		  var overridable = {
@@ -2233,11 +2245,11 @@ var CleanCss = (function(){
 		};
 
 		return Optimizer;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./properties/scanner
-	require['./properties/scanner'] = (function () {
+	//#region URL: /properties/scanner
+	modules['/properties/scanner'] = function () {
 	  var OPEN_BRACE = '{';
 	  var SEMICOLON = ';';
 	  var COLON = ':';
@@ -2256,11 +2268,11 @@ var CleanCss = (function(){
 	  };
 
 	  return PropertyScanner;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/escape-store
-	require['./text/escape-store'] = (function () {
+	//#region URL: /text/escape-store
+	modules['/text/escape-store'] = function () {
 		function EscapeStore(placeholderRoot) {
 		  placeholderRoot = 'ESCAPED_' + placeholderRoot + '_CLEAN_CSS';
 
@@ -2295,11 +2307,11 @@ var CleanCss = (function(){
 		};
 		
 		return EscapeStore;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/quote-scanner
-	require['./text/quote-scanner'] = (function () {
+	//#region URL: /text/quote-scanner
+	modules['/text/quote-scanner'] = function () {
 	  var QuoteScanner = function QuoteScanner(data) {
 		this.data = data;
 	  };
@@ -2389,13 +2401,13 @@ var CleanCss = (function(){
 	  };
 	  
 	  return QuoteScanner;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/comments
-	require['./text/comments'] = (function () {
-		var EscapeStore = require('./text/escape-store');
-		var QuoteScanner = require('./text/quote-scanner');
+	//#region URL: /text/comments
+	modules['/text/comments'] = function () {
+		var EscapeStore = require('/text/escape-store');
+		var QuoteScanner = require('/text/quote-scanner');
 
 		function Comments(keepSpecialComments, keepBreaks, lineBreak) {
 		  var comments = new EscapeStore('COMMENT');
@@ -2479,12 +2491,12 @@ var CleanCss = (function(){
 		};
 		
 		return Comments;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/expressions
-	require['./text/expressions'] = (function () {
-		var EscapeStore = require('./text/escape-store');
+	//#region URL: /text/expressions
+	modules['/text/expressions'] = function () {
+		var EscapeStore = require('/text/escape-store');
 
 		function Expressions() {
 		  var expressions = new EscapeStore('EXPRESSION');
@@ -2559,13 +2571,13 @@ var CleanCss = (function(){
 		};
 		
 		return Expressions;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/name-quotes
-	require['./text/name-quotes'] = (function () {
-	  var QuoteScanner = require('./text/quote-scanner');
-	  var PropertyScanner = require('./properties/scanner');
+	//#region URL: /text/name-quotes
+	modules['/text/name-quotes'] = function () {
+	  var QuoteScanner = require('/text/quote-scanner');
+	  var PropertyScanner = require('/properties/scanner');
 
 	  var NameQuotes = function NameQuotes() {};
 
@@ -2599,13 +2611,13 @@ var CleanCss = (function(){
 	  };
 	  
 	  return NameQuotes;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/free
-	require['./text/free'] = (function () {
-	  var EscapeStore = require('./text/escape-store');
-	  var QuoteScanner = require('./text/quote-scanner');
+	//#region URL: /text/free
+	modules['/text/free'] = function () {
+	  var EscapeStore = require('/text/escape-store');
+	  var QuoteScanner = require('/text/quote-scanner');
 
 	  var Free = function Free() {
 		this.matches = new EscapeStore('FREE_TEXT');
@@ -2628,12 +2640,12 @@ var CleanCss = (function(){
 	  };
 
 	  return Free;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./text/urls
-	require['./text/urls'] = (function () {
-		var EscapeStore = require('./text/escape-store');
+	//#region URL: /text/urls
+	modules['/text/urls'] = function () {
+		var EscapeStore = require('/text/escape-store');
 		
 		function Urls() {
 		  var urls = new EscapeStore('URL');
@@ -2676,11 +2688,11 @@ var CleanCss = (function(){
 		};
 
 		return Urls;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./selectors/empty-removal
-	require['./selectors/empty-removal'] = (function () {
+	//#region URL: /selectors/empty-removal
+	modules['/selectors/empty-removal'] = function () {
 		function EmptyRemoval(data) {
 		  var stripEmpty = function(cssData) {
 			var tempData = [];
@@ -2713,11 +2725,11 @@ var CleanCss = (function(){
 		};
 
 		return EmptyRemoval;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./selectors/tokenizer
-	require['./selectors/tokenizer'] = (function () {
+	//#region URL: /selectors/tokenizer
+	modules['/selectors/tokenizer'] = function () {
 		function Tokenizer(data, minifyContext) {
 		  var chunker = new Chunker(data, 128);
 		  var chunk = chunker.next();
@@ -2888,13 +2900,13 @@ var CleanCss = (function(){
 		};
 
 		return Tokenizer;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./selectors/optimizer
-	require['./selectors/optimizer'] = (function () {
-		var Tokenizer = require('./selectors/tokenizer');
-		var PropertyOptimizer = require('./properties/optimizer');
+	//#region URL: /selectors/optimizer
+	modules['/selectors/optimizer'] = function () {
+		var Tokenizer = require('/selectors/tokenizer');
+		var PropertyOptimizer = require('/properties/optimizer');
 
 		function Optimizer(data, context, options) {
 		  var specialSelectors = {
@@ -3236,31 +3248,30 @@ var CleanCss = (function(){
 		};
 
 		return Optimizer;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./clean
-	require['./clean'] = (function () {
-		var exports;
-		var ColorShortener = require('./colors/shortener');
-		var ColorHSLToHex = require('./colors/hsl-to-hex');
-		var ColorRGBToHex = require('./colors/rgb-to-hex');
-		var ColorLongToShortHex = require('./colors/long-to-short-hex');
+	//#region URL: /clean
+	modules['/clean'] = function () {
+		var ColorShortener = require('/colors/shortener');
+		var ColorHSLToHex = require('/colors/hsl-to-hex');
+		var ColorRGBToHex = require('/colors/rgb-to-hex');
+		var ColorLongToShortHex = require('/colors/long-to-short-hex');
 
-//		var ImportInliner = require('./imports/inliner');
-//		var UrlRebase = require('./images/url-rebase');
-		var EmptyRemoval = require('./selectors/empty-removal');
+//		var ImportInliner = require('/imports/inliner');
+//		var UrlRebase = require('/images/url-rebase');
+		var EmptyRemoval = require('/selectors/empty-removal');
 
-		var CommentsProcessor = require('./text/comments');
-		var ExpressionsProcessor = require('./text/expressions');
-		var FreeTextProcessor = require('./text/free');
-		var UrlsProcessor = require('./text/urls');
-		var NameQuotesProcessor = require('./text/name-quotes');
-		var Splitter = require('./text/splitter');
+		var CommentsProcessor = require('/text/comments');
+		var ExpressionsProcessor = require('/text/expressions');
+		var FreeTextProcessor = require('/text/free');
+		var UrlsProcessor = require('/text/urls');
+		var NameQuotesProcessor = require('/text/name-quotes');
+		var Splitter = require('/text/splitter');
 
-		var SelectorsOptimizer = require('./selectors/optimizer');
+		var SelectorsOptimizer = require('/selectors/optimizer');
 
-		var CleanCSS = exports = function CleanCSS(options) {
+		var CleanCSS = function CleanCSS(options) {
 		  options = options || {};
 
 		  // back compat
@@ -3509,9 +3520,12 @@ var CleanCss = (function(){
 		  var precision = 'roundingPrecision' in options ? options.roundingPrecision : 2;
 		  var decimalMultiplier = Math.pow(10, precision);
 		  replace(new RegExp('\\.(\\d{' + (precision + 1) + ',})px', 'g'), function(match, decimalPlaces) {
-			return precision === 0 ?
-			  'px' :
-			  '.' + Math.round(parseFloat('.' + decimalPlaces) * decimalMultiplier) / decimalMultiplier + 'px';
+			if (precision === 0) {
+			  return 'px';
+			} else {
+			  var rounded = Math.round(parseFloat('.' + decimalPlaces) * decimalMultiplier) / decimalMultiplier;
+			  return (rounded < 1 ? '.' : '') + rounded + 'px';
+			}
 		  });
 
 		  // .0 to 0
@@ -3674,9 +3688,9 @@ var CleanCss = (function(){
 			data;
 		};
 
-		return exports;
-	}).call(this);
+		return CleanCSS;
+	};
 	//#endregion
 	
-	return require('./clean');
+	return require('/clean');
 })();

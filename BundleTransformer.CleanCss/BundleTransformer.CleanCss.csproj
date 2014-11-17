@@ -86,13 +86,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
 del "$(ProjectDir)Resources\clean-css-combined.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\clean-css-combined.js" -out:"$(ProjectDir)Resources\clean-css-combined.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources\clean-css-combined.js" –out "$(ProjectDir)Resources\clean-css-combined.min.js"
 
 del "$(ProjectDir)Resources\cleanCssHelper.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\cleanCssHelper.js" -out:"$(ProjectDir)Resources\cleanCssHelper.min.js"</PreBuildEvent>
+AjaxMinifier.exe "$(ProjectDir)Resources\cleanCssHelper.js" –out "$(ProjectDir)Resources\cleanCssHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

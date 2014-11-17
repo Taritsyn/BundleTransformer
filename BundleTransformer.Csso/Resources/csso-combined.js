@@ -6,12 +6,32 @@
 * Released under the MIT License
 */
 var CSSO = (function(){
-	var require = function(name) {
-		return require[name];
-	};
+	var modules = {},
+		loadedModules = {},
+		require = function(name) {
+			var result;
+		
+			if (typeof loadedModules[name] !== 'undefined') {
+				result = loadedModules[name];
+			}
+			else {
+				if (typeof modules[name] !== 'undefined') {
+					result = modules[name].call(this);
+					
+					loadedModules[name] = (typeof result !== 'undefined') ? result : null;
+					modules[name] = undefined;
+				}
+				else {
+					throw new Error("Can't load '" + name + "' module.");
+				}
+			}
+		
+			return result;
+		}
+		;
 	
-	//#region URL: ./util.js
-	require['./util.js'] = (function () {
+	//#region URL: /util
+	modules['/util'] = function () {
 		var exports = {};
 		var $util = {};
 
@@ -46,7 +66,7 @@ var CSSO = (function(){
 			return '                                                  '.substr(0, num * 2);
 		};
 //		$util.printTree = function(tree) {
-//			require('sys').print($util.treeToString(tree));
+//			require('/sys').print($util.treeToString(tree));
 //		};
 
 		exports.cleanInfo = $util.cleanInfo;
@@ -56,11 +76,11 @@ var CSSO = (function(){
 //		exports.printTree = $util.printTree;
 		
 		return exports;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./gonzales.cssp.node.js
-	require['./gonzales.cssp.node.js'] = (function () {
+	//#region URL: /gonzales.cssp.node
+	modules['/gonzales.cssp.node'] = function () {
 		var exports = {};
 		var srcToCSSP = (function() {
 		var TokenType = {
@@ -2359,11 +2379,11 @@ var CSSO = (function(){
 		exports.srcToCSSP = srcToCSSP;
 		
 		return exports;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./translator.js
-	require['./translator.js'] = (function () {
+	//#region URL: /translator
+	modules['/translator'] = function () {
 		var exports = {};
 		function CSSOTranslator() {}
 
@@ -2495,11 +2515,11 @@ var CSSO = (function(){
 		};
 
 		return exports;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./compressor.js
-	require['./compressor.js'] = (function () {
+	//#region URL: /compressor
+	modules['/compressor'] = function () {
 		var exports = {};
 		function TRBL(name, imp) {
 			this.name = TRBL.extractMain(name);
@@ -3986,24 +4006,24 @@ var CSSO = (function(){
 		CSSOCompressor.prototype.pathUp = function(path) {
 			return path.substr(0, path.lastIndexOf('/'));
 		};
-		var translator = require('./translator.js').translator(),
-			cleanInfo = require('./util.js').cleanInfo;
+		var translator = require('/translator').translator(),
+			cleanInfo = require('/util').cleanInfo;
 
 		exports.compress = function(tree, ro) {
 			return new CSSOCompressor().compress(tree, ro);
 		};
 		
 		return exports;
-	}).call(this);
+	};
 	//#endregion
 	
-	//#region URL: ./cssoapi.js
-	require['./cssoapi.js'] = (function () {
+	//#region URL: /cssoapi
+	modules['/cssoapi'] = function () {
 		var exports = {};
-		var util = require('./util.js'),
-			gonzales = require('./gonzales.cssp.node.js'),
-			translator = require('./translator.js'),
-			compressor = require('./compressor.js');
+		var util = require('/util'),
+			gonzales = require('/gonzales.cssp.node'),
+			translator = require('/translator'),
+			compressor = require('/compressor');
 
 		var parse = exports.parse = function(s, rule, needInfo) {
 			return gonzales.srcToCSSP(s, rule, needInfo);
@@ -4024,8 +4044,8 @@ var CSSO = (function(){
 		};
 		
 		return exports;
-	}).call(this);
+	};
 	//#endregion
 	
-	return require('./cssoapi.js');
+	return require('/cssoapi');
 })();

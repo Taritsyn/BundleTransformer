@@ -108,13 +108,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
 del "$(ProjectDir)Resources\csso-combined.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\csso-combined.js" -out:"$(ProjectDir)Resources\csso-combined.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources\csso-combined.js" –out "$(ProjectDir)Resources\csso-combined.min.js"
 
 del "$(ProjectDir)Resources\cssoHelper.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\cssoHelper.js" -out:"$(ProjectDir)Resources\cssoHelper.min.js"</PreBuildEvent>
+AjaxMinifier.exe "$(ProjectDir)Resources\cssoHelper.js" –out "$(ProjectDir)Resources\cssoHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>

@@ -111,13 +111,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\WebGrease\"
+    <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
 del "$(ProjectDir)Resources\uglify-combined.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\uglify-combined.js" -out:"$(ProjectDir)Resources\uglify-combined.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources\uglify-combined.js" –out "$(ProjectDir)Resources\uglify-combined.min.js" -ignore:JS1019
 
 del "$(ProjectDir)Resources\uglifyJsHelper.min.js"
-wg.exe -m -in:"$(ProjectDir)Resources\uglifyJsHelper.js" -out:"$(ProjectDir)Resources\uglifyJsHelper.min.js"</PreBuildEvent>
+AjaxMinifier.exe "$(ProjectDir)Resources\uglifyJsHelper.js" –out "$(ProjectDir)Resources\uglifyJsHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
