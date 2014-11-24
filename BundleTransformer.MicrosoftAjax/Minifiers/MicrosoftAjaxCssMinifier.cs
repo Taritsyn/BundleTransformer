@@ -236,6 +236,16 @@
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether empty blocks removes
+		/// the corresponding rule or directive
+		/// </summary>
+		public bool RemoveEmptyBlocks
+		{
+			get { return _cssParserConfiguration.RemoveEmptyBlocks; }
+			set { _cssParserConfiguration.RemoveEmptyBlocks = value; }
+		}
+
 
 		/// <summary>
 		/// Constructs instance of Microsoft Ajax CSS-minifier
@@ -257,6 +267,7 @@
 			ColorNames = cssMinifierConfig.ColorNames;
 			CommentMode = cssMinifierConfig.CommentMode;
 			MinifyExpressions = cssMinifierConfig.MinifyExpressions;
+			RemoveEmptyBlocks = cssMinifierConfig.RemoveEmptyBlocks;
 		}
 
 

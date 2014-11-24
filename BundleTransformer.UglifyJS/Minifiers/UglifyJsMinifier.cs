@@ -109,14 +109,15 @@
 		public UglifyJsMinifier(Func<IJsEngine> createJsEngineInstance, UglifySettings uglifyConfig)
 		{
 			JsMinifierSettings jsMinifierConfig = uglifyConfig.Js;
-			ParsingSettings parsing = jsMinifierConfig.Parsing;
+			ParsingSettings parsingConfig = jsMinifierConfig.Parsing;
 			CompressionSettings compressionConfig = jsMinifierConfig.Compression;
 			ManglingSettings manglingConfig = jsMinifierConfig.Mangling;
 			CodeGenerationSettings codeGenerationConfig = jsMinifierConfig.CodeGeneration;
 
 			ParsingOptions = new ParsingOptions
 			{
-				Strict = parsing.Strict
+				Strict = parsingConfig.Strict,
+				BareReturns = parsingConfig.BareReturns
 			};
 
 			CompressionOptions = new CompressionOptions

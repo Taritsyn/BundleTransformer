@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: YUI 1.9.25
+               README file for Bundle Transformer: YUI 1.9.30
  
    ----------------------------------------------------------------------
 
@@ -15,6 +15,12 @@
    (for minification of CSS-code) and `YuiJsMinifier` (for minification of 
    JS-code). These adapters perform minification using the YUI Compressor 
    for .NET (http://github.com/PureKrome/YUICompressor.NET).
+   
+   =============
+   RELEASE NOTES
+   =============
+   Fixed a bug that occurs during processing of null or empty strings by
+   the YUI minifiers.
 
    ====================
    POST-INSTALL ACTIONS

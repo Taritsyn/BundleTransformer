@@ -2702,7 +2702,7 @@ var CoffeeScript = (function(){
 		};
 
 		Base.prototype.compileClosure = function(o) {
-		  var args, argumentsNode, func, jumpNode, meth;
+		  var args, argumentsNode, func, jumpNode, meth, parts;
 		  if (jumpNode = this.jumps()) {
 			jumpNode.error('cannot use a pure statement in an expression');
 		  }
@@ -2719,7 +2719,12 @@ var CoffeeScript = (function(){
 			}
 			func = new Value(func, [new Access(new Literal(meth))]);
 		  }
-		  return (new Call(func, args)).compileNode(o);
+		  parts = (new Call(func, args)).compileNode(o);
+		  if (func.isGenerator) {
+			parts.unshift(this.makeCode("(yield* "));
+			parts.push(this.makeCode(")"));
+		  }
+		  return parts;
 		};
 
 		Base.prototype.cache = function(o, level, reused) {
@@ -4432,7 +4437,7 @@ var CoffeeScript = (function(){
 		  this.params = params || [];
 		  this.body = body || new Block;
 		  this.bound = tag === 'boundfunc';
-		  this.isGenerator = this.body.contains(function(node) {
+		  this.isGenerator = !!this.body.contains(function(node) {
 			var _ref2;
 			return node instanceof Op && ((_ref2 = node.operator) === 'yield' || _ref2 === 'yield*');
 		  });

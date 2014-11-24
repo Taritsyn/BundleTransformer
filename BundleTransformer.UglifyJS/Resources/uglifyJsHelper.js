@@ -1,17 +1,17 @@
 var uglifyJsHelper = (function(uglifyJs, undefined) {
-	"use strict";
+	'use strict';
 
 	var exports = {};
 
 	exports.minify = function (code, options) {
-		var minifiedCode = "",
+		var minifiedCode = '',
 			result = {},
 			errors = [],
 			warnings = []
 			;
 
 		uglifyJs.AST_Node.warn_function = function (message) {
-			warnings.push({ "message": message });
+			warnings.push({ 'message': message });
 		};
 
 		try {
@@ -20,16 +20,16 @@ var uglifyJsHelper = (function(uglifyJs, undefined) {
 		catch (e) {
 			if (e instanceof uglifyJs.JS_Parse_Error) {
 				errors.push({
-					"message": e.message,
-					"lineNumber": e.line,
-					"columnNumber": e.col
+					'message': e.message,
+					'lineNumber': e.line,
+					'columnNumber': e.col
 				});
 			}
 			else if (e instanceof uglifyJs.DefaultsError) {
 				errors.push({
-					"message": e.msg,
-					"lineNumber": 0,
-					"columnNumber": 0
+					'message': e.msg,
+					'lineNumber': 0,
+					'columnNumber': 0
 				});
 			}
 			else {

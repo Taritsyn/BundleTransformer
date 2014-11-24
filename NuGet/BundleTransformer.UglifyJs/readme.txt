@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.9.25
+             README file for Bundle Transformer: UglifyJS 1.9.30
  
    ----------------------------------------------------------------------
 
@@ -25,7 +25,9 @@
    =============
    RELEASE NOTES
    =============
-   UglifyJS was updated to commit a64bdda9ae.
+   1. UglifyJS was updated to commit f36a1eaa8b;
+   2. In parsing settings added new property - `BareReturns`
+      (default `false`).
    
    ====================
    POST-INSTALL ACTIONS

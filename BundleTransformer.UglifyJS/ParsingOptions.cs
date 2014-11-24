@@ -15,6 +15,16 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to allow return outside of functions.
+		/// Useful when minifying CommonJS modules.
+		/// </summary>
+		public bool BareReturns
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs instance of the parsing options
@@ -22,6 +32,7 @@
 		public ParsingOptions()
 		{
 			Strict = false;
+			BareReturns = false;
 		}
 	}
 }

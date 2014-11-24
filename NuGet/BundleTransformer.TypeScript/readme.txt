@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.27
+            README file for Bundle Transformer: TypeScript 1.9.30
 
    ----------------------------------------------------------------------
 
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 1.3.0.
+   Improved performance.
    
    ====================
    POST-INSTALL ACTIONS

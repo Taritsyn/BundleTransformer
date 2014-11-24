@@ -1786,7 +1786,8 @@
 			filename       : null,
 			toplevel       : null,
 			expression     : false,
-			html5_comments : true
+			html5_comments : true,
+			bare_returns   : false,
 		});
 
 		var S = {
@@ -1966,7 +1967,7 @@
 					return if_();
 
 				  case "return":
-					if (S.in_function == 0)
+					if (S.in_function == 0 && !options.bare_returns)
 						croak("'return' outside of function");
 					return new AST_Return({
 						value: ( is("punc", ";")
@@ -7463,7 +7464,7 @@
 		});
 
 		// 1. parse
-		var toplevel = parse(code, { strict: options.strict });
+		var toplevel = parse(code, options.parse);
 
 		// 2. compress
 		if (options.compress) {

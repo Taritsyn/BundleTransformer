@@ -733,6 +733,11 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 						<xs:documentation>Value indicating whether to minify the JavaScript within expression functions</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
+				<xs:attribute name="removeEmptyBlocks" type="Boolean_SchemaType" use="optional" default="true">
+					<xs:annotation>
+						<xs:documentation>Value indicating whether empty blocks removes the corresponding rule or directive</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -1318,6 +1323,11 @@ to preserve references to external symbols.</xs:documentation>
 		<xs:attribute name="strict" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to disable automatic semicolon insertion and support for trailing comma in arrays and objects</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bareReturns" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to allow return outside of functions. Useful when minifying CommonJS modules.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>

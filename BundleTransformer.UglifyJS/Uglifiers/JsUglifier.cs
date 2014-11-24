@@ -218,9 +218,13 @@
 			CodeGenerationOptions codeGenerationOptions = options.CodeGenerationOptions;
 
 			var optionsJson = new JObject(
+				new JProperty("warnings", (options.Severity > 0)
+			));
+
+			optionsJson.Add("parse", new JObject(
 				new JProperty("strict", parsingOptions.Strict),
-				new JProperty("warnings", (options.Severity > 0))
-			);
+				new JProperty("bare_returns", parsingOptions.BareReturns)
+			));
 
 			if (compressionOptions.Compress)
 			{

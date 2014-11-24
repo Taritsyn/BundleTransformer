@@ -1,22 +1,25 @@
-var typeScriptHelper = (function (ts, sys) {
-	"use strict";
+/*global ts, sys */
+var typeScriptHelper = (function (ts, sys, undefined) {
+	'use strict';
 
 	var exports = {},
 		defaultOptions = {
-			charset: "",
+			charset: '',
 			emitBOM: false,
-			mapRoot: "",
+			mapRoot: '',
 			module: 0 /* None */,
 			noImplicitAny: false,
 			noLib: false,
 			noResolve: false,
-			out: "",
-			outDir: "",
+			out: '',
+			outDir: '',
 			removeComments: false,
 			sourceMap: false,
-			sourceRoot: "",
+			sourceRoot: '',
 			target: 0 /* ES3 */
-		}
+		},
+		BtSystem,
+		BtCompilerHost
 		;
 
 	function mix(destination, source) {
@@ -43,7 +46,7 @@ var typeScriptHelper = (function (ts, sys) {
 			;
 
 		for (argumentIndex = 0; argumentIndex < argumentCount - 1; argumentIndex++) {
-			regex = new RegExp("\\{" + argumentIndex + "\\}", "gm");
+			regex = new RegExp('\\{' + argumentIndex + '\\}', 'gm');
 			argument = arguments[argumentIndex + 1];
 
 			result = result.replace(regex, argument);
@@ -58,147 +61,152 @@ var typeScriptHelper = (function (ts, sys) {
 		return key;
 	}
 
-	function getBundleTransformerSystem(files) {
+	//#region BtSystem
+	BtSystem = (function () {
 		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'sys.{0}' is not implemented.";
 
-		function write() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, "write"));
+		function BtSystem(files) {
+			this._files = files;
+
+			this.args = [];
+			this.newLine = '\r\n';
+			this.useCaseSensitiveFileNames = false;
 		}
 
-		function readFile(fileName) {
+		BtSystem.prototype.write = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'write'));
+		};
+
+		BtSystem.prototype.readFile = function(fileName) {
 			var key,
 				content
 				;
 
 			key = generateFileCacheItemKey(fileName);
 
-			if (typeof files[key] !== "undefined") {
-				content = files[key].content;
+			if (typeof this._files[key] !== 'undefined') {
+				content = this._files[key].content;
 			}
 			else {
 				content = undefined;
 			}
 
 			return content;
-		}
+		};
 
-		function writeFile(fileName, data) {
+		BtSystem.prototype.writeFile = function(fileName, data) {
 			var key = generateFileCacheItemKey(fileName);
-			
-			files[key] = { path: fileName, content: data };
-		}
 
-		function resolvePath(path) {
+			this._files[key] = { path: fileName, content: data };
+		};
+
+		BtSystem.prototype.resolvePath = function(path) {
 			return path;
-		}
+		};
 
-		function fileExists(path) {
+		BtSystem.prototype.fileExists = function(path) {
 			var key,
 				isFileExists
 				;
 
 			key = generateFileCacheItemKey(path);
-			isFileExists = (typeof files[key] !== "undefined");
+			isFileExists = (typeof this._files[key] !== 'undefined');
 
 			return isFileExists;
-		}
-
-		function directoryExists() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, "directoryExists"));
-		}
-
-		function createDirectory() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, "createDirectory"));
-		}
-
-		function getExecutingFilePath() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, "getExecutingFilePath"));
-		}
-
-		function getCurrentDirectory() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, "getCurrentDirectory"));
-		}
-
-		function exit() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, "exit"));
-		}
-
-		return {
-			args: [],
-			newLine: "\r\n",
-			useCaseSensitiveFileNames: false,
-			write: write,
-			readFile: readFile,
-			writeFile: writeFile,
-			resolvePath: resolvePath,
-			fileExists: fileExists,
-			directoryExists: directoryExists,
-			createDirectory: createDirectory,
-			getExecutingFilePath: getExecutingFilePath,
-			getCurrentDirectory: getCurrentDirectory,
-			exit: exit
 		};
-	}
 
-	function createCompilerHost() {
-		function getSourceFile(filename, languageVersion, onError) {
+		BtSystem.prototype.directoryExists = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'directoryExists'));
+		};
+
+		BtSystem.prototype.createDirectory = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'createDirectory'));
+		};
+
+		BtSystem.prototype.getExecutingFilePath = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getExecutingFilePath'));
+		};
+
+		BtSystem.prototype.getCurrentDirectory = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getCurrentDirectory'));
+		};
+
+		BtSystem.prototype.exit = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'exit'));
+		};
+
+		BtSystem.prototype.dispose = function () {
+			this._files = null;
+		};
+
+		return BtSystem;
+	})();
+	//#endregion
+
+	//#region BtCompilerHost
+	BtCompilerHost = (function () {
+		function BtCompilerHost(system, options) {
+			this._sys = system;
+			this._options = options;
+		}
+
+		BtCompilerHost.prototype.getSourceFile = function(filename, languageVersion, onError) {
 			var text;
 
 			try {
-				text = sys.readFile(filename);
+				text = this._sys.readFile(filename);
 			}
 			catch (e) {
 				if (onError) {
 					onError(e.message);
 				}
 
-				text = "";
+				text = '';
 			}
 
-			return (typeof text !== "undefined") ? ts.createSourceFile(filename, text, languageVersion, "0") : undefined;
-		}
-
-		function getDefaultLibFilename() {
-			return "lib.d.ts";
-		}
-
-		function writeFile(fileName, data, writeByteOrderMark, onError) {
-			try {
-				sys.writeFile(fileName, data, writeByteOrderMark);
-			}
-			catch (e) {
-				if (onError) {
-					onError(e.message);
-				}
-			}
-		}
-
-		function getCurrentDirectory() {
-			return sys.getCurrentDirectory();
-		}
-
-		function useCaseSensitiveFileNames() {
-			return sys.useCaseSensitiveFileNames;
-		}
-
-		function getCanonicalFileName(fileName) {
-			return sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
-		}
-
-		function getNewLine() {
-			return sys.newLine;
-		}
-
-		return {
-			getSourceFile: getSourceFile,
-			getDefaultLibFilename: getDefaultLibFilename,
-			writeFile: writeFile,
-			getCurrentDirectory: getCurrentDirectory,
-			useCaseSensitiveFileNames: useCaseSensitiveFileNames,
-			getCanonicalFileName: getCanonicalFileName,
-			getNewLine: getNewLine
+			return (typeof text !== 'undefined') ?
+				ts.createSourceFile(filename, text, languageVersion, '0') : undefined;
 		};
-	}
+
+		BtCompilerHost.prototype.getDefaultLibFilename = function() {
+			return 'lib.d.ts';
+		};
+
+		BtCompilerHost.prototype.writeFile = function(fileName, data, writeByteOrderMark, onError) {
+			try {
+				this._sys.writeFile(fileName, data, writeByteOrderMark);
+			}
+			catch (e) {
+				if (onError) {
+					onError(e.message);
+				}
+			}
+		};
+
+		BtCompilerHost.prototype.getCurrentDirectory = function() {
+			return this._sys.getCurrentDirectory();
+		};
+
+		BtCompilerHost.prototype.useCaseSensitiveFileNames = function() {
+			return this._sys.useCaseSensitiveFileNames;
+		};
+
+		BtCompilerHost.prototype.getCanonicalFileName = function(fileName) {
+			return this._sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
+		};
+
+		BtCompilerHost.prototype.getNewLine = function getNewLine() {
+			return this._sys.newLine;
+		};
+
+		BtCompilerHost.prototype.dispose = function () {
+			this._sys = null;
+			this._options = null;
+		};
+
+		return BtCompilerHost;
+	})();
+	//#endregion
 
 	function innerCompile(fileNames, options, compilerHost) {
 		var program,
@@ -232,7 +240,7 @@ var typeScriptHelper = (function (ts, sys) {
 			errors = [],
 			message,
 			file,
-			fileName = "",
+			fileName = '',
 			location,
 			lineNumber = 0,
 			columnNumber = 0
@@ -254,10 +262,10 @@ var typeScriptHelper = (function (ts, sys) {
 
 			if (diagnostic.category === 1 /* Error */) {
 				errors.push({
-					"message": message,
-					"fileName": fileName,
-					"lineNumber": lineNumber,
-					"columnNumber": columnNumber
+					'message': message,
+					'fileName': fileName,
+					'lineNumber': lineNumber,
+					'columnNumber': columnNumber
 				});
 			}
 		}
@@ -266,12 +274,12 @@ var typeScriptHelper = (function (ts, sys) {
 	}
 
 	exports.compile = function (code, path, dependencies, options) {
-		var result = { compiledCode: "" },
+		var result = { compiledCode: '' },
 			compilationErrors,
 			compilationOptions,
 			inputFilePath = path,
 			inputFileKey,
-			outputFilePath = inputFilePath.replace(/\.ts$/i, ".js"),
+			outputFilePath = inputFilePath.replace(/\.ts$/i, '.js'),
 			files,
 			dependency,
 			dependencyIndex,
@@ -301,8 +309,8 @@ var typeScriptHelper = (function (ts, sys) {
 		files[inputFileKey] = { path: inputFilePath, content: code };
 
 		// Compile code
-		sys = getBundleTransformerSystem(files);
-		defaultCompilerHost = createCompilerHost(compilationOptions);
+		sys = new BtSystem(files);
+		defaultCompilerHost = new BtCompilerHost(sys, compilationOptions);
 
 		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors;
 		if (compilationErrors.length === 0) {
@@ -312,6 +320,9 @@ var typeScriptHelper = (function (ts, sys) {
 			result.errors = getErrorsFromDiagnostics(compilationErrors);
 		}
 
+		defaultCompilerHost.dispose();
+
+		sys.dispose();
 		sys = null;
 
 		return JSON.stringify(result);

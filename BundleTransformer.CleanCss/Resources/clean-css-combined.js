@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.17
+ * Clean-css v2.2.19
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -2409,7 +2409,7 @@ var CleanCss = (function(){
 		var EscapeStore = require('/text/escape-store');
 		var QuoteScanner = require('/text/quote-scanner');
 
-		function Comments(keepSpecialComments, keepBreaks, lineBreak) {
+		function Comments(context, keepSpecialComments, keepBreaks, lineBreak) {
 		  var comments = new EscapeStore('COMMENT');
 
 		  return {
@@ -2448,8 +2448,10 @@ var CleanCss = (function(){
 				}
 
 				nextEnd = data.indexOf('*/', nextStart + 2);
-				if (nextEnd == -1)
-				  break;
+				if (nextEnd == -1) {
+				  context.warnings.push('Broken comment: \'' + data.substring(nextStart) + '\'.');
+				  nextEnd = data.length - 2;
+				}
 
 				tempData.push(data.substring(cursor, nextStart));
 				if (data[nextStart + 2] == '!') {
@@ -2647,7 +2649,7 @@ var CleanCss = (function(){
 	modules['/text/urls'] = function () {
 		var EscapeStore = require('/text/escape-store');
 		
-		function Urls() {
+		function Urls(context) {
 		  var urls = new EscapeStore('URL');
 
 		  return {
@@ -2666,6 +2668,18 @@ var CleanCss = (function(){
 				  break;
 
 				nextEnd = data.indexOf(')', nextStart);
+				// Following lines are a safety mechanism to ensure
+				// incorrectly terminated urls are processed correctly.
+				if (nextEnd == -1) {
+				  nextEnd = data.indexOf('}', nextStart);
+
+				  if (nextEnd == -1)
+					nextEnd = data.length;
+				  else
+					nextEnd--;
+
+				  context.warnings.push('Broken URL declaration: \'' + data.substring(nextStart, nextEnd + 1) + '\'.');
+				}
 
 				var url = data.substring(nextStart, nextEnd + 1);
 				var placeholder = urls.store(url);
@@ -2805,7 +2819,11 @@ var CleanCss = (function(){
 				var firstOpenBraceAt = chunk.indexOf('{', nextSpecial);
 				var firstSemicolonAt = chunk.indexOf(';', nextSpecial);
 				var isSingle = firstSemicolonAt > -1 && (firstOpenBraceAt == -1 || firstSemicolonAt < firstOpenBraceAt);
-				if (isSingle) {
+				var isBroken = firstOpenBraceAt == -1 && firstSemicolonAt == -1;
+				if (isBroken) {
+				  minifyContext.warnings.push('Broken declaration: \'' + chunk.substring(context.cursor) +  '\'.');
+				  context.cursor = chunk.length;
+				} else if (isSingle) {
 				  nextEnd = chunk.indexOf(';', nextSpecial + 1);
 				  tokenized.push(chunk.substring(context.cursor, nextEnd + 1));
 
@@ -3332,13 +3350,14 @@ var CleanCss = (function(){
 		  var lineBreak = this.lineBreak;
 
 		  var commentsProcessor = new CommentsProcessor(
+			context,
 			'keepSpecialComments' in options ? options.keepSpecialComments : '*',
 			options.keepBreaks,
 			lineBreak
 		  );
 		  var expressionsProcessor = new ExpressionsProcessor();
 		  var freeTextProcessor = new FreeTextProcessor();
-		  var urlsProcessor = new UrlsProcessor();
+		  var urlsProcessor = new UrlsProcessor(context);
 		  var nameQuotesProcessor = new NameQuotesProcessor();
 
 //		  if (options.debug) {
@@ -3519,13 +3538,8 @@ var CleanCss = (function(){
 		  // round pixels to 2nd decimal place
 		  var precision = 'roundingPrecision' in options ? options.roundingPrecision : 2;
 		  var decimalMultiplier = Math.pow(10, precision);
-		  replace(new RegExp('\\.(\\d{' + (precision + 1) + ',})px', 'g'), function(match, decimalPlaces) {
-			if (precision === 0) {
-			  return 'px';
-			} else {
-			  var rounded = Math.round(parseFloat('.' + decimalPlaces) * decimalMultiplier) / decimalMultiplier;
-			  return (rounded < 1 ? '.' : '') + rounded + 'px';
-			}
+		  replace(new RegExp('(\\d*\\.\\d{' + (precision + 1) + ',})px', 'g'), function(match, number) {
+			return Math.round(parseFloat(number) * decimalMultiplier) / decimalMultiplier + 'px';
 		  });
 
 		  // .0 to 0

@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.0.0
+ * Less - Leaner CSS v2.1.0
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -4026,7 +4026,7 @@ var Less = (function(){
 		};
 
 		ImportVisitor.prototype = {
-			isReplacing: true,
+			isReplacing: false,
 			run: function (root) {
 				var error;
 				try {
@@ -4055,11 +4055,10 @@ var Less = (function(){
 					if (importNode.isVariableImport()) {
 						this._sequencer.addVariableImport(this.processImportNode.bind(this, importNode, context, importParent));
 					} else {
-						importNode = this.processImportNode(importNode, context, importParent);
+						this.processImportNode(importNode, context, importParent);
 					}
 				}
 				visitArgs.visitDeeper = false;
-				return importNode;
 			},
 			processImportNode: function(importNode, context, importParent) {
 				var evaldImportNode,
@@ -4084,22 +4083,20 @@ var Less = (function(){
 					// try appending if we haven't determined if it is css or not
 					var tryAppendLessExtension = evaldImportNode.css === undefined;
 
-					var onImported = this.onImported.bind(this, evaldImportNode, context),
-						sequencedOnImported = this._sequencer.addImport(onImported);
-
-					this._importer.push(evaldImportNode.getPath(), tryAppendLessExtension, evaldImportNode.currentFileInfo, evaldImportNode.options, sequencedOnImported);
-
 					for(var i = 0; i < importParent.rules.length; i++) {
 						if (importParent.rules[i] === importNode) {
 							importParent.rules[i] = evaldImportNode;
 							break;
 						}
 					}
-					importNode = evaldImportNode;
+
+					var onImported = this.onImported.bind(this, evaldImportNode, context),
+						sequencedOnImported = this._sequencer.addImport(onImported);
+
+					this._importer.push(evaldImportNode.getPath(), tryAppendLessExtension, evaldImportNode.currentFileInfo, evaldImportNode.options, sequencedOnImported);
 				} else {
 					this.importCount--;
 				}
-				return importNode;
 			},
 			onImported: function (importNode, context, e, root, importedAtRoot, fullPath) {
 				if (e) {
@@ -4156,32 +4153,27 @@ var Less = (function(){
 			},
 			visitRule: function (ruleNode, visitArgs) {
 				visitArgs.visitDeeper = false;
-				return ruleNode;
 			},
 			visitDirective: function (directiveNode, visitArgs) {
 				this.context.frames.unshift(directiveNode);
-				return directiveNode;
 			},
 			visitDirectiveOut: function (directiveNode) {
 				this.context.frames.shift();
 			},
 			visitMixinDefinition: function (mixinDefinitionNode, visitArgs) {
 				this.context.frames.unshift(mixinDefinitionNode);
-				return mixinDefinitionNode;
 			},
 			visitMixinDefinitionOut: function (mixinDefinitionNode) {
 				this.context.frames.shift();
 			},
 			visitRuleset: function (rulesetNode, visitArgs) {
 				this.context.frames.unshift(rulesetNode);
-				return rulesetNode;
 			},
 			visitRulesetOut: function (rulesetNode) {
 				this.context.frames.shift();
 			},
 			visitMedia: function (mediaNode, visitArgs) {
 				this.context.frames.unshift(mediaNode.rules[0]);
-				return mediaNode;
 			},
 			visitMediaOut: function (mediaNode) {
 				this.context.frames.shift();
@@ -5631,7 +5623,14 @@ var Less = (function(){
 							if (parserInput.peek('}')) {
 								break;
 							}
-							node = this.extendRule() || mixin.definition() || this.rule() || this.ruleset() ||
+
+							node = this.extendRule();
+							if (node) {
+								root = root.concat(node);
+								continue;
+							}
+
+							node = mixin.definition() || this.rule() || this.ruleset() ||
 								mixin.call() || this.rulesetCall() || this.directive();
 							if (node) {
 								root.push(node);
@@ -6313,17 +6312,17 @@ var Less = (function(){
 					// Selectors are made out of one or more Elements, see above.
 					//
 					selector: function (isLess) {
-						var index = parserInput.i, elements, extendList, c, e, extend, when, condition;
+						var index = parserInput.i, elements, extendList, c, e, allExtends, when, condition;
 
-						while ((isLess && (extend = this.extend())) || (isLess && (when = parserInput.$re(/^when/))) || (e = this.element())) {
+						while ((isLess && (extendList = this.extend())) || (isLess && (when = parserInput.$re(/^when/))) || (e = this.element())) {
 							if (when) {
 								condition = expect(this.conditions, 'expected condition');
 							} else if (condition) {
 								error("CSS guard can only be used at the end of selector");
-							} else if (extend) {
-								if (extendList) { extendList.push(extend); } else { extendList = [ extend ]; }
+							} else if (extendList) {
+								if (allExtends) { allExtends = allExtends.concat(extendList); } else { allExtends = extendList; }
 							} else {
-								if (extendList) { error("Extend can only be used at the end of selector"); }
+								if (allExtends) { error("Extend can only be used at the end of selector"); }
 								c = parserInput.currentChar();
 								if (elements) { elements.push(e); } else { elements = [ e ]; }
 								e = null;
@@ -6333,8 +6332,8 @@ var Less = (function(){
 							}
 						}
 
-						if (elements) { return new(tree.Selector)(elements, extendList, condition, index, fileInfo); }
-						if (extendList) { error("Extend must be used to extend a selector, it cannot be used on its own"); }
+						if (elements) { return new(tree.Selector)(elements, allExtends, condition, index, fileInfo); }
+						if (allExtends) { error("Extend must be used to extend a selector, it cannot be used on its own"); }
 					},
 					attribute: function () {
 						if (! parserInput.$char('[')) { return; }
@@ -7942,49 +7941,56 @@ var Less = (function(){
 					path = fileManager.tryAppendLessExtension(path);
 				}
 
-				fileManager.loadFile(path, currentFileInfo.currentDirectory, this.context, environment,
-					function loadFileCallback(loadedFile) {
-						var resolvedFilename = loadedFile.filename,
-							contents = loadedFile.contents;
+				var loadFileCallback = function(loadedFile) {
+					var resolvedFilename = loadedFile.filename,
+						contents = loadedFile.contents;
 
-						// Pass on an updated rootpath if path of imported file is relative and file
-						// is in a (sub|sup) directory
-						//
-						// Examples:
-						// - If path of imported file is 'module/nav/nav.less' and rootpath is 'less/',
-						//   then rootpath should become 'less/module/nav/'
-						// - If path of imported file is '../mixins.less' and rootpath is 'less/',
-						//   then rootpath should become 'less/../'
-						newFileInfo.currentDirectory = fileManager.getPath(resolvedFilename);
-						if(newFileInfo.relativeUrls) {
-							newFileInfo.rootpath = fileManager.join((importManager.context.rootpath || ""), fileManager.pathDiff(newFileInfo.currentDirectory, newFileInfo.entryPath));
-							if (!fileManager.isPathAbsolute(newFileInfo.rootpath) && fileManager.alwaysMakePathsAbsolute()) {
-								newFileInfo.rootpath = fileManager.join(newFileInfo.entryPath, newFileInfo.rootpath);
-							}
+					// Pass on an updated rootpath if path of imported file is relative and file
+					// is in a (sub|sup) directory
+					//
+					// Examples:
+					// - If path of imported file is 'module/nav/nav.less' and rootpath is 'less/',
+					//   then rootpath should become 'less/module/nav/'
+					// - If path of imported file is '../mixins.less' and rootpath is 'less/',
+					//   then rootpath should become 'less/../'
+					newFileInfo.currentDirectory = fileManager.getPath(resolvedFilename);
+					if(newFileInfo.relativeUrls) {
+						newFileInfo.rootpath = fileManager.join((importManager.context.rootpath || ""), fileManager.pathDiff(newFileInfo.currentDirectory, newFileInfo.entryPath));
+						if (!fileManager.isPathAbsolute(newFileInfo.rootpath) && fileManager.alwaysMakePathsAbsolute()) {
+							newFileInfo.rootpath = fileManager.join(newFileInfo.entryPath, newFileInfo.rootpath);
 						}
-						newFileInfo.filename = resolvedFilename;
-
-						var newEnv = new contexts.Parse(importManager.context);
-
-						newEnv.processImports = false;
-						importManager.contents[resolvedFilename] = contents;
-
-						if (currentFileInfo.reference || importOptions.reference) {
-							newFileInfo.reference = true;
-						}
-
-						if (importOptions.inline) {
-							fileParsedFunc(null, contents, resolvedFilename);
-						} else {
-							new Parser(newEnv, importManager, newFileInfo).parse(contents, function (e, root) {
-								fileParsedFunc(e, root, resolvedFilename);
-							});
-						}
-					},
-					function(error) {
-						fileParsedFunc(error);
 					}
-				);
+					newFileInfo.filename = resolvedFilename;
+
+					var newEnv = new contexts.Parse(importManager.context);
+
+					newEnv.processImports = false;
+					importManager.contents[resolvedFilename] = contents;
+
+					if (currentFileInfo.reference || importOptions.reference) {
+						newFileInfo.reference = true;
+					}
+
+					if (importOptions.inline) {
+						fileParsedFunc(null, contents, resolvedFilename);
+					} else {
+						new Parser(newEnv, importManager, newFileInfo).parse(contents, function (e, root) {
+							fileParsedFunc(e, root, resolvedFilename);
+						});
+					}
+				};
+
+				/*var promise = */fileManager.loadFile(path, currentFileInfo.currentDirectory, this.context, environment,
+					function(err, loadedFile) {
+					if (err) {
+						fileParsedFunc(err);
+					} else {
+						loadFileCallback(loadedFile);
+					}
+				});
+//				if (promise) {
+//					promise.then(loadFileCallback, fileParsedFunc);
+//				}
 			};
 			return ImportManager;
 		};
@@ -8088,7 +8094,8 @@ var Less = (function(){
 	
 	//#region URL: /render
 	modules['/render'] = function () {
-		var contexts = require('/contexts'),
+		var /*PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise,*/
+			contexts = require('/contexts'),
 			Parser = require('/parser/parser')/*,
 			PluginManager = require('/plugin-manager')*/;
 
@@ -8101,41 +8108,54 @@ var Less = (function(){
 					options = {};
 				}
 
-				var context,
-					rootFileInfo/*,
-					pluginManager = new PluginManager(this)*/;
+//				if (!callback) {
+//					return new PromiseConstructor(function (resolve, reject) {
+//						render(input, options, function(err, output) {
+//							if (err) {
+//								reject(err);
+//							} else {
+//								resolve(output);
+//							}
+//						});
+//					});
+//				} else {
+					var context,
+						rootFileInfo/*,
+						pluginManager = new PluginManager(this)*/;
 
-//				pluginManager.addPlugins(options.plugins);
-//				options.pluginManager = pluginManager;
+//					pluginManager.addPlugins(options.plugins);
+//					options.pluginManager = pluginManager;
 
-				context = new contexts.Parse(options);
+					context = new contexts.Parse(options);
 
-				if (options.rootFileInfo) {
-					rootFileInfo = options.rootFileInfo;
-				} else {
-					var filename = options.filename || "input";
-					var entryPath = filename.replace(/[^\/\\]*$/, "");
-					rootFileInfo = {
-						filename: filename,
-						relativeUrls: context.relativeUrls,
-						rootpath: context.rootpath || "",
-						currentDirectory: entryPath,
-						entryPath: entryPath,
-						rootFilename: filename
-					};
-				}
-
-				var imports = new ImportManager(context, rootFileInfo);
-				var parser = new Parser(context, imports, rootFileInfo);
-				parser.parse(input, function (e, root) {
-					if (e) { return callback(e); }
-					try {
-						var parseTree = new ParseTree(root, imports);
-						var result = parseTree.toCSS(options);
-						callback(null, result);
+					if (options.rootFileInfo) {
+						rootFileInfo = options.rootFileInfo;
+					} else {
+						var filename = options.filename || "input";
+						var entryPath = filename.replace(/[^\/\\]*$/, "");
+						rootFileInfo = {
+							filename: filename,
+							relativeUrls: context.relativeUrls,
+							rootpath: context.rootpath || "",
+							currentDirectory: entryPath,
+							entryPath: entryPath,
+							rootFilename: filename
+						};
 					}
-					catch (err) { callback(err); }
-				}, options);
+
+					var imports = new ImportManager(context, rootFileInfo);
+
+					new Parser(context, imports, rootFileInfo)
+						.parse(input, function (e, root) {
+						if (e) { return callback(e); }
+						try {
+							var parseTree = new ParseTree(root, imports);
+							var result = parseTree.toCSS(options);
+							callback(null, result);
+						}
+						catch (err) { callback( err); }
+					}, options);
+//				}
 			};
 			return render;
 		};
@@ -8191,7 +8211,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 0, "0"],
+				version: [2, 1, 0],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),

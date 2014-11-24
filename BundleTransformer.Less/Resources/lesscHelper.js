@@ -1,6 +1,6 @@
 /*global Less */
-var lessHelper = (function (less) {
-	"use strict";
+var lessHelper = (function (less, undefined) {
+	'use strict';
 
 	var exports = {},
 		defaultOptions = {
@@ -22,7 +22,10 @@ var lessHelper = (function (less) {
 			syncImport: true,
 			chunkInput: false,
 			processImports: true
-		};
+		},
+		environment,
+		FileManager
+		;
 
 	function mix(destination, source) {
 		var propertyName;
@@ -63,7 +66,8 @@ var lessHelper = (function (less) {
 		return key;
 	}
 
-	function getEnvironment() {
+	//#region environment
+	environment = (function () {
 		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'environment.{0}' is not implemented.",
 			symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 			;
@@ -164,9 +168,11 @@ var lessHelper = (function (less) {
 			charsetLookup: charsetLookup,
 			getSourceMapGenerator: getSourceMapGenerator
 		};
-	}
+	}());
+	//#endregion
 
-	var FileManager = (function(AbstractFileManager) {
+	//#region FileManager
+	FileManager = (function(AbstractFileManager) {
 		var ERROR_MSG_PATTERN_FILE_NOT_FOUND = "File '{0}' does not exist.";
 
 		function FileManager(files) {
@@ -211,23 +217,27 @@ var lessHelper = (function (less) {
 			return true;
 		};
 
-		FileManager.prototype.loadFile = function (filename, currentDirectory, options, environment,
-			fulfill, reject) {
-			var data;
+		FileManager.prototype.loadFile = function (filename, currentDirectory, options, environment, callback) {
+			var data,
+				result = null,
+				err = null
+				;
 
 			if (this._fileExists(filename)) {
 				data = this._readFile(filename);
-				fulfill({
+				result = {
 					contents: data,
 					filename: filename
-				});
+				};
 			}
 			else {
-				reject({
+				err = {
 					type: 'File',
 					message: formatString(ERROR_MSG_PATTERN_FILE_NOT_FOUND, filename)
-				});
+				};
 			}
+
+			callback(err, result);
 		};
 
 		FileManager.prototype.loadFileSync = function (filename) {
@@ -243,6 +253,7 @@ var lessHelper = (function (less) {
 
 		return FileManager;
 	})(less.AbstractFileManager);
+	//#endregion
 
 	exports.compile = function (code, path, dependencies, options) {
 		var result = {
@@ -258,7 +269,6 @@ var lessHelper = (function (less) {
 			dependencyCount,
 			dependencyKey,
 			errors = [],
-			environment,
 			fileManager,
 			lessCompiler
 			;
@@ -283,7 +293,6 @@ var lessHelper = (function (less) {
 		files[inputFileKey] = { path: inputFilePath, content: code };
 
 		// Compile code
-		environment = getEnvironment();
 		fileManager = new FileManager(files);
 
 		compilationOptions = mix(mix(defaultOptions), options);

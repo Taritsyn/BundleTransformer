@@ -37,5 +37,16 @@
 			get { return (bool)this["minifyExpressions"]; }
 			set { this["minifyExpressions"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether empty blocks removes
+		/// the corresponding rule or directive
+		/// </summary>
+		[ConfigurationProperty("removeEmptyBlocks", DefaultValue = true)]
+		public bool RemoveEmptyBlocks
+		{
+			get { return (bool)this["removeEmptyBlocks"]; }
+			set { this["removeEmptyBlocks"] = value; }
+		}
 	}
 }

@@ -237,12 +237,13 @@
 
 		private void InnerMinify(IAsset asset)
 		{
+			string content = asset.Content;
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
 
 			try
 			{
-				newContent = _jsCompressor.Compress(asset.Content);
+				newContent = (!string.IsNullOrEmpty(content)) ? _jsCompressor.Compress(content) : string.Empty;
 
 				var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
 				if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)

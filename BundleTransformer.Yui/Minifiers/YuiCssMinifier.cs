@@ -161,12 +161,13 @@
 
 		private void InnerMinify(IAsset asset)
 		{
+			string content = asset.Content;
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
 
 			try
 			{
-				newContent = _cssCompressor.Compress(asset.Content);
+				newContent = (!string.IsNullOrEmpty(content)) ? _cssCompressor.Compress(content) : string.Empty;
 			}
 			catch (Exception e)
 			{

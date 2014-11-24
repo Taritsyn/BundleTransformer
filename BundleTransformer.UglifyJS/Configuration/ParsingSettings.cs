@@ -17,5 +17,16 @@
 			get { return (bool)this["strict"]; }
 			set { this["strict"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow return outside of functions.
+		/// Useful when minifying CommonJS modules.
+		/// </summary>
+		[ConfigurationProperty("bareReturns", DefaultValue = false)]
+		public bool BareReturns
+		{
+			get { return (bool)this["bareReturns"]; }
+			set { this["bareReturns"] = value; }
+		}
 	}
 }
