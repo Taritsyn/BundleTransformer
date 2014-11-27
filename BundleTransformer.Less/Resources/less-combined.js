@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.1.0
+ * Less - Leaner CSS v2.1.1
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -2396,7 +2396,7 @@ var Less = (function(){
 			Variable = require('/tree/variable');
 
 		var Quoted = function (str, content, escaped, index, currentFileInfo) {
-			this.escaped = escaped;
+			this.escaped = (escaped == null) ? true : escaped;
 			this.value = content || '';
 			this.quote = str.charAt(0);
 			this.index = index;
@@ -8109,8 +8109,9 @@ var Less = (function(){
 				}
 
 //				if (!callback) {
+//					var self = this;
 //					return new PromiseConstructor(function (resolve, reject) {
-//						render(input, options, function(err, output) {
+//						render.call(self, input, options, function(err, output) {
 //							if (err) {
 //								reject(err);
 //							} else {
@@ -8148,12 +8149,13 @@ var Less = (function(){
 					new Parser(context, imports, rootFileInfo)
 						.parse(input, function (e, root) {
 						if (e) { return callback(e); }
+						var result;
 						try {
 							var parseTree = new ParseTree(root, imports);
-							var result = parseTree.toCSS(options);
-							callback(null, result);
+							result = parseTree.toCSS(options);
 						}
-						catch (err) { callback( err); }
+						catch (err) { return callback( err); }
+						callback(null, result);
 					}, options);
 //				}
 			};
@@ -8211,7 +8213,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 1, 0],
+				version: [2, 1, 1],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),
@@ -8222,7 +8224,7 @@ var Less = (function(){
 				functions: require('/functions')(environment),
 				contexts: require('/contexts'),
 //				SourceMapOutput: (SourceMapOutput = require('/source-map-output')(environment)),
-//				SourceMapBuilder: (SourceMapBuilder = require('/source-map-builder')(SourceMapOutput)),
+//				SourceMapBuilder: (SourceMapBuilder = require('/source-map-builder')(SourceMapOutput, environment)),
 				ParseTree: (ParseTree = require('/parse-tree')(/*SourceMapBuilder*/)),
 				ImportManager: (ImportManager = require('/import-manager')(environment)),
 				render: require('/render')(environment, ParseTree, ImportManager),
