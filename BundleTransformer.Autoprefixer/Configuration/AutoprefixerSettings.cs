@@ -39,6 +39,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove outdated prefixes
+		/// </summary>
+		[ConfigurationProperty("remove", DefaultValue = true)]
+		public bool Remove
+		{
+			get { return (bool)this["remove"]; }
+			set { this["remove"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

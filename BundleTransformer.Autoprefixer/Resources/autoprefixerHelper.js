@@ -1,7 +1,15 @@
-﻿var autoprefixerHelper = (function (autoprefixer, undefined) {
-	"use strict";
+﻿/*global Autoprefixer */
+var autoprefixerHelper = (function (autoprefixer, undefined) {
+	'use strict';
 
-	var exports = {};
+	var exports = {},
+		defaultOptions = {
+			browsers: null,
+			cascade: true,
+			remove: true,
+			map: false
+		}
+		;
 
 	function mix(destination, source) {
 		var propertyName;
@@ -22,7 +30,7 @@
 			browsers,
 			postProcessor,
 			result = {},
-			processedCode = "",
+			processedCode = '',
 			errors = [],
 			message,
 			lineNumber,
@@ -31,12 +39,12 @@
 
 		options = options || {};
 
-		autoprefixOptions = mix({}, options);
+		autoprefixOptions = mix(mix({}, defaultOptions), options);
 		delete autoprefixOptions.safe;
 
 		browsers = autoprefixOptions.browsers;
 		if (browsers && browsers.length > 0) {
-			if (browsers[0].toLowerCase() === "none") {
+			if (browsers[0].toLowerCase() === 'none') {
 				browsers = [];
 			}
 		}
@@ -48,25 +56,25 @@
 
 		try {
 			postProcessor = autoprefixer(autoprefixOptions);
-			processedCode = postProcessor.process(code, { "safe": options.safe }).css;
+			processedCode = postProcessor.process(code, { 'safe': options.safe }).css;
 		}
 		catch (e) {
-			if (typeof e.line !== "undefined" || typeof e.autoprefixer !== "undefined") {
+			if (typeof e.line !== 'undefined' || typeof e.autoprefixer !== 'undefined') {
 				message = e.message;
 				lineNumber = 0;
 				columnNumber = 0;
 
-				if (typeof e.line !== "undefined") {
+				if (typeof e.line !== 'undefined') {
 					lineNumber = e.line;
 				}
-				if (typeof e.column !== "undefined") {
+				if (typeof e.column !== 'undefined') {
 					columnNumber = e.column;
 				}
 
 				errors.push({
-					"message": message,
-					"lineNumber": lineNumber,
-					"columnNumber": columnNumber
+					'message': message,
+					'lineNumber': lineNumber,
+					'columnNumber': columnNumber
 				});
 			}
 			else {

@@ -625,6 +625,11 @@
 				<xs:documentation>Flag for whether to enable the special safe mode to parse broken CSS</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="remove" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove outdated prefixes</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="BrowserConditionalExpressionCollection_SchemaType">

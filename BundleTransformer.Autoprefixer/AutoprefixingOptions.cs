@@ -34,6 +34,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to remove outdated prefixes
+		/// </summary>
+		public bool Remove
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of autoprefixing options
@@ -43,6 +52,7 @@
 			Browsers = new List<string>();
 			Cascade = true;
 			Safe = false;
+			Remove = true;
 		}
 	}
 }

@@ -295,7 +295,7 @@ var lessHelper = (function (less, undefined) {
 		// Compile code
 		fileManager = new FileManager(files);
 
-		compilationOptions = mix(mix(defaultOptions), options);
+		compilationOptions = mix(mix({}, defaultOptions), options);
 		compilationOptions.filename = inputFilePath;
 		compilationOptions.rootpath = fileManager.getPath(inputFilePath);
 		compilationOptions.relativeUrls = true;

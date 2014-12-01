@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.Autoprefixer</id>
-    <version>1.9.26</version>
+    <version>1.9.32</version>
 	<title>Bundle Transformer: Autoprefixer</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -10,16 +10,17 @@
     <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
     <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=860421</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (http://github.com/postcss/autoprefixer) version 3.1.2.
+    <description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (http://github.com/postcss/autoprefixer) version 4.0.1.1.
    
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).</description>
-    <summary>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer version 3.1.2.</summary>
-	<releaseNotes>Added support of Autoprefixer version 3.1.2.</releaseNotes>
+    <summary>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer version 4.0.1.1.</summary>
+	<releaseNotes>1. Added support of Autoprefixer version 4.0.1.1;
+2. In configuration settings added new property - `Remove` (default `true`).</releaseNotes>
 	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Postprocessing Postprocessor Autoprefixer</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.25" />
+      <dependency id="BundleTransformer.Core" version="1.9.32" />
 	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.2.0" />
 	  <dependency id="Newtonsoft.Json" version="6.0.5" />
     </dependencies>

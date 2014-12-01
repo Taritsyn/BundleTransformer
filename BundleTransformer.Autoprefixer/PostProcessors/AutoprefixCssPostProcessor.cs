@@ -63,6 +63,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to remove outdated prefixes
+		/// </summary>
+		public bool Remove
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
@@ -85,6 +94,7 @@
 				;
 			Cascade = autoprefixerConfig.Cascade;
 			Safe = autoprefixerConfig.Safe;
+			Remove = autoprefixerConfig.Remove;
 
 			if (createJsEngineInstance == null)
 			{
@@ -201,7 +211,8 @@
 			{
 				Browsers = Browsers,
 				Cascade = Cascade,
-				Safe = Safe
+				Safe = Safe,
+				Remove = Remove
 			};
 
 			return options;
