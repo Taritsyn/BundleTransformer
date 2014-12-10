@@ -347,57 +347,53 @@
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Content Include="packages.config" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj">
-      <Project>{05911325-5BF6-4845-98AF-4AEF698993AE}</Project>
+      <Project>{05911325-5bf6-4845-98af-4aef698993ae}</Project>
       <Name>BundleTransformer.Autoprefixer</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.CleanCss\BundleTransformer.CleanCss.csproj">
-      <Project>{AF409D45-61D1-4906-B7CA-92AB133F3044}</Project>
+      <Project>{af409d45-61d1-4906-b7ca-92ab133f3044}</Project>
       <Name>BundleTransformer.CleanCss</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Closure\BundleTransformer.Closure.csproj">
-      <Project>{C0CA5EE5-832E-4090-A749-CDC0479A35C7}</Project>
+      <Project>{c0ca5ee5-832e-4090-a749-cdc0479a35c7}</Project>
       <Name>BundleTransformer.Closure</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj">
-      <Project>{0648FFE9-2A1A-4E17-AF5D-AE0048378617}</Project>
+      <Project>{0648ffe9-2a1a-4e17-af5d-ae0048378617}</Project>
       <Name>BundleTransformer.CoffeeScript</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
+      <Project>{1bab3b8f-9a16-4632-bfb5-47a441dd9aff}</Project>
       <Name>BundleTransformer.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Csso\BundleTransformer.Csso.csproj">
-      <Project>{E70F938E-7498-4904-8E89-445DE42D974B}</Project>
+      <Project>{e70f938e-7498-4904-8e89-445de42d974b}</Project>
       <Name>BundleTransformer.Csso</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj">
-      <Project>{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}</Project>
+      <Project>{e8af8bf7-1455-4aeb-81cb-0f708b8e4c4a}</Project>
       <Name>BundleTransformer.Handlebars</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Hogan\BundleTransformer.Hogan.csproj">
-      <Project>{19A1A37D-14AF-487F-A968-45CCADC78768}</Project>
+      <Project>{19a1a37d-14af-487f-a968-45ccadc78768}</Project>
       <Name>BundleTransformer.Hogan</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj">
-      <Project>{141FCB8B-27E9-459F-9057-F411107D6E48}</Project>
+      <Project>{141fcb8b-27e9-459f-9057-f411107d6e48}</Project>
       <Name>BundleTransformer.JsMin</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Less\BundleTransformer.Less.csproj">
-      <Project>{8B1E4598-9E2E-4C62-ABCF-E8D6107301C9}</Project>
+      <Project>{8b1e4598-9e2e-4c62-abcf-e8d6107301c9}</Project>
       <Name>BundleTransformer.Less</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.MicrosoftAjax\BundleTransformer.MicrosoftAjax.csproj">
-      <Project>{72A5E68C-6919-4DD7-9D30-E07A857806D4}</Project>
+      <Project>{72a5e68c-6919-4dd7-9d30-e07a857806d4}</Project>
       <Name>BundleTransformer.MicrosoftAjax</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Packer\BundleTransformer.Packer.csproj">
-      <Project>{3F489276-A9C9-4BF4-A3E1-5FB187E5017C}</Project>
+      <Project>{3f489276-a9c9-4bf4-a3e1-5fb187e5017c}</Project>
       <Name>BundleTransformer.Packer</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj">
@@ -405,21 +401,24 @@
       <Name>BundleTransformer.SassAndScss</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.TypeScript\BundleTransformer.TypeScript.csproj">
-      <Project>{0866BE97-464C-4A68-B26E-1E73484A2C98}</Project>
+      <Project>{0866be97-464c-4a68-b26e-1e73484a2c98}</Project>
       <Name>BundleTransformer.TypeScript</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.UglifyJS\BundleTransformer.UglifyJs.csproj">
-      <Project>{B8C2B00A-5703-475E-8D80-F353673B60A6}</Project>
+      <Project>{b8c2b00a-5703-475e-8d80-f353673b60a6}</Project>
       <Name>BundleTransformer.UglifyJs</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.WG\BundleTransformer.WG.csproj">
-      <Project>{43801A25-27D6-42C6-B56C-BAD8172226F6}</Project>
+      <Project>{43801a25-27d6-42c6-b56c-bad8172226f6}</Project>
       <Name>BundleTransformer.WG</Name>
     </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.Yui\BundleTransformer.Yui.csproj">
-      <Project>{760C2730-48D6-4DC9-A08E-B0E47322155A}</Project>
+      <Project>{760c2730-48d6-4dc9-a08e-b0e47322155a}</Project>
       <Name>BundleTransformer.Yui</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Content\fonts\bitstream-vera-sans-bold\vera-bold-webfont.eot" />

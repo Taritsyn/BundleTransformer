@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.19
+ * Clean-css v2.2.20
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -2928,7 +2928,7 @@ var CleanCss = (function(){
 
 		function Optimizer(data, context, options) {
 		  var specialSelectors = {
-			'*': /\-(moz|ms|o|webkit)\-/,
+			'*': /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right)/,
 			'ie8': /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/,
 			'ie7': /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
 		  };

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.9.30
+             README file for Bundle Transformer: UglifyJS 1.9.33
  
    ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
    BundleTransformer.UglifyJs contains one minifier-adapter for 
    minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is 
    based on the Mihai Bazon's UglifyJS 
-   (http://github.com/mishoo/UglifyJS2) version 2.4.15.
+   (http://github.com/mishoo/UglifyJS2) version 2.4.16.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
@@ -25,9 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. UglifyJS was updated to commit f36a1eaa8b;
-   2. In parsing settings added new property - `BareReturns`
-      (default `false`).
+   Added support of UglifyJS version 2.4.16.
    
    ====================
    POST-INSTALL ACTIONS
