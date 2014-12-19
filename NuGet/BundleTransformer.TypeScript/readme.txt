@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.30
+            README file for Bundle Transformer: TypeScript 1.9.34
 
    ----------------------------------------------------------------------
 
@@ -26,11 +26,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   Improved performance.
    
    ====================
    POST-INSTALL ACTIONS

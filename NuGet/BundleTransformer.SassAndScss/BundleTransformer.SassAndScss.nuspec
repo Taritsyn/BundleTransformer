@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.SassAndScss</id>
-    <version>1.9.25</version>
+    <version>1.9.34</version>
 	<title>Bundle Transformer: Sass and SCSS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -20,7 +20,7 @@ For execution of Ruby-code is used a IronRuby (http://github.com/IronLanguages/m
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.25" />
+      <dependency id="BundleTransformer.Core" version="1.9.34" />
     </dependencies>
     <references>
       <reference file="BundleTransformer.SassAndScss.dll" />

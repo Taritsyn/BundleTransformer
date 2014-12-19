@@ -1,5 +1,5 @@
 /*!
- * Clean-css v2.2.20
+ * Clean-css v2.2.22
  * https://github.com/GoalSmashers/clean-css
  *
  * Copyright (C) 2011-2014 GoalSmashers.com
@@ -858,6 +858,7 @@ var CleanCss = (function(){
 		var repeat = result[3];
 		var attachment = result[4];
 		var color = result[5];
+		var positionSet = false;
 
 		// Take care of inherit
 		if (token.value === 'inherit') {
@@ -892,14 +893,13 @@ var CleanCss = (function(){
 				i -= 2;
 			  } else if (parts[i - 1] == '/') {
 				size.value = currentPart;
-				position.value = previousPart;
-				i--;
 			  } else {
-				position.value = previousPart + ' ' + currentPart;
-				i--;
+				position.value = currentPart + (positionSet ? ' ' + position.value : '');
+				positionSet = true;
 			  }
 			} else {
-			  position.value = currentPart;
+			  position.value = currentPart + (positionSet ? ' ' + position.value : '');
+			  positionSet = true;
 			}
 		  } else if (validator.isValidBackgroundPositionAndSize(currentPart)) {
 			var sizeValue = new Splitter('/').split(currentPart);
@@ -1999,14 +1999,8 @@ var CleanCss = (function(){
 			'-webkit-animation-name': ['-webkit-animation'],
 			'-webkit-animation-play-state': ['-webkit-animation'],
 			'-webkit-animation-timing-function': ['-webkit-animation'],
-			'background-attachment': ['background'],
 			'background-clip': ['background'],
-			'background-color': ['background'],
-			'background-image': ['background'],
 			'background-origin': ['background'],
-			'background-position': ['background'],
-			'background-repeat': ['background'],
-			'background-size': ['background'],
 			'border-color': ['border'],
 			'border-style': ['border'],
 			'border-width': ['border'],

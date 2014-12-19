@@ -170,7 +170,7 @@
 
 				// Configure browser cache
 				clientCache.SetCacheability(HttpCacheability.NoCache);
-				clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
+				clientCache.SetExpires(DateTime.UtcNow.AddYears(-1));
 				clientCache.SetValidUntilExpires(false);
 				clientCache.SetNoStore();
 				clientCache.SetNoServerCaching();
@@ -205,7 +205,7 @@
 				response.AddHeader("X-Asset-Transformation-Powered-By", "Bundle Transformer");
 
 				clientCache.SetCacheability(HttpCacheability.Public);
-				clientCache.SetExpires(DateTime.UtcNow.Add(TimeSpan.FromDays(-365)));
+				clientCache.SetExpires(DateTime.UtcNow.AddYears(-1));
 				clientCache.SetValidUntilExpires(true);
 				clientCache.AppendCacheExtension("must-revalidate");
 				clientCache.SetNoServerCaching();
