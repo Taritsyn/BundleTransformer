@@ -1659,55 +1659,15 @@ to preserve references to external symbols.</xs:documentation>
 		<xs:annotation>
 			<xs:documentation>Configuration settings of Clean CSS-minifier</xs:documentation>
 		</xs:annotation>
-		<xs:attribute name="keepSpecialComments" use="optional" default="KeepAll">
+		<xs:attribute name="advanced" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
-				<xs:documentation>Special comments mode</xs:documentation>
-			</xs:annotation>
-			<xs:simpleType>
-				<xs:restriction base="xs:NMTOKEN">
-					<xs:enumeration value="KeepAll">
-						<xs:annotation>
-							<xs:documentation>Keep all special comments</xs:documentation>
-						</xs:annotation>
-					</xs:enumeration>
-					<xs:enumeration value="KeepFirstOne">
-						<xs:annotation>
-							<xs:documentation>Keep first one special comment</xs:documentation>
-						</xs:annotation>
-					</xs:enumeration>
-					<xs:enumeration value="RemoveAll">
-						<xs:annotation>
-							<xs:documentation>Remove all special comments</xs:documentation>
-						</xs:annotation>
-					</xs:enumeration>
-				</xs:restriction>
-			</xs:simpleType>
-		</xs:attribute>
-		<xs:attribute name="keepBreaks" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to keep line breaks</xs:documentation>
+				<xs:documentation>Flag for whether to enable advanced optimizations (selector and property merging, reduction, etc)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="noAdvanced" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="aggressiveMerging" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to disable advanced optimizations (selector and property merging, reduction, etc)</xs:documentation>
+				<xs:documentation>Flag for whether to enable properties merging based on their order</xs:documentation>
 			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="noAggressiveMerging" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to disable properties merging based on their order</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="roundingPrecision" use="optional" default="2">
-			<xs:annotation>
-				<xs:documentation>Rounding precision</xs:documentation>
-			</xs:annotation>
-			<xs:simpleType>
-				<xs:restriction base="xs:int">
-					<xs:minInclusive value="0" />
-					<xs:maxInclusive value="2147483647" />
-				</xs:restriction>
-			</xs:simpleType>
 		</xs:attribute>
 		<xs:attribute name="compatibility" use="optional" default="Ie7">
 			<xs:annotation>
@@ -1732,6 +1692,51 @@ to preserve references to external symbols.</xs:documentation>
 					</xs:enumeration>
 				</xs:restriction>
 			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="keepBreaks" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to keep line breaks</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="keepSpecialComments" use="optional" default="KeepAll">
+			<xs:annotation>
+				<xs:documentation>Special comments mode</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="KeepAll">
+						<xs:annotation>
+							<xs:documentation>Keep all special comments</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="KeepFirstOne">
+						<xs:annotation>
+							<xs:documentation>Keep first one special comment</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="RemoveAll">
+						<xs:annotation>
+							<xs:documentation>Remove all special comments</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="roundingPrecision" use="optional" default="2">
+			<xs:annotation>
+				<xs:documentation>Rounding precision. -1 disables rounding.</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="-1" />
+					<xs:maxInclusive value="2147483647" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="shorthandCompacting" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable shorthand compacting</xs:documentation>
+			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="severity" use="optional" default="0">
 			<xs:annotation>

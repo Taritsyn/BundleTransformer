@@ -37,9 +37,28 @@
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
-		/// Gets or sets a special comments mode
+		/// Gets or sets a flag for whether to enable advanced optimizations
+		/// (selector and property merging, reduction, etc)
 		/// </summary>
-		public SpecialCommentsMode KeepSpecialComments
+		public bool Advanced
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable properties merging based on their order
+		/// </summary>
+		public bool AggressiveMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a compatibility mode
+		/// </summary>
+		public CompatibilityMode Compatibility
 		{
 			get;
 			set;
@@ -55,26 +74,16 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable advanced optimizations
-		/// (selector and property merging, reduction, etc)
+		/// Gets or sets a special comments mode
 		/// </summary>
-		public bool NoAdvanced
+		public SpecialCommentsMode KeepSpecialComments
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable properties merging based on their order
-		/// </summary>
-		public bool NoAggressiveMerging
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a rounding precision
+		/// Gets or sets a rounding precision. -1 disables rounding.
 		/// </summary>
 		public int RoundingPrecision
 		{
@@ -83,9 +92,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a compatibility mode
+		/// Gets or sets a flag for whether to enable shorthand compacting
 		/// </summary>
-		public CompatibilityMode Compatibility
+		public bool ShorthandCompacting
 		{
 			get;
 			set;
@@ -118,12 +127,13 @@
 		public CleanCssMinifier(Func<IJsEngine> createJsEngineInstance, CleanSettings cleanConfig)
 		{
 			CssMinifierSettings cssMinifierConfig = cleanConfig.Css;
-			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
-			KeepBreaks = cssMinifierConfig.KeepBreaks;
-			NoAdvanced = cssMinifierConfig.NoAdvanced;
-			NoAggressiveMerging = cssMinifierConfig.NoAggressiveMerging;
-			RoundingPrecision = cssMinifierConfig.RoundingPrecision;
+			Advanced = cssMinifierConfig.Advanced;
+			AggressiveMerging = cssMinifierConfig.AggressiveMerging;
 			Compatibility = cssMinifierConfig.Compatibility;
+			KeepBreaks = cssMinifierConfig.KeepBreaks;
+			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
+			RoundingPrecision = cssMinifierConfig.RoundingPrecision;
+			ShorthandCompacting = cssMinifierConfig.ShorthandCompacting;
 			Severity = cssMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
@@ -244,12 +254,13 @@
 		{
 			var options = new CleaningOptions
 			{
-				KeepSpecialComments = KeepSpecialComments,
-				KeepBreaks = KeepBreaks,
-				NoAdvanced = NoAdvanced,
-				NoAggressiveMerging = NoAggressiveMerging,
-				RoundingPrecision = RoundingPrecision,
+				Advanced = Advanced,
+				AggressiveMerging = AggressiveMerging,
 				Compatibility = Compatibility,
+				KeepBreaks = KeepBreaks,
+				KeepSpecialComments = KeepSpecialComments,
+				RoundingPrecision = RoundingPrecision,
+				ShorthandCompacting = ShorthandCompacting,
 				Severity = Severity
 			};
 

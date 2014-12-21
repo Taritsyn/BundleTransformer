@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.1.1
+ * Less - Leaner CSS v2.1.2
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -3627,6 +3627,7 @@ var Less = (function(){
 	
 	//#region URL: /environment/environment
 	modules['/environment/environment'] = function () {
+		var logger = require('/logger');
 		var environment = function(externalEnvironment, fileManagers) {
 			this.fileManagers = fileManagers || [];
 			externalEnvironment = externalEnvironment || {};
@@ -3647,6 +3648,14 @@ var Less = (function(){
 		};
 
 		environment.prototype.getFileManager = function (filename, currentDirectory, options, environment, isSync) {
+
+			if (!filename) {
+				logger.warn("getFileManager called with no filename.. Please report this issue. continuing.");
+			}
+			if (currentDirectory == null) {
+				logger.warn("getFileManager called with null directory.. Please report this issue. continuing.");
+			}
+
 			var fileManagers = this.fileManagers;
 //			if (options.pluginManager) {
 //				fileManagers = [].concat(fileManagers).concat(options.pluginManager.getFileManagers());
@@ -8213,7 +8222,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 1, 1],
+				version: [2, 1, 2],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),

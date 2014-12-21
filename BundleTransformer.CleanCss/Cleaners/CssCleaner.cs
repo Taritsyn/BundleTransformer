@@ -172,13 +172,14 @@
 		private static JObject ConvertCleaningOptionsToJson(CleaningOptions options)
 		{
 			var optionsJson = new JObject(
+				new JProperty("advanced", options.Advanced),
+				new JProperty("aggressiveMerging", options.AggressiveMerging),
+				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility)),
+				new JProperty("keepBreaks", options.KeepBreaks),
 				new JProperty("keepSpecialComments", 
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
-				new JProperty("keepBreaks", options.KeepBreaks),
-				new JProperty("noAdvanced", options.NoAdvanced),
-				new JProperty("noAggressiveMerging", options.NoAggressiveMerging),
 				new JProperty("roundingPrecision", options.RoundingPrecision),
-				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility))
+				new JProperty("shorthandCompacting", options.ShorthandCompacting)
 			);
 
 			return optionsJson;
@@ -224,7 +225,7 @@
 			switch (compatibilityMode)
 			{
 				case CompatibilityMode.None:
-					code = string.Empty;
+					code = "*";
 					break;
 				case CompatibilityMode.Ie7:
 					code = "ie7";

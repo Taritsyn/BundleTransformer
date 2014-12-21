@@ -1,27 +1,25 @@
-﻿if (typeof process === 'undefined') {
-	var process = {
-		platform: 'win32'
-	};
-}
-
+﻿/*global CleanCss */
 var cleanCssHelper = (function (CleanCss, undefined) {
-	"use strict";
+	'use strict';
 
 	var exports = {},
 		defaultOptions = {
-			target: null,
+			advanced: true,
+			aggressiveMerging: true,
+			benchmark: false,
+			compatibility: 'ie7',
+			debug: false,
+			inliner: undefined,
 			keepBreaks: false,
 			keepSpecialComments: '*',
+			processImport: false,
+			rebase: false,
 			root: '',
 			relativeTo: '',
-			processImport: false,
-			benchmark: false,
-			noRebase: true,
-			noAdvanced: false,
-			noAggressiveMerging: false,
 			roundingPrecision: 2,
-			compatibility: 'ie8',
-			debug: false
+			shorthandCompacting: true,
+			sourceMap: false,
+			target: null
 		}
 		;
 
@@ -42,6 +40,7 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 	exports.minify = function (code, options) {
 		var cleanOptions,
 			cleaner,
+			data,
 			result = {},
 			minifiedCode,
 			errors,
@@ -51,9 +50,11 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 		cleanOptions = mix(mix({}, defaultOptions), options);
 		cleaner = new CleanCss(cleanOptions);
 
-		minifiedCode = cleaner.minify(code);
-		errors = cleaner.errors;
-		warnings = cleaner.warnings;
+		data = cleaner.minify(code);
+
+		minifiedCode = data.styles;
+		errors = data.errors;
+		warnings = data.warnings;
 
 		result.minifiedCode = minifiedCode;
 		if (errors.length > 0) {

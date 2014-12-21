@@ -8,13 +8,34 @@
 	public sealed class CssMinifierSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets a special comments mode
+		/// Gets or sets a flag for whether to enable advanced optimizations
+		/// (selector and property merging, reduction, etc)
 		/// </summary>
-		[ConfigurationProperty("keepSpecialComments", DefaultValue = SpecialCommentsMode.KeepAll)]
-		public SpecialCommentsMode KeepSpecialComments
+		[ConfigurationProperty("advanced", DefaultValue = true)]
+		public bool Advanced
 		{
-			get { return (SpecialCommentsMode)this["keepSpecialComments"]; }
-			set { this["keepSpecialComments"] = value; }
+			get { return (bool)this["advanced"]; }
+			set { this["advanced"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable properties merging based on their order
+		/// </summary>
+		[ConfigurationProperty("aggressiveMerging", DefaultValue = true)]
+		public bool AggressiveMerging
+		{
+			get { return (bool)this["aggressiveMerging"]; }
+			set { this["aggressiveMerging"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a compatibility mode
+		/// </summary>
+		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie7)]
+		public CompatibilityMode Compatibility
+		{
+			get { return (CompatibilityMode)this["compatibility"]; }
+			set { this["compatibility"] = value; }
 		}
 
 		/// <summary>
@@ -28,31 +49,20 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable advanced optimizations
-		/// (selector and property merging, reduction, etc)
+		/// Gets or sets a special comments mode
 		/// </summary>
-		[ConfigurationProperty("noAdvanced", DefaultValue = false)]
-		public bool NoAdvanced
+		[ConfigurationProperty("keepSpecialComments", DefaultValue = SpecialCommentsMode.KeepAll)]
+		public SpecialCommentsMode KeepSpecialComments
 		{
-			get { return (bool)this["noAdvanced"]; }
-			set { this["noAdvanced"] = value; }
+			get { return (SpecialCommentsMode)this["keepSpecialComments"]; }
+			set { this["keepSpecialComments"] = value; }
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable properties merging based on their order
-		/// </summary>
-		[ConfigurationProperty("noAggressiveMerging", DefaultValue = false)]
-		public bool NoAggressiveMerging
-		{
-			get { return (bool)this["noAggressiveMerging"]; }
-			set { this["noAggressiveMerging"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a rounding precision
+		/// Gets or sets a rounding precision. -1 disables rounding.
 		/// </summary>
 		[ConfigurationProperty("roundingPrecision", DefaultValue = 2)]
-		[IntegerValidator(MinValue = 0, MaxValue = int.MaxValue, ExcludeRange = false)]
+		[IntegerValidator(MinValue = -1, MaxValue = int.MaxValue, ExcludeRange = false)]
 		public int RoundingPrecision
 		{
 			get { return (int)this["roundingPrecision"]; }
@@ -60,13 +70,13 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a compatibility mode
+		/// Gets or sets a flag for whether to enable shorthand compacting
 		/// </summary>
-		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie7)]
-		public CompatibilityMode Compatibility
+		[ConfigurationProperty("shorthandCompacting", DefaultValue = true)]
+		public bool ShorthandCompacting
 		{
-			get { return (CompatibilityMode)this["compatibility"]; }
-			set { this["compatibility"] = value; }
+			get { return (bool)this["shorthandCompacting"]; }
+			set { this["shorthandCompacting"] = value; }
 		}
 
 		/// <summary>
