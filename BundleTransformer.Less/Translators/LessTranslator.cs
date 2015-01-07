@@ -39,9 +39,14 @@
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Max size of data-uri in IE8 (in kilobytes)
+		/// Composite format string for data URI
 		/// </summary>
-		const int DATA_URI_MAX_SIZE_IN_KBYTES = 32;
+		const string DATA_URI_FORMAT = "data:{0},{1}{2}";
+
+		/// <summary>
+		/// Max length of data-uri in IE8
+		/// </summary>
+		const int DATA_URI_MAX_LENGTH = 32768;
 
 		/// <summary>
 		/// Composite format string for <code>@import</code> rule
@@ -52,11 +57,6 @@
 		/// Composite format string for <code>url</code> rule
 		/// </summary>
 		const string URL_RULE_FORMAT = @"url(""{0}"")";
-
-		/// <summary>
-		/// Composite format string for <code>url</code> rule with data URI scheme
-		/// </summary>
-		const string URL_RULE_WITH_DATA_URI_SCHEME_FORMAT = @"url(""data:{0},{1}{2}"")";
 
 		/// <summary>
 		/// Regular expression for working with paths of imported LESS-files
@@ -720,19 +720,7 @@
 			}
 
 			bool useBase64;
-			Encoding encoding;
-			bool isTextContent = _virtualFileSystemWrapper.IsTextFile(absoluteAssetUrl, 256, out encoding);
-
-			if (!string.IsNullOrWhiteSpace(mimeType))
-			{
-				useBase64 = _base64OptionRegex.IsMatch(mimeType);
-				if (!useBase64 && !isTextContent)
-				{
-					useBase64 = true;
-					mimeType += ";base64";
-				}
-			}
-			else
+			if (string.IsNullOrWhiteSpace(mimeType))
 			{
 				string fileExtension = Path.GetExtension(absoluteAssetUrl);
 				mimeType = MimeTypeHelpers.GetMimeType(fileExtension);
@@ -742,38 +730,43 @@
 						string.Format(CoreStrings.Common_UnknownMimeType, absoluteAssetUrl));
 				}
 
+				Encoding encoding;
+				bool isTextContent = _virtualFileSystemWrapper.IsTextFile(absoluteAssetUrl, 256, out encoding);
+
 				useBase64 = !isTextContent;
 				if (useBase64)
 				{
 					mimeType += ";base64";
 				}
 			}
-
-			byte[] buffer = _virtualFileSystemWrapper.GetFileBinaryContent(absoluteAssetUrl);
-			int fileSizeInKb = buffer.Length / 1024;
-
-			if (IeCompat && fileSizeInKb >= DATA_URI_MAX_SIZE_IN_KBYTES)
+			else
 			{
-				// IE8 cannot handle a data-uri larger than 32KB
+				useBase64 = _base64OptionRegex.IsMatch(mimeType);
+			}
+
+			string encodedContent;
+			if (useBase64)
+			{
+				byte[] binaryContent = _virtualFileSystemWrapper.GetFileBinaryContent(absoluteAssetUrl);
+				encodedContent = Convert.ToBase64String(binaryContent);
+			}
+			else
+			{
+				string textContent = _virtualFileSystemWrapper.GetFileTextContent(absoluteAssetUrl);
+				encodedContent = Uri.EscapeDataString(textContent);
+			}
+
+			string dataUri = string.Format(DATA_URI_FORMAT, mimeType, encodedContent, fragment);
+			if (IeCompat && dataUri.Length >= DATA_URI_MAX_LENGTH)
+			{
+				// IE8 cannot handle a data-uri larger than 32,768 characters
 				result = string.Format(URL_RULE_FORMAT, absoluteAssetUrl);
 				processedDataUriFunctionAssetUrl = absoluteAssetUrl;
 
 				return result;
 			}
 
-			string fileContent;
-
-			if (useBase64)
-			{
-				fileContent = Convert.ToBase64String(buffer);
-			}
-			else
-			{
-				fileContent = encoding.GetString(buffer);
-				fileContent = Uri.EscapeUriString(fileContent);
-			}
-
-			result = string.Format(URL_RULE_WITH_DATA_URI_SCHEME_FORMAT, mimeType, fileContent, fragment);
+			result = string.Format(URL_RULE_FORMAT, dataUri);
 			processedDataUriFunctionAssetUrl = absoluteAssetUrl;
 
 			return result;

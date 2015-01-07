@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.9.34
+           README file for Bundle Transformer: CoffeeScript 1.9.37
 
    ----------------------------------------------------------------------
 
-          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -23,6 +23,11 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   CoffeeScript was updated to commit e769423d52.
    
    ====================
    POST-INSTALL ACTIONS

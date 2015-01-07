@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.1.2
+ * Less - Leaner CSS v2.2.0
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -1373,7 +1373,8 @@ var Less = (function(){
 					}
 					// when evaluating variables in an import statement, imports have not been eval'd
 					// so we need to go inside import statements.
-					if (r.type === "Import" && r.root) {
+					// guard against root being a string (in the case of inlined less)
+					if (r.type === "Import" && r.root && r.root.variables) {
 						var vars = r.root.variables();
 						for(var name in vars) {
 							if (vars.hasOwnProperty(name)) {
@@ -2641,7 +2642,10 @@ var Less = (function(){
 			if (!this.isEvald) {
 				// Add the base path if the URL is relative
 				rootpath = this.currentFileInfo && this.currentFileInfo.rootpath;
-				if (rootpath && typeof val.value === "string" && context.isPathRelative(val.value)) {
+				if (rootpath &&
+					typeof val.value === "string" &&
+					context.isPathRelative(val.value)) {
+
 					if (!val.quote) {
 						rootpath = rootpath.replace(/[\(\)'"\s]/g, function(match) { return "\\"+match; });
 					}
@@ -2900,7 +2904,7 @@ var Less = (function(){
 				this.css = !this.options.less || this.options.inline;
 			} else {
 				var pathValue = this.getPath();
-				if (pathValue && /css([\?;].*)?$/.test(pathValue)) {
+				if (pathValue && /[#\.\&\?\/]css([\?;].*)?$/.test(pathValue)) {
 					this.css = true;
 				}
 			}
@@ -3627,7 +3631,7 @@ var Less = (function(){
 	
 	//#region URL: /environment/environment
 	modules['/environment/environment'] = function () {
-		var logger = require('/logger');
+//		var logger = require('/logger');
 		var environment = function(externalEnvironment, fileManagers) {
 			this.fileManagers = fileManagers || [];
 			externalEnvironment = externalEnvironment || {};
@@ -3649,12 +3653,12 @@ var Less = (function(){
 
 		environment.prototype.getFileManager = function (filename, currentDirectory, options, environment, isSync) {
 
-			if (!filename) {
-				logger.warn("getFileManager called with no filename.. Please report this issue. continuing.");
-			}
-			if (currentDirectory == null) {
-				logger.warn("getFileManager called with null directory.. Please report this issue. continuing.");
-			}
+//			if (!filename) {
+//				logger.warn("getFileManager called with no filename.. Please report this issue. continuing.");
+//			}
+//			if (currentDirectory == null) {
+//				logger.warn("getFileManager called with null directory.. Please report this issue. continuing.");
+//			}
 
 			var fileManagers = this.fileManagers;
 //			if (options.pluginManager) {
@@ -3969,6 +3973,7 @@ var Less = (function(){
 			this.imports = [];
 			this.variableImports = [];
 			this._onSequencerEmpty = onSequencerEmpty;
+			this._currentDepth = 0;
 		}
 
 		ImportSequencer.prototype.addImport = function(callback) {
@@ -3991,23 +3996,28 @@ var Less = (function(){
 		};
 
 		ImportSequencer.prototype.tryRun = function() {
-			while(true) {
-				while(this.imports.length > 0) {
-					var importItem = this.imports[0];
-					if (!importItem.isReady) {
-						return;
+			this._currentDepth++;
+			try {
+				while(true) {
+					while(this.imports.length > 0) {
+						var importItem = this.imports[0];
+						if (!importItem.isReady) {
+							return;
+						}
+						this.imports = this.imports.slice(1);
+						importItem.callback.apply(null, importItem.args);
 					}
-					this.imports = this.imports.slice(1);
-					importItem.callback.apply(null, importItem.args);
+					if (this.variableImports.length === 0) {
+						break;
+					}
+					var variableImport = this.variableImports[0];
+					this.variableImports = this.variableImports.slice(1);
+					variableImport();
 				}
-				if (this.variableImports.length === 0) {
-					break;
-				}
-				var variableImport = this.variableImports[0];
-				this.variableImports = this.variableImports.slice(1);
-				variableImport();
+			} finally {
+				this._currentDepth--;
 			}
-			if (this._onSequencerEmpty) {
+			if (this._currentDepth === 0 && this._onSequencerEmpty) {
 				this._onSequencerEmpty();
 			}
 		};
@@ -4031,26 +4041,28 @@ var Less = (function(){
 			this.importCount = 0;
 			this.onceFileDetectionMap = {};
 			this.recursionDetector = {};
-			this._sequencer = new ImportSequencer();
+			this._sequencer = new ImportSequencer(this._onSequencerEmpty.bind(this));
 		};
 
 		ImportVisitor.prototype = {
 			isReplacing: false,
 			run: function (root) {
-				var error;
 				try {
 					// process the contents
 					this._visitor.visit(root);
 				}
 				catch(e) {
-					error = e;
+					this.error = e;
 				}
 
 				this.isFinished = true;
 				this._sequencer.tryRun();
-				if (this.importCount === 0) {
-					this._finish(error || this.error);
+			},
+			_onSequencerEmpty: function() {
+				if (!this.isFinished) {
+					return;
 				}
+				this._finish(this.error);
 			},
 			visitImport: function (importNode, visitArgs) {
 				var inlineCSS = importNode.options.inline;
@@ -4105,6 +4117,9 @@ var Less = (function(){
 					this._importer.push(evaldImportNode.getPath(), tryAppendLessExtension, evaldImportNode.currentFileInfo, evaldImportNode.options, sequencedOnImported);
 				} else {
 					this.importCount--;
+					if (this.isFinished) {
+						this._sequencer.tryRun();
+					}
 				}
 			},
 			onImported: function (importNode, context, e, root, importedAtRoot, fullPath) {
@@ -4154,10 +4169,7 @@ var Less = (function(){
 				importVisitor.importCount--;
 
 				if (importVisitor.isFinished) {
-					this._sequencer.tryRun();
-					if (importVisitor.importCount === 0) {
-						importVisitor._finish(importVisitor.error);
-					}
+					importVisitor._sequencer.tryRun();
 				}
 			},
 			visitRule: function (ruleNode, visitArgs) {
@@ -5143,7 +5155,8 @@ var Less = (function(){
 				saveStack.push( { current: current, i: parserInput.i, j: j });
 			};
 			parserInput.restore = function(possibleErrorMessage) {
-				if (parserInput.i > furthest) {
+
+				if (parserInput.i > furthest || (parserInput.i === furthest && possibleErrorMessage && !furthestPossibleErrorMessage)) {
 					furthest = parserInput.i;
 					furthestPossibleErrorMessage = possibleErrorMessage;
 				}
@@ -5365,7 +5378,7 @@ var Less = (function(){
 
 			parserInput.end = function() {
 				var message,
-					isFinished = parserInput.i >= input.length - 1;
+					isFinished = parserInput.i >= input.length;
 
 				if (parserInput.i < furthest) {
 					message = furthestPossibleErrorMessage;
@@ -6774,15 +6787,19 @@ var Less = (function(){
 					sub: function () {
 						var a, e;
 
+						parserInput.save();
 						if (parserInput.$char('(')) {
 							a = this.addition();
-							if (a) {
+							if (a && parserInput.$char(')')) {
+								parserInput.forget();
 								e = new(tree.Expression)([a]);
-								expectChar(')');
 								e.parens = true;
 								return e;
 							}
+							parserInput.restore("Expected ')'");
+							return;
 						}
+						parserInput.restore();
 					},
 					multiplication: function () {
 						var m, a, op, operation, isSpaced;
@@ -7365,13 +7382,13 @@ var Less = (function(){
 	//#region URL: /functions/data-uri
 	modules['/functions/data-uri'] = function () {
 		var exports = function(environment) {
-			var Anonymous = require('/tree/anonymous'),
-				URL = require('/tree/url'),
+			var /*Quoted = require('/tree/quoted'),
+				*/URL = require('/tree/url'),
 				functionRegistry = require('/functions/function-registry'),
 				fallback = function(functionThis, node) {
 					return new URL(node, functionThis.index, functionThis.currentFileInfo).eval(functionThis.context);
-				},
-				logger = require('/logger');
+				}/*,
+				logger = require('/logger')*/;
 
 			functionRegistry.add("data-uri", function(mimetypeNode, filePathNode) {
 				return fallback(this, filePathNode || mimetypeNode);
@@ -7552,7 +7569,7 @@ var Less = (function(){
 		var exports = function(environment) {
 			var Dimension = require('/tree/dimension'),
 				Color = require('/tree/color'),
-				Anonymous = require('/tree/anonymous'),
+				Quoted = require('/tree/quoted'),
 				URL = require('/tree/url'),
 				functionRegistry = require('/functions/function-registry');
 
@@ -7569,7 +7586,6 @@ var Less = (function(){
 					gradientDirectionSvg,
 					gradientType = "linear",
 					rectangleDimension = 'x="0" y="0" width="1" height="1"',
-					useBase64 = true,
 					renderEnv = {compress: false},
 					returner,
 					directionValue = direction.toCSS(renderEnv),
@@ -7620,16 +7636,10 @@ var Less = (function(){
 				returner += '</' + gradientType + 'Gradient>' +
 					'<rect ' + rectangleDimension + ' fill="url(#gradient)" /></svg>';
 
-				if (useBase64) {
-					try {
-						returner = environment.encodeBase64(returner);
-					} catch(e) {
-						useBase64 = false;
-					}
-				}
+				returner = encodeURIComponent(returner);
 
-				returner = "'data:image/svg+xml" + (useBase64 ? ";base64" : "") + "," + returner + "'";
-				return new URL(new Anonymous(returner), this.index, this.currentFileInfo);
+				returner = "data:image/svg+xml," + returner;
+				return new URL(new Quoted("'" + returner + "'", returner, false, this.index, this.currentFileInfo), this.index, this.currentFileInfo);
 			});
 		};
 
@@ -7652,7 +7662,14 @@ var Less = (function(){
 			return (n instanceof Type) ? Keyword.True : Keyword.False;
 			},
 			isunit = function (n, unit) {
-				return (n instanceof Dimension) && n.unit.is(unit.value || unit) ? Keyword.True : Keyword.False;
+				if (unit === undefined) {
+					throw { type: "Argument", message: "missing the required second argument to isunit." };
+				}
+				unit = typeof unit.value === "string" ? unit.value : unit;
+				if (typeof unit !== "string") {
+					throw { type: "Argument", message: "Second argument to isunit should be a unit or a string." };
+				}
+				return (n instanceof Dimension) && n.unit.is(unit) ? Keyword.True : Keyword.False;
 			};
 		functionRegistry.addMultiple({
 			iscolor: function (n) {
@@ -7822,7 +7839,8 @@ var Less = (function(){
 	//#region URL: /parse-tree
 	modules['/parse-tree'] = function () {
 		var LessError = require('/less-error'),
-			transformTree = require('/transform-tree');
+			transformTree = require('/transform-tree')/*,
+			logger = require('/logger')*/;
 
 		var exports = function(/*SourceMapBuilder*/) {
 			var ParseTree = function(root, imports) {
@@ -7839,8 +7857,13 @@ var Less = (function(){
 				}
 
 				try {
+					var compress = Boolean(options.compress);
+//					if (compress) {
+//						logger.warn("The compress option has been deprecated. We recommend you use a dedicated css minifier, for instance see less-plugin-clean-css.");
+//					}
+					
 					var toCSSOptions = {
-						compress: Boolean(options.compress),
+						compress: compress,
 						dumpLineNumbers: options.dumpLineNumbers,
 						strictUnits: Boolean(options.strictUnits),
 						numPrecision: 8};
@@ -8103,13 +8126,58 @@ var Less = (function(){
 	
 	//#region URL: /render
 	modules['/render'] = function () {
+//		var PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise;
+
+		var exports = function(environment, ParseTree, ImportManager) {
+			var render = function (input, options, callback) {
+				if (typeof(options) === 'function') {
+					callback = options;
+					options = {};
+				}
+
+//				if (!callback) {
+//					var self = this;
+//					return new PromiseConstructor(function (resolve, reject) {
+//						render.call(self, input, options, function(err, output) {
+//							if (err) {
+//								reject(err);
+//							} else {
+//								resolve(output);
+//							}
+//						});
+//					});
+//				} else {
+					this.parse(input, options, function(err, root, imports, options) {
+						if (err) { return callback(err); }
+
+						var result;
+						try {
+							var parseTree = new ParseTree(root, imports);
+							result = parseTree.toCSS(options);
+						}
+						catch (err) { return callback(err); }
+
+						callback(null, result);
+					});
+//				}
+			};
+
+			return render;
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /parse
+	modules['/parse'] = function () {
 		var /*PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise,*/
 			contexts = require('/contexts'),
 			Parser = require('/parser/parser')/*,
 			PluginManager = require('/plugin-manager')*/;
 
 		var exports = function(environment, ParseTree, ImportManager) {
-			var render = function (input, options, callback) {
+			var parse = function (input, options, callback) {
 				options = options || {};
 
 				if (typeof(options) === 'function') {
@@ -8120,7 +8188,7 @@ var Less = (function(){
 //				if (!callback) {
 //					var self = this;
 //					return new PromiseConstructor(function (resolve, reject) {
-//						render.call(self, input, options, function(err, output) {
+//						parse.call(self, input, options, function(err, output) {
 //							if (err) {
 //								reject(err);
 //							} else {
@@ -8158,71 +8226,65 @@ var Less = (function(){
 					new Parser(context, imports, rootFileInfo)
 						.parse(input, function (e, root) {
 						if (e) { return callback(e); }
-						var result;
-						try {
-							var parseTree = new ParseTree(root, imports);
-							result = parseTree.toCSS(options);
-						}
-						catch (err) { return callback( err); }
-						callback(null, result);
+						callback(null, root, imports, options);
 					}, options);
 //				}
 			};
-			return render;
+			return parse;
 		};
 
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /logger
-	modules['/logger'] = function () {
-		var exports = {
-			error: function(msg) {
-				this._fireEvent("error", msg);
-			},
-			warn: function(msg) {
-				this._fireEvent("warn", msg);
-			},
-			info: function(msg) {
-				this._fireEvent("info", msg);
-			},
-			debug: function(msg) {
-				this._fireEvent("debug", msg);
-			},
-			addListener: function(listener) {
-				this._listeners.push(listener);
-			},
-			removeListener: function(listener) {
-				for(var i = 0; i < this._listeners.length; i++) {
-					if (this._listeners[i] === listener) {
-						this._listeners.splice(i, 1);
-						return;
-					}
-				}
-			},
-			_fireEvent: function(type, msg) {
-				for(var i = 0; i < this._listeners.length; i++) {
-					var logFunction = this._listeners[i][type];
-					if (logFunction) {
-						logFunction(msg);
-					}
-				}
-			},
-			_listeners: []
-		};
 
-		return exports;
-	};
-	//#endregion
-	
+//	//#region URL: /logger
+//	modules['/logger'] = function () {
+//		var exports = {
+//			error: function(msg) {
+//				this._fireEvent("error", msg);
+//			},
+//			warn: function(msg) {
+//				this._fireEvent("warn", msg);
+//			},
+//			info: function(msg) {
+//				this._fireEvent("info", msg);
+//			},
+//			debug: function(msg) {
+//				this._fireEvent("debug", msg);
+//			},
+//			addListener: function(listener) {
+//				this._listeners.push(listener);
+//			},
+//			removeListener: function(listener) {
+//				for(var i = 0; i < this._listeners.length; i++) {
+//					if (this._listeners[i] === listener) {
+//						this._listeners.splice(i, 1);
+//						return;
+//					}
+//				}
+//			},
+//			_fireEvent: function(type, msg) {
+//				for(var i = 0; i < this._listeners.length; i++) {
+//					var logFunction = this._listeners[i][type];
+//					if (logFunction) {
+//						logFunction(msg);
+//					}
+//				}
+//			},
+//			_listeners: []
+//		};
+//
+//		return exports;
+//	};
+//	//#endregion
+
 	//#region URL: /
 	modules['/'] = function () {
 		var exports = function(environment, fileManagers) {
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 1, 2],
+				version: [2, 2, 0],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),
@@ -8237,11 +8299,12 @@ var Less = (function(){
 				ParseTree: (ParseTree = require('/parse-tree')(/*SourceMapBuilder*/)),
 				ImportManager: (ImportManager = require('/import-manager')(environment)),
 				render: require('/render')(environment, ParseTree, ImportManager),
+				parse: require('/parse')(environment, ParseTree, ImportManager),
 				LessError: require('/less-error'),
 				transformTree: require('/transform-tree'),
-				utils: require('/utils'),
+				utils: require('/utils')//,
 //				PluginManager: require('/plugin-manager'),
-				logger: require('/logger')
+//				logger: require('/logger')
 			};
 
 			return less;

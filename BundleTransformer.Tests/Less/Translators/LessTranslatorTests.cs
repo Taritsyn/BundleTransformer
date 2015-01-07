@@ -78,6 +78,8 @@
 	background-image: data-uri('headphone.gif');
 }
 
+.icon-google-plus{	display: inline;	background-image: data-uri('google-plus.svg');}
+
 @import (multiple) url(		""TestLessImport.Sub1.less""	);
 .singleline-comment { content: ""//"" } .triple-slash-directive { content: '///' } @import 'TestLessImport.Sub2';
 /*@import 'TestLessImport.Sub3.less';
@@ -97,11 +99,26 @@
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.IsTextFile(headphoneGifAssetVirtualPath, 256, out encoding))
-				.Returns(true)
+				.Returns(false)
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileBinaryContent(headphoneGifAssetVirtualPath))
 				.Returns(new byte[0])
+				;
+
+
+			string googlePlusSvgAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "google-plus.svg");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(googlePlusSvgAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.IsTextFile(googlePlusSvgAssetVirtualPath, 256, out encoding))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(googlePlusSvgAssetVirtualPath))
+				.Returns(string.Empty)
 				;
 
 
@@ -125,7 +142,7 @@
 .icon-network
 {
 	display: inline;
-	background-image: data-uri('image/png', ""@network.png"");
+	background-image: data-uri('image/png;base64', ""@network.png"");
 }
 
 @import url(""TagIcon.css"");")
@@ -139,7 +156,7 @@
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.IsTextFile(networkPngAssetVirtualPath, 256, out encoding))
-				.Returns(true)
+				.Returns(false)
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileBinaryContent(networkPngAssetVirtualPath))
@@ -297,22 +314,23 @@
 			lessTranslator.FillDependencies(assetUrl, stylesheet, dependencies);
 
 			// Assert
-			Assert.AreEqual(14, dependencies.Count);
+			Assert.AreEqual(15, dependencies.Count);
 
 			Dependency mixinsLessAsset = dependencies[0];
 			Dependency selectorsLessAsset = dependencies[1];
 			Dependency testLessImportLessAsset = dependencies[2];
 			Dependency headphoneGifAsset = dependencies[3];
-			Dependency testLessImportSub1LessAsset = dependencies[4];
-			Dependency networkPngAsset = dependencies[5];
-			Dependency googleFontAsset = dependencies[6];
-			Dependency tagIconCssAsset = dependencies[7];
-			Dependency testLessImportSub2LessAsset = dependencies[8];
-			Dependency usbFlashDriveIconCssAsset = dependencies[9];
-			Dependency validationIconCssAsset = dependencies[10];
-			Dependency microformatsIconCssAsset = dependencies[11];
-			Dependency nodeIconLessAsset = dependencies[12];
-			Dependency openIdIconLessAsset = dependencies[13];
+			Dependency googlePlusSvgAsset = dependencies[4];
+			Dependency testLessImportSub1LessAsset = dependencies[5];
+			Dependency networkPngAsset = dependencies[6];
+			Dependency googleFontAsset = dependencies[7];
+			Dependency tagIconCssAsset = dependencies[8];
+			Dependency testLessImportSub2LessAsset = dependencies[9];
+			Dependency usbFlashDriveIconCssAsset = dependencies[10];
+			Dependency validationIconCssAsset = dependencies[11];
+			Dependency microformatsIconCssAsset = dependencies[12];
+			Dependency nodeIconLessAsset = dependencies[13];
+			Dependency openIdIconLessAsset = dependencies[14];
 
 			Assert.AreEqual(mixinsLessAssetVirtualPath, mixinsLessAsset.Url);
 			Assert.AreEqual(true, mixinsLessAsset.IsObservable);
@@ -325,6 +343,9 @@
 
 			Assert.AreEqual(headphoneGifAssetVirtualPath, headphoneGifAsset.Url);
 			Assert.AreEqual(true, headphoneGifAsset.IsObservable);
+
+			Assert.AreEqual(googlePlusSvgAssetVirtualPath, googlePlusSvgAsset.Url);
+			Assert.AreEqual(true, googlePlusSvgAsset.IsObservable);
 
 			Assert.AreEqual(testLessImportSub1LessAssetVirtualPath, testLessImportSub1LessAsset.Url);
 			Assert.AreEqual(true, testLessImportSub1LessAsset.IsObservable);

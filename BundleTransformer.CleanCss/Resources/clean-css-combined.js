@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.0.1
+ * Clean-css v3.0.2
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -1356,10 +1356,12 @@ var CleanCss = (function(){
 		  var widthKeywords = ['thin', 'thick', 'medium', 'inherit', 'initial'];
 		  var allUnits = ['px', '%', 'em', 'rem', 'in', 'cm', 'mm', 'ex', 'pt', 'pc', 'vw', 'vh', 'vmin', 'vmax'];
 		  var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + allUnits.join('|') + '|)|auto|inherit)';
+		  var cssCalcRegexStr = '(\\-moz\\-|\\-webkit\\-)?calc\\([^\\)]+\\)';
 		  var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
 		  var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
 		  var cssVariableRegexStr = 'var\\(\\-\\-[^\\)]+\\)';
 		  var cssFunctionAnyRegexStr = '(' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
+		  var cssUnitOrCalcRegexStr = '(' + cssUnitRegexStr + '|' + cssCalcRegexStr + ')';
 		  var cssUnitAnyRegexStr = '(none|' + widthKeywords.join('|') + '|' + cssUnitRegexStr + '|' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
 
 		  var cssFunctionNoVendorRegex = new RegExp('^' + cssFunctionNoVendorRegexStr + '$', 'i');
@@ -1367,6 +1369,7 @@ var CleanCss = (function(){
 		  var cssVariableRegex = new RegExp('^' + cssVariableRegexStr + '$', 'i');
 		  var cssFunctionAnyRegex = new RegExp('^' + cssFunctionAnyRegexStr + '$', 'i');
 		  var cssUnitRegex = new RegExp('^' + cssUnitRegexStr + '$', 'i');
+		  var cssUnitOrCalcRegex = new RegExp('^' + cssUnitOrCalcRegexStr + '$', 'i');
 		  var cssUnitAnyRegex = new RegExp('^' + cssUnitAnyRegexStr + '$', 'i');
 
 		  var backgroundRepeatKeywords = ['repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'inherit'];
@@ -1451,10 +1454,7 @@ var CleanCss = (function(){
 			  return backgroundAttachmentKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 			},
 			isValidBackgroundPositionPart: function (s) {
-			  if (backgroundPositionKeywords.indexOf(s) >= 0)
-				return true;
-
-			  return cssUnitRegex.test(s) || validator.isValidVariable(s);
+			  return backgroundPositionKeywords.indexOf(s) >= 0 || cssUnitOrCalcRegex.test(s) || validator.isValidVariable(s);
 			},
 			isValidBackgroundPosition: function (s) {
 			  if (s === 'inherit')

@@ -281,7 +281,19 @@
 					string name = nameValue.Substring(0, equalSignPosition);
 					string value = nameValue.Substring(equalSignPosition + 1);
 
-					variablesBuilder.AppendFormatLine("@{0}: {1};", name, value);
+					if (!name.StartsWith("@"))
+					{
+						variablesBuilder.Append("@");
+					}
+
+					variablesBuilder.Append(name);
+					variablesBuilder.Append(": ");
+					variablesBuilder.Append(value);
+
+					if (!value.EndsWith(";"))
+					{
+						variablesBuilder.Append(";");
+					}
 				}
 
 				variables = variablesBuilder.ToString();

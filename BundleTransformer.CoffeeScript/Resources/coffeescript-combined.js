@@ -183,7 +183,7 @@ var CoffeeScript = (function(){
 		  locationData = obj;
 		}
 		if (locationData) {
-		  return ("" + (locationData.first_line + 1) + ":" + (locationData.first_column + 1) + "-") + ("" + (locationData.last_line + 1) + ":" + (locationData.last_column + 1));
+		  return ((locationData.first_line + 1) + ":" + (locationData.first_column + 1) + "-") + ((locationData.last_line + 1) + ":" + (locationData.last_column + 1));
 		} else {
 		  return "No location data";
 		}
@@ -264,7 +264,7 @@ var CoffeeScript = (function(){
 		  codeLine = codeLine.slice(0, start) + colorize(codeLine.slice(start, end)) + codeLine.slice(end);
 		  marker = colorize(marker);
 		}
-		return "" + filename + ":" + (first_line + 1) + ":" + (first_column + 1) + ": error: " + this.message + "\n" + codeLine + "\n" + marker;
+		return filename + ":" + (first_line + 1) + ":" + (first_column + 1) + ": error: " + this.message + "\n" + codeLine + "\n" + marker;
 	  };
 
 	  exports.nameWhitespaceCharacter = function(string) {
@@ -281,7 +281,7 @@ var CoffeeScript = (function(){
 			return string;
 		}
 	  };
-  
+
 	  return exports;
 	};
 	//#endregion
@@ -768,7 +768,7 @@ var CoffeeScript = (function(){
 	//#region URL: /lexer
 	modules['/lexer'] = function () {
 	  var exports = {};
-	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HEREDOC, HEREDOC_ILLEGAL, HEREDOC_INDENT, HEREGEX, HEREGEX_OMIT, IDENTIFIER, INDENTABLE_CLOSERS, INDEXABLE, INVERSES, JSTOKEN, JS_FORBIDDEN, JS_KEYWORDS, LINE_BREAK, LINE_CONTINUER, LOGIC, Lexer, MATH, MULTILINER, MULTI_DENT, NOT_REGEX, NOT_SPACED_REGEX, NUMBER, OPERATOR, REGEX, RELATION, RESERVED, Rewriter, SHIFT, SIMPLESTR, STRICT_PROSCRIBED, TRAILING_SPACES, UNARY, UNARY_MATH, WHITESPACE, compact, count, invertLiterate, key, last, locationDataToString, repeat, starts, throwSyntaxError, _ref, _ref1,
+	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HERECOMMENT_ILLEGAL, HEREDOC_DOUBLE, HEREDOC_INDENT, HEREDOC_SINGLE, HEREGEX, HEREGEX_OMIT, IDENTIFIER, INDENTABLE_CLOSERS, INDEXABLE, INVERSES, JSTOKEN, JS_FORBIDDEN, JS_KEYWORDS, LEADING_BLANK_LINE, LINE_BREAK, LINE_CONTINUER, LOGIC, Lexer, MATH, MULTILINER, MULTI_DENT, NOT_REGEX, NOT_SPACED_REGEX, NUMBER, OCTAL_ESCAPE, OPERATOR, REGEX, REGEX_FLAGS, REGEX_ILLEGAL, RELATION, RESERVED, Rewriter, SHIFT, STRICT_PROSCRIBED, STRING_DOUBLE, STRING_OMIT, STRING_SINGLE, STRING_START, TRAILING_BLANK_LINE, TRAILING_SPACES, UNARY, UNARY_MATH, VALID_FLAGS, WHITESPACE, compact, count, invertLiterate, key, last, locationDataToString, repeat, starts, throwSyntaxError, _ref, _ref1,
 		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 	  _ref = require('/rewriter'), Rewriter = _ref.Rewriter, INVERSES = _ref.INVERSES;
@@ -779,7 +779,7 @@ var CoffeeScript = (function(){
 		function Lexer() {}
 
 		Lexer.prototype.tokenize = function(code, opts) {
-		  var consumed, i, tag, _ref2;
+		  var consumed, end, i, _ref2;
 		  if (opts == null) {
 			opts = {};
 		  }
@@ -796,13 +796,19 @@ var CoffeeScript = (function(){
 		  code = this.clean(code);
 		  i = 0;
 		  while (this.chunk = code.slice(i)) {
-			consumed = this.identifierToken() || this.commentToken() || this.whitespaceToken() || this.lineToken() || this.heredocToken() || this.stringToken() || this.numberToken() || this.regexToken() || this.jsToken() || this.literalToken();
+			consumed = this.identifierToken() || this.commentToken() || this.whitespaceToken() || this.lineToken() || this.stringToken() || this.numberToken() || this.regexToken() || this.jsToken() || this.literalToken();
 			_ref2 = this.getLineAndColumnFromChunk(consumed), this.chunkLine = _ref2[0], this.chunkColumn = _ref2[1];
 			i += consumed;
+			if (opts.untilBalanced && this.ends.length === 0) {
+			  return {
+				tokens: this.tokens,
+				index: i
+			  };
+			}
 		  }
 		  this.closeIndentation();
-		  if (tag = this.ends.pop()) {
-			this.error("missing " + tag);
+		  if (end = this.ends.pop()) {
+			throwSyntaxError("missing " + end.tag, end.origin[2]);
 		  }
 		  if (opts.rewrite === false) {
 			return this.tokens;
@@ -938,60 +944,87 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.stringToken = function() {
-		  var inner, innerLen, numBreak, octalEsc, pos, quote, string, trimmed;
-		  switch (quote = this.chunk.charAt(0)) {
-			case "'":
-			  string = (SIMPLESTR.exec(this.chunk) || [])[0];
-			  break;
-			case '"':
-			  string = this.balancedString(this.chunk, '"');
-		  }
-		  if (!string) {
+		  var $, attempt, doc, end, heredoc, i, indent, indentRegex, match, quote, regex, start, token, tokens, _ref2, _ref3;
+		  quote = (STRING_START.exec(this.chunk) || [])[0];
+		  if (!quote) {
 			return 0;
 		  }
-		  inner = string.slice(1, -1);
-		  trimmed = this.removeNewlines(inner);
-		  if (quote === '"' && 0 < string.indexOf('#{', 1)) {
-			numBreak = pos = 0;
-			innerLen = inner.length;
-			while (inner.charAt(pos++) === '\n' && pos < innerLen) {
-			  numBreak++;
+		  regex = (function() {
+			switch (quote) {
+			  case "'":
+				return STRING_SINGLE;
+			  case '"':
+				return STRING_DOUBLE;
+			  case "'''":
+				return HEREDOC_SINGLE;
+			  case '"""':
+				return HEREDOC_DOUBLE;
 			}
-			this.interpolateString(trimmed, {
-			  strOffset: 1 + numBreak,
-			  lexedLength: string.length
-			});
+		  })();
+		  heredoc = quote.length === 3;
+		  start = quote.length;
+		  _ref2 = this.matchWithInterpolations(this.chunk.slice(start), regex, quote, start), tokens = _ref2.tokens, end = _ref2.index;
+		  $ = tokens.length - 1;
+		  if (heredoc) {
+			indent = null;
+			doc = ((function() {
+			  var _i, _len, _results;
+			  _results = [];
+			  for (i = _i = 0, _len = tokens.length; _i < _len; i = ++_i) {
+				token = tokens[i];
+				if (token[0] === 'NEOSTRING') {
+				  _results.push(token[1]);
+				}
+			  }
+			  return _results;
+			})()).join('#{}');
+			while (match = HEREDOC_INDENT.exec(doc)) {
+			  attempt = match[1];
+			  if (indent === null || (0 < (_ref3 = attempt.length) && _ref3 < indent.length)) {
+				indent = attempt;
+			  }
+			}
+			if (indent) {
+			  indentRegex = RegExp("^" + indent, "gm");
+			}
+			this.mergeInterpolationTokens(tokens, {
+			  quote: quote[0],
+			  start: start,
+			  end: end
+			}, (function(_this) {
+			  return function(value, i) {
+				value = _this.formatString(value);
+				if (i === 0) {
+				  value = value.replace(LEADING_BLANK_LINE, '');
+				}
+				if (i === $) {
+				  value = value.replace(TRAILING_BLANK_LINE, '');
+				}
+				value = value.replace(indentRegex, '');
+				value = value.replace(MULTILINER, '\\n');
+				return value;
+			  };
+			})(this));
 		  } else {
-			this.token('STRING', quote + this.escapeLines(trimmed) + quote, 0, string.length);
+			this.mergeInterpolationTokens(tokens, {
+			  quote: quote,
+			  start: start,
+			  end: end
+			}, (function(_this) {
+			  return function(value, i) {
+				value = _this.formatString(value);
+				value = value.replace(STRING_OMIT, function(match, offset) {
+				  if ((i === 0 && offset === 0) || (i === $ && offset + match.length === value.length)) {
+					return '';
+				  } else {
+					return ' ';
+				  }
+				});
+				return value;
+			  };
+			})(this));
 		  }
-		  if (octalEsc = /^(?:\\.|[^\\])*\\(?:0[0-7]|[1-7])/.test(string)) {
-			this.error("octal escape sequences " + string + " are not allowed");
-		  }
-		  return string.length;
-		};
-
-		Lexer.prototype.heredocToken = function() {
-		  var doc, heredoc, match, quote, strOffset;
-		  if (!(match = HEREDOC.exec(this.chunk))) {
-			return 0;
-		  }
-		  heredoc = match[0];
-		  quote = heredoc.charAt(0);
-		  doc = this.sanitizeHeredoc(match[2], {
-			quote: quote,
-			indent: null
-		  });
-		  if (quote === '"' && 0 <= doc.indexOf('#{')) {
-			strOffset = match[2].charAt(0) === '\n' ? 4 : 3;
-			this.interpolateString(doc, {
-			  heredoc: true,
-			  strOffset: strOffset,
-			  lexedLength: heredoc.length
-			});
-		  } else {
-			this.token('STRING', this.makeString(doc, quote, true), 0, heredoc.length);
-		  }
-		  return heredoc.length;
+		  return end;
 		};
 
 		Lexer.prototype.commentToken = function() {
@@ -1001,10 +1034,13 @@ var CoffeeScript = (function(){
 		  }
 		  comment = match[0], here = match[1];
 		  if (here) {
-			this.token('HERECOMMENT', this.sanitizeHeredoc(here, {
-			  herecomment: true,
-			  indent: repeat(' ', this.indent)
-			}), 0, comment.length);
+			if (match = HERECOMMENT_ILLEGAL.exec(comment)) {
+			  this.error("block comments cannot contain " + match[0], match.index);
+			}
+			if (here.indexOf('\n') >= 0) {
+			  here = here.replace(RegExp("\\n" + (repeat(' ', this.indent)), "g"), '\n');
+			}
+			this.token('HERECOMMENT', here, 0, comment.length);
 		  }
 		  return comment.length;
 		};
@@ -1019,86 +1055,57 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.regexToken = function() {
-		  var flags, length, match, prev, regex, _ref2, _ref3;
-		  if (this.chunk.charAt(0) !== '/') {
-			return 0;
-		  }
-		  if (length = this.heregexToken()) {
-			return length;
-		  }
-		  prev = last(this.tokens);
-		  if (prev && (_ref2 = prev[0], __indexOf.call((prev.spaced ? NOT_REGEX : NOT_SPACED_REGEX), _ref2) >= 0)) {
-			return 0;
-		  }
-		  if (!(match = REGEX.exec(this.chunk))) {
-			return 0;
-		  }
-		  _ref3 = match, match = _ref3[0], regex = _ref3[1], flags = _ref3[2];
-		  if (regex === '//') {
-			return 0;
-		  }
-		  if (regex.slice(0, 2) === '/*') {
-			this.error('regular expressions cannot begin with `*`');
-		  }
-		  this.token('REGEX', "" + regex + flags, 0, match.length);
-		  return match.length;
-		};
-
-		Lexer.prototype.heregexToken = function() {
-		  var body, flags, flagsOffset, heregex, match, plusToken, prev, re, tag, token, tokens, value, _i, _len, _ref2, _ref3, _ref4;
-		  if (!(match = HEREGEX.exec(this.chunk))) {
-			return 0;
-		  }
-		  heregex = match[0], body = match[1], flags = match[2];
-		  if (0 > body.indexOf('#{')) {
-			re = this.escapeLines(body.replace(HEREGEX_OMIT, '$1$2').replace(/\//g, '\\/'), true);
-			if (re.match(/^\*/)) {
-			  this.error('regular expressions cannot begin with `*`');
-			}
-			this.token('REGEX', "/" + (re || '(?:)') + "/" + flags, 0, heregex.length);
-			return heregex.length;
-		  }
-		  this.token('IDENTIFIER', 'RegExp', 0, 0);
-		  this.token('CALL_START', '(', 0, 0);
-		  tokens = [];
-		  _ref2 = this.interpolateString(body, {
-			regex: true,
-			strOffset: 3
-		  });
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			token = _ref2[_i];
-			tag = token[0], value = token[1];
-			if (tag === 'TOKENS') {
-			  tokens.push.apply(tokens, value);
-			} else if (tag === 'NEOSTRING') {
-			  if (!(value = value.replace(HEREGEX_OMIT, '$1$2'))) {
-				continue;
+		  var end, flags, index, match, prev, re, regex, tokens, _ref2, _ref3;
+		  switch (false) {
+			case !(match = REGEX_ILLEGAL.exec(this.chunk)):
+			  this.error("regular expressions cannot begin with " + match[2], match.index + match[1].length);
+			  break;
+			case this.chunk.slice(0, 3) !== '///':
+			  _ref2 = this.matchWithInterpolations(this.chunk.slice(3), HEREGEX, '///', 3), tokens = _ref2.tokens, index = _ref2.index;
+			  break;
+			case !(match = REGEX.exec(this.chunk)):
+			  regex = match[0];
+			  index = regex.length;
+			  prev = last(this.tokens);
+			  if (prev && (_ref3 = prev[0], __indexOf.call((prev.spaced ? NOT_REGEX : NOT_SPACED_REGEX), _ref3) >= 0)) {
+				return 0;
 			  }
-			  value = value.replace(/\\/g, '\\\\');
-			  token[0] = 'STRING';
-			  token[1] = this.makeString(value, '"', true);
-			  tokens.push(token);
-			} else {
-			  this.error("Unexpected " + tag);
-			}
-			prev = last(this.tokens);
-			plusToken = ['+', '+'];
-			plusToken[2] = prev[2];
-			tokens.push(plusToken);
+			  break;
+			default:
+			  return 0;
 		  }
-		  tokens.pop();
-		  if (((_ref3 = tokens[0]) != null ? _ref3[0] : void 0) !== 'STRING') {
-			this.token('STRING', '""', 0, 0);
-			this.token('+', '+', 0, 0);
+		  flags = REGEX_FLAGS.exec(this.chunk.slice(index))[0];
+		  end = index + flags.length;
+		  switch (false) {
+			case !!VALID_FLAGS.test(flags):
+			  this.error("invalid regular expression flags " + flags, index);
+			  break;
+			case !regex:
+			  this.token('REGEX', "" + regex + flags);
+			  break;
+			case tokens.length !== 1:
+			  re = this.formatHeregex(tokens[0][1]).replace(/\//g, '\\/');
+			  this.token('REGEX', "/" + (re || '(?:)') + "/" + flags);
+			  break;
+			default:
+			  this.token('IDENTIFIER', 'RegExp', 0, 0);
+			  this.token('CALL_START', '(', 0, 0);
+			  this.mergeInterpolationTokens(tokens, {
+				quote: '"',
+				start: 3,
+				end: end
+			  }, (function(_this) {
+				return function(value) {
+				  return _this.formatHeregex(value).replace(/\\/g, '\\\\');
+				};
+			  })(this));
+			  if (flags) {
+				this.token(',', ',', index, 0);
+				this.token('STRING', '"' + flags + '"', index, flags.length);
+			  }
+			  this.token(')', ')', end, 0);
 		  }
-		  (_ref4 = this.tokens).push.apply(_ref4, tokens);
-		  if (flags) {
-			flagsOffset = heregex.lastIndexOf(flags);
-			this.token(',', ',', flagsOffset, 0);
-			this.token('STRING', '"' + flags + '"', flagsOffset, flags.length);
-		  }
-		  this.token(')', ')', heregex.length - 1, 0);
-		  return heregex.length;
+		  return end;
 		};
 
 		Lexer.prototype.lineToken = function() {
@@ -1131,7 +1138,9 @@ var CoffeeScript = (function(){
 			diff = size - this.indent + this.outdebt;
 			this.token('INDENT', diff, indent.length - size, size);
 			this.indents.push(diff);
-			this.ends.push('OUTDENT');
+			this.ends.push({
+			  tag: 'OUTDENT'
+			});
 			this.outdebt = this.indebt = 0;
 			this.indent = size;
 		  } else if (size < this.baseIndent) {
@@ -1215,7 +1224,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.literalToken = function() {
-		  var match, prev, tag, value, _ref2, _ref3, _ref4, _ref5;
+		  var match, prev, tag, token, value, _ref2, _ref3, _ref4, _ref5;
 		  if (match = OPERATOR.exec(this.chunk)) {
 			value = match[0];
 			if (CODE.test(value)) {
@@ -1267,46 +1276,23 @@ var CoffeeScript = (function(){
 			  }
 			}
 		  }
+		  token = this.makeToken(tag, value);
 		  switch (value) {
 			case '(':
 			case '{':
 			case '[':
-			  this.ends.push(INVERSES[value]);
+			  this.ends.push({
+				tag: INVERSES[value],
+				origin: token
+			  });
 			  break;
 			case ')':
 			case '}':
 			case ']':
 			  this.pair(value);
 		  }
-		  this.token(tag, value);
+		  this.tokens.push(token);
 		  return value.length;
-		};
-
-		Lexer.prototype.sanitizeHeredoc = function(doc, options) {
-		  var attempt, herecomment, indent, match, _ref2;
-		  indent = options.indent, herecomment = options.herecomment;
-		  if (herecomment) {
-			if (HEREDOC_ILLEGAL.test(doc)) {
-			  this.error("block comment cannot contain \"*/\", starting");
-			}
-			if (doc.indexOf('\n') < 0) {
-			  return doc;
-			}
-		  } else {
-			while (match = HEREDOC_INDENT.exec(doc)) {
-			  attempt = match[1];
-			  if (indent === null || (0 < (_ref2 = attempt.length) && _ref2 < indent.length)) {
-				indent = attempt;
-			  }
-			}
-		  }
-		  if (indent) {
-			doc = doc.replace(RegExp("\\n" + indent, "g"), '\n');
-		  }
-		  if (!herecomment) {
-			doc = doc.replace(/^\n/, '');
-		  }
-		  return doc;
 		};
 
 		Lexer.prototype.tagParameters = function() {
@@ -1342,113 +1328,84 @@ var CoffeeScript = (function(){
 		  return this.outdentToken(this.indent);
 		};
 
-		Lexer.prototype.balancedString = function(str, end) {
-		  var continueCount, i, letter, match, prev, stack, _i, _ref2;
-		  continueCount = 0;
-		  stack = [end];
-		  for (i = _i = 1, _ref2 = str.length; 1 <= _ref2 ? _i < _ref2 : _i > _ref2; i = 1 <= _ref2 ? ++_i : --_i) {
-			if (continueCount) {
-			  --continueCount;
-			  continue;
+		Lexer.prototype.matchWithInterpolations = function(str, regex, end, offsetInChunk) {
+		  var column, index, line, nested, strPart, tokens, _ref2, _ref3, _ref4;
+		  tokens = [];
+		  while (true) {
+			strPart = regex.exec(str)[0];
+			tokens.push(this.makeToken('NEOSTRING', strPart, offsetInChunk));
+			str = str.slice(strPart.length);
+			offsetInChunk += strPart.length;
+			if (str.slice(0, 2) !== '#{') {
+			  break;
 			}
-			switch (letter = str.charAt(i)) {
-			  case '\\':
-				++continueCount;
-				continue;
-			  case end:
-				stack.pop();
-				if (!stack.length) {
-				  return str.slice(0, +i + 1 || 9e9);
-				}
-				end = stack[stack.length - 1];
-				continue;
+			_ref2 = this.getLineAndColumnFromChunk(offsetInChunk + 1), line = _ref2[0], column = _ref2[1];
+			_ref3 = new Lexer().tokenize(str.slice(1), {
+			  line: line,
+			  column: column,
+			  untilBalanced: true
+			}), nested = _ref3.tokens, index = _ref3.index;
+			index += 1;
+			nested.shift();
+			nested.pop();
+			if (((_ref4 = nested[0]) != null ? _ref4[0] : void 0) === 'TERMINATOR') {
+			  nested.shift();
 			}
-			if (end === '}' && (letter === '"' || letter === "'")) {
-			  stack.push(end = letter);
-			} else if (end === '}' && letter === '/' && (match = HEREGEX.exec(str.slice(i)) || REGEX.exec(str.slice(i)))) {
-			  continueCount += match[0].length - 1;
-			} else if (end === '}' && letter === '{') {
-			  stack.push(end = '}');
-			} else if (end === '"' && prev === '#' && letter === '{') {
-			  stack.push(end = '}');
+			if (nested.length > 1) {
+			  nested.unshift(this.makeToken('(', '(', offsetInChunk + 1, 0));
+			  nested.push(this.makeToken(')', ')', offsetInChunk + 1 + index, 0));
 			}
-			prev = letter;
+			tokens.push(['TOKENS', nested]);
+			str = str.slice(index);
+			offsetInChunk += index;
 		  }
-		  return this.error("missing " + (stack.pop()) + ", starting");
+		  if (str.slice(0, end.length) !== end) {
+			this.error("missing " + end);
+		  }
+		  return {
+			tokens: tokens,
+			index: offsetInChunk + end.length
+		  };
 		};
 
-		Lexer.prototype.interpolateString = function(str, options) {
-		  var column, errorToken, expr, heredoc, i, inner, interpolated, len, letter, lexedLength, line, locationToken, nested, offsetInChunk, pi, plusToken, popped, regex, rparen, strOffset, tag, token, tokens, value, _i, _len, _ref2, _ref3, _ref4;
-		  if (options == null) {
-			options = {};
-		  }
-		  heredoc = options.heredoc, regex = options.regex, offsetInChunk = options.offsetInChunk, strOffset = options.strOffset, lexedLength = options.lexedLength;
-		  offsetInChunk || (offsetInChunk = 0);
-		  strOffset || (strOffset = 0);
-		  lexedLength || (lexedLength = str.length);
-		  tokens = [];
-		  pi = 0;
-		  i = -1;
-		  while (letter = str.charAt(i += 1)) {
-			if (letter === '\\') {
-			  i += 1;
-			  continue;
-			}
-			if (!(letter === '#' && str.charAt(i + 1) === '{' && (expr = this.balancedString(str.slice(i + 1), '}')))) {
-			  continue;
-			}
-			if (pi < i) {
-			  tokens.push(this.makeToken('NEOSTRING', str.slice(pi, i), strOffset + pi));
-			}
-			if (!errorToken) {
-			  errorToken = this.makeToken('', 'string interpolation', offsetInChunk + i + 1, 2);
-			}
-			inner = expr.slice(1, -1);
-			if (inner.length) {
-			  _ref2 = this.getLineAndColumnFromChunk(strOffset + i + 2), line = _ref2[0], column = _ref2[1];
-			  nested = new Lexer().tokenize(inner, {
-				line: line,
-				column: column,
-				rewrite: false
-			  });
-			  popped = nested.pop();
-			  if (((_ref3 = nested[0]) != null ? _ref3[0] : void 0) === 'TERMINATOR') {
-				popped = nested.shift();
-			  }
-			  if (len = nested.length) {
-				if (len > 1) {
-				  nested.unshift(this.makeToken('(', '(', strOffset + i + 1, 0));
-				  nested.push(this.makeToken(')', ')', strOffset + i + 1 + inner.length, 0));
-				}
-				tokens.push(['TOKENS', nested]);
-			  }
-			}
-			i += expr.length;
-			pi = i + 1;
-		  }
-		  if ((i > pi && pi < str.length)) {
-			tokens.push(this.makeToken('NEOSTRING', str.slice(pi), strOffset + pi));
-		  }
-		  if (regex) {
-			return tokens;
-		  }
-		  if (!tokens.length) {
-			return this.token('STRING', '""', offsetInChunk, lexedLength);
-		  }
-		  if (tokens[0][0] !== 'NEOSTRING') {
-			tokens.unshift(this.makeToken('NEOSTRING', '', offsetInChunk));
-		  }
+		Lexer.prototype.mergeInterpolationTokens = function(tokens, _arg, fn) {
+		  var converted, end, errorToken, firstEmptyStringIndex, firstIndex, i, interpolated, locationToken, plusToken, quote, rparen, start, tag, token, tokensToPush, value, _i, _len, _ref2;
+		  quote = _arg.quote, start = _arg.start, end = _arg.end;
 		  if (interpolated = tokens.length > 1) {
-			this.token('(', '(', offsetInChunk, 0, errorToken);
+			errorToken = this.makeToken('', 'interpolation', start + tokens[0][1].length, 2);
+			this.token('(', '(', 0, 0, errorToken);
 		  }
+		  firstIndex = this.tokens.length;
 		  for (i = _i = 0, _len = tokens.length; _i < _len; i = ++_i) {
 			token = tokens[i];
 			tag = token[0], value = token[1];
-			if (i) {
-			  if (i) {
-				plusToken = this.token('+', '+');
-			  }
-			  locationToken = tag === 'TOKENS' ? value[0] : token;
+			switch (tag) {
+			  case 'TOKENS':
+				if (value.length === 0) {
+				  continue;
+				}
+				locationToken = value[0];
+				tokensToPush = value;
+				break;
+			  case 'NEOSTRING':
+				converted = fn(token[1], i);
+				if (converted.length === 0) {
+				  if (i === 0) {
+					firstEmptyStringIndex = this.tokens.length;
+				  } else {
+					continue;
+				  }
+				}
+				if (i === 2 && (firstEmptyStringIndex != null)) {
+				  this.tokens.splice(firstEmptyStringIndex, 2);
+				}
+				token[0] = 'STRING';
+				token[1] = this.makeString(converted, quote);
+				locationToken = token;
+				tokensToPush = [token];
+			}
+			if (this.tokens.length > firstIndex) {
+			  plusToken = this.token('+', '+');
 			  plusToken[2] = {
 				first_line: locationToken[2].first_line,
 				first_column: locationToken[2].first_column,
@@ -1456,27 +1413,17 @@ var CoffeeScript = (function(){
 				last_column: locationToken[2].first_column
 			  };
 			}
-			if (tag === 'TOKENS') {
-			  (_ref4 = this.tokens).push.apply(_ref4, value);
-			} else if (tag === 'NEOSTRING') {
-			  token[0] = 'STRING';
-			  token[1] = this.makeString(value, '"', heredoc);
-			  this.tokens.push(token);
-			} else {
-			  this.error("Unexpected " + tag);
-			}
+			(_ref2 = this.tokens).push.apply(_ref2, tokensToPush);
 		  }
 		  if (interpolated) {
-			rparen = this.makeToken(')', ')', offsetInChunk + lexedLength, 0);
-			rparen.stringEnd = true;
-			this.tokens.push(rparen);
+			rparen = this.token(')', ')', end, 0);
+			return rparen.stringEnd = true;
 		  }
-		  return tokens;
 		};
 
 		Lexer.prototype.pair = function(tag) {
-		  var wanted;
-		  if (tag !== (wanted = last(this.ends))) {
+		  var wanted, _ref2;
+		  if (tag !== (wanted = (_ref2 = last(this.ends)) != null ? _ref2.tag : void 0)) {
 			if ('OUTDENT' !== wanted) {
 			  this.error("unmatched " + tag);
 			}
@@ -1548,26 +1495,22 @@ var CoffeeScript = (function(){
 		  return LINE_CONTINUER.test(this.chunk) || ((_ref2 = this.tag()) === '\\' || _ref2 === '.' || _ref2 === '?.' || _ref2 === '?::' || _ref2 === 'UNARY' || _ref2 === 'MATH' || _ref2 === 'UNARY_MATH' || _ref2 === '+' || _ref2 === '-' || _ref2 === 'YIELD' || _ref2 === '**' || _ref2 === 'SHIFT' || _ref2 === 'RELATION' || _ref2 === 'COMPARE' || _ref2 === 'LOGIC' || _ref2 === 'THROW' || _ref2 === 'EXTENDS');
 		};
 
-		Lexer.prototype.removeNewlines = function(str) {
-		  return str.replace(/^\s*\n\s*/, '').replace(/([^\\]|\\\\)\s*\n\s*$/, '$1');
-		};
-
-		Lexer.prototype.escapeLines = function(str, heredoc) {
-		  str = str.replace(/\\[^\S\n]*(\n|\\)\s*/g, function(escaped, character) {
+		Lexer.prototype.formatString = function(str) {
+		  return str.replace(/\\[^\S\n]*(\n|\\)\s*/g, function(escaped, character) {
 			if (character === '\n') {
 			  return '';
 			} else {
 			  return escaped;
 			}
 		  });
-		  if (heredoc) {
-			return str.replace(MULTILINER, '\\n');
-		  } else {
-			return str.replace(/\s*\n\s*/g, ' ');
-		  }
 		};
 
-		Lexer.prototype.makeString = function(body, quote, heredoc) {
+		Lexer.prototype.formatHeregex = function(str) {
+		  return str.replace(HEREGEX_OMIT, '$1$2').replace(MULTILINER, '\\n');
+		};
+
+		Lexer.prototype.makeString = function(body, quote) {
+		  var match;
 		  if (!body) {
 			return quote + quote;
 		  }
@@ -1579,7 +1522,10 @@ var CoffeeScript = (function(){
 			}
 		  });
 		  body = body.replace(RegExp("" + quote, "g"), '\\$&');
-		  return quote + this.escapeLines(body, heredoc) + quote;
+		  if (match = OCTAL_ESCAPE.exec(body)) {
+			this.error("octal escape sequences are not allowed " + match[2], match.index + match[1].length + 1);
+		  }
+		  return quote + body + quote;
 		};
 
 		Lexer.prototype.error = function(message, offset) {
@@ -1637,11 +1583,9 @@ var CoffeeScript = (function(){
 
 	  BOM = 65279;
 
-	  IDENTIFIER = /^([$A-Za-z_\x7f-\uffff][$\w\x7f-\uffff]*)([^\n\S]*:(?!:))?/;
+	  IDENTIFIER = /^(?!\d)((?:(?!\s)[$\w\x7f-\uffff])+)([^\n\S]*:(?!:))?/;
 
 	  NUMBER = /^0b[01]+|^0o[0-7]+|^0x[\da-f]+|^\d*\.?\d+(?:e[+-]?\d+)?/i;
-
-	  HEREDOC = /^("""|''')((?:\\[\s\S]|[^\\])*?)(?:\n[^\n\S]*)?\1/;
 
 	  OPERATOR = /^(?:[-=]>|[-+*\/%<>&|^!?=]=|>>>=?|([-+:])\1|([&|<>*\/%])\2=?|\?(\.|::)|\.{2,3})/;
 
@@ -1653,23 +1597,45 @@ var CoffeeScript = (function(){
 
 	  MULTI_DENT = /^(?:\n[^\n\S]*)+/;
 
-	  SIMPLESTR = /^'[^\\']*(?:\\[\s\S][^\\']*)*'/;
-
 	  JSTOKEN = /^`[^\\`]*(?:\\.[^\\`]*)*`/;
 
-	  REGEX = /^(\/(?![\s=])[^[\/\n\\]*(?:(?:\\[\s\S]|\[[^\]\n\\]*(?:\\[\s\S][^\]\n\\]*)*])[^[\/\n\\]*)*\/)([imgy]{0,4})(?!\w)/;
+	  STRING_START = /^(?:'''|"""|'|")/;
 
-	  HEREGEX = /^\/{3}((?:\\?[\s\S])+?)\/{3}([imgy]{0,4})(?!\w)/;
+	  STRING_SINGLE = /^(?:[^\\']|\\[\s\S])*/;
+
+	  STRING_DOUBLE = /^(?:[^\\"#]|\\[\s\S]|\#(?!\{))*/;
+
+	  HEREDOC_SINGLE = /^(?:[^\\']|\\[\s\S]|'(?!''))*/;
+
+	  HEREDOC_DOUBLE = /^(?:[^\\"#]|\\[\s\S]|"(?!"")|\#(?!\{))*/;
+
+	  STRING_OMIT = /\s*\n\s*/g;
+
+	  HEREDOC_INDENT = /\n+([^\n\S]*)(?=\S)/g;
+
+	  REGEX = /^\/(?![\s=])(?:[^[\/\n\\]|\\.|\[(?:\\.|[^\]\n\\])*])+\//;
+
+	  REGEX_FLAGS = /^\w*/;
+
+	  VALID_FLAGS = /^(?!.*(.).*\1)[imgy]*$/;
+
+	  HEREGEX = /^(?:[^\\\/#]|\\[\s\S]|\/(?!\/\/)|\#(?!\{))*/;
 
 	  HEREGEX_OMIT = /((?:\\\\)+)|\\(\s|\/)|\s+(?:#.*)?/g;
 
+	  REGEX_ILLEGAL = /^(\/|\/{3}\s*)(\*)/;
+
 	  MULTILINER = /\n/g;
 
-	  HEREDOC_INDENT = /\n+([^\n\S]*)/g;
-
-	  HEREDOC_ILLEGAL = /\*\//;
+	  HERECOMMENT_ILLEGAL = /\*\//;
 
 	  LINE_CONTINUER = /^\s*(?:,|\??\.(?![.\d])|::)/;
+
+	  OCTAL_ESCAPE = /^((?:\\.|[^\\])*)(\\(?:0[0-7]|[1-7]))/;
+
+	  LEADING_BLANK_LINE = /^[^\n\S]*\n/;
+
+	  TRAILING_BLANK_LINE = /\n[^\n\S]*$/;
 
 	  TRAILING_SPACES = /\s+$/;
 
@@ -2598,7 +2564,7 @@ var CoffeeScript = (function(){
 		  for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
 			v = _ref1[_i];
 			if (v.type.assigned) {
-			  _results.push("" + v.name + " = " + v.type.value);
+			  _results.push(v.name + " = " + v.type.value);
 			}
 		  }
 		  return _results;
@@ -2751,7 +2717,7 @@ var CoffeeScript = (function(){
 		  var me;
 		  me = this.unwrapAll();
 		  if (res) {
-			return new Call(new Literal("" + res + ".push"), [me]);
+			return new Call(new Literal(res + ".push"), [me]);
 		  } else {
 			return new Return(me);
 		  }
@@ -3100,7 +3066,7 @@ var CoffeeScript = (function(){
 			  if (i) {
 				fragments.push(this.makeCode('\n'));
 			  }
-			  fragments.push(this.makeCode("" + this.tab + "var "));
+			  fragments.push(this.makeCode(this.tab + "var "));
 			  if (declars) {
 				fragments.push(this.makeCode(scope.declaredVariables().join(', ')));
 			  }
@@ -3525,7 +3491,7 @@ var CoffeeScript = (function(){
 			accesses.push(new Access(new Literal(method.name)));
 			return (new Value(new Literal(method.klass), accesses)).compile(o);
 		  } else if (method != null ? method.ctor : void 0) {
-			return "" + method.name + ".__super__.constructor";
+			return method.name + ".__super__.constructor";
 		  } else {
 			return this.error('cannot call super outside of an instance method.');
 		  }
@@ -3627,7 +3593,7 @@ var CoffeeScript = (function(){
 		Call.prototype.compileSplat = function(o, splatArgs) {
 		  var answer, base, fun, idt, name, ref;
 		  if (this.isSuper) {
-			return [].concat(this.makeCode("" + (this.superReference(o)) + ".apply(" + (this.superThis(o)) + ", "), splatArgs, this.makeCode(")"));
+			return [].concat(this.makeCode((this.superReference(o)) + ".apply(" + (this.superThis(o)) + ", "), splatArgs, this.makeCode(")"));
 		  }
 		  if (this.isNew) {
 			idt = this.tab + TAB;
@@ -3766,23 +3732,23 @@ var CoffeeScript = (function(){
 		  idx = del(o, 'index');
 		  idxName = del(o, 'name');
 		  namedIndex = idxName && idxName !== idx;
-		  varPart = "" + idx + " = " + this.fromC;
+		  varPart = idx + " = " + this.fromC;
 		  if (this.toC !== this.toVar) {
 			varPart += ", " + this.toC;
 		  }
 		  if (this.step !== this.stepVar) {
 			varPart += ", " + this.step;
 		  }
-		  _ref2 = ["" + idx + " <" + this.equals, "" + idx + " >" + this.equals], lt = _ref2[0], gt = _ref2[1];
-		  condPart = this.stepNum ? parseNum(this.stepNum[0]) > 0 ? "" + lt + " " + this.toVar : "" + gt + " " + this.toVar : known ? ((_ref3 = [parseNum(this.fromNum[0]), parseNum(this.toNum[0])], from = _ref3[0], to = _ref3[1], _ref3), from <= to ? "" + lt + " " + to : "" + gt + " " + to) : (cond = this.stepVar ? "" + this.stepVar + " > 0" : "" + this.fromVar + " <= " + this.toVar, "" + cond + " ? " + lt + " " + this.toVar + " : " + gt + " " + this.toVar);
-		  stepPart = this.stepVar ? "" + idx + " += " + this.stepVar : known ? namedIndex ? from <= to ? "++" + idx : "--" + idx : from <= to ? "" + idx + "++" : "" + idx + "--" : namedIndex ? "" + cond + " ? ++" + idx + " : --" + idx : "" + cond + " ? " + idx + "++ : " + idx + "--";
+		  _ref2 = [idx + " <" + this.equals, idx + " >" + this.equals], lt = _ref2[0], gt = _ref2[1];
+		  condPart = this.stepNum ? parseNum(this.stepNum[0]) > 0 ? lt + " " + this.toVar : gt + " " + this.toVar : known ? ((_ref3 = [parseNum(this.fromNum[0]), parseNum(this.toNum[0])], from = _ref3[0], to = _ref3[1], _ref3), from <= to ? lt + " " + to : gt + " " + to) : (cond = this.stepVar ? this.stepVar + " > 0" : this.fromVar + " <= " + this.toVar, cond + " ? " + lt + " " + this.toVar + " : " + gt + " " + this.toVar);
+		  stepPart = this.stepVar ? idx + " += " + this.stepVar : known ? namedIndex ? from <= to ? "++" + idx : "--" + idx : from <= to ? idx + "++" : idx + "--" : namedIndex ? cond + " ? ++" + idx + " : --" + idx : cond + " ? " + idx + "++ : " + idx + "--";
 		  if (namedIndex) {
-			varPart = "" + idxName + " = " + varPart;
+			varPart = idxName + " = " + varPart;
 		  }
 		  if (namedIndex) {
-			stepPart = "" + idxName + " = " + stepPart;
+			stepPart = idxName + " = " + stepPart;
 		  }
-		  return [this.makeCode("" + varPart + "; " + condPart + "; " + stepPart)];
+		  return [this.makeCode(varPart + "; " + condPart + "; " + stepPart)];
 		};
 
 		Range.prototype.compileArray = function(o) {
@@ -3806,8 +3772,8 @@ var CoffeeScript = (function(){
 			o.index = i;
 			body = fragmentsToText(this.compileNode(o));
 		  } else {
-			vars = ("" + i + " = " + this.fromC) + (this.toC !== this.toVar ? ", " + this.toC : '');
-			cond = "" + this.fromVar + " <= " + this.toVar;
+			vars = (i + " = " + this.fromC) + (this.toC !== this.toVar ? ", " + this.toC : '');
+			cond = this.fromVar + " <= " + this.toVar;
 			body = "var " + vars + "; " + cond + " ? " + i + " <" + this.equals + " " + this.toVar + " : " + i + " >" + this.equals + " " + this.toVar + "; " + cond + " ? " + i + "++ : " + i + "--";
 		  }
 		  post = "{ " + result + ".push(" + i + "); }\n" + idt + "return " + result + ";\n" + o.indent;
@@ -3904,7 +3870,7 @@ var CoffeeScript = (function(){
 			}
 		  }
 		  answer.unshift(this.makeCode("{" + (props.length && '\n')));
-		  answer.push(this.makeCode("" + (props.length && '\n' + this.tab) + "}"));
+		  answer.push(this.makeCode((props.length && '\n' + this.tab) + "}"));
 		  if (this.front) {
 			return this.wrapInBraces(answer);
 		  } else {
@@ -4038,7 +4004,7 @@ var CoffeeScript = (function(){
 		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
 			bvar = _ref2[_i];
 			lhs = (new Value(new Literal("this"), [new Access(bvar)])).compile(o);
-			this.ctor.body.unshift(new Literal("" + lhs + " = " + (utility('bind')) + "(" + lhs + ", this)"));
+			this.ctor.body.unshift(new Literal(lhs + " = " + (utility('bind')) + "(" + lhs + ", this)"));
 		  }
 		};
 
@@ -4125,9 +4091,9 @@ var CoffeeScript = (function(){
 		  if (!this.ctor) {
 			this.ctor = new Code;
 			if (this.externalCtor) {
-			  this.ctor.body.push(new Literal("" + this.externalCtor + ".apply(this, arguments)"));
+			  this.ctor.body.push(new Literal(this.externalCtor + ".apply(this, arguments)"));
 			} else if (this.parent) {
-			  this.ctor.body.push(new Literal("" + name + ".__super__.constructor.apply(this, arguments)"));
+			  this.ctor.body.push(new Literal(name + ".__super__.constructor.apply(this, arguments)"));
 			}
 			this.ctor.body.makeReturn();
 			this.body.expressions.unshift(this.ctor);
@@ -4292,7 +4258,7 @@ var CoffeeScript = (function(){
 		  assigns = [];
 		  expandedIdx = false;
 		  if (!IDENTIFIER.test(vvarText) || this.variable.assigns(vvarText)) {
-			assigns.push([this.makeCode("" + (ref = o.scope.freeVariable('ref')) + " = ")].concat(__slice.call(vvar)));
+			assigns.push([this.makeCode((ref = o.scope.freeVariable('ref')) + " = ")].concat(__slice.call(vvar)));
 			vvar = [this.makeCode(ref)];
 			vvarText = ref;
 		  }
@@ -4313,7 +4279,7 @@ var CoffeeScript = (function(){
 			if (!expandedIdx && obj instanceof Splat) {
 			  name = obj.name.unwrap().value;
 			  obj = obj.unwrap();
-			  val = "" + olen + " <= " + vvarText + ".length ? " + (utility('slice')) + ".call(" + vvarText + ", " + i;
+			  val = olen + " <= " + vvarText + ".length ? " + (utility('slice')) + ".call(" + vvarText + ", " + i;
 			  if (rest = olen - i - 1) {
 				ivar = o.scope.freeVariable('i');
 				val += ", " + ivar + " = " + vvarText + ".length - " + rest + ") : (" + ivar + " = " + i + ", [])";
@@ -4321,15 +4287,15 @@ var CoffeeScript = (function(){
 				val += ") : []";
 			  }
 			  val = new Literal(val);
-			  expandedIdx = "" + ivar + "++";
+			  expandedIdx = ivar + "++";
 			} else if (!expandedIdx && obj instanceof Expansion) {
 			  if (rest = olen - i - 1) {
 				if (rest === 1) {
-				  expandedIdx = "" + vvarText + ".length - 1";
+				  expandedIdx = vvarText + ".length - 1";
 				} else {
 				  ivar = o.scope.freeVariable('i');
-				  val = new Literal("" + ivar + " = " + vvarText + ".length - " + rest);
-				  expandedIdx = "" + ivar + "++";
+				  val = new Literal(ivar + " = " + vvarText + ".length - " + rest);
+				  expandedIdx = ivar + "++";
 				  assigns.push(val.compileToFragments(o, LEVEL_LIST));
 				}
 			  }
@@ -4736,13 +4702,13 @@ var CoffeeScript = (function(){
 			if (apply) {
 			  return fragments;
 			}
-			return [].concat(node.makeCode("" + (utility('slice')) + ".call("), fragments, node.makeCode(")"));
+			return [].concat(node.makeCode((utility('slice')) + ".call("), fragments, node.makeCode(")"));
 		  }
 		  args = list.slice(index);
 		  for (i = _i = 0, _len = args.length; _i < _len; i = ++_i) {
 			node = args[i];
 			compiledNode = node.compileToFragments(o, LEVEL_LIST);
-			args[i] = node instanceof Splat ? [].concat(node.makeCode("" + (utility('slice')) + ".call("), compiledNode, node.makeCode(")")) : [].concat(node.makeCode("["), compiledNode, node.makeCode("]"));
+			args[i] = node instanceof Splat ? [].concat(node.makeCode((utility('slice')) + ".call("), compiledNode, node.makeCode(")")) : [].concat(node.makeCode("["), compiledNode, node.makeCode("]"));
 		  }
 		  if (index === 0) {
 			node = list[0];
@@ -5235,7 +5201,7 @@ var CoffeeScript = (function(){
 		  tryPart = this.attempt.compileToFragments(o, LEVEL_TOP);
 		  catchPart = this.recovery ? (placeholder = new Literal('_error'), this.errorVariable ? this.recovery.unshift(new Assign(this.errorVariable, placeholder)) : void 0, [].concat(this.makeCode(" catch ("), placeholder.compileToFragments(o), this.makeCode(") {\n"), this.recovery.compileToFragments(o, LEVEL_TOP), this.makeCode("\n" + this.tab + "}"))) : !(this.ensure || this.recovery) ? [this.makeCode(' catch (_error) {}')] : [];
 		  ensurePart = this.ensure ? [].concat(this.makeCode(" finally {\n"), this.ensure.compileToFragments(o, LEVEL_TOP), this.makeCode("\n" + this.tab + "}")) : [];
-		  return [].concat(this.makeCode("" + this.tab + "try {\n"), tryPart, this.makeCode("\n" + this.tab + "}"), catchPart, ensurePart);
+		  return [].concat(this.makeCode(this.tab + "try {\n"), tryPart, this.makeCode("\n" + this.tab + "}"), catchPart, ensurePart);
 		};
 
 		return Try;
@@ -5284,7 +5250,7 @@ var CoffeeScript = (function(){
 			_ref2 = this.negated ? ['===', '||'] : ['!==', '&&'], cmp = _ref2[0], cnj = _ref2[1];
 			code = "typeof " + code + " " + cmp + " \"undefined\" " + cnj + " " + code + " " + cmp + " null";
 		  } else {
-			code = "" + code + " " + (this.negated ? '==' : '!=') + " null";
+			code = code + " " + (this.negated ? '==' : '!=') + " null";
 		  }
 		  return [this.makeCode(o.level <= LEVEL_COND ? code : "(" + code + ")")];
 		};
@@ -5385,7 +5351,7 @@ var CoffeeScript = (function(){
 		  }
 		  ivar = (this.object && index) || scope.freeVariable('i');
 		  kvar = (this.range && name) || index || ivar;
-		  kvarAssign = kvar !== ivar ? "" + kvar + " = " : "";
+		  kvarAssign = kvar !== ivar ? kvar + " = " : "";
 		  if (this.step && !this.range) {
 			_ref3 = this.cacheToCodeFragments(this.step.cache(o, LEVEL_LIST)), step = _ref3[0], stepVar = _ref3[1];
 			stepNum = stepVar.match(NUMBER);
@@ -5410,7 +5376,7 @@ var CoffeeScript = (function(){
 			  svar = ref;
 			}
 			if (name && !this.pattern) {
-			  namePart = "" + name + " = " + svar + "[" + kvar + "]";
+			  namePart = name + " = " + svar + "[" + kvar + "]";
 			}
 			if (!this.object) {
 			  if (step !== stepVar) {
@@ -5421,8 +5387,8 @@ var CoffeeScript = (function(){
 			  }
 			  declare = "" + kvarAssign + ivar + " = 0, " + lvar + " = " + svar + ".length";
 			  declareDown = "" + kvarAssign + ivar + " = " + svar + ".length - 1";
-			  compare = "" + ivar + " < " + lvar;
-			  compareDown = "" + ivar + " >= 0";
+			  compare = ivar + " < " + lvar;
+			  compareDown = ivar + " >= 0";
 			  if (this.step) {
 				if (stepNum) {
 				  if (down) {
@@ -5430,14 +5396,14 @@ var CoffeeScript = (function(){
 					declare = declareDown;
 				  }
 				} else {
-				  compare = "" + stepVar + " > 0 ? " + compare + " : " + compareDown;
+				  compare = stepVar + " > 0 ? " + compare + " : " + compareDown;
 				  declare = "(" + stepVar + " > 0 ? (" + declare + ") : " + declareDown + ")";
 				}
-				increment = "" + ivar + " += " + stepVar;
+				increment = ivar + " += " + stepVar;
 			  } else {
-				increment = "" + (kvar !== ivar ? "++" + ivar : "" + ivar + "++");
+				increment = "" + (kvar !== ivar ? "++" + ivar : ivar + "++");
 			  }
-			  forPartFragments = [this.makeCode("" + declare + "; " + compare + "; " + kvarAssign + increment)];
+			  forPartFragments = [this.makeCode(declare + "; " + compare + "; " + kvarAssign + increment)];
 			}
 		  }
 		  if (this.returns) {
@@ -5455,14 +5421,14 @@ var CoffeeScript = (function(){
 			}
 		  }
 		  if (this.pattern) {
-			body.expressions.unshift(new Assign(this.name, new Literal("" + svar + "[" + kvar + "]")));
+			body.expressions.unshift(new Assign(this.name, new Literal(svar + "[" + kvar + "]")));
 		  }
 		  defPartFragments = [].concat(this.makeCode(defPart), this.pluckDirectCall(o, body));
 		  if (namePart) {
 			varPart = "\n" + idt1 + namePart + ";";
 		  }
 		  if (this.object) {
-			forPartFragments = [this.makeCode("" + kvar + " in " + svar)];
+			forPartFragments = [this.makeCode(kvar + " in " + svar)];
 			if (this.own) {
 			  guardPart = "\n" + idt1 + "if (!" + (utility('hasProp')) + ".call(" + svar + ", " + kvar + ")) continue;";
 			}
@@ -5473,7 +5439,7 @@ var CoffeeScript = (function(){
 		  if (bodyFragments && (bodyFragments.length > 0)) {
 			bodyFragments = [].concat(this.makeCode("\n"), bodyFragments, this.makeCode("\n"));
 		  }
-		  return [].concat(defPartFragments, this.makeCode("" + (resultPart || '') + this.tab + "for ("), forPartFragments, this.makeCode(") {" + guardPart + varPart), bodyFragments, this.makeCode("" + this.tab + "}" + (returnResult || '')));
+		  return [].concat(defPartFragments, this.makeCode("" + (resultPart || '') + this.tab + "for ("), forPartFragments, this.makeCode(") {" + guardPart + varPart), bodyFragments, this.makeCode(this.tab + "}" + (returnResult || '')));
 		};
 
 		For.prototype.pluckDirectCall = function(o, body) {
@@ -5935,24 +5901,27 @@ var CoffeeScript = (function(){
 //	  };
 
 //	  exports["eval"] = function(code, options) {
-//		var Module, Script, js, k, o, r, sandbox, v, _i, _len, _module, _ref, _ref1, _require;
+//		var Module, createContext, isContext, js, k, o, r, sandbox, v, _i, _len, _module, _ref, _ref1, _ref2, _ref3, _require;
 //		if (options == null) {
 //		  options = {};
 //		}
 //		if (!(code = code.trim())) {
 //		  return;
 //		}
-//		Script = vm.Script;
-//		if (Script) {
+//		createContext = (_ref = vm.Script.createContext) != null ? _ref : vm.createContext;
+//		isContext = (_ref1 = vm.isContext) != null ? _ref1 : function(ctx) {
+//		  return options.sandbox instanceof createContext().constructor;
+//		};
+//		if (createContext) {
 //		  if (options.sandbox != null) {
-//			if (options.sandbox instanceof Script.createContext().constructor) {
+//			if (isContext(options.sandbox)) {
 //			  sandbox = options.sandbox;
 //			} else {
-//			  sandbox = Script.createContext();
-//			  _ref = options.sandbox;
-//			  for (k in _ref) {
-//				if (!__hasProp.call(_ref, k)) continue;
-//				v = _ref[k];
+//			  sandbox = createContext();
+//			  _ref2 = options.sandbox;
+//			  for (k in _ref2) {
+//				if (!__hasProp.call(_ref2, k)) continue;
+//				v = _ref2[k];
 //				sandbox[k] = v;
 //			  }
 //			}
@@ -5969,9 +5938,9 @@ var CoffeeScript = (function(){
 //			  return Module._load(path, _module, true);
 //			};
 //			_module.filename = sandbox.__filename;
-//			_ref1 = Object.getOwnPropertyNames(require);
-//			for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-//			  r = _ref1[_i];
+//			_ref3 = Object.getOwnPropertyNames(require);
+//			for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+//			  r = _ref3[_i];
 //			  if (r !== 'paths') {
 //				_require[r] = require[r];
 //			  }
@@ -6078,7 +6047,7 @@ var CoffeeScript = (function(){
 //		  if (frame.isEval()) {
 //			fileName = frame.getScriptNameOrSourceURL();
 //			if (!fileName) {
-//			  fileLocation = "" + (frame.getEvalOrigin()) + ", ";
+//			  fileLocation = (frame.getEvalOrigin()) + ", ";
 //			}
 //		  } else {
 //			fileName = frame.getFileName();
@@ -6087,7 +6056,7 @@ var CoffeeScript = (function(){
 //		  line = frame.getLineNumber();
 //		  column = frame.getColumnNumber();
 //		  source = getSourceMapping(fileName, line, column);
-//		  fileLocation = source ? "" + fileName + ":" + source[0] + ":" + source[1] : "" + fileName + ":" + line + ":" + column;
+//		  fileLocation = source ? fileName + ":" + source[0] + ":" + source[1] : fileName + ":" + line + ":" + column;
 //		}
 //		functionName = frame.getFunctionName();
 //		isConstructor = frame.isConstructor();
@@ -6098,19 +6067,19 @@ var CoffeeScript = (function(){
 //		  if (functionName) {
 //			tp = as = '';
 //			if (typeName && functionName.indexOf(typeName)) {
-//			  tp = "" + typeName + ".";
+//			  tp = typeName + ".";
 //			}
 //			if (methodName && functionName.indexOf("." + methodName) !== functionName.length - methodName.length - 1) {
 //			  as = " [as " + methodName + "]";
 //			}
 //			return "" + tp + functionName + as + " (" + fileLocation + ")";
 //		  } else {
-//			return "" + typeName + "." + (methodName || '<anonymous>') + " (" + fileLocation + ")";
+//			return typeName + "." + (methodName || '<anonymous>') + " (" + fileLocation + ")";
 //		  }
 //		} else if (isConstructor) {
 //		  return "new " + (functionName || '<anonymous>') + " (" + fileLocation + ")";
 //		} else if (functionName) {
-//		  return "" + functionName + " (" + fileLocation + ")";
+//		  return functionName + " (" + fileLocation + ")";
 //		} else {
 //		  return fileLocation;
 //		}
@@ -6156,7 +6125,7 @@ var CoffeeScript = (function(){
 //		  }
 //		  return _results;
 //		})();
-//		return "" + (err.toString()) + "\n" + (frames.join('\n')) + "\n";
+//		return (err.toString()) + "\n" + (frames.join('\n')) + "\n";
 //	  };
   
 	  return exports;
