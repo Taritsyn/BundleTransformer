@@ -141,7 +141,7 @@
 				var contentBuilder = new StringBuilder();
 				if (!string.IsNullOrWhiteSpace(globalVariables))
 				{
-					contentBuilder.Append(ParseVariables(globalVariables, "GlobalVariables"));
+					contentBuilder.AppendLine(ParseVariables(globalVariables, "GlobalVariables"));
 				}
 				contentBuilder.Append(content);
 				if (!string.IsNullOrWhiteSpace(modifyVariables))
