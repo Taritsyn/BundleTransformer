@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.TypeScript.Compilers
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
@@ -20,19 +21,29 @@
 	internal sealed class TypeScriptCompiler : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a TypeScript-library
+		/// Namespace for resources
 		/// </summary>
-		private const string TYPESCRIPT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.typescript-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.TypeScript.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a TypeScript-compiler helper
+		/// Name of file, which contains a TypeScript-library
 		/// </summary>
-		private const string TSC_HELPER_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.tscHelper.min.js";
+		private const string TYPESCRIPT_LIBRARY_FILE_NAME = "typescript-combined.min.js";
 
 		/// <summary>
-		/// Name of resource, which contains a default <code>lib.d.ts</code> with global declarations
+		/// Name of file, which contains a TypeScript-compiler helper
 		/// </summary>
-		private const string DEFAULT_LIBRARY_RESOURCE_NAME = "BundleTransformer.TypeScript.Resources.lib.d.ts";
+		private const string TSC_HELPER_FILE_NAME = "tscHelper.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a default <code>lib.d.ts</code> with global declarations
+		/// </summary>
+		private const string DEFAULT_LIBRARY_FILE_NAME = "lib.d.ts";
+
+		/// <summary>
+		/// Name of file, which contains a default <code>lib.es6.d.ts</code> with global declarations
+		/// </summary>
+		private const string DEFAULT_LIBRARY_ES6_FILE_NAME = "lib.es6.d.ts";
 
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
@@ -50,9 +61,9 @@
 		private readonly string _defaultOptionsString;
 
 		/// <summary>
-		/// Common types definitions (contents of the file <code>lib.d.ts</code>)
+		/// Common types definitions
 		/// </summary>
-		private readonly string _commonTypesDefinitions;
+		private Dictionary<string, string> _commonTypesDefinitions;
 
 		/// <summary>
 		/// JS engine
@@ -94,7 +105,20 @@
 			_defaultOptions = defaultOptions;
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
-			_commonTypesDefinitions = Utils.GetResourceAsString(DEFAULT_LIBRARY_RESOURCE_NAME, GetType());
+
+			Type type = GetType();
+
+			_commonTypesDefinitions = new Dictionary<string, string>
+			{
+				{
+					DEFAULT_LIBRARY_FILE_NAME,
+					Utils.GetResourceAsString(RESOURCES_NAMESPACE + "." + DEFAULT_LIBRARY_FILE_NAME, type)
+				},
+				{
+					DEFAULT_LIBRARY_ES6_FILE_NAME,
+					Utils.GetResourceAsString(RESOURCES_NAMESPACE + "." + DEFAULT_LIBRARY_ES6_FILE_NAME, type)
+				}
+			};
 		}
 
 
@@ -107,8 +131,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(TYPESCRIPT_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(TSC_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + TYPESCRIPT_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + TSC_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}
@@ -141,9 +165,11 @@
 			}
 
 			var newDependencies = new DependencyCollection();
-			if (currentOptions.UseDefaultLib)
+			if (!currentOptions.NoLib)
 			{
-				var defaultLibDependency = new Dependency("lib.d.ts", _commonTypesDefinitions);
+				string defaultLibFileName = (currentOptions.Target == TargetMode.EcmaScript6) ?
+					DEFAULT_LIBRARY_ES6_FILE_NAME : DEFAULT_LIBRARY_FILE_NAME;
+				var defaultLibDependency = new Dependency(defaultLibFileName, _commonTypesDefinitions[defaultLibFileName]);
 				newDependencies.Add(defaultLibDependency);
 			}
 			newDependencies.AddRange(dependencies);
@@ -161,7 +187,7 @@
 						currentOptionsString));
 					var json = JObject.Parse(result);
 
-					var errors = json["errors"] != null ? json["errors"] as JArray : null;
+					var errors = (json["errors"] != null) ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
 						throw new TypeScriptCompilingException(FormatErrorDetails(errors[0], content, path,
@@ -205,10 +231,13 @@
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
 			var optionsJson = new JObject(
-				new JProperty("noLib", !options.UseDefaultLib),
-				new JProperty("removeComments", options.RemoveComments),
+				new JProperty("noEmitOnError", options.NoEmitOnError),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
-				new JProperty("target", options.CodeGenTarget)
+				new JProperty("noLib", options.NoLib),
+				new JProperty("preserveConstEnums", options.PreserveConstEnums),
+				new JProperty("removeComments", options.RemoveComments),
+				new JProperty("suppressImplicitAnyIndexErrors", options.SuppressImplicitAnyIndexErrors),
+				new JProperty("target", options.Target)
 			);
 
 			return optionsJson;
@@ -289,6 +318,12 @@
 				{
 					_jsEngine.Dispose();
 					_jsEngine = null;
+				}
+
+				if (_commonTypesDefinitions != null)
+				{
+					_commonTypesDefinitions.Clear();
+					_commonTypesDefinitions = null;
 				}
 			}
 		}

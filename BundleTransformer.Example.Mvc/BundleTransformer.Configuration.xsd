@@ -470,14 +470,9 @@
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
-		<xs:attribute name="useDefaultLib" type="Boolean_SchemaType" use="optional" default="true">
+		<xs:attribute name="noEmitOnError" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to include a default lib.d.ts with global declarations</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
+				<xs:documentation>Flag for whether to do not emit outputs if any type checking errors were reported</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="noImplicitAny" type="Boolean_SchemaType" use="optional" default="false">
@@ -485,14 +480,35 @@
 				<xs:documentation>Flag for whether to warn on expressions and declarations with an implied 'any' type</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="codeGenTarget" use="optional" default="EcmaScript3">
+		<xs:attribute name="noLib" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
-				<xs:documentation>ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")</xs:documentation>
+				<xs:documentation>Flag for whether to do not include a default library (`lib.d.ts` or `lib.es6.d.ts`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="preserveConstEnums" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not erase const enum declarations in generated code</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="suppressImplicitAnyIndexErrors" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to suppress noImplicitAny errors for indexing objects lacking index signatures</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="target" use="optional" default="EcmaScript3">
+			<xs:annotation>
+				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, or `EcmaScript6` (experimental)</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
 					<xs:enumeration value="EcmaScript3" />
 					<xs:enumeration value="EcmaScript5" />
+					<xs:enumeration value="EcmaScript6" />
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>

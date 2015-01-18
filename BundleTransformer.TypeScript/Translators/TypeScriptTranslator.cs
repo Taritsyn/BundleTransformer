@@ -84,18 +84,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
+		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
 		/// </summary>
-		public bool UseDefaultLib
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to do not emit comments to output
-		/// </summary>
-		public bool RemoveComments
+		public bool NoEmitOnError
 		{
 			get;
 			set;
@@ -112,9 +103,48 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
+		/// Gets or sets a flag for whether to do not include a default library (<code>lib.d.ts</code>
+		/// or <code>lib.es6.d.ts</code>)
 		/// </summary>
-		public CodeGenTarget CodeGenTarget
+		public bool NoLib
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not erase const enum declarations in generated code
+		/// </summary>
+		public bool PreserveConstEnums
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit comments to output
+		/// </summary>
+		public bool RemoveComments
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to suppress noImplicitAny errors for indexing objects lacking
+		/// index signatures
+		/// </summary>
+		public bool SuppressImplicitAnyIndexErrors
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, 
+		/// or `EcmaScript6` (experimental)
+		/// </summary>
+		public TargetMode Target
 		{
 			get;
 			set;
@@ -146,10 +176,13 @@
 			_relativePathResolver = relativePathResolver;
 			_tsScriptCache = new Dictionary<string, TsScript>();
 
-			UseDefaultLib = tsConfig.UseDefaultLib;
-			RemoveComments = tsConfig.RemoveComments;
+			NoEmitOnError = tsConfig.NoEmitOnError;
 			NoImplicitAny = tsConfig.NoImplicitAny;
-			CodeGenTarget = tsConfig.CodeGenTarget;
+			NoLib = tsConfig.NoLib;
+			PreserveConstEnums = tsConfig.PreserveConstEnums;
+			RemoveComments = tsConfig.RemoveComments;
+			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
+			Target = tsConfig.Target;
 
 			if (createJsEngineInstance == null)
 			{
@@ -297,10 +330,13 @@
 		{
 			var options = new CompilationOptions
 			{
-				UseDefaultLib = UseDefaultLib,
-				RemoveComments = RemoveComments,
+				NoEmitOnError = NoEmitOnError,
 				NoImplicitAny = NoImplicitAny,
-				CodeGenTarget = CodeGenTarget
+				NoLib = NoLib,
+				PreserveConstEnums = PreserveConstEnums,
+				RemoveComments = RemoveComments,
+				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
+				Target = Target
 			};
 
 			return options;

@@ -40,7 +40,7 @@ module TranslatorBadges {
             return this.$badgeElem.css("border-color");
         }
 
-        public setBorderColor(color: string) {
+        public setBorderColor(color: string): void {
             /// <summary>
             /// Sets a border color of badge
             /// </summary>

@@ -10,23 +10,13 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to include a default <code>lib.d.ts</code> with global declarations
+		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
 		/// </summary>
-		[ConfigurationProperty("useDefaultLib", DefaultValue = true)]
-		public bool UseDefaultLib
+		[ConfigurationProperty("noEmitOnError", DefaultValue = false)]
+		public bool NoEmitOnError
 		{
-			get { return (bool)this["useDefaultLib"]; }
-			set { this["useDefaultLib"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to do not emit comments to output
-		/// </summary>
-		[ConfigurationProperty("removeComments", DefaultValue = false)]
-		public bool RemoveComments
-		{
-			get { return (bool)this["removeComments"]; }
-			set { this["removeComments"] = value; }
+			get { return (bool)this["noEmitOnError"]; }
+			set { this["noEmitOnError"] = value; }
 		}
 
 		/// <summary>
@@ -41,13 +31,56 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version ("EcmaScript3" (default), or "EcmaScript5")
+		/// Gets or sets a flag for whether to do not include a default library (<code>lib.d.ts</code>
+		/// or <code>lib.es6.d.ts</code>)
 		/// </summary>
-		[ConfigurationProperty("codeGenTarget", DefaultValue = CodeGenTarget.EcmaScript3)]
-		public CodeGenTarget CodeGenTarget
+		[ConfigurationProperty("noLib", DefaultValue = false)]
+		public bool NoLib
 		{
-			get { return (CodeGenTarget)this["codeGenTarget"]; }
-			set { this["codeGenTarget"] = value; }
+			get { return (bool)this["noLib"]; }
+			set { this["noLib"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not erase const enum declarations in generated code
+		/// </summary>
+		[ConfigurationProperty("preserveConstEnums", DefaultValue = false)]
+		public bool PreserveConstEnums
+		{
+			get { return (bool)this["preserveConstEnums"]; }
+			set { this["preserveConstEnums"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit comments to output
+		/// </summary>
+		[ConfigurationProperty("removeComments", DefaultValue = false)]
+		public bool RemoveComments
+		{
+			get { return (bool)this["removeComments"]; }
+			set { this["removeComments"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to suppress noImplicitAny errors for indexing objects lacking
+		/// index signatures
+		/// </summary>
+		[ConfigurationProperty("suppressImplicitAnyIndexErrors", DefaultValue = false)]
+		public bool SuppressImplicitAnyIndexErrors
+		{
+			get { return (bool)this["suppressImplicitAnyIndexErrors"]; }
+			set { this["suppressImplicitAnyIndexErrors"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, 
+		/// or `EcmaScript6` (experimental)
+		/// </summary>
+		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
+		public TargetMode Target
+		{
+			get { return (TargetMode)this["target"]; }
+			set { this["target"] = value; }
 		}
 
 		/// <summary>

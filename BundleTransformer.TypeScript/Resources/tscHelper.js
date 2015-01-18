@@ -1,5 +1,5 @@
-/*global ts, sys */
-var typeScriptHelper = (function (ts, sys, undefined) {
+/*global ts */
+var typeScriptHelper = (function (ts, undefined) {
 	'use strict';
 
 	var exports = {},
@@ -8,12 +8,15 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 			emitBOM: false,
 			mapRoot: '',
 			module: 0 /* None */,
+			noEmitOnError: false,
 			noImplicitAny: false,
 			noLib: false,
 			noResolve: false,
 			out: '',
 			outDir: '',
+			preserveConstEnums: false,
 			removeComments: false,
+			suppressImplicitAnyIndexErrors: false,
 			sourceMap: false,
 			sourceRoot: '',
 			target: 0 /* ES3 */
@@ -63,9 +66,10 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 
 	//#region BtSystem
 	BtSystem = (function () {
-		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'sys.{0}' is not implemented.";
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'ts.sys.{0}' is not implemented.";
 
-		function BtSystem(files) {
+		function BtSystem(path, files) {
+			this._path = path;
 			this._files = files;
 
 			this.args = [];
@@ -127,8 +131,16 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getExecutingFilePath'));
 		};
 
-		BtSystem.prototype.getCurrentDirectory = function() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getCurrentDirectory'));
+		BtSystem.prototype.getCurrentDirectory = function () {
+			var directoryName = '',
+				lastSlashPosition = this._path.lastIndexOf('/')
+				;
+
+			if (lastSlashPosition !== -1) {
+				directoryName = this._path.substring(0, lastSlashPosition + 1);
+			}
+
+			return directoryName;
 		};
 
 		BtSystem.prototype.exit = function() {
@@ -168,8 +180,10 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 				ts.createSourceFile(filename, text, languageVersion, '0') : undefined;
 		};
 
-		BtCompilerHost.prototype.getDefaultLibFilename = function() {
-			return 'lib.d.ts';
+		BtCompilerHost.prototype.getDefaultLibFilename = function (options) {
+			var defaultLibFileName = (options.target === 2 /* ES6 */) ? 'lib.es6.d.ts' : 'lib.d.ts';
+
+			return defaultLibFileName;
 		};
 
 		BtCompilerHost.prototype.writeFile = function(fileName, data, writeByteOrderMark, onError) {
@@ -212,7 +226,6 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 		var program,
 			errors,
 			checker,
-			semanticErrors,
 			emitErrors
 			;
 
@@ -221,10 +234,11 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 		
 		if (errors.length === 0) {
 			checker = program.getTypeChecker(true);
-			semanticErrors = checker.getDiagnostics();
-			emitErrors = checker.emitFiles().errors;
-
-			errors = ts.concatenate(semanticErrors, emitErrors);
+			errors = checker.getDiagnostics();
+			if (!checker.isEmitBlocked()) {
+				emitErrors = checker.emitFiles().diagnostics;
+				errors = ts.concatenate(errors, emitErrors);
+			}
 		}
 
 		return {
@@ -309,12 +323,12 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 		files[inputFileKey] = { path: inputFilePath, content: code };
 
 		// Compile code
-		sys = new BtSystem(files);
-		defaultCompilerHost = new BtCompilerHost(sys, compilationOptions);
+		ts.sys = new BtSystem(path, files);
+		defaultCompilerHost = new BtCompilerHost(ts.sys, compilationOptions);
 
 		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors;
 		if (compilationErrors.length === 0) {
-			result.compiledCode = sys.readFile(outputFilePath);
+			result.compiledCode = ts.sys.readFile(outputFilePath);
 		}
 		else {
 			result.errors = getErrorsFromDiagnostics(compilationErrors);
@@ -322,11 +336,11 @@ var typeScriptHelper = (function (ts, sys, undefined) {
 
 		defaultCompilerHost.dispose();
 
-		sys.dispose();
-		sys = null;
+		ts.sys.dispose();
+		ts.sys = null;
 
 		return JSON.stringify(result);
 	};
 
 	return exports;
-}(ts, sys));
+}(ts));
