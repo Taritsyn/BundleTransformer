@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BundleTransformer.UglifyJs</id>
-    <version>1.9.34</version>
+    <version>1.9.40</version>
 	<title>Bundle Transformer: UglifyJS</title>
     <authors>Andrey Taritsyn</authors>
     <owners>Andrey Taritsyn</owners>
@@ -14,11 +14,13 @@
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
     <summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.4.16.</summary>
-	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+	<releaseNotes>1. UglifyJS was updated to commit a1a4c2ada7;
+2. In configuration settings of JS-minifier added new property - `KeepFunctionNames` (default `false`).</releaseNotes>
+	<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
     <language>en-US</language>
     <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify UglifyJS</tags>
     <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.34" />
+      <dependency id="BundleTransformer.Core" version="1.9.40" />
 	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.2.0" />
 	  <dependency id="Newtonsoft.Json" version="6.0.6" />
     </dependencies>

@@ -319,7 +319,7 @@
 		return ctor;
 	};
 
-	var AST_Token = DEFNODE("Token", "type value line col pos endpos nlb comments_before file", {
+	var AST_Token = DEFNODE("Token", "type value line col pos endline endcol endpos nlb comments_before file", {
 	}, null);
 
 	var AST_Node = DEFNODE("Node", "start end", {
@@ -440,21 +440,27 @@
 		$documentation: "Base class for do/while statements",
 		$propdoc: {
 			condition: "[AST_Node] the loop condition.  Should not be instanceof AST_Statement"
-		},
+		}
+	}, AST_IterationStatement);
+
+	var AST_Do = DEFNODE("Do", null, {
+		$documentation: "A `do` statement",
+		_walk: function(visitor) {
+			return visitor._visit(this, function(){
+				this.body._walk(visitor);
+				this.condition._walk(visitor);
+			});
+		}
+	}, AST_DWLoop);
+
+	var AST_While = DEFNODE("While", null, {
+		$documentation: "A `while` statement",
 		_walk: function(visitor) {
 			return visitor._visit(this, function(){
 				this.condition._walk(visitor);
 				this.body._walk(visitor);
 			});
 		}
-	}, AST_IterationStatement);
-
-	var AST_Do = DEFNODE("Do", null, {
-		$documentation: "A `do` statement"
-	}, AST_DWLoop);
-
-	var AST_While = DEFNODE("While", null, {
-		$documentation: "A `while` statement"
 	}, AST_DWLoop);
 
 	var AST_For = DEFNODE("For", "init condition step", {
@@ -1384,7 +1390,7 @@
 	function tokenizer($TEXT, filename, html5_comments) {
 
 		var S = {
-			text            : $TEXT.replace(/\r\n?|[\n\u2028\u2029]/g, "\n").replace(/\uFEFF/g, ''),
+			text            : $TEXT.replace(/\uFEFF/g, ''),
 			filename        : filename,
 			pos             : 0,
 			tokpos          : 0,
@@ -1403,10 +1409,15 @@
 			var ch = S.text.charAt(S.pos++);
 			if (signal_eof && !ch)
 				throw EX_EOF;
-			if (ch == "\n") {
+			if ("\r\n\u2028\u2029".indexOf(ch) >= 0) {
 				S.newline_before = S.newline_before || !in_string;
 				++S.line;
 				S.col = 0;
+				if (!in_string && ch == "\r" && peek() == "\n") {
+					// treat a \r\n sequence as a single \n
+					++S.pos;
+					ch = "\n";
+				}
 			} else {
 				++S.col;
 			}
@@ -1440,14 +1451,16 @@
 							   (type == "punc" && PUNC_BEFORE_EXPRESSION(value)));
 			prev_was_dot = (type == "punc" && value == ".");
 			var ret = {
-				type   : type,
-				value  : value,
-				line   : S.tokline,
-				col    : S.tokcol,
-				pos    : S.tokpos,
-				endpos : S.pos,
-				nlb    : S.newline_before,
-				file   : filename
+				type    : type,
+				value   : value,
+				line    : S.tokline,
+				col     : S.tokcol,
+				pos     : S.tokpos,
+				endline : S.line,
+				endcol  : S.col,
+				endpos  : S.pos,
+				nlb     : S.newline_before,
+				file    : filename
 			};
 			if (!is_comment) {
 				ret.comments_before = S.comments_before;
@@ -1570,6 +1583,7 @@
 				ret = S.text.substring(S.pos, i);
 				S.pos = i;
 			}
+			S.col = S.tokcol + (S.pos - S.tokpos);
 			S.comments_before.push(token(type, ret, true));
 			S.regex_allowed = regex_allowed;
 			return next_token();
@@ -1787,7 +1801,7 @@
 			toplevel       : null,
 			expression     : false,
 			html5_comments : true,
-			bare_returns   : false,
+			bare_returns   : false
 		});
 
 		var S = {
@@ -2826,9 +2840,14 @@
 
 	SymbolDef.prototype = {
 		unmangleable: function(options) {
-			return (this.global && !(options && options.toplevel))
+			if (!options) options = {};
+
+			return (this.global && !options.toplevel)
 				|| this.undeclared
-				|| (!(options && options.eval) && (this.scope.uses_eval || this.scope.uses_with));
+				|| (!options.eval && (this.scope.uses_eval || this.scope.uses_with))
+				|| (options.keep_fnames
+					&& (this.orig[0] instanceof AST_SymbolLambda
+						|| this.orig[0] instanceof AST_SymbolDefun));
 		},
 		mangle: function(options) {
 			if (!this.mangled_name && !this.unmangleable(options)) {
@@ -3091,11 +3110,12 @@
 
 	AST_Toplevel.DEFMETHOD("_default_mangler_options", function(options){
 		return defaults(options, {
-			except   : [],
-			eval     : false,
-			sort     : false,
-			toplevel : false,
-			screw_ie8 : false
+			except      : [],
+			eval        : false,
+			sort        : false,
+			toplevel    : false,
+			screw_ie8   : false,
+			keep_fnames : false
 		});
 	});
 
@@ -3240,7 +3260,9 @@
 		base54.freq = function(){ return frequency };
 		function base54(num) {
 			var ret = "", base = 54;
+			num++;
 			do {
+				num--;
 				ret += String.fromCharCode(chars[num % base]);
 				num = Math.floor(num / base);
 				base = 64;
@@ -3383,7 +3405,7 @@
 
 		function make_string(str) {
 			var dq = 0, sq = 0;
-			str = str.replace(/[\\\b\f\n\r\t\x22\x27\u2028\u2029\0]/g, function(s){
+			str = str.replace(/[\\\b\f\n\r\t\x22\x27\u2028\u2029\0\ufeff]/g, function(s){
 				switch (s) {
 				  case "\\": return "\\\\";
 				  case "\b": return "\\b";
@@ -3395,6 +3417,7 @@
 				  case '"': ++dq; return '"';
 				  case "'": ++sq; return "'";
 				  case "\0": return "\\x00";
+				  case "\ufeff": return "\\ufeff";
 				}
 				return s;
 			});
@@ -3483,16 +3506,12 @@
 				}
 				might_need_space = false;
 			}
-
-			var a = str.split(/\r?\n/), len = a.length;
-			if (len > 0) {			
-				var n = len - 1;
-				current_line += n;
-				if (n == 0) {
-					current_col += a[n].length;
-				} else {
-					current_col = a[n].length;
-				}
+			var a = str.split(/\r?\n/), n = a.length - 1;
+			current_line += n;
+			if (n == 0) {
+				current_col += a[n].length;
+			} else {
+				current_col = a[n].length;
 			}
 			current_pos += str.length;
 			last = str;
@@ -3522,7 +3541,7 @@
 
 		var newline = options.beautify ? function() {
 			print("\n");
-		} : noop;
+		} : maybe_newline;
 
 		var semicolon = options.beautify ? function() {
 			print(";");
@@ -3847,12 +3866,6 @@
 		PARENS(AST_Number, function(output){
 			var p = output.parent();
 			if (this.getValue() < 0 && p instanceof AST_PropAccess && p.expression === this)
-				return true;
-		});
-
-		PARENS(AST_NaN, function(output){
-			var p = output.parent();
-			if (p instanceof AST_PropAccess && p.expression === this)
 				return true;
 		});
 
@@ -4410,10 +4423,10 @@
 		});
 		DEFPRINT(AST_Hole, noop);
 		DEFPRINT(AST_Infinity, function(self, output){
-			output.print("1/0");
+			output.print("Infinity");
 		});
 		DEFPRINT(AST_NaN, function(self, output){
-			output.print("0/0");
+			output.print("NaN");
 		});
 		DEFPRINT(AST_This, function(self, output){
 			output.print("this");
@@ -4630,6 +4643,7 @@
 			unused        : !false_by_default,
 			hoist_funs    : !false_by_default,
 			keep_fargs    : false,
+			keep_fnames   : false,
 			hoist_vars    : false,
 			if_return     : !false_by_default,
 			join_vars     : !false_by_default,
@@ -4730,10 +4744,10 @@
 				return make_node(AST_Undefined, orig).optimize(compressor);
 			  default:
 				if (val === null) {
-					return make_node(AST_Null, orig).optimize(compressor);
+					return make_node(AST_Null, orig, { value: null }).optimize(compressor);
 				}
 				if (val instanceof RegExp) {
-					return make_node(AST_RegExp, orig).optimize(compressor);
+					return make_node(AST_RegExp, orig, { value: val }).optimize(compressor);
 				}
 				throw new Error(string_template("Can't handle constant of type: {type}", {
 					type: typeof val
@@ -4793,6 +4807,17 @@
 			return statements;
 
 			function process_for_angular(statements) {
+				function has_inject(comment) {
+					return /@ngInject/.test(comment.value);
+				}
+				function make_arguments_names_list(func) {
+					return func.argnames.map(function(sym){
+						return make_node(AST_String, sym, { value: sym.name });
+					});
+				}
+				function make_array(orig, elements) {
+					return make_node(AST_Array, orig, { elements: elements });
+				}
 				function make_injector(func, name) {
 					return make_node(AST_SimpleStatement, func, {
 						body: make_node(AST_Assign, func, {
@@ -4801,37 +4826,56 @@
 								expression: make_node(AST_SymbolRef, name, name),
 								property: "$inject"
 							}),
-							right: make_node(AST_Array, func, {
-								elements: func.argnames.map(function(sym){
-									return make_node(AST_String, sym, { value: sym.name });
-								})
-							})
+							right: make_array(func, make_arguments_names_list(func))
 						})
 					});
 				}
+				function check_expression(body) {
+					if (body && body.args) {
+						// if this is a function call check all of arguments passed
+						body.args.forEach(function(argument, index, array) {
+							var comments = argument.start.comments_before;
+							// if the argument is function preceded by @ngInject
+							if (argument instanceof AST_Lambda && comments.length && has_inject(comments[0])) {
+								// replace the function with an array of names of its parameters and function at the end
+								array[index] = make_array(argument, make_arguments_names_list(argument).concat(argument));
+							}
+						});
+						// if this is chained call check previous one recursively
+						if (body.expression && body.expression.expression) {
+							check_expression(body.expression.expression);
+						}
+					}
+				}
 				return statements.reduce(function(a, stat){
 					a.push(stat);
-					var token = stat.start;
-					var comments = token.comments_before;
-					if (comments && comments.length > 0) {
-						var last = comments.pop();
-						if (/@ngInject/.test(last.value)) {
-							// case 1: defun
-							if (stat instanceof AST_Defun) {
-								a.push(make_injector(stat, stat.name));
-							}
-							else if (stat instanceof AST_Definitions) {
-								stat.definitions.forEach(function(def){
-									if (def.value && def.value instanceof AST_Lambda) {
-										a.push(make_injector(def.value, def.name));
-									}
-								});
-							}
-							else {
-								compressor.warn("Unknown statement marked with @ngInject [{file}:{line},{col}]", token);
+
+					if (stat.body && stat.body.args) {
+						check_expression(stat.body);
+					} else {
+						var token = stat.start;
+						var comments = token.comments_before;
+						if (comments && comments.length > 0) {
+							var last = comments.pop();
+							if (has_inject(last)) {
+								// case 1: defun
+								if (stat instanceof AST_Defun) {
+									a.push(make_injector(stat, stat.name));
+								}
+								else if (stat instanceof AST_Definitions) {
+									stat.definitions.forEach(function(def) {
+										if (def.value && def.value instanceof AST_Lambda) {
+											a.push(make_injector(def.value, def.name));
+										}
+									});
+								}
+								else {
+									compressor.warn("Unknown statement marked with @ngInject [{file}:{line},{col}]", token);
+								}
 							}
 						}
 					}
+
 					return a;
 				}, []);
 			}
@@ -5517,7 +5561,7 @@
 			def(AST_BlockStatement, block_aborts);
 			def(AST_SwitchBranch, block_aborts);
 			def(AST_If, function(){
-				return this.alternative && aborts(this.body) && aborts(this.alternative);
+				return this.alternative && aborts(this.body) && aborts(this.alternative) && this;
 			});
 		})(function(node, func){
 			node.DEFMETHOD("aborts", func);
@@ -6234,7 +6278,7 @@
 
 		OPT(AST_Function, function(self, compressor){
 			self = AST_Lambda.prototype.optimize.call(self, compressor);
-			if (compressor.option("unused")) {
+			if (compressor.option("unused") && !compressor.option("keep_fnames")) {
 				if (self.name && self.name.unreferenced()) {
 					self.name = null;
 				}
@@ -6290,6 +6334,11 @@
 						}).transform(compressor);
 						break;
 					  case "Function":
+						// new Function() => function(){}
+						if (self.args.length == 0) return make_node(AST_Function, self, {
+							argnames: [],
+							body: []
+						});
 						if (all(self.args, function(x){ return x instanceof AST_String })) {
 							// quite a corner-case, but we can handle it:
 							//   https://github.com/mishoo/UglifyJS2/issues/203
@@ -6469,7 +6518,7 @@
 			if (self.cdr instanceof AST_UnaryPrefix
 				&& self.cdr.operator == "void"
 				&& !self.cdr.expression.has_side_effects(compressor)) {
-				self.cdr.operator = self.car;
+				self.cdr.expression = self.car;
 				return self.cdr;
 			}
 			if (self.cdr instanceof AST_Undefined) {
@@ -6771,12 +6820,28 @@
 				  case "undefined":
 					return make_node(AST_Undefined, self);
 				  case "NaN":
-					return make_node(AST_NaN, self);
+					return make_node(AST_NaN, self).transform(compressor);
 				  case "Infinity":
-					return make_node(AST_Infinity, self);
+					return make_node(AST_Infinity, self).transform(compressor);
 				}
 			}
 			return self;
+		});
+
+		OPT(AST_Infinity, function (self, compressor) {
+			return make_node(AST_Binary, self, {
+				operator : '/',
+				left     : make_node(AST_Number, null, {value: 1}),
+				right    : make_node(AST_Number, null, {value: 0})
+			});
+		});
+
+		OPT(AST_NaN, function (self, compressor) {
+			return make_node(AST_Binary, self, {
+				operator : '/',
+				left     : make_node(AST_Number, null, {value: 0}),
+				right    : make_node(AST_Number, null, {value: 0})
+			});
 		});
 
 		OPT(AST_Undefined, function(self, compressor){
@@ -6901,6 +6966,20 @@
 					return make_node_from_constant(compressor, consequent.value, self);
 
 				}
+			}
+			// x=y?true:false --> x=!!y
+			if (consequent instanceof AST_True
+				&& alternative instanceof AST_False) {
+				self.condition = self.condition.negate(compressor);
+				return make_node(AST_UnaryPrefix, self.condition, {
+					operator: "!",
+					expression: self.condition
+				});
+			}
+			// x=y?false:true --> x=!y
+			if (consequent instanceof AST_False
+				&& alternative instanceof AST_True) {
+				return self.condition.negate(compressor)
 			}
 			return self;
 		});
@@ -7307,26 +7386,30 @@
 		/* -----[ tools ]----- */
 
 		function my_start_token(moznode) {
-			var loc = moznode.loc;
+			var loc = moznode.loc, start = loc && loc.start;
 			var range = moznode.range;
 			return new AST_Token({
-				file   : loc && loc.source,
-				line   : loc && loc.start.line,
-				col    : loc && loc.start.column,
-				pos    : range ? range[0] : moznode.start,
-				endpos : range ? range[0] : moznode.start
+				file    : loc && loc.source,
+				line    : start && start.line,
+				col     : start && start.column,
+				pos     : range ? range[0] : moznode.start,
+				endline : start && start.line,
+				endcol  : start && start.column,
+				endpos  : range ? range[0] : moznode.start
 			});
 		};
 
 		function my_end_token(moznode) {
-			var loc = moznode.loc;
+			var loc = moznode.loc, end = loc && loc.end;
 			var range = moznode.range;
 			return new AST_Token({
-				file   : loc && loc.source,
-				line   : loc && loc.end.line,
-				col    : loc && loc.end.column,
-				pos    : range ? range[1] : moznode.end,
-				endpos : range ? range[1] : moznode.end
+				file    : loc && loc.source,
+				line    : end && end.line,
+				col     : end && end.column,
+				pos     : range ? range[1] : moznode.end,
+				endline : end && end.line,
+				endcol  : end && end.column,
+				endpos  : range ? range[1] : moznode.end
 			});
 		};
 
@@ -7402,23 +7485,16 @@
 			return ast;
 		};
 
-		function moz_sub_loc(token) {
-			return token.line ? {
-				line: token.line,
-				column: token.col
-			} : null;
-		};
-
-		function set_moz_loc(mynode, moznode) {
+		function set_moz_loc(mynode, moznode, myparent) {
 			var start = mynode.start;
 			var end = mynode.end;
-			if (start.pos != null && end.pos != null) {
-				moznode.range = [start.pos, end.pos];
+			if (start.pos != null && end.endpos != null) {
+				moznode.range = [start.pos, end.endpos];
 			}
 			if (start.line) {
 				moznode.loc = {
-					start: moz_sub_loc(start),
-					end: moz_sub_loc(end)
+					start: {line: start.line, column: start.col},
+					end: end.endline ? {line: end.endline, column: end.endcol} : null
 				};
 				if (start.file) {
 					moznode.loc.source = start.file;
@@ -7477,8 +7553,8 @@
 
 		// 3. mangle
 		if (options.mangle) {
-			toplevel.figure_out_scope();
-			toplevel.compute_char_frequency();
+			toplevel.figure_out_scope(options.mangle);
+			toplevel.compute_char_frequency(options.mangle);
 			toplevel.mangle_names(options.mangle);
 		}
 

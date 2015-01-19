@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.0.2
+ * Clean-css v3.0.5
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -155,6 +155,7 @@ var CleanCss = (function(){
 			var isSpecial;
 			var wasSpecial;
 			var current;
+			var secondToLast;
 			var wasCloseParenthesis;
 			var isEscape;
 			var token;
@@ -204,7 +205,9 @@ var CleanCss = (function(){
 				isSpecial = current === ':' || current === '[' || current === ']' || current === ',' || current === '(' || current === ')';
 
 				if (wasWhitespace && isSpecial) {
-				  buffer.pop();
+				  secondToLast = buffer[buffer.length - 2];
+				  if (secondToLast != '+' && secondToLast != '-' && secondToLast != '/' && secondToLast != '*')
+					buffer.pop();
 				  buffer.push(current);
 				} else if (isWhitespace && wasSpecial && !wasCloseParenthesis) {
 				} else if (isWhitespace && !wasWhitespace && buffer.length > 0) {
@@ -2460,6 +2463,13 @@ var CleanCss = (function(){
 
 				// Only an important token can even try to override tokens that come after it
 				if (iii > ii && !token.isImportant) {
+				  result.push(t);
+				  continue;
+				}
+
+				// If an important component tries to override an important shorthand and it is not yet merged
+				// just make sure it is not lost
+				if (iii > ii && t.isImportant && token.isImportant && t.prop != token.prop && t.isComponentOf(token)) {
 				  result.push(t);
 				  continue;
 				}

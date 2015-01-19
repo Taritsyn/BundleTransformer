@@ -83,6 +83,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not mangle/drop function names.
+		/// Useful for code relying on <code>Function.prototype.name</code>.
+		/// </summary>
+		public bool KeepFunctionNames
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a severity level of errors:
 		///		0 - only error messages;
 		///		1 - only error messages and warnings.
@@ -175,6 +185,7 @@
 			};
 
 			ScrewIe8 = jsMinifierConfig.ScrewIe8;
+			KeepFunctionNames = jsMinifierConfig.KeepFunctionNames;
 			Severity = jsMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
@@ -302,6 +313,7 @@
 				ManglingOptions = ManglingOptions,
 				CodeGenerationOptions = CodeGenerationOptions,
 				ScrewIe8 = ScrewIe8,
+				KeepFunctionNames = KeepFunctionNames,
 				Severity = Severity
 			};
 

@@ -18,20 +18,24 @@
 	internal sealed class CoffeeScriptCompiler : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a CoffeeScript-library
+		/// Namespace for resources
 		/// </summary>
-		const string COFFEESCRIPT_LIBRARY_RESOURCE_NAME 
-			= "BundleTransformer.CoffeeScript.Resources.coffeescript-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.CoffeeScript.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a CoffeeScript-compiler helper
+		/// Name of file, which contains a CoffeeScript-library
 		/// </summary>
-		const string CSC_HELPER_RESOURCE_NAME = "BundleTransformer.CoffeeScript.Resources.cscHelper.min.js";
+		private const string COFFEESCRIPT_LIBRARY_FILE_NAME = "coffeescript-combined.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a CoffeeScript-compiler helper
+		/// </summary>
+		private const string CSC_HELPER_FILE_NAME = "cscHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"coffeeScriptHelper.compile({0}, {1});";
+		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"coffeeScriptHelper.compile({0}, {1});";
 
 		/// <summary>
 		/// String representation of the default compilation options
@@ -89,8 +93,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(COFFEESCRIPT_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(CSC_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + COFFEESCRIPT_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CSC_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}

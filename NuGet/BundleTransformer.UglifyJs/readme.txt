@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.9.34
+             README file for Bundle Transformer: UglifyJS 1.9.40
  
    ----------------------------------------------------------------------
 
-          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -21,6 +21,13 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   1. UglifyJS was updated to commit a1a4c2ada7;
+   2. In configuration settings of JS-minifier added new property - 
+      `KeepFunctionNames` (default `false`).
    
    ====================
    POST-INSTALL ACTIONS

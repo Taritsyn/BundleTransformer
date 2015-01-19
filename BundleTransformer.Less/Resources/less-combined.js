@@ -271,6 +271,7 @@ var Less = (function(){
 		};
 
 		var evalCopyProperties = [
+			'paths',          // additional include paths
 			'compress',       // whether to compress
 			'ieCompat',       // whether to enforce IE compatibility (IE8 data-uri)
 			'strictMath',     // whether math has to be within parenthesis
@@ -562,11 +563,11 @@ var Less = (function(){
 		Color.prototype.toCSS = function (context, doNotCompress) {
 			var compress = context && context.compress && !doNotCompress, color, alpha;
 
-			// `keyword` is set if this color was originally
+			// `value` is set if this color was originally
 			// converted from a named color string so we need
 			// to respect this and try to output named color too.
-			if (this.keyword) {
-				return this.keyword;
+			if (this.value) {
+				return this.value;
 			}
 
 			// If we have some transparency, the only way to represent it
@@ -685,7 +686,7 @@ var Less = (function(){
 			}
 
 			if (c) {
-				c.keyword = keyword;
+				c.value = keyword;
 				return c;
 			}
 		};
@@ -1799,7 +1800,10 @@ var Less = (function(){
 				value.genCSS(context, output);
 			}
 			if (rules) {
-				this.outputRuleset(context, output, [rules]);
+				if (rules.type === "Ruleset") {
+					rules = [rules];
+				}
+				this.outputRuleset(context, output, rules);
 			} else {
 				output.add(';');
 			}
@@ -2494,7 +2498,7 @@ var Less = (function(){
 		var Expression = function (value) {
 			this.value = value;
 			if (!value) {
-				throw new Error("Expression requires a array parameter");
+				throw new Error("Expression requires an array parameter");
 			}
 		};
 		Expression.prototype = new Node();
@@ -4208,7 +4212,8 @@ var Less = (function(){
 	//#region URL: /visitors/extend-visitor
 	modules['/visitors/extend-visitor'] = function () {
 		var tree = require('/tree'),
-			Visitor = require('/visitors/visitor');
+			Visitor = require('/visitors/visitor')/*,
+			logger = require("/logger")*/;
 
 		/*jshint loopfunc:true */
 
@@ -4303,11 +4308,30 @@ var Less = (function(){
 		ProcessExtendsVisitor.prototype = {
 			run: function(root) {
 				var extendFinder = new ExtendFinderVisitor();
+				this.extendIndicies = {};
 				extendFinder.run(root);
 				if (!extendFinder.foundExtends) { return root; }
 				root.allExtends = root.allExtends.concat(this.doExtendChaining(root.allExtends, root.allExtends));
 				this.allExtendsStack = [root.allExtends];
-				return this._visitor.visit(root);
+				var newRoot = this._visitor.visit(root);
+				this.checkExtendsForNonMatched(root.allExtends);
+				return newRoot;
+			},
+			checkExtendsForNonMatched: function(extendList) {
+				var indicies = this.extendIndicies;
+				extendList.filter(function(extend) {
+					return !extend.hasFoundMatches && extend.parent_ids.length == 1;
+				}).forEach(function(extend) {
+						var selector = "_unknown_";
+						try {
+							selector = extend.selector.toCSS({});
+						}catch(_){}
+
+						if(!indicies[extend.index + ' ' + selector]) {
+							indicies[extend.index + ' ' + selector] = true;
+//							logger.warn("extend '"+selector+"' has no matches");   
+						}
+					});
 			},
 			doExtendChaining: function (extendsList, extendsListTarget, iterationCount) {
 				//
@@ -4343,6 +4367,8 @@ var Less = (function(){
 						matches = extendVisitor.findMatch(extend, selectorPath);
 
 						if (matches.length) {
+
+							extend.hasFoundMatches = true;
 
 							// we found a match, so for each self selector..
 							extend.selfSelectors.forEach(function(selfSelector) {
@@ -4427,6 +4453,7 @@ var Less = (function(){
 						matches = this.findMatch(allExtends[extendIndex], selectorPath);
 
 						if (matches.length) {
+							allExtends[extendIndex].hasFoundMatches = true;
 
 							allExtends[extendIndex].selfSelectors.forEach(function(selfSelector) {
 								selectorsToAdd.push(extendVisitor.extendSelector(matches, selectorPath, selfSelector));
@@ -4612,7 +4639,9 @@ var Less = (function(){
 				this.allExtendsStack.push(newAllExtends);
 			},
 			visitMediaOut: function (mediaNode) {
-				this.allExtendsStack.length = this.allExtendsStack.length - 1;
+				var lastIndex = this.allExtendsStack.length - 1;
+				this.checkExtendsForNonMatched(this.allExtendsStack[lastIndex]);
+				this.allExtendsStack.length = lastIndex;
 			},
 			visitDirective: function (directiveNode, visitArgs) {
 				var newAllExtends = directiveNode.allExtends.concat(this.allExtendsStack[this.allExtendsStack.length-1]);
@@ -4620,7 +4649,9 @@ var Less = (function(){
 				this.allExtendsStack.push(newAllExtends);
 			},
 			visitDirectiveOut: function (directiveNode) {
-				this.allExtendsStack.length = this.allExtendsStack.length - 1;
+				var lastIndex = this.allExtendsStack.length - 1;
+				this.checkExtendsForNonMatched(this.allExtendsStack[lastIndex]);
+				this.allExtendsStack.length = lastIndex;
 			}
 		};
 
@@ -7281,7 +7312,7 @@ var Less = (function(){
 					return new Color(c.value.slice(1));
 				}
 				if ((c instanceof Color) || (c = Color.fromKeyword(c.value))) {
-					c.keyword = undefined;
+					c.value = undefined;
 					return c;
 				}
 				throw {
@@ -7569,6 +7600,7 @@ var Less = (function(){
 		var exports = function(environment) {
 			var Dimension = require('/tree/dimension'),
 				Color = require('/tree/color'),
+				Expression = require('/tree/expression'),
 				Quoted = require('/tree/quoted'),
 				URL = require('/tree/url'),
 				functionRegistry = require('/functions/function-registry');
@@ -7618,7 +7650,7 @@ var Less = (function(){
 					'<' + gradientType + 'Gradient id="gradient" gradientUnits="userSpaceOnUse" ' + gradientDirectionSvg + '>';
 
 				for (i = 0; i < stops.length; i+= 1) {
-					if (stops[i].value) {
+					if (stops[i] instanceof Expression) {
 						color = stops[i].value[0];
 						position = stops[i].value[1];
 					} else {
@@ -7650,6 +7682,7 @@ var Less = (function(){
 	//#region URL: /functions/types
 	modules['/functions/types'] = function () {
 		var Keyword = require('/tree/keyword'),
+			DetachedRuleset = require('/tree/detached-ruleset'),
 			Dimension = require('/tree/dimension'),
 			Color = require('/tree/color'),
 			Quoted = require('/tree/quoted'),
@@ -7672,6 +7705,9 @@ var Less = (function(){
 				return (n instanceof Dimension) && n.unit.is(unit) ? Keyword.True : Keyword.False;
 			};
 		functionRegistry.addMultiple({
+			isruleset: function (n) {
+				return isa(n, DetachedRuleset);
+			},
 			iscolor: function (n) {
 				return isa(n, Color);
 			},
@@ -7975,7 +8011,7 @@ var Less = (function(){
 
 				var loadFileCallback = function(loadedFile) {
 					var resolvedFilename = loadedFile.filename,
-						contents = loadedFile.contents;
+						contents = loadedFile.contents.replace(/^\uFEFF/, '');
 
 					// Pass on an updated rootpath if path of imported file is relative and file
 					// is in a (sub|sup) directory

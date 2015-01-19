@@ -17,20 +17,24 @@
 	internal sealed class CssCleaner : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a Clean-css library
+		/// Namespace for resources
 		/// </summary>
-		const string CLEAN_CSS_LIBRARY_RESOURCE_NAME
-			= "BundleTransformer.CleanCss.Resources.clean-css-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.CleanCss.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a Clean-css-minifier helper
+		/// Name of file, which contains a Clean-css library
 		/// </summary>
-		const string CLEAN_CSS_HELPER_RESOURCE_NAME = "BundleTransformer.CleanCss.Resources.cleanCssHelper.min.js";
+		private const string CLEAN_CSS_LIBRARY_FILE_NAME = "clean-css-combined.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a Clean-css-minifier helper
+		/// </summary>
+		private const string CLEAN_CSS_HELPER_FILE_NAME = "cleanCssHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for cleaning
 		/// </summary>
-		const string CLEANING_FUNCTION_CALL_TEMPLATE = @"cleanCssHelper.minify({0}, {1});";
+		private const string CLEANING_FUNCTION_CALL_TEMPLATE = @"cleanCssHelper.minify({0}, {1});";
 
 		/// <summary>
 		/// Default cleaning options
@@ -93,8 +97,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(CLEAN_CSS_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(CLEAN_CSS_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}

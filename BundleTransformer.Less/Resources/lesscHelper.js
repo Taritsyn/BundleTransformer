@@ -218,33 +218,26 @@ var lessHelper = (function (less, undefined) {
 		};
 
 		FileManager.prototype.loadFile = function (filename, currentDirectory, options, environment, callback) {
-			var data,
-				result = null,
-				err = null
+			var result = this.loadFileSync(filename);
+			callback(result.error, result);
+		};
+
+		FileManager.prototype.loadFileSync = function (filename) {
+			var result,
+				data,
+				err
 				;
 
 			if (this._fileExists(filename)) {
 				data = this._readFile(filename);
-				result = {
-					contents: data,
-					filename: filename
-				};
+				result = { contents: data, filename: filename };
 			}
 			else {
-				err = {
-					type: 'File',
-					message: formatString(ERROR_MSG_PATTERN_FILE_NOT_FOUND, filename)
-				};
+				err = { type: 'File', message: "'" + filename + "' wasn't found." };
+				result = { error: err };
 			}
 
-			callback(err, result);
-		};
-
-		FileManager.prototype.loadFileSync = function (filename) {
-			return {
-				contents: this._readFile(filename),
-				filename: filename
-			};
+			return result;
 		};
 
 		FileManager.prototype.dispose = function () {
@@ -273,6 +266,7 @@ var lessHelper = (function (less, undefined) {
 			lessCompiler
 			;
 
+		code = code.replace(/^\uFEFF/, '');
 		options = options || {};
 
 		// Fill file cache

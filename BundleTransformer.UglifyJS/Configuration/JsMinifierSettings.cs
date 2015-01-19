@@ -55,6 +55,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not mangle/drop function names.
+		/// Useful for code relying on <code>Function.prototype.name</code>.
+		/// </summary>
+		[ConfigurationProperty("keepFunctionNames", DefaultValue = false)]
+		public bool KeepFunctionNames
+		{
+			get { return (bool)this["keepFunctionNames"]; }
+			set { this["keepFunctionNames"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a severity level of errors:
 		///		0 - only error messages;
 		///		1 - only error messages and warnings.

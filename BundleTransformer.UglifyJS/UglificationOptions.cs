@@ -52,6 +52,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not mangle/drop function names.
+		/// Useful for code relying on <code>Function.prototype.name</code>.
+		/// </summary>
+		public bool KeepFunctionNames
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a severity level of errors:
 		///		0 - only error messages;
 		///		1 - only error messages and warnings.
@@ -73,6 +83,7 @@
 			ManglingOptions = new ManglingOptions();
 			CodeGenerationOptions = new CodeGenerationOptions();
 			ScrewIe8 = false;
+			KeepFunctionNames = false;
 			Severity = 0;
 		}
 	}

@@ -21,20 +21,24 @@
 	internal sealed class JsUglifier : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a UglifyJS library
+		/// Namespace for resources
 		/// </summary>
-		const string UGLIFY_JS_LIBRARY_RESOURCE_NAME
-			= "BundleTransformer.UglifyJs.Resources.uglify-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.UglifyJs.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a UglifyJS-minifier helper
+		/// Name of file, which contains a UglifyJS library
 		/// </summary>
-		const string UGLIFY_JS_HELPER_RESOURCE_NAME = "BundleTransformer.UglifyJs.Resources.uglifyJsHelper.min.js";
+		private const string UGLIFY_JS_LIBRARY_FILE_NAME = "uglify-combined.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a UglifyJS-minifier helper
+		/// </summary>
+		private const string UGLIFY_JS_HELPER_FILE_NAME = "uglifyJsHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for uglification
 		/// </summary>
-		const string UGLIFICATION_FUNCTION_CALL_TEMPLATE = @"uglifyJsHelper.minify({0}, {1});";
+		private const string UGLIFICATION_FUNCTION_CALL_TEMPLATE = @"uglifyJsHelper.minify({0}, {1});";
 
 		/// <summary>
 		/// Default uglification options
@@ -136,8 +140,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(UGLIFY_JS_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(UGLIFY_JS_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}
@@ -242,6 +246,7 @@
 					new JProperty("unused", compressionOptions.Unused),
 					new JProperty("hoist_funs", compressionOptions.HoistFunctions),
 					new JProperty("keep_fargs", compressionOptions.KeepFunctionArgs),
+					new JProperty("keep_fnames", options.KeepFunctionNames),
 					new JProperty("hoist_vars", compressionOptions.HoistVars),
 					new JProperty("if_return", compressionOptions.IfReturn),
 					new JProperty("join_vars", compressionOptions.JoinVars),
@@ -267,7 +272,8 @@
 					new JProperty("eval", manglingOptions.Eval),
 					new JProperty("sort", manglingOptions.Sort),
 					new JProperty("toplevel", manglingOptions.TopLevel),
-					new JProperty("screw_ie8", options.ScrewIe8)
+					new JProperty("screw_ie8", options.ScrewIe8),
+					new JProperty("keep_fnames", options.KeepFunctionNames)
 				));
 			}
 			else

@@ -22,14 +22,19 @@
 	internal sealed class LessCompiler : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a LESS-library
+		/// Namespace for resources
 		/// </summary>
-		private const string LESS_LIBRARY_RESOURCE_NAME = "BundleTransformer.Less.Resources.less-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.Less.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a LESS-compiler helper
+		/// Name of file, which contains a LESS-library
 		/// </summary>
-		private const string LESSC_HELPER_RESOURCE_NAME = "BundleTransformer.Less.Resources.lesscHelper.min.js";
+		private const string LESS_LIBRARY_FILE_NAME = "less-combined.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a LESS-compiler helper
+		/// </summary>
+		private const string LESSC_HELPER_FILE_NAME = "lesscHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
@@ -98,8 +103,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(LESS_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(LESSC_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESS_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESSC_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.37
+               README file for Bundle Transformer: LESS 1.9.40
 
    ----------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 2.2.0.
+   LESS was updated to commit 8ed6a9748e.
    
    ====================
    POST-INSTALL ACTIONS
