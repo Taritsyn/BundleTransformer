@@ -173,41 +173,11 @@ var lessHelper = (function (less, undefined) {
 
 	//#region FileManager
 	FileManager = (function(AbstractFileManager) {
-		var ERROR_MSG_PATTERN_FILE_NOT_FOUND = "File '{0}' does not exist.";
-
 		function FileManager(files) {
 			this._files = files;
 		}
 
 		FileManager.prototype = new AbstractFileManager();
-
-		//#region Internal Methods
-		FileManager.prototype._readFile = function(path) {
-			var key,
-				file
-				;
-
-			key = generateFileCacheItemKey(path);
-			if (typeof this._files[key] === 'undefined') {
-				throw new Error(formatString(ERROR_MSG_PATTERN_FILE_NOT_FOUND, path));
-			}
-
-			file = this._files[key];
-
-			return file.content;
-		};
-
-		FileManager.prototype._fileExists = function(path) {
-			var key,
-				isFileExists
-				;
-
-			key = generateFileCacheItemKey(path);
-			isFileExists = (typeof this._files[key] !== 'undefined');
-
-			return isFileExists;
-		};
-		//#endregion
 
 		FileManager.prototype.supports = function () {
 			return true;
@@ -224,12 +194,17 @@ var lessHelper = (function (less, undefined) {
 
 		FileManager.prototype.loadFileSync = function (filename) {
 			var result,
+				key,
+				isFileExists,
 				data,
 				err
 				;
 
-			if (this._fileExists(filename)) {
-				data = this._readFile(filename);
+			key = generateFileCacheItemKey(filename);
+			isFileExists = (typeof this._files[key] !== 'undefined');
+
+			if (isFileExists) {
+				data = this._files[key].content;
 				result = { contents: data, filename: filename };
 			}
 			else {

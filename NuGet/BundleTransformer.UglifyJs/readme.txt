@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: UglifyJS 1.9.40
+             README file for Bundle Transformer: UglifyJS 1.9.41
  
    ----------------------------------------------------------------------
 
@@ -25,9 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. UglifyJS was updated to commit a1a4c2ada7;
-   2. In configuration settings of JS-minifier added new property - 
-      `KeepFunctionNames` (default `false`).
+   UglifyJS was updated to commit d36067cd35.
    
    ====================
    POST-INSTALL ACTIONS

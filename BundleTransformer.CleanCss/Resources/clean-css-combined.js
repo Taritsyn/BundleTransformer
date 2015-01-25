@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.0.5
+ * Clean-css v3.0.7
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -863,7 +863,7 @@ var CleanCss = (function(){
 		}
 
 		var toHexPattern = new RegExp('(' + Object.keys(toHex).join('|') + ')( |,|\\)|$)', 'ig');
-		var toNamePattern = new RegExp('(' + Object.keys(toName).join('|') + ')', 'ig');
+		var toNamePattern = new RegExp('(' + Object.keys(toName).join('|') + ')([^a-f0-9]|$)', 'ig');
 
 		HexNameShortener.shorten = function (value) {
 		  var hasHex = value.indexOf('#') > -1;
@@ -872,8 +872,8 @@ var CleanCss = (function(){
 		  });
 
 		  if (hasHex) {
-			shortened = shortened.replace(toNamePattern, function(match, colorValue) {
-			  return toName[colorValue.toLowerCase()];
+			shortened = shortened.replace(toNamePattern, function(match, colorValue, suffix) {
+			  return toName[colorValue.toLowerCase()] + suffix;
 			});
 		  }
 

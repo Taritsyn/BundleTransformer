@@ -6,8 +6,8 @@ module TranslatorBadges {
     /// Creates badge for translator
     /// </summary>
     export class TranslatorBadge implements ITranslatorBadge {
-        public $badgeElem: any;
-        public $linkElem: any;
+		protected $badgeElem: JQuery;
+		protected $linkElem: JQuery;
 
         constructor (public elementId: string) {
             /// <summary>
