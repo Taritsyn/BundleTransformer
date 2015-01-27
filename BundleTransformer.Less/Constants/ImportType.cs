@@ -11,5 +11,6 @@
 		public const string Once = "once";
 		public const string Inline = "inline";
 		public const string Reference = "reference";
+		public const string Optional = "optional";
 	}
 }

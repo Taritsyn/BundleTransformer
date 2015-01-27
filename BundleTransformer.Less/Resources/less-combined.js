@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.2.0
+ * Less - Leaner CSS v2.3.0
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -1336,15 +1336,15 @@ var Less = (function(){
 			}
 		};
 		Ruleset.prototype.makeImportant = function() {
-			return new Ruleset(this.selectors, this.rules.map(function (r) {
-						if (r.makeImportant) {
-							return r.makeImportant();
-						} else {
-							return r;
-						}
-					}), this.strictImports);
-		};
-		Ruleset.prototype.matchArgs = function (args) {
+			this.rules = this.rules.map(function (r) {
+				if (r.makeImportant) {
+					return r.makeImportant();
+				} else {
+					return r;
+				}
+			});
+			return this;
+		};Ruleset.prototype.matchArgs = function (args) {
 			return !args || args.length === 0;
 		};
 		// lets you call a css selector with a guard
@@ -1568,18 +1568,49 @@ var Less = (function(){
 			}
 		};
 		Ruleset.prototype.markReferenced = function () {
-			if (!this.selectors) {
-				return;
+			var s;
+			if (this.selectors) {
+				for (s = 0; s < this.selectors.length; s++) {
+					this.selectors[s].markReferenced();
+				}
 			}
-			for (var s = 0; s < this.selectors.length; s++) {
-				this.selectors[s].markReferenced();
+
+			if (this.rules) {
+				for (s = 0; s < this.rules.length; s++) {
+					if (this.rules[s].markReferenced)
+						this.rules[s].markReferenced();
+				}
 			}
 		};
+		Ruleset.prototype.getIsReferenced = function() {
+			var i, j, path, selector;
+
+			if (this.paths) {
+				for (i=0; i<this.paths.length; i++) {
+					path = this.paths[i];
+					for (j=0; j<path.length; j++) {
+						if (path[j].getIsReferenced && path[j].getIsReferenced())
+							return true;
+					}
+				}
+			}
+
+			if (this.selectors) {
+				for (i=0;i<this.selectors.length;i++) {
+					selector = this.selectors[i];
+					if (selector.getIsReferenced && selector.getIsReferenced())
+						return true;
+				}
+			}
+			return false;
+		};
+
 		Ruleset.prototype.joinSelectors = function (paths, context, selectors) {
 			for (var s = 0; s < selectors.length; s++) {
 				this.joinSelector(paths, context, selectors[s]);
 			}
 		};
+
 		Ruleset.prototype.joinSelector = function (paths, context, selector) {
 
 			var i, j, k,
@@ -1763,7 +1794,7 @@ var Less = (function(){
 		var Node = require('/tree/node'),
 			Ruleset = require('/tree/ruleset');
 
-		var Directive = function (name, value, rules, index, currentFileInfo, debugInfo) {
+		var Directive = function (name, value, rules, index, currentFileInfo, debugInfo, isReferenced) {
 			this.name  = name;
 			this.value = value;
 			if (rules) {
@@ -1773,6 +1804,7 @@ var Less = (function(){
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
 			this.debugInfo = debugInfo;
+			this.isReferenced = isReferenced;
 		};
 
 		Directive.prototype = new Node();
@@ -1818,7 +1850,7 @@ var Less = (function(){
 				rules.root = true;
 			}
 			return new Directive(this.name, value, rules,
-				this.index, this.currentFileInfo, this.debugInfo);
+				this.index, this.currentFileInfo, this.debugInfo, this.isReferenced);
 		};
 		Directive.prototype.variable = function (name) { if (this.rules) return Ruleset.prototype.variable.call(this.rules, name); };
 		Directive.prototype.find = function () { if (this.rules) return Ruleset.prototype.find.apply(this.rules, arguments); };
@@ -1834,6 +1866,9 @@ var Less = (function(){
 					}
 				}
 			}
+		};
+		Directive.prototype.getIsReferenced = function () {
+			return !this.currentFileInfo || !this.currentFileInfo.reference || this.isReferenced;
 		};
 		Directive.prototype.outputRuleset = function (context, output, rules) {
 			var ruleCnt = rules.length, i;
@@ -3592,6 +3627,7 @@ var Less = (function(){
 	modules['/tree'] = function () {
 		var tree = {};
 
+		tree.Node = require('/tree/node');
 		tree.Alpha = require('/tree/alpha');
 		tree.Color = require('/tree/color');
 		tree.Directive = require('/tree/directive');
@@ -4213,7 +4249,7 @@ var Less = (function(){
 	modules['/visitors/extend-visitor'] = function () {
 		var tree = require('/tree'),
 			Visitor = require('/visitors/visitor')/*,
-			logger = require("/logger")*/;
+			logger = require('/logger')*/;
 
 		/*jshint loopfunc:true */
 
@@ -4329,7 +4365,7 @@ var Less = (function(){
 
 						if(!indicies[extend.index + ' ' + selector]) {
 							indicies[extend.index + ' ' + selector] = true;
-//							logger.warn("extend '"+selector+"' has no matches");   
+//							logger.warn("extend '"+selector+"' has no matches");
 						}
 					});
 			},
@@ -4759,10 +4795,10 @@ var Less = (function(){
 			},
 
 			visitDirective: function(directiveNode, visitArgs) {
-				if (directiveNode.currentFileInfo.reference && !directiveNode.isReferenced) {
-					return;
-				}
 				if (directiveNode.name === "@charset") {
+					if (!directiveNode.getIsReferenced()) {
+						return;
+					}
 					// Only output the debug info together with subsequent @charset definitions
 					// a comment (or @media statement) before the actual @charset directive would
 					// be considered illegal css as it has to be on the first line
@@ -4778,6 +4814,37 @@ var Less = (function(){
 				}
 				if (directiveNode.rules && directiveNode.rules.rules) {
 					this._mergeRules(directiveNode.rules.rules);
+					//process childs
+					directiveNode.accept(this._visitor);
+					visitArgs.visitDeeper = false;
+
+					// the directive was directly referenced and therefore needs to be shown in the output
+					if (directiveNode.getIsReferenced()) {
+						return directiveNode;
+					}
+
+					if (!directiveNode.rules.rules) {
+						return ;
+					}
+
+					//the directive was not directly referenced
+					for (var r = 0; r<directiveNode.rules.rules.length; r++) {
+						var rule = directiveNode.rules.rules[r];
+						if (rule.getIsReferenced && rule.getIsReferenced()) {
+							//the directive contains something that was referenced (likely by extend)
+							//therefore it needs to be shown in output too
+
+							//marking as referenced in case the directive is stored inside another directive
+							directiveNode.markReferenced();
+							return directiveNode;
+						}
+					}
+					//The directive was not directly referenced and does not contain anything that
+					//was referenced. Therefore it must not be shown in output.
+					return ;
+				} else {
+					if (!directiveNode.getIsReferenced())
+						return;
 				}
 				return directiveNode;
 			},
@@ -5666,12 +5733,16 @@ var Less = (function(){
 					primary: function () {
 						var mixin = this.mixin, root = [], node;
 
-						while (!parserInput.finished)
+						while (true)
 						{
 							while(true) {
 								node = this.comment();
 								if (!node) { break; }
 								root.push(node);
+							}
+							// always process comments before deciding if finished
+							if (parserInput.finished) {
+								break;
 							}
 							if (parserInput.peek('}')) {
 								break;
@@ -6293,7 +6364,7 @@ var Less = (function(){
 						c = this.combinator();
 
 						e = parserInput.$re(/^(?:\d+\.\d+|\d+)%/) || parserInput.$re(/^(?:[.#]?|:*)(?:[\w-]|[^\x00-\x9f]|\\(?:[A-Fa-f0-9]{1,6} ?|[^A-Fa-f0-9]))+/) ||
-							parserInput.$char('*') || parserInput.$char('&') || this.attribute() || parserInput.$re(/^\([^()@]+\)/) || parserInput.$re(/^[\.#](?=@)/) ||
+							parserInput.$char('*') || parserInput.$char('&') || this.attribute() || parserInput.$re(/^\([^()@]+\)/) || parserInput.$re(/^[\.#:](?=@)/) ||
 							this.entities.variableCurly();
 
 						if (! e) {
@@ -6604,7 +6675,7 @@ var Less = (function(){
 					},
 
 					importOption: function() {
-						var opt = parserInput.$re(/^(less|css|multiple|once|inline|reference)/);
+						var opt = parserInput.$re(/^(less|css|multiple|once|inline|reference|optional)/);
 						if (opt) {
 							return opt[1];
 						}
@@ -7897,7 +7968,7 @@ var Less = (function(){
 //					if (compress) {
 //						logger.warn("The compress option has been deprecated. We recommend you use a dedicated css minifier, for instance see less-plugin-clean-css.");
 //					}
-					
+
 					var toCSSOptions = {
 						compress: compress,
 						dumpLineNumbers: options.dumpLineNumbers,
@@ -7983,12 +8054,14 @@ var Less = (function(){
 					importManager.queue.splice(importManager.queue.indexOf(path), 1); // Remove the path from the queue
 
 					var importedEqualsRoot = fullPath === importManager.rootFilename;
-
+					if (importOptions.optional && e) {
+					callback(null, {rules:[]}, false, null);
+					}
+					else {
 					importManager.files[fullPath] = root;
-
 					if (e && !importManager.error) { importManager.error = e; }
-
 					callback(e, root, importedEqualsRoot, fullPath);
+					}
 				};
 
 				var newFileInfo = {
@@ -8255,6 +8328,10 @@ var Less = (function(){
 							entryPath: entryPath,
 							rootFilename: filename
 						};
+						// add in a missing trailing slash
+						if (rootFileInfo.rootpath && rootFileInfo.rootpath.slice(-1) !== "/") {
+							rootFileInfo.rootpath += "/";
+						}
 					}
 
 					var imports = new ImportManager(context, rootFileInfo);
@@ -8320,7 +8397,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 2, 0],
+				version: [2, 3, 0],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),

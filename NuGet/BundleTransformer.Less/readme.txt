@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.40
+               README file for Bundle Transformer: LESS 1.9.42
 
    ----------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.Less contains translator-adapter `LessTranslator` 
-   (supports LESS (http://lesscss.org) version 2.2.0). This adapter makes
+   (supports LESS (http://lesscss.org) version 2.3.0). This adapter makes
    translation of LESS-code to CSS-code. Also contains debugging 
    HTTP-handler `LessAssetHandler`, which is responsible for text output 
    of translated LESS-asset.
@@ -29,7 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   LESS was updated to commit 8ed6a9748e.
+   Added support of LESS version 2.3.0.
    
    ====================
    POST-INSTALL ACTIONS

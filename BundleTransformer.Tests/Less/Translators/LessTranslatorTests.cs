@@ -78,7 +78,11 @@
 	background-image: data-uri('headphone.gif');
 }
 
-.icon-google-plus{	display: inline;	background-image: data-uri('google-plus.svg');}
+.icon-google-plus
+{
+	display: inline;
+	background-image: data-uri('google-plus.svg');
+}
 
 @import (multiple) url(		""TestLessImport.Sub1.less""	);
 .singleline-comment { content: ""//"" } .triple-slash-directive { content: '///' } @import 'TestLessImport.Sub2';
@@ -192,7 +196,9 @@
 @import (less) ""ValidationIcon.css"";
 @import (inline) ""MicroformatsIcon.css"";
 @import (inline, css) 'NodeIcon.less';
-@import (css) ""OpenIdIcon.less"";")
+@import (css) ""OpenIdIcon.less"";
+@import (optional) ""PrinterIcon.less"";
+@import (optional) ""NonExistentIcon.less"";")
 				;
 
 
@@ -271,6 +277,28 @@
 }")
 				;
 
+			string printerIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"PrinterIcon.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(printerIconLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(printerIconLessAssetVirtualPath))
+				.Returns(@".icon-printer
+{
+	display: inline;
+	background-image: url(printer.png) !important;
+}")
+				;
+
+			string nonExistentIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"NonExistentIcon.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(nonExistentIconLessAssetVirtualPath))
+				.Returns(false)
+				;
+
 			Func<IJsEngine> createJsEngineInstance = () => (new Mock<IJsEngine>()).Object;
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			IRelativePathResolver relativePathResolver = new MockRelativePathResolver();
@@ -314,7 +342,7 @@
 			lessTranslator.FillDependencies(assetUrl, stylesheet, dependencies);
 
 			// Assert
-			Assert.AreEqual(15, dependencies.Count);
+			Assert.AreEqual(17, dependencies.Count);
 
 			Dependency mixinsLessAsset = dependencies[0];
 			Dependency selectorsLessAsset = dependencies[1];
@@ -331,6 +359,8 @@
 			Dependency microformatsIconCssAsset = dependencies[12];
 			Dependency nodeIconLessAsset = dependencies[13];
 			Dependency openIdIconLessAsset = dependencies[14];
+			Dependency printerIconLessAsset = dependencies[15];
+			Dependency nonExistentIconLessAsset = dependencies[16];
 
 			Assert.AreEqual(mixinsLessAssetVirtualPath, mixinsLessAsset.Url);
 			Assert.AreEqual(true, mixinsLessAsset.IsObservable);
@@ -377,6 +407,12 @@
 
 			Assert.AreEqual(openIdIconLessAssetVirtualPath, openIdIconLessAsset.Url);
 			Assert.AreEqual(false, openIdIconLessAsset.IsObservable);
+
+			Assert.AreEqual(printerIconLessAssetVirtualPath, printerIconLessAsset.Url);
+			Assert.AreEqual(true, printerIconLessAsset.IsObservable);
+
+			Assert.AreEqual(nonExistentIconLessAssetVirtualPath, nonExistentIconLessAsset.Url);
+			Assert.AreEqual(true, nonExistentIconLessAsset.IsObservable);
 		}
 
 		private class MockRelativePathResolver : IRelativePathResolver

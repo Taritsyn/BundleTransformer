@@ -648,6 +648,9 @@
 					case Constants.ImportType.Reference:
 						importOptions.Reference = true;
 						break;
+					case Constants.ImportType.Optional:
+						importOptions.Optional = true;
+						break;
 				}
 
 				importTypes.Add(importType);
@@ -852,44 +855,60 @@
 				var duplicateDependency = dependencies.GetByUrl(dependencyUrl);
 				bool isDuplicateDependency = (duplicateDependency != null);
 				bool isEmptyDependency = isDuplicateDependency && (duplicateDependency.Content.Length == 0);
+				bool isNonExistentOptionalDependency = false;
 
 				if (!isDuplicateDependency || isEmptyDependency)
 				{
-					if (LessStylesheetExists(dependencyUrl))
+					if (!LessStylesheetExists(dependencyUrl))
 					{
-						var stylesheet = new LessStylesheet(dependencyUrl, string.Empty);
-
-						if (dependencyOptions.Less || dependencyOptions.Inline)
+						if (dependencyOptions.Optional)
 						{
-							stylesheet = GetLessStylesheet(dependencyUrl, dependencyOptions);
-
-							if (isEmptyDependency && stylesheet.Content.Length > 0)
-							{
-								duplicateDependency.Content = stylesheet.Content;
-								duplicateDependency.IsObservable = true;
-							}
-							else
-							{
-								var dependency = new Dependency(dependencyUrl, stylesheet.Content);
-								dependencies.Add(dependency);
-							}
+							isNonExistentOptionalDependency = true;
 						}
 						else
 						{
-							if (!isDuplicateDependency)
-							{
-								var dependency = new Dependency(dependencyUrl, string.Empty, false);
-								dependencies.Add(dependency);	
-							}
+							throw new FileNotFoundException(
+								string.Format(CoreStrings.Common_FileNotExist, dependencyUrl));
+						}
+					}
+
+					var stylesheet = new LessStylesheet(dependencyUrl, string.Empty);
+					string dependencyContent = null;
+
+					if (dependencyOptions.Less || dependencyOptions.Inline)
+					{
+						if (!isNonExistentOptionalDependency)
+						{
+							stylesheet = GetLessStylesheet(dependencyUrl, dependencyOptions);
+							dependencyContent = stylesheet.Content;
 						}
 
-						FillDependencies(rootAssetUrl, stylesheet, dependencies);
+						if (isEmptyDependency && stylesheet.Content.Length > 0)
+						{
+							duplicateDependency.Content = dependencyContent;
+							duplicateDependency.IsObservable = true;
+						}
+						else
+						{
+							var dependency = new Dependency(dependencyUrl, dependencyContent);
+							dependencies.Add(dependency);
+						}
 					}
 					else
 					{
-						throw new FileNotFoundException(
-							string.Format(CoreStrings.Common_FileNotExist, dependencyUrl));
+						if (!isNonExistentOptionalDependency)
+						{
+							dependencyContent = string.Empty;
+						}
+
+						if (!isDuplicateDependency)
+						{
+							var dependency = new Dependency(dependencyUrl, dependencyContent, false);
+							dependencies.Add(dependency);
+						}
 					}
+
+					FillDependencies(rootAssetUrl, stylesheet, dependencies);
 				}
 			}
 		}

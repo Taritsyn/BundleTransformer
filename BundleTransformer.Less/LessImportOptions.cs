@@ -13,6 +13,7 @@
 		public bool Multiple;
 		public bool Inline;
 		public bool Reference;
+		public bool Optional;
 
 
 		public LessImportOptions(string extension)
@@ -21,6 +22,7 @@
 			Multiple = false;
 			Inline = false;
 			Reference = false;
+			Optional = false;
 		}
 
 
@@ -36,6 +38,7 @@
 				&& Multiple.Equals(otherOptions.Multiple)
 				&& Inline.Equals(otherOptions.Inline)
 				&& Reference.Equals(otherOptions.Reference)
+				&& Optional.Equals(otherOptions.Optional)
 			);
 
 			return isEquals;
@@ -43,7 +46,7 @@
 
 		public override int GetHashCode()
 		{
-			return Tuple.Create(Less, Multiple, Inline, Reference).GetHashCode();
+			return Tuple.Create(Less, Multiple, Inline, Reference, Optional).GetHashCode();
 		}
 
 		public static bool operator ==(LessImportOptions x, LessImportOptions y)

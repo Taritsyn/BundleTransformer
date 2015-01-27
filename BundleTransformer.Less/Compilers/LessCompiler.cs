@@ -198,10 +198,12 @@
 		private static JArray ConvertDependenciesToJson(DependencyCollection dependencies)
 		{
 			var dependenciesJson = new JArray(
-				dependencies.Select(d => new JObject(
-					new JProperty("path", d.Url),
-					new JProperty("content", d.Content))
-				)
+				dependencies
+					.Where(d => d.Content != null)
+					.Select(d => new JObject(
+						new JProperty("path", d.Url),
+						new JProperty("content", d.Content))
+					)
 			);
 
 			return dependenciesJson;

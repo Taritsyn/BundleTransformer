@@ -160,8 +160,10 @@
     <None Include="ClearScript.V8\v8-x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Content\less\folder\google-plus.svg" />
     <Content Include="Content\less\folder\MicroformatsIcon.css" />
     <None Include="Content\less\folder\OpenIdIcon.less" />
+    <Content Include="Content\less\folder\PrinterIcon.less" />
     <None Include="Content\less\Selectors.less" />
     <None Include="Content\sass\_Colors.sass" />
     <None Include="Content\sass\_Mixins.sass" />
@@ -189,6 +191,7 @@
     <Content Include="Content\less\node.png" />
     <None Include="Content\less\folder\NodeIcon.less" />
     <Content Include="Content\less\openid.png" />
+    <Content Include="Content\less\printer.png" />
     <Content Include="Content\less\tag.png" />
     <Content Include="Content\less\folder\TagIcon.css" />
     <Content Include="Content\less\usb-flash-drive.png" />
