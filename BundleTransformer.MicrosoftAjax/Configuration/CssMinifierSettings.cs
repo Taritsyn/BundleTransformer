@@ -10,7 +10,7 @@
 		/// <summary>
 		/// Gets or sets ColorNames setting
 		/// </summary>
-		[ConfigurationProperty("colorNames", DefaultValue = CssColor.Strict)]
+		[ConfigurationProperty("colorNames", DefaultValue = CssColor.Hex)]
 		public CssColor ColorNames
 		{
 			get { return (CssColor)this["colorNames"]; }
@@ -28,7 +28,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to minify the 
+		/// Gets or sets a value indicating whether to minify the
 		/// JavaScript within expression functions
 		/// </summary>
 		[ConfigurationProperty("minifyExpressions", DefaultValue = true)]

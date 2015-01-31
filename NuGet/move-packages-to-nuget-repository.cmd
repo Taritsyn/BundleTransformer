@@ -2,6 +2,7 @@ set packages_directory="C:\Projects\BundleTransformer\NuGet"
 set repository_directory="C:\NuGet Repository"
 
 move %packages_directory%\BundleTransformer.Core\*.nupkg %repository_directory%
+move %packages_directory%\BundleTransformer.ConfigurationIntelliSense\*.nupkg %repository_directory%
 move %packages_directory%\BundleTransformer.Less\*.nupkg %repository_directory%
 move %packages_directory%\BundleTransformer.SassAndScss\*.nupkg %repository_directory%
 move %packages_directory%\BundleTransformer.CoffeeScript\*.nupkg %repository_directory%

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.40
+               README file for Bundle Transformer: Core 1.9.43
 
    ----------------------------------------------------------------------
 
@@ -41,6 +41,12 @@
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.
+   
+   =============
+   RELEASE NOTES
+   =============
+   BundleTransformer.Configuration.xsd file moved to the
+   BundleTransformer.ConfigurationIntelliSense package.
 
    ====================
    POST-INSTALL ACTIONS

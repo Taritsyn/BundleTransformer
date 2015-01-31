@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.0.7
+ * Clean-css v3.0.8
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -862,22 +862,25 @@ var CleanCss = (function(){
 			toHex[name] = hex;
 		}
 
-		var toHexPattern = new RegExp('(' + Object.keys(toHex).join('|') + ')( |,|\\)|$)', 'ig');
+		var toHexPattern = new RegExp('(^| |,|\\))(' + Object.keys(toHex).join('|') + ')( |,|\\)|$)', 'ig');
 		var toNamePattern = new RegExp('(' + Object.keys(toName).join('|') + ')([^a-f0-9]|$)', 'ig');
+
+		function hexConverter(match, prefix, colorValue, suffix) {
+		  return prefix + toHex[colorValue.toLowerCase()] + suffix;
+		}
+
+		function nameConverter(match, colorValue, suffix) {
+		  return toName[colorValue.toLowerCase()] + suffix;
+		}
 
 		HexNameShortener.shorten = function (value) {
 		  var hasHex = value.indexOf('#') > -1;
-		  var shortened = value.replace(toHexPattern, function(match, colorValue, suffix) {
-			return toHex[colorValue.toLowerCase()] + suffix;
-		  });
+		  var shortened = value.replace(toHexPattern, hexConverter);
 
-		  if (hasHex) {
-			shortened = shortened.replace(toNamePattern, function(match, colorValue, suffix) {
-			  return toName[colorValue.toLowerCase()] + suffix;
-			});
-		  }
+		  if (shortened != value)
+			shortened = shortened.replace(toHexPattern, hexConverter);
 
-		  return shortened;
+		  return hasHex ? shortened.replace(toNamePattern, nameConverter) : shortened;
 		};
 		
 		return HexNameShortener;
@@ -2163,6 +2166,7 @@ var CleanCss = (function(){
 			  canOverride: canOverride.color,
 			  defaultValue: 'transparent',
 			  multiValueLastOnly: true,
+			  nonMergeableValue: 'none',
 			  shortestValue: 'red'
 			},
 			'background-image': {
@@ -2497,8 +2501,8 @@ var CleanCss = (function(){
 				  matchingComponent = t.components.filter(nameMatchFilter1)[0];
 				  if (can(matchingComponent.value, token.value)) {
 					// The component can override the matching component in the shorthand
-					var disabledForToken = !compatibility.properties.backgroundSizeMerging &&
-					  token.prop.indexOf('background-size') > -1;
+					var disabledForToken = !compatibility.properties.backgroundSizeMerging && token.prop.indexOf('background-size') > -1 ||
+					  processable[token.prop].nonMergeableValue && processable[token.prop].nonMergeableValue == token.value;
 
 					if (disabledForToken) {
 					  result.push(t);

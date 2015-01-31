@@ -3,6 +3,9 @@ set packages_directory="C:\Projects\BundleTransformer\NuGet"
 cd %packages_directory%\BundleTransformer.Core
 call build-package.cmd
 
+cd %packages_directory%\BundleTransformer.ConfigurationIntelliSense
+call build-package.cmd
+
 cd %packages_directory%\BundleTransformer.Less
 call build-package.cmd
 

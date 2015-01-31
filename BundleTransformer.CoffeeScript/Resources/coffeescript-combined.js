@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.8.0
+ * CoffeeScript Compiler v1.9.0
  * http://coffeescript.org
  *
  * Copyright 2014, Jeremy Ashkenas
@@ -2983,24 +2983,24 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.compileRoot = function(o) {
-		  var exp, fragments, i, name, prelude, preludeExps, rest, _i, _len, _ref2;
+		  var exp, fragments, i, name, prelude, preludeExps, rest, _i, _len, _ref2, _ref3;
 		  o.indent = o.bare ? '' : TAB;
 		  o.level = LEVEL_TOP;
 		  this.spaced = true;
-		  o.scope = new Scope(null, this, null, o.referencedVars);
-		  _ref2 = o.locals || [];
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			name = _ref2[_i];
+		  o.scope = new Scope(null, this, null, (_ref2 = o.referencedVars) != null ? _ref2 : []);
+		  _ref3 = o.locals || [];
+		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+			name = _ref3[_i];
 			o.scope.parameter(name);
 		  }
 		  prelude = [];
 		  if (!o.bare) {
 			preludeExps = (function() {
-			  var _j, _len1, _ref3, _results;
-			  _ref3 = this.expressions;
+			  var _j, _len1, _ref4, _results;
+			  _ref4 = this.expressions;
 			  _results = [];
-			  for (i = _j = 0, _len1 = _ref3.length; _j < _len1; i = ++_j) {
-				exp = _ref3[i];
+			  for (i = _j = 0, _len1 = _ref4.length; _j < _len1; i = ++_j) {
+				exp = _ref4[i];
 				if (!(exp.unwrap() instanceof Comment)) {
 				  break;
 				}
@@ -5781,7 +5781,7 @@ var CoffeeScript = (function(){
 
 //	  SourceMap = require('/sourcemap');
 
-	  exports.VERSION = '1.8.0';
+	  exports.VERSION = '1.9.0';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 

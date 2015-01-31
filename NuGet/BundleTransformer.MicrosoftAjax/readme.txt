@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Microsoft Ajax 1.9.34
+          README file for Bundle Transformer: Microsoft Ajax 1.9.43
  
    ----------------------------------------------------------------------
 
-          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -20,7 +20,10 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Microsoft Ajax Minifier version 5.13.
+   1. Added support of the Microsoft Ajax Minifier version 5.14;
+   2. In the `CssColor` enumeration added new value - `NoSwap`;
+   3. In CSS minification settings changed the default value for
+      `ColorNames` property (instead of `Strict` now is used `Hex`).
    
    ====================
    POST-INSTALL ACTIONS

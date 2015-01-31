@@ -23,7 +23,7 @@
 	using BtBlockStart = BlockStart;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code 
+	/// Minifier, which produces minifiction of CSS-code
 	/// by using Microsoft Ajax Minifier
 	/// </summary>
 	public sealed class MicrosoftAjaxCssMinifier : MicrosoftAjaxMinifierBase
@@ -44,7 +44,7 @@
 		private readonly CssSettings _cssParserConfiguration;
 
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %gt;</code>) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %gt;</code>)
 		/// should be recognized and output as is
 		/// </summary>
 		public override bool AllowEmbeddedAspNetBlocks
@@ -94,7 +94,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of 
+		/// Gets or sets a string representation of the list of
 		/// debug lookups (comma-separated)
 		/// </summary>
 		public override string IgnoreErrorList
@@ -110,7 +110,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets number of spaces per indent level when in 
+		/// Gets or sets number of spaces per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		public override int IndentSize
@@ -126,7 +126,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a column position at which the line 
+		/// Gets or sets a column position at which the line
 		/// will be broken at the next available opportunity
 		/// </summary>
 		public override int LineBreakThreshold
@@ -159,7 +159,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets string representation of the list 
+		/// Gets or sets string representation of the list
 		/// of names defined for the preprocessor (comma-separated)
 		/// </summary>
 		public override string PreprocessorDefineList
@@ -175,7 +175,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add a semicolon 
+		/// Gets or sets a flag for whether to add a semicolon
 		/// at the end of the parsed code
 		/// </summary>
 		public override bool TermSemicolons
@@ -221,7 +221,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to minify the 
+		/// Gets or sets a value indicating whether to minify the
 		/// JavaScript within expression functions
 		/// </summary>
 		public bool MinifyExpressions
@@ -325,7 +325,7 @@
 			{
 			    Settings = _cssParserConfiguration
 			};
-			
+
 			foreach (var asset in assetsToProcessing)
 			{
 				InnerMinify(asset, cssParser);

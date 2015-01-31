@@ -80,7 +80,7 @@
 				"~/Scripts/handlebars/TestHandlebars.js");
 			commonTemplatesBundle.Orderer = nullOrderer;
 			bundles.Add(commonTemplatesBundle);
-			
+
 			var jqueryUiStylesDirectoryBundle = new Bundle("~/Bundles/JqueryUiStylesDirectory")
 			{
 				Builder = nullBuilder

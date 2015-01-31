@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema 
+<xs:schema
 	id="bundleTransformerConfiguration"
 	targetNamespace="http://tempuri.org/BundleTransformer.Configuration.xsd"
 	elementFormDefault="qualified"
@@ -68,11 +68,11 @@
 				<xs:documentation>Flag for whether to enable tracing</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="jsFilesWithMicrosoftStyleExtensions" type="xs:string" 
+		<xs:attribute name="jsFilesWithMicrosoftStyleExtensions" type="xs:string"
 			use="optional" default="MicrosoftAjax.js,MicrosoftMvcAjax.js,MicrosoftMvcValidation.js,knockout-$version$.js">
 			<xs:annotation>
 				<xs:documentation>List of JS-files with Microsoft-style extensions</xs:documentation>
-			</xs:annotation>			
+			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 
@@ -83,7 +83,7 @@
 					<xs:annotation>
 						<xs:documentation>Ordered comma-separated list of names of default postprocessors</xs:documentation>
 					</xs:annotation>
-				</xs:attribute>				
+				</xs:attribute>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -99,7 +99,7 @@
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
-	
+
 	<xs:complexType name="AssetSettings_SchemaType">
 		<xs:all>
 			<xs:element name="translators" type="TranslatorRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -254,7 +254,7 @@
 		<xs:attribute name="name" type="xs:string" use="required">
 			<xs:annotation>
 				<xs:documentation>Processor name</xs:documentation>
-			</xs:annotation>			
+			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="type" type="xs:string" use="required">
 			<xs:annotation>
@@ -272,7 +272,7 @@
 	</xs:complexType>
 
 	<xs:complexType name="ClearAssetProcessorRegistrationBase_SchemaType" abstract="true" />
-	
+
 	<xs:complexType name="FileExtensionRegistrationCollection_SchemaType">
 		<xs:annotation>
 			<xs:documentation>Collection of registered file extensions</xs:documentation>
@@ -354,7 +354,7 @@
 		<xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
-			</xs:annotation>			
+			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="ieCompat" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
@@ -694,8 +694,8 @@
 			<xs:documentation>Configuration settings of Microsoft Ajax CSS-minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
-			<xs:extension base="MicrosoftAjaxMinifierSettingsBase_SchemaType">	
-				<xs:attribute name="colorNames" use="optional" default="Strict">
+			<xs:extension base="MicrosoftAjaxMinifierSettingsBase_SchemaType">
+				<xs:attribute name="colorNames" use="optional" default="Hex">
 					<xs:annotation>
 						<xs:documentation>ColorNames setting</xs:documentation>
 					</xs:annotation>
@@ -715,6 +715,11 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 							<xs:enumeration value="Major">
 								<xs:annotation>
 									<xs:documentation>Convert known hex values to major-browser color names if shorter; and known major-browser color names to hex if shorter</xs:documentation>
+								</xs:annotation>
+							</xs:enumeration>
+							<xs:enumeration value="NoSwap">
+								<xs:annotation>
+									<xs:documentation>Don't swap names for hex or hex for names, whether or not one is shorter</xs:documentation>
 								</xs:annotation>
 							</xs:enumeration>
 						</xs:restriction>
@@ -772,7 +777,7 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 				<xs:attribute name="alwaysEscapeNonAscii" type="Boolean_SchemaType" use="optional" default="false">
 					<xs:annotation>
 						<xs:documentation>Flag indicating whether to always escape non-ASCII characters as \uXXXX or to let the output encoding object handle that via the JsEncoderFallback object for the specified output encoding format</xs:documentation>
-					</xs:annotation>				
+					</xs:annotation>
 				</xs:attribute>
 				<xs:attribute name="amdSupport" type="Boolean_SchemaType" use="optional" default="false">
 					<xs:annotation>
@@ -994,7 +999,7 @@ if (condition) {
 		<xs:attribute name="indentSize" type="xs:int" use="optional" default="4">
 			<xs:annotation>
 				<xs:documentation>Number of spaces per indent level when in MultipleLines output mode</xs:documentation>
-			</xs:annotation>			
+			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="lineBreakThreshold" type="xs:int" use="optional" default="2147482647">
 			<xs:annotation>
@@ -1163,7 +1168,7 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /YUI settings -->
-	
+
 	<!-- Closure settings -->
 	<xs:complexType name="ClosureSettings_SchemaType">
 		<xs:annotation>
@@ -1234,8 +1239,7 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 				</xs:attribute>
 				<xs:attribute name="thirdParty" type="Boolean_SchemaType" use="optional" default="true">
 					<xs:annotation>
-						<xs:documentation>Flag for whether to check source validity but do not enforce 
-Closure style rules and conventions</xs:documentation>
+						<xs:documentation>Flag for whether to check source validity but do not enforce Closure style rules and conventions</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 				<xs:attribute name="processJqueryPrimitives" type="Boolean_SchemaType" use="optional" default="false">
@@ -1276,7 +1280,7 @@ to preserve references to external symbols.</xs:documentation>
 		<xs:attribute name="prettyPrint" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to add line breaks and indentation to its output code to make the code easier for humans to read</xs:documentation>
-			</xs:annotation>			
+			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="severity" use="optional" default="0">
 			<xs:annotation>
@@ -1637,7 +1641,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /CSSO settings -->
-	
+
 	<!-- WebGrease settings -->
 	<xs:complexType name="WgSettings_SchemaType">
 		<xs:annotation>
@@ -1664,7 +1668,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /WebGrease settings -->
-	
+
 	<!-- Clean-css settings -->
 	<xs:complexType name="CleanSettings_SchemaType">
 		<xs:annotation>

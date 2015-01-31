@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+	<metadata>
+		<id>BundleTransformer.ConfigurationIntelliSense</id>
+		<version>1.0.0</version>
+		<title>Bundle Transformer: IntelliSense</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=1424702</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when editing the `bundleTransformer` configuration section in the Web.config file.</description>
+		<summary>BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when editing the `bundleTransformer` configuration section in the Web.config file.</summary>
+		<releaseNotes>In Microsoft Ajax CSS minifier settings added new definition for the `colorNames` property.</releaseNotes>
+		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>Web.config IntelliSense</tags>
+	</metadata>
+	<files>
+		<file src="..\..\BundleTransformer.Example.Mvc\BundleTransformer.Configuration.xsd" target="content" />
+		<file src="readme.txt" />
+	</files>
+</package>
