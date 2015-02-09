@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.3.1
+ * Less - Leaner CSS v2.4.0
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -234,7 +234,7 @@ var Less = (function(){
 		var copyFromOriginal = function copyFromOriginal(original, destination, propertiesToCopy) {
 			if (!original) { return; }
 
-			for(var i = 0; i < propertiesToCopy.length; i++) {
+			for (var i = 0; i < propertiesToCopy.length; i++) {
 				if (original.hasOwnProperty(propertiesToCopy[i])) {
 					destination[propertiesToCopy[i]] = original[propertiesToCopy[i]];
 				}
@@ -307,7 +307,7 @@ var Less = (function(){
 		};
 
 		contexts.Eval.prototype.isPathRelative = function (path) {
-			return !/^(?:[a-z-]+:|\/)/i.test(path);
+			return !/^(?:[a-z-]+:|\/|#)/i.test(path);
 		};
 
 		contexts.Eval.prototype.normalizePath = function( path ) {
@@ -529,7 +529,7 @@ var Less = (function(){
 					return parseInt(c + c, 16);
 				});
 			}
-			this.alpha = typeof(a) === 'number' ? a : 1;
+			this.alpha = typeof a === 'number' ? a : 1;
 		};
 
 		Color.prototype = new Node();
@@ -656,7 +656,7 @@ var Less = (function(){
 			if (max === min) {
 				h = 0;
 			} else {
-				switch(max){
+				switch(max) {
 					case r: h = (g - b) / d + (g < b ? 6 : 0); break;
 					case g: h = (b - r) / d + 2; break;
 					case b: h = (r - g) / d + 4; break;
@@ -723,7 +723,7 @@ var Less = (function(){
 		};
 		Value.prototype.genCSS = function (context, output) {
 			var i;
-			for(i = 0; i < this.value.length; i++) {
+			for (i = 0; i < this.value.length; i++) {
 				this.value[i].genCSS(context, output);
 				if (i + 1 < this.value.length) {
 					output.add((context && context.compress) ? ',' : ', ');
@@ -802,7 +802,7 @@ var Less = (function(){
 				// things faster (~10% for benchmark.less):
 				name = (name.length === 1) && (name[0] instanceof Keyword) ?
 						name[0].value : evalName(context, name);
-					variable = false; // never treat expanded interpolation as new variable name
+				variable = false; // never treat expanded interpolation as new variable name
 			}
 			if (name === "font" && !context.strictMath) {
 				strictMathBypass = true;
@@ -949,7 +949,7 @@ var Less = (function(){
 			}
 			if (!this._css) {
 				//TODO caching? speed comparison?
-				for(i = 0; i < this.elements.length; i++) {
+				for (i = 0; i < this.elements.length; i++) {
 					element = this.elements[i];
 					element.genCSS(context, output);
 				}
@@ -1030,7 +1030,7 @@ var Less = (function(){
 			this.combinator = combinator instanceof Combinator ?
 							  combinator : new Combinator(combinator);
 
-			if (typeof(value) === 'string') {
+			if (typeof value === 'string') {
 				this.value = value.trim();
 			} else if (value) {
 				this.value = value;
@@ -1216,7 +1216,7 @@ var Less = (function(){
 			ruleset.firstRoot = this.firstRoot;
 			ruleset.allowImports = this.allowImports;
 
-			if(this.debugInfo) {
+			if (this.debugInfo) {
 				ruleset.debugInfo = this.debugInfo;
 			}
 
@@ -1301,7 +1301,7 @@ var Less = (function(){
 					if (rule.selectors[0].isJustParentSelector()) {
 						rsRules.splice(i--, 1);
 
-						for(var j = 0; j < rule.rules.length; j++) {
+						for (var j = 0; j < rule.rules.length; j++) {
 							subRule = rule.rules[j];
 							if (!(subRule instanceof Rule) || !subRule.variable) {
 								rsRules.splice(++i, 0, subRule);
@@ -1341,15 +1341,17 @@ var Less = (function(){
 			}
 		};
 		Ruleset.prototype.makeImportant = function() {
-			this.rules = this.rules.map(function (r) {
+			var result = new Ruleset(this.selectors, this.rules.map(function (r) {
 				if (r.makeImportant) {
 					return r.makeImportant();
 				} else {
 					return r;
 				}
-			});
-			return this;
-		};Ruleset.prototype.matchArgs = function (args) {
+			}), this.strictImports);
+
+			return result;
+		};
+		Ruleset.prototype.matchArgs = function (args) {
 			return !args || args.length === 0;
 		};
 		// lets you call a css selector with a guard
@@ -1382,7 +1384,7 @@ var Less = (function(){
 					// guard against root being a string (in the case of inlined less)
 					if (r.type === "Import" && r.root && r.root.variables) {
 						var vars = r.root.variables();
-						for(var name in vars) {
+						for (var name in vars) {
 							if (vars.hasOwnProperty(name)) {
 								hash[name] = vars[name];
 							}
@@ -1413,7 +1415,11 @@ var Less = (function(){
 		};
 		Ruleset.prototype.prependRule = function (rule) {
 			var rules = this.rules;
-			if (rules) { rules.unshift(rule); } else { this.rules = [ rule ]; }
+			if (rules) {
+				rules.unshift(rule);
+			} else {
+				this.rules = [ rule ];
+			}
 		};
 		Ruleset.prototype.find = function (selector, self, filter) {
 			self = self || this;
@@ -1428,13 +1434,13 @@ var Less = (function(){
 						match = selector.match(rule.selectors[j]);
 						if (match) {
 							if (selector.elements.length > match) {
-							  if (!filter || filter(rule)) {
-								foundMixins = rule.find(new Selector(selector.elements.slice(match)), self, filter);
-								for (var i = 0; i < foundMixins.length; ++i) {
-								  foundMixins[i].path.push(rule);
+								if (!filter || filter(rule)) {
+									foundMixins = rule.find(new Selector(selector.elements.slice(match)), self, filter);
+									for (var i = 0; i < foundMixins.length; ++i) {
+										foundMixins[i].path.push(rule);
+									}
+									Array.prototype.push.apply(rules, foundMixins);
 								}
-								Array.prototype.push.apply(rules, foundMixins);
-							  }
 							} else {
 								rules.push({ rule: rule, path: []});
 							}
@@ -1467,19 +1473,17 @@ var Less = (function(){
 				sep;
 
 			function isRulesetLikeNode(rule, root) {
-				 // if it has nested rules, then it should be treated like a ruleset
-				 // medias and comments do not have nested rules, but should be treated like rulesets anyway
-				 // some directives and anonymous nodes are ruleset like, others are not
-				 if (typeof rule.isRulesetLike === "boolean")
-				 {
-					 return rule.isRulesetLike;
-				 } else if (typeof rule.isRulesetLike === "function")
-				 {
-					 return rule.isRulesetLike(root);
-				 }
+				// if it has nested rules, then it should be treated like a ruleset
+				// medias and comments do not have nested rules, but should be treated like rulesets anyway
+				// some directives and anonymous nodes are ruleset like, others are not
+				if (typeof rule.isRulesetLike === "boolean") {
+					return rule.isRulesetLike;
+				} else if (typeof rule.isRulesetLike === "function") {
+					return rule.isRulesetLike(root);
+				}
 
-				 //anything else is assumed to be a rule
-				 return false;
+				//anything else is assumed to be a rule
+				return false;
 			}
 
 			for (i = 0; i < this.rules.length; i++) {
@@ -1656,7 +1660,7 @@ var Less = (function(){
 				// }
 				// == [[.a] [.c]] [[.b] [.c]]
 				//
-				var i, j, k, currentElements, newSelectors, selectorsMultiplied, sel, el, hadParentSelector = false;
+				var i, j, k, currentElements, newSelectors, selectorsMultiplied, sel, el, hadParentSelector = false, length, lastSelector;
 				function findNestedSelector(element) {
 					var maybeSelector;
 					if (element.value.type !== 'Paren') {
@@ -1750,8 +1754,11 @@ var Less = (function(){
 				mergeElementsOnToSelectors(currentElements, newSelectors);
 
 				for (i = 0; i < newSelectors.length; i++) {
-					if (newSelectors[i].length > 0) {
+					length = newSelectors[i].length;
+					if (length > 0) {
 						paths.push(newSelectors[i]);
+						lastSelector = newSelectors[i][length - 1];
+						newSelectors[i][length - 1] = lastSelector.createDerived(lastSelector.elements, inSelector.extendList);
 					}
 				}
 
@@ -2050,6 +2057,8 @@ var Less = (function(){
 				output.add(this.numerator[0]); // the ideal situation
 			} else if (!strictUnits && this.backupUnit) {
 				output.add(this.backupUnit);
+			} else if (!strictUnits && this.denominator.length) {
+				output.add(this.denominator[0]);
 			}
 		};
 		Unit.prototype.toString = function () {
@@ -2221,9 +2230,9 @@ var Less = (function(){
 				} else {
 					other = other.convertTo(this.unit.usedUnits());
 
-					if(context.strictUnits && other.unit.toString() !== unit.toString()) {
-					  throw new Error("Incompatible units. Change the units or use the unit function. Bad units: '" + unit.toString() +
-						"' and '" + other.unit.toString() + "'.");
+					if (context.strictUnits && other.unit.toString() !== unit.toString()) {
+						throw new Error("Incompatible units. Change the units or use the unit function. Bad units: '" + unit.toString() +
+							"' and '" + other.unit.toString() + "'.");
 					}
 
 					value = this._operate(context, op, this.value, other.value);
@@ -2267,7 +2276,7 @@ var Less = (function(){
 				i, groupName, group, targetUnit, derivedConversions = {}, applyUnit;
 
 			if (typeof conversions === 'string') {
-				for(i in unitConversions) {
+				for (i in unitConversions) {
 					if (unitConversions[i].hasOwnProperty(conversions)) {
 						derivedConversions = {};
 						derivedConversions[i] = conversions;
@@ -2558,9 +2567,9 @@ var Less = (function(){
 			function iterativeReplace(value, regexp, replacementFnc) {
 				var evaluatedValue = value;
 				do {
-				  value = evaluatedValue;
-				  evaluatedValue = value.replace(regexp, replacementFnc);
-				} while  (value !== evaluatedValue);
+					value = evaluatedValue;
+					evaluatedValue = value.replace(regexp, replacementFnc);
+				} while (value !== evaluatedValue);
 				return evaluatedValue;
 			}
 			value = iterativeReplace(value, /`([^`]+)`/g, javascriptReplacement);
@@ -2659,7 +2668,63 @@ var Less = (function(){
 			return returnValue;
 		};
 		Expression.prototype.genCSS = function (context, output) {
-			for(var i = 0; i < this.value.length; i++) {
+			for (var i = 0; i < this.value.length; i++) {
+				this.value[i].genCSS(context, output);
+				if (i + 1 < this.value.length) {
+					output.add(" ");
+				}
+			}
+		};
+		Expression.prototype.throwAwayComments = function () {
+			this.value = this.value.filter(function(v) {
+				return !(v instanceof Comment);
+			});
+		};
+
+		var Node = require('/tree/node'),
+			Paren = require('/tree/paren'),
+			Comment = require('/tree/comment');
+
+		var Expression = function (value) {
+			this.value = value;
+			if (!value) {
+				throw new Error("Expression requires an array parameter");
+			}
+		};
+		Expression.prototype = new Node();
+		Expression.prototype.type = "Expression";
+		Expression.prototype.accept = function (visitor) {
+			this.value = visitor.visitArray(this.value);
+		};
+		Expression.prototype.eval = function (context) {
+			var returnValue,
+				inParenthesis = this.parens && !this.parensInOp,
+				doubleParen = false;
+			if (inParenthesis) {
+				context.inParenthesis();
+			}
+			if (this.value.length > 1) {
+				returnValue = new Expression(this.value.map(function (e) {
+					return e.eval(context);
+				}));
+			} else if (this.value.length === 1) {
+				if (this.value[0].parens && !this.value[0].parensInOp) {
+					doubleParen = true;
+				}
+				returnValue = this.value[0].eval(context);
+			} else {
+				returnValue = this;
+			}
+			if (inParenthesis) {
+				context.outOfParenthesis();
+			}
+			if (this.parens && this.parensInOp && !(context.isMathOn()) && !doubleParen) {
+				returnValue = new Paren(returnValue);
+			}
+			return returnValue;
+		};
+		Expression.prototype.genCSS = function (context, output) {
+			for (var i = 0; i < this.value.length; i++) {
 				this.value[i].genCSS(context, output);
 				if (i + 1 < this.value.length) {
 					output.add(" ");
@@ -2730,7 +2795,7 @@ var Less = (function(){
 		Call.prototype.genCSS = function (context, output) {
 			output.add(this.name + "(", this.currentFileInfo, this.index);
 
-			for(var i = 0; i < this.args.length; i++) {
+			for (var i = 0; i < this.args.length; i++) {
 				this.args[i].genCSS(context, output);
 				if (i + 1 < this.args.length) {
 					output.add(", ");
@@ -2813,7 +2878,7 @@ var Less = (function(){
 			this.index = index;
 			this.mapLines = mapLines;
 			this.currentFileInfo = currentFileInfo;
-			this.rulesetLike = (typeof rulesetLike === 'undefined')? false : rulesetLike;
+			this.rulesetLike = (typeof rulesetLike === 'undefined') ? false : rulesetLike;
 		};
 		Anonymous.prototype = new Node();
 		Anonymous.prototype.type = "Anonymous";
@@ -2877,7 +2942,7 @@ var Less = (function(){
 			}
 
 			var media = new Media(null, [], this.index, this.currentFileInfo);
-			if(this.debugInfo) {
+			if (this.debugInfo) {
 				this.rules[0].debugInfo = this.debugInfo;
 				media.debugInfo = this.debugInfo;
 			}
@@ -2965,7 +3030,7 @@ var Less = (function(){
 					return fragment.toCSS ? fragment : new Anonymous(fragment);
 				});
 
-				for(i = path.length - 1; i > 0; i--) {
+				for (i = path.length - 1; i > 0; i--) {
 					path.splice(i, 0, new Anonymous("and"));
 				}
 
@@ -2976,26 +3041,26 @@ var Less = (function(){
 			return new Ruleset([], []);
 		};
 		Media.prototype.permute = function (arr) {
-		  if (arr.length === 0) {
-			  return [];
-		  } else if (arr.length === 1) {
-			  return arr[0];
-		  } else {
-			  var result = [];
-			  var rest = this.permute(arr.slice(1));
-			  for (var i = 0; i < rest.length; i++) {
-				  for (var j = 0; j < arr[0].length; j++) {
-					  result.push([arr[0][j]].concat(rest[i]));
-				  }
-			  }
-			  return result;
-		  }
+			if (arr.length === 0) {
+				return [];
+			} else if (arr.length === 1) {
+				return arr[0];
+			} else {
+				var result = [];
+				var rest = this.permute(arr.slice(1));
+				for (var i = 0; i < rest.length; i++) {
+					for (var j = 0; j < arr[0].length; j++) {
+						result.push([arr[0][j]].concat(rest[i]));
+					}
+				}
+				return result;
+			}
 		};
 		Media.prototype.bubbleSelectors = function (selectors) {
-		  if (!selectors) {
-			  return;
-		  }
-		  this.rules = [new Ruleset(selectors.slice(0), [this.rules[0]])];
+			if (!selectors) {
+				return;
+			}
+			this.rules = [new Ruleset(selectors.slice(0), [this.rules[0]])];
 		};
 
 		return Media;
@@ -3167,8 +3232,12 @@ var Less = (function(){
 			this.rules = rules;
 			this._lookups = {};
 			this.required = params.reduce(function (count, p) {
-				if (!p.name || (p.name && !p.value)) { return count + 1; }
-				else                                 { return count; }
+				if (!p.name || (p.name && !p.value)) {
+					return count + 1;
+				}
+				else {
+					return count;
+				}
 			}, 0);
 			this.frames = frames;
 		};
@@ -3197,11 +3266,11 @@ var Less = (function(){
 				args = args.slice(0);
 				argsLength = args.length;
 
-				for(i = 0; i < argsLength; i++) {
+				for (i = 0; i < argsLength; i++) {
 					arg = args[i];
 					if (name = (arg && arg.name)) {
 						isNamedFound = false;
-						for(j = 0; j < params.length; j++) {
+						for (j = 0; j < params.length; j++) {
 							if (!evaldArguments[j] && name === params[j].name) {
 								evaldArguments[j] = arg.value.eval(context);
 								frame.prependRule(new Rule(name, arg.value.eval(context)));
@@ -3260,6 +3329,17 @@ var Less = (function(){
 
 			return frame;
 		};
+		Definition.prototype.makeImportant = function() {
+			var rules = !this.rules ? this.rules : this.rules.map(function (r) {
+				if (r.makeImportant) {
+					return r.makeImportant(true);
+				} else {
+					return r;
+				}
+			});
+			var result = new Definition (this.name, this.params, rules, this.condition, this.variadic, this.frames);
+			return result;
+		};
 		Definition.prototype.eval = function (context) {
 			return new Definition(this.name, this.params, this.rules, this.condition, this.variadic, this.frames || context.frames.slice(0));
 		};
@@ -3277,7 +3357,7 @@ var Less = (function(){
 			ruleset.originalRuleset = this;
 			ruleset = ruleset.eval(new contexts.Eval(context, [this, frame].concat(mixinFrames)));
 			if (important) {
-				ruleset = this.makeImportant.apply(ruleset);
+				ruleset = ruleset.makeImportant();
 			}
 			return ruleset;
 		};
@@ -3296,10 +3376,16 @@ var Less = (function(){
 			var argsLength = (args && args.length) || 0, len;
 
 			if (! this.variadic) {
-				if (argsLength < this.required)                               { return false; }
-				if (argsLength > this.params.length)                          { return false; }
+				if (argsLength < this.required) {
+					return false;
+				}
+				if (argsLength > this.params.length) {
+					return false;
+				}
 			} else {
-				if (argsLength < (this.required - 1))                         { return false; }
+				if (argsLength < (this.required - 1)) {
+					return false;
+				}
 			}
 
 			len = Math.min(argsLength, this.arity);
@@ -3353,7 +3439,7 @@ var Less = (function(){
 				for (f = 0; f < 2; f++) {
 					conditionResult[f] = true;
 					defaultFunc.value(f);
-					for(p = 0; p < mixinPath.length && conditionResult[f]; p++) {
+					for (p = 0; p < mixinPath.length && conditionResult[f]; p++) {
 						namespace = mixinPath[p];
 						if (namespace.matchCondition) {
 							conditionResult[f] = conditionResult[f] && namespace.matchCondition(null, context);
@@ -3393,7 +3479,7 @@ var Less = (function(){
 						mixin = mixins[m].rule;
 						mixinPath = mixins[m].path;
 						isRecursive = false;
-						for(f = 0; f < context.frames.length; f++) {
+						for (f = 0; f < context.frames.length; f++) {
 							if ((!(mixin instanceof MixinDefinition)) && mixin === (context.frames[f].originalRuleset || context.frames[f])) {
 								isRecursive = true;
 								break;
@@ -3511,9 +3597,9 @@ var Less = (function(){
 		JavaScript.prototype.eval = function(context) {
 			var result = this.evaluateJavaScript(this.expression, context);
 
-			if (typeof(result) === 'number') {
+			if (typeof result === 'number') {
 				return new Dimension(result);
-			} else if (typeof(result) === 'string') {
+			} else if (typeof result === 'string') {
 				return new Quoted('"' + result + '"', result, this.escaped, this.index);
 			} else if (Array.isArray(result)) {
 				return new Anonymous(result.join(', '));
@@ -3583,10 +3669,14 @@ var Less = (function(){
 					case 'or':  return a || b;
 					default:
 						switch (Node.compare(a, b)) {
-							case -1: return op === '<' || op === '=<' || op === '<=';
-							case  0: return op === '=' || op === '>=' || op === '=<' || op === '<=';
-							case  1: return op === '>' || op === '>=';
-								default: return false;
+							case -1:
+								return op === '<' || op === '=<' || op === '<=';
+							case 0:
+								return op === '=' || op === '>=' || op === '=<' || op === '<=';
+							case 1:
+								return op === '>' || op === '>=';
+							default:
+								return false;
 						}
 				}
 			})(this.op, this.lvalue.eval(context), this.rvalue.eval(context));
@@ -3653,11 +3743,11 @@ var Less = (function(){
 				case "all":
 					this.allowBefore = true;
 					this.allowAfter = true;
-				break;
+					break;
 				default:
 					this.allowBefore = false;
 					this.allowAfter = false;
-				break;
+					break;
 			}
 		};
 		Extend.next_id = 0;
@@ -3678,7 +3768,7 @@ var Less = (function(){
 				i,
 				selectorElements;
 
-			for(i = 0; i < selectors.length; i++) {
+			for (i = 0; i < selectors.length; i++) {
 				selectorElements = selectors[i].elements;
 				// duplicate the logic in genCSS function inside the selector node.
 				// future TODO - move both logics into the selector joiner visitor
@@ -3771,7 +3861,7 @@ var Less = (function(){
 				requiredFunctions = [],
 				functions = requiredFunctions.concat(optionalFunctions);
 
-			for(var i = 0; i < functions.length; i++) {
+			for (var i = 0; i < functions.length; i++) {
 				var propName = functions[i],
 					environmentFunc = externalEnvironment[propName];
 				if (environmentFunc) {
@@ -3795,7 +3885,7 @@ var Less = (function(){
 //			if (options.pluginManager) {
 //				fileManagers = [].concat(fileManagers).concat(options.pluginManager.getFileManagers());
 //			}
-			for(var i = fileManagers.length - 1; i >= 0 ; i--) {
+			for (var i = fileManagers.length - 1; i >= 0 ; i--) {
 				var fileManager = fileManagers[i];
 				if (fileManager[isSync ? "supportsSync" : "supports"](filename, currentDirectory, options, environment)) {
 					return fileManager;
@@ -3849,7 +3939,7 @@ var Less = (function(){
 		};
 
 		abstractFileManager.prototype.isPathAbsolute = function(filename) {
-			return (/^(?:[a-z-]+:|\/|\\)/i).test(filename);
+			return (/^(?:[a-z-]+:|\/|\\|#)/i).test(filename);
 		};
 
 		abstractFileManager.prototype.join = function(basePath, laterPath) {
@@ -3868,15 +3958,15 @@ var Less = (function(){
 				return "";
 			}
 			max = Math.max(baseUrlParts.directories.length, urlParts.directories.length);
-			for(i = 0; i < max; i++) {
+			for (i = 0; i < max; i++) {
 				if (baseUrlParts.directories[i] !== urlParts.directories[i]) { break; }
 			}
 			baseUrlDirectories = baseUrlParts.directories.slice(i);
 			urlDirectories = urlParts.directories.slice(i);
-			for(i = 0; i < baseUrlDirectories.length - 1; i++) {
+			for (i = 0; i < baseUrlDirectories.length - 1; i++) {
 				diff += "../";
 			}
-			for(i = 0; i < urlDirectories.length - 1; i++) {
+			for (i = 0; i < urlDirectories.length - 1; i++) {
 				diff += urlDirectories[i] + "/";
 			}
 			return diff;
@@ -3913,14 +4003,14 @@ var Less = (function(){
 				directories = urlParts[3].replace(/\\/g, "/").split("/");
 
 				// extract out . before .. so .. doesn't absorb a non-directory
-				for(i = 0; i < directories.length; i++) {
+				for (i = 0; i < directories.length; i++) {
 					if (directories[i] === ".") {
 						directories.splice(i, 1);
 						i -= 1;
 					}
 				}
 
-				for(i = 0; i < directories.length; i++) {
+				for (i = 0; i < directories.length; i++) {
 					if (directories[i] === ".." && i > 0) {
 						directories.splice(i - 1, 2);
 						i -= 2;
@@ -4129,8 +4219,8 @@ var Less = (function(){
 		ImportSequencer.prototype.tryRun = function() {
 			this._currentDepth++;
 			try {
-				while(true) {
-					while(this.imports.length > 0) {
+				while (true) {
+					while (this.imports.length > 0) {
 						var importItem = this.imports[0];
 						if (!importItem.isReady) {
 							return;
@@ -4218,7 +4308,7 @@ var Less = (function(){
 
 				try {
 					evaldImportNode = importNode.evalForImport(context);
-				} catch(e){
+				} catch(e) {
 					if (!e.filename) { e.index = importNode.index; e.filename = importNode.currentFileInfo.filename; }
 					// attempt to eval properly and treat as css
 					importNode.css = true;
@@ -4235,7 +4325,7 @@ var Less = (function(){
 					// try appending if we haven't determined if it is css or not
 					var tryAppendLessExtension = evaldImportNode.css === undefined;
 
-					for(var i = 0; i < importParent.rules.length; i++) {
+					for (var i = 0; i < importParent.rules.length; i++) {
 						if (importParent.rules[i] === importNode) {
 							importParent.rules[i] = evaldImportNode;
 							break;
@@ -4372,7 +4462,7 @@ var Less = (function(){
 
 				// get &:extend(.a); rules which apply to all selectors in this ruleset
 				var rules = rulesetNode.rules, ruleCnt = rules ? rules.length : 0;
-				for(i = 0; i < ruleCnt; i++) {
+				for (i = 0; i < ruleCnt; i++) {
 					if (rulesetNode.rules[i] instanceof tree.Extend) {
 						allSelectorsExtendList.push(rules[i]);
 						rulesetNode.extendOnEveryPath = true;
@@ -4382,7 +4472,7 @@ var Less = (function(){
 				// now find every selector and apply the extends that apply to all extends
 				// and the ones which apply to an individual extend
 				var paths = rulesetNode.paths;
-				for(i = 0; i < paths.length; i++) {
+				for (i = 0; i < paths.length; i++) {
 					var selectorPath = paths[i],
 						selector = selectorPath[selectorPath.length - 1],
 						selExtendList = selector.extendList;
@@ -4396,7 +4486,7 @@ var Less = (function(){
 						});
 					}
 
-					for(j = 0; j < extendList.length; j++) {
+					for (j = 0; j < extendList.length; j++) {
 						this.foundExtends = true;
 						extend = extendList[j];
 						extend.findSelfSelectors(selectorPath);
@@ -4453,9 +4543,10 @@ var Less = (function(){
 						var selector = "_unknown_";
 						try {
 							selector = extend.selector.toCSS({});
-						}catch(_){}
+						}
+						catch(_) {}
 
-						if(!indicies[extend.index + ' ' + selector]) {
+						if (!indicies[extend.index + ' ' + selector]) {
 							indicies[extend.index + ' ' + selector] = true;
 //							logger.warn("extend '" + selector + "' has no matches");
 						}
@@ -4482,14 +4573,14 @@ var Less = (function(){
 				// and the second is the target.
 				// the seperation into two lists allows us to process a subset of chains with a bigger set, as is the
 				// case when processing media queries
-				for(extendIndex = 0; extendIndex < extendsList.length; extendIndex++){
-					for(targetExtendIndex = 0; targetExtendIndex < extendsListTarget.length; targetExtendIndex++){
+				for (extendIndex = 0; extendIndex < extendsList.length; extendIndex++) {
+					for (targetExtendIndex = 0; targetExtendIndex < extendsListTarget.length; targetExtendIndex++) {
 
 						extend = extendsList[extendIndex];
 						targetExtend = extendsListTarget[targetExtendIndex];
 
 						// look for circular references
-						if( extend.parent_ids.indexOf( targetExtend.object_id ) >= 0 ){ continue; }
+						if ( extend.parent_ids.indexOf( targetExtend.object_id ) >= 0 ) { continue; }
 
 						// find a match in the target extends self selector (the bit before :extend)
 						selectorPath = [targetExtend.selfSelectors[0]];
@@ -4573,8 +4664,8 @@ var Less = (function(){
 
 				// look at each selector path in the ruleset, find any extend matches and then copy, find and replace
 
-				for(extendIndex = 0; extendIndex < allExtends.length; extendIndex++) {
-					for(pathIndex = 0; pathIndex < rulesetNode.paths.length; pathIndex++) {
+				for (extendIndex = 0; extendIndex < allExtends.length; extendIndex++) {
+					for (pathIndex = 0; pathIndex < rulesetNode.paths.length; pathIndex++) {
 						selectorPath = rulesetNode.paths[pathIndex];
 
 						// extending extends happens initially, before the main pass
@@ -4607,10 +4698,10 @@ var Less = (function(){
 					potentialMatches = [], potentialMatch, matches = [];
 
 				// loop through the haystack elements
-				for(haystackSelectorIndex = 0; haystackSelectorIndex < haystackSelectorPath.length; haystackSelectorIndex++) {
+				for (haystackSelectorIndex = 0; haystackSelectorIndex < haystackSelectorPath.length; haystackSelectorIndex++) {
 					hackstackSelector = haystackSelectorPath[haystackSelectorIndex];
 
-					for(hackstackElementIndex = 0; hackstackElementIndex < hackstackSelector.elements.length; hackstackElementIndex++) {
+					for (hackstackElementIndex = 0; hackstackElementIndex < hackstackSelector.elements.length; hackstackElementIndex++) {
 
 						haystackElement = hackstackSelector.elements[hackstackElementIndex];
 
@@ -4620,7 +4711,7 @@ var Less = (function(){
 								initialCombinator: haystackElement.combinator});
 						}
 
-						for(i = 0; i < potentialMatches.length; i++) {
+						for (i = 0; i < potentialMatches.length; i++) {
 							potentialMatch = potentialMatches[i];
 
 							// selectors add " " onto the first element. When we use & it joins the selectors together, but if we don't
@@ -4690,7 +4781,7 @@ var Less = (function(){
 					if (!(elementValue2 instanceof tree.Selector) || elementValue1.elements.length !== elementValue2.elements.length) {
 						return false;
 					}
-					for(var i = 0; i  < elementValue1.elements.length; i++) {
+					for (var i = 0; i  < elementValue1.elements.length; i++) {
 						if (elementValue1.elements[i].combinator.value !== elementValue2.elements[i].combinator.value) {
 							if (i !== 0 || (elementValue1.elements[i].combinator.value || ' ') !== (elementValue2.elements[i].combinator.value || ' ')) {
 								return false;
@@ -4952,7 +5043,7 @@ var Less = (function(){
 
 			checkPropertiesInRoot: function(rules) {
 				var ruleNode;
-				for(var i = 0; i < rules.length; i++) {
+				for (var i = 0; i < rules.length; i++) {
 					ruleNode = rules[i];
 					if (ruleNode instanceof tree.Rule && !ruleNode.variable) {
 						throw { message: "properties must be inside selector blocks, they cannot be in the root.",
@@ -4974,7 +5065,7 @@ var Less = (function(){
 								if (p[0].elements[0].combinator.value === ' ') {
 									p[0].elements[0].combinator = new(tree.Combinator)('');
 								}
-								for(i = 0; i < p.length; i++) {
+								for (i = 0; i < p.length; i++) {
 									if (p[i].getIsReferenced() && p[i].getIsOutput()) {
 										return true;
 									}
@@ -5039,7 +5130,7 @@ var Less = (function(){
 				var ruleCache = {},
 					ruleList, rule, i;
 
-				for(i = rules.length - 1; i >= 0 ; i--) {
+				for (i = rules.length - 1; i >= 0 ; i--) {
 					rule = rules[i];
 					if (rule instanceof tree.Rule) {
 						if (!ruleCache[rule.name]) {
@@ -5106,8 +5197,8 @@ var Less = (function(){
 						var spacedGroups = [];
 						var lastSpacedGroup = [];
 						parts.map(function (p) {
-						if (p.merge === "+") {
-							if (lastSpacedGroup.length > 0) {
+							if (p.merge === "+") {
+								if (lastSpacedGroup.length > 0) {
 									spacedGroups.push(toExpression(lastSpacedGroup));
 								}
 								lastSpacedGroup = [];
@@ -5187,7 +5278,7 @@ var Less = (function(){
 				this.type = e.type || 'Syntax';
 				this.filename = filename;
 				this.index = e.index;
-				this.line = typeof(line) === 'number' ? line + 1 : null;
+				this.line = typeof line === 'number' ? line + 1 : null;
 				this.callLine = callLine + 1;
 				this.callExtract = lines[callLine];
 				this.column = col;
@@ -5411,7 +5502,7 @@ var Less = (function(){
 				//
 				skipWhitespace(length);
 
-				if(typeof(match) === 'string') {
+				if (typeof match === 'string') {
 					return match;
 				} else {
 					return match.length === 1 ? match[0] : match;
@@ -5430,7 +5521,7 @@ var Less = (function(){
 				}
 
 				skipWhitespace(m[0].length);
-				if(typeof m === "string") {
+				if (typeof m === "string") {
 					return m;
 				}
 
@@ -5523,7 +5614,7 @@ var Less = (function(){
 			// Same as $(), but don't change the state of the parser,
 			// just return the match.
 			parserInput.peek = function(tok) {
-				if (typeof(tok) === 'string') {
+				if (typeof tok === 'string') {
 					return input.charAt(parserInput.i) === tok;
 				} else {
 					return tok.test(current);
@@ -5650,7 +5741,7 @@ var Less = (function(){
 				if (result) {
 					return result;
 				}
-				error(msg || (typeof(arg) === 'string' ? "expected '" + arg + "' got '" + parserInput.currentChar() + "'"
+				error(msg || (typeof arg === 'string' ? "expected '" + arg + "' got '" + parserInput.currentChar() + "'"
 													   : "unexpected token"));
 			}
 
@@ -5695,17 +5786,26 @@ var Less = (function(){
 				// @param [additionalData] An optional map which can contains vars - a map (key, value) of variables to apply
 				//
 				parse: function (str, callback/*, additionalData*/) {
-					var root, error = null/*, globalVars, modifyVars, preText = ""*/;
+					var root, error = null/*, globalVars, modifyVars, ignored, preText = ""*/;
 
 //					globalVars = (additionalData && additionalData.globalVars) ? Parser.serializeVars(additionalData.globalVars) + '\n' : '';
 //					modifyVars = (additionalData && additionalData.modifyVars) ? '\n' + Parser.serializeVars(additionalData.modifyVars) : '';
-//
-//					if (globalVars || (additionalData && additionalData.banner)) {
-//						preText = ((additionalData && additionalData.banner) ? additionalData.banner : "") + globalVars;
-//						imports.contentsIgnoredChars[fileInfo.filename] = preText.length;
+
+//					if (context.pluginManager) {
+//						var preProcessors = context.pluginManager.getPreProcessors();
+//						for (var i = 0; i < preProcessors.length; i++) {
+//							str = preProcessors[i].process(str, { context: context, imports: imports, fileInfo: fileInfo });
+//						}
 //					}
 
-					str = str.replace(/\r\n/g, '\n');
+//					if (globalVars || (additionalData && additionalData.banner)) {
+//						preText = ((additionalData && additionalData.banner) ? additionalData.banner : "") + globalVars;
+//						ignored = imports.contentsIgnoredChars;
+//						ignored[fileInfo.filename] = ignored[fileInfo.filename] || 0;
+//						ignored[fileInfo.filename] += preText.length;
+//					}
+
+					str = str.replace(/\r\n?/g, '\n');
 					// Remove potential UTF Byte Order Mark
 					str = /*preText + */str.replace(/^\uFEFF/, '')/* + modifyVars*/;
 					imports.contents[fileInfo.filename] = str;
@@ -5836,7 +5936,7 @@ var Less = (function(){
 
 						while (true)
 						{
-							while(true) {
+							while (true) {
 								node = this.comment();
 								if (!node) { break; }
 								root.push(node);
@@ -5935,7 +6035,7 @@ var Less = (function(){
 
 							if (nameLC === 'alpha') {
 								alpha = parsers.alpha();
-								if(alpha) {
+								if (alpha) {
 									return alpha;
 								}
 							}
@@ -6150,8 +6250,14 @@ var Less = (function(){
 							elements = null;
 							while (! (option = parserInput.$re(/^(all)(?=\s*(\)|,))/))) {
 								e = this.element();
-								if (!e) { break; }
-								if (elements) { elements.push(e); } else { elements = [ e ]; }
+								if (!e) {
+									break;
+								}
+								if (elements) {
+									elements.push(e);
+								} else {
+									elements = [ e ];
+								}
 							}
 
 							option = option && option[1];
@@ -6159,9 +6265,12 @@ var Less = (function(){
 								error("Missing target selector for :extend().");
 							}
 							extend = new(tree.Extend)(new(tree.Selector)(elements), option, index);
-							if (extendList) { extendList.push(extend); } else { extendList = [ extend ]; }
-
-						} while(parserInput.$char(","));
+							if (extendList) {
+								extendList.push(extend);
+							} else {
+								extendList = [ extend ];
+							}
+						} while (parserInput.$char(","));
 
 						expect(/^\)/);
 
@@ -6209,7 +6318,11 @@ var Less = (function(){
 									break;
 								}
 								elem = new(tree.Element)(c, e, elemIndex, fileInfo);
-								if (elements) { elements.push(elem); } else { elements = [ elem ]; }
+								if (elements) {
+									elements.push(elem);
+								} else {
+									elements = [ elem ];
+								}
 								c = parserInput.$char('>');
 							}
 
@@ -6550,11 +6663,19 @@ var Less = (function(){
 							} else if (condition) {
 								error("CSS guard can only be used at the end of selector");
 							} else if (extendList) {
-								if (allExtends) { allExtends = allExtends.concat(extendList); } else { allExtends = extendList; }
+								if (allExtends) {
+									allExtends = allExtends.concat(extendList);
+								} else {
+									allExtends = extendList;
+								}
 							} else {
 								if (allExtends) { error("Extend can only be used at the end of selector"); }
 								c = parserInput.currentChar();
-								if (elements) { elements.push(e); } else { elements = [ e ]; }
+								if (elements) {
+									elements.push(e);
+								} else {
+									elements = [ e ];
+								}
 								e = null;
 							}
 							if (c === '{' || c === '}' || c === ';' || c === ',' || c === ')') {
@@ -6629,7 +6750,11 @@ var Less = (function(){
 							if (!s) {
 								break;
 							}
-							if (selectors) { selectors.push(s); } else { selectors = [ s ]; }
+							if (selectors) {
+								selectors.push(s);
+							} else {
+								selectors = [ s ];
+							}
 							parserInput.commentStore.length = 0;
 							if (s.condition && selectors.length > 1) {
 								error("Guards are only currently allowed on a single selector.");
@@ -6766,11 +6891,11 @@ var Less = (function(){
 									case "css":
 										optionName = "less";
 										value = false;
-									break;
+										break;
 									case "once":
 										optionName = "multiple";
 										value = false;
-									break;
+										break;
 								}
 								options[optionName] = value;
 								if (! parserInput.$char(',')) { break; }
@@ -6981,7 +7106,7 @@ var Less = (function(){
 								expressions.push(e);
 								if (! parserInput.$char(',')) { break; }
 							}
-						} while(e);
+						} while (e);
 
 						if (expressions.length > 0) {
 							return new(tree.Value)(expressions);
@@ -7244,7 +7369,7 @@ var Less = (function(){
 		function number(n) {
 			if (n instanceof Dimension) {
 				return parseFloat(n.unit.is('%') ? n.value / 100 : n.value);
-			} else if (typeof(n) === 'number') {
+			} else if (typeof n === 'number') {
 				return n;
 			} else {
 				throw {
@@ -7275,10 +7400,18 @@ var Less = (function(){
 			hsla: function (h, s, l, a) {
 				function hue(h) {
 					h = h < 0 ? h + 1 : (h > 1 ? h - 1 : h);
-					if      (h * 6 < 1) { return m1 + (m2 - m1) * h * 6; }
-					else if (h * 2 < 1) { return m2; }
-					else if (h * 3 < 2) { return m1 + (m2 - m1) * (2 / 3 - h) * 6; }
-					else                { return m1; }
+					if (h * 6 < 1) {
+						return m1 + (m2 - m1) * h * 6;
+					}
+					else if (h * 2 < 1) {
+						return m2;
+					}
+					else if (h * 3 < 2) {
+						return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+					}
+					else {
+						return m1;
+					}
 				}
 
 				h = (number(h) % 360) / 360;
@@ -7645,7 +7778,7 @@ var Less = (function(){
 		}
 
 		mathFunctions.round = function (n, f) {
-			var fraction = typeof(f) === "undefined" ? 0 : f.value;
+			var fraction = typeof f === "undefined" ? 0 : f.value;
 			return _math(function(num) { return num.toFixed(fraction); }, null, n);
 		};
 
@@ -7671,7 +7804,7 @@ var Less = (function(){
 			for (i = 0; i < args.length; i++) {
 				current = args[i];
 				if (!(current instanceof Dimension)) {
-					if(Array.isArray(args[i].value)) {
+					if (Array.isArray(args[i].value)) {
 						Array.prototype.push.apply(args, Array.prototype.slice.call(args[i].value));
 					}
 					continue;
@@ -7682,7 +7815,7 @@ var Less = (function(){
 				unitClone = unit !== "" && unitClone === undefined ? current.unit.toString() : unitClone;
 				j = values[""] !== undefined && unit !== "" && unit === unitStatic ? values[""] : values[unit];
 				if (j === undefined) {
-					if(unitStatic !== undefined && unit !== unitStatic) {
+					if (unitStatic !== undefined && unit !== unitStatic) {
 						throw{ type: "Argument", message: "incompatible types" };
 					}
 					values[unit] = order.length;
@@ -7874,7 +8007,7 @@ var Less = (function(){
 			functionRegistry = require('/functions/function-registry');
 
 		var isa = function (n, Type) {
-			return (n instanceof Type) ? Keyword.True : Keyword.False;
+				return (n instanceof Type) ? Keyword.True : Keyword.False;
 			},
 			isunit = function (n, unit) {
 				if (unit === undefined) {
@@ -7885,6 +8018,19 @@ var Less = (function(){
 					throw { type: "Argument", message: "Second argument to isunit should be a unit or a string." };
 				}
 				return (n instanceof Dimension) && n.unit.is(unit) ? Keyword.True : Keyword.False;
+			},
+			getItemsFromNode = function(node) {
+				// handle non-array values as an array of length 1
+				// return 'undefined' if index is invalid
+				var items = Array.isArray(node.value) ?
+					node.value : Array(node);
+
+				return items.filter(function(item) {
+					if (item.type === "Comment") {
+						return false;
+					}
+					return true;
+				});
 			};
 		functionRegistry.addMultiple({
 			isruleset: function (n) {
@@ -7916,7 +8062,7 @@ var Less = (function(){
 			},
 			isunit: isunit,
 			unit: function (val, unit) {
-				if(!(val instanceof Dimension)) {
+				if (!(val instanceof Dimension)) {
 					throw { type: "Argument",
 						message: "the first argument to unit must be a number" +
 							(val instanceof Operation ? ". Have you forgotten parenthesis?" : "") };
@@ -7937,14 +8083,11 @@ var Less = (function(){
 			},
 			extract: function(values, index) {
 				index = index.value - 1; // (1-based index)
-				// handle non-array values as an array of length 1
-				// return 'undefined' if index is invalid
-				return Array.isArray(values.value) ?
-					values.value[index] : Array(values)[index];
+
+				return getItemsFromNode(values)[index];
 			},
 			length: function(values) {
-				var n = Array.isArray(values.value) ? values.value.length : 1;
-				return new Dimension(n);
+				return new Dimension(getItemsFromNode(values).length);
 			}
 		});
 	};
@@ -8001,7 +8144,7 @@ var Less = (function(){
 			//     ])
 			//   )
 			//
-			if (typeof(variables) === 'object' && !Array.isArray(variables)) {
+			if (typeof variables === 'object' && !Array.isArray(variables)) {
 				variables = Object.keys(variables).map(function (k) {
 					var value = variables[k];
 
@@ -8025,7 +8168,7 @@ var Less = (function(){
 
 //			if (options.pluginManager) {
 //				var pluginVisitors = options.pluginManager.getVisitors();
-//				for(i = 0; i < pluginVisitors.length; i++) {
+//				for (i = 0; i < pluginVisitors.length; i++) {
 //					var pluginVisitor = pluginVisitors[i];
 //					if (pluginVisitor.isPreEvalVisitor) {
 //						preEvalVisitors.push(pluginVisitor);
@@ -8039,13 +8182,13 @@ var Less = (function(){
 //				}
 //			}
 
-			for(i = 0; i < preEvalVisitors.length; i++) {
+			for (i = 0; i < preEvalVisitors.length; i++) {
 				preEvalVisitors[i].run(root);
 			}
 
 			evaldRoot = root.eval(evalEnv);
 
-			for(i = 0; i < visitors.length; i++) {
+			for (i = 0; i < visitors.length; i++) {
 				visitors[i].run(evaldRoot);
 			}
 
@@ -8100,7 +8243,7 @@ var Less = (function(){
 
 //				if (options.pluginManager) {
 //					var postProcessors = options.pluginManager.getPostProcessors();
-//					for(var i = 0; i < postProcessors.length; i++) {
+//					for (var i = 0; i < postProcessors.length; i++) {
 //						result.css = postProcessors[i].process(result.css, { sourceMap: sourceMapBuilder, options: options, imports: this.imports });
 //					}
 //				}
@@ -8109,7 +8252,7 @@ var Less = (function(){
 //				}
 
 				result.imports = [];
-				for(var file in this.imports.files) {
+				for (var file in this.imports.files) {
 					if (this.imports.files.hasOwnProperty(file) && file !== this.imports.rootFilename) {
 						result.imports.push(file);
 					}
@@ -8168,12 +8311,12 @@ var Less = (function(){
 
 					var importedEqualsRoot = fullPath === importManager.rootFilename;
 					if (importOptions.optional && e) {
-					callback(null, {rules:[]}, false, null);
+						callback(null, {rules:[]}, false, null);
 					}
 					else {
-					importManager.files[fullPath] = root;
-					if (e && !importManager.error) { importManager.error = e; }
-					callback(e, root, importedEqualsRoot, fullPath);
+						importManager.files[fullPath] = root;
+						if (e && !importManager.error) { importManager.error = e; }
+						callback(e, root, importedEqualsRoot, fullPath);
 					}
 				};
 
@@ -8208,7 +8351,7 @@ var Less = (function(){
 					// - If path of imported file is '../mixins.less' and rootpath is 'less/',
 					//   then rootpath should become 'less/../'
 					newFileInfo.currentDirectory = fileManager.getPath(resolvedFilename);
-					if(newFileInfo.relativeUrls) {
+					if (newFileInfo.relativeUrls) {
 						newFileInfo.rootpath = fileManager.join(
 							(importManager.context.rootpath || ""),
 							fileManager.pathDiff(newFileInfo.currentDirectory, newFileInfo.entryPath));
@@ -8256,111 +8399,21 @@ var Less = (function(){
 	};
 	//#endregion
 	
-//	//#region URL: /plugin-manager
-//	modules['/plugin-manager'] = function () {
-//		/**
-//		 * Plugin Manager
-//		 */
-//		var PluginManager = function(less) {
-//			this.less = less;
-//			this.visitors = [];
-//			this.postProcessors = [];
-//			this.installedPlugins = [];
-//			this.fileManagers = [];
-//		};
-//		/**
-//		 * Adds all the plugins in the array
-//		 * @param {Array} plugins
-//		 */
-//		PluginManager.prototype.addPlugins = function(plugins) {
-//			if (plugins) {
-//				for(var i = 0;i < plugins.length; i++) {
-//					this.addPlugin(plugins[i]);
-//				}
-//			}
-//		};
-//		/**
-//		 *
-//		 * @param plugin
-//		 */
-//		PluginManager.prototype.addPlugin = function(plugin) {
-//			this.installedPlugins.push(plugin);
-//			plugin.install(this.less, this);
-//		};
-//		/**
-//		 * Adds a visitor. The visitor object has options on itself to determine
-//		 * when it should run.
-//		 * @param visitor
-//		 */
-//		PluginManager.prototype.addVisitor = function(visitor) {
-//			this.visitors.push(visitor);
-//		};
-//		/**
-//		 * Adds a post processor object
-//		 * @param {object} postProcessor
-//		 * @param {number} priority - guidelines 1 = before compression, 1000 = compression, 2000 = after compression
-//		 */
-//		PluginManager.prototype.addPostProcessor = function(postProcessor, priority) {
-//			var indexToInsertAt;
-//			for(indexToInsertAt = 0; indexToInsertAt < this.postProcessors.length; indexToInsertAt++) {
-//				if (this.postProcessors[indexToInsertAt].priority >= priority) {
-//					break;
-//				}
-//			}
-//			this.postProcessors.splice(indexToInsertAt, 0, {postProcessor: postProcessor, priority: priority});
-//		};
-//		/**
-//		 *
-//		 * @param manager
-//		 */
-//		PluginManager.prototype.addFileManager = function(manager) {
-//			this.fileManagers.push(manager);
-//		};
-//		/**
-//		 *
-//		 * @returns {Array}
-//		 * @private
-//		 */
-//		PluginManager.prototype.getPostProcessors = function() {
-//			var postProcessors = [];
-//			for(var i = 0; i < this.postProcessors.length; i++) {
-//				postProcessors.push(this.postProcessors[i].postProcessor);
-//			}
-//			return postProcessors;
-//		};
-//		/**
-//		 *
-//		 * @returns {Array}
-//		 * @private
-//		 */
-//		PluginManager.prototype.getVisitors = function() {
-//			return this.visitors;
-//		};
-//		/**
-//		 *
-//		 * @returns {Array}
-//		 * @private
-//		 */
-//		PluginManager.prototype.getFileManagers = function() {
-//			return this.fileManagers;
-//		};
-//
-//		return PluginManager;
-//	};
-//	//#endregion
-	
 	//#region URL: /render
 	modules['/render'] = function () {
-//		var PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise;
+//		var PromiseConstructor;
 
 		var exports = function(environment, ParseTree, ImportManager) {
 			var render = function (input, options, callback) {
-				if (typeof(options) === 'function') {
+				if (typeof options === 'function') {
 					callback = options;
 					options = {};
 				}
 
 //				if (!callback) {
+//					if (!PromiseConstructor) {
+//						PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise;
+//					}
 //					var self = this;
 //					return new PromiseConstructor(function (resolve, reject) {
 //						render.call(self, input, options, function(err, output) {
@@ -8396,7 +8449,7 @@ var Less = (function(){
 	
 	//#region URL: /parse
 	modules['/parse'] = function () {
-		var /*PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise,*/
+		var /*PromiseConstructor,*/
 			contexts = require('/contexts'),
 			Parser = require('/parser/parser')/*,
 			PluginManager = require('/plugin-manager')*/;
@@ -8405,12 +8458,15 @@ var Less = (function(){
 			var parse = function (input, options, callback) {
 				options = options || {};
 
-				if (typeof(options) === 'function') {
+				if (typeof options === 'function') {
 					callback = options;
 					options = {};
 				}
 
 //				if (!callback) {
+//					if (!PromiseConstructor) {
+//						PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise;
+//					}
 //					var self = this;
 //					return new PromiseConstructor(function (resolve, reject) {
 //						parse.call(self, input, options, function(err, output) {
@@ -8466,54 +8522,13 @@ var Less = (function(){
 	};
 	//#endregion
 
-//	//#region URL: /logger
-//	modules['/logger'] = function () {
-//		var exports = {
-//			error: function(msg) {
-//				this._fireEvent("error", msg);
-//			},
-//			warn: function(msg) {
-//				this._fireEvent("warn", msg);
-//			},
-//			info: function(msg) {
-//				this._fireEvent("info", msg);
-//			},
-//			debug: function(msg) {
-//				this._fireEvent("debug", msg);
-//			},
-//			addListener: function(listener) {
-//				this._listeners.push(listener);
-//			},
-//			removeListener: function(listener) {
-//				for(var i = 0; i < this._listeners.length; i++) {
-//					if (this._listeners[i] === listener) {
-//						this._listeners.splice(i, 1);
-//						return;
-//					}
-//				}
-//			},
-//			_fireEvent: function(type, msg) {
-//				for(var i = 0; i < this._listeners.length; i++) {
-//					var logFunction = this._listeners[i][type];
-//					if (logFunction) {
-//						logFunction(msg);
-//					}
-//				}
-//			},
-//			_listeners: []
-//		};
-//
-//		return exports;
-//	};
-//	//#endregion
-
 	//#region URL: /
 	modules['/'] = function () {
 		var exports = function(environment, fileManagers) {
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 3, 1],
+				version: [2, 4, 0],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),

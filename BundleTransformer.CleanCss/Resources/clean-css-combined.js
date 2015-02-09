@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.0.8
+ * Clean-css v3.0.10
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -155,6 +155,7 @@ var CleanCss = (function(){
 			var isSpecial;
 			var wasSpecial;
 			var current;
+			var last;
 			var secondToLast;
 			var wasCloseParenthesis;
 			var isEscape;
@@ -205,8 +206,9 @@ var CleanCss = (function(){
 				isSpecial = current === ':' || current === '[' || current === ']' || current === ',' || current === '(' || current === ')';
 
 				if (wasWhitespace && isSpecial) {
+				  last = buffer[buffer.length - 1];
 				  secondToLast = buffer[buffer.length - 2];
-				  if (secondToLast != '+' && secondToLast != '-' && secondToLast != '/' && secondToLast != '*')
+				  if (secondToLast != '+' && secondToLast != '-' && secondToLast != '/' && secondToLast != '*' && last != '(')
 					buffer.pop();
 				  buffer.push(current);
 				} else if (isWhitespace && wasSpecial && !wasCloseParenthesis) {
@@ -1698,6 +1700,7 @@ var CleanCss = (function(){
 			var repeat = result[3];
 			var attachment = result[4];
 			var color = result[5];
+			var repeatSet = false;
 			var positionSet = false;
 
 			// Take care of inherit
@@ -1719,7 +1722,12 @@ var CleanCss = (function(){
 			  if (validator.isValidBackgroundAttachment(currentPart)) {
 				attachment.value = currentPart;
 			  } else if (validator.isValidBackgroundRepeat(currentPart)) {
-				repeat.value = currentPart;
+				if (repeatSet) {
+				  repeat.value = currentPart + ' ' + repeat.value;
+				} else {
+				  repeat.value = currentPart;
+				  repeatSet = true;
+				}
 			  } else if (validator.isValidBackgroundPositionPart(currentPart) || validator.isValidBackgroundSizePart(currentPart)) {
 				if (i > 0) {
 				  var previousPart = parts[i - 1];
@@ -3319,7 +3327,7 @@ var CleanCss = (function(){
 				callback: collectReducedBodies
 			  });
 
-			  if (reducedBodies[reducedBodies.length - 1].list.length != reducedBodies[0].list.length)
+			  if (reducedBodies[reducedBodies.length - 1].list.join(';') != reducedBodies[0].list.join(';'))
 				continue allSelectors;
 			}
 

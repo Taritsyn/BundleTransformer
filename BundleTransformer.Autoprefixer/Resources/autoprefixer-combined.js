@@ -1,5 +1,5 @@
 /*!
- * Autoprefixer v5.1.3
+ * Autoprefixer v5.1.5
  * https://github.com/postcss/autoprefixer
  * https://github.com/ai/autoprefixer-rails
  *
@@ -452,7 +452,11 @@ var Autoprefixer = (function(){var define,module,exports;return (function e(t,n,
   });
 
   feature(require('caniuse-db/features-json/css-masks'), function(browsers) {
-    return prefix('clip-path', 'mask', 'mask-clip', 'mask-composite', 'mask-image', 'mask-origin', 'mask-position', 'mask-repeat', 'mask-size', {
+    prefix('mask-clip', 'mask-composite', 'mask-image', 'mask-origin', 'mask-repeat', {
+      browsers: browsers
+    });
+    return prefix('clip-path', 'mask', 'mask-position', 'mask-size', {
+      transition: true,
       browsers: browsers
     });
   });
@@ -664,13 +668,14 @@ var Autoprefixer = (function(){var define,module,exports;return (function e(t,n,
     };
 
     Browsers.prototype.prefix = function(browser) {
-      var name, version, _ref;
+      var data, name, prefix, version, _ref;
       _ref = browser.split(' '), name = _ref[0], version = _ref[1];
-      if (name === 'opera' && parseFloat(version) < 15) {
-        return '-o-';
-      } else {
-        return '-' + this.data[name].prefix + '-';
+      data = this.data[name];
+      if (data.prefix_exceptions) {
+        prefix = data.prefix_exceptions[version];
       }
+      prefix || (prefix = data.prefix);
+      return '-' + prefix + '-';
     };
 
     Browsers.prototype.isSelected = function(browser) {
