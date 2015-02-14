@@ -112,7 +112,7 @@
 
 				_scriptEngine = scriptRuntime.GetRubyEngine();
 				_scriptEngine.SetSearchPaths(new List<string>
-				{ 
+				{
 					Path.Combine(@"R:\", IRONRUBY_FOLDER_NAME),
 					Path.Combine(@"R:\", RUBY_FOLDER_NAME)
 				});
@@ -139,7 +139,7 @@
 		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Translated Sass- or SCSS-code</returns>
-		public string Compile(string content, string path, DependencyCollection dependencies, 
+		public string Compile(string content, string path, DependencyCollection dependencies,
 			CompilationOptions options = null)
 		{
 			string currentOptionsString = (options != null) ?
@@ -150,7 +150,7 @@
 				Initialize();
 
 				_platformAdaptationLayer.Dependencies = dependencies;
-				
+
 				string newContent;
 				try
 				{
@@ -186,17 +186,19 @@
 		{
 			var stringBuilder = new StringBuilder();
 			stringBuilder.Append("{");
-			stringBuilder.AppendFormat(":cache => {0}, ", "false");
-			stringBuilder.AppendFormat(":filename => '{0}',", path);
-			stringBuilder.AppendFormat(":syntax => :{0}, ", 
-				(options.SyntaxType == SyntaxType.Sass) ? "sass" : "scss");
 			stringBuilder.AppendFormat(":style => :{0}, ",
 				options.EnableNativeMinification ? "compressed" : "expanded");
-			stringBuilder.AppendFormat(":line_numbers => {0}, ", 
+			stringBuilder.AppendFormat(":syntax => :{0}, ",
+				(options.SyntaxType == SyntaxType.Sass) ? "sass" : "scss");
+			stringBuilder.AppendFormat(":cache => {0}, ", "false");
+			stringBuilder.AppendFormat(":full_exception => {0}, ", "false");
+			stringBuilder.AppendFormat(":filename => '{0}', ", path);
+			stringBuilder.AppendFormat(":sourcemap => :{0}, ", "none");
+			stringBuilder.AppendFormat(":line_numbers => {0}, ",
 				options.LineNumbers.ToString().ToLowerInvariant());
-			stringBuilder.AppendFormat(":trace_selectors => {0}, ", 
+			stringBuilder.AppendFormat(":trace_selectors => {0}, ",
 				options.TraceSelectors.ToString().ToLowerInvariant());
-			stringBuilder.AppendFormat(":debug_info => {0}", 
+			stringBuilder.AppendFormat(":debug_info => {0}",
 				options.DebugInfo.ToString().ToLowerInvariant());
 			stringBuilder.Append("}");
 

@@ -130,6 +130,8 @@
       <Link>BundleTransformer.snk</Link>
     </None>
     <None Include="app.config" />
+    <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.min.rb" />
+    <Content Include="Resources\ruby\1.9.1\rational18.rb" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\LICENSE.txt" />
@@ -150,7 +152,7 @@ for /f "delims=" %25%25A in ('dir "$(ProjectDir)\Resources\*.rb" /b/s') do (
 	
 	if /i not !inputFileExtension!==!outputFileExtension! (
 		del "!outputFilePath!"
-		start /b/wait RBMin.exe "!inputFilePath!" -o "!outputFilePath!" -k -r
+		start /b/wait RBMin.exe "!inputFilePath!" -o "!outputFilePath!" -k
 	)
 )</PreBuildEvent>
   </PropertyGroup>

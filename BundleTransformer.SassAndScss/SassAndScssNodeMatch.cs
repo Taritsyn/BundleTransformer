@@ -22,7 +22,7 @@
 		/// <summary>
 		/// Constructs instance of Sass and SCSS node match
 		/// </summary>
-		/// <param name="position">Position in the original string where 
+		/// <param name="position">Position in the original string where
 		/// the first character of the captured substring was found</param>
 		/// <param name="length">Length of the captured substring</param>
 		/// <param name="nodeType">Type of Sass- and SCSS-node</param>

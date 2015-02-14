@@ -28,7 +28,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to output the full trace of imports 
+		/// Gets or sets a flag for whether to output the full trace of imports
 		/// and mixins before each selector
 		/// </summary>
 		[ConfigurationProperty("traceSelectors", DefaultValue = false)]

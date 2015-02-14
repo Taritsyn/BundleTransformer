@@ -61,7 +61,7 @@
 
 			if (SassAndScssFileExtensionHelpers.IsRuby(extension))
 			{
-				Stream rubyResourceStream = GetResourceStream(path);
+				Stream rubyResourceStream = GetRubyResourceStream(path);
 				if (rubyResourceStream != null)
 				{
 					return true;
@@ -78,7 +78,7 @@
 			return base.FileExists(path);
 		}
 
-		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access, 
+		public override Stream OpenInputFileStream(string path, FileMode mode, FileAccess access,
 			FileShare share, int bufferSize)
 		{
 			Stream fileStream = GetVirtualFileStream(path);
@@ -107,7 +107,7 @@
 
 			if (SassAndScssFileExtensionHelpers.IsRuby(extension))
 			{
-				fileStream = GetResourceStream(path);
+				fileStream = GetRubyResourceStream(path);
 				if (fileStream != null)
 				{
 					return fileStream;
@@ -135,17 +135,17 @@
 		}
 
 		/// <summary>
-		/// Gets a specified embedded resource from this assembly
+		/// Gets a specified embedded Ruby resource from this assembly
 		/// </summary>
-		/// <param name="path">File path</param>
-		/// <returns>A System.IO.Stream representing the embedded resource;
-		/// null if no resources were specified during compilation, 
+		/// <param name="path">RB-file path</param>
+		/// <returns>A System.IO.Stream representing the embedded Ruby resource;
+		/// null if no resources were specified during compilation,
 		/// or if the resource is not visible to the caller</returns>
-		private Stream GetResourceStream(string path)
+		private Stream GetRubyResourceStream(string path)
 		{
 			Stream resourceStream;
 			Assembly assembly = Assembly.GetExecutingAssembly();
-			string resourceName = PathToResourceName(path);
+			string resourceName = PathToRubyResourceName(path);
 
 			try
 			{
@@ -157,6 +157,24 @@
 			}
 
 			return resourceStream;
+		}
+
+		/// <summary>
+		/// Converts a RB-file path to the embedded Ruby resource name
+		/// </summary>
+		/// <param name="path">RB-file path</param>
+		/// <returns>Resource name</returns>
+		private string PathToRubyResourceName(string path)
+		{
+			string processedPath = Path.ChangeExtension(path, ".min.rb")
+				.Replace("1.9.1", "_1._9._1")
+				.Replace('\\', '.')
+				.Replace('/', '.')
+				.Replace(@"R:", _resourcesNamespace)
+				.TrimStart('.')
+				;
+
+			return processedPath;
 		}
 
 		/// <summary>
@@ -174,21 +192,6 @@
 			}
 
 			return assetFileStream;
-		}
-
-		/// <summary>
-		/// Converts file path to the resource name
-		/// </summary>
-		/// <param name="path">File path</param>
-		/// <returns>Resource name</returns>
-		private string PathToResourceName(string path) {
-			return path
-				.Replace("1.9.1", "_1._9._1")
-				.Replace('\\', '.')
-				.Replace('/', '.')
-				.Replace(@"R:", _resourcesNamespace)
-				.TrimStart('.')
-				;
 		}
 
 		#region Disabled methods

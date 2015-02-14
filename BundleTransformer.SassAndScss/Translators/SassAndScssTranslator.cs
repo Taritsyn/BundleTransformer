@@ -20,7 +20,7 @@
 	using Compilers;
 	using Configuration;
 	using SassAndScssFileExtensionHelpers = Helpers.FileExtensionHelpers;
-	
+
 	/// <summary>
 	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
 	/// </summary>
@@ -45,7 +45,7 @@
 		/// </summary>
 		private static readonly Regex _scssServerImportRuleRegex =
 			new Regex(@"@import\s*" +
-				@"(?<urlList>(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" + 
+				@"(?<urlList>(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>)" +
 				@"(?:,\s*(?<quote>'|"")([\w \-+.:,;/?&=%~#$@()]+)(\k<quote>))*)",
 				RegexOptions.IgnoreCase);
 
@@ -113,7 +113,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to output the full trace of imports 
+		/// Gets or sets a flag for whether to output the full trace of imports
 		/// and mixins before each selector
 		/// </summary>
 		public bool TraceSelectors
@@ -147,8 +147,8 @@
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="sassAndScssConfig">Configuration settings of Sass- and SCSS-translator</param>
-		public SassAndScssTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper, 
-			IRelativePathResolver relativePathResolver, 
+		public SassAndScssTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			IRelativePathResolver relativePathResolver,
 			SassAndScssSettings sassAndScssConfig)
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
@@ -162,7 +162,7 @@
 			DebugInfo = sassAndScssConfig.DebugInfo;
 		}
 
-		
+
 		/// <summary>
 		/// Translates code of asset written on Sass or SCSS to CSS-code
 		/// </summary>
@@ -349,7 +349,7 @@
 
 			MatchCollection urlRuleMatches = CommonRegExps.CssUrlRuleRegex.Matches(processedContent);
 
-			if (serverImportRuleMatches.Count == 0 && clientImportRuleMatches.Count == 0 
+			if (serverImportRuleMatches.Count == 0 && clientImportRuleMatches.Count == 0
 				&& urlRuleMatches.Count == 0)
 			{
 				return stylesheet;
@@ -457,7 +457,7 @@
 						List<string> processedServerImportUrls;
 
 						string serverImportRule = match.Value;
-						string processedServerImportRule = ProcessServerImportRule(assetUrl, assetFileExtension, 
+						string processedServerImportRule = ProcessServerImportRule(assetUrl, assetFileExtension,
 							urlList, out processedServerImportUrls);
 
 						if (processedServerImportUrls.Count > 0)
@@ -498,7 +498,7 @@
 						GroupCollection urlRuleGroups = match.Groups;
 
 						string url = urlRuleGroups["url"].Value.Trim();
-						string quote = urlRuleGroups["quote"].Success ? 
+						string quote = urlRuleGroups["quote"].Success ?
 							urlRuleGroups["quote"].Value : string.Empty;
 
 						string urlRule = match.Value;
@@ -555,7 +555,7 @@
 		/// <param name="assetUrls">List of Sass- or SCSS-asset URLs</param>
 		/// <param name="processedImportUrls">List of processed URLs from Sass- and SCSS-imports</param>
 		/// <returns>Processed Sass or SCSS <code>@import</code> rule</returns>
-		private string ProcessServerImportRule(string parentAssetUrl, string parentAssetFileExtension, 
+		private string ProcessServerImportRule(string parentAssetUrl, string parentAssetFileExtension,
 			IEnumerable<string> assetUrls, out List<string> processedImportUrls)
 		{
 			processedImportUrls = new List<string>();
@@ -737,12 +737,12 @@
 		}
 
 		/// <summary>
-		/// Fills the list of Sass- and SCSS-files, that were added to a Sass- or SCSS-asset 
+		/// Fills the list of Sass- and SCSS-files, that were added to a Sass- or SCSS-asset
 		/// by using the<code>@import</code> rules
 		/// </summary>
 		/// <param name="rootAssetUrl">URL of root Sass- or SCSS-asset file</param>
 		/// <param name="parentStylesheet">Parent Sass- and SCSS-stylesheet</param>
-		/// <param name="dependencies">List of LESS-files, that were added to a 
+		/// <param name="dependencies">List of LESS-files, that were added to a
 		/// Sass- or SCSS-asset by using the <code>@import</code> rules</param>
 		public void FillDependencies(string rootAssetUrl, SassAndScssStylesheet parentStylesheet,
 			DependencyCollection dependencies)
@@ -762,7 +762,7 @@
 					if (SassAndScssStylesheetExists(dependencyUrl))
 					{
 						SassAndScssStylesheet stylesheet = GetSassAndScssStylesheet(dependencyUrl);
-						
+
 						var dependency = new Dependency(dependencyUrl, stylesheet.Content);
 						dependencies.Add(dependency);
 
@@ -836,7 +836,7 @@
 			string assetUrl = asset.Url;
 			string assetContent = asset.Content;
 			SassAndScssStylesheet stylesheet = PreprocessStylesheet(assetContent, assetUrl);
-			
+
 			string key = GenerateSassAndScssStylesheetCacheItemKey(assetUrl);
 			_sassAndScssStylesheetCache[key] = stylesheet;
 

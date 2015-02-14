@@ -8,7 +8,7 @@
 	public static class FileExtensionHelpers
 	{
 		/// <summary>
-		/// Checks whether specified file extension is the Sass-file extension 
+		/// Checks whether specified file extension is the Sass-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>
@@ -20,7 +20,7 @@
 		}
 
 		/// <summary>
-		/// Checks whether specified file extension is the SCSS-file extension 
+		/// Checks whether specified file extension is the SCSS-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>
@@ -32,7 +32,7 @@
 		}
 
 		/// <summary>
-		/// Checks whether specified file extension is the Sass- or SCSS-file extension 
+		/// Checks whether specified file extension is the Sass- or SCSS-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>
@@ -44,7 +44,7 @@
 		}
 
 		/// <summary>
-		/// Checks whether specified file extension is the Ruby-file extension 
+		/// Checks whether specified file extension is the Ruby-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>
