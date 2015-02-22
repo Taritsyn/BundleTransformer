@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.SassAndScss</id>
-		<version>1.9.47-Beta1</version>
+		<version>1.9.47</version>
 		<title>Bundle Transformer: Sass and SCSS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -17,7 +17,8 @@ BundleTransformer.SassAndScss does not support the string interpolation in file 
 For execution of Ruby-code is used a IronRuby (http://github.com/IronLanguages/main) version 1.1.4.0. Assemblies `IronRuby.dll`, `IronRuby.Libraries.dll`, `Microsoft.Dynamic.dll` and `Microsoft.Scripting.dll` were builded from source code of the IronLanguages project.</description>
 		<summary>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator` (supports Sass version 3.4.12). This adapter makes translation of Sass- and SCSS-code to CSS-code. Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
 		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-		<releaseNotes>Added support of Sass version 3.4.12.</releaseNotes>
+		<releaseNotes>1. Added support of Sass version 3.4.12;
+2. IronRuby was updated to commit 86ecdd10fd.</releaseNotes>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
 		<dependencies>

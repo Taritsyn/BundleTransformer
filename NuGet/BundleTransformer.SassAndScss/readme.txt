@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Sass and SCSS 1.9.47 Beta 1
+          README file for Bundle Transformer: Sass and SCSS 1.9.47
 
    ----------------------------------------------------------------------
 
@@ -30,7 +30,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Sass version 3.4.12.
+   1. Added support of Sass version 3.4.12;
+   2. IronRuby was updated to commit 86ecdd10fd.
    
    ====================
    POST-INSTALL ACTIONS

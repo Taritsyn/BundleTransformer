@@ -156,6 +156,26 @@
 				resourceStream = null;
 			}
 
+			if (resourceStream == null)
+			{
+				string fileName = Path.GetFileName(path);
+
+				if (string.Equals(fileName, "rational18.rb", StringComparison.OrdinalIgnoreCase))
+				{
+					string processedPath = Path.ChangeExtension(path, ".min.rb");
+					resourceName = PathToRubyResourceName(processedPath);
+
+					try
+					{
+						resourceStream = assembly.GetManifestResourceStream(resourceName);
+					}
+					catch
+					{
+						resourceStream = null;
+					}
+				}
+			}
+
 			return resourceStream;
 		}
 
@@ -166,7 +186,7 @@
 		/// <returns>Resource name</returns>
 		private string PathToRubyResourceName(string path)
 		{
-			string processedPath = Path.ChangeExtension(path, ".min.rb")
+			string processedPath = path
 				.Replace("1.9.1", "_1._9._1")
 				.Replace('\\', '.')
 				.Replace('/', '.')

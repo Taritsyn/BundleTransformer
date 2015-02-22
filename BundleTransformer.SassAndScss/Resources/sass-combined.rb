@@ -7887,6 +7887,11 @@ module Sass
         _, si = Sass::Util.enum_with_index(seq2).find do |e, i|
           return if i == seq2.size - 1
           next if e.is_a?(String)
+		  
+          if i.nil?
+            i = -1
+          end
+		  
           seq1.first.superselector?(e, seq2[0...i])
         end
         return unless si

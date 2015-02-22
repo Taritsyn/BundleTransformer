@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.9.0
+ * CoffeeScript Compiler v1.9.1
  * http://coffeescript.org
  *
  * Copyright 2014, Jeremy Ashkenas
@@ -33,7 +33,7 @@ var CoffeeScript = (function(){
 	//#region URL: /helpers
 	modules['/helpers'] = function() {
 	  var exports = {};
-	  var buildLocationData, extend, flatten, last, repeat, syntaxErrorToString, _ref;
+	  var buildLocationData, extend, flatten, ref, repeat, syntaxErrorToString;
 
 	  exports.starts = function(string, literal, start) {
 		return literal === string.substr(start, literal.length);
@@ -59,15 +59,15 @@ var CoffeeScript = (function(){
 	  };
 
 	  exports.compact = function(array) {
-		var item, _i, _len, _results;
-		_results = [];
-		for (_i = 0, _len = array.length; _i < _len; _i++) {
-		  item = array[_i];
+		var i, item, len1, results;
+		results = [];
+		for (i = 0, len1 = array.length; i < len1; i++) {
+		  item = array[i];
 		  if (item) {
-			_results.push(item);
+			results.push(item);
 		  }
 		}
-		return _results;
+		return results;
 	  };
 
 	  exports.count = function(string, substr) {
@@ -96,10 +96,10 @@ var CoffeeScript = (function(){
 	  };
 
 	  exports.flatten = flatten = function(array) {
-		var element, flattened, _i, _len;
+		var element, flattened, i, len1;
 		flattened = [];
-		for (_i = 0, _len = array.length; _i < _len; _i++) {
-		  element = array[_i];
+		for (i = 0, len1 = array.length; i < len1; i++) {
+		  element = array[i];
 		  if (element instanceof Array) {
 			flattened = flattened.concat(flatten(element));
 		  } else {
@@ -116,14 +116,10 @@ var CoffeeScript = (function(){
 		return val;
 	  };
 
-	  exports.last = last = function(array, back) {
-		return array[array.length - (back || 0) - 1];
-	  };
-
-	  exports.some = (_ref = Array.prototype.some) != null ? _ref : function(fn) {
-		var e, _i, _len;
-		for (_i = 0, _len = this.length; _i < _len; _i++) {
-		  e = this[_i];
+	  exports.some = (ref = Array.prototype.some) != null ? ref : function(fn) {
+		var e, i, len1;
+		for (i = 0, len1 = this.length; i < len1; i++) {
+		  e = this[i];
 		  if (fn(e)) {
 			return true;
 		  }
@@ -135,20 +131,20 @@ var CoffeeScript = (function(){
 		var line, lines, maybe_code;
 		maybe_code = true;
 		lines = (function() {
-		  var _i, _len, _ref1, _results;
-		  _ref1 = code.split('\n');
-		  _results = [];
-		  for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-			line = _ref1[_i];
+		  var i, len1, ref1, results;
+		  ref1 = code.split('\n');
+		  results = [];
+		  for (i = 0, len1 = ref1.length; i < len1; i++) {
+			line = ref1[i];
 			if (maybe_code && /^([ ]{4}|[ ]{0,3}\t)/.test(line)) {
-			  _results.push(line);
+			  results.push(line);
 			} else if (maybe_code = /^\s*$/.test(line)) {
-			  _results.push(line);
+			  results.push(line);
 			} else {
-			  _results.push('# ' + line);
+			  results.push('# ' + line);
 			}
 		  }
-		  return _results;
+		  return results;
 		})();
 		return lines.join('\n');
 	  };
@@ -238,11 +234,11 @@ var CoffeeScript = (function(){
 	  };
 
 	  syntaxErrorToString = function() {
-		var codeLine, colorize, colorsEnabled, end, filename, first_column, first_line, last_column, last_line, marker, start, _ref1, _ref2;
+		var codeLine, colorize, colorsEnabled, end, filename, first_column, first_line, last_column, last_line, marker, ref1, ref2, start;
 		if (!(this.code && this.location)) {
 		  return Error.prototype.toString.call(this);
 		}
-		_ref1 = this.location, first_line = _ref1.first_line, first_column = _ref1.first_column, last_line = _ref1.last_line, last_column = _ref1.last_column;
+		ref1 = this.location, first_line = ref1.first_line, first_column = ref1.first_column, last_line = ref1.last_line, last_column = ref1.last_column;
 		if (last_line == null) {
 		  last_line = first_line;
 		}
@@ -257,7 +253,7 @@ var CoffeeScript = (function(){
 		if (typeof process !== "undefined" && process !== null) {
 		  colorsEnabled = process.stdout.isTTY && !process.env.NODE_DISABLE_COLORS;
 		}
-		if ((_ref2 = this.colorful) != null ? _ref2 : colorsEnabled) {
+		if ((ref2 = this.colorful) != null ? ref2 : colorsEnabled) {
 		  colorize = function(str) {
 			return "\x1B[1;31m" + str + "\x1B[0m";
 		  };
@@ -289,9 +285,9 @@ var CoffeeScript = (function(){
 	//#region URL: /rewriter
 	modules['/rewriter'] = function() {
 	  var exports = {};
-	  var BALANCED_PAIRS, CALL_CLOSERS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, left, rite, _i, _len, _ref,
-		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-		__slice = [].slice;
+	  var BALANCED_PAIRS, CALL_CLOSERS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, k, left, len, ref, rite,
+		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+		slice = [].slice;
 
 	  generate = function(tag, value, origin) {
 		var tok;
@@ -306,8 +302,8 @@ var CoffeeScript = (function(){
 	  exports.Rewriter = (function() {
 		function Rewriter() {}
 
-		Rewriter.prototype.rewrite = function(_at_tokens) {
-		  this.tokens = _at_tokens;
+		Rewriter.prototype.rewrite = function(tokens1) {
+		  this.tokens = tokens1;
 		  this.removeLeadingNewlines();
 		  this.closeOpenCalls();
 		  this.closeOpenIndexes();
@@ -329,7 +325,7 @@ var CoffeeScript = (function(){
 		};
 
 		Rewriter.prototype.detectEnd = function(i, condition, action) {
-		  var levels, token, tokens, _ref, _ref1;
+		  var levels, ref, ref1, token, tokens;
 		  tokens = this.tokens;
 		  levels = 0;
 		  while (token = tokens[i]) {
@@ -339,9 +335,9 @@ var CoffeeScript = (function(){
 			if (!token || levels < 0) {
 			  return action.call(this, token, i - 1);
 			}
-			if (_ref = token[0], __indexOf.call(EXPRESSION_START, _ref) >= 0) {
+			if (ref = token[0], indexOf.call(EXPRESSION_START, ref) >= 0) {
 			  levels += 1;
-			} else if (_ref1 = token[0], __indexOf.call(EXPRESSION_END, _ref1) >= 0) {
+			} else if (ref1 = token[0], indexOf.call(EXPRESSION_END, ref1) >= 0) {
 			  levels -= 1;
 			}
 			i += 1;
@@ -350,10 +346,10 @@ var CoffeeScript = (function(){
 		};
 
 		Rewriter.prototype.removeLeadingNewlines = function() {
-		  var i, tag, _i, _len, _ref;
-		  _ref = this.tokens;
-		  for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-			tag = _ref[i][0];
+		  var i, k, len, ref, tag;
+		  ref = this.tokens;
+		  for (i = k = 0, len = ref.length; k < len; i = ++k) {
+			tag = ref[i][0];
 			if (tag !== 'TERMINATOR') {
 			  break;
 			}
@@ -366,8 +362,8 @@ var CoffeeScript = (function(){
 		Rewriter.prototype.closeOpenCalls = function() {
 		  var action, condition;
 		  condition = function(token, i) {
-			var _ref;
-			return ((_ref = token[0]) === ')' || _ref === 'CALL_END') || token[0] === 'OUTDENT' && this.tag(i - 1) === ')';
+			var ref;
+			return ((ref = token[0]) === ')' || ref === 'CALL_END') || token[0] === 'OUTDENT' && this.tag(i - 1) === ')';
 		  };
 		  action = function(token, i) {
 			return this.tokens[token[0] === 'OUTDENT' ? i - 1 : i][0] = 'CALL_END';
@@ -383,8 +379,8 @@ var CoffeeScript = (function(){
 		Rewriter.prototype.closeOpenIndexes = function() {
 		  var action, condition;
 		  condition = function(token, i) {
-			var _ref;
-			return (_ref = token[0]) === ']' || _ref === 'INDEX_END';
+			var ref;
+			return (ref = token[0]) === ']' || ref === 'INDEX_END';
 		  };
 		  action = function(token, i) {
 			return token[0] = 'INDEX_END';
@@ -397,11 +393,11 @@ var CoffeeScript = (function(){
 		  });
 		};
 
-		Rewriter.prototype.matchTags = function() {
-		  var fuzz, i, j, pattern, _i, _ref, _ref1;
-		  i = arguments[0], pattern = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+		Rewriter.prototype.indexOfTag = function() {
+		  var fuzz, i, j, k, pattern, ref, ref1;
+		  i = arguments[0], pattern = 2 <= arguments.length ? slice.call(arguments, 1) : [];
 		  fuzz = 0;
-		  for (j = _i = 0, _ref = pattern.length; 0 <= _ref ? _i < _ref : _i > _ref; j = 0 <= _ref ? ++_i : --_i) {
+		  for (j = k = 0, ref = pattern.length; 0 <= ref ? k < ref : k > ref; j = 0 <= ref ? ++k : --k) {
 			while (this.tag(i + j + fuzz) === 'HERECOMMENT') {
 			  fuzz += 2;
 			}
@@ -411,37 +407,55 @@ var CoffeeScript = (function(){
 			if (typeof pattern[j] === 'string') {
 			  pattern[j] = [pattern[j]];
 			}
-			if (_ref1 = this.tag(i + j + fuzz), __indexOf.call(pattern[j], _ref1) < 0) {
-			  return false;
+			if (ref1 = this.tag(i + j + fuzz), indexOf.call(pattern[j], ref1) < 0) {
+			  return -1;
 			}
 		  }
-		  return true;
+		  return i + j + fuzz - 1;
 		};
 
 		Rewriter.prototype.looksObjectish = function(j) {
-		  return this.matchTags(j, '@', null, ':') || this.matchTags(j, null, ':');
+		  var end, index;
+		  if (this.indexOfTag(j, '@', null, ':') > -1 || this.indexOfTag(j, null, ':') > -1) {
+			return true;
+		  }
+		  index = this.indexOfTag(j, EXPRESSION_START);
+		  if (index > -1) {
+			end = null;
+			this.detectEnd(index + 1, (function(token) {
+			  var ref;
+			  return ref = token[0], indexOf.call(EXPRESSION_END, ref) >= 0;
+			}), (function(token, i) {
+			  return end = i;
+			}));
+			if (this.tag(end + 1) === ':') {
+			  return true;
+			}
+		  }
+		  return false;
 		};
 
 		Rewriter.prototype.findTagsBackwards = function(i, tags) {
-		  var backStack, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+		  var backStack, ref, ref1, ref2, ref3, ref4, ref5;
 		  backStack = [];
-		  while (i >= 0 && (backStack.length || (_ref2 = this.tag(i), __indexOf.call(tags, _ref2) < 0) && ((_ref3 = this.tag(i), __indexOf.call(EXPRESSION_START, _ref3) < 0) || this.tokens[i].generated) && (_ref4 = this.tag(i), __indexOf.call(LINEBREAKS, _ref4) < 0))) {
-			if (_ref = this.tag(i), __indexOf.call(EXPRESSION_END, _ref) >= 0) {
+		  while (i >= 0 && (backStack.length || (ref2 = this.tag(i), indexOf.call(tags, ref2) < 0) && ((ref3 = this.tag(i), indexOf.call(EXPRESSION_START, ref3) < 0) || this.tokens[i].generated) && (ref4 = this.tag(i), indexOf.call(LINEBREAKS, ref4) < 0))) {
+			if (ref = this.tag(i), indexOf.call(EXPRESSION_END, ref) >= 0) {
 			  backStack.push(this.tag(i));
 			}
-			if ((_ref1 = this.tag(i), __indexOf.call(EXPRESSION_START, _ref1) >= 0) && backStack.length) {
+			if ((ref1 = this.tag(i), indexOf.call(EXPRESSION_START, ref1) >= 0) && backStack.length) {
 			  backStack.pop();
 			}
 			i -= 1;
 		  }
-		  return _ref5 = this.tag(i), __indexOf.call(tags, _ref5) >= 0;
+		  return ref5 = this.tag(i), indexOf.call(tags, ref5) >= 0;
 		};
 
 		Rewriter.prototype.addImplicitBracesAndParens = function() {
-		  var stack;
+		  var stack, start;
 		  stack = [];
+		  start = null;
 		  return this.scanTokens(function(token, i, tokens) {
-			var endImplicitCall, endImplicitObject, forward, inImplicit, inImplicitCall, inImplicitControl, inImplicitObject, newLine, nextTag, offset, prevTag, prevToken, s, sameLine, stackIdx, stackTag, stackTop, startIdx, startImplicitCall, startImplicitObject, startsLine, tag, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+			var endImplicitCall, endImplicitObject, forward, inImplicit, inImplicitCall, inImplicitControl, inImplicitObject, newLine, nextTag, offset, prevTag, prevToken, ref, ref1, ref2, ref3, ref4, ref5, s, sameLine, stackIdx, stackTag, stackTop, startIdx, startImplicitCall, startImplicitObject, startsLine, tag;
 			tag = token[0];
 			prevTag = (prevToken = i > 0 ? tokens[i - 1] : [])[0];
 			nextTag = (i < tokens.length - 1 ? tokens[i + 1] : [])[0];
@@ -453,20 +467,20 @@ var CoffeeScript = (function(){
 			  return i - startIdx + n;
 			};
 			inImplicit = function() {
-			  var _ref, _ref1;
-			  return (_ref = stackTop()) != null ? (_ref1 = _ref[2]) != null ? _ref1.ours : void 0 : void 0;
+			  var ref, ref1;
+			  return (ref = stackTop()) != null ? (ref1 = ref[2]) != null ? ref1.ours : void 0 : void 0;
 			};
 			inImplicitCall = function() {
-			  var _ref;
-			  return inImplicit() && ((_ref = stackTop()) != null ? _ref[0] : void 0) === '(';
+			  var ref;
+			  return inImplicit() && ((ref = stackTop()) != null ? ref[0] : void 0) === '(';
 			};
 			inImplicitObject = function() {
-			  var _ref;
-			  return inImplicit() && ((_ref = stackTop()) != null ? _ref[0] : void 0) === '{';
+			  var ref;
+			  return inImplicit() && ((ref = stackTop()) != null ? ref[0] : void 0) === '{';
 			};
 			inImplicitControl = function() {
-			  var _ref;
-			  return inImplicit && ((_ref = stackTop()) != null ? _ref[0] : void 0) === 'CONTROL';
+			  var ref;
+			  return inImplicit && ((ref = stackTop()) != null ? ref[0] : void 0) === 'CONTROL';
 			};
 			startImplicitCall = function(j) {
 			  var idx;
@@ -487,7 +501,7 @@ var CoffeeScript = (function(){
 			  return i += 1;
 			};
 			startImplicitObject = function(j, startsLine) {
-			  var idx;
+			  var idx, val;
 			  if (startsLine == null) {
 				startsLine = true;
 			  }
@@ -499,7 +513,9 @@ var CoffeeScript = (function(){
 				  ours: true
 				}
 			  ]);
-			  tokens.splice(idx, 0, generate('{', generate(new String('{')), token));
+			  val = new String('{');
+			  val.generated = true;
+			  tokens.splice(idx, 0, generate('{', val, token));
 			  if (j == null) {
 				return i += 1;
 			  }
@@ -530,11 +546,11 @@ var CoffeeScript = (function(){
 			  stack.push([tag, i]);
 			  return forward(1);
 			}
-			if (__indexOf.call(EXPRESSION_START, tag) >= 0) {
+			if (indexOf.call(EXPRESSION_START, tag) >= 0) {
 			  stack.push([tag, i]);
 			  return forward(1);
 			}
-			if (__indexOf.call(EXPRESSION_END, tag) >= 0) {
+			if (indexOf.call(EXPRESSION_END, tag) >= 0) {
 			  while (inImplicit()) {
 				if (inImplicitCall()) {
 				  endImplicitCall();
@@ -544,33 +560,39 @@ var CoffeeScript = (function(){
 				  stack.pop();
 				}
 			  }
-			  stack.pop();
+			  start = stack.pop();
 			}
-			if ((__indexOf.call(IMPLICIT_FUNC, tag) >= 0 && token.spaced && !token.stringEnd && !token.regexEnd || tag === '?' && i > 0 && !tokens[i - 1].spaced) && (__indexOf.call(IMPLICIT_CALL, nextTag) >= 0 || __indexOf.call(IMPLICIT_UNSPACED_CALL, nextTag) >= 0 && !((_ref = tokens[i + 1]) != null ? _ref.spaced : void 0) && !((_ref1 = tokens[i + 1]) != null ? _ref1.newLine : void 0))) {
+			if ((indexOf.call(IMPLICIT_FUNC, tag) >= 0 && token.spaced || tag === '?' && i > 0 && !tokens[i - 1].spaced) && (indexOf.call(IMPLICIT_CALL, nextTag) >= 0 || indexOf.call(IMPLICIT_UNSPACED_CALL, nextTag) >= 0 && !((ref = tokens[i + 1]) != null ? ref.spaced : void 0) && !((ref1 = tokens[i + 1]) != null ? ref1.newLine : void 0))) {
 			  if (tag === '?') {
 				tag = token[0] = 'FUNC_EXIST';
 			  }
 			  startImplicitCall(i + 1);
 			  return forward(2);
 			}
-			if (__indexOf.call(IMPLICIT_FUNC, tag) >= 0 && !token.stringEnd && !token.regexEnd && this.matchTags(i + 1, 'INDENT', null, ':') && !this.findTagsBackwards(i, ['CLASS', 'EXTENDS', 'IF', 'CATCH', 'SWITCH', 'LEADING_WHEN', 'FOR', 'WHILE', 'UNTIL'])) {
+			if (indexOf.call(IMPLICIT_FUNC, tag) >= 0 && this.indexOfTag(i + 1, 'INDENT', null, ':') > -1 && !this.findTagsBackwards(i, ['CLASS', 'EXTENDS', 'IF', 'CATCH', 'SWITCH', 'LEADING_WHEN', 'FOR', 'WHILE', 'UNTIL'])) {
 			  startImplicitCall(i + 1);
 			  stack.push(['INDENT', i + 2]);
 			  return forward(3);
 			}
 			if (tag === ':') {
-			  if (this.tag(i - 2) === '@') {
-				s = i - 2;
-			  } else {
-				s = i - 1;
-			  }
+			  s = (function() {
+				var ref2;
+				switch (false) {
+				  case ref2 = this.tag(i - 1), indexOf.call(EXPRESSION_END, ref2) < 0:
+					return start[1];
+				  case this.tag(i - 2) !== '@':
+					return i - 2;
+				  default:
+					return i - 1;
+				}
+			  }).call(this);
 			  while (this.tag(s - 2) === 'HERECOMMENT') {
 				s -= 2;
 			  }
 			  this.insideForDeclaration = nextTag === 'FOR';
-			  startsLine = s === 0 || (_ref2 = this.tag(s - 1), __indexOf.call(LINEBREAKS, _ref2) >= 0) || tokens[s - 1].newLine;
+			  startsLine = s === 0 || (ref2 = this.tag(s - 1), indexOf.call(LINEBREAKS, ref2) >= 0) || tokens[s - 1].newLine;
 			  if (stackTop()) {
-				_ref3 = stackTop(), stackTag = _ref3[0], stackIdx = _ref3[1];
+				ref3 = stackTop(), stackTag = ref3[0], stackIdx = ref3[1];
 				if ((stackTag === '{' || stackTag === 'INDENT' && this.tag(stackIdx - 1) === '{') && (startsLine || this.tag(s - 1) === ',' || this.tag(s - 1) === '{')) {
 				  return forward(1);
 				}
@@ -578,18 +600,21 @@ var CoffeeScript = (function(){
 			  startImplicitObject(s, !!startsLine);
 			  return forward(2);
 			}
-			if (inImplicitObject() && __indexOf.call(LINEBREAKS, tag) >= 0) {
+			if (inImplicitObject() && indexOf.call(LINEBREAKS, tag) >= 0) {
 			  stackTop()[2].sameLine = false;
 			}
 			newLine = prevTag === 'OUTDENT' || prevToken.newLine;
-			if (__indexOf.call(IMPLICIT_END, tag) >= 0 || __indexOf.call(CALL_CLOSERS, tag) >= 0 && newLine) {
+			if (indexOf.call(IMPLICIT_END, tag) >= 0 || indexOf.call(CALL_CLOSERS, tag) >= 0 && newLine) {
 			  while (inImplicit()) {
-				_ref4 = stackTop(), stackTag = _ref4[0], stackIdx = _ref4[1], (_ref5 = _ref4[2], sameLine = _ref5.sameLine, startsLine = _ref5.startsLine);
+				ref4 = stackTop(), stackTag = ref4[0], stackIdx = ref4[1], (ref5 = ref4[2], sameLine = ref5.sameLine, startsLine = ref5.startsLine);
 				if (inImplicitCall() && prevTag !== ',') {
 				  endImplicitCall();
-				} else if (inImplicitObject() && !this.insideForDeclaration && sameLine && tag !== 'TERMINATOR' && prevTag !== ':' && endImplicitObject()) {
-
+				} else if (inImplicitObject() && !this.insideForDeclaration && sameLine && tag !== 'TERMINATOR' && prevTag !== ':') {
+				  endImplicitObject();
 				} else if (inImplicitObject() && tag === 'TERMINATOR' && prevTag !== ',' && !(startsLine && this.looksObjectish(i + 1))) {
+				  if (nextTag === 'HERECOMMENT') {
+					return forward(1);
+				  }
 				  endImplicitObject();
 				} else {
 				  break;
@@ -608,16 +633,16 @@ var CoffeeScript = (function(){
 
 		Rewriter.prototype.addLocationDataToGeneratedTokens = function() {
 		  return this.scanTokens(function(token, i, tokens) {
-			var column, line, nextLocation, prevLocation, _ref, _ref1;
+			var column, line, nextLocation, prevLocation, ref, ref1;
 			if (token[2]) {
 			  return 1;
 			}
 			if (!(token.generated || token.explicit)) {
 			  return 1;
 			}
-			if (token[0] === '{' && (nextLocation = (_ref = tokens[i + 1]) != null ? _ref[2] : void 0)) {
+			if (token[0] === '{' && (nextLocation = (ref = tokens[i + 1]) != null ? ref[2] : void 0)) {
 			  line = nextLocation.first_line, column = nextLocation.first_column;
-			} else if (prevLocation = (_ref1 = tokens[i - 1]) != null ? _ref1[2] : void 0) {
+			} else if (prevLocation = (ref1 = tokens[i - 1]) != null ? ref1[2] : void 0) {
 			  line = prevLocation.last_line, column = prevLocation.last_column;
 			} else {
 			  line = column = 0;
@@ -636,37 +661,37 @@ var CoffeeScript = (function(){
 		  var action, condition, indent, outdent, starter;
 		  starter = indent = outdent = null;
 		  condition = function(token, i) {
-			var _ref, _ref1, _ref2, _ref3;
-			return token[1] !== ';' && (_ref = token[0], __indexOf.call(SINGLE_CLOSERS, _ref) >= 0) && !(token[0] === 'TERMINATOR' && (_ref1 = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((_ref2 = token[0]) === 'CATCH' || _ref2 === 'FINALLY') && (starter === '->' || starter === '=>')) || (_ref3 = token[0], __indexOf.call(CALL_CLOSERS, _ref3) >= 0) && this.tokens[i - 1].newLine;
+			var ref, ref1, ref2, ref3;
+			return token[1] !== ';' && (ref = token[0], indexOf.call(SINGLE_CLOSERS, ref) >= 0) && !(token[0] === 'TERMINATOR' && (ref1 = this.tag(i + 1), indexOf.call(EXPRESSION_CLOSE, ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((ref2 = token[0]) === 'CATCH' || ref2 === 'FINALLY') && (starter === '->' || starter === '=>')) || (ref3 = token[0], indexOf.call(CALL_CLOSERS, ref3) >= 0) && this.tokens[i - 1].newLine;
 		  };
 		  action = function(token, i) {
 			return this.tokens.splice((this.tag(i - 1) === ',' ? i - 1 : i), 0, outdent);
 		  };
 		  return this.scanTokens(function(token, i, tokens) {
-			var j, tag, _i, _ref, _ref1, _ref2;
+			var j, k, ref, ref1, ref2, tag;
 			tag = token[0];
 			if (tag === 'TERMINATOR') {
 			  if (this.tag(i + 1) === 'ELSE' && this.tag(i - 1) !== 'OUTDENT') {
-				tokens.splice.apply(tokens, [i, 1].concat(__slice.call(this.indentation())));
+				tokens.splice.apply(tokens, [i, 1].concat(slice.call(this.indentation())));
 				return 1;
 			  }
-			  if (_ref = this.tag(i + 1), __indexOf.call(EXPRESSION_CLOSE, _ref) >= 0) {
+			  if (ref = this.tag(i + 1), indexOf.call(EXPRESSION_CLOSE, ref) >= 0) {
 				tokens.splice(i, 1);
 				return 0;
 			  }
 			}
 			if (tag === 'CATCH') {
-			  for (j = _i = 1; _i <= 2; j = ++_i) {
-				if (!((_ref1 = this.tag(i + j)) === 'OUTDENT' || _ref1 === 'TERMINATOR' || _ref1 === 'FINALLY')) {
+			  for (j = k = 1; k <= 2; j = ++k) {
+				if (!((ref1 = this.tag(i + j)) === 'OUTDENT' || ref1 === 'TERMINATOR' || ref1 === 'FINALLY')) {
 				  continue;
 				}
-				tokens.splice.apply(tokens, [i + j, 0].concat(__slice.call(this.indentation())));
+				tokens.splice.apply(tokens, [i + j, 0].concat(slice.call(this.indentation())));
 				return 2 + j;
 			  }
 			}
-			if (__indexOf.call(SINGLE_LINERS, tag) >= 0 && this.tag(i + 1) !== 'INDENT' && !(tag === 'ELSE' && this.tag(i + 1) === 'IF')) {
+			if (indexOf.call(SINGLE_LINERS, tag) >= 0 && this.tag(i + 1) !== 'INDENT' && !(tag === 'ELSE' && this.tag(i + 1) === 'IF')) {
 			  starter = tag;
-			  _ref2 = this.indentation(tokens[i]), indent = _ref2[0], outdent = _ref2[1];
+			  ref2 = this.indentation(tokens[i]), indent = ref2[0], outdent = ref2[1];
 			  if (starter === 'THEN') {
 				indent.fromThen = true;
 			  }
@@ -688,7 +713,7 @@ var CoffeeScript = (function(){
 			var prevTag, tag;
 			tag = token[0];
 			prevTag = this.tokens[i - 1][0];
-			return tag === 'TERMINATOR' || (tag === 'INDENT' && __indexOf.call(SINGLE_LINERS, prevTag) < 0);
+			return tag === 'TERMINATOR' || (tag === 'INDENT' && indexOf.call(SINGLE_LINERS, prevTag) < 0);
 		  };
 		  action = function(token, i) {
 			if (token[0] !== 'INDENT' || (token.generated && !token.fromThen)) {
@@ -721,15 +746,15 @@ var CoffeeScript = (function(){
 		Rewriter.prototype.generate = generate;
 
 		Rewriter.prototype.tag = function(i) {
-		  var _ref;
-		  return (_ref = this.tokens[i]) != null ? _ref[0] : void 0;
+		  var ref;
+		  return (ref = this.tokens[i]) != null ? ref[0] : void 0;
 		};
 
 		return Rewriter;
 
 	  })();
 
-	  BALANCED_PAIRS = [['(', ')'], ['[', ']'], ['{', '}'], ['INDENT', 'OUTDENT'], ['CALL_START', 'CALL_END'], ['PARAM_START', 'PARAM_END'], ['INDEX_START', 'INDEX_END']];
+	  BALANCED_PAIRS = [['(', ')'], ['[', ']'], ['{', '}'], ['INDENT', 'OUTDENT'], ['CALL_START', 'CALL_END'], ['PARAM_START', 'PARAM_END'], ['INDEX_START', 'INDEX_END'], ['STRING_START', 'STRING_END'], ['REGEX_START', 'REGEX_END']];
 
 	  exports.INVERSES = INVERSES = {};
 
@@ -737,8 +762,8 @@ var CoffeeScript = (function(){
 
 	  EXPRESSION_END = [];
 
-	  for (_i = 0, _len = BALANCED_PAIRS.length; _i < _len; _i++) {
-		_ref = BALANCED_PAIRS[_i], left = _ref[0], rite = _ref[1];
+	  for (k = 0, len = BALANCED_PAIRS.length; k < len; k++) {
+		ref = BALANCED_PAIRS[k], left = ref[0], rite = ref[1];
 		EXPRESSION_START.push(INVERSES[rite] = left);
 		EXPRESSION_END.push(INVERSES[left] = rite);
 	  }
@@ -747,7 +772,7 @@ var CoffeeScript = (function(){
 
 	  IMPLICIT_FUNC = ['IDENTIFIER', 'SUPER', ')', 'CALL_END', ']', 'INDEX_END', '@', 'THIS'];
 
-	  IMPLICIT_CALL = ['IDENTIFIER', 'NUMBER', 'STRING', 'JS', 'REGEX', 'NEW', 'PARAM_START', 'CLASS', 'IF', 'TRY', 'SWITCH', 'THIS', 'BOOL', 'NULL', 'UNDEFINED', 'UNARY', 'YIELD', 'UNARY_MATH', 'SUPER', 'THROW', '@', '->', '=>', '[', '(', '{', '--', '++'];
+	  IMPLICIT_CALL = ['IDENTIFIER', 'NUMBER', 'STRING', 'STRING_START', 'JS', 'REGEX', 'REGEX_START', 'NEW', 'PARAM_START', 'CLASS', 'IF', 'TRY', 'SWITCH', 'THIS', 'BOOL', 'NULL', 'UNDEFINED', 'UNARY', 'YIELD', 'UNARY_MATH', 'SUPER', 'THROW', '@', '->', '=>', '[', '(', '{', '--', '++'];
 
 	  IMPLICIT_UNSPACED_CALL = ['+', '-'];
 
@@ -768,18 +793,18 @@ var CoffeeScript = (function(){
 	//#region URL: /lexer
 	modules['/lexer'] = function () {
 	  var exports = {};
-	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HERECOMMENT_ILLEGAL, HEREDOC_DOUBLE, HEREDOC_INDENT, HEREDOC_SINGLE, HEREGEX, HEREGEX_OMIT, IDENTIFIER, INDENTABLE_CLOSERS, INDEXABLE, INVERSES, JSTOKEN, JS_FORBIDDEN, JS_KEYWORDS, LEADING_BLANK_LINE, LINE_BREAK, LINE_CONTINUER, LOGIC, Lexer, MATH, MULTILINER, MULTI_DENT, NOT_REGEX, NUMBER, OCTAL_ESCAPE, OPERATOR, POSSIBLY_DIVISION, REGEX, REGEX_FLAGS, REGEX_ILLEGAL, RELATION, RESERVED, Rewriter, SHIFT, STRICT_PROSCRIBED, STRING_DOUBLE, STRING_OMIT, STRING_SINGLE, STRING_START, TRAILING_BLANK_LINE, TRAILING_SPACES, UNARY, UNARY_MATH, VALID_FLAGS, WHITESPACE, compact, count, invertLiterate, key, last, locationDataToString, repeat, starts, throwSyntaxError, _ref, _ref1,
-		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HERECOMMENT_ILLEGAL, HEREDOC_DOUBLE, HEREDOC_INDENT, HEREDOC_SINGLE, HEREGEX, HEREGEX_OMIT, IDENTIFIER, INDENTABLE_CLOSERS, INDEXABLE, INVALID_ESCAPE, INVERSES, JSTOKEN, JS_FORBIDDEN, JS_KEYWORDS, LEADING_BLANK_LINE, LINE_BREAK, LINE_CONTINUER, LOGIC, Lexer, MATH, MULTI_DENT, NOT_REGEX, NUMBER, OPERATOR, POSSIBLY_DIVISION, REGEX, REGEX_FLAGS, REGEX_ILLEGAL, RELATION, RESERVED, Rewriter, SHIFT, SIMPLE_STRING_OMIT, STRICT_PROSCRIBED, STRING_DOUBLE, STRING_OMIT, STRING_SINGLE, STRING_START, TRAILING_BLANK_LINE, TRAILING_SPACES, UNARY, UNARY_MATH, VALID_FLAGS, WHITESPACE, compact, count, invertLiterate, key, locationDataToString, ref, ref1, repeat, starts, throwSyntaxError,
+		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-	  _ref = require('/rewriter'), Rewriter = _ref.Rewriter, INVERSES = _ref.INVERSES;
+	  ref = require('/rewriter'), Rewriter = ref.Rewriter, INVERSES = ref.INVERSES;
 
-	  _ref1 = require('/helpers'), count = _ref1.count, starts = _ref1.starts, compact = _ref1.compact, last = _ref1.last, repeat = _ref1.repeat, invertLiterate = _ref1.invertLiterate, locationDataToString = _ref1.locationDataToString, throwSyntaxError = _ref1.throwSyntaxError;
+	  ref1 = require('/helpers'), count = ref1.count, starts = ref1.starts, compact = ref1.compact, repeat = ref1.repeat, invertLiterate = ref1.invertLiterate, locationDataToString = ref1.locationDataToString, throwSyntaxError = ref1.throwSyntaxError;
 
 	  exports.Lexer = Lexer = (function() {
 		function Lexer() {}
 
 		Lexer.prototype.tokenize = function(code, opts) {
-		  var consumed, end, i, _ref2;
+		  var consumed, end, i, ref2;
 		  if (opts == null) {
 			opts = {};
 		  }
@@ -797,7 +822,7 @@ var CoffeeScript = (function(){
 		  i = 0;
 		  while (this.chunk = code.slice(i)) {
 			consumed = this.identifierToken() || this.commentToken() || this.whitespaceToken() || this.lineToken() || this.stringToken() || this.numberToken() || this.regexToken() || this.jsToken() || this.literalToken();
-			_ref2 = this.getLineAndColumnFromChunk(consumed), this.chunkLine = _ref2[0], this.chunkColumn = _ref2[1];
+			ref2 = this.getLineAndColumnFromChunk(consumed), this.chunkLine = ref2[0], this.chunkColumn = ref2[1];
 			i += consumed;
 			if (opts.untilBalanced && this.ends.length === 0) {
 			  return {
@@ -808,7 +833,7 @@ var CoffeeScript = (function(){
 		  }
 		  this.closeIndentation();
 		  if (end = this.ends.pop()) {
-			throwSyntaxError("missing " + end.tag, end.origin[2]);
+			this.error("missing " + end.tag, end.origin[2]);
 		  }
 		  if (opts.rewrite === false) {
 			return this.tokens;
@@ -832,7 +857,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.identifierToken = function() {
-		  var colon, colonOffset, forcedIdentifier, id, idLength, input, match, poppedToken, prev, tag, tagToken, _ref2, _ref3, _ref4;
+		  var colon, colonOffset, forcedIdentifier, id, idLength, input, match, poppedToken, prev, ref2, ref3, ref4, ref5, tag, tagToken;
 		  if (!(match = IDENTIFIER.exec(this.chunk))) {
 			return 0;
 		  }
@@ -847,19 +872,20 @@ var CoffeeScript = (function(){
 			this.token('FROM', id);
 			return id.length;
 		  }
-		  forcedIdentifier = colon || (prev = last(this.tokens)) && (((_ref2 = prev[0]) === '.' || _ref2 === '?.' || _ref2 === '::' || _ref2 === '?::') || !prev.spaced && prev[0] === '@');
+		  ref2 = this.tokens, prev = ref2[ref2.length - 1];
+		  forcedIdentifier = colon || (prev != null) && (((ref3 = prev[0]) === '.' || ref3 === '?.' || ref3 === '::' || ref3 === '?::') || !prev.spaced && prev[0] === '@');
 		  tag = 'IDENTIFIER';
-		  if (!forcedIdentifier && (__indexOf.call(JS_KEYWORDS, id) >= 0 || __indexOf.call(COFFEE_KEYWORDS, id) >= 0)) {
+		  if (!forcedIdentifier && (indexOf.call(JS_KEYWORDS, id) >= 0 || indexOf.call(COFFEE_KEYWORDS, id) >= 0)) {
 			tag = id.toUpperCase();
-			if (tag === 'WHEN' && (_ref3 = this.tag(), __indexOf.call(LINE_BREAK, _ref3) >= 0)) {
+			if (tag === 'WHEN' && (ref4 = this.tag(), indexOf.call(LINE_BREAK, ref4) >= 0)) {
 			  tag = 'LEADING_WHEN';
 			} else if (tag === 'FOR') {
 			  this.seenFor = true;
 			} else if (tag === 'UNLESS') {
 			  tag = 'IF';
-			} else if (__indexOf.call(UNARY, tag) >= 0) {
+			} else if (indexOf.call(UNARY, tag) >= 0) {
 			  tag = 'UNARY';
-			} else if (__indexOf.call(RELATION, tag) >= 0) {
+			} else if (indexOf.call(RELATION, tag) >= 0) {
 			  if (tag !== 'INSTANCEOF' && this.seenFor) {
 				tag = 'FOR' + tag;
 				this.seenFor = false;
@@ -872,17 +898,19 @@ var CoffeeScript = (function(){
 			  }
 			}
 		  }
-		  if (__indexOf.call(JS_FORBIDDEN, id) >= 0) {
+		  if (indexOf.call(JS_FORBIDDEN, id) >= 0) {
 			if (forcedIdentifier) {
 			  tag = 'IDENTIFIER';
 			  id = new String(id);
 			  id.reserved = true;
-			} else if (__indexOf.call(RESERVED, id) >= 0) {
-			  this.error("reserved word \"" + id + "\"");
+			} else if (indexOf.call(RESERVED, id) >= 0) {
+			  this.error("reserved word '" + id + "'", {
+				length: id.length
+			  });
 			}
 		  }
 		  if (!forcedIdentifier) {
-			if (__indexOf.call(COFFEE_ALIASES, id) >= 0) {
+			if (indexOf.call(COFFEE_ALIASES, id) >= 0) {
 			  id = COFFEE_ALIAS_MAP[id];
 			}
 			tag = (function() {
@@ -909,7 +937,7 @@ var CoffeeScript = (function(){
 		  tagToken = this.token(tag, id, 0, idLength);
 		  tagToken.variable = !forcedIdentifier;
 		  if (poppedToken) {
-			_ref4 = [poppedToken[2].first_line, poppedToken[2].first_column], tagToken[2].first_line = _ref4[0], tagToken[2].first_column = _ref4[1];
+			ref5 = [poppedToken[2].first_line, poppedToken[2].first_column], tagToken[2].first_line = ref5[0], tagToken[2].first_column = ref5[1];
 		  }
 		  if (colon) {
 			colonOffset = input.lastIndexOf(':');
@@ -924,16 +952,24 @@ var CoffeeScript = (function(){
 			return 0;
 		  }
 		  number = match[0];
-		  if (/^0[BOX]/.test(number)) {
-			this.error("radix prefix '" + number + "' must be lowercase");
-		  } else if (/E/.test(number) && !/^0x/.test(number)) {
-			this.error("exponential notation '" + number + "' must be indicated with a lowercase 'e'");
-		  } else if (/^0\d*[89]/.test(number)) {
-			this.error("decimal literal '" + number + "' must not be prefixed with '0'");
-		  } else if (/^0\d+/.test(number)) {
-			this.error("octal literal '" + number + "' must be prefixed with '0o'");
-		  }
 		  lexedLength = number.length;
+		  if (/^0[BOX]/.test(number)) {
+			this.error("radix prefix in '" + number + "' must be lowercase", {
+			  offset: 1
+			});
+		  } else if (/E/.test(number) && !/^0x/.test(number)) {
+			this.error("exponential notation in '" + number + "' must be indicated with a lowercase 'e'", {
+			  offset: number.indexOf('E')
+			});
+		  } else if (/^0\d*[89]/.test(number)) {
+			this.error("decimal literal '" + number + "' must not be prefixed with '0'", {
+			  length: lexedLength
+			});
+		  } else if (/^0\d+/.test(number)) {
+			this.error("octal literal '" + number + "' must be prefixed with '0o'", {
+			  length: lexedLength
+			});
+		  }
 		  if (octalLiteral = /^0o([0-7]+)/.exec(number)) {
 			number = '0x' + parseInt(octalLiteral[1], 8).toString(16);
 		  }
@@ -945,7 +981,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.stringToken = function() {
-		  var $, attempt, doc, end, heredoc, i, indent, indentRegex, match, quote, regex, start, token, tokens, _ref2, _ref3;
+		  var $, attempt, delimiter, doc, end, heredoc, i, indent, indentRegex, match, quote, ref2, ref3, regex, token, tokens;
 		  quote = (STRING_START.exec(this.chunk) || [])[0];
 		  if (!quote) {
 			return 0;
@@ -963,25 +999,25 @@ var CoffeeScript = (function(){
 			}
 		  })();
 		  heredoc = quote.length === 3;
-		  start = quote.length;
-		  _ref2 = this.matchWithInterpolations(this.chunk.slice(start), regex, quote, start), tokens = _ref2.tokens, end = _ref2.index;
+		  ref2 = this.matchWithInterpolations(regex, quote), tokens = ref2.tokens, end = ref2.index;
 		  $ = tokens.length - 1;
+		  delimiter = quote.charAt(0);
 		  if (heredoc) {
 			indent = null;
 			doc = ((function() {
-			  var _i, _len, _results;
-			  _results = [];
-			  for (i = _i = 0, _len = tokens.length; _i < _len; i = ++_i) {
+			  var j, len, results;
+			  results = [];
+			  for (i = j = 0, len = tokens.length; j < len; i = ++j) {
 				token = tokens[i];
 				if (token[0] === 'NEOSTRING') {
-				  _results.push(token[1]);
+				  results.push(token[1]);
 				}
 			  }
-			  return _results;
+			  return results;
 			})()).join('#{}');
 			while (match = HEREDOC_INDENT.exec(doc)) {
 			  attempt = match[1];
-			  if (indent === null || (0 < (_ref3 = attempt.length) && _ref3 < indent.length)) {
+			  if (indent === null || (0 < (ref3 = attempt.length) && ref3 < indent.length)) {
 				indent = attempt;
 			  }
 			}
@@ -989,9 +1025,7 @@ var CoffeeScript = (function(){
 			  indentRegex = RegExp("^" + indent, "gm");
 			}
 			this.mergeInterpolationTokens(tokens, {
-			  quote: quote[0],
-			  start: start,
-			  end: end
+			  delimiter: delimiter
 			}, (function(_this) {
 			  return function(value, i) {
 				value = _this.formatString(value);
@@ -1001,20 +1035,19 @@ var CoffeeScript = (function(){
 				if (i === $) {
 				  value = value.replace(TRAILING_BLANK_LINE, '');
 				}
-				value = value.replace(indentRegex, '');
-				value = value.replace(MULTILINER, '\\n');
+				if (indentRegex) {
+				  value = value.replace(indentRegex, '');
+				}
 				return value;
 			  };
 			})(this));
 		  } else {
 			this.mergeInterpolationTokens(tokens, {
-			  quote: quote,
-			  start: start,
-			  end: end
+			  delimiter: delimiter
 			}, (function(_this) {
 			  return function(value, i) {
 				value = _this.formatString(value);
-				value = value.replace(STRING_OMIT, function(match, offset) {
+				value = value.replace(SIMPLE_STRING_OMIT, function(match, offset) {
 				  if ((i === 0 && offset === 0) || (i === $ && offset + match.length === value.length)) {
 					return '';
 				  } else {
@@ -1036,7 +1069,10 @@ var CoffeeScript = (function(){
 		  comment = match[0], here = match[1];
 		  if (here) {
 			if (match = HERECOMMENT_ILLEGAL.exec(comment)) {
-			  this.error("block comments cannot contain " + match[0], match.index);
+			  this.error("block comments cannot contain " + match[0], {
+				offset: match.index,
+				length: match[0].length
+			  });
 			}
 			if (here.indexOf('\n') >= 0) {
 			  here = here.replace(RegExp("\\n" + (repeat(' ', this.indent)), "g"), '\n');
@@ -1056,24 +1092,30 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.regexToken = function() {
-		  var closed, end, flags, index, match, prev, re, regex, rparen, tokens, _ref2, _ref3, _ref4;
+		  var body, closed, end, flags, index, match, origin, prev, ref2, ref3, ref4, regex, tokens;
 		  switch (false) {
 			case !(match = REGEX_ILLEGAL.exec(this.chunk)):
-			  this.error("regular expressions cannot begin with " + match[2], match.index + match[1].length);
+			  this.error("regular expressions cannot begin with " + match[2], {
+				offset: match.index + match[1].length
+			  });
 			  break;
-			case this.chunk.slice(0, 3) !== '///':
-			  _ref2 = this.matchWithInterpolations(this.chunk.slice(3), HEREGEX, '///', 3), tokens = _ref2.tokens, index = _ref2.index;
+			case !(match = this.matchWithInterpolations(HEREGEX, '///')):
+			  tokens = match.tokens, index = match.index;
 			  break;
 			case !(match = REGEX.exec(this.chunk)):
-			  regex = match[0], closed = match[1];
+			  regex = match[0], body = match[1], closed = match[2];
+			  this.validateEscapes(body, {
+				isRegex: true,
+				offsetInChunk: 1
+			  });
 			  index = regex.length;
-			  prev = last(this.tokens);
+			  ref2 = this.tokens, prev = ref2[ref2.length - 1];
 			  if (prev) {
-				if (prev.spaced && (_ref3 = prev[0], __indexOf.call(CALLABLE, _ref3) >= 0) && !prev.stringEnd && !prev.regexEnd) {
+				if (prev.spaced && (ref3 = prev[0], indexOf.call(CALLABLE, ref3) >= 0)) {
 				  if (!closed || POSSIBLY_DIVISION.test(regex)) {
 					return 0;
 				  }
-				} else if (_ref4 = prev[0], __indexOf.call(NOT_REGEX, _ref4) >= 0) {
+				} else if (ref4 = prev[0], indexOf.call(NOT_REGEX, ref4) >= 0) {
 				  return 0;
 				}
 			  }
@@ -1086,35 +1128,36 @@ var CoffeeScript = (function(){
 		  }
 		  flags = REGEX_FLAGS.exec(this.chunk.slice(index))[0];
 		  end = index + flags.length;
+		  origin = this.makeToken('REGEX', null, 0, end);
 		  switch (false) {
 			case !!VALID_FLAGS.test(flags):
-			  this.error("invalid regular expression flags " + flags, index);
+			  this.error("invalid regular expression flags " + flags, {
+				offset: index,
+				length: flags.length
+			  });
 			  break;
-			case !regex:
-			  this.token('REGEX', "" + regex + flags);
-			  break;
-			case tokens.length !== 1:
-			  re = this.formatHeregex(tokens[0][1]).replace(/\//g, '\\/');
-			  this.token('REGEX', "/" + (re || '(?:)') + "/" + flags);
+			case !(regex || tokens.length === 1):
+			  if (body == null) {
+				body = this.formatHeregex(tokens[0][1]);
+			  }
+			  this.token('REGEX', "" + (this.makeDelimitedLiteral(body, {
+				delimiter: '/'
+			  })) + flags, 0, end, origin);
 			  break;
 			default:
+			  this.token('REGEX_START', '(', 0, 0, origin);
 			  this.token('IDENTIFIER', 'RegExp', 0, 0);
 			  this.token('CALL_START', '(', 0, 0);
 			  this.mergeInterpolationTokens(tokens, {
-				quote: '"',
-				start: 3,
-				end: end
-			  }, (function(_this) {
-				return function(value) {
-				  return _this.formatHeregex(value).replace(/\\/g, '\\\\');
-				};
-			  })(this));
+				delimiter: '"',
+				double: true
+			  }, this.formatHeregex);
 			  if (flags) {
 				this.token(',', ',', index, 0);
 				this.token('STRING', '"' + flags + '"', index, flags.length);
 			  }
-			  rparen = this.token(')', ')', end, 0);
-			  rparen.regexEnd = true;
+			  this.token(')', ')', end, 0);
+			  this.token('REGEX_END', ')', end, 0);
 		  }
 		  return end;
 		};
@@ -1155,7 +1198,9 @@ var CoffeeScript = (function(){
 			this.outdebt = this.indebt = 0;
 			this.indent = size;
 		  } else if (size < this.baseIndent) {
-			this.error('missing indentation', indent.length);
+			this.error('missing indentation', {
+			  offset: indent.length
+			});
 		  } else {
 			this.indebt = 0;
 			this.outdentToken(this.indent - size, noNewlines, indent.length);
@@ -1164,7 +1209,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.outdentToken = function(moveOut, noNewlines, outdentLength) {
-		  var decreasedIndent, dent, lastIndent, _ref2;
+		  var decreasedIndent, dent, lastIndent, ref2;
 		  decreasedIndent = this.indent - moveOut;
 		  while (moveOut > 0) {
 			lastIndent = this.indents[this.indents.length - 1];
@@ -1178,7 +1223,7 @@ var CoffeeScript = (function(){
 			  moveOut -= lastIndent;
 			} else {
 			  dent = this.indents.pop() + this.outdebt;
-			  if (outdentLength && (_ref2 = this.chunk[outdentLength], __indexOf.call(INDENTABLE_CLOSERS, _ref2) >= 0)) {
+			  if (outdentLength && (ref2 = this.chunk[outdentLength], indexOf.call(INDENTABLE_CLOSERS, ref2) >= 0)) {
 				decreasedIndent -= dent - moveOut;
 				moveOut = dent;
 			  }
@@ -1202,11 +1247,11 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.whitespaceToken = function() {
-		  var match, nline, prev;
+		  var match, nline, prev, ref2;
 		  if (!((match = WHITESPACE.exec(this.chunk)) || (nline = this.chunk.charAt(0) === '\n'))) {
 			return 0;
 		  }
-		  prev = last(this.tokens);
+		  ref2 = this.tokens, prev = ref2[ref2.length - 1];
 		  if (prev) {
 			prev[match ? 'spaced' : 'newLine'] = true;
 		  }
@@ -1235,7 +1280,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.literalToken = function() {
-		  var match, prev, tag, token, value, _ref2, _ref3, _ref4, _ref5;
+		  var match, prev, ref2, ref3, ref4, ref5, ref6, tag, token, value;
 		  if (match = OPERATOR.exec(this.chunk)) {
 			value = match[0];
 			if (CODE.test(value)) {
@@ -1245,12 +1290,12 @@ var CoffeeScript = (function(){
 			value = this.chunk.charAt(0);
 		  }
 		  tag = value;
-		  prev = last(this.tokens);
+		  ref2 = this.tokens, prev = ref2[ref2.length - 1];
 		  if (value === '=' && prev) {
-			if (!prev[1].reserved && (_ref2 = prev[1], __indexOf.call(JS_FORBIDDEN, _ref2) >= 0)) {
-			  this.error("reserved word \"" + (this.value()) + "\" can't be assigned");
+			if (!prev[1].reserved && (ref3 = prev[1], indexOf.call(JS_FORBIDDEN, ref3) >= 0)) {
+			  this.error("reserved word '" + prev[1] + "' can't be assigned", prev[2]);
 			}
-			if ((_ref3 = prev[1]) === '||' || _ref3 === '&&') {
+			if ((ref4 = prev[1]) === '||' || ref4 === '&&') {
 			  prev[0] = 'COMPOUND_ASSIGN';
 			  prev[1] += '=';
 			  return value.length;
@@ -1259,27 +1304,27 @@ var CoffeeScript = (function(){
 		  if (value === ';') {
 			this.seenFor = false;
 			tag = 'TERMINATOR';
-		  } else if (__indexOf.call(MATH, value) >= 0) {
+		  } else if (indexOf.call(MATH, value) >= 0) {
 			tag = 'MATH';
-		  } else if (__indexOf.call(COMPARE, value) >= 0) {
+		  } else if (indexOf.call(COMPARE, value) >= 0) {
 			tag = 'COMPARE';
-		  } else if (__indexOf.call(COMPOUND_ASSIGN, value) >= 0) {
+		  } else if (indexOf.call(COMPOUND_ASSIGN, value) >= 0) {
 			tag = 'COMPOUND_ASSIGN';
-		  } else if (__indexOf.call(UNARY, value) >= 0) {
+		  } else if (indexOf.call(UNARY, value) >= 0) {
 			tag = 'UNARY';
-		  } else if (__indexOf.call(UNARY_MATH, value) >= 0) {
+		  } else if (indexOf.call(UNARY_MATH, value) >= 0) {
 			tag = 'UNARY_MATH';
-		  } else if (__indexOf.call(SHIFT, value) >= 0) {
+		  } else if (indexOf.call(SHIFT, value) >= 0) {
 			tag = 'SHIFT';
-		  } else if (__indexOf.call(LOGIC, value) >= 0 || value === '?' && (prev != null ? prev.spaced : void 0)) {
+		  } else if (indexOf.call(LOGIC, value) >= 0 || value === '?' && (prev != null ? prev.spaced : void 0)) {
 			tag = 'LOGIC';
 		  } else if (prev && !prev.spaced) {
-			if (value === '(' && (_ref4 = prev[0], __indexOf.call(CALLABLE, _ref4) >= 0) && !prev.stringEnd && !prev.regexEnd) {
+			if (value === '(' && (ref5 = prev[0], indexOf.call(CALLABLE, ref5) >= 0)) {
 			  if (prev[0] === '?') {
 				prev[0] = 'FUNC_EXIST';
 			  }
 			  tag = 'CALL_START';
-			} else if (value === '[' && (_ref5 = prev[0], __indexOf.call(INDEXABLE, _ref5) >= 0)) {
+			} else if (value === '[' && (ref6 = prev[0], indexOf.call(INDEXABLE, ref6) >= 0)) {
 			  tag = 'INDEX_START';
 			  switch (prev[0]) {
 				case '?':
@@ -1339,53 +1384,68 @@ var CoffeeScript = (function(){
 		  return this.outdentToken(this.indent);
 		};
 
-		Lexer.prototype.matchWithInterpolations = function(str, regex, end, offsetInChunk) {
-		  var close, column, index, line, nested, open, strPart, tokens, _ref2, _ref3, _ref4;
+		Lexer.prototype.matchWithInterpolations = function(regex, delimiter) {
+		  var close, column, firstToken, index, lastToken, line, nested, offsetInChunk, open, ref2, ref3, ref4, str, strPart, tokens;
 		  tokens = [];
+		  offsetInChunk = delimiter.length;
+		  if (this.chunk.slice(0, offsetInChunk) !== delimiter) {
+			return null;
+		  }
+		  str = this.chunk.slice(offsetInChunk);
 		  while (true) {
 			strPart = regex.exec(str)[0];
+			this.validateEscapes(strPart, {
+			  isRegex: delimiter.charAt(0) === '/',
+			  offsetInChunk: offsetInChunk
+			});
 			tokens.push(this.makeToken('NEOSTRING', strPart, offsetInChunk));
 			str = str.slice(strPart.length);
 			offsetInChunk += strPart.length;
 			if (str.slice(0, 2) !== '#{') {
 			  break;
 			}
-			_ref2 = this.getLineAndColumnFromChunk(offsetInChunk + 1), line = _ref2[0], column = _ref2[1];
-			_ref3 = new Lexer().tokenize(str.slice(1), {
+			ref2 = this.getLineAndColumnFromChunk(offsetInChunk + 1), line = ref2[0], column = ref2[1];
+			ref3 = new Lexer().tokenize(str.slice(1), {
 			  line: line,
 			  column: column,
 			  untilBalanced: true
-			}), nested = _ref3.tokens, index = _ref3.index;
+			}), nested = ref3.tokens, index = ref3.index;
 			index += 1;
 			open = nested[0], close = nested[nested.length - 1];
 			open[0] = open[1] = '(';
 			close[0] = close[1] = ')';
 			close.origin = ['', 'end of interpolation', close[2]];
-			if (((_ref4 = nested[1]) != null ? _ref4[0] : void 0) === 'TERMINATOR') {
+			if (((ref4 = nested[1]) != null ? ref4[0] : void 0) === 'TERMINATOR') {
 			  nested.splice(1, 1);
 			}
 			tokens.push(['TOKENS', nested]);
 			str = str.slice(index);
 			offsetInChunk += index;
 		  }
-		  if (str.slice(0, end.length) !== end) {
-			this.error("missing " + end);
+		  if (str.slice(0, delimiter.length) !== delimiter) {
+			this.error("missing " + delimiter, {
+			  length: delimiter.length
+			});
+		  }
+		  firstToken = tokens[0], lastToken = tokens[tokens.length - 1];
+		  firstToken[2].first_column -= delimiter.length;
+		  lastToken[2].last_column += delimiter.length;
+		  if (lastToken[1].length === 0) {
+			lastToken[2].last_column -= 1;
 		  }
 		  return {
 			tokens: tokens,
-			index: offsetInChunk + end.length
+			index: offsetInChunk + delimiter.length
 		  };
 		};
 
-		Lexer.prototype.mergeInterpolationTokens = function(tokens, _arg, fn) {
-		  var converted, end, errorToken, firstEmptyStringIndex, firstIndex, i, interpolated, locationToken, plusToken, quote, rparen, start, tag, token, tokensToPush, value, _i, _len, _ref2;
-		  quote = _arg.quote, start = _arg.start, end = _arg.end;
-		  if (interpolated = tokens.length > 1) {
-			errorToken = this.makeToken('', 'interpolation', start + tokens[0][1].length, 2);
-			this.token('(', '(', 0, 0, errorToken);
+		Lexer.prototype.mergeInterpolationTokens = function(tokens, options, fn) {
+		  var converted, firstEmptyStringIndex, firstIndex, i, j, lastToken, len, locationToken, lparen, plusToken, ref2, rparen, tag, token, tokensToPush, value;
+		  if (tokens.length > 1) {
+			lparen = this.token('STRING_START', '(', 0, 0);
 		  }
 		  firstIndex = this.tokens.length;
-		  for (i = _i = 0, _len = tokens.length; _i < _len; i = ++_i) {
+		  for (i = j = 0, len = tokens.length; j < len; i = ++j) {
 			token = tokens[i];
 			tag = token[0], value = token[1];
 			switch (tag) {
@@ -1409,7 +1469,7 @@ var CoffeeScript = (function(){
 				  this.tokens.splice(firstEmptyStringIndex, 2);
 				}
 				token[0] = 'STRING';
-				token[1] = this.makeString(converted, quote);
+				token[1] = this.makeDelimitedLiteral(converted, options);
 				locationToken = token;
 				tokensToPush = [token];
 			}
@@ -1422,28 +1482,44 @@ var CoffeeScript = (function(){
 				last_column: locationToken[2].first_column
 			  };
 			}
-			(_ref2 = this.tokens).push.apply(_ref2, tokensToPush);
+			(ref2 = this.tokens).push.apply(ref2, tokensToPush);
 		  }
-		  if (interpolated) {
-			rparen = this.token(')', ')', end, 0);
-			return rparen.stringEnd = true;
+		  if (lparen) {
+			lastToken = tokens[tokens.length - 1];
+			lparen.origin = [
+			  'STRING', null, {
+				first_line: lparen[2].first_line,
+				first_column: lparen[2].first_column,
+				last_line: lastToken[2].last_line,
+				last_column: lastToken[2].last_column
+			  }
+			];
+			rparen = this.token('STRING_END', ')');
+			return rparen[2] = {
+			  first_line: lastToken[2].last_line,
+			  first_column: lastToken[2].last_column,
+			  last_line: lastToken[2].last_line,
+			  last_column: lastToken[2].last_column
+			};
 		  }
 		};
 
 		Lexer.prototype.pair = function(tag) {
-		  var wanted, _ref2;
-		  if (tag !== (wanted = (_ref2 = last(this.ends)) != null ? _ref2.tag : void 0)) {
+		  var lastIndent, prev, ref2, ref3, wanted;
+		  ref2 = this.ends, prev = ref2[ref2.length - 1];
+		  if (tag !== (wanted = prev != null ? prev.tag : void 0)) {
 			if ('OUTDENT' !== wanted) {
 			  this.error("unmatched " + tag);
 			}
-			this.outdentToken(last(this.indents), true);
+			ref3 = this.indents, lastIndent = ref3[ref3.length - 1];
+			this.outdentToken(lastIndent, true);
 			return this.pair(tag);
 		  }
 		  return this.ends.pop();
 		};
 
 		Lexer.prototype.getLineAndColumnFromChunk = function(offset) {
-		  var column, lineCount, lines, string;
+		  var column, lastLine, lineCount, ref2, string;
 		  if (offset === 0) {
 			return [this.chunkLine, this.chunkColumn];
 		  }
@@ -1455,8 +1531,8 @@ var CoffeeScript = (function(){
 		  lineCount = count(string, '\n');
 		  column = this.chunkColumn;
 		  if (lineCount > 0) {
-			lines = string.split('\n');
-			column = last(lines).length;
+			ref2 = string.split('\n'), lastLine = ref2[ref2.length - 1];
+			column = lastLine.length;
 		  } else {
 			column += string.length;
 		  }
@@ -1464,7 +1540,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.makeToken = function(tag, value, offsetInChunk, length) {
-		  var lastCharacter, locationData, token, _ref2, _ref3;
+		  var lastCharacter, locationData, ref2, ref3, token;
 		  if (offsetInChunk == null) {
 			offsetInChunk = 0;
 		  }
@@ -1472,9 +1548,9 @@ var CoffeeScript = (function(){
 			length = value.length;
 		  }
 		  locationData = {};
-		  _ref2 = this.getLineAndColumnFromChunk(offsetInChunk), locationData.first_line = _ref2[0], locationData.first_column = _ref2[1];
+		  ref2 = this.getLineAndColumnFromChunk(offsetInChunk), locationData.first_line = ref2[0], locationData.first_column = ref2[1];
 		  lastCharacter = Math.max(0, length - 1);
-		  _ref3 = this.getLineAndColumnFromChunk(offsetInChunk + lastCharacter), locationData.last_line = _ref3[0], locationData.last_column = _ref3[1];
+		  ref3 = this.getLineAndColumnFromChunk(offsetInChunk + lastCharacter), locationData.last_line = ref3[0], locationData.last_column = ref3[1];
 		  token = [tag, value, locationData];
 		  return token;
 		};
@@ -1489,64 +1565,103 @@ var CoffeeScript = (function(){
 		  return token;
 		};
 
-		Lexer.prototype.tag = function(index, tag) {
-		  var tok;
-		  return (tok = last(this.tokens, index)) && (tag ? tok[0] = tag : tok[0]);
+		Lexer.prototype.tag = function() {
+		  var ref2, token;
+		  ref2 = this.tokens, token = ref2[ref2.length - 1];
+		  return token != null ? token[0] : void 0;
 		};
 
-		Lexer.prototype.value = function(index, val) {
-		  var tok;
-		  return (tok = last(this.tokens, index)) && (val ? tok[1] = val : tok[1]);
+		Lexer.prototype.value = function() {
+		  var ref2, token;
+		  ref2 = this.tokens, token = ref2[ref2.length - 1];
+		  return token != null ? token[1] : void 0;
 		};
 
 		Lexer.prototype.unfinished = function() {
-		  var _ref2;
-		  return LINE_CONTINUER.test(this.chunk) || ((_ref2 = this.tag()) === '\\' || _ref2 === '.' || _ref2 === '?.' || _ref2 === '?::' || _ref2 === 'UNARY' || _ref2 === 'MATH' || _ref2 === 'UNARY_MATH' || _ref2 === '+' || _ref2 === '-' || _ref2 === 'YIELD' || _ref2 === '**' || _ref2 === 'SHIFT' || _ref2 === 'RELATION' || _ref2 === 'COMPARE' || _ref2 === 'LOGIC' || _ref2 === 'THROW' || _ref2 === 'EXTENDS');
+		  var ref2;
+		  return LINE_CONTINUER.test(this.chunk) || ((ref2 = this.tag()) === '\\' || ref2 === '.' || ref2 === '?.' || ref2 === '?::' || ref2 === 'UNARY' || ref2 === 'MATH' || ref2 === 'UNARY_MATH' || ref2 === '+' || ref2 === '-' || ref2 === 'YIELD' || ref2 === '**' || ref2 === 'SHIFT' || ref2 === 'RELATION' || ref2 === 'COMPARE' || ref2 === 'LOGIC' || ref2 === 'THROW' || ref2 === 'EXTENDS');
 		};
 
 		Lexer.prototype.formatString = function(str) {
-		  return str.replace(/\\[^\S\n]*(\n|\\)\s*/g, function(escaped, character) {
-			if (character === '\n') {
-			  return '';
-			} else {
-			  return escaped;
-			}
-		  });
+		  return str.replace(STRING_OMIT, '$1');
 		};
 
 		Lexer.prototype.formatHeregex = function(str) {
-		  return str.replace(HEREGEX_OMIT, '$1$2').replace(MULTILINER, '\\n');
+		  return str.replace(HEREGEX_OMIT, '$1$2');
 		};
 
-		Lexer.prototype.makeString = function(body, quote) {
-		  var match;
-		  if (!body) {
-			return quote + quote;
+		Lexer.prototype.validateEscapes = function(str, options) {
+		  var before, hex, invalidEscape, match, message, octal, ref2, unicode;
+		  if (options == null) {
+			options = {};
 		  }
-		  body = body.replace(RegExp("\\\\(" + quote + "|\\\\)", "g"), function(match, contents) {
-			if (contents === quote) {
-			  return contents;
-			} else {
-			  return match;
+		  match = INVALID_ESCAPE.exec(str);
+		  if (!match) {
+			return;
+		  }
+		  match[0], before = match[1], octal = match[2], hex = match[3], unicode = match[4];
+		  if (options.isRegex && octal && octal.charAt(0) !== '0') {
+			return;
+		  }
+		  message = octal ? "octal escape sequences are not allowed" : "invalid escape sequence";
+		  invalidEscape = "\\" + (octal || hex || unicode);
+		  return this.error(message + " " + invalidEscape, {
+			offset: ((ref2 = options.offsetInChunk) != null ? ref2 : 0) + match.index + before.length,
+			length: invalidEscape.length
+		  });
+		};
+
+		Lexer.prototype.makeDelimitedLiteral = function(body, options) {
+		  var regex;
+		  if (options == null) {
+			options = {};
+		  }
+		  if (body === '' && options.delimiter === '/') {
+			body = '(?:)';
+		  }
+		  regex = RegExp("(\\\\\\\\)|(\\\\0(?=[1-7]))|\\\\?(" + options.delimiter + ")|\\\\?(?:(\\n)|(\\r)|(\\u2028)|(\\u2029))|(\\\\.)", "g");
+		  body = body.replace(regex, function(match, backslash, nul, delimiter, lf, cr, ls, ps, other) {
+			switch (false) {
+			  case !backslash:
+				if (options.double) {
+				  return backslash + backslash;
+				} else {
+				  return backslash;
+				}
+			  case !nul:
+				return '\\x00';
+			  case !delimiter:
+				return "\\" + delimiter;
+			  case !lf:
+				return '\\n';
+			  case !cr:
+				return '\\r';
+			  case !ls:
+				return '\\u2028';
+			  case !ps:
+				return '\\u2029';
+			  case !other:
+				if (options.double) {
+				  return "\\" + other;
+				} else {
+				  return other;
+				}
 			}
 		  });
-		  body = body.replace(RegExp("" + quote, "g"), '\\$&');
-		  if (match = OCTAL_ESCAPE.exec(body)) {
-			this.error("octal escape sequences are not allowed " + match[2], match.index + match[1].length + 1);
-		  }
-		  return quote + body + quote;
+		  return "" + options.delimiter + body + options.delimiter;
 		};
 
-		Lexer.prototype.error = function(message, offset) {
-		  var first_column, first_line, _ref2;
-		  if (offset == null) {
-			offset = 0;
+		Lexer.prototype.error = function(message, options) {
+		  var first_column, first_line, location, ref2, ref3, ref4;
+		  if (options == null) {
+			options = {};
 		  }
-		  _ref2 = this.getLineAndColumnFromChunk(offset), first_line = _ref2[0], first_column = _ref2[1];
-		  return throwSyntaxError(message, {
+		  location = 'first_line' in options ? options : ((ref3 = this.getLineAndColumnFromChunk((ref2 = options.offset) != null ? ref2 : 0), first_line = ref3[0], first_column = ref3[1], ref3), {
 			first_line: first_line,
-			first_column: first_column
+			first_column: first_column,
+			last_column: first_column + ((ref4 = options.length) != null ? ref4 : 1) - 1
 		  });
+		  return throwSyntaxError(message, location);
 		};
 
 		return Lexer;
@@ -1570,12 +1685,12 @@ var CoffeeScript = (function(){
 	  };
 
 	  COFFEE_ALIASES = (function() {
-		var _results;
-		_results = [];
+		var results;
+		results = [];
 		for (key in COFFEE_ALIAS_MAP) {
-		  _results.push(key);
+		  results.push(key);
 		}
-		return _results;
+		return results;
 	  })();
 
 	  COFFEE_KEYWORDS = COFFEE_KEYWORDS.concat(COFFEE_ALIASES);
@@ -1618,11 +1733,13 @@ var CoffeeScript = (function(){
 
 	  HEREDOC_DOUBLE = /^(?:[^\\"#]|\\[\s\S]|"(?!"")|\#(?!\{))*/;
 
-	  STRING_OMIT = /\s*\n\s*/g;
+	  STRING_OMIT = /((?:\\\\)+)|\\[^\S\n]*\n\s*/g;
+
+	  SIMPLE_STRING_OMIT = /\s*\n\s*/g;
 
 	  HEREDOC_INDENT = /\n+([^\n\S]*)(?=\S)/g;
 
-	  REGEX = /^\/(?!\/)(?:[^[\/\n\\]|\\.|\[(?:\\.|[^\]\n\\])*])*(\/)?/;
+	  REGEX = /^\/(?!\/)((?:[^[\/\n\\]|\\[^\n]|\[(?:\\[^\n]|[^\]\n\\])*])*)(\/)?/;
 
 	  REGEX_FLAGS = /^\w*/;
 
@@ -1630,19 +1747,17 @@ var CoffeeScript = (function(){
 
 	  HEREGEX = /^(?:[^\\\/#]|\\[\s\S]|\/(?!\/\/)|\#(?!\{))*/;
 
-	  HEREGEX_OMIT = /((?:\\\\)+)|\\(\s|\/)|\s+(?:#.*)?/g;
+	  HEREGEX_OMIT = /((?:\\\\)+)|\\(\s)|\s+(?:#.*)?/g;
 
 	  REGEX_ILLEGAL = /^(\/|\/{3}\s*)(\*)/;
 
 	  POSSIBLY_DIVISION = /^\/=?\s/;
 
-	  MULTILINER = /\n/g;
-
 	  HERECOMMENT_ILLEGAL = /\*\//;
 
 	  LINE_CONTINUER = /^\s*(?:,|\??\.(?![.\d])|::)/;
 
-	  OCTAL_ESCAPE = /^((?:\\.|[^\\])*)(\\(?:0[0-7]|[1-7]))/;
+	  INVALID_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\(?:(0[0-7]|[1-7])|(x(?![\da-fA-F]{2}).{0,2})|(u(?![\da-fA-F]{4}).{0,4}))/;
 
 	  LEADING_BLANK_LINE = /^[^\n\S]*\n/;
 
@@ -1670,7 +1785,7 @@ var CoffeeScript = (function(){
 
 	  CALLABLE = ['IDENTIFIER', ')', ']', '?', '@', 'THIS', 'SUPER'];
 
-	  INDEXABLE = CALLABLE.concat(['NUMBER', 'STRING', 'REGEX', 'BOOL', 'NULL', 'UNDEFINED', '}', '::']);
+	  INDEXABLE = CALLABLE.concat(['NUMBER', 'STRING', 'STRING_END', 'REGEX', 'REGEX_END', 'BOOL', 'NULL', 'UNDEFINED', '}', '::']);
 
 	  NOT_REGEX = INDEXABLE.concat(['++', '--']);
 
@@ -1759,12 +1874,12 @@ var CoffeeScript = (function(){
 		  }
 		*/
 		var parser = (function(){
-		var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,20],$V1=[1,73],$V2=[1,71],$V3=[1,72],$V4=[1,50],$V5=[1,51],$V6=[1,52],$V7=[1,53],$V8=[1,54],$V9=[1,55],$Va=[1,45],$Vb=[1,46],$Vc=[1,27],$Vd=[1,60],$Ve=[1,61],$Vf=[1,70],$Vg=[1,43],$Vh=[1,26],$Vi=[1,58],$Vj=[1,59],$Vk=[1,57],$Vl=[1,38],$Vm=[1,44],$Vn=[1,56],$Vo=[1,65],$Vp=[1,66],$Vq=[1,67],$Vr=[1,68],$Vs=[1,42],$Vt=[1,64],$Vu=[1,29],$Vv=[1,30],$Vw=[1,31],$Vx=[1,32],$Vy=[1,33],$Vz=[1,34],$VA=[1,35],$VB=[1,74],$VC=[1,6,26,102],$VD=[1,84],$VE=[1,77],$VF=[1,76],$VG=[1,75],$VH=[1,78],$VI=[1,79],$VJ=[1,80],$VK=[1,81],$VL=[1,82],$VM=[1,83],$VN=[1,87],$VO=[1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],$VP=[1,93],$VQ=[1,94],$VR=[1,95],$VS=[1,96],$VT=[1,98],$VU=[1,99],$VV=[1,92],$VW=[2,108],$VX=[1,6,25,26,49,54,57,66,67,68,69,71,73,74,78,84,85,86,91,93,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],$VY=[2,75],$VZ=[1,104],$V_=[2,54],$V$=[1,108],$V01=[1,113],$V11=[1,114],$V21=[1,116],$V31=[1,6,25,26,40,49,54,57,66,67,68,69,71,73,74,78,84,85,86,91,93,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],$V41=[2,72],$V51=[1,6,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],$V61=[1,151],$V71=[1,153],$V81=[1,148],$V91=[1,6,25,26,40,49,54,57,66,67,68,69,71,73,74,78,80,84,85,86,91,93,102,104,105,106,110,111,126,129,130,133,134,135,136,137,138,139,140,141,142],$Va1=[2,91],$Vb1=[1,6,25,26,43,49,54,57,66,67,68,69,71,73,74,78,84,85,86,91,93,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],$Vc1=[1,6,25,26,40,43,49,54,57,66,67,68,69,71,73,74,78,80,84,85,86,91,93,102,104,105,106,110,111,117,118,126,129,130,133,134,135,136,137,138,139,140,141,142],$Vd1=[1,199],$Ve1=[1,198],$Vf1=[2,52],$Vg1=[1,209],$Vh1=[6,25,26,49,54],$Vi1=[6,25,26,40,49,54,57],$Vj1=[1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,129,130,136,138,139,140,141],$Vk1=[1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126],$Vl1=[1,228],$Vm1=[2,129],$Vn1=[1,6,25,26,40,49,54,57,66,67,68,69,71,73,74,78,84,85,86,91,93,102,104,105,106,110,111,117,118,126,129,130,135,136,137,138,139,140,141],$Vo1=[1,237],$Vp1=[6,25,26,54,86,91],$Vq1=[1,6,25,26,49,54,57,73,78,86,91,93,102,111,126],$Vr1=[1,6,25,26,49,54,57,73,78,86,91,93,102,105,111,126],$Vs1=[117,118],$Vt1=[54,117,118],$Vu1=[1,248],$Vv1=[6,25,26,54,78],$Vw1=[6,25,26,43,54,78],$Vx1=[1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,129,130,138,139,140,141],$Vy1=[11,28,30,31,33,34,35,36,37,38,45,46,47,51,52,73,76,79,83,88,89,90,96,100,101,104,106,108,110,119,125,127,128,129,130,131,133,134],$Vz1=[2,118],$VA1=[6,25,26],$VB1=[2,53],$VC1=[1,259],$VD1=[1,260],$VE1=[1,6,25,26,49,54,57,73,78,86,91,93,98,99,102,104,105,106,110,111,121,123,126,129,130,135,136,137,138,139,140,141],$VF1=[26,121,123],$VG1=[1,6,26,49,54,57,73,78,86,91,93,102,105,111,126],$VH1=[2,67],$VI1=[1,282],$VJ1=[1,283],$VK1=[1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,121,126,129,130,135,136,137,138,139,140,141],$VL1=[1,6,25,26,49,54,57,73,78,86,91,93,102,104,106,110,111,126],$VM1=[1,294],$VN1=[1,295],$VO1=[6,25,26,54],$VP1=[1,6,25,26,49,54,57,73,78,86,91,93,98,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],$VQ1=[25,54];
+		var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,20],$V1=[1,75],$V2=[1,71],$V3=[1,76],$V4=[1,77],$V5=[1,73],$V6=[1,74],$V7=[1,50],$V8=[1,52],$V9=[1,53],$Va=[1,54],$Vb=[1,55],$Vc=[1,45],$Vd=[1,46],$Ve=[1,27],$Vf=[1,60],$Vg=[1,61],$Vh=[1,70],$Vi=[1,43],$Vj=[1,26],$Vk=[1,58],$Vl=[1,59],$Vm=[1,57],$Vn=[1,38],$Vo=[1,44],$Vp=[1,56],$Vq=[1,65],$Vr=[1,66],$Vs=[1,67],$Vt=[1,68],$Vu=[1,42],$Vv=[1,64],$Vw=[1,29],$Vx=[1,30],$Vy=[1,31],$Vz=[1,32],$VA=[1,33],$VB=[1,34],$VC=[1,35],$VD=[1,78],$VE=[1,6,26,34,108],$VF=[1,88],$VG=[1,81],$VH=[1,80],$VI=[1,79],$VJ=[1,82],$VK=[1,83],$VL=[1,84],$VM=[1,85],$VN=[1,86],$VO=[1,87],$VP=[1,91],$VQ=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$VR=[1,97],$VS=[1,98],$VT=[1,99],$VU=[1,100],$VV=[1,102],$VW=[1,103],$VX=[1,96],$VY=[2,112],$VZ=[1,6,25,26,34,55,60,63,72,73,74,75,77,79,80,84,90,91,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$V_=[2,79],$V$=[1,108],$V01=[2,58],$V11=[1,112],$V21=[1,117],$V31=[1,118],$V41=[1,120],$V51=[1,6,25,26,34,46,55,60,63,72,73,74,75,77,79,80,84,90,91,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$V61=[2,76],$V71=[1,6,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$V81=[1,155],$V91=[1,157],$Va1=[1,152],$Vb1=[1,6,25,26,34,46,55,60,63,72,73,74,75,77,79,80,84,86,90,91,92,97,99,108,110,111,112,116,117,132,135,136,139,140,141,142,143,144,145,146,147,148],$Vc1=[2,95],$Vd1=[1,6,25,26,34,49,55,60,63,72,73,74,75,77,79,80,84,90,91,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$Ve1=[1,6,25,26,34,46,49,55,60,63,72,73,74,75,77,79,80,84,86,90,91,92,97,99,108,110,111,112,116,117,123,124,132,135,136,139,140,141,142,143,144,145,146,147,148],$Vf1=[1,206],$Vg1=[1,205],$Vh1=[1,6,25,26,34,38,55,60,63,72,73,74,75,77,79,80,84,90,91,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$Vi1=[2,56],$Vj1=[1,216],$Vk1=[6,25,26,55,60],$Vl1=[6,25,26,46,55,60,63],$Vm1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,135,136,142,144,145,146,147],$Vn1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132],$Vo1=[72,73,74,75,77,80,90,91],$Vp1=[1,235],$Vq1=[2,133],$Vr1=[1,6,25,26,34,46,55,60,63,72,73,74,75,77,79,80,84,90,91,92,97,99,108,110,111,112,116,117,123,124,132,135,136,141,142,143,144,145,146,147],$Vs1=[1,244],$Vt1=[6,25,26,60,92,97],$Vu1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,117,132],$Vv1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,111,117,132],$Vw1=[123,124],$Vx1=[60,123,124],$Vy1=[1,255],$Vz1=[6,25,26,60,84],$VA1=[6,25,26,49,60,84],$VB1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,135,136,144,145,146,147],$VC1=[11,28,30,32,33,36,37,40,41,42,43,44,51,52,53,57,58,79,82,85,89,94,95,96,102,106,107,110,112,114,116,125,131,133,134,135,136,137,139,140],$VD1=[2,122],$VE1=[6,25,26],$VF1=[2,57],$VG1=[1,268],$VH1=[1,269],$VI1=[1,6,25,26,34,55,60,63,79,84,92,97,99,104,105,108,110,111,112,116,117,127,129,132,135,136,141,142,143,144,145,146,147],$VJ1=[26,127,129],$VK1=[1,6,26,34,55,60,63,79,84,92,97,99,108,111,117,132],$VL1=[2,71],$VM1=[1,291],$VN1=[1,292],$VO1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,127,132,135,136,141,142,143,144,145,146,147],$VP1=[1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,112,116,117,132],$VQ1=[1,303],$VR1=[1,304],$VS1=[6,25,26,60],$VT1=[1,6,25,26,34,55,60,63,79,84,92,97,99,104,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],$VU1=[25,60];
 		var parser = {trace: function trace() { },
 		yy: {},
-		symbols_: {"error":2,"Root":3,"Body":4,"Line":5,"TERMINATOR":6,"Expression":7,"Statement":8,"Return":9,"Comment":10,"STATEMENT":11,"Value":12,"Invocation":13,"Code":14,"Operation":15,"Assign":16,"If":17,"Try":18,"While":19,"For":20,"Switch":21,"Class":22,"Throw":23,"Block":24,"INDENT":25,"OUTDENT":26,"Identifier":27,"IDENTIFIER":28,"AlphaNumeric":29,"NUMBER":30,"STRING":31,"Literal":32,"JS":33,"REGEX":34,"DEBUGGER":35,"UNDEFINED":36,"NULL":37,"BOOL":38,"Assignable":39,"=":40,"AssignObj":41,"ObjAssignable":42,":":43,"ThisProperty":44,"RETURN":45,"HERECOMMENT":46,"PARAM_START":47,"ParamList":48,"PARAM_END":49,"FuncGlyph":50,"->":51,"=>":52,"OptComma":53,",":54,"Param":55,"ParamVar":56,"...":57,"Array":58,"Object":59,"Splat":60,"SimpleAssignable":61,"Accessor":62,"Parenthetical":63,"Range":64,"This":65,".":66,"?.":67,"::":68,"?::":69,"Index":70,"INDEX_START":71,"IndexValue":72,"INDEX_END":73,"INDEX_SOAK":74,"Slice":75,"{":76,"AssignList":77,"}":78,"CLASS":79,"EXTENDS":80,"OptFuncExist":81,"Arguments":82,"SUPER":83,"FUNC_EXIST":84,"CALL_START":85,"CALL_END":86,"ArgList":87,"THIS":88,"@":89,"[":90,"]":91,"RangeDots":92,"..":93,"Arg":94,"SimpleArgs":95,"TRY":96,"Catch":97,"FINALLY":98,"CATCH":99,"THROW":100,"(":101,")":102,"WhileSource":103,"WHILE":104,"WHEN":105,"UNTIL":106,"Loop":107,"LOOP":108,"ForBody":109,"FOR":110,"BY":111,"ForStart":112,"ForSource":113,"ForVariables":114,"OWN":115,"ForValue":116,"FORIN":117,"FOROF":118,"SWITCH":119,"Whens":120,"ELSE":121,"When":122,"LEADING_WHEN":123,"IfBlock":124,"IF":125,"POST_IF":126,"UNARY":127,"UNARY_MATH":128,"-":129,"+":130,"YIELD":131,"FROM":132,"--":133,"++":134,"?":135,"MATH":136,"**":137,"SHIFT":138,"COMPARE":139,"LOGIC":140,"RELATION":141,"COMPOUND_ASSIGN":142,"$accept":0,"$end":1},
-		terminals_: {2:"error",6:"TERMINATOR",11:"STATEMENT",25:"INDENT",26:"OUTDENT",28:"IDENTIFIER",30:"NUMBER",31:"STRING",33:"JS",34:"REGEX",35:"DEBUGGER",36:"UNDEFINED",37:"NULL",38:"BOOL",40:"=",43:":",45:"RETURN",46:"HERECOMMENT",47:"PARAM_START",49:"PARAM_END",51:"->",52:"=>",54:",",57:"...",66:".",67:"?.",68:"::",69:"?::",71:"INDEX_START",73:"INDEX_END",74:"INDEX_SOAK",76:"{",78:"}",79:"CLASS",80:"EXTENDS",83:"SUPER",84:"FUNC_EXIST",85:"CALL_START",86:"CALL_END",88:"THIS",89:"@",90:"[",91:"]",93:"..",96:"TRY",98:"FINALLY",99:"CATCH",100:"THROW",101:"(",102:")",104:"WHILE",105:"WHEN",106:"UNTIL",108:"LOOP",110:"FOR",111:"BY",115:"OWN",117:"FORIN",118:"FOROF",119:"SWITCH",121:"ELSE",123:"LEADING_WHEN",125:"IF",126:"POST_IF",127:"UNARY",128:"UNARY_MATH",129:"-",130:"+",131:"YIELD",132:"FROM",133:"--",134:"++",135:"?",136:"MATH",137:"**",138:"SHIFT",139:"COMPARE",140:"LOGIC",141:"RELATION",142:"COMPOUND_ASSIGN"},
-		productions_: [0,[3,0],[3,1],[4,1],[4,3],[4,2],[5,1],[5,1],[8,1],[8,1],[8,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[24,2],[24,3],[27,1],[29,1],[29,1],[32,1],[32,1],[32,1],[32,1],[32,1],[32,1],[32,1],[16,3],[16,4],[16,5],[41,1],[41,3],[41,5],[41,1],[42,1],[42,1],[42,1],[9,2],[9,1],[10,1],[14,5],[14,2],[50,1],[50,1],[53,0],[53,1],[48,0],[48,1],[48,3],[48,4],[48,6],[55,1],[55,2],[55,3],[55,1],[56,1],[56,1],[56,1],[56,1],[60,2],[61,1],[61,2],[61,2],[61,1],[39,1],[39,1],[39,1],[12,1],[12,1],[12,1],[12,1],[12,1],[62,2],[62,2],[62,2],[62,2],[62,1],[62,1],[70,3],[70,2],[72,1],[72,1],[59,4],[77,0],[77,1],[77,3],[77,4],[77,6],[22,1],[22,2],[22,3],[22,4],[22,2],[22,3],[22,4],[22,5],[13,3],[13,3],[13,1],[13,2],[81,0],[81,1],[82,2],[82,4],[65,1],[65,1],[44,2],[58,2],[58,4],[92,1],[92,1],[64,5],[75,3],[75,2],[75,2],[75,1],[87,1],[87,3],[87,4],[87,4],[87,6],[94,1],[94,1],[94,1],[95,1],[95,3],[18,2],[18,3],[18,4],[18,5],[97,3],[97,3],[97,2],[23,2],[63,3],[63,5],[103,2],[103,4],[103,2],[103,4],[19,2],[19,2],[19,2],[19,1],[107,2],[107,2],[20,2],[20,2],[20,2],[109,2],[109,4],[109,2],[112,2],[112,3],[116,1],[116,1],[116,1],[116,1],[114,1],[114,3],[113,2],[113,2],[113,4],[113,4],[113,4],[113,6],[113,6],[21,5],[21,7],[21,4],[21,6],[120,1],[120,2],[122,3],[122,4],[124,3],[124,5],[17,1],[17,3],[17,3],[17,3],[15,2],[15,2],[15,2],[15,2],[15,2],[15,2],[15,3],[15,2],[15,2],[15,2],[15,2],[15,2],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,5],[15,4],[15,3]],
+		symbols_: {"error":2,"Root":3,"Body":4,"Line":5,"TERMINATOR":6,"Expression":7,"Statement":8,"Return":9,"Comment":10,"STATEMENT":11,"Value":12,"Invocation":13,"Code":14,"Operation":15,"Assign":16,"If":17,"Try":18,"While":19,"For":20,"Switch":21,"Class":22,"Throw":23,"Block":24,"INDENT":25,"OUTDENT":26,"Identifier":27,"IDENTIFIER":28,"AlphaNumeric":29,"NUMBER":30,"String":31,"STRING":32,"STRING_START":33,"STRING_END":34,"Regex":35,"REGEX":36,"REGEX_START":37,"REGEX_END":38,"Literal":39,"JS":40,"DEBUGGER":41,"UNDEFINED":42,"NULL":43,"BOOL":44,"Assignable":45,"=":46,"AssignObj":47,"ObjAssignable":48,":":49,"ThisProperty":50,"RETURN":51,"HERECOMMENT":52,"PARAM_START":53,"ParamList":54,"PARAM_END":55,"FuncGlyph":56,"->":57,"=>":58,"OptComma":59,",":60,"Param":61,"ParamVar":62,"...":63,"Array":64,"Object":65,"Splat":66,"SimpleAssignable":67,"Accessor":68,"Parenthetical":69,"Range":70,"This":71,".":72,"?.":73,"::":74,"?::":75,"Index":76,"INDEX_START":77,"IndexValue":78,"INDEX_END":79,"INDEX_SOAK":80,"Slice":81,"{":82,"AssignList":83,"}":84,"CLASS":85,"EXTENDS":86,"OptFuncExist":87,"Arguments":88,"SUPER":89,"FUNC_EXIST":90,"CALL_START":91,"CALL_END":92,"ArgList":93,"THIS":94,"@":95,"[":96,"]":97,"RangeDots":98,"..":99,"Arg":100,"SimpleArgs":101,"TRY":102,"Catch":103,"FINALLY":104,"CATCH":105,"THROW":106,"(":107,")":108,"WhileSource":109,"WHILE":110,"WHEN":111,"UNTIL":112,"Loop":113,"LOOP":114,"ForBody":115,"FOR":116,"BY":117,"ForStart":118,"ForSource":119,"ForVariables":120,"OWN":121,"ForValue":122,"FORIN":123,"FOROF":124,"SWITCH":125,"Whens":126,"ELSE":127,"When":128,"LEADING_WHEN":129,"IfBlock":130,"IF":131,"POST_IF":132,"UNARY":133,"UNARY_MATH":134,"-":135,"+":136,"YIELD":137,"FROM":138,"--":139,"++":140,"?":141,"MATH":142,"**":143,"SHIFT":144,"COMPARE":145,"LOGIC":146,"RELATION":147,"COMPOUND_ASSIGN":148,"$accept":0,"$end":1},
+		terminals_: {2:"error",6:"TERMINATOR",11:"STATEMENT",25:"INDENT",26:"OUTDENT",28:"IDENTIFIER",30:"NUMBER",32:"STRING",33:"STRING_START",34:"STRING_END",36:"REGEX",37:"REGEX_START",38:"REGEX_END",40:"JS",41:"DEBUGGER",42:"UNDEFINED",43:"NULL",44:"BOOL",46:"=",49:":",51:"RETURN",52:"HERECOMMENT",53:"PARAM_START",55:"PARAM_END",57:"->",58:"=>",60:",",63:"...",72:".",73:"?.",74:"::",75:"?::",77:"INDEX_START",79:"INDEX_END",80:"INDEX_SOAK",82:"{",84:"}",85:"CLASS",86:"EXTENDS",89:"SUPER",90:"FUNC_EXIST",91:"CALL_START",92:"CALL_END",94:"THIS",95:"@",96:"[",97:"]",99:"..",102:"TRY",104:"FINALLY",105:"CATCH",106:"THROW",107:"(",108:")",110:"WHILE",111:"WHEN",112:"UNTIL",114:"LOOP",116:"FOR",117:"BY",121:"OWN",123:"FORIN",124:"FOROF",125:"SWITCH",127:"ELSE",129:"LEADING_WHEN",131:"IF",132:"POST_IF",133:"UNARY",134:"UNARY_MATH",135:"-",136:"+",137:"YIELD",138:"FROM",139:"--",140:"++",141:"?",142:"MATH",143:"**",144:"SHIFT",145:"COMPARE",146:"LOGIC",147:"RELATION",148:"COMPOUND_ASSIGN"},
+		productions_: [0,[3,0],[3,1],[4,1],[4,3],[4,2],[5,1],[5,1],[8,1],[8,1],[8,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[24,2],[24,3],[27,1],[29,1],[29,1],[31,1],[31,3],[35,1],[35,3],[39,1],[39,1],[39,1],[39,1],[39,1],[39,1],[39,1],[16,3],[16,4],[16,5],[47,1],[47,3],[47,5],[47,1],[48,1],[48,1],[48,1],[9,2],[9,1],[10,1],[14,5],[14,2],[56,1],[56,1],[59,0],[59,1],[54,0],[54,1],[54,3],[54,4],[54,6],[61,1],[61,2],[61,3],[61,1],[62,1],[62,1],[62,1],[62,1],[66,2],[67,1],[67,2],[67,2],[67,1],[45,1],[45,1],[45,1],[12,1],[12,1],[12,1],[12,1],[12,1],[68,2],[68,2],[68,2],[68,2],[68,1],[68,1],[76,3],[76,2],[78,1],[78,1],[65,4],[83,0],[83,1],[83,3],[83,4],[83,6],[22,1],[22,2],[22,3],[22,4],[22,2],[22,3],[22,4],[22,5],[13,3],[13,3],[13,1],[13,2],[87,0],[87,1],[88,2],[88,4],[71,1],[71,1],[50,2],[64,2],[64,4],[98,1],[98,1],[70,5],[81,3],[81,2],[81,2],[81,1],[93,1],[93,3],[93,4],[93,4],[93,6],[100,1],[100,1],[100,1],[101,1],[101,3],[18,2],[18,3],[18,4],[18,5],[103,3],[103,3],[103,2],[23,2],[69,3],[69,5],[109,2],[109,4],[109,2],[109,4],[19,2],[19,2],[19,2],[19,1],[113,2],[113,2],[20,2],[20,2],[20,2],[115,2],[115,4],[115,2],[118,2],[118,3],[122,1],[122,1],[122,1],[122,1],[120,1],[120,3],[119,2],[119,2],[119,4],[119,4],[119,4],[119,6],[119,6],[21,5],[21,7],[21,4],[21,6],[126,1],[126,2],[128,3],[128,4],[130,3],[130,5],[17,1],[17,3],[17,3],[17,3],[15,2],[15,2],[15,2],[15,2],[15,2],[15,2],[15,3],[15,2],[15,2],[15,2],[15,2],[15,2],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,5],[15,4],[15,3]],
 		performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 		/* this == yyval */
 
@@ -1785,294 +1900,294 @@ var CoffeeScript = (function(){
 		case 5:
 		this.$ = $$[$0-1];
 		break;
-		case 6: case 7: case 8: case 9: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 28: case 41: case 42: case 43: case 44: case 52: case 53: case 63: case 64: case 65: case 66: case 71: case 72: case 75: case 79: case 85: case 129: case 130: case 132: case 162: case 163: case 179: case 185:
+		case 6: case 7: case 8: case 9: case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 27: case 32: case 34: case 45: case 46: case 47: case 48: case 56: case 57: case 67: case 68: case 69: case 70: case 75: case 76: case 79: case 83: case 89: case 133: case 134: case 136: case 166: case 167: case 183: case 189:
 		this.$ = $$[$0];
 		break;
-		case 10: case 25: case 26: case 27: case 29: case 30: case 31:
+		case 10: case 25: case 26: case 28: case 30: case 33: case 35:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Literal($$[$0]));
 		break;
 		case 23:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Block);
 		break;
-		case 24: case 86:
+		case 24: case 31: case 90:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])($$[$0-1]);
 		break;
-		case 32:
-		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Undefined);
-		break;
-		case 33:
-		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Null);
-		break;
-		case 34:
-		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Bool($$[$0]));
-		break;
-		case 35:
-		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Assign($$[$0-2], $$[$0]));
+		case 29: case 146:
+		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Parens($$[$0-1]));
 		break;
 		case 36:
-		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Assign($$[$0-3], $$[$0]));
+		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Undefined);
 		break;
 		case 37:
-		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Assign($$[$0-4], $$[$0-1]));
+		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Null);
 		break;
-		case 38: case 68: case 73: case 74: case 76: case 77: case 78: case 164: case 165:
-		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Value($$[$0]));
+		case 38:
+		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Bool($$[$0]));
 		break;
 		case 39:
-		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Assign(yy.addLocationDataFn(_$[$0-2])(new yy.Value($$[$0-2])), $$[$0], 'object'));
+		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Assign($$[$0-2], $$[$0]));
 		break;
 		case 40:
+		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Assign($$[$0-3], $$[$0]));
+		break;
+		case 41:
+		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Assign($$[$0-4], $$[$0-1]));
+		break;
+		case 42: case 72: case 77: case 78: case 80: case 81: case 82: case 168: case 169:
+		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Value($$[$0]));
+		break;
+		case 43:
+		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Assign(yy.addLocationDataFn(_$[$0-2])(new yy.Value($$[$0-2])), $$[$0], 'object'));
+		break;
+		case 44:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Assign(yy.addLocationDataFn(_$[$0-4])(new yy.Value($$[$0-4])), $$[$0-1], 'object'));
 		break;
-		case 45:
+		case 49:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Return($$[$0]));
 		break;
-		case 46:
+		case 50:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Return);
 		break;
-		case 47:
+		case 51:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Comment($$[$0]));
 		break;
-		case 48:
+		case 52:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Code($$[$0-3], $$[$0], $$[$0-1]));
 		break;
-		case 49:
+		case 53:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Code([], $$[$0], $$[$0-1]));
 		break;
-		case 50:
+		case 54:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])('func');
 		break;
-		case 51:
+		case 55:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])('boundfunc');
 		break;
-		case 54: case 91:
+		case 58: case 95:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])([]);
 		break;
-		case 55: case 92: case 124: case 166:
+		case 59: case 96: case 128: case 170:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])([$$[$0]]);
 		break;
-		case 56: case 93: case 125:
+		case 60: case 97: case 129:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])($$[$0-2].concat($$[$0]));
 		break;
-		case 57: case 94: case 126:
+		case 61: case 98: case 130:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])($$[$0-3].concat($$[$0]));
 		break;
-		case 58: case 95: case 128:
+		case 62: case 99: case 132:
 		this.$ = yy.addLocationDataFn(_$[$0-5], _$[$0])($$[$0-5].concat($$[$0-2]));
 		break;
-		case 59:
+		case 63:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Param($$[$0]));
 		break;
-		case 60:
+		case 64:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Param($$[$0-1], null, true));
 		break;
-		case 61:
+		case 65:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Param($$[$0-2], $$[$0]));
 		break;
-		case 62: case 131:
+		case 66: case 135:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Expansion);
 		break;
-		case 67:
+		case 71:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Splat($$[$0-1]));
 		break;
-		case 69:
+		case 73:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])($$[$0-1].add($$[$0]));
 		break;
-		case 70:
+		case 74:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Value($$[$0-1], [].concat($$[$0])));
 		break;
-		case 80:
+		case 84:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Access($$[$0]));
 		break;
-		case 81:
+		case 85:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Access($$[$0], 'soak'));
 		break;
-		case 82:
+		case 86:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])([yy.addLocationDataFn(_$[$0-1])(new yy.Access(new yy.Literal('prototype'))), yy.addLocationDataFn(_$[$0])(new yy.Access($$[$0]))]);
 		break;
-		case 83:
+		case 87:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])([yy.addLocationDataFn(_$[$0-1])(new yy.Access(new yy.Literal('prototype'), 'soak')), yy.addLocationDataFn(_$[$0])(new yy.Access($$[$0]))]);
 		break;
-		case 84:
+		case 88:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Access(new yy.Literal('prototype')));
 		break;
-		case 87:
+		case 91:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(yy.extend($$[$0], {
 				  soak: true
 				}));
 		break;
-		case 88:
+		case 92:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Index($$[$0]));
 		break;
-		case 89:
+		case 93:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Slice($$[$0]));
 		break;
-		case 90:
+		case 94:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Obj($$[$0-2], $$[$0-3].generated));
 		break;
-		case 96:
+		case 100:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Class);
 		break;
-		case 97:
+		case 101:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Class(null, null, $$[$0]));
 		break;
-		case 98:
+		case 102:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Class(null, $$[$0]));
 		break;
-		case 99:
+		case 103:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Class(null, $$[$0-1], $$[$0]));
 		break;
-		case 100:
+		case 104:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Class($$[$0]));
 		break;
-		case 101:
+		case 105:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Class($$[$0-1], null, $$[$0]));
 		break;
-		case 102:
+		case 106:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Class($$[$0-2], $$[$0]));
 		break;
-		case 103:
+		case 107:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Class($$[$0-3], $$[$0-1], $$[$0]));
 		break;
-		case 104: case 105:
+		case 108: case 109:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Call($$[$0-2], $$[$0], $$[$0-1]));
 		break;
-		case 106:
+		case 110:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Call('super', [new yy.Splat(new yy.Literal('arguments'))]));
 		break;
-		case 107:
+		case 111:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Call('super', $$[$0]));
 		break;
-		case 108:
+		case 112:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(false);
 		break;
-		case 109:
+		case 113:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(true);
 		break;
-		case 110:
+		case 114:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])([]);
 		break;
-		case 111: case 127:
+		case 115: case 131:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])($$[$0-2]);
 		break;
-		case 112: case 113:
+		case 116: case 117:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Value(new yy.Literal('this')));
 		break;
-		case 114:
+		case 118:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Value(yy.addLocationDataFn(_$[$0-1])(new yy.Literal('this')), [yy.addLocationDataFn(_$[$0])(new yy.Access($$[$0]))], 'this'));
 		break;
-		case 115:
+		case 119:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Arr([]));
 		break;
-		case 116:
+		case 120:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Arr($$[$0-2]));
 		break;
-		case 117:
+		case 121:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])('inclusive');
 		break;
-		case 118:
+		case 122:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])('exclusive');
 		break;
-		case 119:
+		case 123:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Range($$[$0-3], $$[$0-1], $$[$0-2]));
 		break;
-		case 120:
+		case 124:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Range($$[$0-2], $$[$0], $$[$0-1]));
 		break;
-		case 121:
+		case 125:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Range($$[$0-1], null, $$[$0]));
 		break;
-		case 122:
+		case 126:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Range(null, $$[$0], $$[$0-1]));
 		break;
-		case 123:
+		case 127:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])(new yy.Range(null, null, $$[$0]));
 		break;
-		case 133:
+		case 137:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])([].concat($$[$0-2], $$[$0]));
 		break;
-		case 134:
+		case 138:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Try($$[$0]));
 		break;
-		case 135:
+		case 139:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Try($$[$0-1], $$[$0][0], $$[$0][1]));
 		break;
-		case 136:
+		case 140:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Try($$[$0-2], null, null, $$[$0]));
 		break;
-		case 137:
+		case 141:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Try($$[$0-3], $$[$0-2][0], $$[$0-2][1], $$[$0]));
 		break;
-		case 138:
+		case 142:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])([$$[$0-1], $$[$0]]);
 		break;
-		case 139:
+		case 143:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])([yy.addLocationDataFn(_$[$0-1])(new yy.Value($$[$0-1])), $$[$0]]);
 		break;
-		case 140:
+		case 144:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])([null, $$[$0]]);
 		break;
-		case 141:
+		case 145:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Throw($$[$0]));
 		break;
-		case 142:
-		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Parens($$[$0-1]));
-		break;
-		case 143:
+		case 147:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Parens($$[$0-2]));
 		break;
-		case 144:
+		case 148:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.While($$[$0]));
 		break;
-		case 145:
+		case 149:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.While($$[$0-2], {
 				  guard: $$[$0]
 				}));
 		break;
-		case 146:
+		case 150:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.While($$[$0], {
 				  invert: true
 				}));
 		break;
-		case 147:
+		case 151:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.While($$[$0-2], {
 				  invert: true,
 				  guard: $$[$0]
 				}));
 		break;
-		case 148:
+		case 152:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])($$[$0-1].addBody($$[$0]));
 		break;
-		case 149: case 150:
+		case 153: case 154:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])($$[$0].addBody(yy.addLocationDataFn(_$[$0-1])(yy.Block.wrap([$$[$0-1]]))));
 		break;
-		case 151:
+		case 155:
 		this.$ = yy.addLocationDataFn(_$[$0], _$[$0])($$[$0]);
 		break;
-		case 152:
+		case 156:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.While(yy.addLocationDataFn(_$[$0-1])(new yy.Literal('true'))).addBody($$[$0]));
 		break;
-		case 153:
+		case 157:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.While(yy.addLocationDataFn(_$[$0-1])(new yy.Literal('true'))).addBody(yy.addLocationDataFn(_$[$0])(yy.Block.wrap([$$[$0]]))));
 		break;
-		case 154: case 155:
+		case 158: case 159:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.For($$[$0-1], $$[$0]));
 		break;
-		case 156:
+		case 160:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.For($$[$0], $$[$0-1]));
 		break;
-		case 157:
+		case 161:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])({
 				  source: yy.addLocationDataFn(_$[$0])(new yy.Value($$[$0]))
 				});
 		break;
-		case 158:
+		case 162:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])({
 				  source: yy.addLocationDataFn(_$[$0-2])(new yy.Value($$[$0-2])),
 				  step: $$[$0]
 				});
 		break;
-		case 159:
+		case 163:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])((function () {
 				$$[$0].own = $$[$0-1].own;
 				$$[$0].name = $$[$0-1][0];
@@ -2080,139 +2195,139 @@ var CoffeeScript = (function(){
 				return $$[$0];
 			  }()));
 		break;
-		case 160:
+		case 164:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])($$[$0]);
 		break;
-		case 161:
+		case 165:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])((function () {
 				$$[$0].own = true;
 				return $$[$0];
 			  }()));
 		break;
-		case 167:
+		case 171:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])([$$[$0-2], $$[$0]]);
 		break;
-		case 168:
+		case 172:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])({
 				  source: $$[$0]
 				});
 		break;
-		case 169:
+		case 173:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])({
 				  source: $$[$0],
 				  object: true
 				});
 		break;
-		case 170:
+		case 174:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])({
 				  source: $$[$0-2],
 				  guard: $$[$0]
 				});
 		break;
-		case 171:
+		case 175:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])({
 				  source: $$[$0-2],
 				  guard: $$[$0],
 				  object: true
 				});
 		break;
-		case 172:
+		case 176:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])({
 				  source: $$[$0-2],
 				  step: $$[$0]
 				});
 		break;
-		case 173:
+		case 177:
 		this.$ = yy.addLocationDataFn(_$[$0-5], _$[$0])({
 				  source: $$[$0-4],
 				  guard: $$[$0-2],
 				  step: $$[$0]
 				});
 		break;
-		case 174:
+		case 178:
 		this.$ = yy.addLocationDataFn(_$[$0-5], _$[$0])({
 				  source: $$[$0-4],
 				  step: $$[$0-2],
 				  guard: $$[$0]
 				});
 		break;
-		case 175:
+		case 179:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Switch($$[$0-3], $$[$0-1]));
 		break;
-		case 176:
+		case 180:
 		this.$ = yy.addLocationDataFn(_$[$0-6], _$[$0])(new yy.Switch($$[$0-5], $$[$0-3], $$[$0-1]));
 		break;
-		case 177:
+		case 181:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Switch(null, $$[$0-1]));
 		break;
-		case 178:
+		case 182:
 		this.$ = yy.addLocationDataFn(_$[$0-5], _$[$0])(new yy.Switch(null, $$[$0-3], $$[$0-1]));
 		break;
-		case 180:
+		case 184:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])($$[$0-1].concat($$[$0]));
 		break;
-		case 181:
+		case 185:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])([[$$[$0-1], $$[$0]]]);
 		break;
-		case 182:
+		case 186:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])([[$$[$0-2], $$[$0-1]]]);
 		break;
-		case 183:
+		case 187:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.If($$[$0-1], $$[$0], {
 				  type: $$[$0-2]
 				}));
 		break;
-		case 184:
+		case 188:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])($$[$0-4].addElse(yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.If($$[$0-1], $$[$0], {
 				  type: $$[$0-2]
 				}))));
 		break;
-		case 186:
+		case 190:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])($$[$0-2].addElse($$[$0]));
 		break;
-		case 187: case 188:
+		case 191: case 192:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.If($$[$0], yy.addLocationDataFn(_$[$0-2])(yy.Block.wrap([$$[$0-2]])), {
 				  type: $$[$0-1],
 				  statement: true
 				}));
 		break;
-		case 189: case 190: case 193: case 194:
+		case 193: case 194: case 197: case 198:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op($$[$0-1], $$[$0]));
 		break;
-		case 191:
+		case 195:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op('-', $$[$0]));
 		break;
-		case 192:
+		case 196:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op('+', $$[$0]));
 		break;
-		case 195:
+		case 199:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Op($$[$0-2].concat($$[$0-1]), $$[$0]));
 		break;
-		case 196:
+		case 200:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op('--', $$[$0]));
 		break;
-		case 197:
+		case 201:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op('++', $$[$0]));
 		break;
-		case 198:
+		case 202:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op('--', $$[$0-1], null, true));
 		break;
-		case 199:
+		case 203:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Op('++', $$[$0-1], null, true));
 		break;
-		case 200:
+		case 204:
 		this.$ = yy.addLocationDataFn(_$[$0-1], _$[$0])(new yy.Existence($$[$0-1]));
 		break;
-		case 201:
+		case 205:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Op('+', $$[$0-2], $$[$0]));
 		break;
-		case 202:
+		case 206:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Op('-', $$[$0-2], $$[$0]));
 		break;
-		case 203: case 204: case 205: case 206: case 207:
+		case 207: case 208: case 209: case 210: case 211:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Op($$[$0-1], $$[$0-2], $$[$0]));
 		break;
-		case 208:
+		case 212:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])((function () {
 				if ($$[$0-1].charAt(0) === '!') {
 				  return new yy.Op($$[$0-1].slice(1), $$[$0-2], $$[$0]).invert();
@@ -2221,22 +2336,22 @@ var CoffeeScript = (function(){
 				}
 			  }()));
 		break;
-		case 209:
+		case 213:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Assign($$[$0-2], $$[$0], $$[$0-1]));
 		break;
-		case 210:
+		case 214:
 		this.$ = yy.addLocationDataFn(_$[$0-4], _$[$0])(new yy.Assign($$[$0-4], $$[$0-1], $$[$0-3]));
 		break;
-		case 211:
+		case 215:
 		this.$ = yy.addLocationDataFn(_$[$0-3], _$[$0])(new yy.Assign($$[$0-3], $$[$0], $$[$0-2]));
 		break;
-		case 212:
+		case 216:
 		this.$ = yy.addLocationDataFn(_$[$0-2], _$[$0])(new yy.Extends($$[$0-2], $$[$0]));
 		break;
 		}
 		},
-		table: [{1:[2,1],3:1,4:2,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{1:[3]},{1:[2,2],6:$VB},o($VC,[2,3]),o($VC,[2,6],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VC,[2,7],{112:69,103:88,109:89,104:$Vo,106:$Vp,110:$Vr,126:$VN}),o($VO,[2,11],{81:90,62:91,70:97,66:$VP,67:$VQ,68:$VR,69:$VS,71:$VT,74:$VU,84:$VV,85:$VW}),o($VO,[2,12],{70:97,81:100,62:101,66:$VP,67:$VQ,68:$VR,69:$VS,71:$VT,74:$VU,84:$VV,85:$VW}),o($VO,[2,13]),o($VO,[2,14]),o($VO,[2,15]),o($VO,[2,16]),o($VO,[2,17]),o($VO,[2,18]),o($VO,[2,19]),o($VO,[2,20]),o($VO,[2,21]),o($VO,[2,22]),o($VO,[2,8]),o($VO,[2,9]),o($VO,[2,10]),o($VX,$VY,{40:[1,102]}),o($VX,[2,76]),o($VX,[2,77]),o($VX,[2,78]),o($VX,[2,79]),o([1,6,25,26,49,54,57,66,67,68,69,71,73,74,78,84,86,91,93,102,104,105,106,110,111,126,129,130,135,136,137,138,139,140,141],[2,106],{82:103,85:$VZ}),o([6,25,49,54],$V_,{48:105,55:106,56:107,27:109,44:110,58:111,59:112,28:$V1,57:$V$,76:$Vf,89:$V01,90:$V11}),{24:115,25:$V21},{7:117,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:119,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:120,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:121,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:123,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,132:[1,124],133:$Vz,134:$VA},{12:126,13:127,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:128,44:63,58:47,59:48,61:125,63:23,64:24,65:25,76:$Vf,83:$Vh,88:$Vi,89:$Vj,90:$Vk,101:$Vn},{12:126,13:127,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:128,44:63,58:47,59:48,61:129,63:23,64:24,65:25,76:$Vf,83:$Vh,88:$Vi,89:$Vj,90:$Vk,101:$Vn},o($V31,$V41,{80:[1,133],133:[1,130],134:[1,131],142:[1,132]}),o($VO,[2,185],{121:[1,134]}),{24:135,25:$V21},{24:136,25:$V21},o($VO,[2,151]),{24:137,25:$V21},{7:138,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,139],27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($V51,[2,96],{32:22,63:23,64:24,65:25,58:47,59:48,29:49,27:62,44:63,12:126,13:127,39:128,24:140,61:142,25:$V21,28:$V1,30:$V2,31:$V3,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,76:$Vf,80:[1,141],83:$Vh,88:$Vi,89:$Vj,90:$Vk,101:$Vn}),{7:143,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,135,136,137,138,139,140,141],[2,46],{12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,9:18,10:19,39:21,32:22,63:23,64:24,65:25,50:28,61:36,124:37,103:39,107:40,109:41,58:47,59:48,29:49,27:62,44:63,112:69,8:118,7:144,11:$V0,28:$V1,30:$V2,31:$V3,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,45:$Va,46:$Vb,47:$Vc,51:$Vd,52:$Ve,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,108:$Vq,119:$Vs,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA}),o($VO,[2,47]),o($V31,[2,73]),o($V31,[2,74]),o($VX,[2,28]),o($VX,[2,29]),o($VX,[2,30]),o($VX,[2,31]),o($VX,[2,32]),o($VX,[2,33]),o($VX,[2,34]),{4:145,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,146],27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:147,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V61,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$V71,58:47,59:48,60:152,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,87:149,88:$Vi,89:$Vj,90:$Vk,91:$V81,94:150,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VX,[2,112]),o($VX,[2,113],{27:154,28:$V1}),{25:[2,50]},{25:[2,51]},o($V91,[2,68]),o($V91,[2,71]),{7:155,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:156,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:157,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:159,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:158,25:$V21,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{27:164,28:$V1,44:165,58:166,59:167,64:160,76:$Vf,89:$V01,90:$Vk,114:161,115:[1,162],116:163},{113:168,117:[1,169],118:[1,170]},o([6,25,54,78],$Va1,{77:171,41:172,42:173,10:174,27:175,29:176,44:177,28:$V1,30:$V2,31:$V3,46:$Vb,89:$V01}),o($Vb1,[2,26]),o($Vb1,[2,27]),o($Vc1,[2,25]),o($VC,[2,5],{7:4,8:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,9:18,10:19,39:21,32:22,63:23,64:24,65:25,50:28,61:36,124:37,103:39,107:40,109:41,58:47,59:48,29:49,27:62,44:63,112:69,5:178,11:$V0,28:$V1,30:$V2,31:$V3,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,45:$Va,46:$Vb,47:$Vc,51:$Vd,52:$Ve,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,104:$Vo,106:$Vp,108:$Vq,110:$Vr,119:$Vs,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA}),o($VO,[2,200]),{7:179,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:180,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:181,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:182,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:183,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:184,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:185,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:186,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:187,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VO,[2,150]),o($VO,[2,155]),{7:188,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VO,[2,149]),o($VO,[2,154]),{82:189,85:$VZ},o($V91,[2,69]),{85:[2,109]},{27:190,28:$V1},{27:191,28:$V1},o($V91,[2,84],{27:192,28:$V1}),{27:193,28:$V1},o($V91,[2,85]),{7:195,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$Vd1,58:47,59:48,61:36,63:23,64:24,65:25,72:194,75:196,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,92:197,93:$Ve1,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{70:200,71:$VT,74:$VU},{82:201,85:$VZ},o($V91,[2,70]),{6:[1,203],7:202,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,204],27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VX,[2,107]),{7:207,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V61,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$V71,58:47,59:48,60:152,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,86:[1,205],87:206,88:$Vi,89:$Vj,90:$Vk,94:150,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o([6,25],$Vf1,{53:210,49:[1,208],54:$Vg1}),o($Vh1,[2,55]),o($Vh1,[2,59],{40:[1,212],57:[1,211]}),o($Vh1,[2,62]),o($Vi1,[2,63]),o($Vi1,[2,64]),o($Vi1,[2,65]),o($Vi1,[2,66]),{27:154,28:$V1},{7:207,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V61,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$V71,58:47,59:48,60:152,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,87:149,88:$Vi,89:$Vj,90:$Vk,91:$V81,94:150,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VO,[2,49]),{4:214,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,26:[1,213],27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,129,130,136,137,138,139,140,141],[2,189],{112:69,103:85,109:86,135:$VG}),{103:88,104:$Vo,106:$Vp,109:89,110:$Vr,112:69,126:$VN},o($Vj1,[2,190],{112:69,103:85,109:86,135:$VG,137:$VI}),o($Vj1,[2,191],{112:69,103:85,109:86,135:$VG,137:$VI}),o($Vj1,[2,192],{112:69,103:85,109:86,135:$VG,137:$VI}),o($VO,[2,193],{112:69,103:88,109:89}),o($Vk1,[2,194],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{7:215,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VO,[2,196],{66:$V41,67:$V41,68:$V41,69:$V41,71:$V41,74:$V41,84:$V41,85:$V41}),{62:91,66:$VP,67:$VQ,68:$VR,69:$VS,70:97,71:$VT,74:$VU,81:90,84:$VV,85:$VW},{62:101,66:$VP,67:$VQ,68:$VR,69:$VS,70:97,71:$VT,74:$VU,81:100,84:$VV,85:$VW},o([66,67,68,69,71,74,84,85],$VY),o($VO,[2,197],{66:$V41,67:$V41,68:$V41,69:$V41,71:$V41,74:$V41,84:$V41,85:$V41}),o($VO,[2,198]),o($VO,[2,199]),{6:[1,218],7:216,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,217],27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:219,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{24:220,25:$V21,125:[1,221]},o($VO,[2,134],{97:222,98:[1,223],99:[1,224]}),o($VO,[2,148]),o($VO,[2,156]),{25:[1,225],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},{120:226,122:227,123:$Vl1},o($VO,[2,97]),{7:229,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($V51,[2,100],{24:230,25:$V21,66:$V41,67:$V41,68:$V41,69:$V41,71:$V41,74:$V41,84:$V41,85:$V41,80:[1,231]}),o($Vk1,[2,141],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vk1,[2,45],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{6:$VB,102:[1,232]},{4:233,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o([6,25,54,91],$Vm1,{112:69,103:85,109:86,92:234,57:[1,235],93:$Ve1,104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vn1,[2,115]),o([6,25,91],$Vf1,{53:236,54:$Vo1}),o($Vp1,[2,124]),{7:207,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V61,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$V71,58:47,59:48,60:152,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,87:238,88:$Vi,89:$Vj,90:$Vk,94:150,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($Vp1,[2,130]),o($Vp1,[2,131]),o($Vc1,[2,114]),{24:239,25:$V21,103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},o($Vq1,[2,144],{112:69,103:85,109:86,104:$Vo,105:[1,240],106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vq1,[2,146],{112:69,103:85,109:86,104:$Vo,105:[1,241],106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VO,[2,152]),o($Vr1,[2,153],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,126,129,130,135,136,137,138,139,140,141],[2,157],{111:[1,242]}),o($Vs1,[2,160]),{27:164,28:$V1,44:165,58:166,59:167,76:$Vf,89:$V01,90:$V11,114:243,116:163},o($Vs1,[2,166],{54:[1,244]}),o($Vt1,[2,162]),o($Vt1,[2,163]),o($Vt1,[2,164]),o($Vt1,[2,165]),o($VO,[2,159]),{7:245,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:246,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o([6,25,78],$Vf1,{53:247,54:$Vu1}),o($Vv1,[2,92]),o($Vv1,[2,38],{43:[1,249]}),o($Vv1,[2,41]),o($Vw1,[2,42]),o($Vw1,[2,43]),o($Vw1,[2,44]),o($VC,[2,4]),o($Vx1,[2,201],{112:69,103:85,109:86,135:$VG,136:$VH,137:$VI}),o($Vx1,[2,202],{112:69,103:85,109:86,135:$VG,136:$VH,137:$VI}),o($Vj1,[2,203],{112:69,103:85,109:86,135:$VG,137:$VI}),o($Vj1,[2,204],{112:69,103:85,109:86,135:$VG,137:$VI}),o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,138,139,140,141],[2,205],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI}),o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,139,140],[2,206],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,141:$VM}),o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,140],[2,207],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,141:$VM}),o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,111,126,139,140,141],[2,208],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ}),o($Vr1,[2,188],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vr1,[2,187],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VX,[2,104]),o($V91,[2,80]),o($V91,[2,81]),o($V91,[2,82]),o($V91,[2,83]),{73:[1,250]},{57:$Vd1,73:[2,88],92:251,93:$Ve1,103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},{73:[2,89]},{7:252,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,73:[2,123],76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($Vy1,[2,117]),o($Vy1,$Vz1),o($V91,[2,87]),o($VX,[2,105]),o($Vk1,[2,35],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{7:253,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:254,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VX,[2,110]),o([6,25,86],$Vf1,{53:255,54:$Vo1}),o($Vp1,$Vm1,{112:69,103:85,109:86,57:[1,256],104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{50:257,51:$Vd,52:$Ve},o($VA1,$VB1,{56:107,27:109,44:110,58:111,59:112,55:258,28:$V1,57:$V$,76:$Vf,89:$V01,90:$V11}),{6:$VC1,25:$VD1},o($Vh1,[2,60]),{7:261,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VE1,[2,23]),{6:$VB,26:[1,262]},o($Vk1,[2,195],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vk1,[2,209],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{7:263,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:264,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($Vk1,[2,212],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VO,[2,186]),{7:265,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VO,[2,135],{98:[1,266]}),{24:267,25:$V21},{24:270,25:$V21,27:268,28:$V1,59:269,76:$Vf},{120:271,122:227,123:$Vl1},{26:[1,272],121:[1,273],122:274,123:$Vl1},o($VF1,[2,179]),{7:276,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,95:275,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VG1,[2,98],{112:69,103:85,109:86,24:277,25:$V21,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VO,[2,101]),{7:278,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VX,[2,142]),{6:$VB,26:[1,279]},{7:280,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o([11,28,30,31,33,34,35,36,37,38,45,46,47,51,52,76,79,83,88,89,90,96,100,101,104,106,108,110,119,125,127,128,129,130,131,133,134],$Vz1,{6:$VH1,25:$VH1,54:$VH1,91:$VH1}),{6:$VI1,25:$VJ1,91:[1,281]},o([6,25,26,86,91],$VB1,{12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,9:18,10:19,39:21,32:22,63:23,64:24,65:25,50:28,61:36,124:37,103:39,107:40,109:41,58:47,59:48,29:49,27:62,44:63,112:69,8:118,60:152,7:207,94:284,11:$V0,28:$V1,30:$V2,31:$V3,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,45:$Va,46:$Vb,47:$Vc,51:$Vd,52:$Ve,57:$V71,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,104:$Vo,106:$Vp,108:$Vq,110:$Vr,119:$Vs,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA}),o($VA1,$Vf1,{53:285,54:$Vo1}),o($VK1,[2,183]),{7:286,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:287,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:288,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($Vs1,[2,161]),{27:164,28:$V1,44:165,58:166,59:167,76:$Vf,89:$V01,90:$V11,116:289},o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,106,110,126],[2,168],{112:69,103:85,109:86,105:[1,290],111:[1,291],129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VL1,[2,169],{112:69,103:85,109:86,105:[1,292],129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{6:$VM1,25:$VN1,78:[1,293]},o([6,25,26,78],$VB1,{42:173,10:174,27:175,29:176,44:177,41:296,28:$V1,30:$V2,31:$V3,46:$Vb,89:$V01}),{7:297,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,298],27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($V91,[2,86]),{7:299,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,73:[2,121],76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{73:[2,122],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},o($Vk1,[2,36],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{26:[1,300],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},{6:$VI1,25:$VJ1,86:[1,301]},o($Vp1,$VH1),{24:302,25:$V21},o($Vh1,[2,56]),{27:109,28:$V1,44:110,55:303,56:107,57:$V$,58:111,59:112,76:$Vf,89:$V01,90:$V11},o($VO1,$V_,{55:106,56:107,27:109,44:110,58:111,59:112,48:304,28:$V1,57:$V$,76:$Vf,89:$V01,90:$V11}),o($Vh1,[2,61],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VE1,[2,24]),{26:[1,305],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},o($Vk1,[2,211],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{24:306,25:$V21,103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},{24:307,25:$V21},o($VO,[2,136]),{24:308,25:$V21},{24:309,25:$V21},o($VP1,[2,140]),{26:[1,310],121:[1,311],122:274,123:$Vl1},o($VO,[2,177]),{24:312,25:$V21},o($VF1,[2,180]),{24:313,25:$V21,54:[1,314]},o($VQ1,[2,132],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VO,[2,99]),o($VG1,[2,102],{112:69,103:85,109:86,24:315,25:$V21,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{102:[1,316]},{91:[1,317],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},o($Vn1,[2,116]),{7:207,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$V71,58:47,59:48,60:152,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,94:318,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:207,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V61,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,57:$V71,58:47,59:48,60:152,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,87:319,88:$Vi,89:$Vj,90:$Vk,94:150,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($Vp1,[2,125]),{6:$VI1,25:$VJ1,26:[1,320]},o($Vr1,[2,145],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vr1,[2,147],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vr1,[2,158],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vs1,[2,167]),{7:321,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:322,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:323,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($Vn1,[2,90]),{10:174,27:175,28:$V1,29:176,30:$V2,31:$V3,41:324,42:173,44:177,46:$Vb,89:$V01},o($VO1,$Va1,{41:172,42:173,10:174,27:175,29:176,44:177,77:325,28:$V1,30:$V2,31:$V3,46:$Vb,89:$V01}),o($Vv1,[2,93]),o($Vv1,[2,39],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{7:326,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{73:[2,120],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},o($VO,[2,37]),o($VX,[2,111]),o($VO,[2,48]),o($Vh1,[2,57]),o($VA1,$Vf1,{53:327,54:$Vg1}),o($VO,[2,210]),o($VK1,[2,184]),o($VO,[2,137]),o($VP1,[2,138]),o($VP1,[2,139]),o($VO,[2,175]),{24:328,25:$V21},{26:[1,329]},o($VF1,[2,181],{6:[1,330]}),{7:331,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},o($VO,[2,103]),o($VX,[2,143]),o($VX,[2,119]),o($Vp1,[2,126]),o($VA1,$Vf1,{53:332,54:$Vo1}),o($Vp1,[2,127]),o([1,6,25,26,49,54,57,73,78,86,91,93,102,104,105,106,110,126],[2,170],{112:69,103:85,109:86,111:[1,333],129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($VL1,[2,172],{112:69,103:85,109:86,105:[1,334],129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vk1,[2,171],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vv1,[2,94]),o($VA1,$Vf1,{53:335,54:$Vu1}),{26:[1,336],103:85,104:$Vo,106:$Vp,109:86,110:$Vr,112:69,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM},{6:$VC1,25:$VD1,26:[1,337]},{26:[1,338]},o($VO,[2,178]),o($VF1,[2,182]),o($VQ1,[2,133],{112:69,103:85,109:86,104:$Vo,106:$Vp,110:$Vr,126:$VD,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),{6:$VI1,25:$VJ1,26:[1,339]},{7:340,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{7:341,8:118,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:$V3,32:22,33:$V4,34:$V5,35:$V6,36:$V7,37:$V8,38:$V9,39:21,44:63,45:$Va,46:$Vb,47:$Vc,50:28,51:$Vd,52:$Ve,58:47,59:48,61:36,63:23,64:24,65:25,76:$Vf,79:$Vg,83:$Vh,88:$Vi,89:$Vj,90:$Vk,96:$Vl,100:$Vm,101:$Vn,103:39,104:$Vo,106:$Vp,107:40,108:$Vq,109:41,110:$Vr,112:69,119:$Vs,124:37,125:$Vt,127:$Vu,128:$Vv,129:$Vw,130:$Vx,131:$Vy,133:$Vz,134:$VA},{6:$VM1,25:$VN1,26:[1,342]},o($Vv1,[2,40]),o($Vh1,[2,58]),o($VO,[2,176]),o($Vp1,[2,128]),o($Vk1,[2,173],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vk1,[2,174],{112:69,103:85,109:86,129:$VE,130:$VF,135:$VG,136:$VH,137:$VI,138:$VJ,139:$VK,140:$VL,141:$VM}),o($Vv1,[2,95])],
-		defaultActions: {60:[2,50],61:[2,51],92:[2,109],196:[2,89]},
+		table: [{1:[2,1],3:1,4:2,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{1:[3]},{1:[2,2],6:$VD},o($VE,[2,3]),o($VE,[2,6],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VE,[2,7],{118:69,109:92,115:93,110:$Vq,112:$Vr,116:$Vt,132:$VP}),o($VQ,[2,11],{87:94,68:95,76:101,72:$VR,73:$VS,74:$VT,75:$VU,77:$VV,80:$VW,90:$VX,91:$VY}),o($VQ,[2,12],{76:101,87:104,68:105,72:$VR,73:$VS,74:$VT,75:$VU,77:$VV,80:$VW,90:$VX,91:$VY}),o($VQ,[2,13]),o($VQ,[2,14]),o($VQ,[2,15]),o($VQ,[2,16]),o($VQ,[2,17]),o($VQ,[2,18]),o($VQ,[2,19]),o($VQ,[2,20]),o($VQ,[2,21]),o($VQ,[2,22]),o($VQ,[2,8]),o($VQ,[2,9]),o($VQ,[2,10]),o($VZ,$V_,{46:[1,106]}),o($VZ,[2,80]),o($VZ,[2,81]),o($VZ,[2,82]),o($VZ,[2,83]),o([1,6,25,26,34,38,55,60,63,72,73,74,75,77,79,80,84,90,92,97,99,108,110,111,112,116,117,132,135,136,141,142,143,144,145,146,147],[2,110],{88:107,91:$V$}),o([6,25,55,60],$V01,{54:109,61:110,62:111,27:113,50:114,64:115,65:116,28:$V1,63:$V11,82:$Vh,95:$V21,96:$V31}),{24:119,25:$V41},{7:121,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:123,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:124,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:125,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:127,8:126,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,138:[1,128],139:$VB,140:$VC},{12:130,13:131,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:132,50:63,64:47,65:48,67:129,69:23,70:24,71:25,82:$Vh,89:$Vj,94:$Vk,95:$Vl,96:$Vm,107:$Vp},{12:130,13:131,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:132,50:63,64:47,65:48,67:133,69:23,70:24,71:25,82:$Vh,89:$Vj,94:$Vk,95:$Vl,96:$Vm,107:$Vp},o($V51,$V61,{86:[1,137],139:[1,134],140:[1,135],148:[1,136]}),o($VQ,[2,189],{127:[1,138]}),{24:139,25:$V41},{24:140,25:$V41},o($VQ,[2,155]),{24:141,25:$V41},{7:142,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,143],27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($V71,[2,100],{39:22,69:23,70:24,71:25,64:47,65:48,29:49,35:51,27:62,50:63,31:72,12:130,13:131,45:132,24:144,67:146,25:$V41,28:$V1,30:$V2,32:$V3,33:$V4,36:$V5,37:$V6,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,82:$Vh,86:[1,145],89:$Vj,94:$Vk,95:$Vl,96:$Vm,107:$Vp}),{7:147,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,141,142,143,144,145,146,147],[2,50],{12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,9:18,10:19,45:21,39:22,69:23,70:24,71:25,56:28,67:36,130:37,109:39,113:40,115:41,64:47,65:48,29:49,35:51,27:62,50:63,118:69,31:72,8:122,7:148,11:$V0,28:$V1,30:$V2,32:$V3,33:$V4,36:$V5,37:$V6,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,51:$Vc,52:$Vd,53:$Ve,57:$Vf,58:$Vg,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,114:$Vs,125:$Vu,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC}),o($VQ,[2,51]),o($V51,[2,77]),o($V51,[2,78]),o($VZ,[2,32]),o($VZ,[2,33]),o($VZ,[2,34]),o($VZ,[2,35]),o($VZ,[2,36]),o($VZ,[2,37]),o($VZ,[2,38]),{4:149,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,150],27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:151,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V81,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$V91,64:47,65:48,66:156,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,93:153,94:$Vk,95:$Vl,96:$Vm,97:$Va1,100:154,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VZ,[2,116]),o($VZ,[2,117],{27:158,28:$V1}),{25:[2,54]},{25:[2,55]},o($Vb1,[2,72]),o($Vb1,[2,75]),{7:159,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:160,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:161,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:163,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,24:162,25:$V41,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{27:168,28:$V1,50:169,64:170,65:171,70:164,82:$Vh,95:$V21,96:$Vm,120:165,121:[1,166],122:167},{119:172,123:[1,173],124:[1,174]},o([6,25,60,84],$Vc1,{31:72,83:175,47:176,48:177,10:178,27:179,29:180,50:181,28:$V1,30:$V2,32:$V3,33:$V4,52:$Vd,95:$V21}),o($Vd1,[2,26]),o($Vd1,[2,27]),o($VZ,[2,30]),{12:130,13:182,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:132,50:63,64:47,65:48,67:183,69:23,70:24,71:25,82:$Vh,89:$Vj,94:$Vk,95:$Vl,96:$Vm,107:$Vp},o($Ve1,[2,25]),o($Vd1,[2,28]),{4:184,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VE,[2,5],{7:4,8:5,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,9:18,10:19,45:21,39:22,69:23,70:24,71:25,56:28,67:36,130:37,109:39,113:40,115:41,64:47,65:48,29:49,35:51,27:62,50:63,118:69,31:72,5:185,11:$V0,28:$V1,30:$V2,32:$V3,33:$V4,36:$V5,37:$V6,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,51:$Vc,52:$Vd,53:$Ve,57:$Vf,58:$Vg,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,110:$Vq,112:$Vr,114:$Vs,116:$Vt,125:$Vu,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC}),o($VQ,[2,204]),{7:186,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:187,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:188,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:189,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:190,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:191,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:192,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:193,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:194,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VQ,[2,154]),o($VQ,[2,159]),{7:195,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VQ,[2,153]),o($VQ,[2,158]),{88:196,91:$V$},o($Vb1,[2,73]),{91:[2,113]},{27:197,28:$V1},{27:198,28:$V1},o($Vb1,[2,88],{27:199,28:$V1}),{27:200,28:$V1},o($Vb1,[2,89]),{7:202,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$Vf1,64:47,65:48,67:36,69:23,70:24,71:25,78:201,81:203,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,98:204,99:$Vg1,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{76:207,77:$VV,80:$VW},{88:208,91:$V$},o($Vb1,[2,74]),{6:[1,210],7:209,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,211],27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vh1,[2,111]),{7:214,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V81,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$V91,64:47,65:48,66:156,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,92:[1,212],93:213,94:$Vk,95:$Vl,96:$Vm,100:154,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o([6,25],$Vi1,{59:217,55:[1,215],60:$Vj1}),o($Vk1,[2,59]),o($Vk1,[2,63],{46:[1,219],63:[1,218]}),o($Vk1,[2,66]),o($Vl1,[2,67]),o($Vl1,[2,68]),o($Vl1,[2,69]),o($Vl1,[2,70]),{27:158,28:$V1},{7:214,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V81,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$V91,64:47,65:48,66:156,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,93:153,94:$Vk,95:$Vl,96:$Vm,97:$Va1,100:154,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VQ,[2,53]),{4:221,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,26:[1,220],27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,135,136,142,143,144,145,146,147],[2,193],{118:69,109:89,115:90,141:$VI}),{109:92,110:$Vq,112:$Vr,115:93,116:$Vt,118:69,132:$VP},o($Vm1,[2,194],{118:69,109:89,115:90,141:$VI,143:$VK}),o($Vm1,[2,195],{118:69,109:89,115:90,141:$VI,143:$VK}),o($Vm1,[2,196],{118:69,109:89,115:90,141:$VI,143:$VK}),o($VQ,[2,197],{118:69,109:92,115:93}),o($Vn1,[2,198],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{7:222,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VQ,[2,200],{72:$V61,73:$V61,74:$V61,75:$V61,77:$V61,80:$V61,90:$V61,91:$V61}),{68:95,72:$VR,73:$VS,74:$VT,75:$VU,76:101,77:$VV,80:$VW,87:94,90:$VX,91:$VY},{68:105,72:$VR,73:$VS,74:$VT,75:$VU,76:101,77:$VV,80:$VW,87:104,90:$VX,91:$VY},o($Vo1,$V_),o($VQ,[2,201],{72:$V61,73:$V61,74:$V61,75:$V61,77:$V61,80:$V61,90:$V61,91:$V61}),o($VQ,[2,202]),o($VQ,[2,203]),{6:[1,225],7:223,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,224],27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:226,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{24:227,25:$V41,131:[1,228]},o($VQ,[2,138],{103:229,104:[1,230],105:[1,231]}),o($VQ,[2,152]),o($VQ,[2,160]),{25:[1,232],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},{126:233,128:234,129:$Vp1},o($VQ,[2,101]),{7:236,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($V71,[2,104],{24:237,25:$V41,72:$V61,73:$V61,74:$V61,75:$V61,77:$V61,80:$V61,90:$V61,91:$V61,86:[1,238]}),o($Vn1,[2,145],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vn1,[2,49],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{6:$VD,108:[1,239]},{4:240,5:3,7:4,8:5,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o([6,25,60,97],$Vq1,{118:69,109:89,115:90,98:241,63:[1,242],99:$Vg1,110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vr1,[2,119]),o([6,25,97],$Vi1,{59:243,60:$Vs1}),o($Vt1,[2,128]),{7:214,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V81,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$V91,64:47,65:48,66:156,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,93:245,94:$Vk,95:$Vl,96:$Vm,100:154,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vt1,[2,134]),o($Vt1,[2,135]),o($Ve1,[2,118]),{24:246,25:$V41,109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},o($Vu1,[2,148],{118:69,109:89,115:90,110:$Vq,111:[1,247],112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vu1,[2,150],{118:69,109:89,115:90,110:$Vq,111:[1,248],112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VQ,[2,156]),o($Vv1,[2,157],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,132,135,136,141,142,143,144,145,146,147],[2,161],{117:[1,249]}),o($Vw1,[2,164]),{27:168,28:$V1,50:169,64:170,65:171,82:$Vh,95:$V21,96:$V31,120:250,122:167},o($Vw1,[2,170],{60:[1,251]}),o($Vx1,[2,166]),o($Vx1,[2,167]),o($Vx1,[2,168]),o($Vx1,[2,169]),o($VQ,[2,163]),{7:252,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:253,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o([6,25,84],$Vi1,{59:254,60:$Vy1}),o($Vz1,[2,96]),o($Vz1,[2,42],{49:[1,256]}),o($Vz1,[2,45]),o($VA1,[2,46]),o($VA1,[2,47]),o($VA1,[2,48]),{38:[1,257],68:105,72:$VR,73:$VS,74:$VT,75:$VU,76:101,77:$VV,80:$VW,87:104,90:$VX,91:$VY},o($Vo1,$V61),{6:$VD,34:[1,258]},o($VE,[2,4]),o($VB1,[2,205],{118:69,109:89,115:90,141:$VI,142:$VJ,143:$VK}),o($VB1,[2,206],{118:69,109:89,115:90,141:$VI,142:$VJ,143:$VK}),o($Vm1,[2,207],{118:69,109:89,115:90,141:$VI,143:$VK}),o($Vm1,[2,208],{118:69,109:89,115:90,141:$VI,143:$VK}),o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,144,145,146,147],[2,209],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK}),o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,145,146],[2,210],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,147:$VO}),o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,146],[2,211],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,147:$VO}),o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,117,132,145,146,147],[2,212],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL}),o($Vv1,[2,192],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vv1,[2,191],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vh1,[2,108]),o($Vb1,[2,84]),o($Vb1,[2,85]),o($Vb1,[2,86]),o($Vb1,[2,87]),{79:[1,259]},{63:$Vf1,79:[2,92],98:260,99:$Vg1,109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},{79:[2,93]},{7:261,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,79:[2,127],82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VC1,[2,121]),o($VC1,$VD1),o($Vb1,[2,91]),o($Vh1,[2,109]),o($Vn1,[2,39],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{7:262,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:263,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vh1,[2,114]),o([6,25,92],$Vi1,{59:264,60:$Vs1}),o($Vt1,$Vq1,{118:69,109:89,115:90,63:[1,265],110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{56:266,57:$Vf,58:$Vg},o($VE1,$VF1,{62:111,27:113,50:114,64:115,65:116,61:267,28:$V1,63:$V11,82:$Vh,95:$V21,96:$V31}),{6:$VG1,25:$VH1},o($Vk1,[2,64]),{7:270,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VI1,[2,23]),{6:$VD,26:[1,271]},o($Vn1,[2,199],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vn1,[2,213],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{7:272,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:273,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vn1,[2,216],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VQ,[2,190]),{7:274,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VQ,[2,139],{104:[1,275]}),{24:276,25:$V41},{24:279,25:$V41,27:277,28:$V1,65:278,82:$Vh},{126:280,128:234,129:$Vp1},{26:[1,281],127:[1,282],128:283,129:$Vp1},o($VJ1,[2,183]),{7:285,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,101:284,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VK1,[2,102],{118:69,109:89,115:90,24:286,25:$V41,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VQ,[2,105]),{7:287,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VZ,[2,146]),{6:$VD,26:[1,288]},{7:289,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o([11,28,30,32,33,36,37,40,41,42,43,44,51,52,53,57,58,82,85,89,94,95,96,102,106,107,110,112,114,116,125,131,133,134,135,136,137,139,140],$VD1,{6:$VL1,25:$VL1,60:$VL1,97:$VL1}),{6:$VM1,25:$VN1,97:[1,290]},o([6,25,26,92,97],$VF1,{12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,9:18,10:19,45:21,39:22,69:23,70:24,71:25,56:28,67:36,130:37,109:39,113:40,115:41,64:47,65:48,29:49,35:51,27:62,50:63,118:69,31:72,8:122,66:156,7:214,100:293,11:$V0,28:$V1,30:$V2,32:$V3,33:$V4,36:$V5,37:$V6,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,51:$Vc,52:$Vd,53:$Ve,57:$Vf,58:$Vg,63:$V91,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,110:$Vq,112:$Vr,114:$Vs,116:$Vt,125:$Vu,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC}),o($VE1,$Vi1,{59:294,60:$Vs1}),o($VO1,[2,187]),{7:295,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:296,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:297,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vw1,[2,165]),{27:168,28:$V1,50:169,64:170,65:171,82:$Vh,95:$V21,96:$V31,122:298},o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,112,116,132],[2,172],{118:69,109:89,115:90,111:[1,299],117:[1,300],135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VP1,[2,173],{118:69,109:89,115:90,111:[1,301],135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{6:$VQ1,25:$VR1,84:[1,302]},o([6,25,26,84],$VF1,{31:72,48:177,10:178,27:179,29:180,50:181,47:305,28:$V1,30:$V2,32:$V3,33:$V4,52:$Vd,95:$V21}),{7:306,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:[1,307],27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VZ,[2,31]),o($Vd1,[2,29]),o($Vb1,[2,90]),{7:308,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,79:[2,125],82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{79:[2,126],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},o($Vn1,[2,40],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{26:[1,309],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},{6:$VM1,25:$VN1,92:[1,310]},o($Vt1,$VL1),{24:311,25:$V41},o($Vk1,[2,60]),{27:113,28:$V1,50:114,61:312,62:111,63:$V11,64:115,65:116,82:$Vh,95:$V21,96:$V31},o($VS1,$V01,{61:110,62:111,27:113,50:114,64:115,65:116,54:313,28:$V1,63:$V11,82:$Vh,95:$V21,96:$V31}),o($Vk1,[2,65],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VI1,[2,24]),{26:[1,314],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},o($Vn1,[2,215],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{24:315,25:$V41,109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},{24:316,25:$V41},o($VQ,[2,140]),{24:317,25:$V41},{24:318,25:$V41},o($VT1,[2,144]),{26:[1,319],127:[1,320],128:283,129:$Vp1},o($VQ,[2,181]),{24:321,25:$V41},o($VJ1,[2,184]),{24:322,25:$V41,60:[1,323]},o($VU1,[2,136],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VQ,[2,103]),o($VK1,[2,106],{118:69,109:89,115:90,24:324,25:$V41,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{108:[1,325]},{97:[1,326],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},o($Vr1,[2,120]),{7:214,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$V91,64:47,65:48,66:156,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,100:327,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:214,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,25:$V81,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,63:$V91,64:47,65:48,66:156,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,93:328,94:$Vk,95:$Vl,96:$Vm,100:154,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vt1,[2,129]),{6:$VM1,25:$VN1,26:[1,329]},o($Vv1,[2,149],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vv1,[2,151],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vv1,[2,162],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vw1,[2,171]),{7:330,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:331,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:332,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($Vr1,[2,94]),{10:178,27:179,28:$V1,29:180,30:$V2,31:72,32:$V3,33:$V4,47:333,48:177,50:181,52:$Vd,95:$V21},o($VS1,$Vc1,{31:72,47:176,48:177,10:178,27:179,29:180,50:181,83:334,28:$V1,30:$V2,32:$V3,33:$V4,52:$Vd,95:$V21}),o($Vz1,[2,97]),o($Vz1,[2,43],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{7:335,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{79:[2,124],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},o($VQ,[2,41]),o($Vh1,[2,115]),o($VQ,[2,52]),o($Vk1,[2,61]),o($VE1,$Vi1,{59:336,60:$Vj1}),o($VQ,[2,214]),o($VO1,[2,188]),o($VQ,[2,141]),o($VT1,[2,142]),o($VT1,[2,143]),o($VQ,[2,179]),{24:337,25:$V41},{26:[1,338]},o($VJ1,[2,185],{6:[1,339]}),{7:340,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},o($VQ,[2,107]),o($VZ,[2,147]),o($VZ,[2,123]),o($Vt1,[2,130]),o($VE1,$Vi1,{59:341,60:$Vs1}),o($Vt1,[2,131]),o([1,6,25,26,34,55,60,63,79,84,92,97,99,108,110,111,112,116,132],[2,174],{118:69,109:89,115:90,117:[1,342],135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($VP1,[2,176],{118:69,109:89,115:90,111:[1,343],135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vn1,[2,175],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vz1,[2,98]),o($VE1,$Vi1,{59:344,60:$Vy1}),{26:[1,345],109:89,110:$Vq,112:$Vr,115:90,116:$Vt,118:69,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO},{6:$VG1,25:$VH1,26:[1,346]},{26:[1,347]},o($VQ,[2,182]),o($VJ1,[2,186]),o($VU1,[2,137],{118:69,109:89,115:90,110:$Vq,112:$Vr,116:$Vt,132:$VF,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),{6:$VM1,25:$VN1,26:[1,348]},{7:349,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{7:350,8:122,9:18,10:19,11:$V0,12:6,13:7,14:8,15:9,16:10,17:11,18:12,19:13,20:14,21:15,22:16,23:17,27:62,28:$V1,29:49,30:$V2,31:72,32:$V3,33:$V4,35:51,36:$V5,37:$V6,39:22,40:$V7,41:$V8,42:$V9,43:$Va,44:$Vb,45:21,50:63,51:$Vc,52:$Vd,53:$Ve,56:28,57:$Vf,58:$Vg,64:47,65:48,67:36,69:23,70:24,71:25,82:$Vh,85:$Vi,89:$Vj,94:$Vk,95:$Vl,96:$Vm,102:$Vn,106:$Vo,107:$Vp,109:39,110:$Vq,112:$Vr,113:40,114:$Vs,115:41,116:$Vt,118:69,125:$Vu,130:37,131:$Vv,133:$Vw,134:$Vx,135:$Vy,136:$Vz,137:$VA,139:$VB,140:$VC},{6:$VQ1,25:$VR1,26:[1,351]},o($Vz1,[2,44]),o($Vk1,[2,62]),o($VQ,[2,180]),o($Vt1,[2,132]),o($Vn1,[2,177],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vn1,[2,178],{118:69,109:89,115:90,135:$VG,136:$VH,141:$VI,142:$VJ,143:$VK,144:$VL,145:$VM,146:$VN,147:$VO}),o($Vz1,[2,99])],
+		defaultActions: {60:[2,54],61:[2,55],96:[2,113],203:[2,93]},
 		parseError: function parseError(str, hash) {
 			if (hash.recoverable) {
 				this.trace(str);
@@ -2414,18 +2529,16 @@ var CoffeeScript = (function(){
 	//#region URL: /scope
 	modules['/scope'] = function() {
 	  var exports = {};
-	  var Scope, extend, last, _ref,
-		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-	  _ref = require('/helpers'), extend = _ref.extend, last = _ref.last;
+	  var Scope,
+		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 	  exports.Scope = Scope = (function() {
-		function Scope(_at_parent, _at_expressions, _at_method, _at_referencedVars) {
-		  var _ref1, _ref2;
-		  this.parent = _at_parent;
-		  this.expressions = _at_expressions;
-		  this.method = _at_method;
-		  this.referencedVars = _at_referencedVars;
+		function Scope(parent, expressions, method, referencedVars) {
+		  var ref, ref1;
+		  this.parent = parent;
+		  this.expressions = expressions;
+		  this.method = method;
+		  this.referencedVars = referencedVars;
 		  this.variables = [
 			{
 			  name: 'arguments',
@@ -2436,7 +2549,7 @@ var CoffeeScript = (function(){
 		  if (!this.parent) {
 			this.utilities = {};
 		  }
-		  this.root = (_ref1 = (_ref2 = this.parent) != null ? _ref2.root : void 0) != null ? _ref1 : this;
+		  this.root = (ref = (ref1 = this.parent) != null ? ref1.root : void 0) != null ? ref : this;
 		}
 
 		Scope.prototype.add = function(name, type, immediate) {
@@ -2454,8 +2567,8 @@ var CoffeeScript = (function(){
 		};
 
 		Scope.prototype.namedMethod = function() {
-		  var _ref1;
-		  if (((_ref1 = this.method) != null ? _ref1.name : void 0) || !this.parent) {
+		  var ref;
+		  if (((ref = this.method) != null ? ref.name : void 0) || !this.parent) {
 			return this.method;
 		  }
 		  return this.parent.namedMethod();
@@ -2477,23 +2590,26 @@ var CoffeeScript = (function(){
 		};
 
 		Scope.prototype.check = function(name) {
-		  var _ref1;
-		  return !!(this.type(name) || ((_ref1 = this.parent) != null ? _ref1.check(name) : void 0));
+		  var ref;
+		  return !!(this.type(name) || ((ref = this.parent) != null ? ref.check(name) : void 0));
 		};
 
-		Scope.prototype.temporary = function(name, index) {
-		  if (name.length > 1) {
-			return '_' + name + (index > 1 ? index - 1 : '');
+		Scope.prototype.temporary = function(name, index, single) {
+		  if (single == null) {
+			single = false;
+		  }
+		  if (single) {
+			return (index + parseInt(name, 36)).toString(36).replace(/\d/g, 'a');
 		  } else {
-			return '_' + (index + parseInt(name, 36)).toString(36).replace(/\d/g, 'a');
+			return name + (index || '');
 		  }
 		};
 
 		Scope.prototype.type = function(name) {
-		  var v, _i, _len, _ref1;
-		  _ref1 = this.variables;
-		  for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-			v = _ref1[_i];
+		  var i, len, ref, v;
+		  ref = this.variables;
+		  for (i = 0, len = ref.length; i < len; i++) {
+			v = ref[i];
 			if (v.name === name) {
 			  return v.type;
 			}
@@ -2501,20 +2617,20 @@ var CoffeeScript = (function(){
 		  return null;
 		};
 
-		Scope.prototype.freeVariable = function(name, reserve) {
-		  var index, temp;
-		  if (reserve == null) {
-			reserve = true;
+		Scope.prototype.freeVariable = function(name, options) {
+		  var index, ref, temp;
+		  if (options == null) {
+			options = {};
 		  }
 		  index = 0;
 		  while (true) {
-			temp = this.temporary(name, index);
-			if (!(this.check(temp) || __indexOf.call(this.root.referencedVars, temp) >= 0)) {
+			temp = this.temporary(name, index, options.single);
+			if (!(this.check(temp) || indexOf.call(this.root.referencedVars, temp) >= 0)) {
 			  break;
 			}
 			index++;
 		  }
-		  if (reserve) {
+		  if ((ref = options.reserve) != null ? ref : true) {
 			this.add(temp, 'var', true);
 		  }
 		  return temp;
@@ -2533,30 +2649,32 @@ var CoffeeScript = (function(){
 		};
 
 		Scope.prototype.declaredVariables = function() {
-		  var realVars, tempVars, v, _i, _len, _ref1;
-		  realVars = [];
-		  tempVars = [];
-		  _ref1 = this.variables;
-		  for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-			v = _ref1[_i];
-			if (v.type === 'var') {
-			  (v.name.charAt(0) === '_' ? tempVars : realVars).push(v.name);
+		  var v;
+		  return ((function() {
+			var i, len, ref, results;
+			ref = this.variables;
+			results = [];
+			for (i = 0, len = ref.length; i < len; i++) {
+			  v = ref[i];
+			  if (v.type === 'var') {
+				results.push(v.name);
+			  }
 			}
-		  }
-		  return realVars.sort().concat(tempVars.sort());
+			return results;
+		  }).call(this)).sort();
 		};
 
 		Scope.prototype.assignedVariables = function() {
-		  var v, _i, _len, _ref1, _results;
-		  _ref1 = this.variables;
-		  _results = [];
-		  for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-			v = _ref1[_i];
+		  var i, len, ref, results, v;
+		  ref = this.variables;
+		  results = [];
+		  for (i = 0, len = ref.length; i < len; i++) {
+			v = ref[i];
 			if (v.type.assigned) {
-			  _results.push(v.name + " = " + v.type.value);
+			  results.push(v.name + " = " + v.type.value);
 			}
 		  }
-		  return _results;
+		  return results;
 		};
 
 		return Scope;
@@ -2570,19 +2688,19 @@ var CoffeeScript = (function(){
 	//#region URL: /nodes
 	modules['/nodes'] = function() {
 	  var exports = {};
-	  var Access, Arr, Assign, Base, Block, Call, Class, Code, CodeFragment, Comment, Existence, Expansion, Extends, For, HEXNUM, IDENTIFIER, IDENTIFIER_STR, IS_REGEX, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, METHOD_DEF, NEGATE, NO, NUMBER, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, isLiteralArguments, isLiteralThis, last, locationDataToString, merge, multident, parseNum, some, starts, throwSyntaxError, unfoldSoak, utility, _ref, _ref1,
-		__extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-		__hasProp = {}.hasOwnProperty,
-		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-		__slice = [].slice;
+	  var Access, Arr, Assign, Base, Block, Call, Class, Code, CodeFragment, Comment, Existence, Expansion, Extends, For, HEXNUM, IDENTIFIER, IS_REGEX, IS_STRING, If, In, Index, LEVEL_ACCESS, LEVEL_COND, LEVEL_LIST, LEVEL_OP, LEVEL_PAREN, LEVEL_TOP, Literal, NEGATE, NO, NUMBER, Obj, Op, Param, Parens, RESERVED, Range, Return, SIMPLENUM, STRICT_PROSCRIBED, Scope, Slice, Splat, Switch, TAB, THIS, Throw, Try, UTILITIES, Value, While, YES, addLocationDataFn, compact, del, ends, extend, flatten, fragmentsToText, isComplexOrAssignable, isLiteralArguments, isLiteralThis, locationDataToString, merge, multident, parseNum, ref1, ref2, some, starts, throwSyntaxError, unfoldSoak, utility,
+		extend1 = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+		hasProp = {}.hasOwnProperty,
+		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+		slice = [].slice;
 
 	  Error.stackTraceLimit = Infinity;
 
 	  Scope = require('/scope').Scope;
 
-	  _ref = require('/lexer'), RESERVED = _ref.RESERVED, STRICT_PROSCRIBED = _ref.STRICT_PROSCRIBED;
+	  ref1 = require('/lexer'), RESERVED = ref1.RESERVED, STRICT_PROSCRIBED = ref1.STRICT_PROSCRIBED;
 
-	  _ref1 = require('/helpers'), compact = _ref1.compact, flatten = _ref1.flatten, extend = _ref1.extend, merge = _ref1.merge, del = _ref1.del, starts = _ref1.starts, ends = _ref1.ends, last = _ref1.last, some = _ref1.some, addLocationDataFn = _ref1.addLocationDataFn, locationDataToString = _ref1.locationDataToString, throwSyntaxError = _ref1.throwSyntaxError;
+	  ref2 = require('/helpers'), compact = ref2.compact, flatten = ref2.flatten, extend = ref2.extend, merge = ref2.merge, del = ref2.del, starts = ref2.starts, ends = ref2.ends, some = ref2.some, addLocationDataFn = ref2.addLocationDataFn, locationDataToString = ref2.locationDataToString, throwSyntaxError = ref2.throwSyntaxError;
 
 	  exports.extend = extend;
 
@@ -2607,10 +2725,10 @@ var CoffeeScript = (function(){
 
 	  exports.CodeFragment = CodeFragment = (function() {
 		function CodeFragment(parent, code) {
-		  var _ref2;
+		  var ref3;
 		  this.code = "" + code;
 		  this.locationData = parent != null ? parent.locationData : void 0;
-		  this.type = (parent != null ? (_ref2 = parent.constructor) != null ? _ref2.name : void 0 : void 0) || 'unknown';
+		  this.type = (parent != null ? (ref3 = parent.constructor) != null ? ref3.name : void 0 : void 0) || 'unknown';
 		}
 
 		CodeFragment.prototype.toString = function() {
@@ -2624,13 +2742,13 @@ var CoffeeScript = (function(){
 	  fragmentsToText = function(fragments) {
 		var fragment;
 		return ((function() {
-		  var _i, _len, _results;
-		  _results = [];
-		  for (_i = 0, _len = fragments.length; _i < _len; _i++) {
-			fragment = fragments[_i];
-			_results.push(fragment.code);
+		  var j, len1, results;
+		  results = [];
+		  for (j = 0, len1 = fragments.length; j < len1; j++) {
+			fragment = fragments[j];
+			results.push(fragment.code);
 		  }
-		  return _results;
+		  return results;
 		})()).join('');
 	  };
 
@@ -2682,19 +2800,20 @@ var CoffeeScript = (function(){
 		  return parts;
 		};
 
-		Base.prototype.cache = function(o, level, reused) {
-		  var ref, sub;
-		  if (!this.isComplex()) {
-			ref = level ? this.compileToFragments(o, level) : this;
-			return [ref, ref];
-		  } else {
-			ref = new Literal(reused || o.scope.freeVariable('ref'));
+		Base.prototype.cache = function(o, level, isComplex) {
+		  var complex, ref, sub;
+		  complex = isComplex != null ? isComplex(this) : this.isComplex();
+		  if (complex) {
+			ref = new Literal(o.scope.freeVariable('ref'));
 			sub = new Assign(ref, this);
 			if (level) {
 			  return [sub.compileToFragments(o, level), [this.makeCode(ref.value)]];
 			} else {
 			  return [sub, ref];
 			}
+		  } else {
+			ref = level ? this.compileToFragments(o, level) : this;
+			return [ref, ref];
 		  }
 		};
 
@@ -2754,17 +2873,17 @@ var CoffeeScript = (function(){
 		};
 
 		Base.prototype.eachChild = function(func) {
-		  var attr, child, _i, _j, _len, _len1, _ref2, _ref3;
+		  var attr, child, j, k, len1, len2, ref3, ref4;
 		  if (!this.children) {
 			return this;
 		  }
-		  _ref2 = this.children;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			attr = _ref2[_i];
+		  ref3 = this.children;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			attr = ref3[j];
 			if (this[attr]) {
-			  _ref3 = flatten([this[attr]]);
-			  for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-				child = _ref3[_j];
+			  ref4 = flatten([this[attr]]);
+			  for (k = 0, len2 = ref4.length; k < len2; k++) {
+				child = ref4[k];
 				if (func(child) === false) {
 				  return this;
 				}
@@ -2838,9 +2957,9 @@ var CoffeeScript = (function(){
 		};
 
 		Base.prototype.joinFragmentArrays = function(fragmentsList, joinStr) {
-		  var answer, fragments, i, _i, _len;
+		  var answer, fragments, i, j, len1;
 		  answer = [];
-		  for (i = _i = 0, _len = fragmentsList.length; _i < _len; i = ++_i) {
+		  for (i = j = 0, len1 = fragmentsList.length; j < len1; i = ++j) {
 			fragments = fragmentsList[i];
 			if (i) {
 			  answer.push(this.makeCode(joinStr));
@@ -2854,8 +2973,8 @@ var CoffeeScript = (function(){
 
 	  })();
 
-	  exports.Block = Block = (function(_super) {
-		__extends(Block, _super);
+	  exports.Block = Block = (function(superClass1) {
+		extend1(Block, superClass1);
 
 		function Block(nodes) {
 		  this.expressions = compact(flatten(nodes || []));
@@ -2890,10 +3009,10 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.isStatement = function(o) {
-		  var exp, _i, _len, _ref2;
-		  _ref2 = this.expressions;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			exp = _ref2[_i];
+		  var exp, j, len1, ref3;
+		  ref3 = this.expressions;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			exp = ref3[j];
 			if (exp.isStatement(o)) {
 			  return true;
 			}
@@ -2902,10 +3021,10 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.jumps = function(o) {
-		  var exp, jumpNode, _i, _len, _ref2;
-		  _ref2 = this.expressions;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			exp = _ref2[_i];
+		  var exp, j, jumpNode, len1, ref3;
+		  ref3 = this.expressions;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			exp = ref3[j];
 			if (jumpNode = exp.jumps(o)) {
 			  return jumpNode;
 			}
@@ -2940,13 +3059,13 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.compileNode = function(o) {
-		  var answer, compiledNodes, fragments, index, node, top, _i, _len, _ref2;
+		  var answer, compiledNodes, fragments, index, j, len1, node, ref3, top;
 		  this.tab = o.indent;
 		  top = o.level === LEVEL_TOP;
 		  compiledNodes = [];
-		  _ref2 = this.expressions;
-		  for (index = _i = 0, _len = _ref2.length; _i < _len; index = ++_i) {
-			node = _ref2[index];
+		  ref3 = this.expressions;
+		  for (index = j = 0, len1 = ref3.length; j < len1; index = ++j) {
+			node = ref3[index];
 			node = node.unwrapAll();
 			node = node.unfoldSoak(o) || node;
 			if (node instanceof Block) {
@@ -2983,30 +3102,30 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.compileRoot = function(o) {
-		  var exp, fragments, i, name, prelude, preludeExps, rest, _i, _len, _ref2, _ref3;
+		  var exp, fragments, i, j, len1, name, prelude, preludeExps, ref3, ref4, rest;
 		  o.indent = o.bare ? '' : TAB;
 		  o.level = LEVEL_TOP;
 		  this.spaced = true;
-		  o.scope = new Scope(null, this, null, (_ref2 = o.referencedVars) != null ? _ref2 : []);
-		  _ref3 = o.locals || [];
-		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-			name = _ref3[_i];
+		  o.scope = new Scope(null, this, null, (ref3 = o.referencedVars) != null ? ref3 : []);
+		  ref4 = o.locals || [];
+		  for (j = 0, len1 = ref4.length; j < len1; j++) {
+			name = ref4[j];
 			o.scope.parameter(name);
 		  }
 		  prelude = [];
 		  if (!o.bare) {
 			preludeExps = (function() {
-			  var _j, _len1, _ref4, _results;
-			  _ref4 = this.expressions;
-			  _results = [];
-			  for (i = _j = 0, _len1 = _ref4.length; _j < _len1; i = ++_j) {
-				exp = _ref4[i];
+			  var k, len2, ref5, results;
+			  ref5 = this.expressions;
+			  results = [];
+			  for (i = k = 0, len2 = ref5.length; k < len2; i = ++k) {
+				exp = ref5[i];
 				if (!(exp.unwrap() instanceof Comment)) {
 				  break;
 				}
-				_results.push(exp);
+				results.push(exp);
 			  }
-			  return _results;
+			  return results;
 			}).call(this);
 			rest = this.expressions.slice(preludeExps.length);
 			this.expressions = preludeExps;
@@ -3026,12 +3145,12 @@ var CoffeeScript = (function(){
 		};
 
 		Block.prototype.compileWithDeclarations = function(o) {
-		  var assigns, declars, exp, fragments, i, post, rest, scope, spaced, _i, _len, _ref2, _ref3, _ref4;
+		  var assigns, declars, exp, fragments, i, j, len1, post, ref3, ref4, ref5, rest, scope, spaced;
 		  fragments = [];
 		  post = [];
-		  _ref2 = this.expressions;
-		  for (i = _i = 0, _len = _ref2.length; _i < _len; i = ++_i) {
-			exp = _ref2[i];
+		  ref3 = this.expressions;
+		  for (i = j = 0, len1 = ref3.length; j < len1; i = ++j) {
+			exp = ref3[i];
 			exp = exp.unwrap();
 			if (!(exp instanceof Comment || exp instanceof Literal)) {
 			  break;
@@ -3042,8 +3161,8 @@ var CoffeeScript = (function(){
 		  });
 		  if (i) {
 			rest = this.expressions.splice(i, 9e9);
-			_ref3 = [this.spaced, false], spaced = _ref3[0], this.spaced = _ref3[1];
-			_ref4 = [this.compileNode(o), spaced], fragments = _ref4[0], this.spaced = _ref4[1];
+			ref4 = [this.spaced, false], spaced = ref4[0], this.spaced = ref4[1];
+			ref5 = [this.compileNode(o), spaced], fragments = ref5[0], this.spaced = ref5[1];
 			this.expressions = rest;
 		  }
 		  post = this.compileNode(o);
@@ -3084,11 +3203,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Literal = Literal = (function(_super) {
-		__extends(Literal, _super);
+	  exports.Literal = Literal = (function(superClass1) {
+		extend1(Literal, superClass1);
 
-		function Literal(_at_value) {
-		  this.value = _at_value;
+		function Literal(value1) {
+		  this.value = value1;
 		}
 
 		Literal.prototype.makeReturn = function() {
@@ -3104,8 +3223,8 @@ var CoffeeScript = (function(){
 		};
 
 		Literal.prototype.isStatement = function() {
-		  var _ref2;
-		  return (_ref2 = this.value) === 'break' || _ref2 === 'continue' || _ref2 === 'debugger';
+		  var ref3;
+		  return (ref3 = this.value) === 'break' || ref3 === 'continue' || ref3 === 'debugger';
 		};
 
 		Literal.prototype.isComplex = NO;
@@ -3124,8 +3243,8 @@ var CoffeeScript = (function(){
 		};
 
 		Literal.prototype.compileNode = function(o) {
-		  var answer, code, _ref2;
-		  code = this.value === 'this' ? ((_ref2 = o.scope.method) != null ? _ref2.bound : void 0) ? o.scope.method.context : this.value : this.value.reserved ? "\"" + this.value + "\"" : this.value;
+		  var answer, code, ref3;
+		  code = this.value === 'this' ? ((ref3 = o.scope.method) != null ? ref3.bound : void 0) ? o.scope.method.context : this.value : this.value.reserved ? "\"" + this.value + "\"" : this.value;
 		  answer = this.isStatement() ? "" + this.tab + code + ";" : code;
 		  return [this.makeCode(answer)];
 		};
@@ -3138,8 +3257,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Undefined = (function(_super) {
-		__extends(Undefined, _super);
+	  exports.Undefined = (function(superClass1) {
+		extend1(Undefined, superClass1);
 
 		function Undefined() {
 		  return Undefined.__super__.constructor.apply(this, arguments);
@@ -3157,8 +3276,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Null = (function(_super) {
-		__extends(Null, _super);
+	  exports.Null = (function(superClass1) {
+		extend1(Null, superClass1);
 
 		function Null() {
 		  return Null.__super__.constructor.apply(this, arguments);
@@ -3176,8 +3295,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Bool = (function(_super) {
-		__extends(Bool, _super);
+	  exports.Bool = (function(superClass1) {
+		extend1(Bool, superClass1);
 
 		Bool.prototype.isAssignable = NO;
 
@@ -3187,19 +3306,19 @@ var CoffeeScript = (function(){
 		  return [this.makeCode(this.val)];
 		};
 
-		function Bool(_at_val) {
-		  this.val = _at_val;
+		function Bool(val1) {
+		  this.val = val1;
 		}
 
 		return Bool;
 
 	  })(Base);
 
-	  exports.Return = Return = (function(_super) {
-		__extends(Return, _super);
+	  exports.Return = Return = (function(superClass1) {
+		extend1(Return, superClass1);
 
-		function Return(_at_expression) {
-		  this.expression = _at_expression;
+		function Return(expression) {
+		  this.expression = expression;
 		}
 
 		Return.prototype.children = ['expression'];
@@ -3211,8 +3330,8 @@ var CoffeeScript = (function(){
 		Return.prototype.jumps = THIS;
 
 		Return.prototype.compileToFragments = function(o, level) {
-		  var expr, _ref2;
-		  expr = (_ref2 = this.expression) != null ? _ref2.makeReturn() : void 0;
+		  var expr, ref3;
+		  expr = (ref3 = this.expression) != null ? ref3.makeReturn() : void 0;
 		  if (expr && !(expr instanceof Return)) {
 			return expr.compileToFragments(o, level);
 		  } else {
@@ -3221,13 +3340,18 @@ var CoffeeScript = (function(){
 		};
 
 		Return.prototype.compileNode = function(o) {
-		  var answer;
+		  var answer, exprIsYieldReturn, ref3;
 		  answer = [];
-		  answer.push(this.makeCode(this.tab + ("return" + (this.expression ? " " : ""))));
+		  exprIsYieldReturn = (ref3 = this.expression) != null ? typeof ref3.isYieldReturn === "function" ? ref3.isYieldReturn() : void 0 : void 0;
+		  if (!exprIsYieldReturn) {
+			answer.push(this.makeCode(this.tab + ("return" + (this.expression ? " " : ""))));
+		  }
 		  if (this.expression) {
 			answer = answer.concat(this.expression.compileToFragments(o, LEVEL_PAREN));
 		  }
-		  answer.push(this.makeCode(";"));
+		  if (!exprIsYieldReturn) {
+			answer.push(this.makeCode(";"));
+		  }
 		  return answer;
 		};
 
@@ -3235,8 +3359,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Value = Value = (function(_super) {
-		__extends(Value, _super);
+	  exports.Value = Value = (function(superClass1) {
+		extend1(Value, superClass1);
 
 		function Value(base, props, tag) {
 		  if (!props && base instanceof Value) {
@@ -3294,10 +3418,10 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.isAtomic = function() {
-		  var node, _i, _len, _ref2;
-		  _ref2 = this.properties.concat(this.base);
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			node = _ref2[_i];
+		  var j, len1, node, ref3;
+		  ref3 = this.properties.concat(this.base);
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			node = ref3[j];
 			if (node.soak || node instanceof Call) {
 			  return false;
 			}
@@ -3329,12 +3453,14 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.isSplice = function() {
-		  return last(this.properties) instanceof Slice;
+		  var lastProp, ref3;
+		  ref3 = this.properties, lastProp = ref3[ref3.length - 1];
+		  return lastProp instanceof Slice;
 		};
 
 		Value.prototype.looksStatic = function(className) {
-		  var _ref2;
-		  return this.base.value === className && this.properties.length && ((_ref2 = this.properties[0].name) != null ? _ref2.value : void 0) !== 'prototype';
+		  var ref3;
+		  return this.base.value === className && this.properties.length === 1 && ((ref3 = this.properties[0].name) != null ? ref3.value : void 0) !== 'prototype';
 		};
 
 		Value.prototype.unwrap = function() {
@@ -3346,8 +3472,8 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.cacheReference = function(o) {
-		  var base, bref, name, nref;
-		  name = last(this.properties);
+		  var base, bref, name, nref, ref3;
+		  ref3 = this.properties, name = ref3[ref3.length - 1];
 		  if (this.properties.length < 2 && !this.base.isComplex() && !(name != null ? name.isComplex() : void 0)) {
 			return [this, this];
 		  }
@@ -3368,15 +3494,15 @@ var CoffeeScript = (function(){
 		};
 
 		Value.prototype.compileNode = function(o) {
-		  var fragments, prop, props, _i, _len;
+		  var fragments, j, len1, prop, props;
 		  this.base.front = this.front;
 		  props = this.properties;
 		  fragments = this.base.compileToFragments(o, (props.length ? LEVEL_ACCESS : null));
 		  if ((this.base instanceof Parens || props.length) && SIMPLENUM.test(fragmentsToText(fragments))) {
 			fragments.push(this.makeCode('.'));
 		  }
-		  for (_i = 0, _len = props.length; _i < _len; _i++) {
-			prop = props[_i];
+		  for (j = 0, len1 = props.length; j < len1; j++) {
+			prop = props[j];
 			fragments.push.apply(fragments, prop.compileToFragments(o));
 		  }
 		  return fragments;
@@ -3385,14 +3511,14 @@ var CoffeeScript = (function(){
 		Value.prototype.unfoldSoak = function(o) {
 		  return this.unfoldedSoak != null ? this.unfoldedSoak : this.unfoldedSoak = (function(_this) {
 			return function() {
-			  var fst, i, ifn, prop, ref, snd, _i, _len, _ref2, _ref3;
+			  var fst, i, ifn, j, len1, prop, ref, ref3, ref4, snd;
 			  if (ifn = _this.base.unfoldSoak(o)) {
-				(_ref2 = ifn.body.properties).push.apply(_ref2, _this.properties);
+				(ref3 = ifn.body.properties).push.apply(ref3, _this.properties);
 				return ifn;
 			  }
-			  _ref3 = _this.properties;
-			  for (i = _i = 0, _len = _ref3.length; _i < _len; i = ++_i) {
-				prop = _ref3[i];
+			  ref4 = _this.properties;
+			  for (i = j = 0, len1 = ref4.length; j < len1; i = ++j) {
+				prop = ref4[i];
 				if (!prop.soak) {
 				  continue;
 				}
@@ -3417,11 +3543,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Comment = Comment = (function(_super) {
-		__extends(Comment, _super);
+	  exports.Comment = Comment = (function(superClass1) {
+		extend1(Comment, superClass1);
 
-		function Comment(_at_comment) {
-		  this.comment = _at_comment;
+		function Comment(comment1) {
+		  this.comment = comment1;
 		}
 
 		Comment.prototype.isStatement = YES;
@@ -3431,7 +3557,7 @@ var CoffeeScript = (function(){
 		Comment.prototype.compileNode = function(o, level) {
 		  var code, comment;
 		  comment = this.comment.replace(/^(\s*)# /gm, "$1 * ");
-		  code = "/*" + (multident(comment, this.tab)) + (__indexOf.call(comment, '\n') >= 0 ? "\n" + this.tab : '') + " */";
+		  code = "/*" + (multident(comment, this.tab)) + (indexOf.call(comment, '\n') >= 0 ? "\n" + this.tab : '') + " */";
 		  if ((level || o.level) === LEVEL_TOP) {
 			code = o.indent + code;
 		  }
@@ -3442,12 +3568,12 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Call = Call = (function(_super) {
-		__extends(Call, _super);
+	  exports.Call = Call = (function(superClass1) {
+		extend1(Call, superClass1);
 
-		function Call(variable, _at_args, _at_soak) {
-		  this.args = _at_args != null ? _at_args : [];
-		  this.soak = _at_soak;
+		function Call(variable, args1, soak) {
+		  this.args = args1 != null ? args1 : [];
+		  this.soak = soak;
 		  this.isNew = false;
 		  this.isSuper = variable === 'super';
 		  this.variable = this.isSuper ? null : variable;
@@ -3459,8 +3585,8 @@ var CoffeeScript = (function(){
 		Call.prototype.children = ['variable', 'args'];
 
 		Call.prototype.newInstance = function() {
-		  var base, _ref2;
-		  base = ((_ref2 = this.variable) != null ? _ref2.base : void 0) || this.variable;
+		  var base, ref3;
+		  base = ((ref3 = this.variable) != null ? ref3.base : void 0) || this.variable;
 		  if (base instanceof Call && !base.isNew) {
 			base.newInstance();
 		  } else {
@@ -3470,15 +3596,28 @@ var CoffeeScript = (function(){
 		};
 
 		Call.prototype.superReference = function(o) {
-		  var accesses, method;
+		  var accesses, base, bref, klass, method, name, nref, variable;
 		  method = o.scope.namedMethod();
 		  if (method != null ? method.klass : void 0) {
+			klass = method.klass, name = method.name, variable = method.variable;
+			if (klass.isComplex()) {
+			  bref = new Literal(o.scope.parent.freeVariable('base'));
+			  base = new Value(new Parens(new Assign(bref, klass)));
+			  variable.base = base;
+			  variable.properties.splice(0, klass.properties.length);
+			}
+			if (name.isComplex() || (name instanceof Index && name.index.isAssignable())) {
+			  nref = new Literal(o.scope.parent.freeVariable('name'));
+			  name = new Index(new Assign(nref, name.index));
+			  variable.properties.pop();
+			  variable.properties.push(name);
+			}
 			accesses = [new Access(new Literal('__super__'))];
 			if (method["static"]) {
 			  accesses.push(new Access(new Literal('constructor')));
 			}
-			accesses.push(new Access(new Literal(method.name)));
-			return (new Value(new Literal(method.klass), accesses)).compile(o);
+			accesses.push(nref != null ? new Index(nref) : name);
+			return (new Value(bref != null ? bref : klass, accesses)).compile(o);
 		  } else if (method != null ? method.ctor : void 0) {
 			return method.name + ".__super__.constructor";
 		  } else {
@@ -3493,13 +3632,13 @@ var CoffeeScript = (function(){
 		};
 
 		Call.prototype.unfoldSoak = function(o) {
-		  var call, ifn, left, list, rite, _i, _len, _ref2, _ref3;
+		  var call, ifn, j, left, len1, list, ref3, ref4, rite;
 		  if (this.soak) {
 			if (this.variable) {
 			  if (ifn = unfoldSoak(o, this, 'variable')) {
 				return ifn;
 			  }
-			  _ref2 = new Value(this.variable).cacheReference(o), left = _ref2[0], rite = _ref2[1];
+			  ref3 = new Value(this.variable).cacheReference(o), left = ref3[0], rite = ref3[1];
 			} else {
 			  left = new Literal(this.superReference(o));
 			  rite = new Value(left);
@@ -3527,9 +3666,9 @@ var CoffeeScript = (function(){
 			  break;
 			}
 		  }
-		  _ref3 = list.reverse();
-		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-			call = _ref3[_i];
+		  ref4 = list.reverse();
+		  for (j = 0, len1 = ref4.length; j < len1; j++) {
+			call = ref4[j];
 			if (ifn) {
 			  if (call.variable instanceof Call) {
 				call.variable = ifn;
@@ -3543,18 +3682,18 @@ var CoffeeScript = (function(){
 		};
 
 		Call.prototype.compileNode = function(o) {
-		  var arg, argIndex, compiledArgs, compiledArray, fragments, preface, _i, _len, _ref2, _ref3;
-		  if ((_ref2 = this.variable) != null) {
-			_ref2.front = this.front;
+		  var arg, argIndex, compiledArgs, compiledArray, fragments, j, len1, preface, ref3, ref4;
+		  if ((ref3 = this.variable) != null) {
+			ref3.front = this.front;
 		  }
 		  compiledArray = Splat.compileSplattedArray(o, this.args, true);
 		  if (compiledArray.length) {
 			return this.compileSplat(o, compiledArray);
 		  }
 		  compiledArgs = [];
-		  _ref3 = this.args;
-		  for (argIndex = _i = 0, _len = _ref3.length; _i < _len; argIndex = ++_i) {
-			arg = _ref3[argIndex];
+		  ref4 = this.args;
+		  for (argIndex = j = 0, len1 = ref4.length; j < len1; argIndex = ++j) {
+			arg = ref4[argIndex];
 			if (argIndex) {
 			  compiledArgs.push(this.makeCode(", "));
 			}
@@ -3613,29 +3752,29 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Extends = Extends = (function(_super) {
-		__extends(Extends, _super);
+	  exports.Extends = Extends = (function(superClass1) {
+		extend1(Extends, superClass1);
 
-		function Extends(_at_child, _at_parent) {
-		  this.child = _at_child;
-		  this.parent = _at_parent;
+		function Extends(child1, parent1) {
+		  this.child = child1;
+		  this.parent = parent1;
 		}
 
 		Extends.prototype.children = ['child', 'parent'];
 
 		Extends.prototype.compileToFragments = function(o) {
-		  return new Call(new Value(new Literal(utility('extends', o))), [this.child, this.parent]).compileToFragments(o);
+		  return new Call(new Value(new Literal(utility('extend', o))), [this.child, this.parent]).compileToFragments(o);
 		};
 
 		return Extends;
 
 	  })(Base);
 
-	  exports.Access = Access = (function(_super) {
-		__extends(Access, _super);
+	  exports.Access = Access = (function(superClass1) {
+		extend1(Access, superClass1);
 
-		function Access(_at_name, tag) {
-		  this.name = _at_name;
+		function Access(name1, tag) {
+		  this.name = name1;
 		  this.name.asKey = true;
 		  this.soak = tag === 'soak';
 		}
@@ -3660,11 +3799,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Index = Index = (function(_super) {
-		__extends(Index, _super);
+	  exports.Index = Index = (function(superClass1) {
+		extend1(Index, superClass1);
 
-		function Index(_at_index) {
-		  this.index = _at_index;
+		function Index(index1) {
+		  this.index = index1;
 		}
 
 		Index.prototype.children = ['index'];
@@ -3681,36 +3820,37 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Range = Range = (function(_super) {
-		__extends(Range, _super);
+	  exports.Range = Range = (function(superClass1) {
+		extend1(Range, superClass1);
 
 		Range.prototype.children = ['from', 'to'];
 
-		function Range(_at_from, _at_to, tag) {
-		  this.from = _at_from;
-		  this.to = _at_to;
+		function Range(from1, to1, tag) {
+		  this.from = from1;
+		  this.to = to1;
 		  this.exclusive = tag === 'exclusive';
 		  this.equals = this.exclusive ? '' : '=';
 		}
 
 		Range.prototype.compileVariables = function(o) {
-		  var step, _ref2, _ref3, _ref4, _ref5;
+		  var isComplex, ref3, ref4, ref5, ref6, step;
 		  o = merge(o, {
 			top: true
 		  });
-		  _ref2 = this.cacheToCodeFragments(this.from.cache(o, LEVEL_LIST)), this.fromC = _ref2[0], this.fromVar = _ref2[1];
-		  _ref3 = this.cacheToCodeFragments(this.to.cache(o, LEVEL_LIST)), this.toC = _ref3[0], this.toVar = _ref3[1];
+		  isComplex = del(o, 'isComplex');
+		  ref3 = this.cacheToCodeFragments(this.from.cache(o, LEVEL_LIST, isComplex)), this.fromC = ref3[0], this.fromVar = ref3[1];
+		  ref4 = this.cacheToCodeFragments(this.to.cache(o, LEVEL_LIST, isComplex)), this.toC = ref4[0], this.toVar = ref4[1];
 		  if (step = del(o, 'step')) {
-			_ref4 = this.cacheToCodeFragments(step.cache(o, LEVEL_LIST)), this.step = _ref4[0], this.stepVar = _ref4[1];
+			ref5 = this.cacheToCodeFragments(step.cache(o, LEVEL_LIST, isComplex)), this.step = ref5[0], this.stepVar = ref5[1];
 		  }
-		  _ref5 = [this.fromVar.match(NUMBER), this.toVar.match(NUMBER)], this.fromNum = _ref5[0], this.toNum = _ref5[1];
+		  ref6 = [this.fromVar.match(NUMBER), this.toVar.match(NUMBER)], this.fromNum = ref6[0], this.toNum = ref6[1];
 		  if (this.stepVar) {
 			return this.stepNum = this.stepVar.match(NUMBER);
 		  }
 		};
 
 		Range.prototype.compileNode = function(o) {
-		  var cond, condPart, from, gt, idx, idxName, known, lt, namedIndex, stepPart, to, varPart, _ref2, _ref3;
+		  var cond, condPart, from, gt, idx, idxName, known, lt, namedIndex, ref3, ref4, stepPart, to, varPart;
 		  if (!this.fromVar) {
 			this.compileVariables(o);
 		  }
@@ -3728,8 +3868,8 @@ var CoffeeScript = (function(){
 		  if (this.step !== this.stepVar) {
 			varPart += ", " + this.step;
 		  }
-		  _ref2 = [idx + " <" + this.equals, idx + " >" + this.equals], lt = _ref2[0], gt = _ref2[1];
-		  condPart = this.stepNum ? parseNum(this.stepNum[0]) > 0 ? lt + " " + this.toVar : gt + " " + this.toVar : known ? ((_ref3 = [parseNum(this.fromNum[0]), parseNum(this.toNum[0])], from = _ref3[0], to = _ref3[1], _ref3), from <= to ? lt + " " + to : gt + " " + to) : (cond = this.stepVar ? this.stepVar + " > 0" : this.fromVar + " <= " + this.toVar, cond + " ? " + lt + " " + this.toVar + " : " + gt + " " + this.toVar);
+		  ref3 = [idx + " <" + this.equals, idx + " >" + this.equals], lt = ref3[0], gt = ref3[1];
+		  condPart = this.stepNum ? parseNum(this.stepNum[0]) > 0 ? lt + " " + this.toVar : gt + " " + this.toVar : known ? ((ref4 = [parseNum(this.fromNum[0]), parseNum(this.toNum[0])], from = ref4[0], to = ref4[1], ref4), from <= to ? lt + " " + to : gt + " " + to) : (cond = this.stepVar ? this.stepVar + " > 0" : this.fromVar + " <= " + this.toVar, cond + " ? " + lt + " " + this.toVar + " : " + gt + " " + this.toVar);
 		  stepPart = this.stepVar ? idx + " += " + this.stepVar : known ? namedIndex ? from <= to ? "++" + idx : "--" + idx : from <= to ? idx + "++" : idx + "--" : namedIndex ? cond + " ? ++" + idx + " : --" + idx : cond + " ? " + idx + "++ : " + idx + "--";
 		  if (namedIndex) {
 			varPart = idxName + " = " + varPart;
@@ -3741,12 +3881,12 @@ var CoffeeScript = (function(){
 		};
 
 		Range.prototype.compileArray = function(o) {
-		  var args, body, cond, hasArgs, i, idt, post, pre, range, result, vars, _i, _ref2, _ref3, _results;
+		  var args, body, cond, hasArgs, i, idt, j, post, pre, range, ref3, ref4, result, results, vars;
 		  if (this.fromNum && this.toNum && Math.abs(this.fromNum - this.toNum) <= 20) {
 			range = (function() {
-			  _results = [];
-			  for (var _i = _ref2 = +this.fromNum, _ref3 = +this.toNum; _ref2 <= _ref3 ? _i <= _ref3 : _i >= _ref3; _ref2 <= _ref3 ? _i++ : _i--){ _results.push(_i); }
-			  return _results;
+			  results = [];
+			  for (var j = ref3 = +this.fromNum, ref4 = +this.toNum; ref3 <= ref4 ? j <= ref4 : j >= ref4; ref3 <= ref4 ? j++ : j--){ results.push(j); }
+			  return results;
 			}).apply(this);
 			if (this.exclusive) {
 			  range.pop();
@@ -3754,7 +3894,9 @@ var CoffeeScript = (function(){
 			return [this.makeCode("[" + (range.join(', ')) + "]")];
 		  }
 		  idt = this.tab + TAB;
-		  i = o.scope.freeVariable('i');
+		  i = o.scope.freeVariable('i', {
+			single: true
+		  });
 		  result = o.scope.freeVariable('results');
 		  pre = "\n" + idt + result + " = [];";
 		  if (this.fromNum && this.toNum) {
@@ -3779,19 +3921,19 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Slice = Slice = (function(_super) {
-		__extends(Slice, _super);
+	  exports.Slice = Slice = (function(superClass1) {
+		extend1(Slice, superClass1);
 
 		Slice.prototype.children = ['range'];
 
-		function Slice(_at_range) {
-		  this.range = _at_range;
+		function Slice(range1) {
+		  this.range = range1;
 		  Slice.__super__.constructor.call(this);
 		}
 
 		Slice.prototype.compileNode = function(o) {
-		  var compiled, compiledText, from, fromCompiled, to, toStr, _ref2;
-		  _ref2 = this.range, to = _ref2.to, from = _ref2.from;
+		  var compiled, compiledText, from, fromCompiled, ref3, to, toStr;
+		  ref3 = this.range, to = ref3.to, from = ref3.from;
 		  fromCompiled = from && from.compileToFragments(o, LEVEL_PAREN) || [this.makeCode('0')];
 		  if (to) {
 			compiled = to.compileToFragments(o, LEVEL_PAREN);
@@ -3807,37 +3949,55 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Obj = Obj = (function(_super) {
-		__extends(Obj, _super);
+	  exports.Obj = Obj = (function(superClass1) {
+		extend1(Obj, superClass1);
 
-		function Obj(props, _at_generated) {
-		  this.generated = _at_generated != null ? _at_generated : false;
+		function Obj(props, generated) {
+		  this.generated = generated != null ? generated : false;
 		  this.objects = this.properties = props || [];
 		}
 
 		Obj.prototype.children = ['properties'];
 
 		Obj.prototype.compileNode = function(o) {
-		  var answer, i, idt, indent, join, lastNoncom, node, prop, props, _i, _j, _len, _len1;
+		  var answer, dynamicIndex, hasDynamic, i, idt, indent, j, join, k, key, l, lastNoncom, len1, len2, len3, node, oref, prop, props, ref3, value;
 		  props = this.properties;
-		  if (!props.length) {
-			return [this.makeCode(this.front ? '({})' : '{}')];
-		  }
 		  if (this.generated) {
-			for (_i = 0, _len = props.length; _i < _len; _i++) {
-			  node = props[_i];
+			for (j = 0, len1 = props.length; j < len1; j++) {
+			  node = props[j];
 			  if (node instanceof Value) {
 				node.error('cannot have an implicit value in an implicit object');
 			  }
 			}
 		  }
+		  for (dynamicIndex = k = 0, len2 = props.length; k < len2; dynamicIndex = ++k) {
+			prop = props[dynamicIndex];
+			if ((prop.variable || prop).base instanceof Parens) {
+			  break;
+			}
+		  }
+		  hasDynamic = dynamicIndex < props.length;
 		  idt = o.indent += TAB;
 		  lastNoncom = this.lastNonComment(this.properties);
 		  answer = [];
-		  for (i = _j = 0, _len1 = props.length; _j < _len1; i = ++_j) {
+		  if (hasDynamic) {
+			oref = o.scope.freeVariable('obj');
+			answer.push(this.makeCode("(\n" + idt + oref + " = "));
+		  }
+		  answer.push(this.makeCode("{" + (props.length === 0 || dynamicIndex === 0 ? '}' : '\n')));
+		  for (i = l = 0, len3 = props.length; l < len3; i = ++l) {
 			prop = props[i];
-			join = i === props.length - 1 ? '' : prop === lastNoncom || prop instanceof Comment ? '\n' : ',\n';
+			if (i === dynamicIndex) {
+			  if (i !== 0) {
+				answer.push(this.makeCode("\n" + idt + "}"));
+			  }
+			  answer.push(this.makeCode(',\n'));
+			}
+			join = i === props.length - 1 || i === dynamicIndex - 1 ? '' : prop === lastNoncom || prop instanceof Comment ? '\n' : ',\n';
 			indent = prop instanceof Comment ? '' : idt;
+			if (hasDynamic && i < dynamicIndex) {
+			  indent += TAB;
+			}
 			if (prop instanceof Assign && prop.variable instanceof Value && prop.variable.hasProperties()) {
 			  prop.variable.error('Invalid object key');
 			}
@@ -3845,10 +4005,20 @@ var CoffeeScript = (function(){
 			  prop = new Assign(prop.properties[0].name, prop, 'object');
 			}
 			if (!(prop instanceof Comment)) {
-			  if (!(prop instanceof Assign)) {
-				prop = new Assign(prop, prop, 'object');
+			  if (i < dynamicIndex) {
+				if (!(prop instanceof Assign)) {
+				  prop = new Assign(prop, prop, 'object');
+				}
+				(prop.variable.base || prop.variable).asKey = true;
+			  } else {
+				if (prop instanceof Assign) {
+				  key = prop.variable;
+				  value = prop.value;
+				} else {
+				  ref3 = prop.base.cache(o), key = ref3[0], value = ref3[1];
+				}
+				prop = new Assign(new Value(new Literal(oref), [new Access(key)]), value);
 			  }
-			  (prop.variable.base || prop.variable).asKey = true;
 			}
 			if (indent) {
 			  answer.push(this.makeCode(indent));
@@ -3858,9 +4028,14 @@ var CoffeeScript = (function(){
 			  answer.push(this.makeCode(join));
 			}
 		  }
-		  answer.unshift(this.makeCode("{" + (props.length && '\n')));
-		  answer.push(this.makeCode((props.length && '\n' + this.tab) + "}"));
-		  if (this.front) {
+		  if (hasDynamic) {
+			answer.push(this.makeCode(",\n" + idt + oref + "\n" + this.tab + ")"));
+		  } else {
+			if (props.length !== 0) {
+			  answer.push(this.makeCode("\n" + this.tab + "}"));
+			}
+		  }
+		  if (this.front && !hasDynamic) {
 			return this.wrapInBraces(answer);
 		  } else {
 			return answer;
@@ -3868,10 +4043,10 @@ var CoffeeScript = (function(){
 		};
 
 		Obj.prototype.assigns = function(name) {
-		  var prop, _i, _len, _ref2;
-		  _ref2 = this.properties;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			prop = _ref2[_i];
+		  var j, len1, prop, ref3;
+		  ref3 = this.properties;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			prop = ref3[j];
 			if (prop.assigns(name)) {
 			  return true;
 			}
@@ -3883,8 +4058,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Arr = Arr = (function(_super) {
-		__extends(Arr, _super);
+	  exports.Arr = Arr = (function(superClass1) {
+		extend1(Arr, superClass1);
 
 		function Arr(objs) {
 		  this.objects = objs || [];
@@ -3893,7 +4068,7 @@ var CoffeeScript = (function(){
 		Arr.prototype.children = ['objects'];
 
 		Arr.prototype.compileNode = function(o) {
-		  var answer, compiledObjs, fragments, index, obj, _i, _len;
+		  var answer, compiledObjs, fragments, index, j, len1, obj;
 		  if (!this.objects.length) {
 			return [this.makeCode('[]')];
 		  }
@@ -3904,16 +4079,16 @@ var CoffeeScript = (function(){
 		  }
 		  answer = [];
 		  compiledObjs = (function() {
-			var _i, _len, _ref2, _results;
-			_ref2 = this.objects;
-			_results = [];
-			for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			  obj = _ref2[_i];
-			  _results.push(obj.compileToFragments(o, LEVEL_LIST));
+			var j, len1, ref3, results;
+			ref3 = this.objects;
+			results = [];
+			for (j = 0, len1 = ref3.length; j < len1; j++) {
+			  obj = ref3[j];
+			  results.push(obj.compileToFragments(o, LEVEL_LIST));
 			}
-			return _results;
+			return results;
 		  }).call(this);
-		  for (index = _i = 0, _len = compiledObjs.length; _i < _len; index = ++_i) {
+		  for (index = j = 0, len1 = compiledObjs.length; j < len1; index = ++j) {
 			fragments = compiledObjs[index];
 			if (index) {
 			  answer.push(this.makeCode(", "));
@@ -3931,10 +4106,10 @@ var CoffeeScript = (function(){
 		};
 
 		Arr.prototype.assigns = function(name) {
-		  var obj, _i, _len, _ref2;
-		  _ref2 = this.objects;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			obj = _ref2[_i];
+		  var j, len1, obj, ref3;
+		  ref3 = this.objects;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			obj = ref3[j];
 			if (obj.assigns(name)) {
 			  return true;
 			}
@@ -3946,13 +4121,13 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Class = Class = (function(_super) {
-		__extends(Class, _super);
+	  exports.Class = Class = (function(superClass1) {
+		extend1(Class, superClass1);
 
-		function Class(_at_variable, _at_parent, _at_body) {
-		  this.variable = _at_variable;
-		  this.parent = _at_parent;
-		  this.body = _at_body != null ? _at_body : new Block;
+		function Class(variable1, parent1, body1) {
+		  this.variable = variable1;
+		  this.parent = parent1;
+		  this.body = body1 != null ? body1 : new Block;
 		  this.boundFuncs = [];
 		  this.body.classBody = true;
 		}
@@ -3960,12 +4135,13 @@ var CoffeeScript = (function(){
 		Class.prototype.children = ['variable', 'parent', 'body'];
 
 		Class.prototype.determineName = function() {
-		  var decl, tail;
+		  var decl, ref3, tail;
 		  if (!this.variable) {
 			return null;
 		  }
-		  decl = (tail = last(this.variable.properties)) ? tail instanceof Access && tail.name.value : this.variable.base.value;
-		  if (__indexOf.call(STRICT_PROSCRIBED, decl) >= 0) {
+		  ref3 = this.variable.properties, tail = ref3[ref3.length - 1];
+		  decl = tail ? tail instanceof Access && tail.name.value : this.variable.base.value;
+		  if (indexOf.call(STRICT_PROSCRIBED, decl) >= 0) {
 			this.variable.error("class variable name may not be " + decl);
 		  }
 		  return decl && (decl = IDENTIFIER.test(decl) && decl);
@@ -3979,7 +4155,6 @@ var CoffeeScript = (function(){
 			if (node instanceof Literal && node.value === 'this') {
 			  return node.value = name;
 			} else if (node instanceof Code) {
-			  node.klass = name;
 			  if (node.bound) {
 				return node.context = name;
 			  }
@@ -3988,21 +4163,21 @@ var CoffeeScript = (function(){
 		};
 
 		Class.prototype.addBoundFunctions = function(o) {
-		  var bvar, lhs, _i, _len, _ref2;
-		  _ref2 = this.boundFuncs;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			bvar = _ref2[_i];
+		  var bvar, j, len1, lhs, ref3;
+		  ref3 = this.boundFuncs;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			bvar = ref3[j];
 			lhs = (new Value(new Literal("this"), [new Access(bvar)])).compile(o);
 			this.ctor.body.unshift(new Literal(lhs + " = " + (utility('bind', o)) + "(" + lhs + ", this)"));
 		  }
 		};
 
 		Class.prototype.addProperties = function(node, name, o) {
-		  var assign, base, exprs, func, props;
+		  var acc, assign, base, exprs, func, props;
 		  props = node.base.properties.slice(0);
 		  exprs = (function() {
-			var _results;
-			_results = [];
+			var results;
+			results = [];
 			while (assign = props.shift()) {
 			  if (assign instanceof Assign) {
 				base = assign.variable.base;
@@ -4025,7 +4200,8 @@ var CoffeeScript = (function(){
 				  if (assign.variable["this"]) {
 					func["static"] = true;
 				  } else {
-					assign.variable = new Value(new Literal(name), [new Access(new Literal('prototype')), new Access(base)]);
+					acc = base.isComplex() ? new Index(base) : new Access(base);
+					assign.variable = new Value(new Literal(name), [new Access(new Literal('prototype')), acc]);
 					if (func instanceof Code && func.bound) {
 					  this.boundFuncs.push(base);
 					  func.bound = false;
@@ -4033,9 +4209,9 @@ var CoffeeScript = (function(){
 				  }
 				}
 			  }
-			  _results.push(assign);
+			  results.push(assign);
 			}
-			return _results;
+			return results;
 		  }).call(this);
 		  return compact(exprs);
 		};
@@ -4043,15 +4219,15 @@ var CoffeeScript = (function(){
 		Class.prototype.walkBody = function(name, o) {
 		  return this.traverseChildren(false, (function(_this) {
 			return function(child) {
-			  var cont, exps, i, node, _i, _len, _ref2;
+			  var cont, exps, i, j, len1, node, ref3;
 			  cont = true;
 			  if (child instanceof Class) {
 				return false;
 			  }
 			  if (child instanceof Block) {
-				_ref2 = exps = child.expressions;
-				for (i = _i = 0, _len = _ref2.length; _i < _len; i = ++_i) {
-				  node = _ref2[i];
+				ref3 = exps = child.expressions;
+				for (i = j = 0, len1 = ref3.length; j < len1; i = ++j) {
+				  node = ref3[i];
 				  if (node instanceof Assign && node.variable.looksStatic(name)) {
 					node.value["static"] = true;
 				  } else if (node instanceof Value && node.isObject(true)) {
@@ -4093,7 +4269,7 @@ var CoffeeScript = (function(){
 		};
 
 		Class.prototype.compileNode = function(o) {
-		  var args, argumentsNode, func, jumpNode, klass, lname, name, superClass, _ref2;
+		  var args, argumentsNode, func, jumpNode, klass, lname, name, ref3, superClass;
 		  if (jumpNode = this.body.jumps()) {
 			jumpNode.error('Class bodies cannot contain pure statements');
 		  }
@@ -4116,12 +4292,14 @@ var CoffeeScript = (function(){
 		  this.body.spaced = true;
 		  this.body.expressions.push(lname);
 		  if (this.parent) {
-			superClass = new Literal(o.classScope.freeVariable('super', false));
+			superClass = new Literal(o.classScope.freeVariable('superClass', {
+			  reserve: false
+			}));
 			this.body.expressions.unshift(new Extends(lname, superClass));
 			func.params.push(new Param(superClass));
 			args.push(this.parent);
 		  }
-		  (_ref2 = this.body.expressions).unshift.apply(_ref2, this.directives);
+		  (ref3 = this.body.expressions).unshift.apply(ref3, this.directives);
 		  klass = new Parens(new Call(func, args));
 		  if (this.variable) {
 			klass = new Assign(this.variable, klass);
@@ -4133,17 +4311,17 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Assign = Assign = (function(_super) {
-		__extends(Assign, _super);
+	  exports.Assign = Assign = (function(superClass1) {
+		extend1(Assign, superClass1);
 
-		function Assign(_at_variable, _at_value, _at_context, options) {
-		  var forbidden, name, _ref2;
-		  this.variable = _at_variable;
-		  this.value = _at_value;
-		  this.context = _at_context;
+		function Assign(variable1, value1, context, options) {
+		  var forbidden, name, ref3;
+		  this.variable = variable1;
+		  this.value = value1;
+		  this.context = context;
 		  this.param = options && options.param;
 		  this.subpattern = options && options.subpattern;
-		  forbidden = (_ref2 = (name = this.variable.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref2) >= 0);
+		  forbidden = (ref3 = (name = this.variable.unwrapAll().value), indexOf.call(STRICT_PROSCRIBED, ref3) >= 0);
 		  if (forbidden && this.context !== 'object') {
 			this.variable.error("variable name may not be \"" + name + "\"");
 		  }
@@ -4152,7 +4330,7 @@ var CoffeeScript = (function(){
 		Assign.prototype.children = ['variable', 'value'];
 
 		Assign.prototype.isStatement = function(o) {
-		  return (o != null ? o.level : void 0) === LEVEL_TOP && (this.context != null) && __indexOf.call(this.context, "?") >= 0;
+		  return (o != null ? o.level : void 0) === LEVEL_TOP && (this.context != null) && indexOf.call(this.context, "?") >= 0;
 		};
 
 		Assign.prototype.assigns = function(name) {
@@ -4164,7 +4342,7 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileNode = function(o) {
-		  var answer, compiledName, isValue, match, name, val, varBase, _ref2, _ref3, _ref4, _ref5;
+		  var answer, compiledName, isValue, j, name, properties, prototype, ref3, ref4, ref5, ref6, ref7, val, varBase;
 		  if (isValue = this.variable instanceof Value) {
 			if (this.variable.isArray() || this.variable.isObject()) {
 			  return this.compilePatternMatch(o);
@@ -4172,15 +4350,27 @@ var CoffeeScript = (function(){
 			if (this.variable.isSplice()) {
 			  return this.compileSplice(o);
 			}
-			if ((_ref2 = this.context) === '||=' || _ref2 === '&&=' || _ref2 === '?=') {
+			if ((ref3 = this.context) === '||=' || ref3 === '&&=' || ref3 === '?=') {
 			  return this.compileConditional(o);
 			}
-			if ((_ref3 = this.context) === '**=' || _ref3 === '//=' || _ref3 === '%%=') {
+			if ((ref4 = this.context) === '**=' || ref4 === '//=' || ref4 === '%%=') {
 			  return this.compileSpecialMath(o);
 			}
 		  }
-		  compiledName = this.variable.compileToFragments(o, LEVEL_LIST);
-		  name = fragmentsToText(compiledName);
+		  if (this.value instanceof Code) {
+			if (this.value["static"]) {
+			  this.value.klass = this.variable.base;
+			  this.value.name = this.variable.properties[0];
+			  this.value.variable = this.variable;
+			} else if (((ref5 = this.variable.properties) != null ? ref5.length : void 0) >= 2) {
+			  ref6 = this.variable.properties, properties = 3 <= ref6.length ? slice.call(ref6, 0, j = ref6.length - 2) : (j = 0, []), prototype = ref6[j++], name = ref6[j++];
+			  if (((ref7 = prototype.name) != null ? ref7.value : void 0) === 'prototype') {
+				this.value.klass = new Value(this.variable.base, properties);
+				this.value.name = name;
+				this.value.variable = this.variable;
+			  }
+			}
+		  }
 		  if (!this.context) {
 			varBase = this.variable.unwrapAll();
 			if (!varBase.isAssignable()) {
@@ -4188,19 +4378,14 @@ var CoffeeScript = (function(){
 			}
 			if (!(typeof varBase.hasProperties === "function" ? varBase.hasProperties() : void 0)) {
 			  if (this.param) {
-				o.scope.add(name, 'var');
+				o.scope.add(varBase.value, 'var');
 			  } else {
-				o.scope.find(name);
+				o.scope.find(varBase.value);
 			  }
 			}
 		  }
-		  if (this.value instanceof Code && (match = METHOD_DEF.exec(name))) {
-			if (match[2]) {
-			  this.value.klass = match[1];
-			}
-			this.value.name = (_ref4 = (_ref5 = match[3]) != null ? _ref5 : match[4]) != null ? _ref4 : match[5];
-		  }
 		  val = this.value.compileToFragments(o, LEVEL_LIST);
+		  compiledName = this.variable.compileToFragments(o, LEVEL_LIST);
 		  if (this.context === 'object') {
 			return compiledName.concat(this.makeCode(": "), val);
 		  }
@@ -4213,7 +4398,7 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compilePatternMatch = function(o) {
-		  var acc, assigns, code, expandedIdx, fragments, i, idx, isObject, ivar, name, obj, objects, olen, ref, rest, top, val, value, vvar, vvarText, _i, _len, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+		  var acc, assigns, code, expandedIdx, fragments, i, idx, isObject, ivar, j, len1, name, obj, objects, olen, ref, ref3, ref4, ref5, ref6, ref7, ref8, rest, top, val, value, vvar, vvarText;
 		  top = o.level === LEVEL_TOP;
 		  value = this.value;
 		  objects = this.variable.base.objects;
@@ -4228,14 +4413,14 @@ var CoffeeScript = (function(){
 		  isObject = this.variable.isObject();
 		  if (top && olen === 1 && !((obj = objects[0]) instanceof Splat)) {
 			if (obj instanceof Assign) {
-			  _ref2 = obj, (_ref3 = _ref2.variable, idx = _ref3.base), obj = _ref2.value;
+			  ref3 = obj, (ref4 = ref3.variable, idx = ref4.base), obj = ref3.value;
 			} else {
 			  idx = isObject ? obj["this"] ? obj.properties[0].name : obj : new Literal(0);
 			}
 			acc = IDENTIFIER.test(idx.unwrap().value || 0);
 			value = new Value(value);
 			value.properties.push(new (acc ? Access : Index)(idx));
-			if (_ref4 = obj.unwrap().value, __indexOf.call(RESERVED, _ref4) >= 0) {
+			if (ref5 = obj.unwrap().value, indexOf.call(RESERVED, ref5) >= 0) {
 			  obj.error("assignment to a reserved word: " + (obj.compile(o)));
 			}
 			return new Assign(obj, value, null, {
@@ -4247,19 +4432,19 @@ var CoffeeScript = (function(){
 		  assigns = [];
 		  expandedIdx = false;
 		  if (!IDENTIFIER.test(vvarText) || this.variable.assigns(vvarText)) {
-			assigns.push([this.makeCode((ref = o.scope.freeVariable('ref')) + " = ")].concat(__slice.call(vvar)));
+			assigns.push([this.makeCode((ref = o.scope.freeVariable('ref')) + " = ")].concat(slice.call(vvar)));
 			vvar = [this.makeCode(ref)];
 			vvarText = ref;
 		  }
-		  for (i = _i = 0, _len = objects.length; _i < _len; i = ++_i) {
+		  for (i = j = 0, len1 = objects.length; j < len1; i = ++j) {
 			obj = objects[i];
 			idx = i;
 			if (isObject) {
 			  if (obj instanceof Assign) {
-				_ref5 = obj, (_ref6 = _ref5.variable, idx = _ref6.base), obj = _ref5.value;
+				ref6 = obj, (ref7 = ref6.variable, idx = ref7.base), obj = ref6.value;
 			  } else {
 				if (obj.base instanceof Parens) {
-				  _ref7 = new Value(obj.unwrapAll()).cacheReference(o), obj = _ref7[0], idx = _ref7[1];
+				  ref8 = new Value(obj.unwrapAll()).cacheReference(o), obj = ref8[0], idx = ref8[1];
 				} else {
 				  idx = obj["this"] ? obj.properties[0].name : obj;
 				}
@@ -4270,7 +4455,9 @@ var CoffeeScript = (function(){
 			  obj = obj.unwrap();
 			  val = olen + " <= " + vvarText + ".length ? " + (utility('slice', o)) + ".call(" + vvarText + ", " + i;
 			  if (rest = olen - i - 1) {
-				ivar = o.scope.freeVariable('i');
+				ivar = o.scope.freeVariable('i', {
+				  single: true
+				});
 				val += ", " + ivar + " = " + vvarText + ".length - " + rest + ") : (" + ivar + " = " + i + ", [])";
 			  } else {
 				val += ") : []";
@@ -4282,7 +4469,9 @@ var CoffeeScript = (function(){
 				if (rest === 1) {
 				  expandedIdx = vvarText + ".length - 1";
 				} else {
-				  ivar = o.scope.freeVariable('i');
+				  ivar = o.scope.freeVariable('i', {
+					single: true
+				  });
 				  val = new Literal(ivar + " = " + vvarText + ".length - " + rest);
 				  expandedIdx = ivar + "++";
 				  assigns.push(val.compileToFragments(o, LEVEL_LIST));
@@ -4302,7 +4491,7 @@ var CoffeeScript = (function(){
 			  }
 			  val = new Value(new Literal(vvarText), [new (acc ? Access : Index)(idx)]);
 			}
-			if ((name != null) && __indexOf.call(RESERVED, name) >= 0) {
+			if ((name != null) && indexOf.call(RESERVED, name) >= 0) {
 			  obj.error("assignment to a reserved word: " + (obj.compile(o)));
 			}
 			assigns.push(new Assign(obj, val, null, {
@@ -4322,12 +4511,12 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileConditional = function(o) {
-		  var fragments, left, right, _ref2;
-		  _ref2 = this.variable.cacheReference(o), left = _ref2[0], right = _ref2[1];
+		  var fragments, left, ref3, right;
+		  ref3 = this.variable.cacheReference(o), left = ref3[0], right = ref3[1];
 		  if (!left.properties.length && left.base instanceof Literal && left.base.value !== "this" && !o.scope.check(left.base.value)) {
 			this.variable.error("the variable \"" + left.base.value + "\" can't be assigned with " + this.context + " because it has not been declared before");
 		  }
-		  if (__indexOf.call(this.context, "?") >= 0) {
+		  if (indexOf.call(this.context, "?") >= 0) {
 			o.isExistentialEquals = true;
 			return new If(new Existence(left), right, {
 			  type: 'if'
@@ -4343,17 +4532,17 @@ var CoffeeScript = (function(){
 		};
 
 		Assign.prototype.compileSpecialMath = function(o) {
-		  var left, right, _ref2;
-		  _ref2 = this.variable.cacheReference(o), left = _ref2[0], right = _ref2[1];
+		  var left, ref3, right;
+		  ref3 = this.variable.cacheReference(o), left = ref3[0], right = ref3[1];
 		  return new Assign(left, new Op(this.context.slice(0, -1), right, this.value)).compileToFragments(o);
 		};
 
 		Assign.prototype.compileSplice = function(o) {
-		  var answer, exclusive, from, fromDecl, fromRef, name, to, valDef, valRef, _ref2, _ref3, _ref4;
-		  _ref2 = this.variable.properties.pop().range, from = _ref2.from, to = _ref2.to, exclusive = _ref2.exclusive;
+		  var answer, exclusive, from, fromDecl, fromRef, name, ref3, ref4, ref5, to, valDef, valRef;
+		  ref3 = this.variable.properties.pop().range, from = ref3.from, to = ref3.to, exclusive = ref3.exclusive;
 		  name = this.variable.compile(o);
 		  if (from) {
-			_ref3 = this.cacheToCodeFragments(from.cache(o, LEVEL_OP)), fromDecl = _ref3[0], fromRef = _ref3[1];
+			ref4 = this.cacheToCodeFragments(from.cache(o, LEVEL_OP)), fromDecl = ref4[0], fromRef = ref4[1];
 		  } else {
 			fromDecl = fromRef = '0';
 		  }
@@ -4372,7 +4561,7 @@ var CoffeeScript = (function(){
 		  } else {
 			to = "9e9";
 		  }
-		  _ref4 = this.value.cache(o, LEVEL_LIST), valDef = _ref4[0], valRef = _ref4[1];
+		  ref5 = this.value.cache(o, LEVEL_LIST), valDef = ref5[0], valRef = ref5[1];
 		  answer = [].concat(this.makeCode("[].splice.apply(" + name + ", [" + fromDecl + ", " + to + "].concat("), valDef, this.makeCode(")), "), valRef);
 		  if (o.level > LEVEL_TOP) {
 			return this.wrapInBraces(answer);
@@ -4385,16 +4574,16 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Code = Code = (function(_super) {
-		__extends(Code, _super);
+	  exports.Code = Code = (function(superClass1) {
+		extend1(Code, superClass1);
 
 		function Code(params, body, tag) {
 		  this.params = params || [];
 		  this.body = body || new Block;
 		  this.bound = tag === 'boundfunc';
 		  this.isGenerator = !!this.body.contains(function(node) {
-			var _ref2;
-			return node instanceof Op && ((_ref2 = node.operator) === 'yield' || _ref2 === 'yield*');
+			var ref3;
+			return node instanceof Op && ((ref3 = node.operator) === 'yield' || ref3 === 'yield*');
 		  });
 		}
 
@@ -4411,8 +4600,8 @@ var CoffeeScript = (function(){
 		};
 
 		Code.prototype.compileNode = function(o) {
-		  var answer, boundfunc, code, exprs, i, lit, p, param, params, ref, splats, uniqs, val, wasEmpty, wrapper, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
-		  if (this.bound && ((_ref2 = o.scope.method) != null ? _ref2.bound : void 0)) {
+		  var answer, boundfunc, code, exprs, i, j, k, l, len1, len2, len3, len4, len5, len6, lit, m, p, param, params, q, r, ref, ref3, ref4, ref5, ref6, ref7, ref8, splats, uniqs, val, wasEmpty, wrapper;
+		  if (this.bound && ((ref3 = o.scope.method) != null ? ref3.bound : void 0)) {
 			this.context = o.scope.method.context;
 		  }
 		  if (this.bound && !this.context) {
@@ -4429,41 +4618,41 @@ var CoffeeScript = (function(){
 		  delete o.isExistentialEquals;
 		  params = [];
 		  exprs = [];
-		  _ref3 = this.params;
-		  for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-			param = _ref3[_i];
+		  ref4 = this.params;
+		  for (j = 0, len1 = ref4.length; j < len1; j++) {
+			param = ref4[j];
 			if (!(param instanceof Expansion)) {
 			  o.scope.parameter(param.asReference(o));
 			}
 		  }
-		  _ref4 = this.params;
-		  for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-			param = _ref4[_j];
+		  ref5 = this.params;
+		  for (k = 0, len2 = ref5.length; k < len2; k++) {
+			param = ref5[k];
 			if (!(param.splat || param instanceof Expansion)) {
 			  continue;
 			}
-			_ref5 = this.params;
-			for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
-			  p = _ref5[_k];
+			ref6 = this.params;
+			for (l = 0, len3 = ref6.length; l < len3; l++) {
+			  p = ref6[l];
 			  if (!(p instanceof Expansion) && p.name.value) {
 				o.scope.add(p.name.value, 'var', true);
 			  }
 			}
 			splats = new Assign(new Value(new Arr((function() {
-			  var _l, _len3, _ref6, _results;
-			  _ref6 = this.params;
-			  _results = [];
-			  for (_l = 0, _len3 = _ref6.length; _l < _len3; _l++) {
-				p = _ref6[_l];
-				_results.push(p.asReference(o));
+			  var len4, m, ref7, results;
+			  ref7 = this.params;
+			  results = [];
+			  for (m = 0, len4 = ref7.length; m < len4; m++) {
+				p = ref7[m];
+				results.push(p.asReference(o));
 			  }
-			  return _results;
+			  return results;
 			}).call(this))), new Value(new Literal('arguments')));
 			break;
 		  }
-		  _ref6 = this.params;
-		  for (_l = 0, _len3 = _ref6.length; _l < _len3; _l++) {
-			param = _ref6[_l];
+		  ref7 = this.params;
+		  for (m = 0, len4 = ref7.length; m < len4; m++) {
+			param = ref7[m];
 			if (param.isComplex()) {
 			  val = ref = param.asReference(o);
 			  if (param.value) {
@@ -4489,16 +4678,16 @@ var CoffeeScript = (function(){
 			exprs.unshift(splats);
 		  }
 		  if (exprs.length) {
-			(_ref7 = this.body.expressions).unshift.apply(_ref7, exprs);
+			(ref8 = this.body.expressions).unshift.apply(ref8, exprs);
 		  }
-		  for (i = _m = 0, _len4 = params.length; _m < _len4; i = ++_m) {
+		  for (i = q = 0, len5 = params.length; q < len5; i = ++q) {
 			p = params[i];
 			params[i] = p.compileToFragments(o);
 			o.scope.parameter(fragmentsToText(params[i]));
 		  }
 		  uniqs = [];
 		  this.eachParamName(function(name, node) {
-			if (__indexOf.call(uniqs, name) >= 0) {
+			if (indexOf.call(uniqs, name) >= 0) {
 			  node.error("multiple parameters named " + name);
 			}
 			return uniqs.push(name);
@@ -4515,7 +4704,7 @@ var CoffeeScript = (function(){
 		  }
 		  code += '(';
 		  answer = [this.makeCode(code)];
-		  for (i = _n = 0, _len5 = params.length; _n < _len5; i = ++_n) {
+		  for (i = r = 0, len6 = params.length; r < len6; i = ++r) {
 			p = params[i];
 			if (i) {
 			  answer.push(this.makeCode(", "));
@@ -4528,7 +4717,7 @@ var CoffeeScript = (function(){
 		  }
 		  answer.push(this.makeCode('}'));
 		  if (this.ctor) {
-			return [this.makeCode(this.tab)].concat(__slice.call(answer));
+			return [this.makeCode(this.tab)].concat(slice.call(answer));
 		  }
 		  if (this.front || (o.level >= LEVEL_ACCESS)) {
 			return this.wrapInBraces(answer);
@@ -4538,14 +4727,14 @@ var CoffeeScript = (function(){
 		};
 
 		Code.prototype.eachParamName = function(iterator) {
-		  var param, _i, _len, _ref2, _results;
-		  _ref2 = this.params;
-		  _results = [];
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			param = _ref2[_i];
-			_results.push(param.eachName(iterator));
+		  var j, len1, param, ref3, results;
+		  ref3 = this.params;
+		  results = [];
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			param = ref3[j];
+			results.push(param.eachName(iterator));
 		  }
-		  return _results;
+		  return results;
 		};
 
 		Code.prototype.traverseChildren = function(crossScope, func) {
@@ -4558,15 +4747,15 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Param = Param = (function(_super) {
-		__extends(Param, _super);
+	  exports.Param = Param = (function(superClass1) {
+		extend1(Param, superClass1);
 
-		function Param(_at_name, _at_value, _at_splat) {
-		  var name, _ref2;
-		  this.name = _at_name;
-		  this.value = _at_value;
-		  this.splat = _at_splat;
-		  if (_ref2 = (name = this.name.unwrapAll().value), __indexOf.call(STRICT_PROSCRIBED, _ref2) >= 0) {
+		function Param(name1, value1, splat) {
+		  var name, ref3;
+		  this.name = name1;
+		  this.value = value1;
+		  this.splat = splat;
+		  if (ref3 = (name = this.name.unwrapAll().value), indexOf.call(STRICT_PROSCRIBED, ref3) >= 0) {
 			this.name.error("parameter name \"" + name + "\" is not allowed");
 		  }
 		}
@@ -4584,7 +4773,10 @@ var CoffeeScript = (function(){
 		  }
 		  node = this.name;
 		  if (node["this"]) {
-			name = "at_" + node.properties[0].name.value;
+			name = node.properties[0].name.value;
+			if (name.reserved) {
+			  name = "_" + name;
+			}
 			node = new Literal(o.scope.freeVariable(name));
 		  } else if (node.isComplex()) {
 			node = new Literal(o.scope.freeVariable('arg'));
@@ -4602,7 +4794,7 @@ var CoffeeScript = (function(){
 		};
 
 		Param.prototype.eachName = function(iterator, name) {
-		  var atParam, node, obj, _i, _len, _ref2;
+		  var atParam, j, len1, node, obj, ref3;
 		  if (name == null) {
 			name = this.name;
 		  }
@@ -4615,9 +4807,9 @@ var CoffeeScript = (function(){
 		  if (name instanceof Value) {
 			return atParam(name);
 		  }
-		  _ref2 = name.objects;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			obj = _ref2[_i];
+		  ref3 = name.objects;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			obj = ref3[j];
 			if (obj instanceof Assign) {
 			  this.eachName(iterator, obj.value.unwrap());
 			} else if (obj instanceof Splat) {
@@ -4641,8 +4833,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Splat = Splat = (function(_super) {
-		__extends(Splat, _super);
+	  exports.Splat = Splat = (function(superClass1) {
+		extend1(Splat, superClass1);
 
 		Splat.prototype.children = ['name'];
 
@@ -4665,7 +4857,7 @@ var CoffeeScript = (function(){
 		};
 
 		Splat.compileSplattedArray = function(o, list, apply) {
-		  var args, base, compiledNode, concatPart, fragments, i, index, node, _i, _len;
+		  var args, base, compiledNode, concatPart, fragments, i, index, j, last, len1, node;
 		  index = -1;
 		  while ((node = list[++index]) && !(node instanceof Splat)) {
 			continue;
@@ -4682,7 +4874,7 @@ var CoffeeScript = (function(){
 			return [].concat(node.makeCode((utility('slice', o)) + ".call("), fragments, node.makeCode(")"));
 		  }
 		  args = list.slice(index);
-		  for (i = _i = 0, _len = args.length; _i < _len; i = ++_i) {
+		  for (i = j = 0, len1 = args.length; j < len1; i = ++j) {
 			node = args[i];
 			compiledNode = node.compileToFragments(o, LEVEL_LIST);
 			args[i] = node instanceof Splat ? [].concat(node.makeCode((utility('slice', o)) + ".call("), compiledNode, node.makeCode(")")) : [].concat(node.makeCode("["), compiledNode, node.makeCode("]"));
@@ -4693,26 +4885,27 @@ var CoffeeScript = (function(){
 			return args[0].concat(node.makeCode(".concat("), concatPart, node.makeCode(")"));
 		  }
 		  base = (function() {
-			var _j, _len1, _ref2, _results;
-			_ref2 = list.slice(0, index);
-			_results = [];
-			for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-			  node = _ref2[_j];
-			  _results.push(node.compileToFragments(o, LEVEL_LIST));
+			var k, len2, ref3, results;
+			ref3 = list.slice(0, index);
+			results = [];
+			for (k = 0, len2 = ref3.length; k < len2; k++) {
+			  node = ref3[k];
+			  results.push(node.compileToFragments(o, LEVEL_LIST));
 			}
-			return _results;
+			return results;
 		  })();
 		  base = list[0].joinFragmentArrays(base, ', ');
 		  concatPart = list[index].joinFragmentArrays(args, ', ');
-		  return [].concat(list[0].makeCode("["), base, list[index].makeCode("].concat("), concatPart, (last(list)).makeCode(")"));
+		  last = list[list.length - 1];
+		  return [].concat(list[0].makeCode("["), base, list[index].makeCode("].concat("), concatPart, last.makeCode(")"));
 		};
 
 		return Splat;
 
 	  })(Base);
 
-	  exports.Expansion = Expansion = (function(_super) {
-		__extends(Expansion, _super);
+	  exports.Expansion = Expansion = (function(superClass1) {
+		extend1(Expansion, superClass1);
 
 		function Expansion() {
 		  return Expansion.__super__.constructor.apply(this, arguments);
@@ -4734,8 +4927,8 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.While = While = (function(_super) {
-		__extends(While, _super);
+	  exports.While = While = (function(superClass1) {
+		extend1(While, superClass1);
 
 		function While(condition, options) {
 		  this.condition = (options != null ? options.invert : void 0) ? condition.invert() : condition;
@@ -4757,19 +4950,19 @@ var CoffeeScript = (function(){
 		  }
 		};
 
-		While.prototype.addBody = function(_at_body) {
-		  this.body = _at_body;
+		While.prototype.addBody = function(body1) {
+		  this.body = body1;
 		  return this;
 		};
 
 		While.prototype.jumps = function() {
-		  var expressions, jumpNode, node, _i, _len;
+		  var expressions, j, jumpNode, len1, node;
 		  expressions = this.body.expressions;
 		  if (!expressions.length) {
 			return false;
 		  }
-		  for (_i = 0, _len = expressions.length; _i < _len; _i++) {
-			node = expressions[_i];
+		  for (j = 0, len1 = expressions.length; j < len1; j++) {
+			node = expressions[j];
 			if (jumpNode = node.jumps({
 			  loop: true
 			})) {
@@ -4813,10 +5006,10 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Op = Op = (function(_super) {
+	  exports.Op = Op = (function(superClass1) {
 		var CONVERSIONS, INVERSIONS;
 
-		__extends(Op, _super);
+		extend1(Op, superClass1);
 
 		function Op(op, first, second, flip) {
 		  if (op === 'in') {
@@ -4857,8 +5050,12 @@ var CoffeeScript = (function(){
 		Op.prototype.isSimpleNumber = NO;
 
 		Op.prototype.isYield = function() {
-		  var _ref2;
-		  return (_ref2 = this.operator) === 'yield' || _ref2 === 'yield*';
+		  var ref3;
+		  return (ref3 = this.operator) === 'yield' || ref3 === 'yield*';
+		};
+
+		Op.prototype.isYieldReturn = function() {
+		  return this.isYield() && this.first instanceof Return;
 		};
 
 		Op.prototype.isUnary = function() {
@@ -4866,17 +5063,17 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.isComplex = function() {
-		  var _ref2;
-		  return !(this.isUnary() && ((_ref2 = this.operator) === '+' || _ref2 === '-') && this.first instanceof Value && this.first.isSimpleNumber());
+		  var ref3;
+		  return !(this.isUnary() && ((ref3 = this.operator) === '+' || ref3 === '-') && this.first instanceof Value && this.first.isSimpleNumber());
 		};
 
 		Op.prototype.isChainable = function() {
-		  var _ref2;
-		  return (_ref2 = this.operator) === '<' || _ref2 === '>' || _ref2 === '>=' || _ref2 === '<=' || _ref2 === '===' || _ref2 === '!==';
+		  var ref3;
+		  return (ref3 = this.operator) === '<' || ref3 === '>' || ref3 === '>=' || ref3 === '<=' || ref3 === '===' || ref3 === '!==';
 		};
 
 		Op.prototype.invert = function() {
-		  var allInvertable, curr, fst, op, _ref2;
+		  var allInvertable, curr, fst, op, ref3;
 		  if (this.isChainable() && this.first.isChainable()) {
 			allInvertable = true;
 			curr = this;
@@ -4902,7 +5099,7 @@ var CoffeeScript = (function(){
 			return this;
 		  } else if (this.second) {
 			return new Parens(this).invert();
-		  } else if (this.operator === '!' && (fst = this.first.unwrap()) instanceof Op && ((_ref2 = fst.operator) === '!' || _ref2 === 'in' || _ref2 === 'instanceof')) {
+		  } else if (this.operator === '!' && (fst = this.first.unwrap()) instanceof Op && ((ref3 = fst.operator) === '!' || ref3 === 'in' || ref3 === 'instanceof')) {
 			return fst;
 		  } else {
 			return new Op('!', this);
@@ -4910,17 +5107,17 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.unfoldSoak = function(o) {
-		  var _ref2;
-		  return ((_ref2 = this.operator) === '++' || _ref2 === '--' || _ref2 === 'delete') && unfoldSoak(o, this, 'first');
+		  var ref3;
+		  return ((ref3 = this.operator) === '++' || ref3 === '--' || ref3 === 'delete') && unfoldSoak(o, this, 'first');
 		};
 
 		Op.prototype.generateDo = function(exp) {
-		  var call, func, param, passedParams, ref, _i, _len, _ref2;
+		  var call, func, j, len1, param, passedParams, ref, ref3;
 		  passedParams = [];
 		  func = exp instanceof Assign && (ref = exp.value.unwrap()) instanceof Code ? ref : exp;
-		  _ref2 = func.params || [];
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			param = _ref2[_i];
+		  ref3 = func.params || [];
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			param = ref3[j];
 			if (param.value) {
 			  passedParams.push(param.value);
 			  delete param.value;
@@ -4934,7 +5131,7 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.compileNode = function(o) {
-		  var answer, isChain, lhs, rhs, _ref2, _ref3;
+		  var answer, isChain, lhs, ref3, ref4, rhs;
 		  isChain = this.isChainable() && this.first.isChainable();
 		  if (!isChain) {
 			this.first.front = this.front;
@@ -4942,7 +5139,7 @@ var CoffeeScript = (function(){
 		  if (this.operator === 'delete' && o.scope.check(this.first.unwrapAll().value)) {
 			this.error('delete operand may not be argument or var');
 		  }
-		  if (((_ref2 = this.operator) === '--' || _ref2 === '++') && (_ref3 = this.first.unwrapAll().value, __indexOf.call(STRICT_PROSCRIBED, _ref3) >= 0)) {
+		  if (((ref3 = this.operator) === '--' || ref3 === '++') && (ref4 = this.first.unwrapAll().value, indexOf.call(STRICT_PROSCRIBED, ref4) >= 0)) {
 			this.error("cannot increment/decrement \"" + (this.first.unwrapAll().value) + "\"");
 		  }
 		  if (this.isYield()) {
@@ -4976,8 +5173,8 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.compileChain = function(o) {
-		  var fragments, fst, shared, _ref2;
-		  _ref2 = this.first.second.cache(o), this.first.second = _ref2[0], shared = _ref2[1];
+		  var fragments, fst, ref3, shared;
+		  ref3 = this.first.second.cache(o), this.first.second = ref3[0], shared = ref3[1];
 		  fst = this.first.compileToFragments(o, LEVEL_OP);
 		  fragments = fst.concat(this.makeCode(" " + (this.invert ? '&&' : '||') + " "), shared.compileToFragments(o), this.makeCode(" " + this.operator + " "), this.second.compileToFragments(o, LEVEL_OP));
 		  return this.wrapInBraces(fragments);
@@ -5030,8 +5227,10 @@ var CoffeeScript = (function(){
 		  if (o.scope.parent == null) {
 			this.error('yield statements must occur within a function generator.');
 		  }
-		  if (__indexOf.call(Object.keys(this.first), 'expression') >= 0) {
-			if (this.first.expression != null) {
+		  if (indexOf.call(Object.keys(this.first), 'expression') >= 0 && !(this.first instanceof Throw)) {
+			if (this.isYieldReturn()) {
+			  parts.push(this.first.compileToFragments(o, LEVEL_TOP));
+			} else if (this.first.expression != null) {
 			  parts.push(this.first.expression.compileToFragments(o, LEVEL_OP));
 			}
 		  } else {
@@ -5069,12 +5268,12 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.In = In = (function(_super) {
-		__extends(In, _super);
+	  exports.In = In = (function(superClass1) {
+		extend1(In, superClass1);
 
-		function In(_at_object, _at_array) {
-		  this.object = _at_object;
-		  this.array = _at_array;
+		function In(object, array) {
+		  this.object = object;
+		  this.array = array;
 		}
 
 		In.prototype.children = ['object', 'array'];
@@ -5082,11 +5281,11 @@ var CoffeeScript = (function(){
 		In.prototype.invert = NEGATE;
 
 		In.prototype.compileNode = function(o) {
-		  var hasSplat, obj, _i, _len, _ref2;
+		  var hasSplat, j, len1, obj, ref3;
 		  if (this.array instanceof Value && this.array.isArray() && this.array.base.objects.length) {
-			_ref2 = this.array.base.objects;
-			for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			  obj = _ref2[_i];
+			ref3 = this.array.base.objects;
+			for (j = 0, len1 = ref3.length; j < len1; j++) {
+			  obj = ref3[j];
 			  if (!(obj instanceof Splat)) {
 				continue;
 			  }
@@ -5101,13 +5300,13 @@ var CoffeeScript = (function(){
 		};
 
 		In.prototype.compileOrTest = function(o) {
-		  var cmp, cnj, i, item, ref, sub, tests, _i, _len, _ref2, _ref3, _ref4;
-		  _ref2 = this.object.cache(o, LEVEL_OP), sub = _ref2[0], ref = _ref2[1];
-		  _ref3 = this.negated ? [' !== ', ' && '] : [' === ', ' || '], cmp = _ref3[0], cnj = _ref3[1];
+		  var cmp, cnj, i, item, j, len1, ref, ref3, ref4, ref5, sub, tests;
+		  ref3 = this.object.cache(o, LEVEL_OP), sub = ref3[0], ref = ref3[1];
+		  ref4 = this.negated ? [' !== ', ' && '] : [' === ', ' || '], cmp = ref4[0], cnj = ref4[1];
 		  tests = [];
-		  _ref4 = this.array.base.objects;
-		  for (i = _i = 0, _len = _ref4.length; _i < _len; i = ++_i) {
-			item = _ref4[i];
+		  ref5 = this.array.base.objects;
+		  for (i = j = 0, len1 = ref5.length; j < len1; i = ++j) {
+			item = ref5[i];
 			if (i) {
 			  tests.push(this.makeCode(cnj));
 			}
@@ -5121,8 +5320,8 @@ var CoffeeScript = (function(){
 		};
 
 		In.prototype.compileLoopTest = function(o) {
-		  var fragments, ref, sub, _ref2;
-		  _ref2 = this.object.cache(o, LEVEL_LIST), sub = _ref2[0], ref = _ref2[1];
+		  var fragments, ref, ref3, sub;
+		  ref3 = this.object.cache(o, LEVEL_LIST), sub = ref3[0], ref = ref3[1];
 		  fragments = [].concat(this.makeCode(utility('indexOf', o) + ".call("), this.array.compileToFragments(o, LEVEL_LIST), this.makeCode(", "), ref, this.makeCode(") " + (this.negated ? '< 0' : '>= 0')));
 		  if (fragmentsToText(sub) === fragmentsToText(ref)) {
 			return fragments;
@@ -5143,14 +5342,14 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Try = Try = (function(_super) {
-		__extends(Try, _super);
+	  exports.Try = Try = (function(superClass1) {
+		extend1(Try, superClass1);
 
-		function Try(_at_attempt, _at_errorVariable, _at_recovery, _at_ensure) {
-		  this.attempt = _at_attempt;
-		  this.errorVariable = _at_errorVariable;
-		  this.recovery = _at_recovery;
-		  this.ensure = _at_ensure;
+		function Try(attempt, errorVariable, recovery, ensure) {
+		  this.attempt = attempt;
+		  this.errorVariable = errorVariable;
+		  this.recovery = recovery;
+		  this.ensure = ensure;
 		}
 
 		Try.prototype.children = ['attempt', 'recovery', 'ensure'];
@@ -5158,8 +5357,8 @@ var CoffeeScript = (function(){
 		Try.prototype.isStatement = YES;
 
 		Try.prototype.jumps = function(o) {
-		  var _ref2;
-		  return this.attempt.jumps(o) || ((_ref2 = this.recovery) != null ? _ref2.jumps(o) : void 0);
+		  var ref3;
+		  return this.attempt.jumps(o) || ((ref3 = this.recovery) != null ? ref3.jumps(o) : void 0);
 		};
 
 		Try.prototype.makeReturn = function(res) {
@@ -5185,11 +5384,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Throw = Throw = (function(_super) {
-		__extends(Throw, _super);
+	  exports.Throw = Throw = (function(superClass1) {
+		extend1(Throw, superClass1);
 
-		function Throw(_at_expression) {
-		  this.expression = _at_expression;
+		function Throw(expression) {
+		  this.expression = expression;
 		}
 
 		Throw.prototype.children = ['expression'];
@@ -5208,11 +5407,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Existence = Existence = (function(_super) {
-		__extends(Existence, _super);
+	  exports.Existence = Existence = (function(superClass1) {
+		extend1(Existence, superClass1);
 
-		function Existence(_at_expression) {
-		  this.expression = _at_expression;
+		function Existence(expression) {
+		  this.expression = expression;
 		}
 
 		Existence.prototype.children = ['expression'];
@@ -5220,11 +5419,11 @@ var CoffeeScript = (function(){
 		Existence.prototype.invert = NEGATE;
 
 		Existence.prototype.compileNode = function(o) {
-		  var cmp, cnj, code, _ref2;
+		  var cmp, cnj, code, ref3;
 		  this.expression.front = this.front;
 		  code = this.expression.compile(o, LEVEL_OP);
 		  if (IDENTIFIER.test(code) && !o.scope.check(code)) {
-			_ref2 = this.negated ? ['===', '||'] : ['!==', '&&'], cmp = _ref2[0], cnj = _ref2[1];
+			ref3 = this.negated ? ['===', '||'] : ['!==', '&&'], cmp = ref3[0], cnj = ref3[1];
 			code = "typeof " + code + " " + cmp + " \"undefined\" " + cnj + " " + code + " " + cmp + " null";
 		  } else {
 			code = code + " " + (this.negated ? '==' : '!=') + " null";
@@ -5236,11 +5435,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.Parens = Parens = (function(_super) {
-		__extends(Parens, _super);
+	  exports.Parens = Parens = (function(superClass1) {
+		extend1(Parens, superClass1);
 
-		function Parens(_at_body) {
-		  this.body = _at_body;
+		function Parens(body1) {
+		  this.body = body1;
 		}
 
 		Parens.prototype.children = ['body'];
@@ -5273,17 +5472,17 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.For = For = (function(_super) {
-		__extends(For, _super);
+	  exports.For = For = (function(superClass1) {
+		extend1(For, superClass1);
 
 		function For(body, source) {
-		  var _ref2;
+		  var ref3;
 		  this.source = source.source, this.guard = source.guard, this.step = source.step, this.name = source.name, this.index = source.index;
 		  this.body = Block.wrap([body]);
 		  this.own = !!source.own;
 		  this.object = !!source.object;
 		  if (this.object) {
-			_ref2 = [this.index, this.name], this.name = _ref2[0], this.index = _ref2[1];
+			ref3 = [this.index, this.name], this.name = ref3[0], this.index = ref3[1];
 		  }
 		  if (this.index instanceof Value) {
 			this.index.error('index cannot be a pattern matching expression');
@@ -5305,10 +5504,10 @@ var CoffeeScript = (function(){
 		For.prototype.children = ['body', 'source', 'guard', 'step'];
 
 		For.prototype.compileNode = function(o) {
-		  var body, bodyFragments, compare, compareDown, declare, declareDown, defPart, defPartFragments, down, forPartFragments, guardPart, idt1, increment, index, ivar, kvar, kvarAssign, lastJumps, lvar, name, namePart, ref, resultPart, returnResult, rvar, scope, source, step, stepNum, stepVar, svar, varPart, _ref2, _ref3;
+		  var body, bodyFragments, compare, compareDown, declare, declareDown, defPart, defPartFragments, down, forPartFragments, guardPart, idt1, increment, index, ivar, kvar, kvarAssign, last, lvar, name, namePart, ref, ref3, ref4, resultPart, returnResult, rvar, scope, source, step, stepNum, stepVar, svar, varPart;
 		  body = Block.wrap([this.body]);
-		  lastJumps = (_ref2 = last(body.expressions)) != null ? _ref2.jumps() : void 0;
-		  if (lastJumps && lastJumps instanceof Return) {
+		  ref3 = body.expressions, last = ref3[ref3.length - 1];
+		  if ((last != null ? last.jumps() : void 0) instanceof Return) {
 			this.returns = false;
 		  }
 		  source = this.range ? this.source.base : this.source;
@@ -5326,11 +5525,13 @@ var CoffeeScript = (function(){
 		  if (this.returns) {
 			rvar = scope.freeVariable('results');
 		  }
-		  ivar = (this.object && index) || scope.freeVariable('i');
+		  ivar = (this.object && index) || scope.freeVariable('i', {
+			single: true
+		  });
 		  kvar = (this.range && name) || index || ivar;
 		  kvarAssign = kvar !== ivar ? kvar + " = " : "";
 		  if (this.step && !this.range) {
-			_ref3 = this.cacheToCodeFragments(this.step.cache(o, LEVEL_LIST)), step = _ref3[0], stepVar = _ref3[1];
+			ref4 = this.cacheToCodeFragments(this.step.cache(o, LEVEL_LIST, isComplexOrAssignable)), step = ref4[0], stepVar = ref4[1];
 			stepNum = stepVar.match(NUMBER);
 		  }
 		  if (this.pattern) {
@@ -5344,7 +5545,8 @@ var CoffeeScript = (function(){
 			forPartFragments = source.compileToFragments(merge(o, {
 			  index: ivar,
 			  name: name,
-			  step: this.step
+			  step: this.step,
+			  isComplex: isComplexOrAssignable
 			}));
 		  } else {
 			svar = this.source.compile(o, LEVEL_LIST);
@@ -5420,24 +5622,24 @@ var CoffeeScript = (function(){
 		};
 
 		For.prototype.pluckDirectCall = function(o, body) {
-		  var base, defs, expr, fn, idx, ref, val, _i, _len, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+		  var base, defs, expr, fn, idx, j, len1, ref, ref3, ref4, ref5, ref6, ref7, ref8, ref9, val;
 		  defs = [];
-		  _ref2 = body.expressions;
-		  for (idx = _i = 0, _len = _ref2.length; _i < _len; idx = ++_i) {
-			expr = _ref2[idx];
+		  ref3 = body.expressions;
+		  for (idx = j = 0, len1 = ref3.length; j < len1; idx = ++j) {
+			expr = ref3[idx];
 			expr = expr.unwrapAll();
 			if (!(expr instanceof Call)) {
 			  continue;
 			}
-			val = (_ref3 = expr.variable) != null ? _ref3.unwrapAll() : void 0;
-			if (!((val instanceof Code) || (val instanceof Value && ((_ref4 = val.base) != null ? _ref4.unwrapAll() : void 0) instanceof Code && val.properties.length === 1 && ((_ref5 = (_ref6 = val.properties[0].name) != null ? _ref6.value : void 0) === 'call' || _ref5 === 'apply')))) {
+			val = (ref4 = expr.variable) != null ? ref4.unwrapAll() : void 0;
+			if (!((val instanceof Code) || (val instanceof Value && ((ref5 = val.base) != null ? ref5.unwrapAll() : void 0) instanceof Code && val.properties.length === 1 && ((ref6 = (ref7 = val.properties[0].name) != null ? ref7.value : void 0) === 'call' || ref6 === 'apply')))) {
 			  continue;
 			}
-			fn = ((_ref7 = val.base) != null ? _ref7.unwrapAll() : void 0) || val;
+			fn = ((ref8 = val.base) != null ? ref8.unwrapAll() : void 0) || val;
 			ref = new Literal(o.scope.freeVariable('fn'));
 			base = new Value(ref);
 			if (val.base) {
-			  _ref8 = [base, val], val.base = _ref8[0], base = _ref8[1];
+			  ref9 = [base, val], val.base = ref9[0], base = ref9[1];
 			}
 			body.expressions[idx] = new Call(base, expr.args);
 			defs = defs.concat(this.makeCode(this.tab), new Assign(ref, fn).compileToFragments(o, LEVEL_TOP), this.makeCode(';\n'));
@@ -5449,13 +5651,13 @@ var CoffeeScript = (function(){
 
 	  })(While);
 
-	  exports.Switch = Switch = (function(_super) {
-		__extends(Switch, _super);
+	  exports.Switch = Switch = (function(superClass1) {
+		extend1(Switch, superClass1);
 
-		function Switch(_at_subject, _at_cases, _at_otherwise) {
-		  this.subject = _at_subject;
-		  this.cases = _at_cases;
-		  this.otherwise = _at_otherwise;
+		function Switch(subject, cases, otherwise) {
+		  this.subject = subject;
+		  this.cases = cases;
+		  this.otherwise = otherwise;
 		}
 
 		Switch.prototype.children = ['subject', 'cases', 'otherwise'];
@@ -5463,49 +5665,49 @@ var CoffeeScript = (function(){
 		Switch.prototype.isStatement = YES;
 
 		Switch.prototype.jumps = function(o) {
-		  var block, conds, jumpNode, _i, _len, _ref2, _ref3, _ref4;
+		  var block, conds, j, jumpNode, len1, ref3, ref4, ref5;
 		  if (o == null) {
 			o = {
 			  block: true
 			};
 		  }
-		  _ref2 = this.cases;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			_ref3 = _ref2[_i], conds = _ref3[0], block = _ref3[1];
+		  ref3 = this.cases;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			ref4 = ref3[j], conds = ref4[0], block = ref4[1];
 			if (jumpNode = block.jumps(o)) {
 			  return jumpNode;
 			}
 		  }
-		  return (_ref4 = this.otherwise) != null ? _ref4.jumps(o) : void 0;
+		  return (ref5 = this.otherwise) != null ? ref5.jumps(o) : void 0;
 		};
 
 		Switch.prototype.makeReturn = function(res) {
-		  var pair, _i, _len, _ref2, _ref3;
-		  _ref2 = this.cases;
-		  for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-			pair = _ref2[_i];
+		  var j, len1, pair, ref3, ref4;
+		  ref3 = this.cases;
+		  for (j = 0, len1 = ref3.length; j < len1; j++) {
+			pair = ref3[j];
 			pair[1].makeReturn(res);
 		  }
 		  if (res) {
 			this.otherwise || (this.otherwise = new Block([new Literal('void 0')]));
 		  }
-		  if ((_ref3 = this.otherwise) != null) {
-			_ref3.makeReturn(res);
+		  if ((ref4 = this.otherwise) != null) {
+			ref4.makeReturn(res);
 		  }
 		  return this;
 		};
 
 		Switch.prototype.compileNode = function(o) {
-		  var block, body, cond, conditions, expr, fragments, i, idt1, idt2, _i, _j, _len, _len1, _ref2, _ref3, _ref4;
+		  var block, body, cond, conditions, expr, fragments, i, idt1, idt2, j, k, len1, len2, ref3, ref4, ref5;
 		  idt1 = o.indent + TAB;
 		  idt2 = o.indent = idt1 + TAB;
 		  fragments = [].concat(this.makeCode(this.tab + "switch ("), (this.subject ? this.subject.compileToFragments(o, LEVEL_PAREN) : this.makeCode("false")), this.makeCode(") {\n"));
-		  _ref2 = this.cases;
-		  for (i = _i = 0, _len = _ref2.length; _i < _len; i = ++_i) {
-			_ref3 = _ref2[i], conditions = _ref3[0], block = _ref3[1];
-			_ref4 = flatten([conditions]);
-			for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-			  cond = _ref4[_j];
+		  ref3 = this.cases;
+		  for (i = j = 0, len1 = ref3.length; j < len1; i = ++j) {
+			ref4 = ref3[i], conditions = ref4[0], block = ref4[1];
+			ref5 = flatten([conditions]);
+			for (k = 0, len2 = ref5.length; k < len2; k++) {
+			  cond = ref5[k];
 			  if (!this.subject) {
 				cond = cond.invert();
 			  }
@@ -5524,7 +5726,7 @@ var CoffeeScript = (function(){
 			fragments.push(cond.makeCode(idt2 + 'break;\n'));
 		  }
 		  if (this.otherwise && this.otherwise.expressions.length) {
-			fragments.push.apply(fragments, [this.makeCode(idt1 + "default:\n")].concat(__slice.call(this.otherwise.compileToFragments(o, LEVEL_TOP)), [this.makeCode("\n")]));
+			fragments.push.apply(fragments, [this.makeCode(idt1 + "default:\n")].concat(slice.call(this.otherwise.compileToFragments(o, LEVEL_TOP)), [this.makeCode("\n")]));
 		  }
 		  fragments.push(this.makeCode(this.tab + '}'));
 		  return fragments;
@@ -5534,11 +5736,11 @@ var CoffeeScript = (function(){
 
 	  })(Base);
 
-	  exports.If = If = (function(_super) {
-		__extends(If, _super);
+	  exports.If = If = (function(superClass1) {
+		extend1(If, superClass1);
 
-		function If(condition, _at_body, options) {
-		  this.body = _at_body;
+		function If(condition, body1, options) {
+		  this.body = body1;
 		  if (options == null) {
 			options = {};
 		  }
@@ -5551,13 +5753,13 @@ var CoffeeScript = (function(){
 		If.prototype.children = ['condition', 'body', 'elseBody'];
 
 		If.prototype.bodyNode = function() {
-		  var _ref2;
-		  return (_ref2 = this.body) != null ? _ref2.unwrap() : void 0;
+		  var ref3;
+		  return (ref3 = this.body) != null ? ref3.unwrap() : void 0;
 		};
 
 		If.prototype.elseBodyNode = function() {
-		  var _ref2;
-		  return (_ref2 = this.elseBody) != null ? _ref2.unwrap() : void 0;
+		  var ref3;
+		  return (ref3 = this.elseBody) != null ? ref3.unwrap() : void 0;
 		};
 
 		If.prototype.addElse = function(elseBody) {
@@ -5572,13 +5774,13 @@ var CoffeeScript = (function(){
 		};
 
 		If.prototype.isStatement = function(o) {
-		  var _ref2;
-		  return (o != null ? o.level : void 0) === LEVEL_TOP || this.bodyNode().isStatement(o) || ((_ref2 = this.elseBodyNode()) != null ? _ref2.isStatement(o) : void 0);
+		  var ref3;
+		  return (o != null ? o.level : void 0) === LEVEL_TOP || this.bodyNode().isStatement(o) || ((ref3 = this.elseBodyNode()) != null ? ref3.isStatement(o) : void 0);
 		};
 
 		If.prototype.jumps = function(o) {
-		  var _ref2;
-		  return this.body.jumps(o) || ((_ref2 = this.elseBody) != null ? _ref2.jumps(o) : void 0);
+		  var ref3;
+		  return this.body.jumps(o) || ((ref3 = this.elseBody) != null ? ref3.jumps(o) : void 0);
 		};
 
 		If.prototype.compileNode = function(o) {
@@ -5661,7 +5863,7 @@ var CoffeeScript = (function(){
 	  })(Base);
 
 	  UTILITIES = {
-		"extends": function(o) {
+		extend: function(o) {
 		  return "function(child, parent) { for (var key in parent) { if (" + (utility('hasProp', o)) + ".call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; }";
 		},
 		bind: function() {
@@ -5695,17 +5897,13 @@ var CoffeeScript = (function(){
 
 	  TAB = '  ';
 
-	  IDENTIFIER_STR = "[$A-Za-z_\\x7f-\\uffff][$\\w\\x7f-\\uffff]*";
-
-	  IDENTIFIER = RegExp("^" + IDENTIFIER_STR + "$");
+	  IDENTIFIER = /^(?!\d)[$\w\x7f-\uffff]+$/;
 
 	  SIMPLENUM = /^[+-]?\d+$/;
 
 	  HEXNUM = /^[+-]?0x[\da-f]+/i;
 
 	  NUMBER = /^[+-]?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)$/i;
-
-	  METHOD_DEF = RegExp("^(" + IDENTIFIER_STR + ")(\\.prototype)?(?:\\.(" + IDENTIFIER_STR + ")|\\[(\"(?:[^\\\\\"\\r\\n]|\\\\.)*\"|'(?:[^\\\\'\\r\\n]|\\\\.)*')\\]|\\[(0x[\\da-fA-F]+|\\d*\\.?\\d+(?:[eE][+-]?\\d+)?)\\])$");
 
 	  IS_STRING = /^['"]/;
 
@@ -5717,7 +5915,7 @@ var CoffeeScript = (function(){
 		if (name in root.utilities) {
 		  return root.utilities[name];
 		} else {
-		  ref = root.freeVariable("_" + name);
+		  ref = root.freeVariable(name);
 		  root.assign(ref, UTILITIES[name](o));
 		  return root.utilities[name] = ref;
 		}
@@ -5746,6 +5944,10 @@ var CoffeeScript = (function(){
 		return (node instanceof Literal && node.value === 'this' && !node.asKey) || (node instanceof Code && node.bound) || (node instanceof Call && node.isSuper);
 	  };
 
+	  isComplexOrAssignable = function(node) {
+		return node.isComplex() || (typeof node.isAssignable === "function" ? node.isAssignable() : void 0);
+	  };
+
 	  unfoldSoak = function(o, parent, name) {
 		var ifn;
 		if (!(ifn = parent[name].unfoldSoak(o))) {
@@ -5763,9 +5965,9 @@ var CoffeeScript = (function(){
 	//#region URL: /coffee-script
 	modules['/coffee-script'] = function () {
 	  var exports = {};
-	  var Lexer, SourceMap, compile, ext, formatSourcePosition, fs, getSourceMap, helpers, lexer, parser, path, sourceMaps, vm, withPrettyErrors, _base, _i, _len, _ref,
-		__hasProp = {}.hasOwnProperty,
-		__indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+	  var Lexer, SourceMap, base, compile, ext, formatSourcePosition, fs, getSourceMap, helpers, i, len, lexer, parser, path, ref, sourceMaps, vm, withPrettyErrors,
+		hasProp = {}.hasOwnProperty,
+		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 //	  fs = require('fs');
 
@@ -5781,7 +5983,7 @@ var CoffeeScript = (function(){
 
 //	  SourceMap = require('/sourcemap');
 
-	  exports.VERSION = '1.9.0';
+	  exports.VERSION = '1.9.1';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
@@ -5803,7 +6005,7 @@ var CoffeeScript = (function(){
 	  };
 
 	  exports.compile = compile = withPrettyErrors(function(code, options) {
-		var answer, currentColumn, currentLine, extend, fragment, fragments, header, js, map, merge, newLines, token, tokens, _i, _len;
+		var answer, currentColumn, currentLine, extend, fragment, fragments, header, i, js, len, map, merge, newLines, token, tokens;
 		merge = helpers.merge, extend = helpers.extend;
 		options = extend({}, options);
 //		if (options.sourceMap) {
@@ -5811,15 +6013,15 @@ var CoffeeScript = (function(){
 //		}
 		tokens = lexer.tokenize(code, options);
 		options.referencedVars = (function() {
-		  var _i, _len, _results;
-		  _results = [];
-		  for (_i = 0, _len = tokens.length; _i < _len; _i++) {
-			token = tokens[_i];
-			if (token.variable && token[1].charAt(0) === '_') {
-			  _results.push(token[1]);
+		  var i, len, results;
+		  results = [];
+		  for (i = 0, len = tokens.length; i < len; i++) {
+			token = tokens[i];
+			if (token.variable) {
+			  results.push(token[1]);
 			}
 		  }
-		  return _results;
+		  return results;
 		})();
 		fragments = parser.parse(tokens).compileToFragments(options);
 		currentLine = 0;
@@ -5831,8 +6033,8 @@ var CoffeeScript = (function(){
 //		}
 		currentColumn = 0;
 		js = "";
-		for (_i = 0, _len = fragments.length; _i < _len; _i++) {
-		  fragment = fragments[_i];
+		for (i = 0, len = fragments.length; i < len; i++) {
+		  fragment = fragments[i];
 //		  if (options.sourceMap) {
 //			if (fragment.locationData) {
 //			  map.add([fragment.locationData.first_line, fragment.locationData.first_column], [currentLine, currentColumn], {
@@ -5878,7 +6080,7 @@ var CoffeeScript = (function(){
 //	  });
 
 //	  exports.run = function(code, options) {
-//		var answer, dir, mainModule, _ref;
+//		var answer, dir, mainModule, ref;
 //		if (options == null) {
 //		  options = {};
 //		}
@@ -5889,21 +6091,21 @@ var CoffeeScript = (function(){
 //		mainModule.paths = require('module')._nodeModulePaths(dir);
 //		if (!helpers.isCoffee(mainModule.filename) || require.extensions) {
 //		  answer = compile(code, options);
-//		  code = (_ref = answer.js) != null ? _ref : answer;
+//		  code = (ref = answer.js) != null ? ref : answer;
 //		}
 //		return mainModule._compile(code, mainModule.filename);
 //	  };
 
 //	  exports["eval"] = function(code, options) {
-//		var Module, createContext, isContext, js, k, o, r, sandbox, v, _i, _len, _module, _ref, _ref1, _ref2, _ref3, _require;
+//		var Module, _module, _require, createContext, i, isContext, js, k, len, o, r, ref, ref1, ref2, ref3, sandbox, v;
 //		if (options == null) {
 //		  options = {};
 //		}
 //		if (!(code = code.trim())) {
 //		  return;
 //		}
-//		createContext = (_ref = vm.Script.createContext) != null ? _ref : vm.createContext;
-//		isContext = (_ref1 = vm.isContext) != null ? _ref1 : function(ctx) {
+//		createContext = (ref = vm.Script.createContext) != null ? ref : vm.createContext;
+//		isContext = (ref1 = vm.isContext) != null ? ref1 : function(ctx) {
 //		  return options.sandbox instanceof createContext().constructor;
 //		};
 //		if (createContext) {
@@ -5912,10 +6114,10 @@ var CoffeeScript = (function(){
 //			  sandbox = options.sandbox;
 //			} else {
 //			  sandbox = createContext();
-//			  _ref2 = options.sandbox;
-//			  for (k in _ref2) {
-//				if (!__hasProp.call(_ref2, k)) continue;
-//				v = _ref2[k];
+//			  ref2 = options.sandbox;
+//			  for (k in ref2) {
+//				if (!hasProp.call(ref2, k)) continue;
+//				v = ref2[k];
 //				sandbox[k] = v;
 //			  }
 //			}
@@ -5932,9 +6134,9 @@ var CoffeeScript = (function(){
 //			  return Module._load(path, _module, true);
 //			};
 //			_module.filename = sandbox.__filename;
-//			_ref3 = Object.getOwnPropertyNames(require);
-//			for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-//			  r = _ref3[_i];
+//			ref3 = Object.getOwnPropertyNames(require);
+//			for (i = 0, len = ref3.length; i < len; i++) {
+//			  r = ref3[i];
 //			  if (r !== 'paths') {
 //				_require[r] = require[r];
 //			  }
@@ -5947,7 +6149,7 @@ var CoffeeScript = (function(){
 //		}
 //		o = {};
 //		for (k in options) {
-//		  if (!__hasProp.call(options, k)) continue;
+//		  if (!hasProp.call(options, k)) continue;
 //		  v = options[k];
 //		  o[k] = v;
 //		}
@@ -5965,11 +6167,11 @@ var CoffeeScript = (function(){
 //	  };
 
 //	  if (require.extensions) {
-//		_ref = this.FILE_EXTENSIONS;
-//		for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-//		  ext = _ref[_i];
-//		  if ((_base = require.extensions)[ext] == null) {
-//			_base[ext] = function() {
+//		ref = this.FILE_EXTENSIONS;
+//		for (i = 0, len = ref.length; i < len; i++) {
+//		  ext = ref[i];
+//		  if ((base = require.extensions)[ext] == null) {
+//			base[ext] = function() {
 //			  throw new Error("Use CoffeeScript.register() or require the coffee-script/register module to require " + ext + " files.");
 //			};
 //		  }
@@ -6022,12 +6224,23 @@ var CoffeeScript = (function(){
 
 	  parser.yy = require('/nodes');
 
-	  parser.yy.parseError = function(message, _arg) {
+	  parser.yy.parseError = function(message, arg) {
 		var errorLoc, errorTag, errorText, errorToken, token, tokens;
-		token = _arg.token;
+		token = arg.token;
 		errorToken = parser.errorToken, tokens = parser.tokens;
 		errorTag = errorToken[0], errorText = errorToken[1], errorLoc = errorToken[2];
-		errorText = errorToken === tokens[tokens.length - 1] ? 'end of input' : errorTag === 'INDENT' || errorTag === 'OUTDENT' ? 'indentation' : helpers.nameWhitespaceCharacter(errorText);
+		errorText = (function() {
+		  switch (false) {
+			case errorToken !== tokens[tokens.length - 1]:
+			  return 'end of input';
+			case errorTag !== 'INDENT' && errorTag !== 'OUTDENT':
+			  return 'indentation';
+			case errorTag !== 'IDENTIFIER' && errorTag !== 'NUMBER' && errorTag !== 'STRING' && errorTag !== 'STRING_START' && errorTag !== 'REGEX' && errorTag !== 'REGEX_START':
+			  return errorTag.replace(/_START$/, '').toLowerCase();
+			default:
+			  return helpers.nameWhitespaceCharacter(errorText);
+		  }
+		})();
 		return helpers.throwSyntaxError("unexpected " + errorText, errorLoc);
 	  };
 
@@ -6082,11 +6295,11 @@ var CoffeeScript = (function(){
 //	  sourceMaps = {};
 
 //	  getSourceMap = function(filename) {
-//		var answer, _ref1;
+//		var answer, ref1;
 //		if (sourceMaps[filename]) {
 //		  return sourceMaps[filename];
 //		}
-//		if (_ref1 = path != null ? path.extname(filename) : void 0, __indexOf.call(exports.FILE_EXTENSIONS, _ref1) < 0) {
+//		if (ref1 = path != null ? path.extname(filename) : void 0, indexOf.call(exports.FILE_EXTENSIONS, ref1) < 0) {
 //		  return;
 //		}
 //		answer = exports._compileFile(filename, true);
@@ -6108,16 +6321,16 @@ var CoffeeScript = (function(){
 //		  }
 //		};
 //		frames = (function() {
-//		  var _j, _len1, _results;
-//		  _results = [];
-//		  for (_j = 0, _len1 = stack.length; _j < _len1; _j++) {
-//			frame = stack[_j];
+//		  var j, len1, results;
+//		  results = [];
+//		  for (j = 0, len1 = stack.length; j < len1; j++) {
+//			frame = stack[j];
 //			if (frame.getFunction() === exports.run) {
 //			  break;
 //			}
-//			_results.push("  at " + (formatSourcePosition(frame, getSourceMapping)));
+//			results.push("  at " + (formatSourcePosition(frame, getSourceMapping)));
 //		  }
-//		  return _results;
+//		  return results;
 //		})();
 //		return (err.toString()) + "\n" + (frames.join('\n')) + "\n";
 //	  };

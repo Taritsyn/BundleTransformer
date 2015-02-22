@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.Autoprefixer</id>
-		<version>1.9.46</version>
+		<version>1.9.47</version>
 		<title>Bundle Transformer: Autoprefixer</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -10,11 +10,11 @@
 		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
 		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=860421</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (http://github.com/postcss/autoprefixer) version 5.1.5.
+		<description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (http://github.com/postcss/autoprefixer) version 5.1.7.
 	 
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).</description>
-		<summary>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer version 5.1.5.</summary>
-		<releaseNotes>Added support of Autoprefixer version 5.1.5.</releaseNotes>
+		<summary>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer version 5.1.7.</summary>
+		<releaseNotes>Added support of Autoprefixer version 5.1.7.</releaseNotes>
 		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Postprocessing Postprocessor Autoprefixer</tags>
