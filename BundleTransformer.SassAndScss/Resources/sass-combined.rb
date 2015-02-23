@@ -14488,6 +14488,8 @@ module Sass::Script::Value
     attr_reader :type
 
     def self.value(contents)
+#BT
+=begin
       contents.gsub("\\\n", "").gsub(/\\(?:([0-9a-fA-F]{1,6})\s?|(.))/) do
         next $2 if $2
         # Handle unicode escapes as per CSS Syntax Level 3 section 4.3.8.
@@ -14499,6 +14501,8 @@ module Sass::Script::Value
           [code_point].pack("U")
         end
       end
+=end
+      contents.gsub("\\\n", "")
     end
 
     def self.quote(contents, quote = nil)
@@ -14521,7 +14525,8 @@ module Sass::Script::Value
       end
 
       # Replace single backslashes with multiples.
-      contents = contents.gsub("\\", "\\\\\\\\")
+      #BT contents = contents.gsub("\\", "\\\\\\\\")
+      contents = contents.gsub("\\", "\\\\")
 
       if quote == '"'
         contents = contents.gsub('"', "\\\"")
@@ -18621,7 +18626,7 @@ WARNING
       def _find(dir, name, options)
         full_filename, syntax = Sass::Util.destructure(find_real_file(dir, name, options))
         #BT return unless full_filename && File.readable?(full_filename)
-        full_filename = full_filename.gsub(/\\/, "/")
+        full_filename = full_filename.tr("\\", "/")
         return unless full_filename
 
         # TODO: this preserves historical behavior, but it's possible
