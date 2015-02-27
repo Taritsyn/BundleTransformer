@@ -11,17 +11,17 @@ dir = File.dirname(__FILE__)
 $LOAD_PATH.unshift dir unless $LOAD_PATH.include?(dir)
 
 #region URL: /sass/version.rb
-#BT require 'date'
+#BT- require 'date'
 
 #region URL: /sass/util.rb
 # -*- coding: utf-8 -*-
-#BT require 'erb'
+#BT- require 'erb'
 require 'set'
 require 'enumerator'
 require 'stringio'
 require 'rbconfig'
 require 'uri'
-#BT require 'thread'
+#BT- require 'thread'
 require 'pathname'
 
 #region URL: /sass/root.rb
@@ -1253,7 +1253,17 @@ end
     # @param enum [Enumerable] The enumerable to get the enumerator for
     # @return [Enumerator] The with-index enumerator
     def enum_with_index(enum)
-      ruby1_8? ? enum.enum_with_index : enum.each_with_index
+      #BT- ruby1_8? ? enum.enum_with_index : enum.each_with_index
+
+      hash = Hash.new #BT+
+	  index = -1 #BT+
+
+	  enum.each do |item| #BT+
+		index += 1 #BT+
+		hash[item] = index #BT+
+	  end #BT+
+
+	  return hash #BT+
     end
 
     # A version of `Enumerable#enum_cons` that works in Ruby 1.8 and 1.9.
@@ -1558,7 +1568,7 @@ end
       end
     end
 
-#BT
+#BT-
 =begin
     # @private
     ATOMIC_WRITE_MUTEX = Mutex.new
@@ -1702,11 +1712,11 @@ end
 #region URL: /sass/util/multibyte_string_scanner.rb
 require 'strscan'
 
-#BT if Sass::Util.ruby1_8?
+#BT- if Sass::Util.ruby1_8?
   # rubocop:disable ConstantName
   Sass::Util::MultibyteStringScanner = StringScanner
   # rubocop:enable ConstantName
-#BT else
+#BT- else
 =begin
   if Sass::Util.rbx?
     # Rubinius's StringScanner class implements some of its methods in terms of
@@ -1858,7 +1868,7 @@ require 'strscan'
     end
   end
 =end
-#BT end
+#BT- end
 #endregion
 
 #region URL: /sass/util/normalized_map.rb
@@ -2013,7 +2023,7 @@ end
 #endregion
 #endregion
 
-#BT
+#BT-
 =begin
 module Sass
   # Handles Sass version-reporting.
@@ -2061,11 +2071,11 @@ module Sass
     def version
       return @@version if defined?(@@version)
 
-      #BT numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.4.12'.split('.')
+      #BT- numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
+	  numbers = '3.4.12'.split('.') #BT+
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
-      #BT name = File.read(Sass::Util.scope('VERSION_NAME')).strip
-	  name = 'Selective Steve'
+      #BT- name = File.read(Sass::Util.scope('VERSION_NAME')).strip
+	  name = 'Selective Steve' #BT+
       @@version = {
         :major => numbers[0],
         :minor => numbers[1],
@@ -2321,7 +2331,7 @@ end
 #region URL: /sass/engine.rb
 require 'digest/sha1'
 
-#BT
+#BT-
 =begin
 #region URL: /sass/cache_stores.rb
 module Sass
@@ -3285,8 +3295,8 @@ module Sass::Tree
     #
     # @return [{#to_s => #to_s}]
     def debug_info
-      #BT {:filename => filename && ("file://" + Sass::Util.escape_uri(File.expand_path(filename))),
-      {:filename => filename && ("file://" + Sass::Util.escape_uri(filename)),
+      #BT- {:filename => filename && ("file://" + Sass::Util.escape_uri(File.expand_path(filename))),
+      {:filename => filename && ("file://" + Sass::Util.escape_uri(filename)), #BT+
        :line => line}
     end
 
@@ -6273,8 +6283,8 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
         ])
       prop = Sass::Tree::PropNode.new([""], Sass::Script::Value::String.new(''), :new)
       prop.resolved_name = "font-family"
-      #BT prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
-	  prop.resolved_value = !(v =~ /^\d+$/).nil? ? ("\\00003" + v) : Sass::SCSS::RX.escape_ident(v.to_s)
+      #BT- prop.resolved_value = Sass::SCSS::RX.escape_ident(v.to_s)
+	  prop.resolved_value = !(v =~ /^\d+$/).nil? ? ("\\00003" + v) : Sass::SCSS::RX.escape_ident(v.to_s) #BT+
       rule << prop
       node << rule
     end
@@ -7887,11 +7897,6 @@ module Sass
         _, si = Sass::Util.enum_with_index(seq2).find do |e, i|
           return if i == seq2.size - 1
           next if e.is_a?(String)
-		  
-          if i.nil?
-            i = -1
-          end
-		  
           seq1.first.superselector?(e, seq2[0...i])
         end
         return unless si
@@ -7929,6 +7934,10 @@ module Sass
       def parent_superselector?(seq1, seq2)
         base = Sass::Selector::SimpleSequence.new([Sass::Selector::Placeholder.new('<temp>')],
                                                   false)
+
+        seq1 = [] if seq1.nil? #BT+
+        seq2 = [] if seq2.nil? #BT+
+
         _superselector?(seq1 + [base], seq2 + [base])
       end
 
@@ -8988,8 +8997,8 @@ module Sass
 
       S = /[ \t\r\n\f]+/
 
-      #BT COMMENT = %r{/\*([^*]|\*+[^/*])*\**\*/}
-      COMMENT = %r{(?<![^/]?/)/\*([^*]|\*+[^/*])*\**\*/}
+      #BT- COMMENT = %r{/\*([^*]|\*+[^/*])*\**\*/}
+      COMMENT = %r{(?<![^/]?/)/\*([^*]|\*+[^/*])*\**\*/} #BT+
       SINGLE_LINE_COMMENT = %r{//.*(\n[ \t]*//.*)*}
 
       CDO            = quote("<!--")
@@ -14488,7 +14497,7 @@ module Sass::Script::Value
     attr_reader :type
 
     def self.value(contents)
-#BT
+#BT-
 =begin
       contents.gsub("\\\n", "").gsub(/\\(?:([0-9a-fA-F]{1,6})\s?|(.))/) do
         next $2 if $2
@@ -14502,7 +14511,7 @@ module Sass::Script::Value
         end
       end
 =end
-      contents.gsub("\\\n", "")
+      contents.gsub("\\\n", "") #BT+
     end
 
     def self.quote(contents, quote = nil)
@@ -14525,8 +14534,8 @@ module Sass::Script::Value
       end
 
       # Replace single backslashes with multiples.
-      #BT contents = contents.gsub("\\", "\\\\\\\\")
-      contents = contents.gsub("\\", "\\\\")
+      #BT- contents = contents.gsub("\\", "\\\\\\\\")
+      contents = contents.gsub("\\", "\\\\") #BT+
 
       if quote == '"'
         contents = contents.gsub('"', "\\\"")
@@ -17366,14 +17375,23 @@ module Sass
           # group, but then rewinds the scanner and removes the group from the
           # end of the matched string. This fix makes the assumption that the
           # matched group will always occur at the end of the match.
-          if last_group_lookahead
-			#BT IronRuby has the negative group index code wrong, so use regexp on 
-			#BT the matched text to get the last group
-			lastgroup = rx.match( @scanner.matched )[-1]
-			if lastgroup
-			  @scanner.pos -= lastgroup.length
-			  res.slice!(-lastgroup.length..-1)
-			end
+
+#BT-
+=begin
+          if last_group_lookahead && @scanner[-1]
+            @scanner.pos -= @scanner[-1].length
+            res.slice!(-@scanner[-1].length..-1)
+          end
+=end
+
+          if last_group_lookahead #BT+
+			#BT+ IronRuby has the negative group index code wrong, so use regexp on 
+			#BT+ the matched text to get the last group
+			lastgroup = rx.match( @scanner.matched )[-1] #BT+
+			if lastgroup #BT+
+			  @scanner.pos -= lastgroup.length #BT+
+			  res.slice!(-lastgroup.length..-1) #BT+
+			end #BT+
           end
 
           newline_count = res.count(NEWLINE)
@@ -18625,8 +18643,8 @@ WARNING
 
       def _find(dir, name, options)
         full_filename, syntax = Sass::Util.destructure(find_real_file(dir, name, options))
-        #BT return unless full_filename && File.readable?(full_filename)
-        full_filename = full_filename.tr("\\", "/")
+        #BT- return unless full_filename && File.readable?(full_filename)
+        full_filename = full_filename.tr("\\", "/") #BT+
         return unless full_filename
 
         # TODO: this preserves historical behavior, but it's possible
@@ -19296,8 +19314,8 @@ module Sass
       # Tracks the original filename of the top-level Sass file
       options[:original_filename] ||= options[:filename]
 
-      #BT options[:cache_store] ||= Sass::CacheStores::Chain.new(
-        #BT Sass::CacheStores::Memory.new, Sass::CacheStores::Filesystem.new(options[:cache_location]))
+      #BT- options[:cache_store] ||= Sass::CacheStores::Chain.new(
+        #BT- Sass::CacheStores::Memory.new, Sass::CacheStores::Filesystem.new(options[:cache_location]))
       # Support both, because the docs said one and the other actually worked
       # for quite a long time.
       options[:line_comments] ||= options[:line_numbers]

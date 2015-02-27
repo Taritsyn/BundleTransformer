@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.9.48
+          README file for Bundle Transformer: Sass and SCSS 1.9.49
 
    ----------------------------------------------------------------------
 
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed problems with UTF-8 characters in Sass-files.
+   Fixed bug #95 "SCSS Class names that end with hyphen number".
    
    ====================
    POST-INSTALL ACTIONS
