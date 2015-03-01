@@ -202,7 +202,7 @@
 		{
 			string newContent;
 			string assetVirtualPath = asset.VirtualPath;
-			
+
 			try
 			{
 				newContent = handlebarsCompiler.Compile(asset.Content, assetVirtualPath);

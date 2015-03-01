@@ -20,20 +20,24 @@
 	internal sealed class HandlebarsCompiler : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a Handlebars-library
+		/// Namespace for resources
 		/// </summary>
-		const string HANDLEBARS_LIBRARY_RESOURCE_NAME
-			= "BundleTransformer.Handlebars.Resources.handlebars.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.Handlebars.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a Handlebars-compiler helper
+		/// Name of file, which contains a Handlebars-library
 		/// </summary>
-		const string HBS_HELPER_RESOURCE_NAME = "BundleTransformer.Handlebars.Resources.hbsHelper.min.js";
+		private const string HANDLEBARS_LIBRARY_FILE_NAME = "handlebars.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a Handlebars-compiler helper
+		/// </summary>
+		private const string HBS_HELPER_FILE_NAME = "hbsHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		const string COMPILATION_FUNCTION_CALL_TEMPLATE = "handlebarsHelper.precompile({0}, {1});";
+		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = "handlebarsHelper.precompile({0}, {1});";
 
 		/// <summary>
 		/// Default compilation options
@@ -96,8 +100,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(HANDLEBARS_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(HBS_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + HANDLEBARS_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + HBS_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}
@@ -149,7 +153,7 @@
 					bool isPartial;
 					string templateName = GetTemplateName(path, currentOptions.RootPath, out isPartial);
 
-					newContent = WrapCompiledTemplateCode(compiledCode, currentOptions.Namespace, 
+					newContent = WrapCompiledTemplateCode(compiledCode, currentOptions.Namespace,
 						templateName, isPartial);
 				}
 				catch (JsRuntimeException e)
@@ -260,16 +264,16 @@
 			if (!isPartial)
 			{
 				contentBuilder.AppendLine("(function(handlebars, templates) {");
-				contentBuilder.AppendFormatLine("	templates['{0}'] = handlebars.template({1});", 
+				contentBuilder.AppendFormatLine("	templates['{0}'] = handlebars.template({1});",
 					templateName, compiledCode);
 				contentBuilder.AppendFormatLine("}})(Handlebars, {0} = {0} || {{}});", templateNamespace);
 			}
 			else
 			{
 				contentBuilder.AppendLine("(function(handlebars) {");
-				contentBuilder.AppendFormatLine("	handlebars.partials['{0}'] = handlebars.template({1});", 
+				contentBuilder.AppendFormatLine("	handlebars.partials['{0}'] = handlebars.template({1});",
 					templateName, compiledCode);
-				contentBuilder.AppendLine("})(Handlebars);");	
+				contentBuilder.AppendLine("})(Handlebars);");
 			}
 
 			return contentBuilder.ToString();

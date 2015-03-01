@@ -112,6 +112,9 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
+del "$(ProjectDir)Resources\handlebars.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources\handlebars.js" –out "$(ProjectDir)Resources\handlebars.min.js"
+
 del "$(ProjectDir)Resources\hbsHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\hbsHelper.js" –out "$(ProjectDir)Resources\hbsHelper.min.js"</PreBuildEvent>
   </PropertyGroup>

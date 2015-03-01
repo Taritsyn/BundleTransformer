@@ -1,5 +1,6 @@
-﻿var handlebarsHelper = (function (handlebars, undefined) {
-	"use strict";
+﻿/*global Handlebars */
+var handlebarsHelper = (function (handlebars, undefined) {
+	'use strict';
 
 	var exports = {},
 		defaultOptions = {
@@ -26,7 +27,7 @@
 
 	exports.precompile = function (code, options) {
 		var compilationOptions,
-			compiledCode = "",
+			compiledCode = '',
 			result = {},
 			errors = [],
 			message,
@@ -48,10 +49,10 @@
 			isSyntaxError = false;
 
 			if (e instanceof handlebars.Exception) {
-				if (typeof e.lineNumber !== "undefined") {
+				if (typeof e.lineNumber !== 'undefined') {
 					lineNumber = e.lineNumber;
 				}
-				if (typeof e.column !== "undefined") {
+				if (typeof e.column !== 'undefined') {
 					columnNumber = e.column;
 				}
 
@@ -68,9 +69,9 @@
 
 			if (isSyntaxError) {
 				errors.push({
-					"message": message,
-					"lineNumber": lineNumber,
-					"columnNumber": columnNumber
+					'message': message,
+					'lineNumber': lineNumber,
+					'columnNumber': columnNumber
 				});
 			}
 			else {

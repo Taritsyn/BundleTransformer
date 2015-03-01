@@ -1,29 +1,34 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Handlebars 1.9.34
+            README file for Bundle Transformer: Handlebars 1.9.50
 
    ----------------------------------------------------------------------
 
-          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
-		  
+      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.Handlebars contains translator-adapter
    `HandlebarsTranslator` (supports Handlebars (http://handlebarsjs.com)
-   version 2.0.0). This adapter makes translation of Handlebars-templates
+   version 3.0.0). This adapter makes translation of Handlebars-templates
    to JS-code. Also contains debugging HTTP-handler
    `HandlebarsAssetHandler`, which is responsible for text output of
    translated Handlebars-asset.
-   
+
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
+
+   =============
+   RELEASE NOTES
+   =============
+   Added support of Handlebars version 3.0.0.
+
    ====================
    POST-INSTALL ACTIONS
    ====================
@@ -44,7 +49,7 @@
    <add
       path="*.hbs" verb="GET"
       type="BundleTransformer.Handlebars.HttpHandlers.HandlebarsAssetHandler, BundleTransformer.Handlebars" />
-   
+
    =============
    DOCUMENTATION
    =============
