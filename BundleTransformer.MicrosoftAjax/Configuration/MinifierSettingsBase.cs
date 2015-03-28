@@ -43,8 +43,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of 
-		/// debug lookups (comma-separated)
+		/// Gets or sets a string representation of the list of errors to ignore (comma-separated)
 		/// </summary>
 		[ConfigurationProperty("ignoreErrorList", DefaultValue = "")]
 		public string IgnoreErrorList

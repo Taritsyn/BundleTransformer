@@ -8,7 +8,7 @@
 	public sealed class ClosureSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Get a configuration settings of minification JS-assets
+		/// Gets a configuration settings of minification JS-assets
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public JsSettings Js

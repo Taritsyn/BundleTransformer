@@ -15,6 +15,11 @@
 		/// <returns>Result of checking (true – contains; false – not contains)</returns>
 		public bool ContainsUrl(string url)
 		{
+			if (Count == 0)
+			{
+				return false;
+			}
+
 			string urlInUpperCase = url.ToUpperInvariant();
 			bool result = (this.Count(d => d.Url.ToUpperInvariant() == urlInUpperCase) > 0);
 
@@ -28,6 +33,11 @@
 		/// <returns>Dependency</returns>
 		public Dependency GetByUrl(string url)
 		{
+			if (Count == 0)
+			{
+				return null;
+			}
+
 			string urlInUpperCase = url.ToUpperInvariant();
 			Dependency dependency = this.SingleOrDefault(d => d.Url.ToUpperInvariant() == urlInUpperCase);
 

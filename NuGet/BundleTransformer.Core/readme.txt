@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.43
+               README file for Bundle Transformer: Core 1.9.51
 
    ----------------------------------------------------------------------
 
@@ -45,8 +45,8 @@
    =============
    RELEASE NOTES
    =============
-   BundleTransformer.Configuration.xsd file moved to the
-   BundleTransformer.ConfigurationIntelliSense package.
+   In `IAsset` interface added 2 new properties: `OriginalAssets` and
+   `Combined`.
 
    ====================
    POST-INSTALL ACTIONS

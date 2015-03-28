@@ -17,7 +17,7 @@
 			new Lazy<ClosureSettings>(() => (ClosureSettings)ConfigurationManager.GetSection("bundleTransformer/closure"));
 
 		/// <summary>
-		/// Gets Closure Minifier configuration settings
+		/// Gets a Closure Minifier configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Closure Minifier</returns>

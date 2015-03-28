@@ -41,8 +41,7 @@
 		public abstract bool IgnoreAllErrors { get; set; }
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of 
-		/// debug lookups (comma-separated)
+		/// Gets or sets a string representation of the list of errors to ignore (comma-separated)
 		/// </summary>
 		public abstract string IgnoreErrorList { get; set; }
 

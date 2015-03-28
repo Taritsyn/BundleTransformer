@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.0.0
+           README file for Bundle Transformer: IntelliSense 1.9.51
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   In Microsoft Ajax CSS minifier settings added new definition for the
-   `colorNames` property.
+   Updated definitions for configuration settings of Closure Minifier.
    
    =============
    DOCUMENTATION

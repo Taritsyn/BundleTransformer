@@ -2,51 +2,57 @@
 /// <reference path="./IColoredTranslatorBadge.d.ts" />
 /// <reference path="./TranslatorBadge.ts" />
 
+/** @namespace */
 module TranslatorBadges {
-    /// <summary>
-    /// Creates colored badge for translator
-    /// </summary>
+	/**
+	* Creates colored badge for translator
+	*
+	* @class
+	* @export
+	*/
     export class ColoredTranslatorBadge 
         extends TranslatorBadge 
         implements IColoredTranslatorBadge
     {
+		/**
+		* Gets a text color of badge
+		*
+		* @returns {String} - Text color of badge
+		* @expose
+		*/
         public getTextColor(): string {
-            /// <summary>
-            /// Gets a text color of badge
-            /// </summary>
-            /// <returns type="String">
-            /// Text color of badge
-            /// </returns>
             return this.$linkElem.css("color");
         }
 
+		/**
+		* Sets a text color of badge
+		*
+		* @param {String} color - Text color of badge
+		* @returns {void}
+		* @expose
+		*/
         public setTextColor(color: string): void {
-            /// <summary>
-            /// Sets a text color of badge
-            /// </summary>
-            /// <param name="color" type="String">
-            /// Text color of badge
-            /// </param>
             this.$linkElem.css("color", color);
         }
 
+		/**
+		* Gets a border color of badge
+		*
+		* @returns {String} - Border color of badge
+		* @expose
+		*/
         public getBorderColor(): string {
-            /// <summary>
-            /// Gets a border color of badge
-            /// </summary>
-            /// <returns type="String">
-            /// Border color of badge
-            /// </returns>
             return this.$badgeElem.css("border-color");
         }
 
+		/**
+		* Sets a border color of badge
+		*
+		* @param {String} color - Border color of badge
+		* @returns {void}
+		* @expose
+		*/
         public setBorderColor(color: string): void {
-            /// <summary>
-            /// Sets a border color of badge
-            /// </summary>
-            /// <param name="color" type="String">
-            /// Border color of badge
-            /// </param>
             this.$badgeElem.css("border-color", color);
         }
     }

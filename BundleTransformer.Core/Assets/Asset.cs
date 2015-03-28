@@ -12,24 +12,24 @@
 	public sealed class Asset : IAsset
 	{
 		/// <summary>
-		/// Regular expression to determine whether asset is 
+		/// Regular expression to determine whether asset is
 		/// minified version of CSS-file with *.min.css extension
 		/// </summary>
 		private static readonly Regex _cssFileWithMinExtensionRegex = new Regex(@"\.min\.css$",
 			RegexOptions.IgnoreCase);
 
 		/// <summary>
-		/// Regular expression to determine whether asset is 
+		/// Regular expression to determine whether asset is
 		/// debug version of JS-file with *.debug.js extension
 		/// </summary>
 		private static readonly Regex _jsFileWithDebugExtensionRegex = new Regex(@"\.debug\.js$",
 			RegexOptions.IgnoreCase);
 
 		/// <summary>
-		/// Regular expression to determine whether asset is 
+		/// Regular expression to determine whether asset is
 		/// minified version of JS-file with *.min.js extension
 		/// </summary>
-		private static readonly Regex _jsFileWithMinExtensionRegex = new Regex(@"\.min\.js$", 
+		private static readonly Regex _jsFileWithMinExtensionRegex = new Regex(@"\.min\.js$",
 			RegexOptions.IgnoreCase);
 
 		/// <summary>
@@ -137,11 +137,30 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a list of original assets
+		/// </summary>
+		public IList<IAsset> OriginalAssets
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets a asset type code
 		/// </summary>
 		public string AssetTypeCode
 		{
 			get { return _assetTypeCode; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag indicating what text content of asset was obtained by
+		/// combining the contents of other assets
+		/// </summary>
+		public bool Combined
+		{
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -154,7 +173,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag indicating what all relative paths in 
+		/// Gets or sets a flag indicating what all relative paths in
 		/// text content of asset is transformed to absolute
 		/// </summary>
 		public bool RelativePathsResolved
@@ -164,7 +183,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a text content of asset 
+		/// Gets or sets a text content of asset
 		/// </summary>
 		public string Content
 		{
@@ -247,7 +266,7 @@
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="styleFileExtensionMappings">Style file extension mappings</param>
 		/// <param name="scriptFileExtensionMappings">Script file extension mappings</param>
-		public Asset(string virtualPath, BundleFile bundleFile, 
+		public Asset(string virtualPath, BundleFile bundleFile,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			FileExtensionMappingCollection styleFileExtensionMappings,
 			FileExtensionMappingCollection scriptFileExtensionMappings)
@@ -272,6 +291,8 @@
 
 			VirtualPath = virtualPath;
 			VirtualPathDependencies = new List<string>();
+			OriginalAssets = new List<IAsset>();
+			Combined = false;
 			Minified = false;
 			RelativePathsResolved = false;
 		}
@@ -297,11 +318,11 @@
 		}
 
 		/// <summary>
-		/// Checks a whether an asset is minified version of CSS-file 
+		/// Checks a whether an asset is minified version of CSS-file
 		/// with *.min.css extension
 		/// </summary>
 		/// <param name="assetVirtualPath">CSS-asset virtual file path</param>
-		/// <returns>Checking result (true - with *.min.css extension; 
+		/// <returns>Checking result (true - with *.min.css extension;
 		/// false - without *.min.css extension)</returns>
 		public static bool IsCssFileWithMinExtension(string assetVirtualPath)
 		{
@@ -309,7 +330,7 @@
 		}
 
 		/// <summary>
-		/// Checks a whether an asset is debug version of JS-file 
+		/// Checks a whether an asset is debug version of JS-file
 		/// with *.debug.js extension
 		/// </summary>
 		/// <param name="assetVirtualPath">JS-asset virtual file path</param>
@@ -338,7 +359,7 @@
 		/// <returns>CSS-asset virtual file path without additional file extension</returns>
 		public static string RemoveAdditionalCssFileExtension(string assetVirtualPath)
 		{
-			string newAssetVirtualPath = _cssFileWithMinExtensionRegex.Replace(assetVirtualPath, 
+			string newAssetVirtualPath = _cssFileWithMinExtensionRegex.Replace(assetVirtualPath,
 				Constants.FileExtension.Css);
 
 			return newAssetVirtualPath;
@@ -351,9 +372,9 @@
 		/// <returns>JS-asset virtual file path without additional file extension</returns>
 		public static string RemoveAdditionalJsFileExtension(string assetVirtualPath)
 		{
-			string newAssetVirtualPath = _jsFileWithDebugExtensionRegex.Replace(assetVirtualPath, 
+			string newAssetVirtualPath = _jsFileWithDebugExtensionRegex.Replace(assetVirtualPath,
 				Constants.FileExtension.JavaScript);
-			newAssetVirtualPath = _jsFileWithMinExtensionRegex.Replace(newAssetVirtualPath, 
+			newAssetVirtualPath = _jsFileWithMinExtensionRegex.Replace(newAssetVirtualPath,
 				Constants.FileExtension.JavaScript);
 
 			return newAssetVirtualPath;

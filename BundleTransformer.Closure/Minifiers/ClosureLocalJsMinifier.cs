@@ -2,22 +2,22 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
-	using System.Text;
 	using System.Web;
 
 	using Core;
 	using Core.Assets;
+	using Core.FileSystem;
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Compilers;
 	using Configuration;
 	using Resources;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using Google Closure Compiler Application
 	/// </summary>
 	public sealed class ClosureLocalJsMinifier : ClosureJsMinifierBase
@@ -38,9 +38,29 @@
 		private readonly string _tempFilesDirectoryPath;
 
 		/// <summary>
-		/// Gets or sets a path to Java Virtual Machine
+		/// Gets or sets a flag for whether to allow usage of const keyword
 		/// </summary>
-		public string JavaVirtualMachinePath
+		public bool AcceptConstKeyword
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to allow ES6 language output for compiling ES6 to ES6
+		/// as well as transpiling to ES6 from lower versions
+		/// </summary>
+		public bool AllowEs6Output
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to generate <code>$inject</code> properties for
+		/// AngularJS for functions annotated with <code>@ngInject</code>
+		/// </summary>
+		public bool AngularPass
 		{
 			get;
 			set;
@@ -56,16 +76,116 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a language spec that input sources conform
+		/// Gets or sets a string representation of variable list, that overrides the values of
+		/// a variables annotated <code>@define</code> (semicolon-separated list of values of
+		/// the form &lt;name&gt;[=&lt;val&gt;]). Where &lt;name&gt; is the name of a <code>@define</code>
+		/// variable and &lt;val&gt; is a boolean, number, or a single-quoted string that contains no single quotes.
+		/// If [=&lt;val&gt;] is omitted, the variable is marked true.
 		/// </summary>
-		public LanguageSpec LanguageSpec
+		public string DefinitionList
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to check source validity 
+		/// Gets or sets a comma-separated list of the named classes of warnings, that
+		/// need to make an errors
+		/// </summary>
+		public string ErrorList
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to generate export code for local properties
+		/// marked with <code>@export</code>
+		/// </summary>
+		public bool ExportLocalPropertyDefinitions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated whitelist of tag names in JSDoc
+		/// </summary>
+		public string ExtraAnnotationNameList
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to generate export code for those marked with <code>@export</code>
+		/// </summary>
+		public bool GenerateExports
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a path to Java Virtual Machine
+		/// </summary>
+		public string JavaVirtualMachinePath
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a language spec that input sources conform
+		/// </summary>
+		public ExperimentalLanguageSpec LanguageInput
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a language spec the output should conform to.
+		/// If omitted, defaults to the value of <code>LanguageInput</code>.
+		/// </summary>
+		public ExperimentalLanguageSpec LanguageOutput
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to process built-ins from
+		/// the Closure library, such as <code>goog.require()</code>, <code>goog.provide()</code>
+		/// and <code>goog.exportSymbol()</code>
+		/// </summary>
+		public bool ProcessClosurePrimitives
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to process built-ins from
+		/// the jQuery library, such as <code>jQuery.fn</code> and <code>jQuery.extend()</code>
+		/// </summary>
+		public bool ProcessJqueryPrimitives
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to output code with single quotes
+		/// </summary>
+		public bool SingleQuotes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to check source validity
 		/// but do not enforce Closure style rules and conventions
 		/// </summary>
 		public bool ThirdParty
@@ -75,20 +195,38 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to process built-ins from 
-		/// the jQuery library, such as jQuery.fn and jQuery.extend()
+		/// Gets or sets a flag for whether to run ES6 to ES3 transpilation only, skip other passes
 		/// </summary>
-		public bool ProcessJqueryPrimitives
+		public bool TranspileOnly
 		{
 			get;
-			set; 
+			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to process built-ins from 
-		/// the Closure library, such as goog.require(), goog.provide() and goog.exportSymbol()
+		/// Gets or sets a comma-separated list of the named classes of warnings, that
+		/// need to turn off
 		/// </summary>
-		public bool ProcessClosurePrimitives
+		public string TurnOffWarningClassList
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to exclude the default externs
+		/// </summary>
+		public bool UseOnlyCustomExterns
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of the named classes of warnings, that
+		/// need to make a normal warning
+		/// </summary>
+		public string WarningList
 		{
 			get;
 			set;
@@ -96,39 +234,50 @@
 
 
 		/// <summary>
-		/// Constructs instance of Closure Local JS-minifier
+		/// Constructs a instance of Closure Local JS-minifier
 		/// </summary>
 		public ClosureLocalJsMinifier()
-			: this(BundleTransformerContext.Current.Configuration.GetClosureSettings())
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.Configuration.GetClosureSettings(),
+				HttpContext.Current.Server.MapPath(Core.Constants.Common.TempFilesDirectoryPath))
 		{ }
 
-		/// <summary>
-		/// Constructs instance of Closure Local JS-minifier
-		/// </summary>
-		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
-		public ClosureLocalJsMinifier(ClosureSettings closureConfig)
-			: this(closureConfig, HttpContext.Current.Server.MapPath(Core.Constants.Common.TempFilesDirectoryPath))
-		{ }
 
 		/// <summary>
-		/// Constructs instance of Closure Local JS-minifier
+		/// Constructs a instance of Closure Local JS-minifier
 		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
 		/// <param name="tempFilesDirectoryPath">Absolute path to directory that contains temporary files</param>
-		public ClosureLocalJsMinifier(ClosureSettings closureConfig, string tempFilesDirectoryPath)
+		public ClosureLocalJsMinifier(IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			ClosureSettings closureConfig,
+			string tempFilesDirectoryPath)
+			: base(virtualFileSystemWrapper, closureConfig)
 		{
 			_tempFilesDirectoryPath = tempFilesDirectoryPath;
 
 			LocalJsMinifierSettings localJsMinifierConfig = closureConfig.Js.Local;
-			JavaVirtualMachinePath = localJsMinifierConfig.JavaVirtualMachinePath;
+			MapCommonSettings(this, localJsMinifierConfig);
+			AcceptConstKeyword = localJsMinifierConfig.AcceptConstKeyword;
+			AllowEs6Output = localJsMinifierConfig.AllowEs6Output;
+			AngularPass = localJsMinifierConfig.AngularPass;
 			ClosureCompilerApplicationPath = localJsMinifierConfig.ClosureCompilerApplicationPath;
-			CompilationLevel = localJsMinifierConfig.CompilationLevel;
-			PrettyPrint = localJsMinifierConfig.PrettyPrint;
-			LanguageSpec = localJsMinifierConfig.LanguageSpec;
-			ThirdParty = localJsMinifierConfig.ThirdParty;
-			ProcessJqueryPrimitives = localJsMinifierConfig.ProcessJqueryPrimitives;
+			DefinitionList = localJsMinifierConfig.DefinitionList;
+			ErrorList = localJsMinifierConfig.ErrorList;
+			ExportLocalPropertyDefinitions = localJsMinifierConfig.ExportLocalPropertyDefinitions;
+			ExtraAnnotationNameList = localJsMinifierConfig.ExtraAnnotationNameList;
+			GenerateExports = localJsMinifierConfig.GenerateExports;
+			JavaVirtualMachinePath = localJsMinifierConfig.JavaVirtualMachinePath;
+			LanguageInput = localJsMinifierConfig.LanguageInput;
+			LanguageOutput = localJsMinifierConfig.LanguageOutput;
 			ProcessClosurePrimitives = localJsMinifierConfig.ProcessClosurePrimitives;
-			Severity = localJsMinifierConfig.Severity;
+			ProcessJqueryPrimitives = localJsMinifierConfig.ProcessJqueryPrimitives;
+			SingleQuotes = localJsMinifierConfig.SingleQuotes;
+			ThirdParty = localJsMinifierConfig.ThirdParty;
+			TranspileOnly = localJsMinifierConfig.TranspileOnly;
+			TurnOffWarningClassList = localJsMinifierConfig.TurnOffWarningClassList;
+			UseOnlyCustomExterns = localJsMinifierConfig.UseOnlyCustomExterns;
+			WarningList = localJsMinifierConfig.WarningList;
 
 			string javaVirtualMachinePath = JavaVirtualMachinePath;
 			if (string.IsNullOrWhiteSpace(javaVirtualMachinePath))
@@ -155,7 +304,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using Google Closure Compiler Application
+		/// Produces a code minifiction of JS-asset by using Google Closure Compiler Application
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
 		/// <returns>JS-asset with minified text content</returns>
@@ -171,18 +320,20 @@
 				return asset;
 			}
 
-			if (!Directory.Exists(_tempFilesDirectoryPath))
-			{
-				Directory.CreateDirectory(_tempFilesDirectoryPath);
-			}
+			DependencyCollection commonExternsDependencies = GetCommonExternsDependencies();
 
-			InnerMinify(asset);
+			using (var closureCompiler = new ClosureLocalJsCompiler(JavaVirtualMachinePath,
+				ClosureCompilerApplicationPath, _tempFilesDirectoryPath,
+				commonExternsDependencies, CreateCompilationOptions()))
+			{
+				InnerMinify(asset, commonExternsDependencies, closureCompiler);
+			}
 
 			return asset;
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using Google Closure Compiler Application
+		/// Produces a code minifiction of JS-assets by using Google Closure Compiler Application
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>
@@ -204,135 +355,31 @@
 				return assets;
 			}
 
-			if (!Directory.Exists(_tempFilesDirectoryPath))
-			{
-				Directory.CreateDirectory(_tempFilesDirectoryPath);
-			}
+			DependencyCollection commonExternsDependencies = GetCommonExternsDependencies();
 
-			foreach (var asset in assetsToProcessing)
+			using (var closureCompiler = new ClosureLocalJsCompiler(JavaVirtualMachinePath,
+				ClosureCompilerApplicationPath, _tempFilesDirectoryPath,
+				commonExternsDependencies, CreateCompilationOptions()))
 			{
-				InnerMinify(asset);
+				foreach (var asset in assetsToProcessing)
+				{
+					InnerMinify(asset, commonExternsDependencies, closureCompiler);
+				}
 			}
 
 			return assets;
 		}
 
-		private void InnerMinify(IAsset asset)
+		private void InnerMinify(IAsset asset, DependencyCollection commonExternsDependencies,
+			ClosureLocalJsCompiler closureCompiler)
 		{
 			string newContent;
 			string assetUrl = asset.Url;
-			string uniqueId = Guid.NewGuid().ToString();
-			string inputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + ".tmp");
-			string outputFilePath = Path.Combine(_tempFilesDirectoryPath, uniqueId + "-min.tmp");
-			int severity = Severity;
-
-			using (var file = new StreamWriter(inputFilePath))
-			{
-				file.Write(asset.Content);
-			}
-
-			var args = new StringBuilder();
-			args.AppendFormat(@"-jar ""{0}"" ", ClosureCompilerApplicationPath);
-			args.AppendFormat(@"--compilation_level {0} ", ConvertCompilationLevelEnumValueToCode(CompilationLevel));
-			if (PrettyPrint)
-			{
-				args.Append("--formatting PRETTY_PRINT ");
-			}
-			args.AppendFormat(@"--js ""{0}"" ", inputFilePath);
-			args.AppendFormat(@"--js_output_file ""{0}"" ", outputFilePath);
-			args.AppendFormat("--language_in={0} ", ConvertLanguageSpecEnumValueToCode(LanguageSpec));
-			if (ThirdParty)
-			{
-				args.AppendFormat("--third_party ");
-			}
-			if (ProcessJqueryPrimitives)
-			{
-				args.AppendFormat("--process_jquery_primitives ");
-			}
-			if (ProcessClosurePrimitives)
-			{
-				args.AppendFormat("--process_closure_primitives ");
-			}
-			if (severity > 0)
-			{
-				if (severity >= 1 && severity <= 3)
-				{
-					args.Append("--warning_level ");
-					if (severity == 1)
-					{
-						args.Append("QUIET ");
-					}
-					else if (severity == 2)
-					{
-						args.Append("DEFAULT ");
-					}
-					else if (severity == 3)
-					{
-						args.Append("VERBOSE ");
-					}
-				}
-			}
-			else
-			{
-				args.Append("--warning_level QUIET ");
-				args.Append("--jscomp_off=accessControls ");
-				args.Append("--jscomp_off=ambiguousFunctionDecl ");
-				args.Append("--jscomp_off=checkRegExp ");
-				args.Append("--jscomp_off=checkTypes ");
-				args.Append("--jscomp_off=checkVars ");
-				args.Append("--jscomp_off=constantProperty ");
-				args.Append("--jscomp_off=deprecated ");
-				args.Append("--jscomp_off=duplicateMessage ");
-				args.Append("--jscomp_off=es5Strict ");
-				args.Append("--jscomp_off=externsValidation ");
-				args.Append("--jscomp_off=fileoverviewTags ");
-				args.Append("--jscomp_off=globalThis ");
-				args.Append("--jscomp_off=internetExplorerChecks ");
-				args.Append("--jscomp_off=invalidCasts ");
-				args.Append("--jscomp_off=missingProperties ");
-				args.Append("--jscomp_off=nonStandardJsDocs ");
-				args.Append("--jscomp_off=strictModuleDepCheck ");
-				args.Append("--jscomp_off=typeInvalidation ");
-				args.Append("--jscomp_off=undefinedNames ");
-				args.Append("--jscomp_off=undefinedVars ");
-				args.Append("--jscomp_off=unknownDefines ");
-				args.Append("--jscomp_off=uselessCode ");
-				args.Append("--jscomp_off=visibility ");
-			}
-
-			var processInfo = new ProcessStartInfo
-			{
-				FileName = JavaVirtualMachinePath,
-				Arguments = args.ToString(),
-				CreateNoWindow = true,
-				WindowStyle = ProcessWindowStyle.Hidden,
-				UseShellExecute = false,
-				RedirectStandardError = true
-			};
+			DependencyCollection assetExternsDependencies = GetAssetExternsDependencies(asset);
 
 			try
 			{
-				string errorDetails;
-
-				using (var process = Process.Start(processInfo))
-				{
-					process.WaitForExit();
-
-					using (StreamReader processOutputReader = process.StandardError)
-					{
-						errorDetails = processOutputReader.ReadToEnd();
-					}
-				}
-
-				if (!string.IsNullOrWhiteSpace(errorDetails))
-				{
-					throw new ClosureCompilingException(errorDetails);
-				}
-
-				using (var file = new StreamReader(outputFilePath))
-				{
-					newContent = file.ReadToEnd();
-				}
+				newContent = closureCompiler.Compile(asset.Content, assetUrl, assetExternsDependencies);
 			}
 			catch (ClosureCompilingException e)
 			{
@@ -346,42 +393,42 @@
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
 						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
-			finally
-			{
-				File.Delete(outputFilePath);
-				File.Delete(inputFilePath);
-			}
 
 			asset.Content = newContent;
 			asset.Minified = true;
+			FillAssetVirtualPathDependencies(asset, commonExternsDependencies, assetExternsDependencies);
 		}
 
 		/// <summary>
-		/// Convert language spec enum value to code
+		/// Creates a compilation options
 		/// </summary>
-		/// <param name="languageSpec">Language spec enum value</param>
-		/// <returns>Language spec code</returns>
-		internal static string ConvertLanguageSpecEnumValueToCode(LanguageSpec languageSpec)
+		/// <returns>Compilation options</returns>
+		private LocalJsCompilationOptions CreateCompilationOptions()
 		{
-			string code;
-
-			switch (languageSpec)
+			var options = new LocalJsCompilationOptions
 			{
-				case LanguageSpec.EcmaScript3:
-					code = "ECMASCRIPT3";
-					break;
-				case LanguageSpec.EcmaScript5:
-					code = "ECMASCRIPT5";
-					break;
-				case LanguageSpec.EcmaScript5Strict:
-					code = "ECMASCRIPT5_STRICT";
-					break;
-				default:
-					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
-						languageSpec.ToString(), typeof(LanguageSpec)));
-			}
+				AcceptConstKeyword = AcceptConstKeyword,
+				AllowEs6Output = AllowEs6Output,
+				AngularPass = AngularPass,
+				DefinitionList = DefinitionList,
+				ErrorList = ErrorList,
+				ExportLocalPropertyDefinitions = ExportLocalPropertyDefinitions,
+				ExtraAnnotationNameList = ExtraAnnotationNameList,
+				GenerateExports = GenerateExports,
+				LanguageInput = LanguageInput,
+				LanguageOutput = LanguageOutput,
+				ProcessClosurePrimitives = ProcessClosurePrimitives,
+				ProcessJqueryPrimitives = ProcessJqueryPrimitives,
+				SingleQuotes = SingleQuotes,
+				ThirdParty = ThirdParty,
+				TranspileOnly = TranspileOnly,
+				TurnOffWarningClassList = TurnOffWarningClassList,
+				UseOnlyCustomExterns = UseOnlyCustomExterns,
+				WarningList = WarningList
+			};
+			FillJsCompilationOptions(options);
 
-			return code;
+			return options;
 		}
 	}
 }

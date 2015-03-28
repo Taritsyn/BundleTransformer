@@ -10,7 +10,7 @@
 		/// <summary>
 		/// Gets or sets a file extension
 		/// </summary>
-		[ConfigurationProperty("fileExtension", IsRequired = true)]
+		[ConfigurationProperty("fileExtension", IsKey = true, IsRequired = true)]
 		public string FileExtension
 		{
 			get { return (string)this["fileExtension"]; }

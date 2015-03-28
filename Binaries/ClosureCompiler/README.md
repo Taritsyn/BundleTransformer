@@ -354,6 +354,40 @@ an encoding of structured data.</td>
   </tr>
 </table>
 
+### Truth
+
+<table>
+  <tr>
+    <td>Code Path</td>
+    <td><code>lib/truth.jar</code></td>
+  </tr>
+
+  <tr>
+    <td>URL</td>
+    <td>https://github.com/google/truth</td>
+  </tr>
+
+  <tr>
+    <td>Version</td>
+    <td>0.24</td>
+  </tr>
+
+  <tr>
+    <td>License</td>
+    <td>Apache License 2.0</td>
+  </tr>
+
+  <tr>
+    <td>Description</td>
+    <td>Assertion/Proposition framework for Java unit tests</td>
+  </tr>
+
+  <tr>
+    <td>Local Modifications</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### Ant
 
 <table>
@@ -417,77 +451,6 @@ without make's wrinkles and with the full portability of pure java code.</td>
   <tr>
     <td>Description</td>
     <td>A Java library to convert JSON to Java objects and vice-versa</td>
-  </tr>
-
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### Mockito
-
-<table>
-  <tr>
-    <td>Code Path</td>
-    <td><code>lib/mockito-core.jar</code></td>
-  </tr>
-
-  <tr>
-    <td>URL</td>
-    <td>https://code.google.com/p/mockito</td>
-  </tr>
-
-  <tr>
-    <td>Version</td>
-    <td>1.9.5</td>
-  </tr>
-
-  <tr>
-    <td>License</td>
-    <td>MIT license</td>
-  </tr>
-
-  <tr>
-    <td>Description</td>
-    <td>Mockito is an open source testing framework for Java. The framework allows the
-creation of Test Double objects (called "Mock Objects") in automated unit tests
-for the purpose of Test-driven Development (TDD) or Behavior Driven Development
-(BDD).</td>
-  </tr>
-
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### Objenesis
-
-<table>
-  <tr>
-    <td>Code Path</td>
-    <td><code>lib/objenesis.jar</code></td>
-  </tr>
-
-  <tr>
-    <td>URL</td>
-    <td>http://objenesis.org</td>
-  </tr>
-
-  <tr>
-    <td>Version</td>
-    <td>1.2</td>
-  </tr>
-
-  <tr>
-    <td>License</td>
-    <td>Apache 2.0 license</td>
-  </tr>
-
-  <tr>
-    <td>Description</td>
-    <td>Depended by lib/mockito-core.jar, not used directly.</td>
   </tr>
 
   <tr>

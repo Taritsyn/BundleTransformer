@@ -66,8 +66,10 @@
 
 			IAsset combinedAsset = new Asset(GenerateCombinedAssetVirtualPath(bundleVirtualPath));
 			combinedAsset.Content = CombineAssetContent(assets);
+			combinedAsset.Combined = true;
 			combinedAsset.Minified = isMinified;
 			combinedAsset.RelativePathsResolved = isRelativePathsResolved;
+			combinedAsset.OriginalAssets = assets;
 			combinedAsset.VirtualPathDependencies = CombineAssetVirtualPathDependencies(assets);
 
 			return combinedAsset;

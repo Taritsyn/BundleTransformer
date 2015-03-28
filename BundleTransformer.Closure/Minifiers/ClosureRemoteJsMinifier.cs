@@ -2,26 +2,20 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using System.Linq;
-	using System.Net.Http;
-	using System.Text;
-
-	using Newtonsoft.Json.Linq;
 
 	using Core;
 	using Core.Assets;
+	using Core.FileSystem;
 	using Core.Minifiers;
-	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Compilers;
 	using Configuration;
-	using Http;
 	using Resources;
-	using FormItem = System.Collections.Generic.KeyValuePair<string, string>;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using Google Closure Compiler Service API
 	/// </summary>
 	public sealed class ClosureRemoteJsMinifier : ClosureJsMinifierBase
@@ -46,8 +40,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to exclude common externs 
-		/// such as document and all its methods
+		/// Gets or sets a flag for whether to exclude common externs
+		/// such as <code>document</code> and all its methods
 		/// </summary>
 		public bool ExcludeDefaultExterns
 		{
@@ -55,31 +49,43 @@
 			set;
 		}
 
-
 		/// <summary>
-		/// Constructs instance of Closure Remote JS-minifier
+		/// Gets or sets a language spec that input sources conform
 		/// </summary>
-		public ClosureRemoteJsMinifier()
-			: this(BundleTransformerContext.Current.Configuration.GetClosureSettings())
-		{ }
-
-		/// <summary>
-		/// Constructs instance of Closure Remote JS-minifier
-		/// </summary>
-		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
-		public ClosureRemoteJsMinifier(ClosureSettings closureConfig)
+		public LanguageSpec Language
 		{
-			RemoteJsMinifierSettings remoteJsMinifierConfig = closureConfig.Js.Remote;
-			ClosureCompilerServiceApiUrl = remoteJsMinifierConfig.ClosureCompilerServiceApiUrl;
-			CompilationLevel = remoteJsMinifierConfig.CompilationLevel;
-			PrettyPrint = remoteJsMinifierConfig.PrettyPrint;
-			ExcludeDefaultExterns = remoteJsMinifierConfig.ExcludeDefaultExterns;
-			Severity = remoteJsMinifierConfig.Severity;
+			get;
+			set;
 		}
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using Google Closure Compiler Service API
+		/// Constructs a instance of Closure Remote JS-minifier
+		/// </summary>
+		public ClosureRemoteJsMinifier()
+			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.Configuration.GetClosureSettings())
+		{ }
+
+		/// <summary>
+		/// Constructs a instance of Closure Remote JS-minifier
+		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
+		public ClosureRemoteJsMinifier(IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			ClosureSettings closureConfig)
+			: base(virtualFileSystemWrapper, closureConfig)
+		{
+			RemoteJsMinifierSettings remoteJsMinifierConfig = closureConfig.Js.Remote;
+			MapCommonSettings(this, remoteJsMinifierConfig);
+			ClosureCompilerServiceApiUrl = remoteJsMinifierConfig.ClosureCompilerServiceApiUrl;
+			ExcludeDefaultExterns = remoteJsMinifierConfig.ExcludeDefaultExterns;
+			Language = remoteJsMinifierConfig.Language;
+		}
+
+
+		/// <summary>
+		/// Produces a code minifiction of JS-asset by using Google Closure Compiler Service API
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
 		/// <returns>JS-asset with minified text content</returns>
@@ -95,13 +101,17 @@
 				return asset;
 			}
 
-			InnerMinify(asset);
+			DependencyCollection commonExternsDependencies = GetCommonExternsDependencies();
+			var closureCompiler = new ClosureRemoteJsCompiler(ClosureCompilerServiceApiUrl,
+				commonExternsDependencies, CreateCompilationOptions());
+
+			InnerMinify(asset, commonExternsDependencies, closureCompiler);
 
 			return asset;
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using Google Closure Compiler Service API
+		/// Produces a code minifiction of JS-assets by using Google Closure Compiler Service API
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>
@@ -128,177 +138,61 @@
 				throw new EmptyValueException(Strings.Minifiers_ClosureCompilerServiceApiUrlNotSpecified);
 			}
 
+			DependencyCollection commonExternsDependencies = GetCommonExternsDependencies();
+			var closureCompiler = new ClosureRemoteJsCompiler(ClosureCompilerServiceApiUrl,
+				commonExternsDependencies, CreateCompilationOptions());
+
 			foreach (var asset in assetsToProcessing)
 			{
-				InnerMinify(asset);
+				InnerMinify(asset, commonExternsDependencies, closureCompiler);
 			}
 
 			return assets;
 		}
 
-		private void InnerMinify(IAsset asset)
+		private void InnerMinify(IAsset asset, DependencyCollection commonExternsDependencies,
+			ClosureRemoteJsCompiler closureCompiler)
 		{
 			string newContent;
 			string assetUrl = asset.Url;
-			string serviceUrl = ClosureCompilerServiceApiUrl;
-			int severity = Severity;
-			
-			var formItems = new List<FormItem>();
-			formItems.Add(new FormItem("compilation_level", ConvertCompilationLevelEnumValueToCode(CompilationLevel)));
-			formItems.Add(new FormItem("js_code", asset.Content));
-			formItems.Add(new FormItem("output_format", "json"));
-			formItems.Add(new FormItem("output_info", "compiled_code"));
-			formItems.Add(new FormItem("output_info", "errors"));
-			if (severity > 0)
+			DependencyCollection assetExternsDependencies = GetAssetExternsDependencies(asset);
+
+			try
 			{
-				formItems.Add(new FormItem("output_info", "warnings"));
+				newContent = closureCompiler.Compile(asset.Content, assetUrl, assetExternsDependencies);
 			}
-			if (PrettyPrint)
+			catch (ClosureCompilingException e)
 			{
-				formItems.Add(new FormItem("formatting", "pretty_print"));
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
-			formItems.Add(new FormItem("exclude_default_externs", ExcludeDefaultExterns.ToString().ToLowerInvariant()));
-			if (severity > 0)
+			catch (Exception e)
 			{
-				if (severity == 1)
-				{
-					formItems.Add(new FormItem("warning_level", "QUIET"));
-				}
-				else if (severity == 2)
-				{
-					formItems.Add(new FormItem("warning_level", "DEFAULT"));
-				}
-				else if (severity == 3)
-				{
-					formItems.Add(new FormItem("warning_level", "VERBOSE"));
-				}
-			}
-
-			HttpContent httpContent = new CustomFormUrlEncodedContent(formItems);
-
-			using (var client = new HttpClient())
-			{
-				HttpResponseMessage response;
-				try
-				{
-					response = client
-						.PostAsync(new Uri(serviceUrl), httpContent)
-						.Result
-						;
-				}
-				catch (AggregateException e)
-				{
-					Exception innerException = e.InnerException;
-					if (innerException != null)
-					{
-						if (innerException is HttpRequestException)
-						{
-							throw new AssetMinificationException(
-								string.Format(Strings.Minifiers_ClosureRemoteMinificationHttpRequestError, serviceUrl));
-						}
-
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetUrl, MINIFIER_NAME, innerException.Message), innerException);
-					}
-
-					throw;
-				}
-				catch (Exception e)
-				{
-					throw new AssetMinificationException(
-						string.Format(CoreStrings.Minifiers_MinificationFailed,
-							CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
-				}
-
-				if (response.IsSuccessStatusCode)
-				{
-					var result = response.Content.ReadAsStringAsync().Result;
-					var json = JObject.Parse(result);
-
-					var serverErrors = json["serverErrors"] != null ? json["serverErrors"] as JArray : null;
-					if (serverErrors != null && serverErrors.Count > 0)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationFailed,
-								CODE_TYPE, assetUrl, MINIFIER_NAME,
-								FormatErrorDetails(serverErrors[0], ErrorType.ServerError, assetUrl)));
-					}
-
-					var errors = json["errors"] != null ? json["errors"] as JArray : null;
-					if (errors != null && errors.Count > 0)
-					{
-						throw new AssetMinificationException(
-							string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-								CODE_TYPE, assetUrl, MINIFIER_NAME,
-								FormatErrorDetails(errors[0], ErrorType.Error, assetUrl)));
-					}
-
-					if (severity > 0)
-					{
-						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
-						if (warnings != null && warnings.Count > 0)
-						{
-							throw new AssetMinificationException(
-								string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-									CODE_TYPE, assetUrl, MINIFIER_NAME,
-									FormatErrorDetails(warnings[0], ErrorType.Warning, assetUrl)));
-						}
-					}
-
-					newContent = json.Value<string>("compiledCode");
-				}
-				else
-				{
-					throw new AssetMinificationException(
-						string.Format(Strings.Minifiers_ClosureRemoteMinificationInvalidHttpStatus, 
-							response.StatusCode));
-				}
+				throw new AssetMinificationException(
+					string.Format(CoreStrings.Minifiers_MinificationFailed,
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 
 			asset.Content = newContent;
 			asset.Minified = true;
+			FillAssetVirtualPathDependencies(asset, commonExternsDependencies, assetExternsDependencies);
 		}
 
 		/// <summary>
-		/// Generates a detailed error message
+		/// Creates a compilation options
 		/// </summary>
-		/// <param name="errorDetails">Error details</param>
-		/// <param name="errorType">Error type</param>
-		/// <param name="filePath">File path</param>
-		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string filePath)
+		/// <returns>Compilation options</returns>
+		private RemoteJsCompilationOptions CreateCompilationOptions()
 		{
-			var errorMessage = new StringBuilder();
-			if (errorType == ErrorType.ServerError || errorType == ErrorType.Error)
+			var options = new RemoteJsCompilationOptions
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
-					errorDetails.Value<string>("error"));
-			}
-			else if (errorType == ErrorType.Warning)
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
-					errorDetails.Value<string>("warning"));
-			}
-			if (errorDetails["code"] != null)
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode,
-					errorDetails.Value<string>("code"));
-			}
-			if (errorDetails["type"] != null)
-			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, 
-					errorDetails.Value<string>("type"));
-			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
-				errorDetails.Value<int>("lineno").ToString(CultureInfo.InvariantCulture));
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
-				errorDetails.Value<int>("charno").ToString(CultureInfo.InvariantCulture));
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineSource,
-				errorDetails.Value<string>("line"));
+				ExcludeDefaultExterns = ExcludeDefaultExterns,
+				Language = Language
+			};
+			FillJsCompilationOptions(options);
 
-			return errorMessage.ToString();
+			return options;
 		}
 	}
 }
