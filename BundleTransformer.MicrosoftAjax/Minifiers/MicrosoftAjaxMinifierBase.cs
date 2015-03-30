@@ -15,20 +15,20 @@
 	using BtBlockStart = BlockStart;
 
 	/// <summary>
-	/// Base class of minifier, which produces minifiction of code 
+	/// Base class of minifier, which produces minifiction of code
 	/// by using Microsoft Ajax Minifier
 	/// </summary>
 	public abstract class MicrosoftAjaxMinifierBase : IMinifier
 	{
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>)
 		/// should be recognized and output as is
 		/// </summary>
 		public abstract bool AllowEmbeddedAspNetBlocks { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the opening curly brace for blocks is
-		/// on its own line (<code>NewLine</code>) or on the same line as 
+		/// on its own line (<code>NewLine</code>) or on the same line as
 		/// the preceding code (<code>SameLine</code>)
 		/// or taking a hint from the source code position (UseSource).
 		/// Only relevant when OutputMode is set to MultipleLines.
@@ -46,13 +46,13 @@
 		public abstract string IgnoreErrorList { get; set; }
 
 		/// <summary>
-		/// Gets or sets a number of spaces per indent level when in 
+		/// Gets or sets a number of spaces per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		public abstract int IndentSize { get; set; }
 
 		/// <summary>
-		/// Gets or sets the column position at which the line 
+		/// Gets or sets the column position at which the line
 		/// will be broken at the next available opportunity
 		/// </summary>
 		public abstract int LineBreakThreshold { get; set; }
@@ -65,13 +65,13 @@
 		public abstract BtOutputMode OutputMode { get; set; }
 
 		/// <summary>
-		/// Gets or sets a string representation of the list 
+		/// Gets or sets a string representation of the list
 		/// of names defined for the preprocessor (comma-separated)
 		/// </summary>
 		public abstract string PreprocessorDefineList { get; set; }
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add a semicolon 
+		/// Gets or sets a flag for whether to add a semicolon
 		/// at the end of the parsed code
 		/// </summary>
 		public abstract bool TermSemicolons { get; set; }
@@ -88,14 +88,14 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of asset
+		/// Produces a code minifiction of asset
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <returns>Asset with minified text content</returns>
 		public abstract IAsset Minify(IAsset asset);
 
 		/// <summary>
-		/// Produces code minifiction of assets
+		/// Produces a code minifiction of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
 		/// <returns>Set of assets with minified text content</returns>
@@ -134,7 +134,7 @@
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
 		/// <param name="commonMinifierSettings">Common configuration settings of Microsoft Ajax Minifier</param>
-		protected static void MapCommonSettings(MicrosoftAjaxMinifierBase minifier, 
+		protected static void MapCommonSettings(MicrosoftAjaxMinifierBase minifier,
 			MinifierSettingsBase commonMinifierSettings)
 		{
 			minifier.AllowEmbeddedAspNetBlocks = commonMinifierSettings.AllowEmbeddedAspNetBlocks;

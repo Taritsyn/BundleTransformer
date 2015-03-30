@@ -68,7 +68,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of CSS-cleaner
+		/// Constructs a instance of CSS-cleaner
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public CssCleaner(Func<IJsEngine> createJsEngineInstance)
@@ -76,7 +76,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-cleaner
+		/// Constructs a instance of CSS-cleaner
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default cleaning options</param>
@@ -131,7 +131,7 @@
 			lock (_cleaningSynchronizer)
 			{
 				Initialize();
-				
+
 				try
 				{
 					var result = _jsEngine.Evaluate<string>(
@@ -143,7 +143,7 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new CssCleaningException(FormatErrorDetails(errors[0].Value<string>(), true, 
+						throw new CssCleaningException(FormatErrorDetails(errors[0].Value<string>(), true,
 							path));
 					}
 
@@ -152,7 +152,7 @@
 						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
 						if (warnings != null && warnings.Count > 0)
 						{
-							throw new CssCleaningException(FormatErrorDetails(warnings[0].Value<string>(), 
+							throw new CssCleaningException(FormatErrorDetails(warnings[0].Value<string>(),
 								false, path));
 						}
 					}
@@ -180,8 +180,10 @@
 				new JProperty("aggressiveMerging", options.AggressiveMerging),
 				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility)),
 				new JProperty("keepBreaks", options.KeepBreaks),
-				new JProperty("keepSpecialComments", 
+				new JProperty("keepSpecialComments",
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
+				new JProperty("mediaMerging", options.MediaMerging),
+				new JProperty("restructuring", options.Restructuring),
 				new JProperty("roundingPrecision", options.RoundingPrecision),
 				new JProperty("shorthandCompacting", options.ShorthandCompacting)
 			);

@@ -11,9 +11,9 @@
 	using Resources;
 
 	/// <summary>
-	/// Filter that responsible for choosing appropriate version 
-	/// of JS-file, depending on current mode of 
-	/// web application (debug mode - debug versions of JS-asset files; 
+	/// Filter that responsible for choosing appropriate version
+	/// of JS-file, depending on current mode of
+	/// web application (debug mode - debug versions of JS-asset files;
 	/// release mode - minified versions)
 	/// </summary>
 	public sealed class JsFileExtensionsFilter : FileExtensionsFilterBase
@@ -50,7 +50,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of JS-file extensions filter
+		/// Constructs a instance of JS-file extensions filter
 		/// </summary>
 		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions)
@@ -58,11 +58,11 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-file extensions filter
+		/// Constructs a instance of JS-file extensions filter
 		/// </summary>
 		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions, 
+		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper) : base(virtualFileSystemWrapper)
 		{
 			var jsFileRegExps = new List<Regex>();
@@ -76,10 +76,10 @@
 					{
 						string jsFileNamePattern = Regex.Escape(jsFileName.Trim());
 
-						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder, 
+						if (jsFileNamePattern.IndexOf(versionNumberPlaceholder,
 							StringComparison.OrdinalIgnoreCase) != -1)
 						{
-							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder, 
+							jsFileNamePattern = jsFileNamePattern.Replace(versionNumberPlaceholder,
 								@"(?:\d+\.)*\d+(?:(?:alpha|beta|rc)\d{0,1})?");
 						}
 						jsFileNamePattern = "^" + jsFileNamePattern + "$";
@@ -94,7 +94,7 @@
 
 
 		/// <summary>
-		/// Chooses appropriate versions of JS-files, depending on 
+		/// Chooses a appropriate versions of JS-files, depending on
 		/// current mode of web application
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
@@ -124,13 +124,13 @@
 		}
 
 		/// <summary>
-		/// Gets version of JS-file virtual path, most appropriate for 
+		/// Gets a version of JS-file virtual path, most appropriate for
 		/// current mode of web application
 		/// </summary>
 		/// <param name="assetVirtualPath">JS-asset file virtual path</param>
-		/// <param name="isMinified">Flag indicating what appropriate 
+		/// <param name="isMinified">Flag indicating what appropriate
 		/// virtual file path version of JS-asset is minified</param>
-		/// <returns>Virtual path to JS-file, corresponding current mode 
+		/// <returns>Virtual path to JS-file, corresponding current mode
 		/// of web application</returns>
 		protected override string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified)
 		{
@@ -142,13 +142,13 @@
 			{
 				appropriateAssetVirtualPath = Asset.RemoveAdditionalJsFileExtension(appropriateAssetVirtualPath);
 
-				// Fill list of file extensions, sorted in order 
+				// Fill list of file extensions, sorted in order
 				// of relevance to current mode of web application
 				string[] appropriateFileExtensions;
 
 				if (IsJsFileWithMicrosoftStyleExtension(appropriateAssetVirtualPath))
 				{
-					appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ? 
+					appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ?
 						_releaseJsExtensionsForMicrosoftStyle : _debugJsExtensionsForMicrosoftStyle;
 					appropriateAssetVirtualPath = ProbeAssetFilePath(appropriateAssetVirtualPath, appropriateFileExtensions);
 					isMinified = !Asset.IsJsFileWithDebugExtension(appropriateAssetVirtualPath);
@@ -166,7 +166,7 @@
 		}
 
 		/// <summary>
-		/// Checks existance of specified JS-file in list of 
+		/// Checks a existance of specified JS-file in list of
 		/// JS-files that have extensions in Microsoft-style
 		/// </summary>
 		/// <param name="assetVirtualPath">JS-asset virtual file path</param>

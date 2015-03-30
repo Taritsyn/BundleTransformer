@@ -20,7 +20,7 @@
 	using Configuration;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code 
+	/// Minifier, which produces minifiction of CSS-code
 	/// by using WebGrease Semantic CSS-minifier
 	/// </summary>
 	public sealed class WgCssMinifier : IMinifier
@@ -36,7 +36,7 @@
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Information about the constructor of 
+		/// Information about the constructor of
 		/// <code>WebGrease.Configuration.WebGreaseConfiguration</code> class
 		/// </summary>
 		private static readonly ConstructorInfo _wgConfigurationConstructorInfo;
@@ -71,7 +71,7 @@
 			set;
 		}
 
-		
+
 		/// <summary>
 		/// Loads a information about <code>WebGrease.Configuration.WebGreaseConfiguration</code> type
 		/// </summary>
@@ -84,14 +84,14 @@
 		}
 
 		/// <summary>
-		/// Constructs instance of WebGrease Semantic CSS-minifier
+		/// Constructs a instance of WebGrease Semantic CSS-minifier
 		/// </summary>
 		public WgCssMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetWgSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of WebGrease Semantic CSS-minifier
+		/// Constructs a instance of WebGrease Semantic CSS-minifier
 		/// </summary>
 		/// <param name="wgConfig">Configuration settings of WebGrease Minifier</param>
 		public WgCssMinifier(WgSettings wgConfig)
@@ -105,7 +105,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of CSS-asset by using WebGrease Semantic CSS-minifier
+		/// Produces a code minifiction of CSS-asset by using WebGrease Semantic CSS-minifier
 		/// </summary>
 		/// <param name="asset">CSS-asset</param>
 		/// <returns>CSS-asset with minified text content</returns>
@@ -132,7 +132,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of CSS-assets by using WebGrease Semantic CSS-minifier
+		/// Produces a code minifiction of CSS-assets by using WebGrease Semantic CSS-minifier
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of CSS-assets with minified text content</returns>
@@ -365,13 +365,13 @@
 					new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
 				var errorMessageBuilder = new StringBuilder();
-				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, 
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
 					message);
-				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, 
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode,
 					errorCode);
-				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, 
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity,
 					severity.ToString(CultureInfo.InvariantCulture));
-				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, 
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory,
 					subcategory);
 				if (!string.IsNullOrWhiteSpace(file))
 				{

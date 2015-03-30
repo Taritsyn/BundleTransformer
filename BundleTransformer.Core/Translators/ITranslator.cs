@@ -5,8 +5,8 @@
 	using Assets;
 
 	/// <summary>
-	/// This interface used in implementation of containers for 
-	/// translators of code written on intermediate languages 
+	/// This interface used in implementation of containers for
+	/// translators of code written on intermediate languages
 	/// (LESS, Sass, SCSS, CoffeeScript, TypeScript and etc) to CSS- or JS-code
 	/// </summary>
 	public interface ITranslator
@@ -18,14 +18,14 @@
 
 
 		/// <summary>
-		/// Translates code of asset written on intermediate language to CSS- or JS-code
+		/// Translates a code of asset written on intermediate language to CSS- or JS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on intermediate language</param>
 		/// <returns>Asset with translated code</returns>
 		IAsset Translate(IAsset asset);
 
 		/// <summary>
-		/// Translates code of assets written on intermediate languages to CSS- or JS-code
+		/// Translates a code of assets written on intermediate languages to CSS- or JS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on intermediate languages</param>
 		/// <returns>Set of assets with translated code</returns>

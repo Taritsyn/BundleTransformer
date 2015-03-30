@@ -26,7 +26,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-compiler script host
+		/// Constructs a instance of Sass- and SCSS-compiler script host
 		/// </summary>
 		/// <param name="platformAdaptationLayer">Platform adaptation layer</param>
 		public SassAndScssCompilerScriptHost(PlatformAdaptationLayer platformAdaptationLayer)

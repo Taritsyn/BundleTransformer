@@ -11,9 +11,9 @@
 	using Core.Transformers;
 
 	using Translators;
-	
+
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output
 	/// of translated CoffeeScript-asset
 	/// </summary>
 	public sealed class CoffeeScriptAssetHandler : ScriptAssetHandlerBase

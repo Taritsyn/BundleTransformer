@@ -37,7 +37,7 @@
 					.ToArray()
 					;
 
-				throw new InvalidAssetTypesException(string.Format(Strings.Assets_ScriptAssetsContainAssetsWithInvalidTypes, 
+				throw new InvalidAssetTypesException(string.Format(Strings.Assets_ScriptAssetsContainAssetsWithInvalidTypes,
 					string.Join(", ", invalidAssetsVirtualPaths)),
 					invalidAssetsVirtualPaths);
 			}

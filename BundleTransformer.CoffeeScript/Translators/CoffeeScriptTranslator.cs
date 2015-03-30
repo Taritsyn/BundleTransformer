@@ -45,7 +45,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to allow compilation to JavaScript 
+		/// Gets or sets a flag for whether to allow compilation to JavaScript
 		/// without the top-level function safety wrapper
 		/// </summary>
 		public bool Bare
@@ -56,14 +56,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript-translator
+		/// Constructs a instance of CoffeeScript-translator
 		/// </summary>
 		public CoffeeScriptTranslator()
 			: this(null, BundleTransformerContext.Current.Configuration.GetCoffeeScriptSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript-translator
+		/// Constructs a instance of CoffeeScript-translator
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="coffeeConfig">Configuration settings of CoffeeScript-translator</param>
@@ -95,7 +95,7 @@
 
 
 		/// <summary>
-		/// Translates code of asset written on CoffeeScript to JS-code
+		/// Translates a code of asset written on CoffeeScript to JS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on CoffeeScript</param>
 		/// <returns>Asset with translated code</returns>
@@ -115,7 +115,7 @@
 		}
 
 		/// <summary>
-		/// Translates code of assets written on CoffeeScript to JS-code
+		/// Translates a code of assets written on CoffeeScript to JS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on CoffeeScript</param>
 		/// <returns>Set of assets with translated code</returns>

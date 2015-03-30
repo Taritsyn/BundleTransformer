@@ -8,7 +8,7 @@
 	public static class FileExtensionHelpers
 	{
 		/// <summary>
-		/// Checks whether specified file extension is the TypeScript-file extension 
+		/// Checks whether specified file extension is the TypeScript-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>

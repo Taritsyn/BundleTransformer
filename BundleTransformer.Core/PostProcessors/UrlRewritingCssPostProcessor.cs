@@ -12,7 +12,7 @@
 	using Helpers;
 
 	/// <summary>
-	/// Postprocessor that responsible for transformation of relative 
+	/// Postprocessor that responsible for transformation of relative
 	/// paths in CSS-files to absolute
 	/// </summary>
 	public sealed class UrlRewritingCssPostProcessor : PostProcessorBase
@@ -31,14 +31,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of URL rewriting CSS-postprocessor
+		/// Constructs a instance of URL rewriting CSS-postprocessor
 		/// </summary>
 		public UrlRewritingCssPostProcessor()
 			: this(BundleTransformerContext.Current.FileSystem.GetCommonRelativePathResolver())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of URL rewriting CSS-postprocessor
+		/// Constructs a instance of URL rewriting CSS-postprocessor
 		/// </summary>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		public UrlRewritingCssPostProcessor(IRelativePathResolver relativePathResolver)

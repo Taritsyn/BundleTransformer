@@ -20,7 +20,7 @@
 	public abstract class TransformerBase : ITransformer, IBundleTransform
 	{
 		/// <summary>
-		/// List of patterns of files and directories that 
+		/// List of patterns of files and directories that
 		/// should be ignored when processing
 		/// </summary>
 		protected readonly string[] _ignorePatterns;
@@ -104,7 +104,7 @@
 		/// <summary>
 		/// Constructs a instance of transformer
 		/// </summary>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
 		protected TransformerBase(string[] ignorePatterns, CoreSettings coreConfig)
@@ -309,7 +309,7 @@
 		protected virtual void ConfigureBundleResponse(IAsset combinedAsset, BundleResponse bundleResponse,
 			VirtualPathProvider virtualPathProvider)
 		{
-			var bundleFiles = combinedAsset.VirtualPathDependencies.Select(assetVirtualPath => 
+			var bundleFiles = combinedAsset.VirtualPathDependencies.Select(assetVirtualPath =>
 				new BundleFile(assetVirtualPath, virtualPathProvider.GetFile(assetVirtualPath))).ToList();
 
 			bundleResponse.Content = combinedAsset.Content;

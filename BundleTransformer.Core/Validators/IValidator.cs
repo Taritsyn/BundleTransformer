@@ -10,7 +10,7 @@
 	interface IValidator
 	{
 		/// <summary>
-		/// Validates assets
+		/// Validates a assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
 		void Validate(IList<IAsset> assets);

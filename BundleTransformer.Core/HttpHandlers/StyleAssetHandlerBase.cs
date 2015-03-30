@@ -10,7 +10,7 @@
 	using Translators;
 
 	/// <summary>
-	/// Base class of the debugging HTTP-handler that responsible for text output 
+	/// Base class of the debugging HTTP-handler that responsible for text output
 	/// of processed style asset
 	/// </summary>
 	public abstract class StyleAssetHandlerBase : AssetHandlerBase
@@ -31,7 +31,7 @@
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
 		protected StyleAssetHandlerBase(Cache cache,
-			IVirtualFileSystemWrapper virtualFileSystemWrapper, 
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
 				: base(cache, virtualFileSystemWrapper, assetHandlerConfig)
 		{ }

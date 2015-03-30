@@ -20,7 +20,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Sass and SCSS node match
+		/// Constructs a instance of Sass and SCSS node match
 		/// </summary>
 		/// <param name="position">Position in the original string where
 		/// the first character of the captured substring was found</param>

@@ -35,7 +35,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of interval
+		/// Constructs a instance of interval
 		/// </summary>
 		/// <param name="start">Start value</param>
 		/// <param name="end">End value</param>
@@ -44,6 +44,7 @@
 			_start = start;
 			_end = end;
 		}
+
 
 		/// <summary>
 		/// Checks whether a value is included in the interval

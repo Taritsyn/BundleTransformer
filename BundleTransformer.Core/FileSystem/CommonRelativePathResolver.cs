@@ -19,14 +19,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of common relative path resolver
+		/// Constructs a instance of common relative path resolver
 		/// </summary>
 		public CommonRelativePathResolver()
 			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of common relative path resolver
+		/// Constructs a instance of common relative path resolver
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		public CommonRelativePathResolver(IVirtualFileSystemWrapper virtualFileSystemWrapper)

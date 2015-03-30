@@ -8,7 +8,7 @@
 	public sealed class FileSystemContext : IFileSystemContext
 	{
 		/// <summary>
-		/// Virtual file system wrapper 
+		/// Virtual file system wrapper
 		/// </summary>
 		private readonly Lazy<VirtualFileSystemWrapper> _virtualFileSystemWrapper
 			= new Lazy<VirtualFileSystemWrapper>();

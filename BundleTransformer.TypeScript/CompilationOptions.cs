@@ -15,7 +15,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to warn on expressions and declarations 
+		/// Gets or sets a flag for whether to warn on expressions and declarations
 		/// with an implied 'any' type
 		/// </summary>
 		public bool NoImplicitAny
@@ -63,7 +63,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, 
+		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript6` (experimental)
 		/// </summary>
 		public TargetMode Target
@@ -74,7 +74,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the TypeScript compilation options
+		/// Constructs a instance of the TypeScript compilation options
 		/// </summary>
 		public CompilationOptions()
 		{

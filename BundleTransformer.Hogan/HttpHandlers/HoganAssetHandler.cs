@@ -13,7 +13,7 @@
 	using Translators;
 
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output
 	/// of translated Mustache-asset
 	/// </summary>
 	public sealed class HoganAssetHandler : ScriptAssetHandlerBase

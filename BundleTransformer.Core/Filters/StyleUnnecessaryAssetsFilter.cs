@@ -12,9 +12,9 @@
 	public sealed class StyleUnnecessaryAssetsFilter : UnnecessaryAssetsFilterBase
 	{
 		/// <summary>
-		/// Constructs instance of unnecessary style assets filter
+		/// Constructs a instance of unnecessary style assets filter
 		/// </summary>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		public StyleUnnecessaryAssetsFilter(string[] ignorePatterns) : base(ignorePatterns)
 		{ }

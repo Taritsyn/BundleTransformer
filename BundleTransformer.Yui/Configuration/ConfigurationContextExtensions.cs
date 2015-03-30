@@ -17,7 +17,7 @@
 			new Lazy<YuiSettings>(() => (YuiSettings)ConfigurationManager.GetSection("bundleTransformer/yui"));
 
 		/// <summary>
-		/// Gets YUI Minifier configuration settings
+		/// Gets a YUI Minifier configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of YUI Minifier</returns>

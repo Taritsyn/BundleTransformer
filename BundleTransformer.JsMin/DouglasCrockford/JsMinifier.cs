@@ -1,4 +1,4 @@
-﻿/* This is a .NET port of the Douglas Crockford's JSMin 'C' project. 
+﻿/* This is a .NET port of the Douglas Crockford's JSMin 'C' project.
  * The author's copyright message is reproduced below.
  */
 
@@ -87,7 +87,7 @@ namespace BundleTransformer.JsMin.DouglasCrockford
 
 			return minifiedContent;
 		}
-		
+
 		/// <summary>
 		/// Returns a true if the character is a letter, digit, underscore, dollar sign, or non-ASCII character
 		/// </summary>
@@ -140,7 +140,7 @@ namespace BundleTransformer.JsMin.DouglasCrockford
 		}
 
 		/// <summary>
-		/// Gets a next character, excluding comments. 
+		/// Gets a next character, excluding comments.
 		/// <code>Peek()</code> is used to see if a '/' is followed by a '/' or '*'.
 		/// </summary>
 		/// <returns>The character</returns>
@@ -200,7 +200,7 @@ namespace BundleTransformer.JsMin.DouglasCrockford
 		///		2 - Copy B to A. Get the next B. (Delete A).
 		///		3 - Get the next B. (Delete B).
 		/// <code>Action</code> treats a string as a single character.
-		/// Wow! <code>Action</code> recognizes a regular expression 
+		/// Wow! <code>Action</code> recognizes a regular expression
 		/// if it is preceded by <code>(</code> or , or <code>=</code>.
 		/// </summary>
 		/// <param name="d">Action type</param>
@@ -407,14 +407,16 @@ namespace BundleTransformer.JsMin.DouglasCrockford
 		}
 
 		#region Methods for substitution methods of the C language
+
 		/// <summary>
-		/// Puts a character to output stream 
+		/// Puts a character to output stream
 		/// </summary>
 		/// <param name="c">The character</param>
 		private void Put(int c)
         {
             _writer.Write((char)c);
 		}
+
 		#endregion
 	}
 }

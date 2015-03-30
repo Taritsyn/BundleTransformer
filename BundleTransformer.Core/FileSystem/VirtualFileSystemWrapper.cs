@@ -33,7 +33,7 @@
 		public string GetFileTextContent(string virtualPath)
 		{
 			string content;
-			
+
 			try
 			{
 				VirtualFile virtualFile = BundleTable.VirtualPathProvider.GetFile(virtualPath);
@@ -81,7 +81,7 @@
 			catch (FileNotFoundException e)
 			{
 				throw new FileNotFoundException(
-					string.Format(Strings.Common_FileNotExist, virtualPath), virtualPath, e);	
+					string.Format(Strings.Common_FileNotExist, virtualPath), virtualPath, e);
 			}
 
 			return bytes;
@@ -104,7 +104,7 @@
 			catch (FileNotFoundException e)
 			{
 				throw new FileNotFoundException(
-					string.Format(Strings.Common_FileNotExist, virtualPath), virtualPath, e);	
+					string.Format(Strings.Common_FileNotExist, virtualPath), virtualPath, e);
 			}
 
 			return stream;
@@ -139,10 +139,10 @@
 		/// <param name="virtualPathDependencies">An array of paths to other resources required by the primary virtual resource</param>
 		/// <param name="utcStart">The UTC time at which the virtual resources were read</param>
 		/// <returns>A System.Web.Caching.CacheDependency object for the specified virtual resources</returns>
-		public CacheDependency GetCacheDependency(string virtualPath, string[] virtualPathDependencies, 
+		public CacheDependency GetCacheDependency(string virtualPath, string[] virtualPathDependencies,
 			DateTime utcStart)
 		{
-			return BundleTable.VirtualPathProvider.GetCacheDependency(virtualPath, virtualPathDependencies, 
+			return BundleTable.VirtualPathProvider.GetCacheDependency(virtualPath, virtualPathDependencies,
 				utcStart);
 		}
 

@@ -1,39 +1,37 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-  <metadata>	
-    <id>BundleTransformer.TypeScript</id>
-    <version>1.9.39</version>
-	<title>Bundle Transformer: TypeScript</title>
-    <authors>Andrey Taritsyn</authors>
-    <owners>Andrey Taritsyn</owners>
-    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=501174</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator` (supports TypeScript (http://www.typescriptlang.org) version 1.4.1). This adapter makes translation of TypeScript-code to JS-code. Also contains debugging HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of translated TypeScript-asset.
+	<metadata>	
+		<id>BundleTransformer.TypeScript</id>
+		<version>1.9.52</version>
+		<title>Bundle Transformer: TypeScript</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=501174</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator` (supports TypeScript (http://www.typescriptlang.org) version 1.4.1). This adapter makes translation of TypeScript-code to JS-code. Also contains debugging HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of translated TypeScript-asset.
 	
 BundleTransformer.TypeScript does not support external modules (CommonJS and AMD modules).
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
-    <summary>BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator` (supports TypeScript version 1.4.1). This adapter makes translation of TypeScript-code to JS-code. Also contains debugging HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of translated TypeScript-asset.</summary>
-	<releaseNotes>1. Added support of TypeScript version 1.4.1;
-2. In configuration settings of TypeScript-translator was replaced 2 properties: `UseDefaultLib` by `NoLib` (default `false`) and `CodeGenTarget` by `Target` (`EcmaScript3` (default), `EcmaScript5`, or `EcmaScript6` (experimental)), and added 3 properties - `NoEmitOnError` (default `false`), `PreserveConstEnums` (default `false`) and `SuppressImplicitAnyIndexErrors` (default `false`).</releaseNotes>
-	<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-    <language>en-US</language>
-    <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling TypeScript Translation Translator Compilation Compiler</tags>
-    <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.39" />
-	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.2.0" />
-	  <dependency id="Newtonsoft.Json" version="6.0.6" />
-    </dependencies>
-    <references>
-      <reference file="BundleTransformer.TypeScript.dll" />
-    </references>
-  </metadata>
-  <files>
-    <file src="..\..\BundleTransformer.TypeScript\bin\Release\BundleTransformer.TypeScript.dll" target="lib\net40" />
-	<file src="..\..\BundleTransformer.TypeScript\bin\Release\**\BundleTransformer.TypeScript.resources.dll" target="lib\net40" />
-	<file src="content\web.config.transform" target="content" />
-	<file src="readme.txt" />
-  </files>
+		<summary>BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator` (supports TypeScript version 1.4.1). This adapter makes translation of TypeScript-code to JS-code. Also contains debugging HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of translated TypeScript-asset.</summary>
+		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling TypeScript Translation Translator Compilation Compiler</tags>
+		<dependencies>
+			<dependency id="BundleTransformer.Core" version="1.9.52" />
+			<dependency id="JavaScriptEngineSwitcher.Core" version="1.2.4" />
+			<dependency id="Newtonsoft.Json" version="6.0.8" />
+		</dependencies>
+		<references>
+			<reference file="BundleTransformer.TypeScript.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\BundleTransformer.TypeScript\bin\Release\BundleTransformer.TypeScript.dll" target="lib\net40" />
+		<file src="..\..\BundleTransformer.TypeScript\bin\Release\**\BundleTransformer.TypeScript.resources.dll" target="lib\net40" />
+		<file src="content\web.config.transform" target="content" />
+		<file src="readme.txt" />
+	</files>
 </package>

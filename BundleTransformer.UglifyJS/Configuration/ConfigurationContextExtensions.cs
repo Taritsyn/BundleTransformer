@@ -17,7 +17,7 @@
 			new Lazy<UglifySettings>(() => (UglifySettings)ConfigurationManager.GetSection("bundleTransformer/uglify"));
 
 		/// <summary>
-		/// Gets Uglify Minifier configuration settings
+		/// Gets a Uglify Minifier configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Uglify Minifier</returns>

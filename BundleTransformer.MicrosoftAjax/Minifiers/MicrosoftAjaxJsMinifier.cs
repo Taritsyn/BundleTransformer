@@ -27,7 +27,7 @@
 	using Resources;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using Microsoft Ajax Minifier
 	/// </summary>
 	public sealed class MicrosoftAjaxJsMinifier : MicrosoftAjaxMinifierBase
@@ -48,7 +48,7 @@
 		private readonly CodeSettings _jsParserConfiguration;
 
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>)
 		/// should be recognized and output as is
 		/// </summary>
 		public override bool AllowEmbeddedAspNetBlocks
@@ -98,7 +98,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of 
+		/// Gets or sets a string representation of the list of
 		/// debug lookups (comma-separated)
 		/// </summary>
 		public override string IgnoreErrorList
@@ -114,7 +114,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets number of spaces per indent level when in 
+		/// Gets or sets number of spaces per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		public override int IndentSize
@@ -130,7 +130,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a column position at which the line 
+		/// Gets or sets a column position at which the line
 		/// will be broken at the next available opportunity
 		/// </summary>
 		public override int LineBreakThreshold {
@@ -162,7 +162,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets string representation of the list 
+		/// Gets or sets string representation of the list
 		/// of names defined for the preprocessor (comma-separated)
 		/// </summary>
 		public override string PreprocessorDefineList
@@ -178,7 +178,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add a semicolon 
+		/// Gets or sets a flag for whether to add a semicolon
 		/// at the end of the parsed code
 		/// </summary>
 		public override bool TermSemicolons
@@ -243,8 +243,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether to use old-style 
-		/// const statements (just var-statements that define unchangeable fields) 
+		/// Gets or sets a boolean value indicating whether to use old-style
+		/// const statements (just var-statements that define unchangeable fields)
 		/// or new EcmaScript 6 lexical declarations
 		/// </summary>
 		public bool ConstStatementsMozilla
@@ -260,7 +260,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of debug 
+		/// Gets or sets a string representation of the list of debug
 		/// lookups (comma-separated)
 		/// </summary>
 		public string DebugLookupList
@@ -276,8 +276,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to throw an error 
-		/// if a source string is not safe for inclusion in an 
+		/// Gets or sets a flag for whether to throw an error
+		/// if a source string is not safe for inclusion in an
 		/// HTML inline script block
 		/// </summary>
 		public bool ErrorIfNotInlineSafe
@@ -287,7 +287,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to evaluate expressions containing 
+		/// Gets or sets a flag for whether to evaluate expressions containing
 		/// only literal bool, string, numeric, or null values (true).
 		/// Leave literal expressions alone and do not evaluate them (false).
 		/// </summary>
@@ -313,7 +313,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether or not to ignore conditional-compilation 
+		/// Gets or sets a flag for whether or not to ignore conditional-compilation
 		/// comment syntax (true) or to try to retain the comments in the output (false)
 		/// </summary>
 		public bool IgnoreConditionalCompilation
@@ -329,7 +329,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether or not to ignore preprocessor 
+		/// Gets or sets a boolean value indicating whether or not to ignore preprocessor
 		/// defines comment syntax (true) or to evaluate them (false)
 		/// </summary>
 		public bool IgnorePreprocessorDefines
@@ -346,7 +346,7 @@
 
 		/// <summary>
 		/// Gets or sets a flag for whether to break up string literals containing
-		/// <code>&lt;/script&gt;</code> so inline code won't break (true). 
+		/// <code>&lt;/script&gt;</code> so inline code won't break (true).
 		/// Leave string literals as-is (false).
 		/// </summary>
 		public bool InlineSafeStrings
@@ -395,7 +395,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to add characters to the output 
+		/// Gets or sets a value indicating whether to add characters to the output
 		/// to make sure Mac Safari bugs are not generated (true).
 		/// Disregard potential Mac Safari bugs (false).
 		/// </summary>
@@ -412,9 +412,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether object property 
-		/// names with the specified "from" names will get renamed to 
-		/// the corresponding "to" names (true) when using 
+		/// Gets or sets a boolean value indicating whether object property
+		/// names with the specified "from" names will get renamed to
+		/// the corresponding "to" names (true) when using
 		/// the manual-rename feature, or left alone (false)
 		/// </summary>
 		public bool ManualRenamesProperties
@@ -430,7 +430,7 @@
 		}
 
 		/// <summary>
-		/// Get or sets the no-automatic-renaming list as a single string of 
+		/// Get or sets the no-automatic-renaming list as a single string of
 		/// comma-separated identifiers
 		/// </summary>
 		public string NoAutoRenameList
@@ -446,7 +446,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether all function names 
+		/// Gets or sets a value indicating whether all function names
 		/// must be preserved and remain as-named
 		/// </summary>
 		public bool PreserveFunctionNames
@@ -456,7 +456,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to preserve important 
+		/// Gets or sets a value indicating whether to preserve important
 		/// comments in the output
 		/// </summary>
 		public bool PreserveImportantComments
@@ -481,7 +481,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether or not to remove 
+		/// Gets or sets a value indicating whether or not to remove
 		/// unreferenced function expression names
 		/// </summary>
 		public bool RemoveFunctionExpressionNames
@@ -513,7 +513,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of all the indentifier 
+		/// Gets or sets a string representation of all the indentifier
 		/// replacements as a comma-separated list of "source=target" identifiers.
 		/// </summary>
 		public string RenamePairs
@@ -530,7 +530,7 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not to reorder function and variable
-		/// declarations within scopes (true), or to leave the order as specified in 
+		/// declarations within scopes (true), or to leave the order as specified in
 		/// the original source
 		/// </summary>
 		public bool ReorderScopeDeclarations
@@ -540,9 +540,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether or not to force 
-		/// the input code into strict mode (can still specify strict-mode in 
-		/// the sources if this value is false) 
+		/// Gets or sets a boolean value indicating whether or not to force
+		/// the input code into strict mode (can still specify strict-mode in
+		/// the sources if this value is false)
 		/// </summary>
 		public bool StrictMode
 		{
@@ -574,14 +574,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax JS-minifier
+		/// Constructs a instance of Microsoft Ajax JS-minifier
 		/// </summary>
 		public MicrosoftAjaxJsMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax JS-minifier
+		/// Constructs a instance of Microsoft Ajax JS-minifier
 		/// </summary>
 		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxJsMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
@@ -619,7 +619,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using Microsoft Ajax Minifier
+		/// Produces a code minifiction of JS-asset by using Microsoft Ajax Minifier
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
 		/// <returns>JS-asset with minified text content</returns>
@@ -646,7 +646,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using Microsoft Ajax Minifier
+		/// Produces a code minifiction of JS-assets by using Microsoft Ajax Minifier
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>

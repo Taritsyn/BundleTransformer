@@ -18,8 +18,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a comma-separated list of names to exclude from mangling. 
-		/// For example, to keep names <code>$</code>, <code>require</code> and <code>exports</code> 
+		/// Gets or sets a comma-separated list of names to exclude from mangling.
+		/// For example, to keep names <code>$</code>, <code>require</code> and <code>exports</code>
 		/// intact you’d specify <code>"$,require,exports"</code>.
 		/// </summary>
 		[ConfigurationProperty("except", DefaultValue = "")]
@@ -30,7 +30,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to mangle names visible in scopes 
+		/// Gets or sets a flag for whether to mangle names visible in scopes
 		/// where <code>eval</code> or <code>when</code> are used
 		/// </summary>
 		[ConfigurationProperty("eval", DefaultValue = false)]
@@ -41,7 +41,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to assign shorter names to most 
+		/// Gets or sets a flag for whether to assign shorter names to most
 		/// frequently used variables
 		/// </summary>
 		[ConfigurationProperty("sort", DefaultValue = false)]

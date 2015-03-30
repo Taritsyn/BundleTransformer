@@ -9,7 +9,7 @@
 	public sealed class NullOrderer : IBundleOrderer
 	{
 		/// <summary>
-		/// Sort files in declarative order
+		/// Sorts a files in declarative order
 		/// </summary>
 		/// <param name="context">Object BundleContext</param>
 		/// <param name="files">List of files</param>

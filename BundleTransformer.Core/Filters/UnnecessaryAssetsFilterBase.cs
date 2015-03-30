@@ -13,16 +13,16 @@
 	public abstract class UnnecessaryAssetsFilterBase : IFilter
 	{
 		/// <summary>
-		/// List of regular expressions of files and directories that 
+		/// List of regular expressions of files and directories that
 		/// should be ignored when processing
 		/// </summary>
 		protected readonly List<Regex> _ignoreRegExps;
 
 
 		/// <summary>
-		/// Constructs instance of unnecessary assets filter
+		/// Constructs a instance of unnecessary assets filter
 		/// </summary>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		protected UnnecessaryAssetsFilterBase(string[] ignorePatterns)
 		{
@@ -64,14 +64,14 @@
 
 
 		/// <summary>
-		/// Removes unnecessary assets
+		/// Removes a unnecessary assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
 		/// <returns>Set of necessary assets</returns>
 		public abstract IList<IAsset> Transform(IList<IAsset> assets);
 
 		/// <summary>
-		/// Checks whether asset is unnecessary
+		/// Checks a whether asset is unnecessary
 		/// </summary>
 		/// <param name="assetVirtualPath">Asset virtual file path</param>
 		/// <returns>Checking result (true - unnecessary; false - necessary)</returns>

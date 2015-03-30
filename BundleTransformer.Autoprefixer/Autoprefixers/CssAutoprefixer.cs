@@ -18,21 +18,24 @@
 	internal sealed class CssAutoprefixer : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a Autoprefixer library
+		/// Namespace for resources
 		/// </summary>
-		const string AUTOPREFIXER_LIBRARY_RESOURCE_NAME
-			= "BundleTransformer.Autoprefixer.Resources.autoprefixer-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.Autoprefixer.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a Autoprefixer helper
+		/// Name of file, which contains a Autoprefixer library
 		/// </summary>
-		const string AUTOPREFIXER_HELPER_RESOURCE_NAME =
-			"BundleTransformer.Autoprefixer.Resources.autoprefixerHelper.min.js";
+		private const string AUTOPREFIXER_LIBRARY_FILE_NAME = "autoprefixer-combined.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a Autoprefixer helper
+		/// </summary>
+		private const string AUTOPREFIXER_HELPER_FILE_NAME = "autoprefixerHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for autoprefixing
 		/// </summary>
-		const string AUTOPREFIXER_FUNCTION_CALL_TEMPLATE = @"autoprefixerHelper.process({0}, {1});";
+		private const string AUTOPREFIXER_FUNCTION_CALL_TEMPLATE = @"autoprefixerHelper.process({0}, {1});";
 
 		/// <summary>
 		/// String representation of the default autoprefixing options
@@ -90,8 +93,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(AUTOPREFIXER_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(AUTOPREFIXER_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + AUTOPREFIXER_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + AUTOPREFIXER_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}

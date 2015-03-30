@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.16
+ * UglifyJS v2.4.17
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -355,11 +355,12 @@
 		$documentation: "Represents a debugger statement"
 	}, AST_Statement);
 
-	var AST_Directive = DEFNODE("Directive", "value scope", {
+	var AST_Directive = DEFNODE("Directive", "value scope quote", {
 		$documentation: "Represents a directive, like \"use strict\";",
 		$propdoc: {
 			value: "[string] The value of this directive as a plain string (it's not an AST_String!)",
-			scope: "[AST_Scope/S] The scope that this directive affects"
+			scope: "[AST_Scope/S] The scope that this directive affects",
+			quote: "[string] the original quote character"
 		}
 	}, AST_Statement);
 
@@ -1001,8 +1002,11 @@
 		}
 	});
 
-	var AST_ObjectKeyVal = DEFNODE("ObjectKeyVal", null, {
-		$documentation: "A key: value object property"
+	var AST_ObjectKeyVal = DEFNODE("ObjectKeyVal", "quote", {
+		$documentation: "A key: value object property",
+		$propdoc: {
+			quote: "[string] the original quote character"
+		}
 	}, AST_ObjectProperty);
 
 	var AST_ObjectSetter = DEFNODE("ObjectSetter", null, {
@@ -1087,10 +1091,11 @@
 		}
 	});
 
-	var AST_String = DEFNODE("String", "value", {
+	var AST_String = DEFNODE("String", "value quote", {
 		$documentation: "A string literal",
 		$propdoc: {
-			value: "[string] the contents of this string"
+			value: "[string] the contents of this string",
+			quote: "[string] the original quote character"
 		}
 	}, AST_Constant);
 
@@ -1371,8 +1376,9 @@
 		}
 	};
 
-	function JS_Parse_Error(message, line, col, pos) {
+	function JS_Parse_Error(message, filename, line, col, pos) {
 		this.message = message;
+		this.filename = filename;
 		this.line = line;
 		this.col = col;
 		this.pos = pos;
@@ -1384,7 +1390,7 @@
 	};
 
 	function js_error(message, filename, line, col, pos) {
-		throw new JS_Parse_Error(message, line, col, pos);
+		throw new JS_Parse_Error(message, filename, line, col, pos);
 	};
 
 	function is_token(token, type, val) {
@@ -1551,7 +1557,7 @@
 			return num;
 		};
 
-		var read_string = with_eof_error("Unterminated string constant", function(){
+		var read_string = with_eof_error("Unterminated string constant", function(quote_char){
 			var quote = next(), ret = "";
 			for (;;) {
 				var ch = next(true);
@@ -1576,7 +1582,9 @@
 				else if (ch == quote) break;
 				ret += ch;
 			}
-			return token("string", ret);
+			var tok = token("string", ret);
+			tok.quote = quote_char;
+			return tok;
 		});
 
 		function skip_line_comment(type) {
@@ -1731,7 +1739,7 @@
 			if (!ch) return token("eof");
 			var code = ch.charCodeAt(0);
 			switch (code) {
-			  case 34: case 39: return read_string();
+			  case 34: case 39: return read_string(ch);
 			  case 46: return handle_dot();
 			  case 47: return handle_slash();
 			}
@@ -1921,8 +1929,14 @@
 			  case "string":
 				var dir = S.in_directives, stat = simple_statement();
 				// XXXv2: decide how to fix directives
-				if (dir && stat.body instanceof AST_String && !is("punc", ","))
-					return new AST_Directive({ value: stat.body.value });
+				if (dir && stat.body instanceof AST_String && !is("punc", ",")) {
+					return new AST_Directive({
+						start : stat.body.start,
+						end   : stat.body.end,
+						quote : stat.body.quote,
+						value : stat.body.value
+					});
+				}
 				return stat;
 			  case "num":
 			  case "regexp":
@@ -2308,7 +2322,12 @@
 				ret = new AST_Number({ start: tok, end: tok, value: tok.value });
 				break;
 			  case "string":
-				ret = new AST_String({ start: tok, end: tok, value: tok.value });
+				ret = new AST_String({
+					start : tok,
+					end   : tok,
+					value : tok.value,
+					quote : tok.quote
+				});
 				break;
 			  case "regexp":
 				ret = new AST_RegExp({ start: tok, end: tok, value: tok.value });
@@ -2421,6 +2440,7 @@
 				expect(":");
 				a.push(new AST_ObjectKeyVal({
 					start : start,
+					quote : start.quote,
 					key   : name,
 					value : expression(false),
 					end   : prev()
@@ -3387,7 +3407,8 @@
 			comments         : false,
 			preserve_line    : false,
 			screw_ie8        : false,
-			preamble         : null
+			preamble         : null,
+			quote_style      : 0
 		}, true);
 
 		var indentation = 0;
@@ -3409,7 +3430,7 @@
 			});
 		};
 
-		function make_string(str) {
+		function make_string(str, quote) {
 			var dq = 0, sq = 0;
 			str = str.replace(/[\\\b\f\n\r\t\x22\x27\u2028\u2029\0\ufeff]/g, function(s){
 				switch (s) {
@@ -3427,13 +3448,27 @@
 				}
 				return s;
 			});
+			function quote_single() {
+				return "'" + str.replace(/\x27/g, "\\'") + "'";
+			}
+			function quote_double() {
+				return '"' + str.replace(/\x22/g, '\\"') + '"';
+			}
 			if (options.ascii_only) str = to_ascii(str);
-			if (dq > sq) return "'" + str.replace(/\x27/g, "\\'") + "'";
-			else return '"' + str.replace(/\x22/g, '\\"') + '"';
+			switch (options.quote_style) {
+			  case 1:
+				return quote_single();
+			  case 2:
+				return quote_double();
+			  case 3:
+				return quote == "'" ? quote_single() : quote_double();
+			  default:
+				return dq > sq ? quote_single() : quote_double();
+			}
 		};
 
-		function encode_string(str) {
-			var ret = make_string(str);
+		function encode_string(str, quote) {
+			var ret = make_string(str, quote);
 			if (options.inline_script)
 				ret = ret.replace(/<\x2fscript([>\/\t\n\f\r ])/gi, "<\\/script$1");
 			return ret;
@@ -3649,7 +3684,7 @@
 			force_semicolon : force_semicolon,
 			to_ascii        : to_ascii,
 			print_name      : function(name) { print(make_name(name)) },
-			print_string    : function(str) { print(encode_string(str)) },
+			print_string    : function(str, quote) { print(encode_string(str, quote)) },
 			next_indent     : next_indent,
 			with_indent     : with_indent,
 			with_block      : with_block,
@@ -3738,6 +3773,15 @@
 							return c(self, comment);
 						});
 					}
+
+					// Keep single line comments after nlb, after nlb
+					if (!output.option("beautify") && comments.length > 0 &&
+						/comment[134]/.test(comments[0].type) &&
+						output.col() !== 0 && comments[0].nlb)
+					{
+						output.print("\n");
+					}
+
 					comments.forEach(function(c){
 						if (/comment[134]/.test(c.type)) {
 							output.print("//" + c.value + "\n");
@@ -3897,7 +3941,7 @@
 		/* -----[ PRINTERS ]----- */
 
 		DEFPRINT(AST_Directive, function(self, output){
-			output.print_string(self.value);
+			output.print_string(self.value, self.quote);
 			output.semicolon();
 		});
 		DEFPRINT(AST_Debugger, function(self, output){
@@ -4393,6 +4437,7 @@
 		});
 		DEFPRINT(AST_ObjectKeyVal, function(self, output){
 			var key = self.key;
+			var quote = self.quote;
 			if (output.option("quote_keys")) {
 				output.print_string(key + "");
 			} else if ((typeof key == "number"
@@ -4403,7 +4448,7 @@
 			} else if (RESERVED_WORDS(key) ? output.option("screw_ie8") : is_identifier_string(key)) {
 				output.print_name(key);
 			} else {
-				output.print_string(key);
+				output.print_string(key, quote);
 			}
 			output.colon();
 			self.value.print(output);
@@ -4441,7 +4486,7 @@
 			output.print(self.getValue());
 		});
 		DEFPRINT(AST_String, function(self, output){
-			output.print_string(self.getValue());
+			output.print_string(self.getValue(), self.quote);
 		});
 		DEFPRINT(AST_Number, function(self, output){
 			output.print(make_num(self.getValue()));
@@ -6460,11 +6505,16 @@
 				}
 			}
 			if (compressor.option("drop_console")) {
-				if (self.expression instanceof AST_PropAccess &&
-					self.expression.expression instanceof AST_SymbolRef &&
-					self.expression.expression.name == "console" &&
-					self.expression.expression.undeclared()) {
-					return make_node(AST_Undefined, self).transform(compressor);
+				if (self.expression instanceof AST_PropAccess) {
+					var name = self.expression.expression;
+					while (name.expression) {
+						name = name.expression;
+					}
+					if (name instanceof AST_SymbolRef
+						&& name.name == "console"
+						&& name.undeclared()) {
+						return make_node(AST_Undefined, self).transform(compressor);
+					}
 				}
 			}
 			return self.evaluate(compressor)[0];
@@ -6692,6 +6742,12 @@
 				var rr = self.right.evaluate(compressor);
 				if ((ll.length > 1 && !ll[1]) || (rr.length > 1 && !rr[1])) {
 					compressor.warn("Boolean && always false [{file}:{line},{col}]", self.start);
+					if (self.left.has_side_effects(compressor)) {
+						return make_node(AST_Seq, self, {
+							car: self.left,
+							cdr: make_node(AST_False)
+						}).optimize(compressor);
+					}
 					return make_node(AST_False, self);
 				}
 				if (ll.length > 1 && ll[1]) {
@@ -6706,6 +6762,12 @@
 				var rr = self.right.evaluate(compressor);
 				if ((ll.length > 1 && ll[1]) || (rr.length > 1 && rr[1])) {
 					compressor.warn("Boolean || always true [{file}:{line},{col}]", self.start);
+					if (self.left.has_side_effects(compressor)) {
+						return make_node(AST_Seq, self, {
+							car: self.left,
+							cdr: make_node(AST_True)
+						}).optimize(compressor);
+					}
 					return make_node(AST_True, self);
 				}
 				if (ll.length > 1 && !ll[1]) {

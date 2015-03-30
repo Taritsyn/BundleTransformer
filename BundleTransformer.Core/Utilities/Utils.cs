@@ -11,7 +11,7 @@
 	public static class Utils
 	{
 		/// <summary>
-		/// Converts string value to string collection
+		/// Converts a string value to string collection
 		/// </summary>
 		/// <param name="value">String value</param>
 		/// <param name="separator">Separator</param>
@@ -25,14 +25,14 @@
 		}
 
 		/// <summary>
-		/// Converts string value to string collection
+		/// Converts a string value to string collection
 		/// </summary>
 		/// <param name="value">String value</param>
 		/// <param name="separator">Separator</param>
 		/// <param name="trimItemValues">Allow trim of item values</param>
 		/// <param name="removeEmptyItems">Allow removal of empty items from collection</param>
 		/// <returns>String collection</returns>
-		public static string[] ConvertToStringCollection(string value, char[] separator, 
+		public static string[] ConvertToStringCollection(string value, char[] separator,
 			bool trimItemValues = false, bool removeEmptyItems = false)
 		{
 			var result = new List<string>();
@@ -61,7 +61,7 @@
 		}
 
 		/// <summary>
-		/// Creates instance by specified full type name
+		/// Creates a instance by specified full type name
 		/// </summary>
 		/// <param name="fullTypeName">Full type name</param>
 		/// <typeparam name="T">Target type</typeparam>
@@ -105,7 +105,7 @@
 			object instance = assembly.CreateInstance(typeName);
 			if (instance == null)
 			{
-				throw new NullReferenceException(string.Format(Strings.Common_InstanceCreationFailed, 
+				throw new NullReferenceException(string.Format(Strings.Common_InstanceCreationFailed,
 					typeName, assemblyName));
 			}
 
@@ -113,7 +113,7 @@
 		}
 
 		/// <summary>
-		/// Converts value of source enumeration type to value of destination enumeration type
+		/// Converts a value of source enumeration type to value of destination enumeration type
 		/// </summary>
 		/// <typeparam name="TSource">Source enumeration type</typeparam>
 		/// <typeparam name="TDest">Destination enumeration type</typeparam>

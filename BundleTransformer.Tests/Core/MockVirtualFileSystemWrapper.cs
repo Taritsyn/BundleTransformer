@@ -24,6 +24,7 @@
 		}
 
 		#region Not implemented methods
+
 		public bool FileExists(string virtualPath)
 		{
 			throw new NotImplementedException();
@@ -69,7 +70,7 @@
 			throw new NotImplementedException();
 		}
 
-		public CacheDependency GetCacheDependency(string virtualPath, string[] virtualPathDependencies, 
+		public CacheDependency GetCacheDependency(string virtualPath, string[] virtualPathDependencies,
 			DateTime utcStart)
 		{
 			throw new NotImplementedException();
@@ -79,6 +80,7 @@
 		{
 			throw new NotImplementedException();
 		}
+
 		#endregion
 	}
 }

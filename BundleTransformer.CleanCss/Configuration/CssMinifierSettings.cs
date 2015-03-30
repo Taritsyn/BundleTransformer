@@ -59,6 +59,26 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable <code>@media</code> merging
+		/// </summary>
+		[ConfigurationProperty("mediaMerging", DefaultValue = true)]
+		public bool MediaMerging
+		{
+			get { return (bool)this["mediaMerging"]; }
+			set { this["mediaMerging"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable restructuring optimizations
+		/// </summary>
+		[ConfigurationProperty("restructuring", DefaultValue = true)]
+		public bool Restructuring
+		{
+			get { return (bool)this["restructuring"]; }
+			set { this["restructuring"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a rounding precision. -1 disables rounding.
 		/// </summary>
 		[ConfigurationProperty("roundingPrecision", DefaultValue = 2)]

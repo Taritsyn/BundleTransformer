@@ -17,7 +17,7 @@
 			new Lazy<HandlebarsSettings>(() => (HandlebarsSettings)ConfigurationManager.GetSection("bundleTransformer/handlebars"));
 
 		/// <summary>
-		/// Gets Handlebars-translator configuration settings
+		/// Gets a Handlebars-translator configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Handlebars-translator</returns>

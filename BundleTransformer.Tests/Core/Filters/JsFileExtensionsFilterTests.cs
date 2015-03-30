@@ -1,7 +1,7 @@
 ﻿namespace BundleTransformer.Tests.Core.Filters
 {
 	using System.Collections.Generic;
-	
+
 	using Moq;
 	using NUnit.Framework;
 
@@ -15,7 +15,7 @@
 	{
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
-		private readonly string[] _jsFilesWithMicrosoftStyleExtensions = { "MicrosoftAjax.js", 
+		private readonly string[] _jsFilesWithMicrosoftStyleExtensions = { "MicrosoftAjax.js",
 			"MicrosoftMvcAjax.js", "MicrosoftMvcValidation.js", "knockout-$version$.js" };
 		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
@@ -24,81 +24,81 @@
 		{
 			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"jquery-1.6.2.debug.js")))
 				.Returns(false)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"jquery-1.6.2.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"jquery-1.6.2.min.js")))
 				.Returns(true)
 				;
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"jquery-ui-1.8.11.debug.js")))
 				.Returns(false)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"jquery-ui-1.8.11.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"jquery-ui-1.8.11.min.js")))
 				.Returns(true)
 				;
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"MicrosoftAjax.debug.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"MicrosoftAjax.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"MicrosoftAjax.min.js")))
 				.Returns(false)
 				;
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"knockout-2.1.0beta.debug.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"knockout-2.1.0beta.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"knockout-2.1.0beta.min.js")))
 				.Returns(false)
 				;
 
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"modernizr-2.0.6-development-only.debug.js")))
 				.Returns(false)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"modernizr-2.0.6-development-only.js")))
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+				.Setup(fs => fs.FileExists(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 					"modernizr-2.0.6-development-only.min.js")))
 				.Returns(false)
 				;
@@ -108,23 +108,23 @@
 
 		private IList<IAsset> GetTestAssets()
 		{
-			var jqueryAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var jqueryAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"jquery-1.6.2.js"), _virtualFileSystemWrapper);
-			var jqueryUiAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var jqueryUiAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"jquery-ui-1.8.11.min.js"), _virtualFileSystemWrapper);
-			var microsoftAjaxAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var microsoftAjaxAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"MicrosoftAjax.debug.js"), _virtualFileSystemWrapper);
-			var knockoutAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var knockoutAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"knockout-2.1.0beta.js"), _virtualFileSystemWrapper);
-			var modernizrAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var modernizrAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), _virtualFileSystemWrapper);
 
 			var testAssets = new List<IAsset>
 			{
-			    jqueryAsset, 
-				jqueryUiAsset, 
-				microsoftAjaxAsset, 
-				knockoutAsset, 
+			    jqueryAsset,
+				jqueryUiAsset,
+				microsoftAjaxAsset,
+				knockoutAsset,
 				modernizrAsset
 			};
 
@@ -152,17 +152,17 @@
 			IAsset modernizrAsset = processedAssets[4];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),
 				jqueryAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.js"),
 				jqueryUiAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"),
 				microsoftAjaxAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.debug.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.debug.js"),
 				knockoutAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), modernizrAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.debug.js"), modernizrAsset.VirtualPath);
 
 			Assert.AreEqual(false, jqueryAsset.Minified);
@@ -193,17 +193,17 @@
 			IAsset modernizrAsset = processedAssets[4];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),
 				jqueryAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.js"),
 				jqueryUiAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"),
 				microsoftAjaxAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.debug.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.debug.js"),
 				knockoutAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), modernizrAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.debug.js"), modernizrAsset.VirtualPath);
 
 			Assert.AreEqual(false, jqueryAsset.Minified);
@@ -234,17 +234,17 @@
 			IAsset modernizrAsset = processedAssets[4];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"),
 				jqueryAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.min.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.min.js"),
 				jqueryUiAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.js"),
 				microsoftAjaxAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.js"),
 				knockoutAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), modernizrAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.min.js"), modernizrAsset.VirtualPath);
 
 			Assert.AreEqual(true, jqueryAsset.Minified);
@@ -275,17 +275,17 @@
 			IAsset modernizrAsset = processedAssets[4];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),
 				jqueryAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-ui-1.8.11.js"),
 				jqueryUiAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"),
 				microsoftAjaxAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.debug.js"), 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.1.0beta.debug.js"),
 				knockoutAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), modernizrAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreNotEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.min.js"), modernizrAsset.VirtualPath);
 
 			Assert.AreEqual(false, jqueryAsset.Minified);

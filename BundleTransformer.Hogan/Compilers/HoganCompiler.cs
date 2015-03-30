@@ -19,14 +19,19 @@
 	internal sealed class HoganCompiler : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a Hogan-library
+		/// Namespace for resources
 		/// </summary>
-		const string HOGAN_LIBRARY_RESOURCE_NAME = "BundleTransformer.Hogan.Resources.hogan.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.Hogan.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a Hogan-compiler helper
+		/// Name of file, which contains a Hogan-library
 		/// </summary>
-		const string HOGAN_HELPER_RESOURCE_NAME = "BundleTransformer.Hogan.Resources.hoganHelper.min.js";
+		private const string HOGAN_LIBRARY_FILE_NAME = "hogan.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a Hogan-compiler helper
+		/// </summary>
+		private const string HOGAN_HELPER_FILE_NAME = "hoganHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
@@ -65,7 +70,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Hogan-compiler
+		/// Constructs a instance of Hogan-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public HoganCompiler(Func<IJsEngine> createJsEngineInstance)
@@ -73,7 +78,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Hogan-compiler
+		/// Constructs a instance of Hogan-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>
@@ -94,8 +99,8 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(HOGAN_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(HOGAN_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + HOGAN_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + HOGAN_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}

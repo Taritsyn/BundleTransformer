@@ -36,14 +36,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-stylesheet
+		/// Constructs a instance of Sass- and SCSS-stylesheet
 		/// </summary>
 		/// <param name="url">URL of stylesheet file</param>
 		public SassAndScssStylesheet(string url) : this(url, string.Empty)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-stylesheet
+		/// Constructs a instance of Sass- and SCSS-stylesheet
 		/// </summary>
 		/// <param name="url">URL of stylesheet file</param>
 		/// <param name="content">Text content of stylesheet</param>
@@ -52,7 +52,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-stylesheet
+		/// Constructs a instance of Sass- and SCSS-stylesheet
 		/// </summary>
 		/// <param name="url">URL of stylesheet file</param>
 		/// <param name="content">Text content of stylesheet</param>

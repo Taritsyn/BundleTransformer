@@ -14,9 +14,9 @@
 
 	using Configuration;
 	using Packers;
-	
+
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using Dean Edwards' Packer version 3.0
 	/// </summary>
 	public sealed class EdwardsJsMinifier : IMinifier
@@ -56,14 +56,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Dean Edwards' JS-minifier
+		/// Constructs a instance of Dean Edwards' JS-minifier
 		/// </summary>
 		public EdwardsJsMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetPackerSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Dean Edwards' JS-minifier
+		/// Constructs a instance of Dean Edwards' JS-minifier
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="packerConfig">Configuration settings of Dean Edwards' Minifier</param>
@@ -96,7 +96,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using Dean Edwards' Packer
+		/// Produces a code minifiction of JS-asset by using Dean Edwards' Packer
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
 		/// <returns>JS-asset with minified text content</returns>
@@ -121,7 +121,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using Dean Edwards' Packer
+		/// Produces a code minifiction of JS-assets by using Dean Edwards' Packer
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>

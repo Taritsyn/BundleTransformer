@@ -8,7 +8,7 @@
 	public abstract class AssetNodeMatchBase
 	{
 		/// <summary>
-		/// Gets a position in the original string where 
+		/// Gets a position in the original string where
 		/// the first character of the captured substring was found
 		/// </summary>
 		public int Position
@@ -37,9 +37,9 @@
 
 
 		/// <summary>
-		/// Constructs instance of asset node match
+		/// Constructs a instance of asset node match
 		/// </summary>
-		/// <param name="position">Position in the original string where 
+		/// <param name="position">Position in the original string where
 		/// the first character of the captured substring was found</param>
 		/// <param name="length">Length of the captured substring</param>
 		/// <param name="match">Single regular expression match</param>

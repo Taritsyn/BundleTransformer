@@ -11,11 +11,12 @@
 		/// <summary>
 		/// Regular expression for format placeholder
 		/// </summary>
-		private static readonly Regex _formatPlaceholderRegExp = 
+		private static readonly Regex _formatPlaceholderRegExp =
 			new Regex(@"\{[0-9]\}", RegexOptions.Multiline);
 
+
 		/// <summary>
-		/// Appends the default line terminator to the end of the current System.Text.StringBuilder object
+		/// Appends a default line terminator to the end of the current System.Text.StringBuilder object
 		/// </summary>
 		/// <param name="sb">Object StringBuilder</param>
 		/// <returns>Object StringBuilder</returns>
@@ -25,9 +26,9 @@
 		}
 
 		/// <summary>
-		/// Appends the string returned by processing a composite format string, which 
-		/// contains zero or more format items, with default line terminator to this instance. 
-		/// Each format item is replaced by the string representation of a corresponding 
+		/// Appends a string returned by processing a composite format string, which
+		/// contains zero or more format items, with default line terminator to this instance.
+		/// Each format item is replaced by the string representation of a corresponding
 		/// argument in a parameter array.
 		/// </summary>
 		/// <param name="sb">Object StringBuilder</param>

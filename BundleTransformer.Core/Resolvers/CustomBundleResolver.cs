@@ -110,7 +110,7 @@
 			{
 				string fileVirtualPath = bundleFile.IncludedVirtualPath;
 
-				// Store a information about bundle to the virtual path of file 
+				// Store a information about bundle to the virtual path of file
 				string processedFileVirtualPath = fileVirtualPath;
 				if (fileVirtualPath.IndexOf("?", StringComparison.Ordinal) != -1)
 				{
@@ -137,7 +137,7 @@
 		{
 			if (ValidateVirtualPath(virtualPath, "virtualPath") != null)
 			{
-				return null;				
+				return null;
 			}
 
 			return _bundles.ResolveBundleUrl(virtualPath);

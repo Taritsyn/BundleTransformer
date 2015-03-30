@@ -1,12 +1,13 @@
-﻿var cssoHelper = (function (csso, undefined) {
-	"use strict";
+﻿/*global CSSO */
+var cssoHelper = (function (csso, undefined) {
+	'use strict';
 
 	var exports = {};
 
 	exports.minify = function (code, disableRestructuring) {
 		var result = {},
 			errors = [],
-			minifiedCode = ""
+			minifiedCode = ''
 			;
 
 		try {

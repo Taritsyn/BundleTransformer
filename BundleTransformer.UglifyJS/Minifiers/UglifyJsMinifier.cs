@@ -16,7 +16,7 @@
 	using Uglifiers;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using Uglify JS-minifier
 	/// </summary>
 	public sealed class UglifyJsMinifier : IMinifier
@@ -73,7 +73,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable full compliance with 
+		/// Gets or sets a flag for whether to disable full compliance with
 		/// Internet Explorer 6-8 quirks
 		/// </summary>
 		public bool ScrewIe8
@@ -105,14 +105,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Uglify JS-minifier
+		/// Constructs a instance of Uglify JS-minifier
 		/// </summary>
 		public UglifyJsMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetUglifySettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Uglify JS-minifier
+		/// Constructs a instance of Uglify JS-minifier
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="uglifyConfig">Configuration settings of Uglify Minifier</param>
@@ -181,7 +181,8 @@
 				Semicolons = codeGenerationConfig.Semicolons,
 				Comments = codeGenerationConfig.Comments,
 				PreserveLine = codeGenerationConfig.PreserveLine,
-				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps
+				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps,
+				QuoteStyle = codeGenerationConfig.QuoteStyle
 			};
 
 			ScrewIe8 = jsMinifierConfig.ScrewIe8;
@@ -211,7 +212,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using Uglify JS-minifier
+		/// Produces a code minifiction of JS-asset by using Uglify JS-minifier
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
 		/// <returns>JS-asset with minified text content</returns>
@@ -238,7 +239,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using Uglify JS-minifier
+		/// Produces a code minifiction of JS-assets by using Uglify JS-minifier
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>

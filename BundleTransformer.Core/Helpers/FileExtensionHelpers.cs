@@ -8,7 +8,7 @@
 	public static class FileExtensionHelpers
 	{
 		/// <summary>
-		/// Checks whether specified file extension is the CSS-file extension 
+		/// Checks a whether specified file extension is the CSS-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>
@@ -20,7 +20,7 @@
 		}
 
 		/// <summary>
-		/// Checks whether specified file extension is the JS-file extension 
+		/// Checks a whether specified file extension is the JS-file extension
 		/// </summary>
 		/// <param name="fileExtension">File extension</param>
 		/// <returns>Result of check</returns>

@@ -202,7 +202,7 @@
 				;
 
 
-			string usbFlashDriveIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string usbFlashDriveIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"UsbFlashDriveIcon.css");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(usbFlashDriveIconCssAssetVirtualPath))
@@ -217,7 +217,7 @@
 }")
 				;
 
-			string validationIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string validationIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"ValidationIcon.css");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(validationIconCssAssetVirtualPath))
@@ -304,7 +304,7 @@
 			IRelativePathResolver relativePathResolver = new MockRelativePathResolver();
 			var lessConfig = new LessSettings();
 
-			var lessTranslator = new LessTranslator(createJsEngineInstance, 
+			var lessTranslator = new LessTranslator(createJsEngineInstance,
 				virtualFileSystemWrapper, relativePathResolver, lessConfig);
 			const string assetContent = @"@import (once) ""Mixins.less"";
 @import (reference) ""Selectors.less"";

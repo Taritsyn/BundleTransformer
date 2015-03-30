@@ -5,7 +5,7 @@
 	/// <summary>
 	/// Collection of registered postprocessors
 	/// </summary>
-	[ConfigurationCollection(typeof(PostProcessorRegistration))] 
+	[ConfigurationCollection(typeof(PostProcessorRegistration))]
 	public sealed class PostProcessorRegistrationCollection : ConfigurationElementCollection
 	{
 		/// <summary>

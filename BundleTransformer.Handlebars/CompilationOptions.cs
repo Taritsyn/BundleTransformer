@@ -54,7 +54,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the Handlebars compilation options
+		/// Constructs a instance of the Handlebars compilation options
 		/// </summary>
 		public CompilationOptions()
 		{

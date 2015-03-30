@@ -25,7 +25,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of LESS-import
+		/// Constructs a instance of LESS-import
 		/// </summary>
 		/// <param name="url">URL of imported stylesheet file</param>
 		/// <param name="importOptions">Import options</param>

@@ -25,15 +25,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to keep line breaks
-		/// </summary>
-		public bool KeepBreaks
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a compatibility mode
 		/// </summary>
 		public CompatibilityMode Compatibility
@@ -43,9 +34,36 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to keep line breaks
+		/// </summary>
+		public bool KeepBreaks
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a special comments mode
 		/// </summary>
 		public SpecialCommentsMode KeepSpecialComments
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable <code>@media</code> merging
+		/// </summary>
+		public bool MediaMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable restructuring optimizations
+		/// </summary>
+		public bool Restructuring
 		{
 			get;
 			set;
@@ -82,15 +100,17 @@
 
 
 		/// <summary>
-		/// Constructs instance of the cleaning options
+		/// Constructs a instance of the cleaning options
 		/// </summary>
 		public CleaningOptions()
 		{
 			Advanced = true;
 			AggressiveMerging = true;
 			Compatibility = CompatibilityMode.Ie7;
-			KeepSpecialComments = SpecialCommentsMode.KeepAll;
 			KeepBreaks = false;
+			KeepSpecialComments = SpecialCommentsMode.KeepAll;
+			MediaMerging = true;
+			Restructuring = true;
 			RoundingPrecision = 2;
 			ShorthandCompacting = true;
 			Severity = 0;

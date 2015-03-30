@@ -15,7 +15,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to join consecutive simple 
+		/// Gets or sets a flag for whether to join consecutive simple
 		/// statements using the comma operator
 		/// </summary>
 		public bool Sequences
@@ -25,7 +25,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to rewrite property access using 
+		/// Gets or sets a flag for whether to rewrite property access using
 		/// the dot notation (for example, <code>foo["bar"] → foo.bar</code>)
 		/// </summary>
 		public bool PropertiesDotNotation
@@ -62,7 +62,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to apply optimizations 
+		/// Gets or sets a flag for whether to apply optimizations
 		/// for <code>if</code>-s and conditional expressions
 		/// </summary>
 		public bool Conditionals
@@ -72,7 +72,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to apply certain optimizations 
+		/// Gets or sets a flag for whether to apply certain optimizations
 		/// to binary nodes, attempts to negate binary nodes, etc.
 		/// </summary>
 		public bool Comparisons
@@ -91,7 +91,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable various optimizations for boolean 
+		/// Gets or sets a flag for whether to enable various optimizations for boolean
 		/// context (for example, <code>!!a ? b : c → a ? b : c</code>)
 		/// </summary>
 		public bool Booleans
@@ -101,7 +101,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable optimizations for <code>do</code>, <code>while</code> 
+		/// Gets or sets a flag for whether to enable optimizations for <code>do</code>, <code>while</code>
 		/// and <code>for</code> loops when we can statically determine the condition
 		/// </summary>
 		public bool Loops
@@ -148,7 +148,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable optimizations for if/return 
+		/// Gets or sets a flag for whether to enable optimizations for if/return
 		/// and if/continue
 		/// </summary>
 		public bool IfReturn
@@ -167,7 +167,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to small optimization for sequences 
+		/// Gets or sets a flag for whether to small optimization for sequences
 		/// (for example: transform <code>x, x</code> into <code>x</code>
 		/// and <code>x = something(), x</code> into <code>x = something()</code>)
 		/// </summary>
@@ -178,11 +178,11 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the object 
-		/// (comma-separated list of values of the form SYMBOL[=value]) 
-		/// with properties named after symbols to replace 
-		/// (except where symbol has properly declared by a var declaration 
-		/// or use as function parameter or similar) and the values 
+		/// Gets or sets a string representation of the object
+		/// (comma-separated list of values of the form SYMBOL[=value])
+		/// with properties named after symbols to replace
+		/// (except where symbol has properly declared by a var declaration
+		/// or use as function parameter or similar) and the values
 		/// representing the AST replacement value
 		/// </summary>
 		public string GlobalDefinitions
@@ -192,8 +192,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to UglifyJS will assume 
-		/// that object property access (e.g. <code>foo.bar</code> or <code>foo["bar"]</code>) 
+		/// Gets or sets a flag for whether to UglifyJS will assume
+		/// that object property access (e.g. <code>foo.bar</code> or <code>foo["bar"]</code>)
 		/// doesn't have any side effects
 		/// </summary>
 		public bool PureGetters
@@ -203,7 +203,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the function names list, 
+		/// Gets or sets a string representation of the function names list,
 		/// which UglifyJS will assume that those functions do not produce side effects
 		/// </summary>
 		public string PureFunctions
@@ -232,7 +232,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the compression options
+		/// Constructs a instance of the compression options
 		/// </summary>
 		public CompressionOptions()
 		{

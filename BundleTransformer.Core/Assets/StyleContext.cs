@@ -24,9 +24,9 @@
 			get { return "CSS"; }
 		}
 
-		
+
 		/// <summary>
-		/// Constructs instance of style context
+		/// Constructs a instance of style context
 		/// </summary>
 		/// <param name="styleConfig">Configuration settings of processing style assets</param>
 		public StyleContext(StyleSettings styleConfig)

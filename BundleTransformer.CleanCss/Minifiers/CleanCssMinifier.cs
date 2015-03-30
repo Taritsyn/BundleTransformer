@@ -16,7 +16,7 @@
 	using Cleaners;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code 
+	/// Minifier, which produces minifiction of CSS-code
 	/// by using Clean-css
 	/// </summary>
 	public sealed class CleanCssMinifier : IMinifier
@@ -83,6 +83,24 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable <code>@media</code> merging
+		/// </summary>
+		public bool MediaMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable restructuring optimizations
+		/// </summary>
+		public bool Restructuring
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a rounding precision. -1 disables rounding.
 		/// </summary>
 		public int RoundingPrecision
@@ -113,14 +131,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Clean CSS-minifier
+		/// Constructs a instance of Clean CSS-minifier
 		/// </summary>
 		public CleanCssMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetCleanSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Clean CSS-minifier
+		/// Constructs a instance of Clean CSS-minifier
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="cleanConfig">Configuration settings of Clean-css Minifier</param>
@@ -132,6 +150,8 @@
 			Compatibility = cssMinifierConfig.Compatibility;
 			KeepBreaks = cssMinifierConfig.KeepBreaks;
 			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
+			MediaMerging = cssMinifierConfig.MediaMerging;
+			Restructuring = cssMinifierConfig.Restructuring;
 			RoundingPrecision = cssMinifierConfig.RoundingPrecision;
 			ShorthandCompacting = cssMinifierConfig.ShorthandCompacting;
 			Severity = cssMinifierConfig.Severity;
@@ -158,7 +178,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of CSS-asset by using Clean-css
+		/// Produces a code minifiction of CSS-asset by using Clean-css
 		/// </summary>
 		/// <param name="asset">CSS-asset</param>
 		/// <returns>CSS-asset with minified text content</returns>
@@ -185,7 +205,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of CSS-assets by using Clean-css
+		/// Produces a code minifiction of CSS-assets by using Clean-css
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of CSS-assets with minified text content</returns>
@@ -259,6 +279,8 @@
 				Compatibility = Compatibility,
 				KeepBreaks = KeepBreaks,
 				KeepSpecialComments = KeepSpecialComments,
+				MediaMerging = MediaMerging,
+				Restructuring = Restructuring,
 				RoundingPrecision = RoundingPrecision,
 				ShorthandCompacting = ShorthandCompacting,
 				Severity = Severity

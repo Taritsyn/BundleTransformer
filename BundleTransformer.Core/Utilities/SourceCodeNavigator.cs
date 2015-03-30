@@ -25,7 +25,7 @@
 		/// Finds a next line break
 		/// </summary>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="startPosition">Position in the input string that defines the leftmost 
+		/// <param name="startPosition">Position in the input string that defines the leftmost
 		/// position to be searched</param>
 		/// <param name="lineBreakPosition">Position of line break</param>
 		/// <param name="lineBreakLength">Length of line break</param>
@@ -42,7 +42,7 @@
 		/// Finds a next line break
 		/// </summary>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="startPosition">Position in the input string that defines the leftmost 
+		/// <param name="startPosition">Position in the input string that defines the leftmost
 		/// position to be searched</param>
 		/// <param name="length">Number of characters in the substring to include in the search</param>
 		/// <param name="lineBreakPosition">Position of line break</param>
@@ -67,7 +67,7 @@
 		/// Finds a previous line break
 		/// </summary>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="startPosition">Position in the input string that defines the leftmost 
+		/// <param name="startPosition">Position in the input string that defines the leftmost
 		/// position to be searched</param>
 		/// <param name="lineBreakPosition">Position of line break</param>
 		/// <param name="lineBreakLength">Length of line break</param>
@@ -105,12 +105,12 @@
 		/// <param name="fragmentStartPosition">Start position of fragment</param>
 		/// <param name="lineBreakCount">Number of line breaks</param>
 		/// <param name="charRemainderCount">Number of characters left</param>
-		public static void CalculateLineBreakCount(string sourceCode, int fragmentStartPosition, 
+		public static void CalculateLineBreakCount(string sourceCode, int fragmentStartPosition,
 			out int lineBreakCount, out int charRemainderCount)
 		{
 			int fragmentLength = sourceCode.Length - fragmentStartPosition;
 
-			CalculateLineBreakCount(sourceCode, fragmentStartPosition, fragmentLength, 
+			CalculateLineBreakCount(sourceCode, fragmentStartPosition, fragmentLength,
 				out lineBreakCount, out charRemainderCount);
 		}
 
@@ -122,7 +122,7 @@
 		/// <param name="fragmentLength">Length of fragment</param>
 		/// <param name="lineBreakCount">Number of line breaks</param>
 		/// <param name="charRemainderCount">Number of characters left</param>
-		public static void CalculateLineBreakCount(string sourceCode, int fragmentStartPosition, int fragmentLength, 
+		public static void CalculateLineBreakCount(string sourceCode, int fragmentStartPosition, int fragmentLength,
 			out int lineBreakCount, out int charRemainderCount)
 		{
 			int sourceCodeLength = sourceCode.Length;
@@ -155,7 +155,7 @@
 					fragmentStartPosition : lineBreakPosition + lineBreakLength;
 				int lineLength = fragmentEndPosition - startLinePosition + 1;
 
-				FindNextLineBreak(sourceCode, startLinePosition, lineLength, 
+				FindNextLineBreak(sourceCode, startLinePosition, lineLength,
 					out lineBreakPosition, out lineBreakLength);
 
 				if (lineBreakPosition != -1)
@@ -252,7 +252,7 @@
 					int startLinePosition = (lineBreakPosition == int.MinValue) ? 0 : lineBreakPosition + lineBreakLength;
 
 					FindNextLineBreak(sourceCode, startLinePosition, out lineBreakPosition, out lineBreakLength);
-					
+
 					if (lineBreakPosition != -1)
 					{
 						line = sourceCode.Substring(startLinePosition, lineBreakPosition - startLinePosition);
@@ -297,7 +297,7 @@
 				{
 					if (previousLine.Length > 0)
 					{
-						sourceFragmentBuilder.AppendLine(FormatSourceCodeLine(previousLine, 
+						sourceFragmentBuilder.AppendLine(FormatSourceCodeLine(previousLine,
 							new SourceCodeNodeCoordinates(previousLineNumber, 0),
 							lineNumberSize, fragmentStartPosition, fragmentLength, tabSize));
 					}
@@ -336,7 +336,7 @@
 
 			fragmentStartPosition = 0;
 			fragmentLength = maxFragmentLength;
-			
+
 			if (lineLength > maxFragmentLength)
 			{
 				fragmentStartPosition = columnNumber - leftOffset - 1;

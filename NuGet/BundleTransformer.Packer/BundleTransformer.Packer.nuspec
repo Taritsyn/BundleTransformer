@@ -1,34 +1,34 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-  <metadata>
-    <id>BundleTransformer.Packer</id>
-    <version>1.9.34</version>
-	<title>Bundle Transformer: Packer</title>
-    <authors>Andrey Taritsyn</authors>
-    <owners>Andrey Taritsyn</owners>
-    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476858</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) version 3.0.
+	<metadata>
+		<id>BundleTransformer.Packer</id>
+		<version>1.9.52</version>
+		<title>Bundle Transformer: Packer</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476858</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) version 3.0.
 	
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
-    <summary>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer version 3.0.</summary>
-	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-    <language>en-US</language>
-    <tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Dean Edwards Packer</tags>
-    <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.34" />
-	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.2.0" />
-    </dependencies>
-    <references>
-      <reference file="BundleTransformer.Packer.dll" />
-    </references>
-  </metadata>
-  <files>
-    <file src="..\..\BundleTransformer.Packer\bin\Release\BundleTransformer.Packer.dll" target="lib\net40" />
-	<file src="..\..\BundleTransformer.Packer\bin\Release\**\BundleTransformer.Packer.resources.dll" target="lib\net40" />
-	<file src="content\web.config.transform" target="content" />
-	<file src="readme.txt" />
-  </files>
+		<summary>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer version 3.0.</summary>
+		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Dean Edwards Packer</tags>
+		<dependencies>
+			<dependency id="BundleTransformer.Core" version="1.9.52" />
+			<dependency id="JavaScriptEngineSwitcher.Core" version="1.2.4" />
+		</dependencies>
+		<references>
+			<reference file="BundleTransformer.Packer.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\BundleTransformer.Packer\bin\Release\BundleTransformer.Packer.dll" target="lib\net40" />
+		<file src="..\..\BundleTransformer.Packer\bin\Release\**\BundleTransformer.Packer.resources.dll" target="lib\net40" />
+		<file src="content\web.config.transform" target="content" />
+		<file src="readme.txt" />
+	</files>
 </package>

@@ -11,7 +11,7 @@
 	using DouglasCrockford;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using C# port of Douglas Crockford's JSMin
 	/// </summary>
 	public sealed class CrockfordJsMinifier : IMinifier
@@ -28,7 +28,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using C# port of 
+		/// Produces a code minifiction of JS-asset by using C# port of
 		/// Douglas Crockford's JSMin
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
@@ -53,7 +53,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using C# port of 
+		/// Produces a code minifiction of JS-assets by using C# port of
 		/// Douglas Crockford's JSMin
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>

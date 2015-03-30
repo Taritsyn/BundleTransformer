@@ -18,7 +18,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to preserve unnecessary 
+		/// Gets or sets a flag for whether to preserve unnecessary
 		/// semicolons (such as right before a '}')
 		/// </summary>
 		[ConfigurationProperty("preserveAllSemicolons", DefaultValue = false)]
@@ -39,7 +39,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to ignore when processing code, that 
+		/// Gets or sets a flag for whether to ignore when processing code, that
 		/// executed in eval operator
 		/// </summary>
 		[ConfigurationProperty("ignoreEval", DefaultValue = false)]
@@ -61,7 +61,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets the culture you want the thread to run under. 
+		/// Gets or sets the culture you want the thread to run under.
 		/// This affects the treatment of numbers etc - e.g. 9.00 could be output as 9,00
 		/// (this is mainly for non English OS's).
 		/// </summary>

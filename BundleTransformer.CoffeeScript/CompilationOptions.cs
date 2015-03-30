@@ -6,7 +6,7 @@
 	internal sealed class CompilationOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to allow compilation to JavaScript 
+		/// Gets or sets a flag for whether to allow compilation to JavaScript
 		/// without the top-level function safety wrapper
 		/// </summary>
 		public bool Bare
@@ -26,7 +26,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the CoffeeScript compilation options
+		/// Constructs a instance of the CoffeeScript compilation options
 		/// </summary>
 		public CompilationOptions()
 		{

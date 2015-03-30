@@ -7,7 +7,7 @@
 	public enum BlockStart
 	{
 		/// <summary>
-		/// Output the opening curly-brace block-start character on its own new line. 
+		/// Output the opening curly-brace block-start character on its own new line.
 		/// Example:
 		/// <code>if (condition)
 		/// {
@@ -17,7 +17,7 @@
 		NewLine = 0,
 
 		/// <summary>
-		/// Output the opening curly-brace block-start character at the end of the previous line. 
+		/// Output the opening curly-brace block-start character at the end of the previous line.
 		/// Example:
 		/// <code>if (condition) {
 		///     ...

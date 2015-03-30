@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.51
+               README file for Bundle Transformer: Core 1.9.52
 
    ----------------------------------------------------------------------
 
@@ -41,12 +41,6 @@
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.
-   
-   =============
-   RELEASE NOTES
-   =============
-   In `IAsset` interface added 2 new properties: `OriginalAssets` and
-   `Combined`.
 
    ====================
    POST-INSTALL ACTIONS

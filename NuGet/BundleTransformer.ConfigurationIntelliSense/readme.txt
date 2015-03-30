@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.51
+           README file for Bundle Transformer: IntelliSense 1.9.52
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of Closure Minifier.
+   Added definitions for new properties of Clean CSS-minifier and Uglify
+   JS-minifier.
    
    =============
    DOCUMENTATION

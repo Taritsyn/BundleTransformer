@@ -124,7 +124,7 @@ $alt-bg-color: #CE4DD6")
 				;
 
 
-			string testSassImportSassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string testSassImportSassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestSassImport.sass");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testSassImportSassAssetVirtualPath))
@@ -150,7 +150,7 @@ $alt-bg-color: #CE4DD6")
 // @import ""TestSassImport.Sub8.sass""; @import ""TestSassImport.Sub9.sass"";")
 				;
 
-			string testSassImportScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string testSassImportScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestSassImport.scss");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testSassImportScssAssetVirtualPath))
@@ -181,7 +181,7 @@ $alt-bg-color: #CE4DD6")
 @import ""AndroidIcon"", 'BatteryIcon', ""ComputerIcon"", url(	 DatabaseIcon.css	 )")
 				;
 
-			string testSassImportSub1ScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string testSassImportSub1ScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestSassImport.Sub1.scss");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testSassImportSub1ScssAssetVirtualPath))
@@ -284,7 +284,7 @@ $alt-bg-color: #CE4DD6")
 				;
 
 
-			string testSassImportSub2SassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string testSassImportSub2SassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestSassImport.Sub2.sass");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testSassImportSub2SassAssetVirtualPath))
@@ -297,7 +297,7 @@ $alt-bg-color: #CE4DD6")
 @import ""FolderIcon.css"" screen, projection")
 				;
 
-			string testSassImportSub2ScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			string testSassImportSub2ScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestSassImport.Sub2.scss");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testSassImportSub2ScssAssetVirtualPath))
@@ -314,7 +314,7 @@ $alt-bg-color: #CE4DD6")
 
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 
-			var sassAndScssTranslator = new SassAndScssTranslator(virtualFileSystemWrapper, 
+			var sassAndScssTranslator = new SassAndScssTranslator(virtualFileSystemWrapper,
 				_relativePathResolver, _sassAndScssConfig);
 
 			const string assetContent = @"@import ""Colors""
@@ -345,7 +345,7 @@ $alt-bg-color: #CE4DD6")
 
 			// Act
 			sassAndScssTranslator.FillDependencies(assetUrl, stylesheet, dependencies);
-			
+
 			// Assert
 			Assert.AreEqual(7, dependencies.Count);
 
@@ -392,7 +392,7 @@ $alt-bg-color: #CE4DD6")
 				.Setup(fs => fs.FileExists(colorsScssAssetVirtualPath))
 				.Returns(false)
 				;
-			
+
 			string partialColorsScssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"_Colors.scss");
 			virtualFileSystemMock
@@ -544,7 +544,7 @@ $alt-bg-color: #CE4DD6;")
 				;
 
 			string testScssImportSub1SassAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
-				"TestScssImport.Sub1.sass"); 
+				"TestScssImport.Sub1.sass");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testScssImportSub1SassAssetVirtualPath))
 				.Returns(false)

@@ -15,7 +15,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets text content of dependency file 
+		/// Gets or sets a text content of dependency file
 		/// </summary>
 		public string Content
 		{
@@ -34,13 +34,13 @@
 
 
 		/// <summary>
-		/// Constructs instance of the asset dependency
+		/// Constructs a instance of the asset dependency
 		/// </summary>
 		public Dependency() : this(string.Empty)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of the asset dependency
+		/// Constructs a instance of the asset dependency
 		/// </summary>
 		/// <param name="url">URL of dependency file</param>
 		public Dependency(string url)
@@ -48,7 +48,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of the asset dependency
+		/// Constructs a instance of the asset dependency
 		/// </summary>
 		/// <param name="url">URL of dependency file</param>
 		/// <param name="content">Text content of dependency file</param>
@@ -57,7 +57,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of the asset dependency
+		/// Constructs a instance of the asset dependency
 		/// </summary>
 		/// <param name="url">URL of dependency file</param>
 		/// <param name="content">Text content of dependency file</param>

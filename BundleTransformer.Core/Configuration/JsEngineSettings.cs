@@ -8,7 +8,7 @@
 	public sealed class JsEngineSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets JavaScript engine name
+		/// Gets or sets a JavaScript engine name
 		/// </summary>
 		[ConfigurationProperty("name", DefaultValue = "")]
 		public string Name

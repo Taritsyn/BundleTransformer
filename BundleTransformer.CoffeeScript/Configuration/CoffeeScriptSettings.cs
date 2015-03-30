@@ -10,7 +10,7 @@
 	public sealed class CoffeeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to allow compilation to JavaScript 
+		/// Gets or sets a flag for whether to allow compilation to JavaScript
 		/// without the top-level function safety wrapper
 		/// </summary>
 		[ConfigurationProperty("bare", DefaultValue = true)]

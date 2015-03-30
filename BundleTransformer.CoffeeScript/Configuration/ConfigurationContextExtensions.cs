@@ -17,7 +17,7 @@
 			new Lazy<CoffeeScriptSettings>(() => (CoffeeScriptSettings)ConfigurationManager.GetSection("bundleTransformer/coffeeScript"));
 
 		/// <summary>
-		/// Gets CoffeeScript-translator configuration settings
+		/// Gets a CoffeeScript-translator configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of CoffeeScript-translator</returns>

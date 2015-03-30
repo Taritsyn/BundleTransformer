@@ -73,7 +73,7 @@
 		/// <summary>
 		/// Regular expression for working with strings of the form SYMBOL[=value]
 		/// </summary>
-		private static readonly Regex _symbolValueRegex = 
+		private static readonly Regex _symbolValueRegex =
 			new Regex(@"^(?<symbol>[a-zA-Z_\$][a-zA-Z_\$0-9]*)(=(?<value>.*))?$");
 
 		/// <summary>
@@ -105,12 +105,12 @@
 		/// Regular expression for working with the string representation of error
 		/// </summary>
 		private static readonly Regex _errorStringRegex =
-			new Regex(@"^(?<message>.*?)\s*" + 
+			new Regex(@"^(?<message>.*?)\s*" +
 				@"\[[\w \-+.:,;/?&=%~#$@()\[\]{}]*:(?<lineNumber>\d+),\s*(?<columnNumber>\d+)\]$");
 
 
 		/// <summary>
-		/// Constructs instance of JS-uglifier
+		/// Constructs a instance of JS-uglifier
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public JsUglifier(Func<IJsEngine> createJsEngineInstance)
@@ -118,7 +118,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of JS-uglifier
+		/// Constructs a instance of JS-uglifier
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default uglification options</param>
@@ -148,7 +148,7 @@
 		}
 
 		/// <summary>
-		/// "Uglifies" JS-code by using UglifyJS
+		/// "Uglifies" a JS-code by using UglifyJS
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
 		/// <param name="path">Path to JS-file</param>
@@ -296,7 +296,8 @@
 				new JProperty("comments", codeGenerationOptions.Comments),
 				new JProperty("preserve_line", codeGenerationOptions.PreserveLine),
 				new JProperty("screw_ie8", options.ScrewIe8),
-				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps)
+				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps),
+				new JProperty("quote_style", codeGenerationOptions.QuoteStyle)
 			));
 
 			return optionsJson;
@@ -310,7 +311,7 @@
 		private static JObject ParseGlobalDefinitions(string globalDefsString)
 		{
 			var globalDefs = new JObject();
-			var symbolValueList = Utils.ConvertToStringCollection(globalDefsString, ',', 
+			var symbolValueList = Utils.ConvertToStringCollection(globalDefsString, ',',
 				trimItemValues: true, removeEmptyItems: true);
 
 			foreach (string symbolValue in symbolValueList)
@@ -431,7 +432,7 @@
 		/// <returns>"Except" list in JSON format</returns>
 		private static JArray ParseExcept(string exceptString)
 		{
-			var except = Utils.ConvertToStringCollection(exceptString, ',', 
+			var except = Utils.ConvertToStringCollection(exceptString, ',',
 				trimItemValues: true, removeEmptyItems: true);
 
 			return new JArray(except.Select(e => new JValue(e)));
@@ -445,7 +446,7 @@
 		/// <param name="sourceCode">Source code</param>
 		/// <param name="currentFilePath">Path to current JS-file</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, bool isError, string sourceCode, 
+		private static string FormatErrorDetails(JToken errorDetails, bool isError, string sourceCode,
 			string currentFilePath)
 		{
 			string message;

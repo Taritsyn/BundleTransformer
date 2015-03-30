@@ -42,8 +42,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether to use old-style 
-		/// const statements (just var-statements that define unchangeable fields) 
+		/// Gets or sets a boolean value indicating whether to use old-style
+		/// const statements (just var-statements that define unchangeable fields)
 		/// or new EcmaScript 6 lexical declarations
 		/// </summary>
 		[ConfigurationProperty("constStatementsMozilla", DefaultValue = false)]
@@ -54,7 +54,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list of debug 
+		/// Gets or sets a string representation of the list of debug
 		/// lookups (comma-separated)
 		/// </summary>
 		[ConfigurationProperty("debugLookupList", DefaultValue = "Debug,$Debug,WAssert,Msn.Debug,Web.Debug")]
@@ -65,8 +65,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to throw an error 
-		/// if a source string is not safe for inclusion in an 
+		/// Gets or sets a flag for whether to throw an error
+		/// if a source string is not safe for inclusion in an
 		/// HTML inline script block
 		/// </summary>
 		[ConfigurationProperty("errorIfNotInlineSafe", DefaultValue = false)]
@@ -77,7 +77,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to evaluate expressions containing 
+		/// Gets or sets a flag for whether to evaluate expressions containing
 		/// only literal bool, string, numeric, or null values (true).
 		/// Leave literal expressions alone and do not evaluate them (false).
 		/// </summary>
@@ -99,7 +99,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether or not to ignore conditional-compilation 
+		/// Gets or sets a flag for whether or not to ignore conditional-compilation
 		/// comment syntax (true) or to try to retain the comments in the output (false)
 		/// </summary>
 		[ConfigurationProperty("ignoreConditionalCompilation", DefaultValue = false)]
@@ -110,7 +110,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether or not to ignore preprocessor 
+		/// Gets or sets a boolean value indicating whether or not to ignore preprocessor
 		/// defines comment syntax (true) or to evaluate them (false)
 		/// </summary>
 		[ConfigurationProperty("ignorePreprocessorDefines", DefaultValue = false)]
@@ -122,7 +122,7 @@
 
 		/// <summary>
 		/// Gets or sets a flag for whether to break up string literals containing
-		/// <code>&lt;/script&gt;</code> so inline code won't break (true). 
+		/// <code>&lt;/script&gt;</code> so inline code won't break (true).
 		/// Leave string literals as-is (false).
 		/// </summary>
 		[ConfigurationProperty("inlineSafeStrings", DefaultValue = true)]
@@ -156,7 +156,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to add characters to the output 
+		/// Gets or sets a value indicating whether to add characters to the output
 		/// to make sure Mac Safari bugs are not generated (true).
 		/// Disregard potential Mac Safari bugs (false).
 		/// </summary>
@@ -168,9 +168,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether object property 
-		/// names with the specified "from" names will get renamed to 
-		/// the corresponding "to" names (true) when using 
+		/// Gets or sets a boolean value indicating whether object property
+		/// names with the specified "from" names will get renamed to
+		/// the corresponding "to" names (true) when using
 		/// the manual-rename feature, or left alone (false)
 		/// </summary>
 		[ConfigurationProperty("manualRenamesProperties", DefaultValue = true)]
@@ -181,7 +181,7 @@
 		}
 
 		/// <summary>
-		/// Get or sets the no-automatic-renaming list as a single string of 
+		/// Get or sets the no-automatic-renaming list as a single string of
 		/// comma-separated identifiers
 		/// </summary>
 		[ConfigurationProperty("noAutoRenameList", DefaultValue = "$super")]
@@ -192,7 +192,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether all function names 
+		/// Gets or sets a value indicating whether all function names
 		/// must be preserved and remain as-named
 		/// </summary>
 		[ConfigurationProperty("preserveFunctionNames", DefaultValue = false)]
@@ -203,7 +203,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether to preserve important 
+		/// Gets or sets a value indicating whether to preserve important
 		/// comments in the output
 		/// </summary>
 		[ConfigurationProperty("preserveImportantComments", DefaultValue = true)]
@@ -224,7 +224,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether or not to remove 
+		/// Gets or sets a value indicating whether or not to remove
 		/// unreferenced function expression names
 		/// </summary>
 		[ConfigurationProperty("removeFunctionExpressionNames", DefaultValue = true)]
@@ -246,7 +246,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of all the indentifier 
+		/// Gets or sets a string representation of all the indentifier
 		/// replacements as a comma-separated list of "source=target" identifiers
 		/// </summary>
 		[ConfigurationProperty("renamePairs", DefaultValue = "")]
@@ -258,7 +258,7 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not to reorder function and variable
-		/// declarations within scopes (true), or to leave the order as specified in 
+		/// declarations within scopes (true), or to leave the order as specified in
 		/// the original source
 		/// </summary>
 		[ConfigurationProperty("reorderScopeDeclarations", DefaultValue = true)]
@@ -269,9 +269,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a boolean value indicating whether or not to force 
-		/// the input code into strict mode (can still specify strict-mode in 
-		/// the sources if this value is false) 
+		/// Gets or sets a boolean value indicating whether or not to force
+		/// the input code into strict mode (can still specify strict-mode in
+		/// the sources if this value is false)
 		/// </summary>
 		[ConfigurationProperty("strictMode", DefaultValue = false)]
 		public bool StrictMode

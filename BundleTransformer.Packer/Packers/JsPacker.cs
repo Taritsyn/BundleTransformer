@@ -13,14 +13,19 @@
 	internal sealed class JsPacker : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a Dean Edwards' Packer-library
+		/// Namespace for resources
 		/// </summary>
-		const string PACKER_LIBRARY_RESOURCE_NAME = "BundleTransformer.Packer.Resources.packer-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.Packer.Resources";
+
+		/// <summary>
+		/// Name of file, which contains a Dean Edwards' Packer-library
+		/// </summary>
+		private const string PACKER_LIBRARY_FILE_NAME = "packer-combined.min.js";
 
 		/// <summary>
 		/// Name of function, which is responsible for packing
 		/// </summary>
-		const string PACKING_FUNCTION_NAME = "packerPack";
+		private const string PACKING_FUNCTION_NAME = "packerPack";
 
 		/// <summary>
 		/// JS engine
@@ -44,7 +49,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of JS-packer
+		/// Constructs a instance of JS-packer
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public JsPacker(Func<IJsEngine> createJsEngineInstance)
@@ -60,11 +65,11 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine.ExecuteResource(PACKER_LIBRARY_RESOURCE_NAME, GetType());
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + PACKER_LIBRARY_FILE_NAME, GetType());
 				_jsEngine.Execute(
 					string.Format(@"var {0} = function(code, base62Encode, shrinkVariables) {{
-	var packer = new Packer();	
- 
+	var packer = new Packer();
+
 	return packer.pack(code, base62Encode, shrinkVariables);
 }}", PACKING_FUNCTION_NAME));
 
@@ -73,7 +78,7 @@
 		}
 
 		/// <summary>
-		/// "Packs" JS-code by using Dean Edwards' Packer
+		/// "Packs" a JS-code by using Dean Edwards' Packer
 		/// </summary>
 		/// <param name="content">Text content of JS-asset</param>
 		/// <param name="base62Encode">Flag for whether to Base62 encode</param>

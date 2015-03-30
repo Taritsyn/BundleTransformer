@@ -6,7 +6,7 @@
 	public static class StringExtensions
 	{
 		/// <summary>
-		/// Replaces tabs by specified number of spaces
+		/// Replaces a tabs by specified number of spaces
 		/// </summary>
 		/// <param name="source">String value</param>
 		/// <param name="tabSize">Number of spaces in tab</param>

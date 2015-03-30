@@ -6,7 +6,7 @@
 	public sealed class ParsingOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to disable automatic semicolon 
+		/// Gets or sets a flag for whether to disable automatic semicolon
 		/// insertion and support for trailing comma in arrays and objects
 		/// </summary>
 		public bool Strict
@@ -27,7 +27,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the parsing options
+		/// Constructs a instance of the parsing options
 		/// </summary>
 		public ParsingOptions()
 		{

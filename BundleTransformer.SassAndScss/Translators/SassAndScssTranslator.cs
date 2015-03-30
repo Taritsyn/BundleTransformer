@@ -133,7 +133,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-translator
+		/// Constructs a instance of Sass- and SCSS-translator
 		/// </summary>
 		public SassAndScssTranslator()
 			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
@@ -142,7 +142,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-translator
+		/// Constructs a instance of Sass- and SCSS-translator
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="relativePathResolver">Relative path resolver</param>
@@ -164,7 +164,7 @@
 
 
 		/// <summary>
-		/// Translates code of asset written on Sass or SCSS to CSS-code
+		/// Translates a code of asset written on Sass or SCSS to CSS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Sass or SCSS</param>
 		/// <returns>Asset with translated code</returns>
@@ -195,7 +195,7 @@
 		}
 
 		/// <summary>
-		/// Translates code of assets written on Sass or SCSS to CSS-code
+		/// Translates a code of assets written on Sass or SCSS to CSS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on Sass or SCSS</param>
 		/// <returns>Set of assets with translated code</returns>

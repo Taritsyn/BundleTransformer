@@ -8,7 +8,7 @@
 	using FileSystem;
 
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output
 	/// of translated CSS-asset
 	/// </summary>
 	public sealed class CssAssetHandler : StyleAssetHandlerBase

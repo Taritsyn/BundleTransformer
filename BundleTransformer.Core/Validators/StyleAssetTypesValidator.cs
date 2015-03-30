@@ -38,8 +38,8 @@
 					;
 
 				throw new InvalidAssetTypesException(
-					string.Format(Strings.Assets_StyleAssetsContainAssetsWithInvalidTypes, 
-					string.Join(", ", invalidAssetsVirtualPaths)), 
+					string.Format(Strings.Assets_StyleAssetsContainAssetsWithInvalidTypes,
+					string.Join(", ", invalidAssetsVirtualPaths)),
 					invalidAssetsVirtualPaths);
 			}
 		}

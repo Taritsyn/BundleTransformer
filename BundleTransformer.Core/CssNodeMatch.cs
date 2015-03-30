@@ -18,9 +18,9 @@
 
 
 		/// <summary>
-		/// Constructs instance of CSS node match
+		/// Constructs a instance of CSS node match
 		/// </summary>
-		/// <param name="position">Position in the original string where 
+		/// <param name="position">Position in the original string where
 		/// the first character of the captured substring was found</param>
 		/// <param name="length">Length of the captured substring</param>
 		/// <param name="nodeType">Type of CSS-node</param>

@@ -17,7 +17,7 @@
 			new Lazy<MicrosoftAjaxSettings>(() => (MicrosoftAjaxSettings)ConfigurationManager.GetSection("bundleTransformer/microsoftAjax"));
 
 		/// <summary>
-		/// Gets Microsoft Ajax Minifier configuration settings
+		/// Gets a Microsoft Ajax Minifier configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Microsoft Ajax Minifier</returns>

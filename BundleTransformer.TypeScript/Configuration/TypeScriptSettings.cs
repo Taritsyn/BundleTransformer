@@ -20,7 +20,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to warn on expressions and declarations 
+		/// Gets or sets a flag for whether to warn on expressions and declarations
 		/// with an implied 'any' type
 		/// </summary>
 		[ConfigurationProperty("noImplicitAny", DefaultValue = false)]
@@ -73,7 +73,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, 
+		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript6` (experimental)
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]

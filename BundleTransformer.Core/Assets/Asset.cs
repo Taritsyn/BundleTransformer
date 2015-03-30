@@ -220,7 +220,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Asset
+		/// Constructs a instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
 		public Asset(string virtualPath)
@@ -228,7 +228,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Asset
+		/// Constructs a instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
@@ -237,7 +237,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Asset
+		/// Constructs a instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
 		/// <param name="bundleFile">Bundle file</param>
@@ -246,7 +246,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Asset
+		/// Constructs a instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
 		/// <param name="bundleFile">Bundle file</param>
@@ -259,7 +259,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Asset
+		/// Constructs a instance of Asset
 		/// </summary>
 		/// <param name="virtualPath">Virtual path to asset file</param>
 		/// <param name="bundleFile">Bundle file</param>

@@ -18,7 +18,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets list of JS-files with Microsoft-style extensions
+		/// Gets or sets a list of JS-files with Microsoft-style extensions
 		/// </summary>
 		[ConfigurationProperty("jsFilesWithMicrosoftStyleExtensions", DefaultValue = "MicrosoftAjax.js,MicrosoftMvcAjax.js,MicrosoftMvcValidation.js,knockout-$version$.js")]
 		public string JsFilesWithMicrosoftStyleExtensions
@@ -28,7 +28,7 @@
 		}
 
 		/// <summary>
-		/// Gets configuration settings of processing style assets
+		/// Gets a configuration settings of processing style assets
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public StyleSettings Styles
@@ -37,7 +37,7 @@
 		}
 
 		/// <summary>
-		/// Gets configuration settings of processing script assets
+		/// Gets a configuration settings of processing script assets
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public ScriptSettings Scripts
@@ -46,7 +46,7 @@
 		}
 
 		/// <summary>
-		/// Gets configuration settings of the debugging HTTP-handler, that responsible 
+		/// Gets a configuration settings of the debugging HTTP-handler, that responsible
 		/// for text output of processed asset
 		/// </summary>
 		[ConfigurationProperty("assetHandler")]

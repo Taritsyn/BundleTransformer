@@ -45,7 +45,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Resource redirection platform adaptation layer
+		/// Constructs a instance of Resource redirection platform adaptation layer
 		/// </summary>
 		/// <param name="resourcesNamespace">Resources namespace</param>
 		public ResourceRedirectionPlatformAdaptationLayer(string resourcesNamespace)

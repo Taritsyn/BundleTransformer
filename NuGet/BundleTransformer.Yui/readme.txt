@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: YUI 1.9.34
+               README file for Bundle Transformer: YUI 1.9.52
  
    ----------------------------------------------------------------------
 
-          Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========

@@ -16,7 +16,7 @@
 	using Optimizers;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code 
+	/// Minifier, which produces minifiction of CSS-code
 	/// by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 	/// </summary>
 	public sealed class KryzhanovskyCssMinifier : IMinifier
@@ -47,14 +47,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Sergey Kryzhanovsky's CSS-minifier
+		/// Constructs a instance of Sergey Kryzhanovsky's CSS-minifier
 		/// </summary>
 		public KryzhanovskyCssMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetCssoSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Sergey Kryzhanovsky's CSS-minifier
+		/// Constructs a instance of Sergey Kryzhanovsky's CSS-minifier
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="cssoConfig">Configuration settings of Sergey Kryzhanovsky's Minifier</param>
@@ -85,7 +85,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of CSS-asset by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
+		/// Produces a code minifiction of CSS-asset by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 		/// </summary>
 		/// <param name="asset">CSS-asset</param>
 		/// <returns>CSS-asset with minified text content</returns>
@@ -110,7 +110,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of CSS-assets by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
+		/// Produces a code minifiction of CSS-assets by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of CSS-assets with minified text content</returns>

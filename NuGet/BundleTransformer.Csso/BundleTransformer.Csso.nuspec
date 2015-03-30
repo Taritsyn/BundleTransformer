@@ -1,35 +1,35 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-  <metadata>
-    <id>BundleTransformer.Csso</id>
-    <version>1.9.34</version>
-	<title>Bundle Transformer: CSSO</title>
-    <authors>Andrey Taritsyn</authors>
-    <owners>Andrey Taritsyn</owners>
-    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=484303</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.11.
-   
+	<metadata>
+		<id>BundleTransformer.Csso</id>
+		<version>1.9.52</version>
+		<title>Bundle Transformer: CSSO</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=484303</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 1.3.11.
+	 
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode).</description>
-    <summary>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO version 1.3.11.</summary>
-	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-    <language>en-US</language>
-    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
-    <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.34" />
-	  <dependency id="JavaScriptEngineSwitcher.Core" version="1.2.0" />
-	  <dependency id="Newtonsoft.Json" version="6.0.6" />
-    </dependencies>
-    <references>
-      <reference file="BundleTransformer.Csso.dll" />
-    </references>
-  </metadata>
-  <files>
-    <file src="..\..\BundleTransformer.Csso\bin\Release\BundleTransformer.Csso.dll" target="lib\net40" />
-	<file src="..\..\BundleTransformer.Csso\bin\Release\**\BundleTransformer.Csso.resources.dll" target="lib\net40" />
-	<file src="content\web.config.transform" target="content" />
-	<file src="readme.txt" />
-  </files>
+		<summary>BundleTransformer.Csso contains one minifier-adapter for minification of CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO version 1.3.11.</summary>
+		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
+		<dependencies>
+			<dependency id="BundleTransformer.Core" version="1.9.52" />
+			<dependency id="JavaScriptEngineSwitcher.Core" version="1.2.4" />
+			<dependency id="Newtonsoft.Json" version="6.0.8" />
+		</dependencies>
+		<references>
+			<reference file="BundleTransformer.Csso.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\BundleTransformer.Csso\bin\Release\BundleTransformer.Csso.dll" target="lib\net40" />
+		<file src="..\..\BundleTransformer.Csso\bin\Release\**\BundleTransformer.Csso.resources.dll" target="lib\net40" />
+		<file src="content\web.config.transform" target="content" />
+		<file src="readme.txt" />
+	</files>
 </package>

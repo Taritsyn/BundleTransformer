@@ -17,7 +17,7 @@
 			new Lazy<PackerSettings>(() => (PackerSettings)ConfigurationManager.GetSection("bundleTransformer/packer"));
 
 		/// <summary>
-		/// Gets Dean Edwards' Minifier configuration settings
+		/// Gets a Dean Edwards' Minifier configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Dean Edwards' Minifier</returns>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.Closure</id>
-		<version>1.9.51</version>
+		<version>1.9.52</version>
 		<title>Bundle Transformer: Closure</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -12,16 +12,13 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>BundleTransformer.Closure contains 2 minifier-adapters for minification of JS-code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. `ClosureRemoteJsMinifier` is based on the Google Closure Compiler Service API (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet. `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of file compiler.jar.</description>
 		<summary>BundleTransformer.Closure contains 2 minifier-adapters for minification of JS-code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. These adapters perform minification using the Google Closure Compiler.</summary>
-		<releaseNotes>1. Added the ability to specify the externs files;
-2. In configuration settings of Closure Remote JS-minifier was added 3 new properties: `Charset` (default is empty), `Language` (default `EcmaScript3`) and `UseTypesForOptimization` (default `false`);
-3. In configuration settings of Closure Local JS-minifier was renamed one property - `LanguageSpec` to `LanguageInput`, and added 16 new properties: `AcceptConstKeyword` (default `false`), `AllowEs6Output` (default `false`), `AngularPass` (default `false`), `Charset` (default is empty), `DefinitionList` (default is empty), `ErrorList` (default is empty), `ExportLocalPropertyDefinitions` (default `false`), `ExtraAnnotationNameList` (default is empty), `GenerateExports` (default `false`), `LanguageOutput` (default `None`), `SingleQuotes` (default `false`), `TranspileOnly` (default `false`), `TurnOffWarningClassList` (default is empty), `UseOnlyCustomExterns` (default `false`), `UseTypesForOptimization` (default `false`) and `WarningList` (default is empty).</releaseNotes>
 		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Google Closure Compiler</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.51" />
+			<dependency id="BundleTransformer.Core" version="1.9.52" />
 			<dependency id="Microsoft.Net.Http" version="2.2.29" />
-			<dependency id="Newtonsoft.Json" version="6.0.6" />
+			<dependency id="Newtonsoft.Json" version="6.0.8" />
 		</dependencies>
 		<references>
 			<reference file="BundleTransformer.Closure.dll" />

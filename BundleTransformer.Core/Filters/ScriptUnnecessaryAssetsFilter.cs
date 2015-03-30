@@ -12,9 +12,9 @@
 	public sealed class ScriptUnnecessaryAssetsFilter : UnnecessaryAssetsFilterBase
 	{
 		/// <summary>
-		/// Constructs instance of unnecessary script assets filter
+		/// Constructs a instance of unnecessary script assets filter
 		/// </summary>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		public ScriptUnnecessaryAssetsFilter(string[] ignorePatterns) : base(ignorePatterns)
 		{ }

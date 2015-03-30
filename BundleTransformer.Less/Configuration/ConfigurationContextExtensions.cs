@@ -17,7 +17,7 @@
 			new Lazy<LessSettings>(() => (LessSettings)ConfigurationManager.GetSection("bundleTransformer/less"));
 
 		/// <summary>
-		/// Gets LESS-translator configuration settings
+		/// Gets a LESS-translator configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of LESS-translator</returns>

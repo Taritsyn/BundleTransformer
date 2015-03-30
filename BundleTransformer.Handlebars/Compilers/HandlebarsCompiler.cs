@@ -71,7 +71,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of Handlebars-compiler
+		/// Constructs a instance of Handlebars-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public HandlebarsCompiler(Func<IJsEngine> createJsEngineInstance)
@@ -79,7 +79,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Handlebars-compiler
+		/// Constructs a instance of Handlebars-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>

@@ -8,9 +8,9 @@
 	using Resources;
 
 	/// <summary>
-	/// Base class of filter is responsible for choosing appropriate 
-	/// version of asset file, depending on current mode of 
-	/// web application (debug mode - debug versions of asset files; 
+	/// Base class of filter is responsible for choosing appropriate
+	/// version of asset file, depending on current mode of
+	/// web application (debug mode - debug versions of asset files;
 	/// release mode - minified versions)
 	/// </summary>
 	public abstract class FileExtensionsFilterBase : IFilter
@@ -51,7 +51,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the file extensions filter
+		/// Constructs a instance of the file extensions filter
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		protected FileExtensionsFilterBase(IVirtualFileSystemWrapper virtualFileSystemWrapper)
@@ -61,7 +61,7 @@
 
 
 		/// <summary>
-		/// Chooses appropriate versions of files, depending on 
+		/// Chooses a appropriate versions of files, depending on
 		/// current mode of web application
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
@@ -69,18 +69,18 @@
 		public abstract IList<IAsset> Transform(IList<IAsset> assets);
 
 		/// <summary>
-		/// Gets version of virtual file path, most appropriate for 
+		/// Gets a version of virtual file path, most appropriate for
 		/// current mode of web application
 		/// </summary>
 		/// <param name="assetVirtualPath">Asset virtual file path</param>
-		/// <param name="isMinified">Flag indicating what appropriate 
+		/// <param name="isMinified">Flag indicating what appropriate
 		/// virtual file path version of asset is minified</param>
-		/// <returns>Path to file, corresponding current mode 
+		/// <returns>Path to file, corresponding current mode
 		/// of web application</returns>
 		protected abstract string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified);
 
 		/// <summary>
-		/// Gets appropriate version of asset virtual file path based 
+		/// Gets a appropriate version of asset virtual file path based
 		/// on list of file extensions
 		/// </summary>
 		/// <param name="assetVirtualPath">Asset virtual file path</param>

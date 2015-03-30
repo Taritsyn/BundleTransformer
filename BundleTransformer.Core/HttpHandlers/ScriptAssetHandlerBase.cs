@@ -10,7 +10,7 @@
 	using Translators;
 
 	/// <summary>
-	/// Base class of the debugging HTTP-handler that responsible for text output 
+	/// Base class of the debugging HTTP-handler that responsible for text output
 	/// of processed script asset
 	/// </summary>
 	public abstract class ScriptAssetHandlerBase : AssetHandlerBase

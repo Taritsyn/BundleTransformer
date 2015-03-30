@@ -1,6 +1,6 @@
 ﻿square = (x) -> x * x
 
-showElem = (id) -> 
+showElem = (id) ->
 	elem = document.getElementById(id)
 	elem.style.display = "block" if elem?
 

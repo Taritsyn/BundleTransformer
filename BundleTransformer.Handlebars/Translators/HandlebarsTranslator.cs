@@ -94,14 +94,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Handlebars-translator
+		/// Constructs a instance of Handlebars-translator
 		/// </summary>
 		public HandlebarsTranslator()
 			: this(null, BundleTransformerContext.Current.Configuration.GetHandlebarsSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Handlebars-translator
+		/// Constructs a instance of Handlebars-translator
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="handlebarsConfig">Configuration settings of Handlebars-translator</param>
@@ -141,7 +141,7 @@
 		}
 
 		/// <summary>
-		/// Translates code of asset written on Handlebars to JS-code
+		/// Translates a code of asset written on Handlebars to JS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Handlebars</param>
 		/// <returns>Asset with translated code</returns>
@@ -163,7 +163,7 @@
 		}
 
 		/// <summary>
-		/// Translates code of assets written on Handlebars to JS-code
+		/// Translates a code of assets written on Handlebars to JS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on Handlebars</param>
 		/// <returns>Set of assets with translated code</returns>

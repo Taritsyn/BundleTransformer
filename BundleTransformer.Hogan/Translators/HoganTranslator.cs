@@ -75,14 +75,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Hogan-translator
+		/// Constructs a instance of Hogan-translator
 		/// </summary>
 		public HoganTranslator()
 			: this(null, BundleTransformerContext.Current.Configuration.GetHoganSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Hogan-translator
+		/// Constructs a instance of Hogan-translator
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="hoganConfig">Configuration settings of Hogan-translator</param>
@@ -126,7 +126,7 @@
 
 
 		/// <summary>
-		/// Translates code of asset written on Mustache to JS-code
+		/// Translates a code of asset written on Mustache to JS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Mustache</param>
 		/// <returns>Asset with translated code</returns>
@@ -149,7 +149,7 @@
 		}
 
 		/// <summary>
-		/// Translates code of assets written on Mustache to JS-code
+		/// Translates a code of assets written on Mustache to JS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on Mustache</param>
 		/// <returns>Set of assets with translated code</returns>

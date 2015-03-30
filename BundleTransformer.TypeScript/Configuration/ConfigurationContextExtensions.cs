@@ -17,7 +17,7 @@
 			new Lazy<TypeScriptSettings>(() => (TypeScriptSettings)ConfigurationManager.GetSection("bundleTransformer/typeScript"));
 
 		/// <summary>
-		/// Gets TypeScript-translator configuration settings
+		/// Gets a TypeScript-translator configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of TypeScript-translator</returns>

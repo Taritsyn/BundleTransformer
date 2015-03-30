@@ -76,13 +76,13 @@
 
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-compiler
+		/// Constructs a instance of Sass- and SCSS-compiler
 		/// </summary>
 		public SassAndScssCompiler() : this(null)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Sass- and SCSS-compiler
+		/// Constructs a instance of Sass- and SCSS-compiler
 		/// </summary>
 		/// <param name="defaultOptions">Default compilation options</param>
 		public SassAndScssCompiler(CompilationOptions defaultOptions)
@@ -191,7 +191,7 @@
 			stringBuilder.AppendFormat(":syntax => :{0}, ",
 				(options.SyntaxType == SyntaxType.Sass) ? "sass" : "scss");
 			stringBuilder.AppendFormat(":cache => {0}, ", "false");
-			stringBuilder.AppendFormat(":full_exception => {0}, ", "false");
+			stringBuilder.AppendFormat(":full_exception => {0}, ", "true");
 			stringBuilder.AppendFormat(":filename => '{0}', ", path);
 			stringBuilder.AppendFormat(":sourcemap => :{0}, ", "none");
 			stringBuilder.AppendFormat(":line_numbers => {0}, ",

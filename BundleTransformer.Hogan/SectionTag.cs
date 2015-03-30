@@ -25,7 +25,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of custom section tag
+		/// Constructs a instance of custom section tag
 		/// </summary>
 		/// <param name="openingTagName">Name of opening tag</param>
 		/// <param name="closingTagName">Name of closing tag</param>

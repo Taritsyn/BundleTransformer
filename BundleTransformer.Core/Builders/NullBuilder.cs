@@ -4,13 +4,13 @@
 	using System.Web.Optimization;
 
 	/// <summary>
-	/// Builder that responsible for prevention of early applying of 
-	/// the item transformations and combining of code 
+	/// Builder that responsible for prevention of early applying of
+	/// the item transformations and combining of code
 	/// </summary>
 	public sealed class NullBuilder : IBundleBuilder
 	{
 		/// <summary>
-		/// Prevents a early applying of the item transformations and combining of code 
+		/// Prevents a early applying of the item transformations and combining of code
 		/// </summary>
 		/// <param name="bundle">Bundle</param>
 		/// <param name="context">Object BundleContext</param>

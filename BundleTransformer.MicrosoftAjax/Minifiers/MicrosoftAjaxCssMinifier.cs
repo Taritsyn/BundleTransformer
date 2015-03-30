@@ -248,14 +248,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax CSS-minifier
+		/// Constructs a instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		public MicrosoftAjaxCssMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of Microsoft Ajax CSS-minifier
+		/// Constructs a instance of Microsoft Ajax CSS-minifier
 		/// </summary>
 		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
@@ -272,7 +272,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of CSS-asset by using Microsoft Ajax Minifier
+		/// Produces a code minifiction of CSS-asset by using Microsoft Ajax Minifier
 		/// </summary>
 		/// <param name="asset">CSS-asset</param>
 		/// <returns>CSS-asset with minified text content</returns>
@@ -299,7 +299,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of CSS-assets by using Microsoft Ajax Minifier
+		/// Produces a code minifiction of CSS-assets by using Microsoft Ajax Minifier
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of CSS-assets with minified text content</returns>

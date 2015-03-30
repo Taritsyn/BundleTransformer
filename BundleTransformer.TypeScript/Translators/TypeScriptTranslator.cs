@@ -17,7 +17,7 @@
 	using Core.Translators;
 	using CoreFileExtensionHelpers = Core.Helpers.FileExtensionHelpers;
 	using CoreStrings = Core.Resources.Strings;
-	
+
 	using Compilers;
 	using Configuration;
 	using TypeScriptFileExtensionHelpers = Helpers.FileExtensionHelpers;
@@ -93,7 +93,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to warn on expressions and declarations 
+		/// Gets or sets a flag for whether to warn on expressions and declarations
 		/// with an implied 'any' type
 		/// </summary>
 		public bool NoImplicitAny
@@ -141,7 +141,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, 
+		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript6` (experimental)
 		/// </summary>
 		public TargetMode Target
@@ -152,7 +152,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of TypeScript-translator
+		/// Constructs a instance of TypeScript-translator
 		/// </summary>
 		public TypeScriptTranslator()
 			: this(null,
@@ -162,13 +162,13 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of TypeScript-translator
+		/// Constructs a instance of TypeScript-translator
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		/// <param name="tsConfig">Configuration settings of TypeScript-translator</param>
-		public TypeScriptTranslator(Func<IJsEngine> createJsEngineInstance, 
+		public TypeScriptTranslator(Func<IJsEngine> createJsEngineInstance,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			IRelativePathResolver relativePathResolver, TypeScriptSettings tsConfig)
 		{
@@ -207,7 +207,7 @@
 
 
 		/// <summary>
-		/// Translates code of asset written on TypeScript to JS-code
+		/// Translates a code of asset written on TypeScript to JS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on TypeScript</param>
 		/// <returns>Asset with translated code</returns>
@@ -240,7 +240,7 @@
 		}
 
 		/// <summary>
-		/// Translates code of assets written on TypeScript to JS-code
+		/// Translates a code of assets written on TypeScript to JS-code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on TypeScript</param>
 		/// <returns>Set of assets with translated code</returns>
@@ -507,12 +507,12 @@
 		}
 
 		/// <summary>
-		/// Fills the list of TypeScript-files, references to which have been added to a TypeScript-asset 
+		/// Fills the list of TypeScript-files, references to which have been added to a TypeScript-asset
 		/// by using the "reference" comments
 		/// </summary>
 		/// <param name="rootAssetUrl">URL of root TypeScript-asset file</param>
 		/// <param name="parentScript">Parent TypeScript-script</param>
-		/// <param name="dependencies">List of TypeScript-files, references to which have been 
+		/// <param name="dependencies">List of TypeScript-files, references to which have been
 		/// added to a TypeScript-asset by using the "reference" comments</param>
 		public void FillDependencies(string rootAssetUrl, TsScript parentScript,
 			DependencyCollection dependencies)
@@ -552,7 +552,7 @@
 		}
 
 		/// <summary>
-		/// Removes "reference" comments
+		/// Removes a "reference" comments
 		/// </summary>
 		/// <param name="content">Text content</param>
 		/// <returns>Text content without "reference" comments</returns>

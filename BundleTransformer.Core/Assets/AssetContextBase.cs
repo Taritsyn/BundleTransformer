@@ -71,7 +71,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of script context
+		/// Constructs a instance of script context
 		/// </summary>
 		/// <param name="assetConfig">Configuration settings of processing assets</param>
 		protected AssetContextBase(AssetSettingsBase assetConfig)
@@ -184,7 +184,7 @@
 						if (postProcessorRegistration == null)
 						{
 							throw new PostProcessorNotFoundException(
-								string.Format(Strings.Configuration_PostProcessorNotRegistered, 
+								string.Format(Strings.Configuration_PostProcessorNotRegistered,
 									OutputCodeType, postProcessorName));
 						}
 

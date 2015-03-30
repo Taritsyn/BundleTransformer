@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.9.49
+          README file for Bundle Transformer: Sass and SCSS 1.9.52
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
    `SassAndScssTranslator` (supports Sass (http://sass-lang.com) 
-   version 3.4.12). This adapter makes translation of Sass- and 
+   version 3.4.13). This adapter makes translation of Sass- and 
    SCSS-code to CSS-code. Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of 
    translated Sass- or SCSS-asset.
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #95 "SCSS Class names that end with hyphen number".
+   Added support of Sass version 3.4.13.
    
    ====================
    POST-INSTALL ACTIONS

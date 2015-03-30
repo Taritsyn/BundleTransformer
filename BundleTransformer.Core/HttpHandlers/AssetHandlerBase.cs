@@ -21,7 +21,7 @@
 	using Translators;
 
 	/// <summary>
-	/// Base class of the debugging HTTP-handler that responsible for text output 
+	/// Base class of the debugging HTTP-handler that responsible for text output
 	/// of processed asset
 	/// </summary>
 	public abstract class AssetHandlerBase : IHttpHandler
@@ -107,7 +107,7 @@
 		{
 			_context = context;
 
-			var request = context.Request; 
+			var request = context.Request;
 			var response = context.Response;
 
 			Uri assetUri = request.Url;
@@ -185,7 +185,7 @@
 				string eTag = GenerateAssetETag(content);
 				bool eTagChanged = IsETagHeaderChanged(request, eTag);
 
-				// Add a special HTTP-headers to ensure that 
+				// Add a special HTTP-headers to ensure that
 				// asset caching in browsers
 				if (eTagChanged)
 				{
@@ -295,7 +295,7 @@
 			}
 
 			string content;
-			
+
 			if (_assetHandlerConfig.DisableServerCache)
 			{
 				IAsset processedAsset = ProcessAsset(assetVirtualPath, bundleVirtualPath);
@@ -338,7 +338,7 @@
 		}
 
 		/// <summary>
-		/// Generates a value for HTTP-header "ETag" based on 
+		/// Generates a value for HTTP-header "ETag" based on
 		/// information about processed asset
 		/// </summary>
 		/// <param name="assetContent">Text content of asset</param>
@@ -380,7 +380,7 @@
 		}
 
 		/// <summary>
-		/// Checks a actuality of data in browser cache using 
+		/// Checks a actuality of data in browser cache using
 		/// HTTP-header "ETag"
 		/// </summary>
 		/// <param name="request">HttpRequest object</param>
@@ -409,7 +409,7 @@
 		{
 			BundleFile bundleFile = null;
 			ITransformer transformer = null;
-			
+
 			if (!string.IsNullOrWhiteSpace(bundleVirtualPath))
 			{
 				Bundle bundle = GetBundleByVirtualPath(bundleVirtualPath);
@@ -509,7 +509,7 @@
 		protected abstract ITransformer GetTransformer(Bundle bundle);
 
 		/// <summary>
-		/// Translates code of asset written on intermediate language
+		/// Translates a code of asset written on intermediate language
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <param name="transformer">Transformer</param>

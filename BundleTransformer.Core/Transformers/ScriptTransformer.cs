@@ -19,7 +19,7 @@
 	public sealed class ScriptTransformer : TransformerBase
 	{
 		/// <summary>
-		/// list of JS-files with Microsoft-style extensions
+		/// List of JS-files with Microsoft-style extensions
 		/// </summary>
 		private readonly string[] _jsFilesWithMsStyleExtensions;
 
@@ -102,7 +102,7 @@
 		/// <summary>
 		/// Constructs a instance of script transformer
 		/// </summary>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		public ScriptTransformer(string[] ignorePatterns)
 			: this(null, null, null, ignorePatterns)
@@ -114,7 +114,7 @@
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="postProcessors">List of postprocessors</param>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		public ScriptTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
 			string[] ignorePatterns)
@@ -128,7 +128,7 @@
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="postProcessors">List of postprocessors</param>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
 		public ScriptTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,

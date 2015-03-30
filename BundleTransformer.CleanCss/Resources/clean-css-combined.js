@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.0.10
+ * Clean-css v3.1.8
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -162,6 +162,9 @@ var CleanCss = (function(){
 			var token;
 //			var addSourceMap = context.addSourceMap;
 
+			if (string.replace && string.indexOf(')') > 0)
+			  string = string.replace(/\)([^\s_;:,\)])/g, /*context.addSourceMap ? ') __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__$1' : */') $1');
+
 			for (var i = 0, l = string.length; i < l; i++) {
 			  current = string[i];
 			  isPropertyEnd = current === ';';
@@ -192,12 +195,14 @@ var CleanCss = (function(){
 				  buffer.pop();
 				if (buffer.length > 0) {
 				  property = buffer.join('');
-				  token = { value: property };
-				  tokenized.push(token);
-				  list.push(property);
+				  if (property.indexOf('{') === -1) {
+					token = { value: property };
+					tokenized.push(token);
+					list.push(property);
 
-//				  if (addSourceMap)
-//					token.metadata = SourceMaps.saveAndTrack(all.join(''), context, !isEscape);
+//					if (addSourceMap)
+//					  token.metadata = SourceMaps.saveAndTrack(all.join(''), context, !isEscape);
+				  }
 				}
 				buffer = [];
 				all = [];
@@ -232,12 +237,14 @@ var CleanCss = (function(){
 			  buffer.pop();
 			if (buffer.length > 0) {
 			  property = buffer.join('');
-			  token = { value: property };
-			  tokenized.push(token);
-			  list.push(property);
+			  if (property.indexOf('{') === -1) {
+				token = { value: property };
+				tokenized.push(token);
+				list.push(property);
 
-//			  if (addSourceMap)
-//				token.metadata = SourceMaps.saveAndTrack(all.join(''), context, false);
+//				if (addSourceMap)
+//				  token.metadata = SourceMaps.saveAndTrack(all.join(''), context, false);
+			  }
 			} else if (all.indexOf('\n') > -1) {
 //			  SourceMaps.track(all.join(''), context);
 			}
@@ -375,7 +382,11 @@ var CleanCss = (function(){
 			if (!next) {
 			  var whatsLeft = context.chunk.substring(context.cursor);
 			  if (whatsLeft.trim().length > 0) {
-				tokenized.push({ kind: 'text', value: whatsLeft });
+				if (context.mode == 'body') {
+				  context.outer.warnings.push('Missing \'}\' after \'' + whatsLeft + '\'. Ignoring.');
+				} else {
+				  tokenized.push({ kind: 'text', value: whatsLeft });
+				}
 				context.cursor += whatsLeft.length;
 			  }
 			  break;
@@ -550,7 +561,7 @@ var CleanCss = (function(){
 		}
 
 		var CleanUp = {
-		  selectors: function (selectors, removeUnsupported) {
+		  selectors: function (selectors, removeUnsupported, adjacentSpace) {
 			var plain = [];
 			var tokenized = [];
 
@@ -561,6 +572,9 @@ var CleanCss = (function(){
 				.replace(/ ?, ?/g, ',')
 				.replace(/\s*([>\+\~])\s*/g, '$1')
 				.trim();
+
+			  if (adjacentSpace && reduced.indexOf('nav') > 0)
+				reduced = reduced.replace(/\+nav(\S|$)/, '+ nav$1');
 
 			  if (removeUnsupported && (reduced.indexOf('*+html ') != -1 || reduced.indexOf('*:first-child+html ') != -1))
 				continue;
@@ -587,11 +601,30 @@ var CleanCss = (function(){
 			};
 		  },
 
+		  selectorDuplicates: function (selectors) {
+			var plain = [];
+			var tokenized = [];
+
+			for (var i = 0, l = selectors.length; i < l; i++) {
+			  var selector = selectors[i];
+
+			  if (plain.indexOf(selector.value) == -1) {
+				plain.push(selector.value);
+				tokenized.push(selector);
+			  }
+			}
+
+			return {
+			  list: plain.sort(),
+			  tokenized: tokenized.sort(selectorSorter)
+			};
+		  },
+
 		  block: function (block) {
 			return block
 			  .replace(/\s+/g, ' ')
 			  .replace(/(,|:|\() /g, '$1')
-			  .replace(/ \)/g, ')');
+			  .replace(/ ?\) ?/g, ')');
 		  },
 
 		  atRule: function (block) {
@@ -898,6 +931,8 @@ var CleanCss = (function(){
 		var HSL = require('/colors/hsl');
 		var HexNameShortener = require('/colors/hex-name-shortener');
 
+		var processable = require('/properties/processable');
+
 		var DEFAULT_ROUNDING_PRECISION = 2;
 		var CHARSET_TOKEN = '@charset';
 		var CHARSET_REGEXP = new RegExp('^' + CHARSET_TOKEN, 'i');
@@ -936,8 +971,8 @@ var CleanCss = (function(){
 		  },
 		  'filter': function (value) {
 			if (value.indexOf('DXImageTransform') === value.lastIndexOf('DXImageTransform')) {
-			  value = value.replace(/progid:DXImageTransform\.Microsoft\.(Alpha|Chroma)/, function (match, filter) {
-				return filter.toLowerCase();
+			  value = value.replace(/progid:DXImageTransform\.Microsoft\.(Alpha|Chroma)(\W)/, function (match, filter, suffix) {
+				return filter.toLowerCase() + suffix;
 			  });
 			}
 
@@ -966,13 +1001,27 @@ var CleanCss = (function(){
 		  }
 		};
 
+		function isNegative(value) {
+		  var parts = new Splitter(',').split(value);
+		  for (var i = 0, l = parts.length; i < l; i++) {
+			if (parts[i][0] == '-' && parseFloat(parts[i]) < 0)
+			  return true;
+		  }
+
+		  return false;
+		}
+
 		function zeroMinifier(_, value) {
 		  if (value.indexOf('0') == -1)
 			return value;
 
+		  if (value.indexOf('-') > -1) {
+			value = value
+			  .replace(/([^\w\d\-]|^)\-0([^\.]|$)/g, '$10$2')
+			  .replace(/([^\w\d\-]|^)\-0([^\.]|$)/g, '$10$2');
+		  }
+
 		  return value
-			.replace(/\-0$/g, '0')
-			.replace(/\-0([^\.])/g, '0$1')
 			.replace(/(^|\s)0+([1-9])/g, '$1$2')
 			.replace(/(^|\D)\.0+(\D|$)/g, '$10$2')
 			.replace(/(^|\D)\.0+(\D|$)/g, '$10$2')
@@ -980,6 +1029,13 @@ var CleanCss = (function(){
 			  return (nonZeroPart.length > 0 ? '.' : '') + nonZeroPart + suffix;
 			})
 			.replace(/(^|\D)0\.(\d)/g, '$1.$2');
+		}
+
+		function zeroDegMinifier(_, value) {
+		  if (value.indexOf('0deg') == -1)
+			return value;
+
+		  return value.replace(/\(0deg\)/g, '(0)');
 		}
 
 		function precisionMinifier(_, value, precisionOptions) {
@@ -1049,6 +1105,13 @@ var CleanCss = (function(){
 		  return HexNameShortener.shorten(value);
 		}
 
+		function spaceMinifier(property, value) {
+		  if (property == 'filter' || value.indexOf(') ') == -1 || processable.implementedFor.test(property))
+			return value;
+
+		  return value.replace(/\) ((?![\+\-] )|$)/g, ')$1');
+		}
+
 		function reduce(body, options) {
 		  var reduced = [];
 		  var properties = [];
@@ -1077,6 +1140,9 @@ var CleanCss = (function(){
 			  important = true;
 			}
 
+			if (property.indexOf('padding') === 0 && isNegative(value))
+			  continue;
+
 			if (property.indexOf('border') === 0 && property.indexOf('radius') > 0)
 			  value = valueMinifiers['border-*-radius'](value);
 
@@ -1085,9 +1151,13 @@ var CleanCss = (function(){
 
 			value = precisionMinifier(property, value, options.precision);
 			value = zeroMinifier(property, value);
+			value = zeroDegMinifier(property, value);
 			value = unitMinifier(property, value, options.unitsRegexp);
 			value = multipleZerosMinifier(property, value);
 			value = colorMininifier(property, value, options.compatibility);
+
+			if (!options.compatibility.properties.spaceAfterClosingBrace)
+			  value = spaceMinifier(property, value);
 
 			newProperty = property + ':' + value + (important ? '!important' : '');
 			reduced.push({ value: newProperty, metadata: token.metadata });
@@ -1113,7 +1183,7 @@ var CleanCss = (function(){
 				break;
 
 			  if (token.kind == 'selector') {
-				var newSelectors = CleanUp.selectors(token.value, !options.compatibility.selectors.ie7Hack);
+				var newSelectors = CleanUp.selectors(token.value, !options.compatibility.selectors.ie7Hack, options.compatibility.selectors.adjacentSpace);
 				token.value = newSelectors.tokenized;
 
 				if (token.value.length === 0) {
@@ -1295,6 +1365,10 @@ var CleanCss = (function(){
 				var property = t.prop === '' && t.value.indexOf('__ESCAPED_') === 0 ?
 				  t.value :
 				  t.prop + ':' + t.value + (t.isImportant ? important : '');
+
+				// FIXME: to be fixed with #429
+				property = property.replace(/\) /g, ')');
+
 				tokenized.push({ value: property, metadata: t.metadata || {} });
 				list.push(property);
 			  }
@@ -1384,6 +1458,7 @@ var CleanCss = (function(){
 		  var backgroundAttachmentKeywords = ['inherit', 'scroll', 'fixed', 'local'];
 		  var backgroundPositionKeywords = ['center', 'top', 'bottom', 'left', 'right'];
 		  var backgroundSizeKeywords = ['contain', 'cover'];
+		  var backgroundBoxKeywords = ['border-box', 'content-box', 'padding-box'];
 		  var listStyleTypeKeywords = ['armenian', 'circle', 'cjk-ideographic', 'decimal', 'decimal-leading-zero', 'disc', 'georgian', 'hebrew', 'hiragana', 'hiragana-iroha', 'inherit', 'katakana', 'katakana-iroha', 'lower-alpha', 'lower-greek', 'lower-latin', 'lower-roman', 'none', 'square', 'upper-alpha', 'upper-latin', 'upper-roman'];
 		  var listStylePositionKeywords = ['inside', 'outside', 'inherit'];
 		  var outlineStyleKeywords = ['auto', 'inherit', 'hidden', 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset'];
@@ -1460,6 +1535,9 @@ var CleanCss = (function(){
 			},
 			isValidBackgroundAttachment: function (s) {
 			  return backgroundAttachmentKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
+			},
+			isValidBackgroundBox: function (s) {
+			  return backgroundBoxKeywords.indexOf(s) >= 0 || validator.isValidVariable(s);
 			},
 			isValidBackgroundPositionPart: function (s) {
 			  return backgroundPositionKeywords.indexOf(s) >= 0 || cssUnitOrCalcRegex.test(s) || validator.isValidVariable(s);
@@ -1675,10 +1753,13 @@ var CleanCss = (function(){
 			  var values = new Splitter(',').split(token.value);
 			  var components = [];
 
+			  // TODO: we should be rather clonging elements than reusing them!
 			  for (var i = 0, l = values.length; i < l; i++) {
 				token.value = values[i];
 				components.push(splitfunc(token));
 			  }
+
+			  token.value = values.join(',');
 
 			  for (var j = 0, m = components[0].length; j < m; j++) {
 				for (var k = 0, n = components.length, newValues = []; k < n; k++) {
@@ -1693,20 +1774,24 @@ var CleanCss = (function(){
 		  };
 		  breakUp.background = function (token) {
 			// Default values
-			var result = Token.makeDefaults(['background-image', 'background-position', 'background-size', 'background-repeat', 'background-attachment', 'background-color'], token.isImportant);
+			var result = Token.makeDefaults(['background-image', 'background-position', 'background-size', 'background-repeat', 'background-attachment', 'background-origin', 'background-clip', 'background-color'], token.isImportant);
 			var image = result[0];
 			var position = result[1];
 			var size = result[2];
 			var repeat = result[3];
 			var attachment = result[4];
-			var color = result[5];
-			var repeatSet = false;
+			var origin = result[5];
+			var clip = result[6];
+			var color = result[7];
 			var positionSet = false;
+			var clipSet = false;
+			var originSet = false;
+			var repeatSet = false;
 
 			// Take care of inherit
 			if (token.value === 'inherit') {
 			  // NOTE: 'inherit' is not a valid value for background-attachment so there we'll leave the default value
-			  color.value = image.value =  repeat.value = position.value = size.value = attachment.value = 'inherit';
+			  color.value = image.value =  repeat.value = position.value = size.value = attachment.value = origin.value = clip.value = 'inherit';
 			  return result;
 			}
 
@@ -1721,6 +1806,14 @@ var CleanCss = (function(){
 
 			  if (validator.isValidBackgroundAttachment(currentPart)) {
 				attachment.value = currentPart;
+			  } else if (validator.isValidBackgroundBox(currentPart)) {
+				if (clipSet) {
+				  origin.value = currentPart;
+				  originSet = true;
+				} else {
+				  clip.value = currentPart;
+				  clipSet = true;
+				}
 			  } else if (validator.isValidBackgroundRepeat(currentPart)) {
 				if (repeatSet) {
 				  repeat.value = currentPart + ' ' + repeat.value;
@@ -1759,6 +1852,9 @@ var CleanCss = (function(){
 				image.value = currentPart;
 			  }
 			}
+
+			if (clipSet && !originSet)
+			  origin.value = clip.value;
 
 			return result;
 		  };
@@ -1957,6 +2053,7 @@ var CleanCss = (function(){
 			  // Go through all tokens and concatenate their values as necessary
 			  for (var i = 0; i < tokens.length; i++) {
 				var token = tokens[i];
+				var definition = processable[token.prop] && processable[token.prop];
 
 				// Set granular value so that other parts of the code can use this for optimalization opportunities
 				result.granularValues = result.granularValues || { };
@@ -1972,20 +2069,28 @@ var CleanCss = (function(){
 				  }
 				}
 
-				// Omit default / irrelevant value
-				if (token.isIrrelevant || (processable[token.prop] && processable[token.prop].defaultValue === token.value)) {
-				  continue;
-				}
-
-				if (meta && meta.partsCount && meta.position < meta.partsCount - 1 && processable[token.prop].multiValueLastOnly)
+				// merge with previous if possible
+				if (definition.mergeWithPrevious && token.value === tokens[i - 1].value)
 				  continue;
 
-				var requiresPreceeding = processable[token.prop].shorthandFollows;
+				// omit irrelevant value
+				if (token.isIrrelevant)
+				  continue;
+
+				// omit default value unless mergable with previous and it wasn't default
+				if (definition.defaultValue === token.value)
+				  if (!definition.mergeWithPrevious || tokens[i - 1].value === processable[tokens[i - 1].prop].defaultValue)
+					continue;
+
+				if (meta && meta.partsCount && meta.position < meta.partsCount - 1 && definition.multiValueLastOnly)
+				  continue;
+
+				var requiresPreceeding = definition.shorthandFollows;
 				if (requiresPreceeding && (tokens[i - 1].value == processable[requiresPreceeding].defaultValue)) {
 				  result.value += ' ' + tokens[i - 1].value;
 				}
 
-				result.value += (processable[token.prop].prefixShorthandValueWith || ' ') + token.value;
+				result.value += (definition.prefixShorthandValueWith || ' ') + token.value;
 			  }
 
 			  result.value = result.value.trim();
@@ -2161,6 +2266,8 @@ var CleanCss = (function(){
 				'background-size',
 				'background-repeat',
 				'background-attachment',
+				'background-origin',
+				'background-clip',
 				'background-color'
 			  ],
 			  breakUp: breakUp.commaSeparatedMulitpleValues(breakUp.background),
@@ -2169,6 +2276,13 @@ var CleanCss = (function(){
 			  ),
 			  defaultValue: '0 0',
 			  shortestValue: '0'
+			},
+			'background-clip': {
+			  canOverride: canOverride.always,
+			  defaultValue: 'border-box',
+			  shortestValue: 'border-box',
+			  shorthandFollows: 'background-origin',
+			  mergeWithPrevious: true
 			},
 			'background-color': {
 			  canOverride: canOverride.color,
@@ -2180,6 +2294,11 @@ var CleanCss = (function(){
 			'background-image': {
 			  canOverride: canOverride.backgroundImage,
 			  defaultValue: 'none'
+			},
+			'background-origin': {
+			  canOverride: canOverride.always,
+			  defaultValue: 'padding-box',
+			  shortestValue: 'border-box'
 			},
 			'background-repeat': {
 			  canOverride: canOverride.always,
@@ -3124,10 +3243,135 @@ var CleanCss = (function(){
 	};
 	//#endregion
 	
+	//#region URL: /properties/extractor
+	modules['/properties/extractor'] = function () {
+		// This extractor is used in advanced optimizations
+		// IMPORTANT: Mind Token class and this code is not related!
+		// Properties will be tokenized in one step, see #429
+
+		function extract(token) {
+		  var properties = [];
+
+		  if (token.kind == 'selector') {
+			var inSimpleSelector = !/[\.\+#>~\s]/.test(token.metadata.selector);
+			for (var i = 0, l = token.metadata.bodiesList.length; i < l; i++) {
+			  var property = token.metadata.bodiesList[i];
+			  if (property.indexOf('__ESCAPED') === 0)
+				continue;
+
+			  var splitAt = property.indexOf(':');
+			  var name = property.substring(0, splitAt);
+			  if (!name)
+				continue;
+
+			  var nameRoot = findNameRoot(name);
+
+			  properties.push([
+				name,
+				property.substring(splitAt + 1),
+				nameRoot,
+				property,
+				token.metadata.selectorsList,
+				inSimpleSelector
+			  ]);
+			}
+		  } else if (token.kind == 'block') {
+			for (var j = 0, k = token.body.length; j < k; j++) {
+			  properties = properties.concat(extract(token.body[j]));
+			}
+		  }
+
+		  return properties;
+		}
+
+		function findNameRoot(name) {
+		  if (name == 'list-style')
+			return name;
+		  if (name.indexOf('-radius') > 0)
+			return 'border-radius';
+		  if (name.indexOf('border-') === 0)
+			return name.match(/border\-\w+/)[0];
+		  if (name.indexOf('text-') === 0)
+			return name;
+
+		  return name.replace(/^\-\w+\-/, '').match(/([a-zA-Z]+)/)[0].toLowerCase();
+		}
+
+		return extract;
+	};
+	//#endregion
+	
+	//#region URL: /properties/reorderable
+	modules['/properties/reorderable'] = function () {
+		var FLEX_PROPERTIES = /align\-items|box\-align|box\-pack|flex|justify/;
+
+		function canReorder(left, right) {
+		  for (var i = right.length - 1; i >= 0; i--) {
+			for (var j = left.length - 1; j >= 0; j--) {
+			  if (!canReorderSingle(left[j], right[i]))
+				return false;
+			}
+		  }
+
+		  return true;
+		}
+
+		function canReorderSingle(left, right) {
+		  var leftName = left[0];
+		  var leftValue = left[1];
+		  var leftNameRoot = left[2];
+		  var leftSelector = left[4];
+		  var leftInSimpleSelector = left[5];
+		  var rightName = right[0];
+		  var rightValue = right[1];
+		  var rightNameRoot = right[2];
+		  var rightSelector = right[4];
+		  var rightInSimpleSelector = right[5];
+
+		  if (leftName == 'font' && rightName == 'line-height' || rightName == 'font' && leftName == 'line-height')
+			return false;
+		  if (FLEX_PROPERTIES.test(leftName) && FLEX_PROPERTIES.test(rightName))
+			return false;
+		  if (leftNameRoot != rightNameRoot)
+			return true;
+		  if (leftName == rightName && leftNameRoot == rightNameRoot && leftValue == rightValue)
+			return true;
+		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftName != leftNameRoot && rightName != rightNameRoot)
+			return true;
+		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftValue == rightValue)
+			return true;
+		  if (rightInSimpleSelector && leftInSimpleSelector && selectorsDoNotOverlap(rightSelector, leftSelector))
+			return true;
+
+		  return false;
+		}
+
+		function selectorsDoNotOverlap(s1, s2) {
+		  for (var i = 0, l = s1.length; i < l; i++) {
+			if (s2.indexOf(s1[i]) > -1)
+			  return false;
+		  }
+
+		  return true;
+		}
+
+		var exports = {
+		  canReorder: canReorder,
+		  canReorderSingle: canReorderSingle
+		};
+
+		return exports;
+	};
+	//#endregion
+	
 	//#region URL: /selectors/optimizers/advanced
 	modules['/selectors/optimizers/advanced'] = function () {
 		var PropertyOptimizer = require('/properties/optimizer');
 		var CleanUp = require('/selectors/optimizers/clean-up');
+
+		var extractProperties = require('/properties/extractor');
+		var canReorder = require('/properties/reorderable').canReorder;
+		var canReorderSingle = require('/properties/reorderable').canReorderSingle;
 
 		function AdvancedOptimizer(options, context) {
 		  this.options = options;
@@ -3145,6 +3389,14 @@ var CleanCss = (function(){
 		  token.value = newSelectors.tokenized;
 		  token.metadata.selector = newSelectors.list.join(',');
 		  token.metadata.selectorsList = newSelectors.list;
+		}
+
+		function unsafeSelector(value) {
+		  return /\.|\*| :/.test(value);
+		}
+
+		function naturalSorter(a, b) {
+		  return a > b;
 		}
 
 		AdvancedOptimizer.prototype.isSpecial = function (selector) {
@@ -3185,12 +3437,15 @@ var CleanCss = (function(){
 		AdvancedOptimizer.prototype.mergeAdjacent = function (tokens) {
 		  var forRemoval = [];
 		  var lastToken = { selector: null, body: null };
+		  var adjacentSpace = this.options.compatibility.selectors.adjacentSpace;
 
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
 
-			if (token.kind != 'selector')
+			if (token.kind != 'selector') {
+			  lastToken = { selector: null, body: null };
 			  continue;
+			}
 
 			if (lastToken.kind == 'selector' && token.metadata.selector == lastToken.metadata.selector) {
 			  var joinAt = [lastToken.body.length];
@@ -3203,7 +3458,7 @@ var CleanCss = (function(){
 				!this.isSpecial(token.metadata.selector) && !this.isSpecial(lastToken.metadata.selector)) {
 			  changeSelectorOf(
 				lastToken,
-				CleanUp.selectors(lastToken.value.concat(token.value), false)
+				CleanUp.selectors(lastToken.value.concat(token.value), false, adjacentSpace)
 			  );
 			  forRemoval.push(i);
 			} else {
@@ -3383,6 +3638,437 @@ var CleanCss = (function(){
 		  }
 		};
 
+		AdvancedOptimizer.prototype.mergeNonAdjacentBySelector = function (tokens) {
+		  var allSelectors = {};
+		  var repeatedSelectors = [];
+		  var i;
+
+		  for (i = tokens.length - 1; i >= 0; i--) {
+			if (tokens[i].kind != 'selector')
+			  continue;
+			if (tokens[i].body.length === 0)
+			  continue;
+
+			var selector = tokens[i].metadata.selector;
+			allSelectors[selector] = [i].concat(allSelectors[selector] || []);
+
+			if (allSelectors[selector].length == 2)
+			  repeatedSelectors.push(selector);
+		  }
+
+		  for (i = repeatedSelectors.length - 1; i >= 0; i--) {
+			var positions = allSelectors[repeatedSelectors[i]];
+
+			selectorIterator:
+			for (var j = positions.length - 1; j > 0; j--) {
+			  var positionOne = positions[j - 1];
+			  var tokenOne = tokens[positionOne];
+			  var positionTwo = positions[j];
+			  var tokenTwo = tokens[positionTwo];
+
+			  directionIterator:
+			  for (var direction = 1; direction >= -1; direction -= 2) {
+				var topToBottom = direction == 1;
+				var from = topToBottom ? positionOne + 1 : positionTwo - 1;
+				var to = topToBottom ? positionTwo : positionOne;
+				var delta = topToBottom ? 1 : -1;
+				var moved = topToBottom ? tokenOne : tokenTwo;
+				var target = topToBottom ? tokenTwo : tokenOne;
+				var movedProperties = extractProperties(moved);
+
+				while (from != to) {
+				  var traversedProperties = extractProperties(tokens[from]);
+				  from += delta;
+
+				  // traversed then moved as we move selectors towards the start
+				  var reorderable = topToBottom ?
+					canReorder(movedProperties, traversedProperties) :
+					canReorder(traversedProperties, movedProperties);
+
+				  if (!reorderable && !topToBottom)
+					continue selectorIterator;
+				  if (!reorderable && topToBottom)
+					continue directionIterator;
+				}
+
+				var joinAt = topToBottom ? [target.body.length] : [moved.body.length];
+				var joinedBodies = topToBottom ? moved.body.concat(target.body) : target.body.concat(moved.body);
+				var newBody = this.propertyOptimizer.process(target.value, joinedBodies, joinAt, true);
+				changeBodyOf(target, newBody);
+				changeBodyOf(moved, { tokenized: [], list: [] });
+			  }
+			}
+		  }
+		};
+
+		AdvancedOptimizer.prototype.mergeNonAdjacentByBody = function (tokens) {
+		  var candidates = {};
+		  var adjacentSpace = this.options.compatibility.selectors.adjacentSpace;
+
+		  for (var i = tokens.length - 1; i >= 0; i--) {
+			var token = tokens[i];
+			if (token.kind != 'selector')
+			  continue;
+
+			if (token.body.length > 0 && unsafeSelector(token.metadata.selector))
+			  candidates = {};
+
+			var oldToken = candidates[token.metadata.body];
+			if (oldToken && !this.isSpecial(token.metadata.selector) && !this.isSpecial(oldToken.metadata.selector)) {
+			  changeSelectorOf(
+				token,
+				CleanUp.selectors(oldToken.value.concat(token.value), false, adjacentSpace)
+			  );
+
+			  changeBodyOf(oldToken, { tokenized: [], list: [] });
+			  candidates[token.metadata.body] = null;
+			}
+
+			candidates[token.metadata.body] = token;
+		  }
+		};
+
+		AdvancedOptimizer.prototype.restructure = function (tokens) {
+		  var movableTokens = {};
+		  var movedProperties = [];
+		  var multiPropertyMoveCache = {};
+		  var movedToBeDropped = [];
+		  var self = this;
+		  var maxCombinationsLevel = 2;
+		  var ID_JOIN_CHARACTER = '%';
+
+		  function sendToMultiPropertyMoveCache(position, movedProperty, allFits) {
+			for (var i = allFits.length - 1; i >= 0; i--) {
+			  var fit = allFits[i][0];
+			  var id = addToCache(movedProperty, fit);
+
+			  if (multiPropertyMoveCache[id].length > 1 && processMultiPropertyMove(position, multiPropertyMoveCache[id])) {
+				removeAllMatchingFromCache(id);
+				break;
+			  }
+			}
+		  }
+
+		  function addToCache(movedProperty, fit) {
+			var id = cacheId(fit);
+			multiPropertyMoveCache[id] = multiPropertyMoveCache[id] || [];
+			multiPropertyMoveCache[id].push([movedProperty, fit]);
+			return id;
+		  }
+
+		  function removeAllMatchingFromCache(matchId) {
+			var matchSelectors = matchId.split(ID_JOIN_CHARACTER);
+			var forRemoval = [];
+			var i;
+
+			for (var id in multiPropertyMoveCache) {
+			  var selectors = id.split(ID_JOIN_CHARACTER);
+			  for (i = selectors.length - 1; i >= 0; i--) {
+				if (matchSelectors.indexOf(selectors[i]) > -1) {
+				  forRemoval.push(id);
+				  break;
+				}
+			  }
+			}
+
+			for (i = forRemoval.length - 1; i >= 0; i--) {
+			  delete multiPropertyMoveCache[forRemoval[i]];
+			}
+		  }
+
+		  function cacheId(cachedTokens) {
+			var id = [];
+			for (var i = 0, l = cachedTokens.length; i < l; i++) {
+			  id.push(cachedTokens[i].metadata.selector);
+			}
+			return id.join(ID_JOIN_CHARACTER);
+		  }
+
+		  function tokensToMerge(sourceTokens) {
+			var uniqueTokensWithBody = [];
+			var mergeableTokens = [];
+
+			for (var i = sourceTokens.length - 1; i >= 0; i--) {
+			  if (self.isSpecial(sourceTokens[i].metadata.selector))
+				continue;
+
+			  mergeableTokens.unshift(sourceTokens[i]);
+			  if (sourceTokens[i].body.length > 0 && uniqueTokensWithBody.indexOf(sourceTokens[i]) == -1)
+				uniqueTokensWithBody.push(sourceTokens[i]);
+			}
+
+			return uniqueTokensWithBody.length > 1 ?
+			  mergeableTokens :
+			  [];
+		  }
+
+		  function shortenIfPossible(position, movedProperty) {
+			var name = movedProperty[0];
+			var value = movedProperty[1];
+			var key = movedProperty[3];
+			var valueSize = name.length + value.length + 1;
+			var allSelectors = [];
+			var qualifiedTokens = [];
+
+			var mergeableTokens = tokensToMerge(movableTokens[key]);
+			if (mergeableTokens.length < 2)
+			  return;
+
+			var allFits = findAllFits(mergeableTokens, valueSize, 1);
+			var bestFit = allFits[0];
+			if (bestFit[1] > 0)
+			  return sendToMultiPropertyMoveCache(position, movedProperty, allFits);
+
+			for (var i = bestFit[0].length - 1; i >=0; i--) {
+			  allSelectors = bestFit[0][i].value.concat(allSelectors);
+			  qualifiedTokens.unshift(bestFit[0][i]);
+			}
+
+			allSelectors = CleanUp.selectorDuplicates(allSelectors);
+			dropAsNewTokenAt(position, [movedProperty], allSelectors, qualifiedTokens);
+		  }
+
+		  function fitSorter(fit1, fit2) {
+			return fit1[1] > fit2[1];
+		  }
+
+		  function findAllFits(mergeableTokens, propertySize, propertiesCount) {
+			var combinations = allCombinations(mergeableTokens, propertySize, propertiesCount, maxCombinationsLevel - 1);
+			return combinations.sort(fitSorter);
+		  }
+
+		  function allCombinations(tokensVariant, propertySize, propertiesCount, level) {
+			var differenceVariants = [[tokensVariant, sizeDifference(tokensVariant, propertySize, propertiesCount)]];
+			if (tokensVariant.length > 2 && level > 0) {
+			  for (var i = tokensVariant.length - 1; i >= 0; i--) {
+				var subVariant = Array.prototype.slice.call(tokensVariant, 0);
+				subVariant.splice(i, 1);
+				differenceVariants = differenceVariants.concat(allCombinations(subVariant, propertySize, propertiesCount, level - 1));
+			  }
+			}
+
+			return differenceVariants;
+		  }
+
+		  function sizeDifference(tokensVariant, propertySize, propertiesCount) {
+			var allSelectorsSize = 0;
+			for (var i = tokensVariant.length - 1; i >= 0; i--) {
+			  allSelectorsSize += tokensVariant[i].body.length > propertiesCount ? tokensVariant[i].metadata.selector.length : -1;
+			}
+			return allSelectorsSize - (tokensVariant.length - 1) * propertySize + 1;
+		  }
+
+		  function dropAsNewTokenAt(position, properties, allSelectors, mergeableTokens) {
+			var bodyMetadata = {};
+			var i, j, k, m;
+
+			for (i = mergeableTokens.length - 1; i >= 0; i--) {
+			  var mergeableToken = mergeableTokens[i];
+
+			  for (j = mergeableToken.body.length - 1; j >= 0; j--) {
+
+				for (k = 0, m = properties.length; k < m; k++) {
+				  var property = properties[k];
+
+				  if (mergeableToken.body[j].value === property[3]) {
+					bodyMetadata[property[3]] = mergeableToken.body[j].metadata;
+
+					mergeableToken.body.splice(j, 1);
+					mergeableToken.metadata.bodiesList.splice(j, 1);
+					mergeableToken.metadata.body = mergeableToken.metadata.bodiesList.join(';');
+					break;
+				  }
+				}
+			  }
+			}
+
+			var newToken = { kind: 'selector', metadata: {} };
+			var allBodies = { tokenized: [], list: [] };
+
+			for (i = properties.length - 1; i >= 0; i--) {
+			  allBodies.tokenized.push({ value: properties[i][3] });
+			  allBodies.list.push(properties[i][3]);
+			}
+
+			changeSelectorOf(newToken, allSelectors);
+			changeBodyOf(newToken, allBodies);
+
+			for (i = properties.length - 1; i >= 0; i--) {
+			  newToken.body[i].metadata = bodyMetadata[properties[i][3]];
+			}
+
+			tokens.splice(position, 0, newToken);
+		  }
+
+		  function dropPropertiesAt(position, movedProperty) {
+			var key = movedProperty[3];
+
+			if (movableTokens[key] && movableTokens[key].length > 1)
+			  shortenIfPossible(position, movedProperty);
+		  }
+
+		  function processMultiPropertyMove(position, propertiesAndMergableTokens) {
+			var valueSize = 0;
+			var properties = [];
+			var property;
+
+			for (var i = propertiesAndMergableTokens.length - 1; i >= 0; i--) {
+			  property = propertiesAndMergableTokens[i][0];
+			  var fullValue = property[3];
+			  valueSize += fullValue.length + (i > 0 ? 1 : 0);
+
+			  properties.push(property);
+			}
+
+			var mergeableTokens = propertiesAndMergableTokens[0][1];
+			var bestFit = findAllFits(mergeableTokens, valueSize, properties.length)[0];
+			if (bestFit[1] > 0)
+			  return false;
+
+			var allSelectors = [];
+			var qualifiedTokens = [];
+			for (i = bestFit[0].length - 1; i >= 0; i--) {
+			  allSelectors = bestFit[0][i].value.concat(allSelectors);
+			  qualifiedTokens.unshift(bestFit[0][i]);
+			}
+
+			allSelectors = CleanUp.selectorDuplicates(allSelectors);
+			dropAsNewTokenAt(position, properties, allSelectors, qualifiedTokens);
+
+			for (i = properties.length - 1; i >= 0; i--) {
+			  property = properties[i];
+			  var index = movedProperties.indexOf(property);
+
+			  delete movableTokens[property[3]];
+
+			  if (index > -1 && movedToBeDropped.indexOf(index) == -1)
+				movedToBeDropped.push(index);
+			}
+
+			return true;
+		  }
+
+		  for (var i = tokens.length - 1; i >= 0; i--) {
+			var token = tokens[i];
+			var isSelector;
+			var j, k, m;
+
+			if (token.kind == 'selector') {
+			  isSelector = true;
+			} else if (token.kind == 'block' && !token.isFlatBlock) {
+			  isSelector = false;
+			} else {
+			  continue;
+			}
+
+			// We cache movedProperties.length as it may change in the loop
+			var movedCount = movedProperties.length;
+
+			var properties = extractProperties(token);
+			movedToBeDropped = [];
+
+			var unmovableInCurrentToken = [];
+			for (j = properties.length - 1; j >= 0; j--) {
+			  for (k = j - 1; k >= 0; k--) {
+				if (!canReorderSingle(properties[j], properties[k])) {
+				  unmovableInCurrentToken.push(j);
+				  break;
+				}
+			  }
+			}
+
+			for (j = 0, m = properties.length; j < m; j++) {
+			  var property = properties[j];
+			  var movedSameProperty = false;
+
+			  for (k = 0; k < movedCount; k++) {
+				var movedProperty = movedProperties[k];
+
+				if (movedToBeDropped.indexOf(k) == -1 && !canReorderSingle(property, movedProperty)) {
+				  dropPropertiesAt(i + 1, movedProperty);
+				  movedToBeDropped.push(k);
+				  delete movableTokens[movedProperty[3]];
+				}
+
+				if (!movedSameProperty)
+				  movedSameProperty = property[0] == movedProperty[0] && property[1] == movedProperty[1];
+			  }
+
+			  if (!isSelector || unmovableInCurrentToken.indexOf(j) > -1)
+				continue;
+
+			  var key = property[3];
+			  movableTokens[key] = movableTokens[key] || [];
+			  movableTokens[key].push(token);
+
+			  if (!movedSameProperty)
+				movedProperties.push(property);
+			}
+
+			movedToBeDropped = movedToBeDropped.sort(naturalSorter);
+			for (j = 0, m = movedToBeDropped.length; j < m; j++) {
+			  movedProperties.splice(movedToBeDropped[j] - j, 1);
+			}
+		  }
+
+		  var position = tokens[0] && tokens[0].kind == 'at-rule' && tokens[0].value.indexOf('@charset') === 0 ? 1 : 0;
+		  for (; position < tokens.length - 1; position++) {
+			var isImportRule = tokens[position].kind === 'at-rule' && tokens[position].value.indexOf('@import') === 0;
+			var isEscapedCommentSpecial = tokens[position].kind === 'text' && tokens[position].value.indexOf('__ESCAPED_COMMENT_SPECIAL') === 0;
+			if (!(isImportRule || isEscapedCommentSpecial))
+			  break;
+		  }
+
+		  for (i = 0; i < movedProperties.length; i++) {
+			dropPropertiesAt(position, movedProperties[i]);
+		  }
+		};
+
+		AdvancedOptimizer.prototype.mergeMediaQueries = function (tokens) {
+		  var candidates = {};
+		  var reduced = [];
+
+		  for (var i = tokens.length - 1; i >= 0; i--) {
+			var token = tokens[i];
+			if (token.kind != 'block' || token.isFlatBlock === true)
+			  continue;
+
+			var candidate = candidates[token.value];
+			if (!candidate) {
+			  candidate = [];
+			  candidates[token.value] = candidate;
+			}
+
+			candidate.push(i);
+		  }
+
+		  for (var name in candidates) {
+			var positions = candidates[name];
+
+			positionLoop:
+			for (var j = positions.length - 1; j > 0; j--) {
+			  var source = tokens[positions[j]];
+			  var target = tokens[positions[j - 1]];
+			  var movedProperties = extractProperties(source);
+
+			  for (var k = positions[j] + 1; k < positions[j - 1]; k++) {
+				var traversedProperties = extractProperties(tokens[k]);
+
+				// moved then traversed as we move @media towards the end
+				if (!canReorder(movedProperties, traversedProperties))
+				  continue positionLoop;
+			  }
+
+			  target.body = source.body.concat(target.body);
+			  source.body = [];
+
+			  reduced.push(target);
+			}
+		  }
+
+		  return reduced;
+		};
+
 		function optimizeProperties(tokens, propertyOptimizer) {
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
@@ -3401,10 +4087,12 @@ var CleanCss = (function(){
 		AdvancedOptimizer.prototype.optimize = function (tokens) {
 		  var self = this;
 
-		  function _optimize(tokens) {
+		  function _optimize(tokens, withRestructuring) {
 			tokens.forEach(function (token) {
-			  if (token.kind == 'block')
-				_optimize(token.body);
+			  if (token.kind == 'block') {
+				var isKeyframes = /@(-moz-|-o-|-webkit-)?keyframes/.test(token.value);
+				_optimize(token.body, !isKeyframes);
+			  }
 			});
 
 			optimizeProperties(tokens, self.propertyOptimizer);
@@ -3413,11 +4101,23 @@ var CleanCss = (function(){
 			self.mergeAdjacent(tokens);
 			self.reduceNonAdjacent(tokens);
 
-			self.removeDuplicates(tokens);
-			self.mergeAdjacent(tokens);
+			self.mergeNonAdjacentBySelector(tokens);
+			self.mergeNonAdjacentByBody(tokens);
+
+			if (self.options.restructuring && withRestructuring) {
+			  self.restructure(tokens);
+			  self.mergeAdjacent(tokens);
+			}
+
+			if (self.options.mediaMerging) {
+			  var reduced = self.mergeMediaQueries(tokens);
+			  for (var i = reduced.length - 1; i >= 0; i--) {
+				_optimize(reduced[i].body);
+			  }
+			}
 		  }
 
-		  _optimize(tokens);
+		  _optimize(tokens, true);
 		};
 		
 		return AdvancedOptimizer;
@@ -3625,93 +4325,18 @@ var CleanCss = (function(){
 		  return cursor;
 		};
 
-		QuoteScanner.prototype.each = function (callback) {
-		  var data = this.data;
-		  var tempData = [];
-		  var nextStart = 0;
-		  var nextEnd = 0;
-		  var cursor = 0;
-		  var matchedMark = null;
-		  var singleMark = '\'';
-		  var doubleMark = '"';
-		  var dataLength = data.length;
-
-		  for (; nextEnd < data.length;) {
-			var nextStartSingle = data.indexOf(singleMark, nextEnd + 1);
-			var nextStartDouble = data.indexOf(doubleMark, nextEnd + 1);
-
-			if (nextStartSingle == -1)
-			  nextStartSingle = dataLength;
-			if (nextStartDouble == -1)
-			  nextStartDouble = dataLength;
-
-			if (nextStartSingle < nextStartDouble) {
-			  nextStart = nextStartSingle;
-			  matchedMark = singleMark;
-			} else {
-			  nextStart = nextStartDouble;
-			  matchedMark = doubleMark;
-			}
-
-			if (nextStart == -1)
-			  break;
-
-			nextEnd = findQuoteEnd(data, matchedMark, nextStart + 1, cursor);
-			if (nextEnd == -1)
-			  break;
-
-			var text = data.substring(nextStart, nextEnd + 1);
-			tempData.push(data.substring(cursor, nextStart));
-			if (text.length > 0)
-			  callback(text, tempData, nextStart);
-
-			cursor = nextEnd + 1;
-		  }
-
-		  return tempData.length > 0 ?
-			tempData.join('') + data.substring(cursor, data.length) :
-			data;
-		};
-
-		function QuoteScanner(data) {
-		  this.data = data;
-		}
-
-		var findQuoteEnd = function (data, matched, cursor, oldCursor) {
-		  var commentStartMark = '/*';
-		  var commentEndMark = '*/';
+		function findNext(data, mark, startAt) {
 		  var escapeMark = '\\';
-		  var blockEndMark = '}';
-		  var dataPrefix = data.substring(oldCursor, cursor);
-		  var commentEndedAt = dataPrefix.lastIndexOf(commentEndMark, cursor);
-		  var commentStartedAt = dataPrefix.lastIndexOf(commentStartMark, cursor);
-		  var commentStarted = false;
-
-		  if (commentEndedAt >= cursor && commentStartedAt > -1)
-			commentStarted = true;
-		  if (commentStartedAt < cursor && commentStartedAt > commentEndedAt)
-			commentStarted = true;
-
-		  if (commentStarted) {
-			var commentEndsAt = data.indexOf(commentEndMark, cursor);
-			if (commentEndsAt > -1)
-			  return commentEndsAt;
-
-			commentEndsAt = data.indexOf(blockEndMark, cursor);
-			return commentEndsAt > -1 ? commentEndsAt - 1 : data.length;
-		  }
+		  var candidate = startAt;
 
 		  while (true) {
-			if (data[cursor] === undefined)
-			  break;
-			if (data[cursor] == matched && (data[cursor - 1] != escapeMark || data[cursor - 2] == escapeMark))
-			  break;
-
-			cursor++;
+			candidate = data.indexOf(mark, candidate + 1);
+			if (candidate == -1)
+			  return -1;
+			if (data[candidate - 1] != escapeMark)
+			  return candidate;
 		  }
-
-		  return cursor;
-		};
+		}
 
 		QuoteScanner.prototype.each = function (callback) {
 		  var data = this.data;
@@ -3725,8 +4350,8 @@ var CleanCss = (function(){
 		  var dataLength = data.length;
 
 		  for (; nextEnd < data.length;) {
-			var nextStartSingle = data.indexOf(singleMark, nextEnd + 1);
-			var nextStartDouble = data.indexOf(doubleMark, nextEnd + 1);
+			var nextStartSingle = findNext(data, singleMark, nextEnd);
+			var nextStartDouble = findNext(data, doubleMark, nextEnd);
 
 			if (nextStartSingle == -1)
 			  nextStartSingle = dataLength;
@@ -4122,60 +4747,28 @@ var CleanCss = (function(){
 	//#region URL: /text/urls-processor
 	modules['/text/urls-processor'] = function () {
 		var EscapeStore = require('/text/escape-store');
+		var UrlScanner = require('/utils/url-scanner');
 
-		var URL_PREFIX = 'url(';
-		var URL_SUFFIX = ')';
 		var lineBreak = require('os').EOL;
 
-		function UrlsProcessor(context/*, saveWaypoints*/) {
+		function UrlsProcessor(context/*, saveWaypoints*/, removeTrailingSpace) {
 		  this.urls = new EscapeStore('URL');
 		  this.context = context;
 //		  this.saveWaypoints = saveWaypoints;
+		  this.removeTrailingSpace = removeTrailingSpace;
 		}
 
 		// Strip urls by replacing them by a special
 		// marker for further restoring. It's done via string scanning
 		// instead of regexps to speed up the process.
 		UrlsProcessor.prototype.escape = function (data) {
-		  var nextStart = 0;
-		  var nextEnd = 0;
-		  var cursor = 0;
-		  var tempData = [];
 		  var breaksCount;
 		  var lastBreakAt;
 		  var indent;
 //		  var saveWaypoints = this.saveWaypoints;
+		  var self = this;
 
-		  for (; nextEnd < data.length;) {
-			nextStart = data.indexOf(URL_PREFIX, nextEnd);
-			if (nextStart == -1)
-			  break;
-
-			if (data[nextStart + URL_PREFIX.length] == '"')
-			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
-			else if (data[nextStart + URL_PREFIX.length] == '\'')
-			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
-			else
-			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
-
-			// Following lines are a safety mechanism to ensure
-			// incorrectly terminated urls are processed correctly.
-			if (nextEnd == -1) {
-			  nextEnd = data.indexOf('}', nextStart);
-
-			  if (nextEnd == -1)
-				nextEnd = data.length;
-			  else
-				nextEnd--;
-
-			  this.context.warnings.push('Broken URL declaration: \'' + data.substring(nextStart, nextEnd + 1) + '\'.');
-			} else {
-			  if (data[nextEnd] != URL_SUFFIX)
-				nextEnd = data.indexOf(URL_SUFFIX, nextEnd);
-			}
-
-			var url = data.substring(nextStart, nextEnd + 1);
-
+		  return new UrlScanner(data, this.context).reduce(function (url, tempData) {
 //			if (saveWaypoints) {
 //			  breaksCount = url.split(lineBreak).length - 1;
 //			  lastBreakAt = url.lastIndexOf(lineBreak);
@@ -4184,20 +4777,14 @@ var CleanCss = (function(){
 //				url.length;
 //			}
 
-			var placeholder = this.urls.store(url, /*saveWaypoints ? [breaksCount, indent] : */null);
-			tempData.push(data.substring(cursor, nextStart));
+			var placeholder = self.urls.store(url, /*saveWaypoints ? [breaksCount, indent] : */null);
 			tempData.push(placeholder);
-
-			cursor = nextEnd + 1;
-		  }
-
-		  return tempData.length > 0 ?
-			tempData.join('') + data.substring(cursor, data.length) :
-			data;
+		  });
 		};
 
 		function normalize(url) {
 		  url = url
+			.replace(/^url/gi, 'url')
 			.replace(/\\?\n|\\?\r\n/g, '')
 			.replace(/(\s{2,}|\s)/g, ' ')
 			.replace(/^url\((['"])? /, 'url($1')
@@ -4222,7 +4809,7 @@ var CleanCss = (function(){
 			var url = normalize(this.urls.restore(nextMatch.match));
 			tempData.push(url);
 
-			cursor = nextMatch.end;
+			cursor = nextMatch.end + (this.removeTrailingSpace && data[nextMatch.end] == ' ' ? 1 : 0);
 		  }
 
 		  return tempData.length > 0 ?
@@ -4231,6 +4818,75 @@ var CleanCss = (function(){
 		};
 		
 		return UrlsProcessor;
+	};
+	//#endregion
+	
+	//#region URL: /utils/url-scanner
+	modules['/utils/url-scanner'] = function () {
+		var URL_PREFIX = 'url(';
+		var UPPERCASE_URL_PREFIX = 'URL(';
+		var URL_SUFFIX = ')';
+
+		function UrlScanner(data, context) {
+		  this.data = data;
+		  this.context = context;
+		}
+
+		UrlScanner.prototype.reduce = function (callback) {
+		  var nextStart = 0;
+		  var nextStartUpperCase = 0;
+		  var nextEnd = 0;
+		  var cursor = 0;
+		  var tempData = [];
+		  var data = this.data;
+		  var hasUppercaseUrl = data.indexOf(UPPERCASE_URL_PREFIX) > -1;
+
+		  for (; nextEnd < data.length;) {
+			nextStart = data.indexOf(URL_PREFIX, nextEnd);
+			nextStartUpperCase = hasUppercaseUrl ? data.indexOf(UPPERCASE_URL_PREFIX, nextEnd) : -1;
+			if (nextStart == -1 && nextStartUpperCase == -1)
+			  break;
+
+			if (nextStart == -1 && nextStartUpperCase > -1)
+			  nextStart = nextStartUpperCase;
+
+			if (data[nextStart + URL_PREFIX.length] == '"')
+			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
+			else if (data[nextStart + URL_PREFIX.length] == '\'')
+			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
+			else
+			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
+
+			// Following lines are a safety mechanism to ensure
+			// incorrectly terminated urls are processed correctly.
+			if (nextEnd == -1) {
+			  nextEnd = data.indexOf('}', nextStart);
+
+			  if (nextEnd == -1)
+				nextEnd = data.length;
+			  else
+				nextEnd--;
+
+			  this.context.warnings.push('Broken URL declaration: \'' + data.substring(nextStart, nextEnd + 1) + '\'.');
+			} else {
+			  if (data[nextEnd] != URL_SUFFIX)
+				nextEnd = data.indexOf(URL_SUFFIX, nextEnd);
+			}
+
+			tempData.push(data.substring(cursor, nextStart));
+
+			var url = data.substring(nextStart, nextEnd + 1);
+			callback(url, tempData);
+
+			cursor = nextEnd + 1;
+		  }
+
+		  return tempData.length > 0 ?
+			tempData.join('') + data.substring(cursor, data.length) :
+			data;
+		};
+
+		return UrlScanner;
 	};
 	//#endregion
 	
@@ -4247,9 +4903,11 @@ var CleanCss = (function(){
 			  backgroundSizeMerging: false, // background-size to shorthand
 			  iePrefixHack: false, // underscore / asterisk prefix hacks on IE
 			  ieSuffixHack: false, // \9 suffix hacks on IE
-			  merging: true // merging properties into one
+			  merging: true, // merging properties into one
+			  spaceAfterClosingBrace: false // 'url() no-repeat' to 'url()no-repeat'
 			},
 			selectors: {
+			  adjacentSpace: false, // div+ nav Android stock browser hack
 			  ie7Hack: false, // *+html hack
 			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right)/ // special selectors which prevent merging
 			},
@@ -4265,9 +4923,11 @@ var CleanCss = (function(){
 			  backgroundSizeMerging: false,
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
-			  merging: false
+			  merging: false,
+			  spaceAfterClosingBrace: true
 			},
 			selectors: {
+			  adjacentSpace: false,
 			  ie7Hack: false,
 			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
 			},
@@ -4283,9 +4943,11 @@ var CleanCss = (function(){
 			  backgroundSizeMerging: false,
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
-			  merging: false
+			  merging: false,
+			  spaceAfterClosingBrace: true
 			},
 			selectors: {
+			  adjacentSpace: false,
 			  ie7Hack: true,
 			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
 			},
@@ -4386,6 +5048,7 @@ var CleanCss = (function(){
 	//#region URL: /utils/source-reader
 	modules['/utils/source-reader'] = function () {
 //		var path = require('path');
+//		var UrlRewriter = require('/images/url-rewriter');
 
 		function SourceReader(context, data) {
 		  this.outerContext = context;
@@ -4400,7 +5063,7 @@ var CleanCss = (function(){
 		  if (Array.isArray(this.data))
 			return fromArray(this.outerContext, this.data);
 
-		  return this.data;
+		  return fromHash(this.outerContext, this.data);
 		};
 
 		function fromArray(outerContext, sources) {
@@ -4418,7 +5081,37 @@ var CleanCss = (function(){
 			.map(function (source) { return '@import url(' + source + ');'; })
 			.join('');
 		}
-		
+
+		function fromHash(outerContext, sources) {
+		  var data = [];
+		  var toBase = path.resolve(outerContext.options.target || process.cwd());
+
+		  for (var source in sources) {
+			var styles = sources[source].styles;
+//			var inputSourceMap = sources[source].sourceMap;
+
+//			var rewriter = new UrlRewriter({
+//			  absolute: !!outerContext.options.root,
+//			  relative: !outerContext.options.root,
+//			  imports: true,
+//			  urls: outerContext.options.rebase,
+//			  fromBase: path.dirname(path.resolve(source)),
+//			  toBase: toBase
+//			}, this.outerContext);
+//			styles = rewriter.process(styles);
+
+//			if (outerContext.options.sourceMap && inputSourceMap) {
+//			  var absoluteSource = path.resolve(source);
+//			  styles = outerContext.sourceTracker.store(absoluteSource, styles);
+//			  outerContext.inputSourceMapTracker.trackLoaded(absoluteSource, inputSourceMap);
+//			}
+
+			data.push(styles);
+		  }
+
+		  return data.join('');
+		}
+
 		return SourceReader;
 	};
 	//#endregion
@@ -4455,9 +5148,11 @@ var CleanCss = (function(){
 //			inliner: options.inliner || {},
 			keepBreaks: options.keepBreaks || false,
 			keepSpecialComments: 'keepSpecialComments' in options ? options.keepSpecialComments : '*',
+			mediaMerging: undefined === options.mediaMerging ? true : !!options.mediaMerging,
 			processImport: undefined === options.processImport ? true : !!options.processImport,
 			rebase: undefined === options.rebase ? true : !!options.rebase,
 			relativeTo: options.relativeTo,
+			restructuring: undefined === options.restructuring ? true : !!options.restructuring,
 			root: options.root,
 			roundingPrecision: options.roundingPrecision,
 			shorthandCompacting: /*!!options.sourceMap ? false : */(undefined === options.shorthandCompacting ? true : !!options.shorthandCompacting),
@@ -4478,6 +5173,9 @@ var CleanCss = (function(){
 //			debug: this.options.debug,
 			sourceTracker: new SourceTracker()
 		  };
+
+//		  if (context.options.sourceMap)
+//			context.inputSourceMapTracker = new InputSourceMapTracker(context);
 
 		  data = new SourceReader(context, data).toString();
 
@@ -4512,7 +5210,6 @@ var CleanCss = (function(){
 
 		  return function (data) {
 //			if (context.options.sourceMap) {
-//			  context.inputSourceMapTracker = new InputSourceMapTracker(context);
 //			  return context.inputSourceMapTracker.track(data, function () { return whenSourceMapReady(data); });
 //			} else {
 			  return whenSourceMapReady(data);
@@ -4558,7 +5255,7 @@ var CleanCss = (function(){
 		  var commentsProcessor = new CommentsProcessor(context, options.keepSpecialComments, options.keepBreaks/*, options.sourceMap*/);
 		  var expressionsProcessor = new ExpressionsProcessor(/*options.sourceMap*/);
 		  var freeTextProcessor = new FreeTextProcessor(/*options.sourceMap*/);
-		  var urlsProcessor = new UrlsProcessor(context/*, options.sourceMap*/);
+		  var urlsProcessor = new UrlsProcessor(context/*, options.sourceMap*/, !options.compatibility.properties.spaceAfterClosingBrace);
 
 //		  var urlRebase = new UrlRebase(context);
 		  var selectorsOptimizer = new SelectorsOptimizer(options, context);

@@ -9,9 +9,9 @@
 	using Resources;
 
 	/// <summary>
-	/// Filter that responsible for choosing appropriate version 
-	/// of CSS-file, depending on current mode of 
-	/// web application (debug mode - debug versions of CSS-asset files; 
+	/// Filter that responsible for choosing appropriate version
+	/// of CSS-file, depending on current mode of
+	/// web application (debug mode - debug versions of CSS-asset files;
 	/// release mode - minified versions)
 	/// </summary>
 	public sealed class CssFileExtensionsFilter : FileExtensionsFilterBase
@@ -28,14 +28,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of CSS-file extensions filter
+		/// Constructs a instance of CSS-file extensions filter
 		/// </summary>
 		public CssFileExtensionsFilter()
 			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CSS-file extensions filter
+		/// Constructs a instance of CSS-file extensions filter
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		public CssFileExtensionsFilter(IVirtualFileSystemWrapper virtualFileSystemWrapper)
@@ -44,7 +44,7 @@
 
 
 		/// <summary>
-		/// Chooses appropriate versions of CSS-files, depending on 
+		/// Chooses a appropriate versions of CSS-files, depending on
 		/// current mode of web application
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
@@ -61,7 +61,7 @@
 				return assets;
 			}
 
-			foreach (var asset in assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.Css 
+			foreach (var asset in assets.Where(a => a.AssetTypeCode == Constants.AssetTypeCode.Css
 				&& !a.Minified))
 			{
 				bool isMinified;
@@ -75,13 +75,13 @@
 		}
 
 		/// <summary>
-		/// Gets version of CSS-file virtual path, most appropriate for 
+		/// Gets a version of CSS-file virtual path, most appropriate for
 		/// current mode of web application
 		/// </summary>
 		/// <param name="assetVirtualPath">CSS-asset virtual file path</param>
-		/// <param name="isMinified">Flag indicating what appropriate 
+		/// <param name="isMinified">Flag indicating what appropriate
 		/// virtual file path version of CSS-asset is minified</param>
-		/// <returns>Virtual path to CSS-file, corresponding current mode 
+		/// <returns>Virtual path to CSS-file, corresponding current mode
 		/// of web application</returns>
 		protected override string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified)
 		{
@@ -91,7 +91,7 @@
 
 			if (appropriateAssetVirtualPath.Length > 0)
 			{
-				// Fill list of file extensions, sorted in order 
+				// Fill list of file extensions, sorted in order
 				// of relevance to current mode of web application
 				string[] appropriateFileExtensions = UsageOfPreMinifiedFilesEnabled ?
 					_releaseCssExtensions : _debugCssExtensions;

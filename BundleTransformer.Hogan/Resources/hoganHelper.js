@@ -1,5 +1,6 @@
-﻿var hoganHelper = (function (hogan, undefined) {
-	"use strict";
+﻿/*global Hogan */
+var hoganHelper = (function (hogan, undefined) {
+	'use strict';
 
 	var exports = {},
 		defaultOptions = {
@@ -26,7 +27,7 @@
 
 	exports.precompile = function (code, options) {
 		var compilationOptions,
-			compiledCode = "",
+			compiledCode = '',
 			result = {},
 			errors = []
 			;

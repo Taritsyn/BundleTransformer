@@ -9,7 +9,7 @@
 	using BtCompressionType = CompressionType;
 
 	/// <summary>
-	/// Base class of minifier, which produces minifiction of code 
+	/// Base class of minifier, which produces minifiction of code
 	/// by using YUI Compressor for .NET
 	/// </summary>
 	public abstract class YuiMinifierBase : IMinifier
@@ -25,7 +25,7 @@
 
 		/// <summary>
 		/// Gets or sets a column number, after which must be inserted a line break.
-		/// Specify 0 to get a line break after each semi-colon in JavaScript, 
+		/// Specify 0 to get a line break after each semi-colon in JavaScript,
 		/// and after each rule in CSS.
 		/// </summary>
 		public abstract int LineBreakPosition
@@ -36,14 +36,14 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of asset
+		/// Produces a code minifiction of asset
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <returns>Asset with minified text content</returns>
 		public abstract IAsset Minify(IAsset asset);
 
 		/// <summary>
-		/// Produces code minifiction of assets
+		/// Produces a code minifiction of assets
 		/// </summary>
 		/// <param name="assets">Set of assets</param>
 		/// <returns>Set of assets with minified text content</returns>

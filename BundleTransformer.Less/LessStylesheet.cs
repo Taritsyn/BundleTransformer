@@ -45,29 +45,29 @@
 
 
 		/// <summary>
-		/// Constructs instance of LESS-stylesheet
+		/// Constructs a instance of LESS-stylesheet
 		/// </summary>
 		/// <param name="url">URL of stylesheet file</param>
 		public LessStylesheet(string url) : this(url, string.Empty)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of LESS-stylesheet
+		/// Constructs a instance of LESS-stylesheet
 		/// </summary>
 		/// <param name="url">URL of stylesheet file</param>
 		/// <param name="content">Text content of stylesheet</param>
-		public LessStylesheet(string url, string content) 
+		public LessStylesheet(string url, string content)
 			: this(url, content, new List<LessImport>(), new List<string>())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of LESS-stylesheet
+		/// Constructs a instance of LESS-stylesheet
 		/// </summary>
 		/// <param name="url">URL of stylesheet file</param>
 		/// <param name="content">Text content of stylesheet</param>
 		/// <param name="imports">List of LESS-imports</param>
 		/// <param name="dataUriFunctionImageUrls">List of image's URLs from <code>data-uri</code> functions</param>
-		public LessStylesheet(string url, string content, 
+		public LessStylesheet(string url, string content,
 			List<LessImport> imports, List<string> dataUriFunctionImageUrls)
 		{
 			Url = url;

@@ -17,19 +17,24 @@
 	internal sealed class CssOptimizer : IDisposable
 	{
 		/// <summary>
-		/// Name of resource, which contains a Sergey Kryzhanovsky's CSSO-library
+		/// Namespace for resources
 		/// </summary>
-		const string CSSO_LIBRARY_RESOURCE_NAME = "BundleTransformer.Csso.Resources.csso-combined.min.js";
+		private const string RESOURCES_NAMESPACE = "BundleTransformer.Csso.Resources";
 
 		/// <summary>
-		/// Name of resource, which contains a CSSO-minifier helper
+		/// Name of file, which contains a Sergey Kryzhanovsky's CSSO-library
 		/// </summary>
-		const string CSSO_HELPER_RESOURCE_NAME = "BundleTransformer.Csso.Resources.cssoHelper.min.js";
+		private const string CSSO_LIBRARY_FILE_NAME = "csso-combined.min.js";
+
+		/// <summary>
+		/// Name of file, which contains a CSSO-minifier helper
+		/// </summary>
+		private const string CSSO_HELPER_FILE_NAME = "cssoHelper.min.js";
 
 		/// <summary>
 		/// Template of function call, which is responsible for CSS-optimization
 		/// </summary>
-		const string OPTIMIZATION_FUNCTION_CALL_TEMPLATE = @"cssoHelper.minify({0}, {1});";
+		private const string OPTIMIZATION_FUNCTION_CALL_TEMPLATE = @"cssoHelper.minify({0}, {1});";
 
 		/// <summary>
 		/// JS engine
@@ -53,7 +58,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of CSS-optimizer
+		/// Constructs a instance of CSS-optimizer
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public CssOptimizer(Func<IJsEngine> createJsEngineInstance)
@@ -71,15 +76,15 @@
 			{
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(CSSO_LIBRARY_RESOURCE_NAME, type);
-				_jsEngine.ExecuteResource(CSSO_HELPER_RESOURCE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CSSO_LIBRARY_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CSSO_HELPER_FILE_NAME, type);
 
 				_initialized = true;
 			}
 		}
 
 		/// <summary>
-		/// "Optimizes" CSS-code by using Sergey Kryzhanovsky's CSSO
+		/// "Optimizes" a CSS-code by using Sergey Kryzhanovsky's CSSO
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>
 		/// <param name="disableRestructuring">Flag for whether to disable structure minification</param>

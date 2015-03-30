@@ -97,7 +97,7 @@
 		/// <summary>
 		/// Constructs a instance of style transformer
 		/// </summary>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		public StyleTransformer(string[] ignorePatterns)
 			: this(null, null, null, ignorePatterns)
@@ -109,7 +109,7 @@
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="postProcessors">List of postprocessors</param>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		public StyleTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,
 			string[] ignorePatterns)
@@ -123,7 +123,7 @@
 		/// <param name="minifier">Minifier</param>
 		/// <param name="translators">List of translators</param>
 		/// <param name="postProcessors">List of postprocessors</param>
-		/// <param name="ignorePatterns">List of patterns of files and directories that 
+		/// <param name="ignorePatterns">List of patterns of files and directories that
 		/// should be ignored when processing</param>
 		/// <param name="coreConfig">Configuration settings of core</param>
 		public StyleTransformer(IMinifier minifier, IList<ITranslator> translators, IList<IPostProcessor> postProcessors,

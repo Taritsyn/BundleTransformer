@@ -44,7 +44,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable full compliance with 
+		/// Gets or sets a flag for whether to disable full compliance with
 		/// Internet Explorer 6-8 quirks
 		/// </summary>
 		[ConfigurationProperty("screwIe8", DefaultValue = false)]

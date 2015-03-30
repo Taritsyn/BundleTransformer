@@ -68,7 +68,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to escape the slash in 
+		/// Gets or sets a flag for whether to escape the slash in
 		/// occurrences of <code>&lt;/script</code> in strings
 		/// </summary>
 		[ConfigurationProperty("inlineScript", DefaultValue = false)]
@@ -99,8 +99,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to insert brackets in <code>if</code>, 
-		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code> 
+		/// Gets or sets a flag for whether to insert brackets in <code>if</code>,
+		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code>
 		/// statements, even if their body is a single statement
 		/// </summary>
 		[ConfigurationProperty("bracketize", DefaultValue = false)]
@@ -121,12 +121,16 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to preserve comments
+		/// Gets or sets a value that determines what kind of comments need to preserve:
+		///		"all" - keep all comments;
+		///		"copyright" - keep JSDoc-style comments that contain <code>@license</code> or <code>@preserve</code>;
+		///		valid JS regexp (needs to start with a slash) - keep only comments that match;
+		///		empty string - remove all comments.
 		/// </summary>
-		[ConfigurationProperty("comments", DefaultValue = false)]
-		public bool Comments
+		[ConfigurationProperty("comments", DefaultValue = "")]
+		public string Comments
 		{
-			get { return (bool)this["comments"]; }
+			get { return (string)this["comments"]; }
 			set { this["comments"] = value; }
 		}
 
@@ -148,6 +152,16 @@
 		{
 			get { return (bool)this["unescapeRegexps"]; }
 			set { this["unescapeRegexps"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a preferred quote style for strings
+		/// </summary>
+		[ConfigurationProperty("quoteStyle", DefaultValue = QuoteStyle.Auto)]
+		public QuoteStyle QuoteStyle
+		{
+			get { return (QuoteStyle)this["quoteStyle"]; }
+			set { this["quoteStyle"] = value; }
 		}
 	}
 }

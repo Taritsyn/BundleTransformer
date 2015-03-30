@@ -53,7 +53,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the Sass and SCSS compilation options
+		/// Constructs a instance of the Sass and SCSS compilation options
 		/// </summary>
 		public CompilationOptions()
 		{

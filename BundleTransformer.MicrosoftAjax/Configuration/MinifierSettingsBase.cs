@@ -8,7 +8,7 @@
 	public abstract class MinifierSettingsBase : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>) 
+		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %&gt;</code>)
 		/// should be recognized and output as is
 		/// </summary>
 		[ConfigurationProperty("allowEmbeddedAspNetBlocks", DefaultValue = false)]
@@ -20,7 +20,7 @@
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the opening curly brace for blocks is
-		/// on its own line (<code>NewLine</code>) or on the same line as 
+		/// on its own line (<code>NewLine</code>) or on the same line as
 		/// the preceding code (<code>SameLine</code>)
 		/// or taking a hint from the source code position (<code>UseSource</code>).
 		/// Only relevant when OutputMode is set to <code>MultipleLines</code>.
@@ -53,7 +53,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a number of spaces per indent level when in 
+		/// Gets or sets a number of spaces per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		[ConfigurationProperty("indentSize", DefaultValue = 4)]
@@ -64,7 +64,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a column position at which the line 
+		/// Gets or sets a column position at which the line
 		/// will be broken at the next available opportunity
 		/// </summary>
 		[ConfigurationProperty("lineBreakThreshold", DefaultValue = 2147482647)]
@@ -87,7 +87,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the list 
+		/// Gets or sets a string representation of the list
 		/// of names defined for the preprocessor (comma-separated)
 		/// </summary>
 		[ConfigurationProperty("preprocessorDefineList", DefaultValue = "")]
@@ -98,7 +98,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add a semicolon 
+		/// Gets or sets a flag for whether to add a semicolon
 		/// at the end of the parsed code
 		/// </summary>
 		[ConfigurationProperty("termSemicolons", DefaultValue = false)]

@@ -55,7 +55,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the Hogan compilation options
+		/// Constructs a instance of the Hogan compilation options
 		/// </summary>
 		public CompilationOptions()
 		{

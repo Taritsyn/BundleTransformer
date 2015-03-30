@@ -14,7 +14,7 @@ module TranslatorBadges {
 		$linkElem: JQuery;
 
 		/**
-		* Constructs instance of translator badge
+		* Constructs a instance of translator badge
 		*
 		* @param {String} elementId - Id of badge DOM-element
 		* @constructor

@@ -26,7 +26,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of script context
+		/// Constructs a instance of script context
 		/// </summary>
 		/// <param name="scriptConfig">Configuration settings of processing script assets</param>
 		public ScriptContext(ScriptSettings scriptConfig)

@@ -270,9 +270,9 @@ var lessHelper = (function (less, undefined) {
 		compilationOptions.relativeUrls = true;
 
 		lessCompiler = less.createFromEnvironment(environment, [fileManager]);
-		
+
 		try {
-			lessCompiler.render(code, compilationOptions, 
+			lessCompiler.render(code, compilationOptions,
 				function(err, stylesheet){
 					if (err) {
 						errors.push({

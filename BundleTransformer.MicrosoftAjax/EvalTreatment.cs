@@ -16,7 +16,7 @@
 		MakeImmediateSafe,
 
 		/// <summary>
-		/// Assume that any local variable or function in any accessible scope chain may be referenced by 
+		/// Assume that any local variable or function in any accessible scope chain may be referenced by
 		/// code that is eval'd. This will turn off local variable and function renaming for all scopes that
 		/// contain an eval statement, and all their parent scopes up the chain to the global scope.
 		/// </summary>

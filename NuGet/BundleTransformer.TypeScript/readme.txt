@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.39
+            README file for Bundle Transformer: TypeScript 1.9.52
 
    ----------------------------------------------------------------------
 
@@ -26,17 +26,6 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of TypeScript version 1.4.1;
-   2. In configuration settings of TypeScript-translator was replaced 2
-      properties: `UseDefaultLib` by `NoLib` (default `false`) and
-      `CodeGenTarget` by `Target` (`EcmaScript3` (default), `EcmaScript5`,
-      or `EcmaScript6` (experimental)), and added 3 properties -
-      `NoEmitOnError` (default `false`), `PreserveConstEnums` (default
-      `false`) and `SuppressImplicitAnyIndexErrors` (default `false`).
    
    ====================
    POST-INSTALL ACTIONS

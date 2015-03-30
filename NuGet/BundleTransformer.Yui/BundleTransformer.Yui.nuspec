@@ -1,32 +1,32 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-  <metadata>
-    <id>BundleTransformer.Yui</id>
-    <version>1.9.34</version>
-	<title>Bundle Transformer: YUI</title>
-    <authors>Andrey Taritsyn</authors>
-    <owners>Andrey Taritsyn</owners>
-    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476853</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.Yui contains 2 minifier-adapters: `YuiCssMinifier` (for minification of CSS-code) and `YuiJsMinifier` (for minification of JS-code). These adapters perform minification using the YUI Compressor for .NET (http://github.com/PureKrome/YUICompressor.NET).</description>
-    <summary>BundleTransformer.Yui contains 2 minifier-adapters: `YuiCssMinifier` (for minification of CSS-code) and `YuiJsMinifier` (for minification of JS-code). These adapters perform minification using the YUI Compressor for .NET.</summary>
-	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-    <language>en-US</language>
-    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation YUICompressor</tags>
-    <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.34" />
-	  <dependency id="YUICompressor.NET" version="2.7.0.0" />
-    </dependencies>
-    <references>
-      <reference file="BundleTransformer.Yui.dll" />
-    </references>
-  </metadata>
-  <files>
-    <file src="..\..\BundleTransformer.Yui\bin\Release\BundleTransformer.Yui.dll" target="lib\net40" />
-	<file src="..\..\BundleTransformer.Yui\bin\Release\**\BundleTransformer.Yui.resources.dll" target="lib\net40" />
-	<file src="content\web.config.transform" target="content" />
-	<file src="readme.txt" />
-  </files>
+	<metadata>
+		<id>BundleTransformer.Yui</id>
+		<version>1.9.52</version>
+		<title>Bundle Transformer: YUI</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476853</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.Yui contains 2 minifier-adapters: `YuiCssMinifier` (for minification of CSS-code) and `YuiJsMinifier` (for minification of JS-code). These adapters perform minification using the YUI Compressor for .NET (http://github.com/PureKrome/YUICompressor.NET).</description>
+		<summary>BundleTransformer.Yui contains 2 minifier-adapters: `YuiCssMinifier` (for minification of CSS-code) and `YuiJsMinifier` (for minification of JS-code). These adapters perform minification using the YUI Compressor for .NET.</summary>
+		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation YUICompressor</tags>
+		<dependencies>
+			<dependency id="BundleTransformer.Core" version="1.9.52" />
+			<dependency id="YUICompressor.NET" version="2.7.0.0" />
+		</dependencies>
+		<references>
+			<reference file="BundleTransformer.Yui.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\BundleTransformer.Yui\bin\Release\BundleTransformer.Yui.dll" target="lib\net40" />
+		<file src="..\..\BundleTransformer.Yui\bin\Release\**\BundleTransformer.Yui.resources.dll" target="lib\net40" />
+		<file src="content\web.config.transform" target="content" />
+		<file src="readme.txt" />
+	</files>
 </package>

@@ -231,7 +231,7 @@ var typeScriptHelper = (function (ts, undefined) {
 
 		program = ts.createProgram(fileNames, options, compilerHost);
 		errors = program.getDiagnostics();
-		
+
 		if (errors.length === 0) {
 			checker = program.getTypeChecker(true);
 			errors = checker.getDiagnostics();

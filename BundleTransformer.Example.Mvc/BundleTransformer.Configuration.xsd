@@ -1225,7 +1225,7 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 				</xs:attribute>
 				<xs:attribute name="excludeDefaultExterns" type="Boolean_SchemaType" use="optional" default="false">
 					<xs:annotation>
-						<xs:documentation>Flag for whether to exclude common externs such as document and all its methods</xs:documentation>
+						<xs:documentation>Flag for whether to exclude common externs such as `document` and all its methods</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 				<xs:attribute name="language" type="ClosureLanguageSpec_SchemaType" use="optional" default="EcmaScript3">
@@ -1737,9 +1737,13 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to separate statements with semicolons</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="comments" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="comments" type="xs:string" use="optional" default="">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to preserve comments</xs:documentation>
+				<xs:documentation>Value that determines what kind of comments need to preserve:
+ "all" - keep all comments;
+ "copyright" - keep JSDoc-style comments that contain `@license` or `@preserve`;
+ valid JS regexp (needs to start with a slash) - keep only comments that match;
+ empty string - remove all comments.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="preserveLine" type="Boolean_SchemaType" use="optional" default="false">
@@ -1751,6 +1755,35 @@ to preserve references to external symbols.</xs:documentation>
 			<xs:annotation>
 				<xs:documentation>Flag for whether to unescape regular expressions</xs:documentation>
 			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="quoteStyle" use="optional" default="Auto">
+			<xs:annotation>
+				<xs:documentation>Preferred quote style for strings</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="Auto">
+						<xs:annotation>
+							<xs:documentation>Prefers double quotes, switches to single quotes when there are more double quotes in the string itself</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="Single">
+						<xs:annotation>
+							<xs:documentation>Always use single quotes</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="Double">
+						<xs:annotation>
+							<xs:documentation>Always use double quotes</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="Original">
+						<xs:annotation>
+							<xs:documentation>Always use the original quotes</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /UglifyJs settings -->
@@ -1911,6 +1944,16 @@ to preserve references to external symbols.</xs:documentation>
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>
+		<xs:attribute name="mediaMerging" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable `@media` merging</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="restructuring" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable restructuring optimizations</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="roundingPrecision" use="optional" default="2">
 			<xs:annotation>
 				<xs:documentation>Rounding precision. -1 disables rounding.</xs:documentation>
@@ -1929,11 +1972,9 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:attribute>
 		<xs:attribute name="severity" use="optional" default="0">
 			<xs:annotation>
-				<xs:documentation>
-					Severity level of errors:
-					0 - only error messages;
-					1 - only error messages and warnings.
-				</xs:documentation>
+				<xs:documentation>Severity level of errors:
+	0 - only error messages;
+	1 - only error messages and warnings.</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:int">

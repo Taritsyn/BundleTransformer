@@ -15,13 +15,13 @@
 	using Core.Minifiers;
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
-	
+
 	using Configuration;
 	using BtCompressionType = CompressionType;
 	using YuiStrings = Resources.Strings;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code 
+	/// Minifier, which produces minifiction of JS-code
 	/// by using YUI Compressor for .NET
 	/// </summary>
 	public sealed class YuiJsMinifier : YuiMinifierBase
@@ -71,7 +71,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to preserve unnecessary 
+		/// Gets or sets a flag for whether to preserve unnecessary
 		/// semicolons (such as right before a '}')
 		/// </summary>
 		public bool PreserveAllSemicolons
@@ -90,7 +90,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to ignore when processing code, that 
+		/// Gets or sets a flag for whether to ignore when processing code, that
 		/// executed in eval operator
 		/// </summary>
 		public bool IgnoreEval
@@ -137,7 +137,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets the culture you want the thread to run under. 
+		/// Gets or sets the culture you want the thread to run under.
 		/// This affects the treatment of numbers etc - e.g. 9.00 could be output as 9,00
 		/// (this is mainly for non English OS's)/
 		/// </summary>
@@ -149,14 +149,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of YUI JS-minifier
+		/// Constructs a instance of YUI JS-minifier
 		/// </summary>
 		public YuiJsMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetYuiSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of YUI JS-minifier
+		/// Constructs a instance of YUI JS-minifier
 		/// </summary>
 		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
 		public YuiJsMinifier(YuiSettings yuiConfig)
@@ -177,7 +177,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of JS-asset by using YUI Compressor for .NET
+		/// Produces a code minifiction of JS-asset by using YUI Compressor for .NET
 		/// </summary>
 		/// <param name="asset">JS-asset</param>
 		/// <returns>JS-asset with minified text content</returns>
@@ -202,7 +202,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of JS-assets by using YUI Compressor for .NET
+		/// Produces a code minifiction of JS-assets by using YUI Compressor for .NET
 		/// </summary>
 		/// <param name="assets">Set of JS-assets</param>
 		/// <returns>Set of JS-assets with minified text content</returns>

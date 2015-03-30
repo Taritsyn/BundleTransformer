@@ -17,7 +17,7 @@
 			new Lazy<SassAndScssSettings>(() => (SassAndScssSettings)ConfigurationManager.GetSection("bundleTransformer/sassAndScss"));
 
 		/// <summary>
-		/// Gets Sass- and SCSS-translator configuration settings
+		/// Gets a Sass- and SCSS-translator configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
 		/// <returns>Configuration settings of Sass- and SCSS-translator</returns>

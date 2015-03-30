@@ -60,7 +60,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to escape the slash in 
+		/// Gets or sets a flag for whether to escape the slash in
 		/// occurrences of <code>&lt;/script</code> in strings
 		/// </summary>
 		public bool InlineScript
@@ -88,8 +88,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to insert brackets in <code>if</code>, 
-		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code> 
+		/// Gets or sets a flag for whether to insert brackets in <code>if</code>,
+		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code>
 		/// statements, even if their body is a single statement
 		/// </summary>
 		public bool Bracketize
@@ -108,9 +108,13 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to preserve comments
+		/// Gets or sets a value that determines what kind of comments need to preserve:
+		///		"all" - keep all comments;
+		///		"copyright" - keep JSDoc-style comments that contain <code>@license</code> or <code>@preserve</code>;
+		///		valid JS regexp (needs to start with a slash) - keep only comments that match;
+		///		empty string - remove all comments.
 		/// </summary>
-		public bool Comments
+		public string Comments
 		{
 			get;
 			set;
@@ -134,9 +138,18 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a preferred quote style for strings
+		/// </summary>
+		public QuoteStyle QuoteStyle
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
-		/// Constructs instance of the options of code generation
+		/// Constructs a instance of the options of code generation
 		/// </summary>
 		public CodeGenerationOptions()
 		{
@@ -151,9 +164,10 @@
 			MaxLineLength = 32000;
 			Bracketize = false;
 			Semicolons = true;
-			Comments = false;
+			Comments = string.Empty;
 			PreserveLine = false;
 			UnescapeRegexps = false;
+			QuoteStyle = QuoteStyle.Auto;
 		}
 	}
 }

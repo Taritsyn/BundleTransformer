@@ -1,32 +1,32 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-  <metadata>
-    <id>BundleTransformer.WG</id>
-    <version>1.9.34-Beta4</version>
-	<title>Bundle Transformer: WebGrease</title>
-    <authors>Andrey Taritsyn</authors>
-    <owners>Andrey Taritsyn</owners>
-    <licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-    <projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=483384</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.WG contains one minifier-adapter for minification of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS-minifier (http://webgrease.codeplex.com) version 1.6.0.</description>
-    <summary>BundleTransformer.WG contains one minifier-adapter for minification of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS-minifier version 1.6.0.</summary>
-	<copyright>Copyright 2014 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-    <language>en-US</language>
-    <tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify WebGrease</tags>
-    <dependencies>
-      <dependency id="BundleTransformer.Core" version="1.9.34" />
-	  <dependency id="WebGrease" version="1.6.0" />
-    </dependencies>
-    <references>
-      <reference file="BundleTransformer.WG.dll" />
-    </references>
-  </metadata>
-  <files>
-    <file src="..\..\BundleTransformer.WG\bin\Release\BundleTransformer.WG.dll" target="lib\net40" />
-	<file src="..\..\BundleTransformer.WG\bin\Release\**\BundleTransformer.WG.resources.dll" target="lib\net40" />
-	<file src="content\web.config.transform" target="content" />
-	<file src="readme.txt" />
-  </files>
+	<metadata>
+		<id>BundleTransformer.WG</id>
+		<version>1.9.52-Beta4</version>
+		<title>Bundle Transformer: WebGrease</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
+		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
+		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=483384</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.WG contains one minifier-adapter for minification of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS-minifier (http://webgrease.codeplex.com) version 1.6.0.</description>
+		<summary>BundleTransformer.WG contains one minifier-adapter for minification of CSS-code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS-minifier version 1.6.0.</summary>
+		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify WebGrease</tags>
+		<dependencies>
+			<dependency id="BundleTransformer.Core" version="1.9.52" />
+			<dependency id="WebGrease" version="1.6.0" />
+		</dependencies>
+		<references>
+			<reference file="BundleTransformer.WG.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\BundleTransformer.WG\bin\Release\BundleTransformer.WG.dll" target="lib\net40" />
+		<file src="..\..\BundleTransformer.WG\bin\Release\**\BundleTransformer.WG.resources.dll" target="lib\net40" />
+		<file src="content\web.config.transform" target="content" />
+		<file src="readme.txt" />
+	</files>
 </package>

@@ -52,11 +52,11 @@
 
 			// Assert
 			Assert.AreEqual(3, processedAssets.Count);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, @"Site.css"), 
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, @"Site.css"),
 				processedAssets[0].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.css"), processedAssets[1].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH, 
+			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"css\TestCssComponentsPaths.css"), processedAssets[2].VirtualPath);
 		}
 

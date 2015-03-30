@@ -27,7 +27,7 @@
 			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
 
 
-			string jqueryTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			string jqueryTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"jquery.d.ts");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(jqueryTsAssetVirtualPath))
@@ -39,7 +39,7 @@
 				;
 
 
-			string iTranslatorBadgeTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			string iTranslatorBadgeTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"ITranslatorBadge.d.ts");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(iTranslatorBadgeTsAssetVirtualPath))
@@ -56,7 +56,7 @@
 				;
 
 
-			string translatorBadgeTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			string translatorBadgeTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"TranslatorBadge.ts");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(translatorBadgeTsAssetVirtualPath))

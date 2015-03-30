@@ -87,7 +87,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of TypeScript-compiler
+		/// Constructs a instance of TypeScript-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance)
@@ -95,7 +95,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of TypeScript-compiler
+		/// Constructs a instance of TypeScript-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>
@@ -139,14 +139,14 @@
 		}
 
 		/// <summary>
-		/// "Compiles" TypeScript-code to JS-code
+		/// "Compiles" a TypeScript-code to JS-code
 		/// </summary>
 		/// <param name="content">Text content written on TypeScript</param>
 		/// <param name="path">Path to TypeScript-file</param>
 		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Translated TypeScript-code</returns>
-		public string Compile(string content, string path, DependencyCollection dependencies, 
+		public string Compile(string content, string path, DependencyCollection dependencies,
 			CompilationOptions options = null)
 		{
 			string newContent;

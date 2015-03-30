@@ -17,7 +17,7 @@
 	using BtCompressionType = CompressionType;
 
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code 
+	/// Minifier, which produces minifiction of CSS-code
 	/// by using YUI Compressor for .NET
 	/// </summary>
 	public sealed class YuiCssMinifier : YuiMinifierBase
@@ -58,7 +58,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to remove all comments 
+		/// Gets or sets a flag for whether to remove all comments
 		/// except "important" comments
 		/// </summary>
 		public bool RemoveComments
@@ -79,14 +79,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of YUI CSS-minifier
+		/// Constructs a instance of YUI CSS-minifier
 		/// </summary>
 		public YuiCssMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetYuiSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs instance of YUI CSS-minifier
+		/// Constructs a instance of YUI CSS-minifier
 		/// </summary>
 		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
 		public YuiCssMinifier(YuiSettings yuiConfig)
@@ -101,7 +101,7 @@
 
 
 		/// <summary>
-		/// Produces code minifiction of CSS-asset by using YUI Compressor for .NET
+		/// Produces a code minifiction of CSS-asset by using YUI Compressor for .NET
 		/// </summary>
 		/// <param name="asset">CSS-asset</param>
 		/// <returns>CSS-asset with minified text content</returns>
@@ -126,7 +126,7 @@
 		}
 
 		/// <summary>
-		/// Produces code minifiction of CSS-assets by using YUI Compressor for .NET
+		/// Produces a code minifiction of CSS-assets by using YUI Compressor for .NET
 		/// </summary>
 		/// <param name="assets">Set of CSS-assets</param>
 		/// <returns>Set of CSS-assets with minified text content</returns>

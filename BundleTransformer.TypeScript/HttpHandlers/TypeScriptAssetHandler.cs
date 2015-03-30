@@ -13,7 +13,7 @@
 	using Translators;
 
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output 
+	/// Debugging HTTP-handler that responsible for text output
 	/// of translated TypeScript-asset
 	/// </summary>
 	public sealed class TypeScriptAssetHandler : ScriptAssetHandlerBase

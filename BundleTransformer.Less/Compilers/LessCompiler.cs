@@ -73,7 +73,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of LESS-compiler
+		/// Constructs a instance of LESS-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public LessCompiler(Func<IJsEngine> createJsEngineInstance)
@@ -81,7 +81,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of LESS-compiler
+		/// Constructs a instance of LESS-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>
@@ -111,7 +111,7 @@
 		}
 
 		/// <summary>
-		/// "Compiles" LESS-code to CSS-code
+		/// "Compiles" a LESS-code to CSS-code
 		/// </summary>
 		/// <param name="content">Text content written on LESS</param>
 		/// <param name="path">Path to LESS-file</param>
@@ -174,7 +174,7 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new LessCompilingException(FormatErrorDetails(errors[0], processedContent, path, 
+						throw new LessCompilingException(FormatErrorDetails(errors[0], processedContent, path,
 							dependencies));
 					}
 
@@ -281,7 +281,7 @@
 					if (equalSignPosition == -1)
 					{
 						throw new FormatException(
-							string.Format(Strings.VariablesParsing_InvalidNameValueFormat, 
+							string.Format(Strings.VariablesParsing_InvalidNameValueFormat,
 								propertyName, variablesString));
 					}
 

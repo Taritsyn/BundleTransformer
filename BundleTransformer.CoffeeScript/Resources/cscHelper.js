@@ -1,4 +1,5 @@
-﻿var coffeeScriptHelper = (function(coffeeScript, undefined) {
+﻿/*global CoffeeScript */
+var coffeeScriptHelper = (function (coffeeScript, undefined) {
 	'use strict';
 
 	var exports = {};
@@ -31,7 +32,7 @@
 						columnNumber = location.first_column + 1;
 					}
 				}
-		
+
 				parseErrors.push({
 					'message': message,
 					'lineNumber': lineNumber,
@@ -47,7 +48,7 @@
 		if (parseErrors.length > 0) {
 			result.errors = parseErrors;
 		}
-		
+
 		return JSON.stringify(result);
 	};
 

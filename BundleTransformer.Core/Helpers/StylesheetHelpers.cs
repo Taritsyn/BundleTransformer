@@ -67,7 +67,7 @@
 					return true;
 				}
 
-				string commentText = currentLine.Substring(commentTextPosition, 
+				string commentText = currentLine.Substring(commentTextPosition,
 					currentPosition - commentTextPosition);
 				if (string.IsNullOrWhiteSpace(commentText))
 				{

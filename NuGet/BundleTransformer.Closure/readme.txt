@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Closure 1.9.51
+             README file for Bundle Transformer: Closure 1.9.52
  
    ----------------------------------------------------------------------
 
@@ -22,27 +22,6 @@
    `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application 
    (https://developers.google.com/closure/compiler/docs/gettingstarted_app) 
    and for their work requires the latest version of file compiler.jar.
-   
-   =============
-   RELEASE NOTES
-   =============
-   1. Added the ability to specify the externs files;
-   2. In configuration settings of Closure Remote JS-minifier was
-      added 3 new properties: `Charset` (default is empty), `Language`
-	  (default `EcmaScript3`) and `UseTypesForOptimization`
-	  (default `false`);
-   3. In configuration settings of Closure Local JS-minifier was renamed
-      one property - `LanguageSpec` to `LanguageInput`, and added 16 new
-	  properties: `AcceptConstKeyword` (default `false`), `AllowEs6Output`
-	  (default `false`), `AngularPass` (default `false`), `Charset`
-	  (default is empty), `DefinitionList` (default is empty),
-	  `ErrorList` (default is empty), `ExportLocalPropertyDefinitions`
-	  (default `false`), `ExtraAnnotationNameList` (default is empty),
-	  `GenerateExports` (default `false`), `LanguageOutput`
-	  (default `None`), `SingleQuotes` (default `false`), `TranspileOnly`
-      (default `false`), `TurnOffWarningClassList` (default is empty),
-	  `UseOnlyCustomExterns` (default `false`), `UseTypesForOptimization`
-	  (default `false`) and `WarningList` (default is empty).
 
    ====================
    POST-INSTALL ACTIONS

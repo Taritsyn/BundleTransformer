@@ -29,7 +29,7 @@
 		public void ScriptAssetsListContainAssetsWithInvalidTypes()
 		{
 			// Arrange
-			var siteCssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), 
+			var siteCssAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
 				_virtualFileSystemWrapper);
 
 			var jqueryJsAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.js"),

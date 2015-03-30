@@ -4,7 +4,7 @@
 
 Sets a border style of **Badge**.
 
-	setElemBorderStyle = (id, style) -> 
+	setElemBorderStyle = (id, style) ->
 		elem = document.getElementById(id)
 		elem.style.borderStyle = style if elem?
 

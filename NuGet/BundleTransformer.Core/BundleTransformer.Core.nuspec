@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.Core</id>
-		<version>1.9.51</version>
+		<version>1.9.52</version>
 		<title>Bundle Transformer: Core</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -16,7 +16,6 @@ The main differences of `StyleTransformer` and `ScriptTransformer` classes from 
 
 This extension will help your web applications successfully pass a most part of the tests in YSlow.</description>
 		<summary>Bundle Transformer - a modular extension for System.Web.Optimization (also known as the Microsoft ASP.NET Web Optimization Framework). Classes `StyleTransformer` and `ScriptTransformer`, included in the core of Bundle Transformer and implement interface `IBundleTransform`. They are intended to replace the standard classes `CssMinify` and `JsMinify`.</summary>
-		<releaseNotes>In `IAsset` interface added 2 new properties: `OriginalAssets` and `Combined`.</releaseNotes>
 		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Performance Optimization YSlow Speed Pre-minified Combine Compression</tags>

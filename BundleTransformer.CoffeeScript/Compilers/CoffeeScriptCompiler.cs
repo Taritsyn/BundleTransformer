@@ -64,7 +64,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript-compiler
+		/// Constructs a instance of CoffeeScript-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		public CoffeeScriptCompiler(Func<IJsEngine> createJsEngineInstance)
@@ -72,7 +72,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of CoffeeScript-compiler
+		/// Constructs a instance of CoffeeScript-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="defaultOptions">Default compilation options</param>
@@ -110,7 +110,7 @@
 		public string Compile(string content, string path, CompilationOptions options = null)
 		{
 			string newContent;
-			string currentOptionsString = (options != null) ? 
+			string currentOptionsString = (options != null) ?
 				ConvertCompilationOptionsToJson(options).ToString() : _defaultOptionsString;
 
 			lock (_compilationSynchronizer)
@@ -165,14 +165,14 @@
 		/// <param name="sourceCode">Source code</param>
 		/// <param name="currentFilePath">Path to current CoffeeScript-file</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, 
+		private static string FormatErrorDetails(JToken errorDetails, string sourceCode,
 			string currentFilePath)
 		{
 			var message = errorDetails.Value<string>("message");
 			string file = currentFilePath;
 			var lineNumber = errorDetails.Value<int>("lineNumber");
 			var columnNumber = errorDetails.Value<int>("columnNumber");
-			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode, 
+			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
 			var errorMessage = new StringBuilder();

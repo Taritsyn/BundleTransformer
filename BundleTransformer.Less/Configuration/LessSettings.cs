@@ -48,7 +48,7 @@
 			get { return (bool)this["strictUnits"]; }
 			set { this["strictUnits"] = value; }
 		}
-		
+
 		/// <summary>
 		/// Gets or sets a output mode of the debug information
 		/// </summary>
@@ -81,7 +81,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of variable list, that modifies a variables 
+		/// Gets or sets a string representation of variable list, that modifies a variables
 		/// already declared in the file (semicolon-separated list of values of the form VAR=VALUE)
 		/// </summary>
 		[ConfigurationProperty("modifyVariables", DefaultValue = "")]

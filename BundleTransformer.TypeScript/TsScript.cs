@@ -36,14 +36,14 @@
 
 
 		/// <summary>
-		/// Constructs instance of TypeScript-script
+		/// Constructs a instance of TypeScript-script
 		/// </summary>
 		/// <param name="url">URL of script file</param>
 		public TsScript(string url) : this(url, string.Empty)
 		{ }
 
 		/// <summary>
-		/// Constructs instance of TypeScript-script
+		/// Constructs a instance of TypeScript-script
 		/// </summary>
 		/// <param name="url">URL of script file</param>
 		/// <param name="content">Text content of script</param>
@@ -52,7 +52,7 @@
 		{ }
 
 		/// <summary>
-		/// Constructs instance of TypeScript-script
+		/// Constructs a instance of TypeScript-script
 		/// </summary>
 		/// <param name="url">URL of script file</param>
 		/// <param name="content">Text content of script</param>

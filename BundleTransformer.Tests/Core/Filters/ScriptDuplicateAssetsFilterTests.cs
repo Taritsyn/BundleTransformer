@@ -27,13 +27,13 @@
 				"jquery-1.6.2.js"), virtualFileSystemWrapper);
 			var ajaxLoginAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"AjaxLogin.js"), virtualFileSystemWrapper);
-			var microsoftAjaxDebugAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var microsoftAjaxDebugAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"MicrosoftAjax.debug.js"), virtualFileSystemWrapper);
-			var microsoftAjaxAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var microsoftAjaxAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"MicrosoftAjax.js"), virtualFileSystemWrapper);
-			var modernizrAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var modernizrAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), virtualFileSystemWrapper);
-			var ajaxLoginDuplicateAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, 
+			var ajaxLoginDuplicateAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"ajaxlogin.js"), virtualFileSystemWrapper);
 			var testCoffeeAsset = new Asset(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"coffee/TestCoffeeScript.coffee"), virtualFileSystemWrapper);

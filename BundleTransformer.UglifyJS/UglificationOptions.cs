@@ -42,7 +42,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable full compliance with 
+		/// Gets or sets a flag for whether to disable full compliance with
 		/// Internet Explorer 6-8 quirks
 		/// </summary>
 		public bool ScrewIe8
@@ -74,7 +74,7 @@
 
 
 		/// <summary>
-		/// Constructs instance of the uglification options
+		/// Constructs a instance of the uglification options
 		/// </summary>
 		public UglificationOptions()
 		{
