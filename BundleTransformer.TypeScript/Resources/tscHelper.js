@@ -8,6 +8,7 @@ var typeScriptHelper = (function (ts, undefined) {
 			emitBOM: false,
 			mapRoot: '',
 			module: 0 /* None */,
+			noEmit: false,
 			noEmitOnError: false,
 			noImplicitAny: false,
 			noLib: false,
@@ -16,13 +17,14 @@ var typeScriptHelper = (function (ts, undefined) {
 			outDir: '',
 			preserveConstEnums: false,
 			removeComments: false,
-			suppressImplicitAnyIndexErrors: false,
+			separateCompilation: false,
 			sourceMap: false,
 			sourceRoot: '',
+			stripInternal: false,
+			suppressImplicitAnyIndexErrors: false,
 			target: 0 /* ES3 */
 		},
-		BtSystem,
-		BtCompilerHost
+		BtSystem
 		;
 
 	function mix(destination, source) {
@@ -64,7 +66,7 @@ var typeScriptHelper = (function (ts, undefined) {
 		return key;
 	}
 
-	//#region BtSystem
+	//#region BtSystem class
 	BtSystem = (function () {
 		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'ts.sys.{0}' is not implemented.";
 
@@ -102,6 +104,10 @@ var typeScriptHelper = (function (ts, undefined) {
 			var key = generateFileCacheItemKey(fileName);
 
 			this._files[key] = { path: fileName, content: data };
+		};
+
+		BtSystem.prototype.readDirectory = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'readDirectory'));
 		};
 
 		BtSystem.prototype.resolvePath = function(path) {
@@ -155,18 +161,13 @@ var typeScriptHelper = (function (ts, undefined) {
 	})();
 	//#endregion
 
-	//#region BtCompilerHost
-	BtCompilerHost = (function () {
-		function BtCompilerHost(system, options) {
-			this._sys = system;
-			this._options = options;
-		}
-
-		BtCompilerHost.prototype.getSourceFile = function(filename, languageVersion, onError) {
+	//#region createBtCompilerHost function
+	function createBtCompilerHost() {
+		function getSourceFile(fileName, languageVersion, onError) {
 			var text;
 
 			try {
-				text = this._sys.readFile(filename);
+				text = ts.sys.readFile(fileName);
 			}
 			catch (e) {
 				if (onError) {
@@ -177,69 +178,74 @@ var typeScriptHelper = (function (ts, undefined) {
 			}
 
 			return (typeof text !== 'undefined') ?
-				ts.createSourceFile(filename, text, languageVersion, '0') : undefined;
-		};
+				ts.createSourceFile(fileName, text, languageVersion, false) : undefined;
+		}
 
-		BtCompilerHost.prototype.getDefaultLibFilename = function (options) {
-			var defaultLibFileName = (options.target === 2 /* ES6 */) ? 'lib.es6.d.ts' : 'lib.d.ts';
+		function getDefaultLibFileName(options) {
+			return ts.getDefaultLibFileName(options);
+		}
 
-			return defaultLibFileName;
-		};
-
-		BtCompilerHost.prototype.writeFile = function(fileName, data, writeByteOrderMark, onError) {
+		function writeFile(fileName, data, writeByteOrderMark, onError) {
 			try {
-				this._sys.writeFile(fileName, data, writeByteOrderMark);
+				ts.sys.writeFile(fileName, data, writeByteOrderMark);
 			}
 			catch (e) {
 				if (onError) {
 					onError(e.message);
 				}
 			}
-		};
+		}
 
-		BtCompilerHost.prototype.getCurrentDirectory = function() {
-			return this._sys.getCurrentDirectory();
-		};
+		function getCurrentDirectory() {
+			return ts.sys.getCurrentDirectory();
+		}
 
-		BtCompilerHost.prototype.useCaseSensitiveFileNames = function() {
-			return this._sys.useCaseSensitiveFileNames;
-		};
+		function useCaseSensitiveFileNames() {
+			return ts.sys.useCaseSensitiveFileNames;
+		}
 
-		BtCompilerHost.prototype.getCanonicalFileName = function(fileName) {
-			return this._sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
-		};
+		function getCanonicalFileName(fileName) {
+			return ts.sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
+		}
 
-		BtCompilerHost.prototype.getNewLine = function getNewLine() {
-			return this._sys.newLine;
-		};
+		function getNewLine() {
+			return ts.sys.newLine;
+		}
 
-		BtCompilerHost.prototype.dispose = function () {
-			this._sys = null;
-			this._options = null;
+		return {
+			getSourceFile: getSourceFile,
+			getDefaultLibFileName: getDefaultLibFileName,
+			writeFile: writeFile,
+			getCurrentDirectory: getCurrentDirectory,
+			useCaseSensitiveFileNames: useCaseSensitiveFileNames,
+			getCanonicalFileName: getCanonicalFileName,
+			getNewLine: getNewLine
 		};
-
-		return BtCompilerHost;
-	})();
+	}
 	//#endregion
 
 	function innerCompile(fileNames, options, compilerHost) {
 		var program,
 			errors,
-			checker,
 			emitErrors
 			;
 
 		program = ts.createProgram(fileNames, options, compilerHost);
-		errors = program.getDiagnostics();
+		errors = program.getSyntacticDiagnostics();
 
 		if (errors.length === 0) {
-			checker = program.getTypeChecker(true);
-			errors = checker.getDiagnostics();
-			if (!checker.isEmitBlocked()) {
-				emitErrors = checker.emitFiles().diagnostics;
-				errors = ts.concatenate(errors, emitErrors);
+			errors = program.getGlobalDiagnostics();
+			if (errors.length === 0) {
+				errors = program.getSemanticDiagnostics();
 			}
 		}
+
+		if (options.noEmit) {
+			return errors;
+		}
+
+		emitErrors = program.emit().diagnostics;
+		errors = ts.concatenate(errors, emitErrors);
 
 		return {
 			program: program,
@@ -264,14 +270,14 @@ var typeScriptHelper = (function (ts, undefined) {
 
 		for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
 			diagnostic = diagnostics[diagnosticIndex];
-			message = diagnostic.messageText;
+			message = ts.flattenDiagnosticMessageText(diagnostic.messageText, ts.sys.newLine);
 			file = diagnostic.file;
 
 			if (file) {
-				fileName = file.filename;
-				location = file.getLineAndCharacterFromPosition(diagnostic.start);
-				lineNumber = location.line;
-				columnNumber = location.character;
+				fileName = file.fileName;
+				location = ts.getLineAndCharacterOfPosition(file, diagnostic.start);
+				lineNumber = location.line + 1;
+				columnNumber = location.character + 1;
 			}
 
 			if (diagnostic.category === 1 /* Error */) {
@@ -324,17 +330,15 @@ var typeScriptHelper = (function (ts, undefined) {
 
 		// Compile code
 		ts.sys = new BtSystem(path, files);
-		defaultCompilerHost = new BtCompilerHost(ts.sys, compilationOptions);
+		defaultCompilerHost = createBtCompilerHost();
 
-		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors;
+		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors || [];
 		if (compilationErrors.length === 0) {
 			result.compiledCode = ts.sys.readFile(outputFilePath);
 		}
 		else {
 			result.errors = getErrorsFromDiagnostics(compilationErrors);
 		}
-
-		defaultCompilerHost.dispose();
 
 		ts.sys.dispose();
 		ts.sys = null;

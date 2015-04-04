@@ -470,6 +470,11 @@
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
+		<xs:attribute name="noEmit" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not emit outputs</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noEmitOnError" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not emit outputs if any type checking errors were reported</xs:documentation>
@@ -477,7 +482,7 @@
 		</xs:attribute>
 		<xs:attribute name="noImplicitAny" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to warn on expressions and declarations with an implied 'any' type</xs:documentation>
+				<xs:documentation>Flag for whether to raise error on expressions and declarations with an implied `any` type</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="noLib" type="Boolean_SchemaType" use="optional" default="false">
@@ -493,6 +498,11 @@
 		<xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="stripInternal" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not emit declarations for code that has an `@internal` annotation</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="suppressImplicitAnyIndexErrors" type="Boolean_SchemaType" use="optional" default="false">

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.52
+           README file for Bundle Transformer: IntelliSense 1.9.53
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Added definitions for new properties of Clean CSS-minifier and Uglify
-   JS-minifier.
+   Added definitions for new properties of TypeScript-translator.
    
    =============
    DOCUMENTATION

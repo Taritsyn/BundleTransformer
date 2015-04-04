@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.52
+            README file for Bundle Transformer: TypeScript 1.9.53
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains translator-adapter 
    `TypeScriptTranslator` (supports TypeScript
-   (http://www.typescriptlang.org) version 1.4.1). This adapter makes 
+   (http://www.typescriptlang.org) version 1.5.0 Alpha). This adapter makes 
    translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text 
    output of translated TypeScript-asset.
@@ -26,6 +26,14 @@
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of TypeScript version 1.5.0 Alpha;
+   2. In configuration settings of TypeScript-translator was added 2 new
+      properties - `NoEmit` (default `false`) and `StripInternal` (default
+      `false`).
    
    ====================
    POST-INSTALL ACTIONS

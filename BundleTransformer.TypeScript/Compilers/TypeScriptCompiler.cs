@@ -231,11 +231,13 @@
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
 			var optionsJson = new JObject(
+				new JProperty("noEmit", options.NoEmit),
 				new JProperty("noEmitOnError", options.NoEmitOnError),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
 				new JProperty("noLib", options.NoLib),
 				new JProperty("preserveConstEnums", options.PreserveConstEnums),
 				new JProperty("removeComments", options.RemoveComments),
+				new JProperty("stripInternal", options.StripInternal),
 				new JProperty("suppressImplicitAnyIndexErrors", options.SuppressImplicitAnyIndexErrors),
 				new JProperty("target", options.Target)
 			);

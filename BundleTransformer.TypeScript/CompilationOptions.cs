@@ -6,6 +6,15 @@
 	internal sealed class CompilationOptions
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to do not emit outputs
+		/// </summary>
+		public bool NoEmit
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
 		/// </summary>
 		public bool NoEmitOnError
@@ -15,8 +24,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to warn on expressions and declarations
-		/// with an implied 'any' type
+		/// Gets or sets a flag for whether to raise error on expressions and declarations
+		/// with an implied <code>any</code> type
 		/// </summary>
 		public bool NoImplicitAny
 		{
@@ -53,6 +62,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not emit declarations for code that has an
+		/// <code>@internal</code> annotation
+		/// </summary>
+		public bool StripInternal
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to suppress noImplicitAny errors for indexing objects lacking
 		/// index signatures
 		/// </summary>
@@ -78,11 +97,13 @@
 		/// </summary>
 		public CompilationOptions()
 		{
+			NoEmit = false;
 			NoEmitOnError = false;
 			NoImplicitAny = false;
 			NoLib = false;
 			PreserveConstEnums = false;
 			RemoveComments = false;
+			StripInternal = false;
 			SuppressImplicitAnyIndexErrors = false;
 			Target = TargetMode.EcmaScript3;
 		}

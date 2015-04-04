@@ -84,6 +84,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not emit outputs
+		/// </summary>
+		public bool NoEmit
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
 		/// </summary>
 		public bool NoEmitOnError
@@ -93,8 +102,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to warn on expressions and declarations
-		/// with an implied 'any' type
+		/// Gets or sets a flag for whether to raise error on expressions and declarations
+		/// with an implied <code>any</code> type
 		/// </summary>
 		public bool NoImplicitAny
 		{
@@ -141,6 +150,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not emit declarations for code that has an
+		/// <code>@internal</code> annotation
+		/// </summary>
+		public bool StripInternal
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript6` (experimental)
 		/// </summary>
@@ -176,11 +195,13 @@
 			_relativePathResolver = relativePathResolver;
 			_tsScriptCache = new Dictionary<string, TsScript>();
 
+			NoEmit = tsConfig.NoEmit;
 			NoEmitOnError = tsConfig.NoEmitOnError;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			NoLib = tsConfig.NoLib;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
 			RemoveComments = tsConfig.RemoveComments;
+			StripInternal = tsConfig.StripInternal;
 			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
 			Target = tsConfig.Target;
 
@@ -330,11 +351,13 @@
 		{
 			var options = new CompilationOptions
 			{
+				NoEmit = NoEmit,
 				NoEmitOnError = NoEmitOnError,
 				NoImplicitAny = NoImplicitAny,
 				NoLib = NoLib,
 				PreserveConstEnums = PreserveConstEnums,
 				RemoveComments = RemoveComments,
+				StripInternal = StripInternal,
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
 				Target = Target
 			};

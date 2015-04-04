@@ -10,6 +10,16 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to do not emit outputs
+		/// </summary>
+		[ConfigurationProperty("noEmit", DefaultValue = false)]
+		public bool NoEmit
+		{
+			get { return (bool)this["noEmit"]; }
+			set { this["noEmit"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
 		/// </summary>
 		[ConfigurationProperty("noEmitOnError", DefaultValue = false)]
@@ -20,8 +30,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to warn on expressions and declarations
-		/// with an implied 'any' type
+		/// Gets or sets a flag for whether to raise error on expressions and declarations
+		/// with an implied <code>any</code> type
 		/// </summary>
 		[ConfigurationProperty("noImplicitAny", DefaultValue = false)]
 		public bool NoImplicitAny
@@ -59,6 +69,17 @@
 		{
 			get { return (bool)this["removeComments"]; }
 			set { this["removeComments"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit declarations for code that has an
+		/// <code>@internal</code> annotation
+		/// </summary>
+		[ConfigurationProperty("stripInternal", DefaultValue = false)]
+		public bool StripInternal
+		{
+			get { return (bool)this["stripInternal"]; }
+			set { this["stripInternal"] = value; }
 		}
 
 		/// <summary>
