@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.52
+               README file for Bundle Transformer: LESS 1.9.54
 
    ----------------------------------------------------------------------
 
@@ -12,19 +12,24 @@
    DESCRIPTION
    ===========
    BundleTransformer.Less contains translator-adapter `LessTranslator` 
-   (supports LESS (http://lesscss.org) version 2.4.0). This adapter makes
+   (supports LESS (http://lesscss.org) version 2.5.0). This adapter makes
    translation of LESS-code to CSS-code. Also contains debugging 
    HTTP-handler `LessAssetHandler`, which is responsible for text output 
    of translated LESS-asset.
    
-   BundleTransformer.Less does not support the string interpolation in
-   file paths. 
+   BundleTransformer.Less does not support: the string interpolation in
+   file paths and loading of plugins.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
    working of this module is recommended to install one of the following 
    NuGet packages: JavaScriptEngineSwitcher.Msie or 
    JavaScriptEngineSwitcher.V8.
+   
+   =============
+   RELEASE NOTES
+   =============
+   Added support of LESS version 2.5.0.
    
    ====================
    POST-INSTALL ACTIONS
