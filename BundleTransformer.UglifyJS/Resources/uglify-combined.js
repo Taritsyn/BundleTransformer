@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.17
+ * UglifyJS v2.4.19
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -77,10 +77,12 @@
 	};
 
 	function merge(obj, ext) {
+		var count = 0;
 		for (var i in ext) if (ext.hasOwnProperty(i)) {
 			obj[i] = ext[i];
+			count++;
 		}
-		return obj;
+		return count;
 	};
 
 	function noop() {};
@@ -269,7 +271,13 @@
 			for (var i in this._values)
 				ret.push(f(this._values[i], i.substr(1)));
 			return ret;
-		}
+		},
+		toObject: function() { return this._values }
+	};
+	Dictionary.fromObject = function(obj) {
+		var dict = new Dictionary();
+		dict._size = merge(dict._values, obj);
+		return dict;
 	};
 	
 	exports.DefaultsError = DefaultsError;
@@ -1487,7 +1495,8 @@
 		};
 
 		function skip_whitespace() {
-			while (WHITESPACE_CHARS(peek()))
+			var ch;
+			while (WHITESPACE_CHARS(ch = peek()) || ch == "\u2028" || ch == "\u2029")
 				next();
 		};
 
@@ -2876,18 +2885,26 @@
 						|| this.orig[0] instanceof AST_SymbolDefun));
 		},
 		mangle: function(options) {
-			if (!this.mangled_name && !this.unmangleable(options)) {
+			var cache = options.cache && options.cache.props;
+			if (this.global && cache && cache.has(this.name)) {
+				this.mangled_name = cache.get(this.name);
+			}
+			else if (!this.mangled_name && !this.unmangleable(options)) {
 				var s = this.scope;
 				if (!options.screw_ie8 && this.orig[0] instanceof AST_SymbolLambda)
 					s = s.parent_scope;
 				this.mangled_name = s.next_mangled(options, this);
+				if (this.global && cache) {
+					cache.set(this.name, this.mangled_name);
+				}
 			}
 		}
 	};
 
 	AST_Toplevel.DEFMETHOD("figure_out_scope", function(options){
 		options = defaults(options, {
-			screw_ie8: false
+			screw_ie8: false,
+			cache: null
 		});
 
 		// pass 1: setup scope chaining and handle definitions
@@ -2992,6 +3009,10 @@
 			}
 		});
 		self.walk(tw);
+
+		if (options.cache) {
+			this.cname = options.cache.cname;
+		}
 	});
 
 	AST_Scope.DEFMETHOD("init_scope_vars", function(nesting){
@@ -3153,6 +3174,15 @@
 		// the AST_SymbolDeclaration that it points to).
 		var lname = -1;
 		var to_mangle = [];
+
+		if (options.cache) {
+			this.globals.each(function(symbol){
+				if (options.except.indexOf(symbol.name) < 0) {
+					to_mangle.push(symbol);
+				}
+			});
+		}
+
 		var tw = new TreeWalker(function(node, descend){
 			if (node instanceof AST_LabeledStatement) {
 				// lname is incremented when we get to the AST_Label
@@ -3187,6 +3217,10 @@
 		});
 		this.walk(tw);
 		to_mangle.forEach(function(def){ def.mangle(options) });
+
+		if (options.cache) {
+			options.cache.cname = this.cname;
+		}
 	});
 
 	AST_Toplevel.DEFMETHOD("compute_char_frequency", function(options){
@@ -5121,7 +5155,7 @@
 					seq = [];
 				};
 				statements.forEach(function(stat){
-					if (stat instanceof AST_SimpleStatement) seq.push(stat.body);
+					if (stat instanceof AST_SimpleStatement && seq.length < 2000) seq.push(stat.body);
 					else push_seq(), ret.push(stat);
 				});
 				push_seq();
@@ -5718,7 +5752,7 @@
 				var tt = new TreeTransformer(
 					function before(node, descend, in_list) {
 						if (node instanceof AST_Lambda && !(node instanceof AST_Accessor)) {
-							if (!compressor.option("keep_fargs")) {
+							if (compressor.option("unsafe") && !compressor.option("keep_fargs")) {
 								for (var a = node.argnames, i = a.length; --i >= 0;) {
 									var sym = a[i];
 									if (sym.unreferenced()) {
@@ -6899,16 +6933,16 @@
 		OPT(AST_Infinity, function (self, compressor) {
 			return make_node(AST_Binary, self, {
 				operator : '/',
-				left     : make_node(AST_Number, null, {value: 1}),
-				right    : make_node(AST_Number, null, {value: 0})
+				left     : make_node(AST_Number, self, {value: 1}),
+				right    : make_node(AST_Number, self, {value: 0})
 			});
 		});
 
 		OPT(AST_NaN, function (self, compressor) {
 			return make_node(AST_Binary, self, {
 				operator : '/',
-				left     : make_node(AST_Number, null, {value: 0}),
-				right    : make_node(AST_Number, null, {value: 0})
+				left     : make_node(AST_Number, self, {value: 0}),
+				right    : make_node(AST_Number, self, {value: 0})
 			});
 		});
 
@@ -7112,7 +7146,7 @@
 		});
 
 		function literals_in_boolean_context(self, compressor) {
-			if (compressor.option("booleans") && compressor.in_boolean_context()) {
+			if (compressor.option("booleans") && compressor.in_boolean_context() && !self.has_side_effects(compressor)) {
 				return make_node(AST_True, self);
 			}
 			return self;

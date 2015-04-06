@@ -234,7 +234,7 @@ var CoffeeScript = (function(){
 	  };
 
 	  syntaxErrorToString = function() {
-		var codeLine, colorize, colorsEnabled, end, filename, first_column, first_line, last_column, last_line, marker, ref1, ref2, start;
+		var codeLine, colorize, colorsEnabled, end, filename, first_column, first_line, last_column, last_line, marker, ref1, ref2, ref3, ref4, start;
 		if (!(this.code && this.location)) {
 		  return Error.prototype.toString.call(this);
 		}
@@ -251,9 +251,9 @@ var CoffeeScript = (function(){
 		end = first_line === last_line ? last_column + 1 : codeLine.length;
 		marker = codeLine.slice(0, start).replace(/[^\s]/g, ' ') + repeat('^', end - start);
 		if (typeof process !== "undefined" && process !== null) {
-		  colorsEnabled = process.stdout.isTTY && !process.env.NODE_DISABLE_COLORS;
+		  colorsEnabled = ((ref2 = process.stdout) != null ? ref2.isTTY : void 0) && !((ref3 = process.env) != null ? ref3.NODE_DISABLE_COLORS : void 0);
 		}
-		if ((ref2 = this.colorful) != null ? ref2 : colorsEnabled) {
+		if ((ref4 = this.colorful) != null ? ref4 : colorsEnabled) {
 		  colorize = function(str) {
 			return "\x1B[1;31m" + str + "\x1B[0m";
 		  };
@@ -1739,7 +1739,7 @@ var CoffeeScript = (function(){
 
 	  HEREDOC_INDENT = /\n+([^\n\S]*)(?=\S)/g;
 
-	  REGEX = /^\/(?!\/)((?:[^[\/\n\\]|\\[^\n]|\[(?:\\[^\n]|[^\]\n\\])*])*)(\/)?/;
+	  REGEX = /^\/(?!\/)((?:[^[\/\n\\]|\\[^\n]|\[(?:\\[^\n]|[^\]\n\\])*\])*)(\/)?/;
 
 	  REGEX_FLAGS = /^\w*/;
 
@@ -2775,7 +2775,7 @@ var CoffeeScript = (function(){
 		};
 
 		Base.prototype.compileClosure = function(o) {
-		  var args, argumentsNode, func, jumpNode, meth, parts;
+		  var args, argumentsNode, func, jumpNode, meth, parts, ref3;
 		  if (jumpNode = this.jumps()) {
 			jumpNode.error('cannot use a pure statement in an expression');
 		  }
@@ -2793,7 +2793,7 @@ var CoffeeScript = (function(){
 			func = new Value(func, [new Access(new Literal(meth))]);
 		  }
 		  parts = (new Call(func, args)).compileNode(o);
-		  if (func.isGenerator) {
+		  if (func.isGenerator || ((ref3 = func.base) != null ? ref3.isGenerator : void 0)) {
 			parts.unshift(this.makeCode("(yield* "));
 			parts.push(this.makeCode(")"));
 		  }

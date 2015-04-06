@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.1.8
+ * Clean-css v3.1.9
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -1360,14 +1360,13 @@ var CleanCss = (function(){
 				  i--;
 				  continue;
 				}
-
 				// FIXME: the check should be gone with #396
 				var property = t.prop === '' && t.value.indexOf('__ESCAPED_') === 0 ?
 				  t.value :
 				  t.prop + ':' + t.value + (t.isImportant ? important : '');
 
 				// FIXME: to be fixed with #429
-				property = property.replace(/\) /g, ')');
+				property = property.replace(/\) ([^\+\-\/\*])/g, ')$1');
 
 				tokenized.push({ value: property, metadata: t.metadata || {} });
 				list.push(property);
