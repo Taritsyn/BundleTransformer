@@ -29,12 +29,15 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a compatibility mode
+		/// Gets or sets a compatibility mode:
+		///		"ie7" - Internet Explorer 7 compatibility mode;
+		///		"ie8" - Internet Explorer 8 compatibility mode;
+		///		"*" - Internet Explorer 9+ compatibility mode.
 		/// </summary>
-		[ConfigurationProperty("compatibility", DefaultValue = CompatibilityMode.Ie7)]
-		public CompatibilityMode Compatibility
+		[ConfigurationProperty("compatibility", DefaultValue = "*")]
+		public string Compatibility
 		{
-			get { return (CompatibilityMode)this["compatibility"]; }
+			get { return (string)this["compatibility"]; }
 			set { this["compatibility"] = value; }
 		}
 

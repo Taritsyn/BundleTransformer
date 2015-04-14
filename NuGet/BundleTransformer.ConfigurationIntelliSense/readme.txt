@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.53
+           README file for Bundle Transformer: IntelliSense 1.9.57
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Added definitions for new properties of TypeScript-translator.
+   In Clean CSS-minifier settings added new definition for the
+   `compatibility` property.
    
    =============
    DOCUMENTATION

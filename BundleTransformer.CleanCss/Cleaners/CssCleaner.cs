@@ -178,7 +178,7 @@
 			var optionsJson = new JObject(
 				new JProperty("advanced", options.Advanced),
 				new JProperty("aggressiveMerging", options.AggressiveMerging),
-				new JProperty("compatibility", ConvertCompatibilityModeEnumValueToCode(options.Compatibility)),
+				new JProperty("compatibility", options.Compatibility),
 				new JProperty("keepBreaks", options.KeepBreaks),
 				new JProperty("keepSpecialComments",
 					ConvertSpecialCommentsModeEnumValueToCode(options.KeepSpecialComments)),
@@ -214,34 +214,6 @@
 				default:
 					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
 						specialCommentsMode.ToString(), typeof(SpecialCommentsMode)));
-			}
-
-			return code;
-		}
-
-		/// <summary>
-		/// Converts a compatibility mode enum value to the code
-		/// </summary>
-		/// <param name="compatibilityMode">Compatibility mode enum value</param>
-		/// <returns>Compatibility mode code</returns>
-		private static string ConvertCompatibilityModeEnumValueToCode(CompatibilityMode compatibilityMode)
-		{
-			string code;
-
-			switch (compatibilityMode)
-			{
-				case CompatibilityMode.None:
-					code = "*";
-					break;
-				case CompatibilityMode.Ie7:
-					code = "ie7";
-					break;
-				case CompatibilityMode.Ie8:
-					code = "ie8";
-					break;
-				default:
-					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
-						compatibilityMode.ToString(), typeof(CompatibilityMode)));
 			}
 
 			return code;

@@ -60,7 +60,6 @@
     <Compile Include="Configuration\CssMinifierSettings.cs" />
     <Compile Include="Minifiers\CleanCssMinifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CompatibilityMode.cs" />
     <Compile Include="SpecialCommentsMode.cs" />
   </ItemGroup>
   <ItemGroup>

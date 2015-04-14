@@ -7,7 +7,7 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 			advanced: true,
 			aggressiveMerging: true,
 			benchmark: false,
-			compatibility: 'ie7',
+			compatibility: '*',
 			debug: false,
 			inliner: undefined,
 			keepBreaks: false,

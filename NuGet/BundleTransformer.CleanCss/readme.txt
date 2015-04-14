@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-             README file for Bundle Transformer: Clean-css 1.9.55
+             README file for Bundle Transformer: Clean-css 1.9.57
  
    ----------------------------------------------------------------------
 
@@ -25,7 +25,10 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 3.1.9.
+   In configuration settings of CSS-minifier was changed type of
+   `Compatibility` property from enumeration to string (default `*`).
+   This change also gives fine grained control over the compatibility
+   settings (for example, you can specify `ie8,+units.rem`).
 
    ====================
    POST-INSTALL ACTIONS

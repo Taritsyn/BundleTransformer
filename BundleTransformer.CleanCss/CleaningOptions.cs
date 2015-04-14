@@ -25,9 +25,12 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a compatibility mode
+		/// Gets or sets a compatibility mode:
+		///		"ie7" - Internet Explorer 7 compatibility mode;
+		///		"ie8" - Internet Explorer 8 compatibility mode;
+		///		"*" - Internet Explorer 9+ compatibility mode.
 		/// </summary>
-		public CompatibilityMode Compatibility
+		public string Compatibility
 		{
 			get;
 			set;
@@ -106,7 +109,7 @@
 		{
 			Advanced = true;
 			AggressiveMerging = true;
-			Compatibility = CompatibilityMode.Ie7;
+			Compatibility = "*";
 			KeepBreaks = false;
 			KeepSpecialComments = SpecialCommentsMode.KeepAll;
 			MediaMerging = true;
