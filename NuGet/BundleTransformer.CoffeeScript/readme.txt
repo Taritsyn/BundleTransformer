@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CoffeeScript 1.9.55
+           README file for Bundle Transformer: CoffeeScript 1.9.59
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.CoffeeScript contains translator-adapter 
    `CoffeeScriptTranslator` (supports CoffeeScript (http://coffeescript.org) 
-   version 1.9.1). This adapter makes translation of CoffeeScript-code 
+   version 1.9.2). This adapter makes translation of CoffeeScript-code 
    to JS-code. Also contains debugging HTTP-handler 
    `CoffeeScriptAssetHandler`, which is responsible for text output of 
    translated CoffeeScript-asset.
@@ -27,7 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   CoffeeScript was updated to commit bd17cc9b3c.
+   Added support of CoffeeScript version 1.9.2.
 
    ====================
    POST-INSTALL ACTIONS

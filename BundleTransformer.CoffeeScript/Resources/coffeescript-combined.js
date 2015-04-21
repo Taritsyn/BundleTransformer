@@ -1,8 +1,8 @@
 /*!
- * CoffeeScript Compiler v1.9.1
+ * CoffeeScript Compiler v1.9.2
  * http://coffeescript.org
  *
- * Copyright 2014, Jeremy Ashkenas
+ * Copyright 2009-2015, Jeremy Ashkenas
  * Released under the MIT License
  */
 var CoffeeScript = (function(){
@@ -5983,7 +5983,7 @@ var CoffeeScript = (function(){
 
 //	  SourceMap = require('/sourcemap');
 
-	  exports.VERSION = '1.9.1';
+	  exports.VERSION = '1.9.2';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 

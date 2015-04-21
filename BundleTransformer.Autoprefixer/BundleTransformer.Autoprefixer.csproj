@@ -87,7 +87,7 @@
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
 del "$(ProjectDir)Resources\autoprefixer-combined.min.js"
-AjaxMinifier.exe "$(ProjectDir)Resources\autoprefixer-combined.js" –out "$(ProjectDir)Resources\autoprefixer-combined.min.js"
+AjaxMinifier.exe -ignore:JS1300 "$(ProjectDir)Resources\autoprefixer-combined.js" –out "$(ProjectDir)Resources\autoprefixer-combined.min.js"
 
 del "$(ProjectDir)Resources\autoprefixerHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\autoprefixerHelper.js" –out "$(ProjectDir)Resources\autoprefixerHelper.min.js"</PreBuildEvent>

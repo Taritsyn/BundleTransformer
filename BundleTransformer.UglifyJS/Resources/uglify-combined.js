@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.19
+ * UglifyJS v2.4.20
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -7009,6 +7009,7 @@
 				&& alternative instanceof AST_Assign
 				&& consequent.operator == alternative.operator
 				&& consequent.left.equivalent_to(alternative.left)
+				&& !consequent.left.has_side_effects(compressor)
 			   ) {
 				/*
 				 * Stuff like this:

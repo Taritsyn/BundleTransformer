@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.Handlebars</id>
-		<version>1.9.52</version>
+		<version>1.9.59</version>
 		<title>Bundle Transformer: Handlebars</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -10,11 +10,11 @@
 		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
 		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=871250</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.Handlebars contains translator-adapter `HandlebarsTranslator` (supports Handlebars (http://handlebarsjs.com) version 3.0.1). This adapter makes translation of Handlebars-templates to JS-code. Also contains debugging HTTP-handler `HandlebarsAssetHandler`, which is responsible for text output of translated Handlebars-asset.
+		<description>BundleTransformer.Handlebars contains translator-adapter `HandlebarsTranslator` (supports Handlebars (http://handlebarsjs.com) version 3.0.2). This adapter makes translation of Handlebars-templates to JS-code. Also contains debugging HTTP-handler `HandlebarsAssetHandler`, which is responsible for text output of translated Handlebars-asset.
 
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
-		<summary>BundleTransformer.Handlebars contains translator-adapter `HandlebarsTranslator` (supports Handlebars version 3.0.1). This adapter makes translation of Handlebars-templates to JS-code. Also contains debugging HTTP-handler `HandlebarsAssetHandler`, which is responsible for text output of translated Handlebars-asset.</summary>
-		<releaseNotes>Added support of Handlebars version 3.0.1.</releaseNotes>
+		<summary>BundleTransformer.Handlebars contains translator-adapter `HandlebarsTranslator` (supports Handlebars version 3.0.2). This adapter makes translation of Handlebars-templates to JS-code. Also contains debugging HTTP-handler `HandlebarsAssetHandler`, which is responsible for text output of translated Handlebars-asset.</summary>
+		<releaseNotes>Added support of Handlebars version 3.0.2.</releaseNotes>
 		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Handlebars Translation Translator Compilation Compiler</tags>

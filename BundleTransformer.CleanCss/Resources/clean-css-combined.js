@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.2.1
+ * Clean-css v3.2.2
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -3430,8 +3430,8 @@ var CleanCss = (function(){
 		}
 
 		var valueMinifiers = {
-		  'background': function (value) {
-			return value == 'none' || value == 'transparent' ? '0 0' : value;
+		  'background': function (value, index, total) {
+			return index == 1 && total == 2 && (value == 'none' || value == 'transparent') ? '0 0' : value;
 		  },
 		  'font-weight': function (value) {
 			if (value == 'normal')
@@ -3441,8 +3441,8 @@ var CleanCss = (function(){
 			else
 			  return value;
 		  },
-		  'outline': function (value) {
-			return value == 'none' ? '0' : value;
+		  'outline': function (value, index, total) {
+			return index == 1 && total == 2 && value == 'none' ? '0' : value;
 		  }
 		};
 
@@ -3648,7 +3648,7 @@ var CleanCss = (function(){
 			  value = property[j][0];
 
 			  if (valueMinifiers[name])
-				value = valueMinifiers[name](value);
+				value = valueMinifiers[name](value, j, m);
 
 			  value = whitespaceMinifier(name, value);
 			  value = precisionMinifier(name, value, options.precision);
