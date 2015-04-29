@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Handlebars 1.9.59
+            README file for Bundle Transformer: Handlebars 1.9.60
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.Handlebars contains translator-adapter
    `HandlebarsTranslator` (supports Handlebars (http://handlebarsjs.com)
-   version 3.0.2). This adapter makes translation of Handlebars-templates
+   version 3.0.3). This adapter makes translation of Handlebars-templates
    to JS-code. Also contains debugging HTTP-handler
    `HandlebarsAssetHandler`, which is responsible for text output of
    translated Handlebars-asset.
@@ -27,7 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Handlebars version 3.0.2.
+   Added support of Handlebars version 3.0.3.
 
    ====================
    POST-INSTALL ACTIONS

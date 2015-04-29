@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.2.2
+ * Clean-css v3.2.6
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -644,7 +644,7 @@ var CleanCss = (function(){
 
 		  if (values.length > 0) {
 			matches = values.filter(_widthFilter(validator));
-			match = matches.length > 1 && matches[0] == 'none' ? matches[1] : matches[0];
+			match = matches.length > 1 && (matches[0] == 'none' || matches[0] == 'auto') ? matches[1] : matches[0];
 			if (match) {
 			  width.value = [match];
 			  values.splice(values.indexOf(match), 1);
@@ -1295,7 +1295,7 @@ var CleanCss = (function(){
 			if (property.unused)
 			  continue;
 
-			if (_name == lastName && sameValue(position)) {
+			if (position > 0 && _name == lastName && sameValue(position)) {
 			  property.unused = true;
 			  continue;
 			}
@@ -3592,6 +3592,9 @@ var CleanCss = (function(){
 		  if (hasNumeral)
 			return;
 
+		  if (property[2] == '/')
+			return;
+
 		  var normalCount = 0;
 		  if (property[1][0] == 'normal')
 			normalCount++;
@@ -4093,7 +4096,7 @@ var CleanCss = (function(){
 		var lineBreak = require('os').EOL;
 
 		var STAR_HACK = '*';
-		var SUFFIX_HACK = '\\0';
+		var SUFFIX_HACK = '\\9';
 		var UNDERSCORE_HACK = '_';
 
 		function hasMoreProperties(tokens, index) {
@@ -4107,6 +4110,10 @@ var CleanCss = (function(){
 
 		function afterClosingBrace(token, valueIndex) {
 		  return token[valueIndex][0][token[valueIndex][0].length - 1] == ')' || token[valueIndex][0].indexOf('__ESCAPED_URL_CLEAN_CSS') === 0;
+		}
+
+		function afterCalc(token, valueIndex) {
+		  return token[valueIndex][0].indexOf('calc(') === 0;
 		}
 
 		function afterComma(token, valueIndex) {
@@ -4130,7 +4137,7 @@ var CleanCss = (function(){
 		}
 
 		function inSpecialContext(token, valueIndex, context) {
-		  return !context.spaceAfterClosingBrace && afterClosingBrace(token, valueIndex) ||
+		  return !context.spaceAfterClosingBrace && afterClosingBrace(token, valueIndex) && !afterCalc(token, valueIndex) ||
 			beforeSlash(token, valueIndex) ||
 			afterSlash(token, valueIndex) ||
 			beforeComma(token, valueIndex) ||
@@ -4347,6 +4354,7 @@ var CleanCss = (function(){
 		  this.specialComments = new EscapeStore('COMMENT_SPECIAL');
 
 		  this.context = context;
+		  this.restored = 0;
 		  this.keepAll = keepSpecialComments == '*';
 		  this.keepOne = keepSpecialComments == '1' || keepSpecialComments === 1;
 		  this.keepBreaks = keepBreaks;
@@ -4431,7 +4439,6 @@ var CleanCss = (function(){
 
 		function restore(context, data, from, isSpecial) {
 		  var tempData = [];
-		  var restored = 0;
 		  var cursor = 0;
 		  var addBreak;
 
@@ -4443,8 +4450,8 @@ var CleanCss = (function(){
 			tempData.push(data.substring(cursor, nextMatch.start));
 			var comment = from.restore(nextMatch.match);
 
-			if (isSpecial && (context.keepAll || (context.keepOne && restored === 0))) {
-			  restored++;
+			if (isSpecial && (context.keepAll || (context.keepOne && context.restored === 0))) {
+			  context.restored++;
 			  addBreak = context.keepBreaks && data[nextMatch.end] != '\n' && data.lastIndexOf('\r\n', nextMatch.end + 1) != nextMatch.end;
 			  tempData.push(comment, addBreak ? lineBreak : '');
 			} else {
@@ -4989,16 +4996,48 @@ var CleanCss = (function(){
 		  return value[0];
 		}
 
+		function noop() {}
+
+		function withoutComments(string, into, heading, context) {
+		  var matcher = heading ? /^__ESCAPED_COMMENT_/ : /__ESCAPED_COMMENT_/;
+		  var track = heading ? context.track : noop; // don't track when comment not in a heading as we do it later in `trackComments`
+
+		  while (matcher.test(string)) {
+			var startOfComment = string.indexOf('__');
+			var endOfComment = string.indexOf('__', startOfComment + 1) + 2;
+			var comment = string.substring(startOfComment, endOfComment);
+			string = string.substring(0, startOfComment) + string.substring(endOfComment);
+
+			track(comment);
+			into.push(comment);
+		  }
+
+		  return string;
+		}
+
+		function withoutHeadingComments(string, into, context) {
+		  return withoutComments(string, into, true, context);
+		}
+
+		function withoutInnerComments(string, into, context) {
+		  return withoutComments(string, into, false, context);
+		}
+
+		function trackComments(comments, into, context) {
+		  for (var i = 0, l = comments.length; i < l; i++) {
+			context.track(comments[i]);
+			into.push(comments[i]);
+		  }
+		}
+
 		var Extractors = {
 		  properties: function (string, selectors, context) {
 			var list = [];
+			var innerComments = [];
 			var splitter = new Splitter(/[ ,\/]/);
 
 			if (typeof string != 'string')
 			  return [];
-
-			if (string.indexOf('__ESCAPED_COMMENT_') > -1)
-			  string = string.replace(/(__ESCAPED_COMMENT_(SPECIAL_)?CLEAN_CSS[^_]+?__)/g, ';$1;');
 
 			if (string.indexOf(')') > -1)
 			  string = string.replace(/\)([^\s_;:,\)])/g, /*context.sourceMaps ? ') __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__ $1' : */') $1');
@@ -5014,8 +5053,8 @@ var CleanCss = (function(){
 
 			  if (firstColonAt == -1) {
 				context.track(candidate);
-				if (candidate.indexOf('__ESCAPED_COMMENT_SPECIAL') > -1)
-				  list.push(candidate);
+				if (candidate.indexOf('__ESCAPED_COMMENT_') > -1)
+				  list.push(candidate.trim());
 				continue;
 			  }
 
@@ -5026,8 +5065,19 @@ var CleanCss = (function(){
 
 			  var body = [];
 			  var name = candidate.substring(0, firstColonAt);
+
+			  innerComments = [];
+
+			  if (name.indexOf('__ESCAPED_COMMENT') > -1)
+				name = withoutHeadingComments(name, list, context);
+
+			  if (name.indexOf('__ESCAPED_COMMENT') > -1)
+				name = withoutInnerComments(name, innerComments, context);
+
 			  body.push([name.trim()].concat(context.track(name, true)));
 			  context.track(':');
+
+			  trackComments(innerComments, list, context);
 
 			  var values = splitter.split(candidate.substring(firstColonAt + 1), true);
 
@@ -5054,6 +5104,19 @@ var CleanCss = (function(){
 				  continue;
 				}
 
+				innerComments = [];
+
+				if (trimmed.indexOf('__ESCAPED_COMMENT') > -1)
+				  trimmed = withoutHeadingComments(trimmed, list, context);
+
+				if (trimmed.indexOf('__ESCAPED_COMMENT') > -1)
+				  trimmed = withoutInnerComments(trimmed, innerComments, context);
+
+				if (trimmed.length === 0) {
+				  trackComments(innerComments, list, context);
+				  continue;
+				}
+
 				var pos = body.length - 1;
 				if (trimmed == 'important' && body[pos][0] == '!') {
 				  context.track(trimmed);
@@ -5069,6 +5132,8 @@ var CleanCss = (function(){
 				}
 
 				body.push([trimmed].concat(context.track(value, true)));
+
+				trackComments(innerComments, list, context);
 
 				if (endsWithNonSpaceSeparator) {
 				  body.push([lastCharacter]);

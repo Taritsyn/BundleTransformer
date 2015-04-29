@@ -1,6 +1,6 @@
 /*!
 
- handlebars v3.0.2
+ handlebars v3.0.3
 
 Copyright (C) 2011-2014 by Yehuda Katz
 
@@ -80,12 +80,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+	'use strict';
 
-	var _interopRequireWildcard = __webpack_require__(6)['default'];
+	var _interopRequireWildcard = __webpack_require__(7)['default'];
 
 	exports.__esModule = true;
-	/*global window */
 
 	var _import = __webpack_require__(1);
 
@@ -110,6 +109,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var runtime = _interopRequireWildcard(_import3);
 
+	var _noConflict = __webpack_require__(6);
+
+	var _noConflict2 = _interopRequireWildcard(_noConflict);
+
 	// For compatibility and usage outside of module systems, make the Handlebars object a namespace
 	function create() {
 	  var hb = new base.HandlebarsEnvironment();
@@ -128,25 +131,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return hb;
 	}
 
-	var Handlebars = create();
-	Handlebars.create = create;
+	var inst = create();
+	inst.create = create;
 
-	/*jshint -W040 */
-	/* istanbul ignore next */
-	var root = typeof global !== 'undefined' ? global : window,
-	    $Handlebars = root.Handlebars;
-	/* istanbul ignore next */
-	Handlebars.noConflict = function () {
-	  if (root.Handlebars === Handlebars) {
-	    root.Handlebars = $Handlebars;
-	  }
-	};
+	_noConflict2['default'](inst);
 
-	Handlebars['default'] = Handlebars;
+	inst['default'] = inst;
 
-	exports['default'] = Handlebars;
+	exports['default'] = inst;
 	module.exports = exports['default'];
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 1 */
@@ -154,7 +147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _interopRequireWildcard = __webpack_require__(6)['default'];
+	var _interopRequireWildcard = __webpack_require__(7)['default'];
 
 	exports.__esModule = true;
 	exports.HandlebarsEnvironment = HandlebarsEnvironment;
@@ -503,7 +496,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isEmpty = isEmpty;
 	exports.blockParams = blockParams;
 	exports.appendContextPath = appendContextPath;
-	/*jshint -W004 */
 	var escape = {
 	  '&': '&amp;',
 	  '<': '&lt;',
@@ -614,7 +606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _interopRequireWildcard = __webpack_require__(6)['default'];
+	var _interopRequireWildcard = __webpack_require__(7)['default'];
 
 	exports.__esModule = true;
 	exports.checkRevision = checkRevision;
@@ -847,6 +839,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	exports.__esModule = true;
+	/*global window */
+
+	exports['default'] = function (Handlebars) {
+	  /* istanbul ignore next */
+	  var root = typeof global !== 'undefined' ? global : window,
+	      $Handlebars = root.Handlebars;
+	  /* istanbul ignore next */
+	  Handlebars.noConflict = function () {
+	    if (root.Handlebars === Handlebars) {
+	      root.Handlebars = $Handlebars;
+	    }
+	  };
+	};
+
+	module.exports = exports['default'];
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
