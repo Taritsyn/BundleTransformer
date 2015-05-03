@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.2.6
+ * Clean-css v3.2.7
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -1570,7 +1570,35 @@ var CleanCss = (function(){
 			(left.name == 'background' || left.name == 'background-image') &&
 			right.multiplex &&
 			(right.name == 'background' || right.name == 'background-image') &&
-			right.value[right.value.length - 1][0] == 'none';
+			anyLayerIsNone(right.value);
+		}
+
+		function anyLayerIsNone(values) {
+		  var layers = intoLayers(values);
+
+		  for (var i = 0, l = layers.length; i < l; i++) {
+			if (layers[i].length == 1 && layers[i][0][0] == 'none')
+			  return true;
+		  }
+
+		  return false;
+		}
+
+		function intoLayers(values) {
+		  var layers = [];
+
+		  for (var i = 0, layer = [], l = values.length; i < l; i++) {
+			var value = values[i];
+			if (value[0] == MULTIPLEX_SEPARATOR) {
+			  layers.push(layer);
+			  layer = [];
+			} else {
+			  layer.push(value);
+			}
+		  }
+
+		  layers.push(layer);
+		  return layers;
 		}
 
 		function compactOverrides(properties, compatibility, validator) {
@@ -2820,6 +2848,7 @@ var CleanCss = (function(){
 				var moved = topToBottom ? tokenOne : tokenTwo;
 				var target = topToBottom ? tokenTwo : tokenOne;
 				var movedProperties = extractProperties(moved);
+				var joinAt;
 
 				while (from != to) {
 				  var traversedProperties = extractProperties(tokens[from]);
@@ -2836,11 +2865,12 @@ var CleanCss = (function(){
 					continue directionIterator;
 				}
 
-				var joinAt = topToBottom ? [target[2].length] : [moved[2].length];
 				if (topToBottom) {
+				  joinAt = [moved[2].length];
 				  Array.prototype.push.apply(moved[2], target[2]);
 				  target[2] = moved[2];
 				} else {
+				  joinAt = [target[2].length];
 				  Array.prototype.push.apply(target[2], moved[2]);
 				}
 
@@ -3041,8 +3071,44 @@ var CleanCss = (function(){
 			var key = movedProperty[4];
 			var toMove = movableTokens[key];
 
-			if (toMove && toMove.length > 1)
-			  shortenIfPossible(position, movedProperty);
+			if (toMove && toMove.length > 1) {
+			  if (!shortenMultiMovesIfPossible(position, movedProperty))
+				shortenIfPossible(position, movedProperty);
+			}
+		  }
+
+		  function shortenMultiMovesIfPossible(position, movedProperty) {
+			var candidates = [];
+			var propertiesAndMergableTokens = [];
+			var key = movedProperty[4];
+			var tokensToShorten = movableTokens[key];
+			var j, k;
+
+			movableLoop:
+			for (var value in movableTokens) {
+			  var tokensList = movableTokens[value];
+
+			  for (j = tokensToShorten.length - 1; j >= 0; j--) {
+				if (tokensList.indexOf(tokensToShorten[j]) == -1)
+				  continue movableLoop;
+			  }
+
+			  candidates.push(value);
+			}
+
+			if (candidates.length < 2)
+			  return false;
+
+			for (j = candidates.length - 1; j >= 0; j--) {
+			  for (k = movedProperties.length - 1; k >= 0; k--) {
+				if (movedProperties[k][4] == candidates[j]) {
+				  propertiesAndMergableTokens.unshift([movedProperties[k], tokensToShorten]);
+				  break;
+				}
+			  }
+			}
+
+			return processMultiPropertyMove(position, propertiesAndMergableTokens);
 		  }
 
 		  function processMultiPropertyMove(position, propertiesAndMergableTokens) {
@@ -3135,8 +3201,11 @@ var CleanCss = (function(){
 
 				if (movedToBeDropped.indexOf(k) == -1 && !canReorderSingle(property, movedProperty) && !boundToAnotherPropertyInCurrrentToken(property, movedProperty, token)) {
 				  dropPropertiesAt(i + 1, movedProperty, token);
-				  movedToBeDropped.push(k);
-				  delete movableTokens[movedProperty[4]];
+
+				  if (movedToBeDropped.indexOf(k) == -1) {
+					movedToBeDropped.push(k);
+					delete movableTokens[movedProperty[4]];
+				  }
 				}
 
 				if (!movedSameProperty)
@@ -3156,7 +3225,8 @@ var CleanCss = (function(){
 
 			movedToBeDropped = movedToBeDropped.sort(naturalSorter);
 			for (j = 0, m = movedToBeDropped.length; j < m; j++) {
-			  movedProperties.splice(movedToBeDropped[j] - j, 1);
+			  var dropAt = movedToBeDropped[j] - j;
+			  movedProperties.splice(dropAt, 1);
 			}
 		  }
 

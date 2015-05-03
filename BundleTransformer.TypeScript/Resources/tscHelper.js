@@ -6,6 +6,7 @@ var typeScriptHelper = (function (ts, undefined) {
 		defaultOptions = {
 			charset: '',
 			emitBOM: false,
+			emitDecoratorMetadata: false,
 			mapRoot: '',
 			module: 0 /* None */,
 			noEmit: false,
@@ -17,6 +18,7 @@ var typeScriptHelper = (function (ts, undefined) {
 			outDir: '',
 			preserveConstEnums: false,
 			removeComments: false,
+			rootDir: '',
 			separateCompilation: false,
 			sourceMap: false,
 			sourceRoot: '',
