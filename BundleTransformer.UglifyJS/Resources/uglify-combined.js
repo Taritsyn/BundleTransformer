@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.20
+ * UglifyJS v2.4.21
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -1551,8 +1551,13 @@
 			  case 120 : return String.fromCharCode(hex_bytes(2)); // \x
 			  case 117 : return String.fromCharCode(hex_bytes(4)); // \u
 			  case 10  : return ""; // newline
-			  default  : return ch;
+			  case 13  :            // \r
+				if (peek() == "\n") { // DOS newline
+					next(true, in_string);
+					return "";
+				}
 			}
+			return ch;
 		};
 
 		function hex_bytes(n) {
@@ -1569,7 +1574,7 @@
 		var read_string = with_eof_error("Unterminated string constant", function(quote_char){
 			var quote = next(), ret = "";
 			for (;;) {
-				var ch = next(true);
+				var ch = next(true, true);
 				if (ch == "\\") {
 					// read OctalEscapeSequence (XXX: deprecated if "strict mode")
 					// https://github.com/mishoo/UglifyJS/issues/178
@@ -3555,7 +3560,6 @@
 						might_need_space = false;
 				}
 				might_need_semicolon = false;
-				maybe_newline();
 			}
 
 			if (!options.beautify && options.preserve_line && stack[stack.length - 1]) {
@@ -5834,12 +5838,12 @@
 								return make_node(AST_EmptyStatement, node);
 							}
 							if (def.length == 0) {
-								return side_effects;
+								return in_list ? MAP.splice(side_effects.body) : side_effects;
 							}
 							node.definitions = def;
 							if (side_effects) {
 								side_effects.body.unshift(node);
-								node = side_effects;
+								return in_list ? MAP.splice(side_effects.body) : side_effects;
 							}
 							return node;
 						}
@@ -6934,14 +6938,6 @@
 			return make_node(AST_Binary, self, {
 				operator : '/',
 				left     : make_node(AST_Number, self, {value: 1}),
-				right    : make_node(AST_Number, self, {value: 0})
-			});
-		});
-
-		OPT(AST_NaN, function (self, compressor) {
-			return make_node(AST_Binary, self, {
-				operator : '/',
-				left     : make_node(AST_Number, self, {value: 0}),
 				right    : make_node(AST_Number, self, {value: 0})
 			});
 		});

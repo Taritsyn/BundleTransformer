@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.2.7
+ * Clean-css v3.2.8
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -3081,15 +3081,18 @@ var CleanCss = (function(){
 			var candidates = [];
 			var propertiesAndMergableTokens = [];
 			var key = movedProperty[4];
-			var tokensToShorten = movableTokens[key];
 			var j, k;
+
+			var mergeableTokens = tokensToMerge(movableTokens[key]);
+			if (mergeableTokens.length < 2)
+			  return;
 
 			movableLoop:
 			for (var value in movableTokens) {
 			  var tokensList = movableTokens[value];
 
-			  for (j = tokensToShorten.length - 1; j >= 0; j--) {
-				if (tokensList.indexOf(tokensToShorten[j]) == -1)
+			  for (j = mergeableTokens.length - 1; j >= 0; j--) {
+				if (tokensList.indexOf(mergeableTokens[j]) == -1)
 				  continue movableLoop;
 			  }
 
@@ -3102,7 +3105,7 @@ var CleanCss = (function(){
 			for (j = candidates.length - 1; j >= 0; j--) {
 			  for (k = movedProperties.length - 1; k >= 0; k--) {
 				if (movedProperties[k][4] == candidates[j]) {
-				  propertiesAndMergableTokens.unshift([movedProperties[k], tokensToShorten]);
+				  propertiesAndMergableTokens.unshift([movedProperties[k], mergeableTokens]);
 				  break;
 				}
 			  }
