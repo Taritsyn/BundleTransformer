@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.21
+ * UglifyJS v2.4.22
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -1410,7 +1410,7 @@
 	function tokenizer($TEXT, filename, html5_comments) {
 
 		var S = {
-			text            : $TEXT.replace(/\uFEFF/g, ''),
+			text            : $TEXT.replace(/^\uFEFF/g, ''),
 			filename        : filename,
 			pos             : 0,
 			tokpos          : 0,
@@ -7026,6 +7026,7 @@
 			if (consequent instanceof AST_Call
 				&& alternative.TYPE === consequent.TYPE
 				&& consequent.args.length == alternative.args.length
+				&& !consequent.expression.has_side_effects(compressor)
 				&& consequent.expression.equivalent_to(alternative.expression)) {
 				if (consequent.args.length == 0) {
 					return make_node(AST_Seq, self, {

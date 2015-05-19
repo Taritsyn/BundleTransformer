@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.2.8
+ * Clean-css v3.2.10
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -741,7 +741,7 @@ var CleanCss = (function(){
 			return false;
 
 		  // Functions with the same name can override each other; same values can override each other
-		  return sameFunctionOrValue(property1, property2);
+		  return sameFunctionOrValue(property1, property2, validator);
 		}
 
 		function twoOptionalFunctions(property1, property2, validator) {
@@ -3755,11 +3755,10 @@ var CleanCss = (function(){
 		  var options = this.options;
 		  var ie7Hack = options.compatibility.selectors.ie7Hack;
 		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
-		  var token;
 
 		  function _cleanupCharsets(tokens) {
 			for (var i = 0, l = tokens.length; i < l; i++) {
-			  token = tokens[i];
+			  var token = tokens[i];
 
 			  if (token[0] != 'at-rule')
 				continue;
@@ -3782,7 +3781,7 @@ var CleanCss = (function(){
 			var mayHaveCharset = false;
 
 			for (var i = 0, l = tokens.length; i < l; i++) {
-			  token = tokens[i];
+			  var token = tokens[i];
 
 			  switch (token[0]) {
 				case 'selector':
