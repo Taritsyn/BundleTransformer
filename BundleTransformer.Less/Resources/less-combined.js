@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.5.0
+ * Less - Leaner CSS v2.5.1
  * http://lesscss.org
  *
  * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
@@ -1460,7 +1460,7 @@ var Less = (function(){
 			return this.variables()[name];
 		};
 		Ruleset.prototype.rulesets = function () {
-			if (!this.rules) { return null; }
+			if (!this.rules) { return []; }
 
 			var filtRules = [], rules = this.rules, cnt = rules.length,
 				i, rule;
@@ -3440,7 +3440,7 @@ var Less = (function(){
 				new contexts.Eval(context,
 					[this.evalParams(context, /* the parameter variables*/
 						new contexts.Eval(context, this.frames ? this.frames.concat(context.frames) : context.frames), args, [])]
-					.concat(this.frames) // the parent namespace/mixin frames
+					.concat(this.frames || []) // the parent namespace/mixin frames
 					.concat(context.frames)))) { // the current environment frames
 				return false;
 			}
@@ -8802,7 +8802,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 5, 0],
+				version: [2, 5, 1],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),

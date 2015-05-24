@@ -1,5 +1,5 @@
 ##################################################################################
-# Sass v3.4.13
+# Sass v3.4.14
 # http://sass-lang.com
 #
 # Copyright (c) 2006-2014 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
@@ -2454,12 +2454,12 @@ module Sass
       # @see Base#\_retrieve
       def _retrieve(key, version, sha)
         return unless File.readable?(path_to(key))
-        File.open(path_to(key), "rb") do |f|
-          if f.readline("\n").strip == version && f.readline("\n").strip == sha
-            return f.read
-          end
-        end
         begin
+          File.open(path_to(key), "rb") do |f|
+            if f.readline("\n").strip == version && f.readline("\n").strip == sha
+              return f.read
+            end
+          end
           File.unlink path_to(key)
         rescue Errno::ENOENT
           # Already deleted. Race condition?
@@ -4323,13 +4323,14 @@ module Sass
           return f if f
         end
 
-        message = "File to import not found or unreadable: #{@imported_filename}.\n"
+        lines = ["File to import not found or unreadable: #{@imported_filename}."]
+
         if paths.size == 1
-          message << "Load path: #{paths.first}"
-        else
-          message << "Load paths:\n  " << paths.join("\n  ")
+          lines << "Load path: #{paths.first}"
+        elsif !paths.empty?
+          lines << "Load paths:\n  #{paths.join("\n  ")}"
         end
-        raise SyntaxError.new(message)
+        raise SyntaxError.new(lines.join("\n"))
       rescue SyntaxError => e
         raise SyntaxError.new(e.message, :line => line, :filename => @filename)
       end
@@ -9593,7 +9594,7 @@ module Sass::Script
   # for selector arguments. They can take a plain string, a list of
   # lists as returned by `&` or anything in between:
   #
-  # * A plain sring, such as `".foo .bar, .baz .bang"`.
+  # * A plain string, such as `".foo .bar, .baz .bang"`.
   # * A space-separated list of strings such as `(".foo" ".bar")`.
   # * A comma-separated list of strings such as `(".foo .bar", ".baz .bang")`.
   # * A comma-separated list of space-separated lists of strings such
@@ -10774,6 +10775,15 @@ module Sass::Script
     # @raise [ArgumentError] if `$string` isn't a string
     def unquote(string)
       unless string.is_a?(Sass::Script::Value::String)
+        # Don't warn multiple times for the same source line.
+        # rubocop:disable GlobalVars
+        $_sass_warned_for_unquote ||= Set.new
+        frame = environment.stack.frames.last
+        key = [frame.filename, frame.line] if frame
+        return string if frame && $_sass_warned_for_unquote.include?(key)
+        $_sass_warned_for_unquote << key if frame
+        # rubocop:enable GlobalVars
+
         Sass::Util.sass_warn(<<MESSAGE.strip)
 DEPRECATION WARNING: Passing #{string.to_sass}, a non-string value, to unquote()
 will be an error in future versions of Sass.
@@ -13696,12 +13706,19 @@ module Sass::Script::Tree
         raise Sass::SyntaxError.new("Undefined operation: \"#{value1} #{@operator} #{value2}\".")
       end
 
-      if @operator == :eq && value1.is_a?(Sass::Script::Value::Number) &&
-          value2.is_a?(Sass::Script::Value::Number) && result == Sass::Script::Value::Bool::TRUE &&
-          value1.unitless? != value2.unitless?
+      if (@operator == :eq || @operator == :neq) && value1.is_a?(Sass::Script::Value::Number) &&
+         value2.is_a?(Sass::Script::Value::Number) && value1.unitless? != value2.unitless? &&
+         result == (if @operator == :eq
+                      Sass::Script::Value::Bool::TRUE
+                    else
+                      Sass::Script::Value::Bool::FALSE
+                    end)
+
+        operation = "#{value1} #{@operator == :eq ? '==' : '!='} #{value2}"
+        future_value = @operator == :neq
         Sass::Util.sass_warn <<WARNING
 DEPRECATION WARNING on line #{line}#{" of #{filename}" if filename}:
-The result of `#{value1} == #{value2}` will be `false` in future releases of Sass.
+The result of `#{operation}` will be `#{future_value}` in future releases of Sass.
 Unitless numbers will no longer be equal to the same numbers with units.
 WARNING
       end
@@ -15371,7 +15388,7 @@ module Sass::Script::Value
           raise ArgumentError.new("Color.new(array) expects a three- or four-element array")
         end
 
-        red, green, blue = attrs[0...3].map {|c| c.to_i}
+        red, green, blue = attrs[0...3].map {|c| c.round}
         @attrs = {:red => red, :green => green, :blue => blue}
         @attrs[:alpha] = attrs[3] ? attrs[3].to_f : 1
         @representation = representation
@@ -15397,7 +15414,7 @@ module Sass::Script::Value
 
       [:red, :green, :blue].each do |k|
         next if @attrs[k].nil?
-        @attrs[k] = Sass::Util.restrict(@attrs[k].to_i, 0..255)
+        @attrs[k] = Sass::Util.restrict(@attrs[k].round, 0..255)
       end
 
       [:saturation, :lightness].each do |k|
@@ -15422,7 +15439,7 @@ module Sass::Script::Value
       green = $2.ljust(2, $2).to_i(16)
       blue  = $3.ljust(2, $3).to_i(16)
 
-      hex_string = '##{hex_string}' unless hex_string[0] == ?#
+      hex_string = "##{hex_string}" unless hex_string[0] == ?#
       attrs = {:red => red, :green => green, :blue => blue, :representation => hex_string}
       attrs[:alpha] = alpha if alpha
       new(attrs)
@@ -15521,7 +15538,7 @@ module Sass::Script::Value
     # @return [Array<Fixnum>] A frozen four-element array of the hue,
     #   saturation, lightness, and alpha values (respectively) of the color
     def hsla
-      [hue, saturation, lightness].freeze
+      [hue, saturation, lightness, alpha].freeze
     end
 
     # The SassScript `==` operation.
@@ -16775,7 +16792,9 @@ module Sass
       def supports_operator
         cond = supports_condition_in_parens
         return unless cond
-        while (op = tok(/and|or/i))
+        re = /and|or/i
+        while (op = tok(re))
+          re = /#{op}/i
           ss
           cond = Sass::Supports::Operator.new(
             cond, expr!(:supports_condition_in_parens), op)
@@ -16797,11 +16816,6 @@ module Sass
           tok!(/\)/); ss
           Sass::Supports::Declaration.new(name, value)
         end
-      end
-
-      def supports_declaration_condition
-        return unless tok(/\(/); ss
-        supports_declaration_body
       end
 
       def supports_interpolation
@@ -19049,11 +19063,11 @@ module Sass::Supports
     end
 
     def to_css
-      "#{left_parens @left.to_css} #{op} #{right_parens @right.to_css}"
+      "#{parens @left, @left.to_css} #{op} #{parens @right, @right.to_css}"
     end
 
     def to_src(options)
-      "#{left_parens @left.to_src(options)} #{op} #{right_parens @right.to_src(options)}"
+      "#{parens @left, @left.to_src(options)} #{op} #{parens @right, @right.to_src(options)}"
     end
 
     def deep_copy
@@ -19070,14 +19084,12 @@ module Sass::Supports
 
     private
 
-    def left_parens(str)
-      return "(#{str})" if @left.is_a?(Negation)
-      str
-    end
-
-    def right_parens(str)
-      return "(#{str})" if @right.is_a?(Negation) || @right.is_a?(Operator)
-      str
+    def parens(condition, str)
+      if condition.is_a?(Negation) || (condition.is_a?(Operator) && condition.op != op)
+        return "(#{str})"
+      else
+        return str
+      end
     end
   end
 
@@ -19250,7 +19262,7 @@ module Sass
   # This class handles the parsing and compilation of the Sass template.
   # Example usage:
   #
-  #     template = File.load('stylesheets/sassy.sass')
+  #     template = File.read('stylesheets/sassy.sass')
   #     sass_engine = Sass::Engine.new(template)
   #     output = sass_engine.render
   #     puts output
@@ -19323,7 +19335,7 @@ module Sass
     # @api public
     DEFAULT_OPTIONS = {
       :style => :nested,
-      :load_paths => ['.'],
+      :load_paths => [],
       :cache => true,
       :cache_location => './.sass-cache',
       :syntax => :sass,

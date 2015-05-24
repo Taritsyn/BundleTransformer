@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.22
+ * UglifyJS v2.4.23
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -1305,7 +1305,7 @@
 		"||"
 	]);
 
-	var WHITESPACE_CHARS = makePredicate(characters(" \u00a0\n\r\t\f\u000b\u200b\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"));
+	var WHITESPACE_CHARS = makePredicate(characters(" \u00a0\n\r\t\f\u000b\u200b\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\uFEFF"));
 
 	var PUNC_BEFORE_EXPRESSION = makePredicate(characters("[{(,.;:"));
 
@@ -1410,7 +1410,7 @@
 	function tokenizer($TEXT, filename, html5_comments) {
 
 		var S = {
-			text            : $TEXT.replace(/^\uFEFF/g, ''),
+			text            : $TEXT,
 			filename        : filename,
 			pos             : 0,
 			tokpos          : 0,
