@@ -6,7 +6,9 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		defaultOptions = {
 			browsers: null,
 			cascade: true,
+			safe: false,
 			remove: true,
+			add: true,
 			map: false
 		}
 		;

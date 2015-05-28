@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.57
+           README file for Bundle Transformer: IntelliSense 1.9.65
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   In Clean CSS-minifier settings added new definition for the
-   `compatibility` property.
+   In Autoprefixer settings added definition for the `add` property.
    
    =============
    DOCUMENTATION

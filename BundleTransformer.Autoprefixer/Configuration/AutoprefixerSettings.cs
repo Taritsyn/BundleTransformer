@@ -49,6 +49,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to add new prefixes
+		/// </summary>
+		[ConfigurationProperty("add", DefaultValue = true)]
+		public bool Add
+		{
+			get { return (bool)this["add"]; }
+			set { this["add"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

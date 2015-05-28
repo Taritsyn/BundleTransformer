@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.9.2
+ * CoffeeScript Compiler v1.9.3
  * http://coffeescript.org
  *
  * Copyright 2009-2015, Jeremy Ashkenas
@@ -569,7 +569,7 @@ var CoffeeScript = (function(){
 			  startImplicitCall(i + 1);
 			  return forward(2);
 			}
-			if (indexOf.call(IMPLICIT_FUNC, tag) >= 0 && this.indexOfTag(i + 1, 'INDENT', null, ':') > -1 && !this.findTagsBackwards(i, ['CLASS', 'EXTENDS', 'IF', 'CATCH', 'SWITCH', 'LEADING_WHEN', 'FOR', 'WHILE', 'UNTIL'])) {
+			if (indexOf.call(IMPLICIT_FUNC, tag) >= 0 && this.indexOfTag(i + 1, 'INDENT') > -1 && this.looksObjectish(i + 2) && !this.findTagsBackwards(i, ['CLASS', 'EXTENDS', 'IF', 'CATCH', 'SWITCH', 'LEADING_WHEN', 'FOR', 'WHILE', 'UNTIL'])) {
 			  startImplicitCall(i + 1);
 			  stack.push(['INDENT', i + 2]);
 			  return forward(3);
@@ -857,7 +857,7 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.identifierToken = function() {
-		  var colon, colonOffset, forcedIdentifier, id, idLength, input, match, poppedToken, prev, ref2, ref3, ref4, ref5, tag, tagToken;
+		  var alias, colon, colonOffset, forcedIdentifier, id, idLength, input, match, poppedToken, prev, ref2, ref3, ref4, ref5, tag, tagToken;
 		  if (!(match = IDENTIFIER.exec(this.chunk))) {
 			return 0;
 		  }
@@ -911,6 +911,7 @@ var CoffeeScript = (function(){
 		  }
 		  if (!forcedIdentifier) {
 			if (indexOf.call(COFFEE_ALIASES, id) >= 0) {
+			  alias = id;
 			  id = COFFEE_ALIAS_MAP[id];
 			}
 			tag = (function() {
@@ -935,6 +936,9 @@ var CoffeeScript = (function(){
 			})();
 		  }
 		  tagToken = this.token(tag, id, 0, idLength);
+		  if (alias) {
+			tagToken.origin = [tag, alias, tagToken[2]];
+		  }
 		  tagToken.variable = !forcedIdentifier;
 		  if (poppedToken) {
 			ref5 = [poppedToken[2].first_line, poppedToken[2].first_column], tagToken[2].first_line = ref5[0], tagToken[2].first_column = ref5[1];
@@ -1293,6 +1297,9 @@ var CoffeeScript = (function(){
 		  ref2 = this.tokens, prev = ref2[ref2.length - 1];
 		  if (value === '=' && prev) {
 			if (!prev[1].reserved && (ref3 = prev[1], indexOf.call(JS_FORBIDDEN, ref3) >= 0)) {
+			  if (prev.origin) {
+				prev = prev.origin;
+			  }
 			  this.error("reserved word '" + prev[1] + "' can't be assigned", prev[2]);
 			}
 			if ((ref4 = prev[1]) === '||' || ref4 === '&&') {
@@ -3556,7 +3563,7 @@ var CoffeeScript = (function(){
 
 		Comment.prototype.compileNode = function(o, level) {
 		  var code, comment;
-		  comment = this.comment.replace(/^(\s*)# /gm, "$1 * ");
+		  comment = this.comment.replace(/^(\s*)#(?=\s)/gm, "$1 *");
 		  code = "/*" + (multident(comment, this.tab)) + (indexOf.call(comment, '\n') >= 0 ? "\n" + this.tab : '') + " */";
 		  if ((level || o.level) === LEVEL_TOP) {
 			code = o.indent + code;
@@ -3999,7 +4006,7 @@ var CoffeeScript = (function(){
 			  indent += TAB;
 			}
 			if (prop instanceof Assign && prop.variable instanceof Value && prop.variable.hasProperties()) {
-			  prop.variable.error('Invalid object key');
+			  prop.variable.error('invalid object key');
 			}
 			if (prop instanceof Value && prop["this"]) {
 			  prop = new Assign(prop.properties[0].name, prop, 'object');
@@ -5983,7 +5990,7 @@ var CoffeeScript = (function(){
 
 //	  SourceMap = require('/sourcemap');
 
-	  exports.VERSION = '1.9.2';
+	  exports.VERSION = '1.9.3';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
@@ -5999,6 +6006,9 @@ var CoffeeScript = (function(){
 			return fn.call(this, code, options);
 		  } catch (_error) {
 			err = _error;
+			if (typeof code !== 'string') {
+			  throw err;
+			}
 			throw helpers.updateSyntaxError(err, code, options.filename);
 		  }
 		};
@@ -6036,7 +6046,7 @@ var CoffeeScript = (function(){
 		for (i = 0, len = fragments.length; i < len; i++) {
 		  fragment = fragments[i];
 //		  if (options.sourceMap) {
-//			if (fragment.locationData) {
+//			if (fragment.locationData && !/^[;\s]*$/.test(fragment.code)) {
 //			  map.add([fragment.locationData.first_line, fragment.locationData.first_column], [currentLine, currentColumn], {
 //				noReplace: true
 //			  });

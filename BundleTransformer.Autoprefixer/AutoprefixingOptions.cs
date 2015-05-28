@@ -43,6 +43,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to add new prefixes
+		/// </summary>
+		public bool Add
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of autoprefixing options
@@ -53,6 +62,7 @@
 			Cascade = true;
 			Safe = false;
 			Remove = true;
+			Add = true;
 		}
 	}
 }

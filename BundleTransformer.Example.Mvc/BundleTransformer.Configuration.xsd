@@ -656,6 +656,11 @@
 				<xs:documentation>Flag for whether to remove outdated prefixes</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="add" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to add new prefixes</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="BrowserConditionalExpressionCollection_SchemaType">

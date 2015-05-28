@@ -72,6 +72,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to add new prefixes
+		/// </summary>
+		public bool Add
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
@@ -95,6 +104,7 @@
 			Cascade = autoprefixerConfig.Cascade;
 			Safe = autoprefixerConfig.Safe;
 			Remove = autoprefixerConfig.Remove;
+			Add = autoprefixerConfig.Add;
 
 			if (createJsEngineInstance == null)
 			{
@@ -212,7 +222,8 @@
 				Browsers = Browsers,
 				Cascade = Cascade,
 				Safe = Safe,
-				Remove = Remove
+				Remove = Remove,
+				Add = Add
 			};
 
 			return options;
