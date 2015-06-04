@@ -185,6 +185,7 @@
 				new JProperty("mediaMerging", options.MediaMerging),
 				new JProperty("restructuring", options.Restructuring),
 				new JProperty("roundingPrecision", options.RoundingPrecision),
+				new JProperty("semanticMerging", options.SemanticMerging),
 				new JProperty("shorthandCompacting", options.ShorthandCompacting)
 			);
 

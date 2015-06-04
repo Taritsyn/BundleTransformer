@@ -19,6 +19,7 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 			root: '',
 			relativeTo: '',
 			roundingPrecision: 2,
+			semanticMerging: false,
 			shorthandCompacting: true,
 			sourceMap: false,
 			target: null

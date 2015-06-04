@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.65
+           README file for Bundle Transformer: IntelliSense 1.9.66
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   In Autoprefixer settings added definition for the `add` property.
+   In Clean CSS-minifier settings added definition for the
+   `semanticMerging` property.
    
    =============
    DOCUMENTATION

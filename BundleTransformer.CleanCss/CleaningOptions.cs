@@ -82,6 +82,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets
+		/// (warning, this may break your styling!)
+		/// </summary>
+		public bool SemanticMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable shorthand compacting
 		/// </summary>
 		public bool ShorthandCompacting
@@ -115,6 +125,7 @@
 			MediaMerging = true;
 			Restructuring = true;
 			RoundingPrecision = 2;
+			SemanticMerging = false;
 			ShorthandCompacting = true;
 			Severity = 0;
 		}

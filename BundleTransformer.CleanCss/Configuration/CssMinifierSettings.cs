@@ -93,6 +93,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets
+		/// (warning, this may break your styling!)
+		/// </summary>
+		[ConfigurationProperty("semanticMerging", DefaultValue = false)]
+		public bool SemanticMerging
+		{
+			get { return (bool)this["semanticMerging"]; }
+			set { this["semanticMerging"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable shorthand compacting
 		/// </summary>
 		[ConfigurationProperty("shorthandCompacting", DefaultValue = true)]

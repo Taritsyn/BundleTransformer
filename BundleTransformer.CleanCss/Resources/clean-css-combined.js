@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.2.10
+ * Clean-css v3.3.1
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -1392,6 +1392,7 @@ var CleanCss = (function(){
 		var hasInherit = require('/properties/has-inherit');
 		var restoreShorthands = require('/properties/restore-shorthands');
 		var everyCombination = require('/properties/every-combination');
+		var sameVendorPrefixesIn = require('/properties/vendor-prefixes').same;
 
 		var stringifyProperty = require('/stringifier/one-time').property;
 
@@ -1637,6 +1638,9 @@ var CleanCss = (function(){
 				if (!right.important && left.important)
 				  continue;
 
+				if (!sameVendorPrefixesIn([left], right.components))
+				  continue;
+
 				component = right.components.filter(nameMatchFilter(left))[0];
 				mayOverride = (compactable[left.name] && compactable[left.name].canOverride) || canOverride.sameValue;
 				if (everyCombination(mayOverride, left, component, validator)) {
@@ -1656,10 +1660,13 @@ var CleanCss = (function(){
 
 				component = left.components.filter(nameMatchFilter(right))[0];
 				if (everyCombination(mayOverride, component, right, validator)) {
-				  var disabledBackgroundSizeMerging = !compatibility.properties.backgroundSizeMerging && component.name.indexOf('background-size') > -1;
+				  var disabledBackgroundMerging =
+					!compatibility.properties.backgroundClipMerging && component.name.indexOf('background-clip') > -1 ||
+					!compatibility.properties.backgroundOriginMerging && component.name.indexOf('background-origin') > -1 ||
+					!compatibility.properties.backgroundSizeMerging && component.name.indexOf('background-size') > -1;
 				  var nonMergeableValue = compactable[right.name].nonMergeableValue === right.value[0][0];
 
-				  if (disabledBackgroundSizeMerging || nonMergeableValue)
+				  if (disabledBackgroundMerging || nonMergeableValue)
 					continue;
 
 				  if (!compatibility.properties.merging && wouldBreakCompatibility(left, validator))
@@ -1791,6 +1798,7 @@ var CleanCss = (function(){
 	modules['/properties/restore'] = function () {
 		var shallowClone = require('/properties/clone').shallow;
 		var MULTIPLEX_SEPARATOR = ',';
+		var SIZE_POSITION_SEPARATOR = '/';
 
 		function background(property, compactable, lastInMultiplex) {
 		  var components = property.components;
@@ -1849,7 +1857,7 @@ var CleanCss = (function(){
 				restoreValue(positionComponent);
 			  } else if (needsBoth) {
 				restoreValue(component);
-				restored.unshift(['/']);
+				restored.unshift([SIZE_POSITION_SEPARATOR]);
 				restoreValue(positionComponent);
 			  } else if (positionComponent.value.length == 1) {
 				restoreValue(positionComponent);
@@ -1870,7 +1878,21 @@ var CleanCss = (function(){
 		  if (restored.length === 0)
 			restored.push([compactable[property.name].defaultValue]);
 
+		  if (_isInheritBackground(restored))
+			return [restored[0]];
+
 		  return restored;
+		}
+
+		function _isInheritBackground(values) {
+		  for (var i = 0, l = values.length; i < l; i++) {
+			var value = values[i][0];
+
+			if (value != 'inherit' && value != MULTIPLEX_SEPARATOR && value != SIZE_POSITION_SEPARATOR)
+			  return false;
+		  }
+
+		  return true;
 		}
 
 		function borderRadius(property, compactable) {
@@ -2177,7 +2199,7 @@ var CleanCss = (function(){
 		var Splitter = require('/utils/splitter');
 
 		var widthKeywords = ['thin', 'thick', 'medium', 'inherit', 'initial'];
-		var allUnits = ['px', '%', 'em', 'rem', 'in', 'cm', 'mm', 'ex', 'pt', 'pc', 'vw', 'vh', 'vmin', 'vmax'];
+		var allUnits = ['px', '%', 'em', 'in', 'cm', 'mm', 'ex', 'pt', 'pc', 'ch', 'rem', 'vh', 'vm', 'vmin', 'vmax', 'vw'];
 		var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + allUnits.join('|') + '|)|auto|inherit)';
 		var cssCalcRegexStr = '(\\-moz\\-|\\-webkit\\-)?calc\\([^\\)]+\\)';
 		var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
@@ -2205,18 +2227,13 @@ var CleanCss = (function(){
 		var listStylePositionKeywords = ['inside', 'outside', 'inherit'];
 
 		function Validator(compatibility) {
-		  if (compatibility.units.rem) {
-			this.compatibleCssUnitRegex = cssUnitRegex;
-			this.compatibleCssUnitAnyRegex = cssUnitAnyRegex;
-		  } else {
-			var validUnits = allUnits.slice(0).filter(function (value) {
-			  return value != 'rem';
-			});
+		  var validUnits = allUnits.slice(0).filter(function (value) {
+			return !(value in compatibility.units) || compatibility.units[value] === true;
+		  });
 
-			var compatibleCssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + validUnits.join('|') + ')|auto|inherit)';
-			this.compatibleCssUnitRegex = new RegExp('^' + compatibleCssUnitRegexStr + '$', 'i');
-			this.compatibleCssUnitAnyRegex = new RegExp('^(none|' + widthKeywords.join('|') + '|' + compatibleCssUnitRegexStr + '|' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')$', 'i');
-		  }
+		  var compatibleCssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + validUnits.join('|') + '|)|auto|inherit)';
+		  this.compatibleCssUnitRegex = new RegExp('^' + compatibleCssUnitRegexStr + '$', 'i');
+		  this.compatibleCssUnitAnyRegex = new RegExp('^(none|' + widthKeywords.join('|') + '|' + compatibleCssUnitRegexStr + '|' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')$', 'i');
 		}
 
 		Validator.prototype.isValidHexColor = function (s) {
@@ -2363,6 +2380,39 @@ var CleanCss = (function(){
 	};
 	//#endregion
 	
+	//#region URL: /properties/vendor-prefixes
+	modules['/properties/vendor-prefixes'] = function () {
+		var VENDOR_PREFIX_PATTERN = /$\-moz\-|\-ms\-|\-o\-|\-webkit\-/;
+
+		function prefixesIn(tokens) {
+		  var prefixes = [];
+
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+
+			for (var j = 0, m = token.value.length; j < m; j++) {
+			  var match = VENDOR_PREFIX_PATTERN.exec(token.value[j][0]);
+
+			  if (match && prefixes.indexOf(match[0]) == -1)
+				prefixes.push(match[0]);
+			}
+		  }
+
+		  return prefixes;
+		}
+
+		function same(left, right) {
+		  return prefixesIn(left).sort().join(',') == prefixesIn(right).sort().join(',');
+		}
+
+		var exports = {
+		  same: same
+		};
+
+		return exports;
+	};
+	//#endregion
+	
 	//#region URL: /properties/wrap-for-optimizing
 	modules['/properties/wrap-for-optimizing'] = function () {
 		function wrapAll(properties) {
@@ -2464,8 +2514,12 @@ var CleanCss = (function(){
 			return name;
 		  if (name.indexOf('-radius') > 0)
 			return 'border-radius';
-		  if (name.indexOf('border-') === 0)
+		  if (name == 'border-collapse' || name == 'border-spacing' || name == 'border-image')
+			return name;
+		  if (name.indexOf('border-') === 0 && /^border\-\w+\-\w+$/.test(name))
 			return name.match(/border\-\w+/)[0];
+		  if (name.indexOf('border-') === 0 && /^border\-\w+$/.test(name))
+			return 'border';
 		  if (name.indexOf('text-') === 0)
 			return name;
 
@@ -2539,7 +2593,7 @@ var CleanCss = (function(){
 	
 	//#region URL: /selectors/optimizer
 	modules['/selectors/optimizer'] = function () {
-		var Tokenizer = require('/selectors/tokenizer');
+		var tokenize = require('/tokenizer/tokenize');
 		var SimpleOptimizer = require('/selectors/optimizers/simple');
 		var AdvancedOptimizer = require('/selectors/optimizers/advanced');
 		var addOptimizationMetadata = require('/selectors/optimization-metadata');
@@ -2550,7 +2604,7 @@ var CleanCss = (function(){
 		}
 
 		SelectorsOptimizer.prototype.process = function (data, stringify, restoreCallback/*, sourceMapTracker*/) {
-		  var tokens = new Tokenizer(this.context/*, this.options.sourceMap*/).toTokens(data);
+		  var tokens = tokenize(data, this.context);
 
 		  addOptimizationMetadata(tokens);
 
@@ -2881,6 +2935,27 @@ var CleanCss = (function(){
 		  }
 		};
 
+		function isBemElement(token) {
+		  var asString = stringifySelectors(token[1]);
+		  return asString.indexOf('__') > -1 || asString.indexOf('--') > -1;
+		}
+
+		function withoutModifier(selector) {
+		  return selector.replace(/--[^ ,>\+~:]+/g, '');
+		}
+
+		function removeAnyUnsafeElements(left, candidates) {
+		  var leftSelector = withoutModifier(stringifySelectors(left[1]));
+
+		  for (var body in candidates) {
+			var right = candidates[body];
+			var rightSelector = withoutModifier(stringifySelectors(right[1]));
+
+			if (rightSelector.indexOf(leftSelector) > -1 || leftSelector.indexOf(rightSelector) > -1)
+			  delete candidates[body];
+		  }
+		}
+
 		AdvancedOptimizer.prototype.mergeNonAdjacentByBody = function (tokens) {
 		  var candidates = {};
 		  var adjacentSpace = this.options.compatibility.selectors.adjacentSpace;
@@ -2890,8 +2965,11 @@ var CleanCss = (function(){
 			if (token[0] != 'selector')
 			  continue;
 
-			if (token[2].length > 0 && unsafeSelector(stringifySelectors(token[1])))
+			if (token[2].length > 0 && (!this.options.semanticMerging && unsafeSelector(stringifySelectors(token[1]))))
 			  candidates = {};
+
+			if (token[2].length > 0 && this.options.semanticMerging && isBemElement(token))
+			  removeAnyUnsafeElements(token, candidates);
 
 			var oldToken = candidates[stringifyBody(token[2])];
 			if (oldToken && !this.isSpecial(stringifySelectors(token[1])) && !this.isSpecial(stringifySelectors(oldToken[1]))) {
@@ -3452,11 +3530,14 @@ var CleanCss = (function(){
 			return list.sort(selectorSorter);
 		  },
 
-		  block: function (values) {
+		  block: function (values, spaceAfterClosingBrace) {
 			values[0] = values[0]
 			  .replace(/\s+/g, ' ')
 			  .replace(/(,|:|\() /g, '$1')
-			  .replace(/ ?\) ?/g, ')');
+			  .replace(/ \)/g, ')');
+
+			if (!spaceAfterClosingBrace)
+			  values[0] = values[0].replace(/\) /g, ')');
 		  },
 
 		  atRule: function (values) {
@@ -3490,9 +3571,14 @@ var CleanCss = (function(){
 		  this.options = options;
 
 		  var units = ['px', 'em', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', '%'];
-		  if (options.compatibility.units.rem)
-			units.push('rem');
-		  options.unitsRegexp = new RegExp('(^|\\s|\\(|,)0(?:' + units.join('|') + ')', 'g');
+		  var otherUnits = ['ch', 'rem', 'vh', 'vm', 'vmax', 'vmin', 'vw'];
+
+		  otherUnits.forEach(function (unit) {
+			if (options.compatibility.units[unit])
+			  units.push(unit);
+		  });
+
+		  options.unitsRegexp = new RegExp('(^|\\s|\\(|,)0(?:' + units.join('|') + ')(\\W|$)', 'g');
 
 		  options.precision = {};
 		  options.precision.value = options.roundingPrecision === undefined ?
@@ -3580,7 +3666,9 @@ var CleanCss = (function(){
 		  if (/^(?:\-moz\-calc|\-webkit\-calc|calc)\(/.test(value))
 			return value;
 
-		  return value.replace(unitsRegexp, '$1' + '0');
+		  return value
+			.replace(unitsRegexp, '$1' + '0' + '$2')
+			.replace(unitsRegexp, '$1' + '0' + '$2');
 		}
 
 		function multipleZerosMinifier(property) {
@@ -3611,7 +3699,10 @@ var CleanCss = (function(){
 			})
 			.replace(/(rgb|rgba|hsl|hsla)\(([^\)]+)\)/g, function(match, colorFunction, colorDef) {
 			  var tokens = colorDef.split(',');
-			  var applies = colorFunction == 'hsl' || colorFunction == 'hsla' || tokens[0].indexOf('%') > -1;
+			  var applies = (colorFunction == 'hsl' && tokens.length == 3) ||
+				(colorFunction == 'hsla' && tokens.length == 4) ||
+				(colorFunction == 'rgb' && tokens.length == 3 && colorDef.indexOf('%') > 0) ||
+				(colorFunction == 'rgba' && tokens.length == 4 && colorDef.indexOf('%') > 0);
 			  if (!applies)
 				return match;
 
@@ -3733,7 +3824,8 @@ var CleanCss = (function(){
 				value = zeroDegMinifier(name, value);
 				value = unitMinifier(name, value, options.unitsRegexp);
 			  }
-			  value = colorMininifier(name, value, options.compatibility);
+			  if (options.compatibility.properties.colors)
+				value = colorMininifier(name, value, options.compatibility);
 
 			  property[j][0] = value;
 			}
@@ -3755,6 +3847,7 @@ var CleanCss = (function(){
 		  var options = this.options;
 		  var ie7Hack = options.compatibility.selectors.ie7Hack;
 		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
+		  var spaceAfterClosingBrace = options.compatibility.properties.spaceAfterClosingBrace;
 
 		  function _cleanupCharsets(tokens) {
 			for (var i = 0, l = tokens.length; i < l; i++) {
@@ -3789,11 +3882,11 @@ var CleanCss = (function(){
 				  optimizeBody(token[2], self.options);
 				  break;
 				case 'block':
-				  CleanUp.block(token[1]);
+				  CleanUp.block(token[1], spaceAfterClosingBrace);
 				  _optimize(token[2]);
 				  break;
 				case 'flat-block':
-				  CleanUp.block(token[1]);
+				  CleanUp.block(token[1], spaceAfterClosingBrace);
 				  optimizeBody(token[2], self.options);
 				  break;
 				case 'at-rule':
@@ -3824,6 +3917,7 @@ var CleanCss = (function(){
 		// TODO: it'd be great to merge it with the other canReorder functionality
 
 		var FLEX_PROPERTIES = /align\-items|box\-align|box\-pack|flex|justify/;
+		var BORDER_PROPERTIES = /^border\-(top|right|bottom|left|color|style|width|radius)/;
 
 		function canReorder(left, right) {
 		  for (var i = right.length - 1; i >= 0; i--) {
@@ -3853,6 +3947,10 @@ var CleanCss = (function(){
 		  if (FLEX_PROPERTIES.test(leftName) && FLEX_PROPERTIES.test(rightName))
 			return false;
 		  if (leftNameRoot == rightNameRoot && unprefixed(leftName) == unprefixed(rightName) && (vendorPrefixed(leftName) ^ vendorPrefixed(rightName)))
+			return false;
+		  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot))
+			return false;
+		  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
 			return false;
 		  if (leftNameRoot != rightNameRoot)
 			return true;
@@ -3900,269 +3998,6 @@ var CleanCss = (function(){
 	};
 	//#endregion
 
-	//#region URL: /selectors/tokenizer
-	modules['/selectors/tokenizer'] = function () {
-		var Chunker = require('/utils/chunker');
-		var Extract = require('/utils/extractors');
-//		var track = require('/utils/source-maps');
-
-//		var path = require('path');
-
-		var flatBlock = /(^@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport|counter\-style)|\\@.+?)/;
-
-		function Tokenizer(minifyContext/*, sourceMaps*/) {
-		  this.minifyContext = minifyContext;
-//		  this.sourceMaps = sourceMaps;
-		}
-
-		Tokenizer.prototype.toTokens = function (data) {
-		  data = data.replace(/\r\n/g, '\n');
-
-		  var chunker = new Chunker(data, '}', 128);
-		  if (chunker.isEmpty())
-			return [];
-
-		  var context = {
-			cursor: 0,
-			mode: 'top',
-			chunker: chunker,
-			chunk: chunker.next(),
-			outer: this.minifyContext,
-			track: /*this.sourceMaps ?
-			  function (data, snapshotMetadata, fallbacks) { return [[track(data, context, snapshotMetadata, fallbacks)]]; } :
-			  */function () { return []; },
-//			sourceMaps: this.sourceMaps,
-			state: [],
-			line: 1,
-			column: 0,
-			source: undefined
-		  };
-
-//		  if (this.minifyContext.options.explicitTarget)
-//			context.resolvePath = relativePathResolver(context);
-
-		  return tokenize(context);
-		};
-
-//		function relativePathResolver(context) {
-//		  var rebaseTo = path.relative(context.outer.options.root, context.outer.options.target);
-//
-//		  return function (relativeTo, sourcePath) {
-//			return relativeTo != sourcePath ?
-//			  path.normalize(path.join(path.relative(rebaseTo, path.dirname(relativeTo)), sourcePath)) :
-//			  sourcePath;
-//		  };
-//		}
-
-		function whatsNext(context) {
-		  var mode = context.mode;
-		  var chunk = context.chunk;
-		  var closest;
-
-		  if (chunk.length == context.cursor) {
-			if (context.chunker.isEmpty())
-			  return null;
-
-			context.chunk = chunk = context.chunker.next();
-			context.cursor = 0;
-		  }
-
-		  if (mode == 'body') {
-			closest = chunk.indexOf('}', context.cursor);
-			return closest > -1 ?
-			  [closest, 'bodyEnd'] :
-			  null;
-		  }
-
-		  var nextSpecial = chunk.indexOf('@', context.cursor);
-		  var nextEscape = chunk.indexOf('__ESCAPED_', context.cursor);
-		  var nextBodyStart = chunk.indexOf('{', context.cursor);
-		  var nextBodyEnd = chunk.indexOf('}', context.cursor);
-
-		  if (nextEscape > -1 && /\S/.test(chunk.substring(context.cursor, nextEscape)))
-			nextEscape = -1;
-
-		  closest = nextSpecial;
-		  if (closest == -1 || (nextEscape > -1 && nextEscape < closest))
-			closest = nextEscape;
-		  if (closest == -1 || (nextBodyStart > -1 && nextBodyStart < closest))
-			closest = nextBodyStart;
-		  if (closest == -1 || (nextBodyEnd > -1 && nextBodyEnd < closest))
-			closest = nextBodyEnd;
-
-		  if (closest == -1)
-			return;
-		  if (nextEscape === closest)
-			return [closest, 'escape'];
-		  if (nextBodyStart === closest)
-			return [closest, 'bodyStart'];
-		  if (nextBodyEnd === closest)
-			return [closest, 'bodyEnd'];
-		  if (nextSpecial === closest)
-			return [closest, 'special'];
-		}
-
-		function tokenize(context) {
-		  var chunk = context.chunk;
-		  var tokenized = [];
-		  var newToken;
-		  var value;
-
-		  while (true) {
-			var next = whatsNext(context);
-			if (!next) {
-			  var whatsLeft = context.chunk.substring(context.cursor);
-			  if (whatsLeft.trim().length > 0) {
-				if (context.mode == 'body') {
-				  context.outer.warnings.push('Missing \'}\' after \'' + whatsLeft + '\'. Ignoring.');
-				} else {
-				  tokenized.push(['text', [whatsLeft]]);
-				}
-				context.cursor += whatsLeft.length;
-			  }
-			  break;
-			}
-
-			var nextSpecial = next[0];
-			var what = next[1];
-			var nextEnd;
-			var oldMode;
-
-			chunk = context.chunk;
-
-			if (context.cursor != nextSpecial && what != 'bodyEnd') {
-			  var spacing = chunk.substring(context.cursor, nextSpecial);
-			  var leadingWhitespace = /^\s+/.exec(spacing);
-
-			  if (leadingWhitespace) {
-				context.cursor += leadingWhitespace[0].length;
-				context.track(leadingWhitespace[0]);
-			  }
-			}
-
-			if (what == 'special') {
-			  var firstOpenBraceAt = chunk.indexOf('{', nextSpecial);
-			  var firstSemicolonAt = chunk.indexOf(';', nextSpecial);
-			  var isSingle = firstSemicolonAt > -1 && (firstOpenBraceAt == -1 || firstSemicolonAt < firstOpenBraceAt);
-			  var isBroken = firstOpenBraceAt == -1 && firstSemicolonAt == -1;
-			  if (isBroken) {
-				context.outer.warnings.push('Broken declaration: \'' + chunk.substring(context.cursor) +  '\'.');
-				context.cursor = chunk.length;
-			  } else if (isSingle) {
-				nextEnd = chunk.indexOf(';', nextSpecial + 1);
-				value = chunk.substring(context.cursor, nextEnd + 1);
-
-				tokenized.push([
-				  'at-rule',
-				  [value].concat(context.track(value, true))
-				]);
-
-				context.track(';');
-				context.cursor = nextEnd + 1;
-			  } else {
-				nextEnd = chunk.indexOf('{', nextSpecial + 1);
-				value = chunk.substring(context.cursor, nextEnd);
-
-				var trimmedValue = value.trim();
-				var isFlat = flatBlock.test(trimmedValue);
-				oldMode = context.mode;
-				context.cursor = nextEnd + 1;
-				context.mode = isFlat ? 'body' : 'block';
-
-				newToken = [
-				  isFlat ? 'flat-block' : 'block'
-				];
-
-				newToken.push([trimmedValue].concat(context.track(value, true)));
-				context.track('{');
-				newToken.push(tokenize(context));
-
-				if (typeof newToken[2] == 'string')
-				  newToken[2] = Extract.properties(newToken[2], [[trimmedValue]], context);
-
-				context.mode = oldMode;
-				context.track('}');
-
-				tokenized.push(newToken);
-			  }
-			} else if (what == 'escape') {
-			  nextEnd = chunk.indexOf('__', nextSpecial + 1);
-			  var escaped = chunk.substring(context.cursor, nextEnd + 2);
-			  var isStartSourceMarker = !!context.outer.sourceTracker.nextStart(escaped);
-			  var isEndSourceMarker = !!context.outer.sourceTracker.nextEnd(escaped);
-
-			  if (isStartSourceMarker) {
-				context.track(escaped);
-				context.state.push({
-				  source: context.source,
-				  line: context.line,
-				  column: context.column
-				});
-				context.source = context.outer.sourceTracker.nextStart(escaped).filename;
-				context.line = 1;
-				context.column = 0;
-			  } else if (isEndSourceMarker) {
-				var oldState = context.state.pop();
-				context.source = oldState.source;
-				context.line = oldState.line;
-				context.column = oldState.column;
-				context.track(escaped);
-			  } else {
-				if (escaped.indexOf('__ESCAPED_COMMENT_SPECIAL') === 0)
-				  tokenized.push(['text', [escaped]]);
-
-				context.track(escaped);
-			  }
-
-			  context.cursor = nextEnd + 2;
-			} else if (what == 'bodyStart') {
-			  var selectors = Extract.selectors(chunk.substring(context.cursor, nextSpecial), context);
-
-			  oldMode = context.mode;
-			  context.cursor = nextSpecial + 1;
-			  context.mode = 'body';
-
-			  var body = Extract.properties(tokenize(context), selectors, context);
-
-			  context.track('{');
-			  context.mode = oldMode;
-
-			  tokenized.push([
-				'selector',
-				selectors,
-				body
-			  ]);
-			} else if (what == 'bodyEnd') {
-			  // extra closing brace at the top level can be safely ignored
-			  if (context.mode == 'top') {
-				var at = context.cursor;
-				var warning = chunk[context.cursor] == '}' ?
-				  'Unexpected \'}\' in \'' + chunk.substring(at - 20, at + 20) + '\'. Ignoring.' :
-				  'Unexpected content: \'' + chunk.substring(at, nextSpecial + 1) + '\'. Ignoring.';
-
-				context.outer.warnings.push(warning);
-				context.cursor = nextSpecial + 1;
-				continue;
-			  }
-
-			  if (context.mode == 'block')
-				context.track(chunk.substring(context.cursor, nextSpecial));
-			  if (context.mode != 'block')
-				tokenized = chunk.substring(context.cursor, nextSpecial);
-
-			  context.cursor = nextSpecial + 1;
-
-			  break;
-			}
-		  }
-
-		  return tokenized;
-		}
-		
-		return Tokenizer;
-	};
-	//#endregion
-	
 	//#region URL: /stringifier/helpers
 	modules['/stringifier/helpers'] = function () {
 		var lineBreak = require('os').EOL;
@@ -4180,12 +4015,16 @@ var CleanCss = (function(){
 		  return false;
 		}
 
-		function afterClosingBrace(token, valueIndex) {
-		  return token[valueIndex][0][token[valueIndex][0].length - 1] == ')' || token[valueIndex][0].indexOf('__ESCAPED_URL_CLEAN_CSS') === 0;
+		function supportsAfterClosingBrace(token) {
+		  return token[0][0] == 'background' || token[0][0] == 'transform' || token[0][0] == 'src';
 		}
 
-		function afterCalc(token, valueIndex) {
-		  return token[valueIndex][0].indexOf('calc(') === 0;
+		function isVariable(token, valueIndex) {
+		  return token[valueIndex][0].indexOf('var(') === 0;
+		}
+
+		function afterClosingBrace(token, valueIndex) {
+		  return token[valueIndex][0][token[valueIndex][0].length - 1] == ')' || token[valueIndex][0].indexOf('__ESCAPED_URL_CLEAN_CSS') === 0;
 		}
 
 		function afterComma(token, valueIndex) {
@@ -4209,7 +4048,7 @@ var CleanCss = (function(){
 		}
 
 		function inSpecialContext(token, valueIndex, context) {
-		  return !context.spaceAfterClosingBrace && afterClosingBrace(token, valueIndex) && !afterCalc(token, valueIndex) ||
+		  return (!context.spaceAfterClosingBrace && supportsAfterClosingBrace(token) || isVariable(token, valueIndex)) && afterClosingBrace(token, valueIndex) ||
 			beforeSlash(token, valueIndex) ||
 			afterSlash(token, valueIndex) ||
 			beforeComma(token, valueIndex) ||
@@ -4825,7 +4664,7 @@ var CleanCss = (function(){
 	//#region URL: /text/urls-processor
 	modules['/text/urls-processor'] = function () {
 		var EscapeStore = require('/text/escape-store');
-		var UrlScanner = require('/utils/url-scanner');
+		var reduceUrls = require('/urls/reduce');
 
 		var lineBreak = require('os').EOL;
 
@@ -4846,7 +4685,7 @@ var CleanCss = (function(){
 //		  var saveWaypoints = this.saveWaypoints;
 		  var self = this;
 
-		  return new UrlScanner(data, this.context).reduce(function (url, tempData) {
+		  return reduceUrls(data, this.context, function (url, tempData) {
 //			if (saveWaypoints) {
 //			  breaksCount = url.split(lineBreak).length - 1;
 //			  lastBreakAt = url.lastIndexOf(lineBreak);
@@ -4868,7 +4707,7 @@ var CleanCss = (function(){
 			.replace(/^url\((['"])? /, 'url($1')
 			.replace(/ (['"])?\)$/, '$1)');
 
-		  if (!keepUrlQuotes && !/url\(.*[\s\(\)].*\)/.test(url) && !/url\(['"]data:[^;]+;charset/.test(url))
+		  if (!keepUrlQuotes && !/^['"].+['"]$/.test(url) && !/url\(.*[\s\(\)].*\)/.test(url) && !/url\(['"]data:[^;]+;charset/.test(url))
 			url = url.replace(/["']/g, '');
 
 		  return url;
@@ -4898,9 +4737,9 @@ var CleanCss = (function(){
 		return UrlsProcessor;
 	};
 	//#endregion
-
-	//#region URL: /utils/chunker
-	modules['/utils/chunker'] = function () {
+	
+	//#region URL: /tokenizer/chunker
+	modules['/tokenizer/chunker'] = function () {
 		// Divides `data` into chunks of `chunkSize` for faster processing
 		function Chunker(data, breakString, chunkSize) {
 		  this.chunks = [];
@@ -4927,8 +4766,597 @@ var CleanCss = (function(){
 		Chunker.prototype.next = function () {
 		  return this.chunks.shift();
 		};
-		
+
 		return Chunker;
+	};
+	//#endregion
+	
+	//#region URL: /tokenizer/extract-properties
+	modules['/tokenizer/extract-properties'] = function () {
+		var Splitter = require('/utils/splitter');
+
+		var COMMA = ',';
+		var FORWARD_SLASH = '/';
+
+		function selectorName(value) {
+		  return value[0];
+		}
+
+		function noop() {}
+
+		function withoutComments(string, into, heading, context) {
+		  var matcher = heading ? /^__ESCAPED_COMMENT_/ : /__ESCAPED_COMMENT_/;
+		  var track = heading ? context.track : noop; // don't track when comment not in a heading as we do it later in `trackComments`
+
+		  while (matcher.test(string)) {
+			var startOfComment = string.indexOf('__');
+			var endOfComment = string.indexOf('__', startOfComment + 1) + 2;
+			var comment = string.substring(startOfComment, endOfComment);
+			string = string.substring(0, startOfComment) + string.substring(endOfComment);
+
+			track(comment);
+			into.push(comment);
+		  }
+
+		  return string;
+		}
+
+		function withoutHeadingComments(string, into, context) {
+		  return withoutComments(string, into, true, context);
+		}
+
+		function withoutInnerComments(string, into, context) {
+		  return withoutComments(string, into, false, context);
+		}
+
+		function trackComments(comments, into, context) {
+		  for (var i = 0, l = comments.length; i < l; i++) {
+			context.track(comments[i]);
+			into.push(comments[i]);
+		  }
+		}
+
+		function extractProperties(string, selectors, context) {
+		  var list = [];
+		  var innerComments = [];
+		  var splitter = new Splitter(/[ ,\/]/);
+
+		  if (typeof string != 'string')
+			return [];
+
+		  if (string.indexOf(')') > -1)
+			string = string.replace(/\)([^\s_;:,\)])/g, /*context.sourceMap ? ') __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__ $1' : */') $1');
+
+		  if (string.indexOf('ESCAPED_URL_CLEAN_CSS') > -1)
+			string = string.replace(/(ESCAPED_URL_CLEAN_CSS[^_]+?__)/g, /*context.sourceMap ? '$1 __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__ ' : */'$1 ');
+
+		  var candidates = string.split(';');
+
+		  for (var i = 0, l = candidates.length; i < l; i++) {
+			var candidate = candidates[i];
+			var firstColonAt = candidate.indexOf(':');
+
+			if (firstColonAt == -1) {
+			  context.track(candidate);
+			  if (candidate.indexOf('__ESCAPED_COMMENT_SPECIAL') > -1)
+				list.push(candidate.trim());
+			  continue;
+			}
+
+			if (candidate.indexOf('{') > 0) {
+			  context.track(candidate);
+			  continue;
+			}
+
+			var body = [];
+			var name = candidate.substring(0, firstColonAt);
+
+			innerComments = [];
+
+			if (name.indexOf('__ESCAPED_COMMENT') > -1)
+			  name = withoutHeadingComments(name, list, context);
+
+			if (name.indexOf('__ESCAPED_COMMENT') > -1)
+			  name = withoutInnerComments(name, innerComments, context);
+
+			body.push([name.trim()].concat(context.track(name, true)));
+			context.track(':');
+
+			trackComments(innerComments, list, context);
+
+			var values = splitter.split(candidate.substring(firstColonAt + 1), true);
+
+			if (values.length == 1 && values[0] === '') {
+			  context.warnings.push('Empty property \'' + name + '\' inside \'' + selectors.filter(selectorName).join(',') + '\' selector. Ignoring.');
+			  continue;
+			}
+
+			for (var j = 0, m = values.length; j < m; j++) {
+			  var value = values[j];
+			  var trimmed = value.trim();
+
+			  if (trimmed.length === 0)
+				continue;
+
+			  var lastCharacter = trimmed[trimmed.length - 1];
+			  var endsWithNonSpaceSeparator = trimmed.length > 1 && (lastCharacter == COMMA || lastCharacter == FORWARD_SLASH);
+
+			  if (endsWithNonSpaceSeparator)
+				trimmed = trimmed.substring(0, trimmed.length - 1);
+
+			  if (trimmed.indexOf('__ESCAPED_COMMENT_CLEAN_CSS(0,-') > -1) {
+				context.track(trimmed);
+				continue;
+			  }
+
+			  innerComments = [];
+
+			  if (trimmed.indexOf('__ESCAPED_COMMENT') > -1)
+				trimmed = withoutHeadingComments(trimmed, list, context);
+
+			  if (trimmed.indexOf('__ESCAPED_COMMENT') > -1)
+				trimmed = withoutInnerComments(trimmed, innerComments, context);
+
+			  if (trimmed.length === 0) {
+				trackComments(innerComments, list, context);
+				continue;
+			  }
+
+			  var pos = body.length - 1;
+			  if (trimmed == 'important' && body[pos][0] == '!') {
+				context.track(trimmed);
+				body[pos - 1][0] += '!important';
+				body.pop();
+				continue;
+			  }
+
+			  if (trimmed == '!important' || (trimmed == 'important' && body[pos][0][body[pos][0].length - 1] == '!')) {
+				context.track(trimmed);
+				body[pos][0] += trimmed;
+				continue;
+			  }
+
+			  body.push([trimmed].concat(context.track(value, true)));
+
+			  trackComments(innerComments, list, context);
+
+			  if (endsWithNonSpaceSeparator) {
+				body.push([lastCharacter]);
+				context.track(lastCharacter);
+			  }
+			}
+
+			if (i < l - 1)
+			  context.track(';');
+
+			list.push(body);
+		  }
+
+		  return list;
+		}
+
+		return extractProperties;
+	};
+	//#endregion
+	
+	//#region URL: /tokenizer/extract-selectors
+	modules['/tokenizer/extract-selectors'] = function () {
+		var Splitter = require('/utils/splitter');
+
+		function extractSelectors(string, context) {
+		  var list = [];
+		  var metadata;
+		  var selectors = new Splitter(',').split(string);
+
+		  for (var i = 0, l = selectors.length; i < l; i++) {
+			metadata = context.track(selectors[i], true, i);
+			context.track(',');
+			list.push([selectors[i].trim()].concat(metadata));
+		  }
+
+		  return list;
+		}
+
+		return extractSelectors;
+	};
+	//#endregion
+	
+	//#region URL: /tokenizer/tokenize
+	modules['/tokenizer/tokenize'] = function () {
+		var Chunker = require('/tokenizer/chunker');
+		var extractProperties = require('/tokenizer/extract-properties');
+		var extractSelectors = require('/tokenizer/extract-selectors');
+//		var track = require('/source-maps/track');
+
+//		var path = require('path');
+
+		var flatBlock = /(^@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport|counter\-style)|\\@.+?)/;
+
+		function tokenize(data, outerContext) {
+		  var chunker = new Chunker(normalize(data), '}', 128);
+		  if (chunker.isEmpty())
+			return [];
+
+		  var context = {
+			chunk: chunker.next(),
+			chunker: chunker,
+			column: 0,
+			cursor: 0,
+			line: 1,
+			mode: 'top',
+			resolvePath: /*outerContext.options.explicitTarget ?
+			  relativePathResolver(outerContext.options.root, outerContext.options.target) :
+			  */null,
+			source: undefined,
+//			sourceMap: outerContext.options.sourceMap,
+//			sourceMapInlineSources: outerContext.options.sourceMapInlineSources,
+//			sourceMapTracker: outerContext.inputSourceMapTracker,
+			sourceReader: outerContext.sourceReader,
+			sourceTracker: outerContext.sourceTracker,
+			state: [],
+			track: /*outerContext.options.sourceMap ?
+			  function (data, snapshotMetadata, fallbacks) { return [[track(data, context, snapshotMetadata, fallbacks)]]; } :
+			  */function () { return []; },
+			warnings: outerContext.warnings
+		  };
+
+		  return intoTokens(context);
+		}
+
+		function normalize(data) {
+		  return data.replace(/\r\n/g, '\n');
+		}
+
+//		function relativePathResolver(root, target) {
+//		  var rebaseTo = path.relative(root, target);
+//
+//		  return function (relativeTo, sourcePath) {
+//			return relativeTo != sourcePath ?
+//			  path.normalize(path.join(path.relative(rebaseTo, path.dirname(relativeTo)), sourcePath)) :
+//			  sourcePath;
+//		  };
+//		}
+
+		function whatsNext(context) {
+		  var mode = context.mode;
+		  var chunk = context.chunk;
+		  var closest;
+
+		  if (chunk.length == context.cursor) {
+			if (context.chunker.isEmpty())
+			  return null;
+
+			context.chunk = chunk = context.chunker.next();
+			context.cursor = 0;
+		  }
+
+		  if (mode == 'body') {
+			closest = chunk.indexOf('}', context.cursor);
+			return closest > -1 ?
+			  [closest, 'bodyEnd'] :
+			  null;
+		  }
+
+		  var nextSpecial = chunk.indexOf('@', context.cursor);
+		  var nextEscape = chunk.indexOf('__ESCAPED_', context.cursor);
+		  var nextBodyStart = chunk.indexOf('{', context.cursor);
+		  var nextBodyEnd = chunk.indexOf('}', context.cursor);
+
+		  if (nextEscape > -1 && /\S/.test(chunk.substring(context.cursor, nextEscape)))
+			nextEscape = -1;
+
+		  closest = nextSpecial;
+		  if (closest == -1 || (nextEscape > -1 && nextEscape < closest))
+			closest = nextEscape;
+		  if (closest == -1 || (nextBodyStart > -1 && nextBodyStart < closest))
+			closest = nextBodyStart;
+		  if (closest == -1 || (nextBodyEnd > -1 && nextBodyEnd < closest))
+			closest = nextBodyEnd;
+
+		  if (closest == -1)
+			return;
+		  if (nextEscape === closest)
+			return [closest, 'escape'];
+		  if (nextBodyStart === closest)
+			return [closest, 'bodyStart'];
+		  if (nextBodyEnd === closest)
+			return [closest, 'bodyEnd'];
+		  if (nextSpecial === closest)
+			return [closest, 'special'];
+		}
+
+		function intoTokens(context) {
+		  var chunk = context.chunk;
+		  var tokenized = [];
+		  var newToken;
+		  var value;
+
+		  while (true) {
+			var next = whatsNext(context);
+			if (!next) {
+			  var whatsLeft = context.chunk.substring(context.cursor);
+			  if (whatsLeft.trim().length > 0) {
+				if (context.mode == 'body') {
+				  context.warnings.push('Missing \'}\' after \'' + whatsLeft + '\'. Ignoring.');
+				} else {
+				  tokenized.push(['text', [whatsLeft]]);
+				}
+				context.cursor += whatsLeft.length;
+			  }
+			  break;
+			}
+
+			var nextSpecial = next[0];
+			var what = next[1];
+			var nextEnd;
+			var oldMode;
+
+			chunk = context.chunk;
+
+			if (context.cursor != nextSpecial && what != 'bodyEnd') {
+			  var spacing = chunk.substring(context.cursor, nextSpecial);
+			  var leadingWhitespace = /^\s+/.exec(spacing);
+
+			  if (leadingWhitespace) {
+				context.cursor += leadingWhitespace[0].length;
+				context.track(leadingWhitespace[0]);
+			  }
+			}
+
+			if (what == 'special') {
+			  var firstOpenBraceAt = chunk.indexOf('{', nextSpecial);
+			  var firstSemicolonAt = chunk.indexOf(';', nextSpecial);
+			  var isSingle = firstSemicolonAt > -1 && (firstOpenBraceAt == -1 || firstSemicolonAt < firstOpenBraceAt);
+			  var isBroken = firstOpenBraceAt == -1 && firstSemicolonAt == -1;
+			  if (isBroken) {
+				context.warnings.push('Broken declaration: \'' + chunk.substring(context.cursor) +  '\'.');
+				context.cursor = chunk.length;
+			  } else if (isSingle) {
+				nextEnd = chunk.indexOf(';', nextSpecial + 1);
+				value = chunk.substring(context.cursor, nextEnd + 1);
+
+				tokenized.push([
+				  'at-rule',
+				  [value].concat(context.track(value, true))
+				]);
+
+				context.track(';');
+				context.cursor = nextEnd + 1;
+			  } else {
+				nextEnd = chunk.indexOf('{', nextSpecial + 1);
+				value = chunk.substring(context.cursor, nextEnd);
+
+				var trimmedValue = value.trim();
+				var isFlat = flatBlock.test(trimmedValue);
+				oldMode = context.mode;
+				context.cursor = nextEnd + 1;
+				context.mode = isFlat ? 'body' : 'block';
+
+				newToken = [
+				  isFlat ? 'flat-block' : 'block'
+				];
+
+				newToken.push([trimmedValue].concat(context.track(value, true)));
+				context.track('{');
+				newToken.push(intoTokens(context));
+
+				if (typeof newToken[2] == 'string')
+				  newToken[2] = extractProperties(newToken[2], [[trimmedValue]], context);
+
+				context.mode = oldMode;
+				context.track('}');
+
+				tokenized.push(newToken);
+			  }
+			} else if (what == 'escape') {
+			  nextEnd = chunk.indexOf('__', nextSpecial + 1);
+			  var escaped = chunk.substring(context.cursor, nextEnd + 2);
+			  var isStartSourceMarker = !!context.sourceTracker.nextStart(escaped);
+			  var isEndSourceMarker = !!context.sourceTracker.nextEnd(escaped);
+
+			  if (isStartSourceMarker) {
+				context.track(escaped);
+				context.state.push({
+				  source: context.source,
+				  line: context.line,
+				  column: context.column
+				});
+				context.source = context.sourceTracker.nextStart(escaped).filename;
+				context.line = 1;
+				context.column = 0;
+			  } else if (isEndSourceMarker) {
+				var oldState = context.state.pop();
+				context.source = oldState.source;
+				context.line = oldState.line;
+				context.column = oldState.column;
+				context.track(escaped);
+			  } else {
+				if (escaped.indexOf('__ESCAPED_COMMENT_SPECIAL') === 0)
+				  tokenized.push(['text', [escaped]]);
+
+				context.track(escaped);
+			  }
+
+			  context.cursor = nextEnd + 2;
+			} else if (what == 'bodyStart') {
+			  var selectors = extractSelectors(chunk.substring(context.cursor, nextSpecial), context);
+
+			  oldMode = context.mode;
+			  context.cursor = nextSpecial + 1;
+			  context.mode = 'body';
+
+			  var body = extractProperties(intoTokens(context), selectors, context);
+
+			  context.track('{');
+			  context.mode = oldMode;
+
+			  tokenized.push([
+				'selector',
+				selectors,
+				body
+			  ]);
+			} else if (what == 'bodyEnd') {
+			  // extra closing brace at the top level can be safely ignored
+			  if (context.mode == 'top') {
+				var at = context.cursor;
+				var warning = chunk[context.cursor] == '}' ?
+				  'Unexpected \'}\' in \'' + chunk.substring(at - 20, at + 20) + '\'. Ignoring.' :
+				  'Unexpected content: \'' + chunk.substring(at, nextSpecial + 1) + '\'. Ignoring.';
+
+				context.warnings.push(warning);
+				context.cursor = nextSpecial + 1;
+				continue;
+			  }
+
+			  if (context.mode == 'block')
+				context.track(chunk.substring(context.cursor, nextSpecial));
+			  if (context.mode != 'block')
+				tokenized = chunk.substring(context.cursor, nextSpecial);
+
+			  context.cursor = nextSpecial + 1;
+
+			  break;
+			}
+		  }
+
+		  return tokenized;
+		}
+
+		return tokenize;
+	};
+	//#endregion
+	
+	//#region URL: /urls/reduce
+	modules['/urls/reduce'] = function () {
+		var URL_PREFIX = 'url(';
+		var UPPERCASE_URL_PREFIX = 'URL(';
+		var URL_SUFFIX = ')';
+
+		var IMPORT_URL_PREFIX = '@import';
+		var UPPERCASE_IMPORT_URL_PREFIX = '@IMPORT';
+
+		function byUrl(data, context, callback) {
+		  var nextStart = 0;
+		  var nextStartUpperCase = 0;
+		  var nextEnd = 0;
+		  var cursor = 0;
+		  var tempData = [];
+		  var hasUppercaseUrl = data.indexOf(UPPERCASE_URL_PREFIX) > -1;
+
+		  for (; nextEnd < data.length;) {
+			nextStart = data.indexOf(URL_PREFIX, nextEnd);
+			nextStartUpperCase = hasUppercaseUrl ? data.indexOf(UPPERCASE_URL_PREFIX, nextEnd) : -1;
+			if (nextStart == -1 && nextStartUpperCase == -1)
+			  break;
+
+			if (nextStart == -1 && nextStartUpperCase > -1)
+			  nextStart = nextStartUpperCase;
+
+			if (data[nextStart + URL_PREFIX.length] == '"')
+			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
+			else if (data[nextStart + URL_PREFIX.length] == '\'')
+			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
+			else
+			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
+
+			// Following lines are a safety mechanism to ensure
+			// incorrectly terminated urls are processed correctly.
+			if (nextEnd == -1) {
+			  nextEnd = data.indexOf('}', nextStart);
+
+			  if (nextEnd == -1)
+				nextEnd = data.length;
+			  else
+				nextEnd--;
+
+			  context.warnings.push('Broken URL declaration: \'' + data.substring(nextStart, nextEnd + 1) + '\'.');
+			} else {
+			  if (data[nextEnd] != URL_SUFFIX)
+				nextEnd = data.indexOf(URL_SUFFIX, nextEnd);
+			}
+
+			tempData.push(data.substring(cursor, nextStart));
+
+			var url = data.substring(nextStart, nextEnd + 1);
+			callback(url, tempData);
+
+			cursor = nextEnd + 1;
+		  }
+
+		  return tempData.length > 0 ?
+			tempData.join('') + data.substring(cursor, data.length) :
+			data;
+		}
+
+		function byImport(data, context, callback) {
+		  var nextImport = 0;
+		  var nextImportUpperCase = 0;
+		  var nextStart = 0;
+		  var nextEnd = 0;
+		  var cursor = 0;
+		  var tempData = [];
+		  var nextSingleQuote = 0;
+		  var nextDoubleQuote = 0;
+		  var untilNextQuote;
+		  var withQuote;
+		  var SINGLE_QUOTE = '\'';
+		  var DOUBLE_QUOTE = '"';
+
+		  for (; nextEnd < data.length;) {
+			nextImport = data.indexOf(IMPORT_URL_PREFIX, nextEnd);
+			nextImportUpperCase = data.indexOf(UPPERCASE_IMPORT_URL_PREFIX, nextEnd);
+			if (nextImport == -1 && nextImportUpperCase == -1)
+			  break;
+
+			if (nextImport > -1 && nextImportUpperCase > -1 && nextImportUpperCase < nextImport)
+			  nextImport = nextImportUpperCase;
+
+			nextSingleQuote = data.indexOf(SINGLE_QUOTE, nextImport);
+			nextDoubleQuote = data.indexOf(DOUBLE_QUOTE, nextImport);
+
+			if (nextSingleQuote > -1 && nextDoubleQuote > -1 && nextSingleQuote < nextDoubleQuote) {
+			  nextStart = nextSingleQuote;
+			  withQuote = SINGLE_QUOTE;
+			} else if (nextSingleQuote > -1 && nextDoubleQuote > -1 && nextSingleQuote > nextDoubleQuote) {
+			  nextStart = nextDoubleQuote;
+			  withQuote = DOUBLE_QUOTE;
+			} else if (nextSingleQuote > -1) {
+			  nextStart = nextSingleQuote;
+			  withQuote = SINGLE_QUOTE;
+			} else if (nextDoubleQuote > -1) {
+			  nextStart = nextDoubleQuote;
+			  withQuote = DOUBLE_QUOTE;
+			} else {
+			  break;
+			}
+
+			tempData.push(data.substring(cursor, nextStart));
+			nextEnd = data.indexOf(withQuote, nextStart + 1);
+
+			untilNextQuote = data.substring(nextImport, nextEnd);
+			if (nextEnd == -1 || /^@import\s+(url\(|__ESCAPED)/i.test(untilNextQuote)) {
+			  cursor = nextStart;
+			  break;
+			}
+
+			var url = data.substring(nextStart, nextEnd + 1);
+			callback(url, tempData);
+
+			cursor = nextEnd + 1;
+		  }
+
+		  return tempData.length > 0 ?
+			tempData.join('') + data.substring(cursor, data.length) :
+			data;
+		}
+
+		function reduceAll(data, context, callback) {
+		  data = byUrl(data, context, callback);
+		  data = byImport(data, context, callback);
+		  return data;
+		}
+
+		return reduceAll;
 	};
 	//#endregion
 
@@ -4942,11 +5370,14 @@ var CleanCss = (function(){
 			  opacity: true // rgba / hsla
 			},
 			properties: {
+			  backgroundClipMerging: false, // background-clip to shorthand
+			  backgroundOriginMerging: false, // background-origin to shorthand
 			  backgroundSizeMerging: false, // background-size to shorthand
+			  colors: true, // any kind of color transformations, like `#ff00ff` to `#f0f` or `#fff` into `red`
 			  iePrefixHack: false, // underscore / asterisk prefix hacks on IE
 			  ieSuffixHack: false, // \9 suffix hacks on IE
 			  merging: true, // merging properties into one
-			  spaceAfterClosingBrace: false, // 'url() no-repeat' to 'url()no-repeat'
+			  spaceAfterClosingBrace: true, // 'url() no-repeat' to 'url()no-repeat'
 			  urlQuotes: false, // whether to wrap content of `url()` into quotes or not
 			  zeroUnits: true // 0[unit] -> 0
 			},
@@ -4956,7 +5387,13 @@ var CleanCss = (function(){
 			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right)/ // special selectors which prevent merging
 			},
 			units: {
-			  rem: true
+			  ch: true,
+			  rem: true,
+			  vh: true,
+			  vm: true, // vm is vmin on IE9+ see https://developer.mozilla.org/en-US/docs/Web/CSS/length
+			  vmax: true,
+			  vmin: true,
+			  vw: true
 			}
 		  },
 		  'ie8': {
@@ -4964,7 +5401,10 @@ var CleanCss = (function(){
 			  opacity: false
 			},
 			properties: {
+			  backgroundClipMerging: false,
+			  backgroundOriginMerging: false,
 			  backgroundSizeMerging: false,
+			  colors: true,
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
 			  merging: false,
@@ -4978,7 +5418,13 @@ var CleanCss = (function(){
 			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
 			},
 			units: {
-			  rem: false
+			  ch: false,
+			  rem: false,
+			  vh: false,
+			  vm: false,
+			  vmax: false,
+			  vmin: false,
+			  vw: false
 			}
 		  },
 		  'ie7': {
@@ -4986,7 +5432,10 @@ var CleanCss = (function(){
 			  opacity: false
 			},
 			properties: {
+			  backgroundClipMerging: false,
+			  backgroundOriginMerging: false,
 			  backgroundSizeMerging: false,
+			  colors: true,
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
 			  merging: false,
@@ -5000,7 +5449,13 @@ var CleanCss = (function(){
 			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
 			},
 			units: {
-			  rem: false
+			  ch: false,
+			  rem: false,
+			  vh: false,
+			  vm: false,
+			  vmax: false,
+			  vmin: false,
+			  vw: false,
 			}
 		  }
 		};
@@ -5054,190 +5509,6 @@ var CleanCss = (function(){
 		};
 		
 		return Compatibility;
-	};
-	//#endregion
-
-	//#region URL: /utils/extractors
-	modules['/utils/extractors'] = function () {
-		var Splitter = require('/utils/splitter');
-
-		var COMMA = ',';
-		var FORWARD_SLASH = '/';
-
-		function selectorName(value) {
-		  return value[0];
-		}
-
-		function noop() {}
-
-		function withoutComments(string, into, heading, context) {
-		  var matcher = heading ? /^__ESCAPED_COMMENT_/ : /__ESCAPED_COMMENT_/;
-		  var track = heading ? context.track : noop; // don't track when comment not in a heading as we do it later in `trackComments`
-
-		  while (matcher.test(string)) {
-			var startOfComment = string.indexOf('__');
-			var endOfComment = string.indexOf('__', startOfComment + 1) + 2;
-			var comment = string.substring(startOfComment, endOfComment);
-			string = string.substring(0, startOfComment) + string.substring(endOfComment);
-
-			track(comment);
-			into.push(comment);
-		  }
-
-		  return string;
-		}
-
-		function withoutHeadingComments(string, into, context) {
-		  return withoutComments(string, into, true, context);
-		}
-
-		function withoutInnerComments(string, into, context) {
-		  return withoutComments(string, into, false, context);
-		}
-
-		function trackComments(comments, into, context) {
-		  for (var i = 0, l = comments.length; i < l; i++) {
-			context.track(comments[i]);
-			into.push(comments[i]);
-		  }
-		}
-
-		var Extractors = {
-		  properties: function (string, selectors, context) {
-			var list = [];
-			var innerComments = [];
-			var splitter = new Splitter(/[ ,\/]/);
-
-			if (typeof string != 'string')
-			  return [];
-
-			if (string.indexOf(')') > -1)
-			  string = string.replace(/\)([^\s_;:,\)])/g, /*context.sourceMaps ? ') __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__ $1' : */') $1');
-
-			if (string.indexOf('ESCAPED_URL_CLEAN_CSS') > -1)
-			  string = string.replace(/(ESCAPED_URL_CLEAN_CSS[^_]+?__)/g, /*context.sourceMaps ? '$1 __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__ ' : */'$1 ');
-
-			var candidates = string.split(';');
-
-			for (var i = 0, l = candidates.length; i < l; i++) {
-			  var candidate = candidates[i];
-			  var firstColonAt = candidate.indexOf(':');
-
-			  if (firstColonAt == -1) {
-				context.track(candidate);
-				if (candidate.indexOf('__ESCAPED_COMMENT_') > -1)
-				  list.push(candidate.trim());
-				continue;
-			  }
-
-			  if (candidate.indexOf('{') > 0) {
-				context.track(candidate);
-				continue;
-			  }
-
-			  var body = [];
-			  var name = candidate.substring(0, firstColonAt);
-
-			  innerComments = [];
-
-			  if (name.indexOf('__ESCAPED_COMMENT') > -1)
-				name = withoutHeadingComments(name, list, context);
-
-			  if (name.indexOf('__ESCAPED_COMMENT') > -1)
-				name = withoutInnerComments(name, innerComments, context);
-
-			  body.push([name.trim()].concat(context.track(name, true)));
-			  context.track(':');
-
-			  trackComments(innerComments, list, context);
-
-			  var values = splitter.split(candidate.substring(firstColonAt + 1), true);
-
-			  if (values.length == 1 && values[0] === '') {
-				context.outer.warnings.push('Empty property \'' + name + '\' inside \'' + selectors.filter(selectorName).join(',') + '\' selector. Ignoring.');
-				continue;
-			  }
-
-			  for (var j = 0, m = values.length; j < m; j++) {
-				var value = values[j];
-				var trimmed = value.trim();
-
-				if (trimmed.length === 0)
-				  continue;
-
-				var lastCharacter = trimmed[trimmed.length - 1];
-				var endsWithNonSpaceSeparator = trimmed.length > 1 && (lastCharacter == COMMA || lastCharacter == FORWARD_SLASH);
-
-				if (endsWithNonSpaceSeparator)
-				  trimmed = trimmed.substring(0, trimmed.length - 1);
-
-				if (trimmed.indexOf('__ESCAPED_COMMENT_CLEAN_CSS(0,-') > -1) {
-				  context.track(trimmed);
-				  continue;
-				}
-
-				innerComments = [];
-
-				if (trimmed.indexOf('__ESCAPED_COMMENT') > -1)
-				  trimmed = withoutHeadingComments(trimmed, list, context);
-
-				if (trimmed.indexOf('__ESCAPED_COMMENT') > -1)
-				  trimmed = withoutInnerComments(trimmed, innerComments, context);
-
-				if (trimmed.length === 0) {
-				  trackComments(innerComments, list, context);
-				  continue;
-				}
-
-				var pos = body.length - 1;
-				if (trimmed == 'important' && body[pos][0] == '!') {
-				  context.track(trimmed);
-				  body[pos - 1][0] += '!important';
-				  body.pop();
-				  continue;
-				}
-
-				if (trimmed == '!important' || (trimmed == 'important' && body[pos][0][body[pos][0].length - 1] == '!')) {
-				  context.track(trimmed);
-				  body[pos][0] += trimmed;
-				  continue;
-				}
-
-				body.push([trimmed].concat(context.track(value, true)));
-
-				trackComments(innerComments, list, context);
-
-				if (endsWithNonSpaceSeparator) {
-				  body.push([lastCharacter]);
-				  context.track(lastCharacter);
-				}
-			  }
-
-			  if (i < l - 1)
-				context.track(';');
-
-			  list.push(body);
-			}
-
-			return list;
-		  },
-
-		  selectors: function (string, context) {
-			var list = [];
-			var metadata;
-			var selectors = new Splitter(',').split(string);
-
-			for (var i = 0, l = selectors.length; i < l; i++) {
-			  metadata = context.track(selectors[i], true, i);
-			  context.track(',');
-			  list.push([selectors[i].trim()].concat(metadata));
-			}
-
-			return list;
-		  }
-		};
-		
-		return Extractors;
 	};
 	//#endregion
 
@@ -5351,7 +5622,7 @@ var CleanCss = (function(){
 	//#region URL: /utils/source-reader
 	modules['/utils/source-reader'] = function () {
 //		var path = require('path');
-//		var UrlRewriter = require('/images/url-rewriter');
+//		var rewriteUrls = require('/urls/rewrite');
 
 		var REMOTE_RESOURCE = /^(https?:)?\/\//;
 
@@ -5420,15 +5691,15 @@ var CleanCss = (function(){
 //			var absoluteSource = isRemote ? source : path.resolve(source);
 //			var absoluteSourcePath = path.dirname(absoluteSource);
 
-//			var rewriter = new UrlRewriter({
+//			var rewriteOptions = {
 //			  absolute: self.outerContext.options.explicitRoot,
 //			  relative: !self.outerContext.options.explicitRoot,
 //			  imports: true,
-//			  urls: self.outerContext.options.rebase,
+//			  rebase: self.outerContext.options.rebase,
 //			  fromBase: absoluteSourcePath,
 //			  toBase: isRemote ? absoluteSourcePath : toBase
-//			}, self.outerContext);
-//			styles = rewriter.process(styles);
+//			};
+//			styles = rewriteUrls(styles, rewriteOptions, self.outerContext);
 
 			self.trackSource(source, styles);
 
@@ -5528,79 +5799,10 @@ var CleanCss = (function(){
 	};
 	//#endregion
 
-	//#region URL: /utils/url-scanner
-	modules['/utils/url-scanner'] = function () {
-		var URL_PREFIX = 'url(';
-		var UPPERCASE_URL_PREFIX = 'URL(';
-		var URL_SUFFIX = ')';
-
-		function UrlScanner(data, context) {
-		  this.data = data;
-		  this.context = context;
-		}
-
-		UrlScanner.prototype.reduce = function (callback) {
-		  var nextStart = 0;
-		  var nextStartUpperCase = 0;
-		  var nextEnd = 0;
-		  var cursor = 0;
-		  var tempData = [];
-		  var data = this.data;
-		  var hasUppercaseUrl = data.indexOf(UPPERCASE_URL_PREFIX) > -1;
-
-		  for (; nextEnd < data.length;) {
-			nextStart = data.indexOf(URL_PREFIX, nextEnd);
-			nextStartUpperCase = hasUppercaseUrl ? data.indexOf(UPPERCASE_URL_PREFIX, nextEnd) : -1;
-			if (nextStart == -1 && nextStartUpperCase == -1)
-			  break;
-
-			if (nextStart == -1 && nextStartUpperCase > -1)
-			  nextStart = nextStartUpperCase;
-
-			if (data[nextStart + URL_PREFIX.length] == '"')
-			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
-			else if (data[nextStart + URL_PREFIX.length] == '\'')
-			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
-			else
-			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
-
-			// Following lines are a safety mechanism to ensure
-			// incorrectly terminated urls are processed correctly.
-			if (nextEnd == -1) {
-			  nextEnd = data.indexOf('}', nextStart);
-
-			  if (nextEnd == -1)
-				nextEnd = data.length;
-			  else
-				nextEnd--;
-
-			  this.context.warnings.push('Broken URL declaration: \'' + data.substring(nextStart, nextEnd + 1) + '\'.');
-			} else {
-			  if (data[nextEnd] != URL_SUFFIX)
-				nextEnd = data.indexOf(URL_SUFFIX, nextEnd);
-			}
-
-			tempData.push(data.substring(cursor, nextStart));
-
-			var url = data.substring(nextStart, nextEnd + 1);
-			callback(url, tempData);
-
-			cursor = nextEnd + 1;
-		  }
-
-		  return tempData.length > 0 ?
-			tempData.join('') + data.substring(cursor, data.length) :
-			data;
-		};
-
-		return UrlScanner;
-	};
-	//#endregion
-
 	//#region URL: /clean
 	modules['/clean'] = function () {
 //		var ImportInliner = require('/imports/inliner');
-//		var UrlRebase = require('/images/url-rebase');
+//		var rebaseUrls = require('/urls/rebase');
 		var SelectorsOptimizer = require('/selectors/optimizer');
 
 		var simpleStringify = require('/stringifier/simple');
@@ -5643,15 +5845,24 @@ var CleanCss = (function(){
 			restructuring: undefined === options.restructuring ? true : !!options.restructuring,
 			root: options.root/* || process.cwd()*/,
 			roundingPrecision: options.roundingPrecision,
+			semanticMerging: undefined === options.semanticMerging ? false : !!options.semanticMerging,
 			shorthandCompacting: undefined === options.shorthandCompacting ? true : !!options.shorthandCompacting,
 //			sourceMap: options.sourceMap,
 //			sourceMapInlineSources: !!options.sourceMapInlineSources,
-			target: options.target/* && fs.existsSync(options.target) && fs.statSync(options.target).isDirectory() ? options.target : path.dirname(options.target)*/
+			target: /*!options.target || missingDirectory(options.target) || presentDirectory(options.target) ? */options.target/* : path.dirname(options.target)*/
 		  };
 
 //		  this.options.inliner.timeout = this.options.inliner.timeout || DEFAULT_TIMEOUT;
 //		  this.options.inliner.request = this.options.inliner.request || {};
 		};
+
+//		function missingDirectory(filepath) {
+//		  return !fs.existsSync(filepath) && !/\.css$/.test(filepath);
+//		}
+
+//		function presentDirectory(filepath) {
+//		  return fs.existsSync(filepath) && fs.statSync(filepath).isDirectory();
+//		}
 
 		CleanCSS.prototype.minify = function(data, callback) {
 		  var context = {
@@ -5757,7 +5968,6 @@ var CleanCss = (function(){
 		  var freeTextProcessor = new FreeTextProcessor(/*options.sourceMap*/);
 		  var urlsProcessor = new UrlsProcessor(context/*, options.sourceMap*/, options.compatibility.properties.urlQuotes);
 
-//		  var urlRebase = new UrlRebase(context);
 		  var selectorsOptimizer = new SelectorsOptimizer(options, context);
 		  var stringify = /*options.sourceMap ? sourceMapStringify : */simpleStringify;
 
@@ -5779,7 +5989,7 @@ var CleanCss = (function(){
 			return selectorsOptimizer.process(data, stringify, function (data) {
 			  data = freeTextProcessor.restore(data);
 			  data = urlsProcessor.restore(data);
-//			  data = options.rebase ? urlRebase.process(data) : data;
+//			  data = options.rebase ? rebaseUrls(data, context) : data;
 			  data = expressionsProcessor.restore(data);
 			  return commentsProcessor.restore(data);
 			}/*, sourceMapTracker*/);

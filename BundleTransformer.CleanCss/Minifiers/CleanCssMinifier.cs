@@ -113,6 +113,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets
+		/// (warning, this may break your styling!)
+		/// </summary>
+		public bool SemanticMerging
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable shorthand compacting
 		/// </summary>
 		public bool ShorthandCompacting
@@ -156,6 +166,7 @@
 			MediaMerging = cssMinifierConfig.MediaMerging;
 			Restructuring = cssMinifierConfig.Restructuring;
 			RoundingPrecision = cssMinifierConfig.RoundingPrecision;
+			SemanticMerging = cssMinifierConfig.SemanticMerging;
 			ShorthandCompacting = cssMinifierConfig.ShorthandCompacting;
 			Severity = cssMinifierConfig.Severity;
 
@@ -285,6 +296,7 @@
 				MediaMerging = MediaMerging,
 				Restructuring = Restructuring,
 				RoundingPrecision = RoundingPrecision,
+				SemanticMerging = SemanticMerging,
 				ShorthandCompacting = ShorthandCompacting,
 				Severity = Severity
 			};

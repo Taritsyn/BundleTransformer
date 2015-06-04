@@ -1964,6 +1964,11 @@ to preserve references to external symbols.</xs:documentation>
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>
+		<xs:attribute name="semanticMerging" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets (warning, this may break your styling!)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="shorthandCompacting" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to enable shorthand compacting</xs:documentation>
