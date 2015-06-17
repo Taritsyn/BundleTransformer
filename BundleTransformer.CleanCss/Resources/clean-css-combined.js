@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.3.1
+ * Clean-css v3.3.3
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -2577,6 +2577,9 @@ var CleanCss = (function(){
 		  } else if (lastValue[0].indexOf(BACKSLASH_HACK) > 0 && lastValue[0].indexOf(BACKSLASH_HACK) == lastValue[0].length - BACKSLASH_HACK.length - 1) {
 			lastValue[0] = lastValue[0].substring(0, lastValue[0].length - BACKSLASH_HACK.length - 1);
 			hackType = 'suffix';
+		  } else if (lastValue[0].indexOf(BACKSLASH_HACK) === 0 && lastValue[0].length == 2) {
+			property.pop();
+			hackType = 'suffix';
 		  }
 
 		  // TODO: this should be done at tokenization step
@@ -3662,8 +3665,11 @@ var CleanCss = (function(){
 			.replace(/(\d)\.($|\D)/g, '$1$2');
 		}
 
-		function unitMinifier(_, value, unitsRegexp) {
+		function unitMinifier(name, value, unitsRegexp) {
 		  if (/^(?:\-moz\-calc|\-webkit\-calc|calc)\(/.test(value))
+			return value;
+
+		  if (name == 'flex' || name == 'flex-basis')
 			return value;
 
 		  return value
@@ -4970,7 +4976,7 @@ var CleanCss = (function(){
 
 //		var path = require('path');
 
-		var flatBlock = /(^@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport|counter\-style)|\\@.+?)/;
+		var flatBlock = /(@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport|counter\-style)|\\@.+?)/;
 
 		function tokenize(data, outerContext) {
 		  var chunker = new Chunker(normalize(data), '}', 128);
@@ -5375,7 +5381,7 @@ var CleanCss = (function(){
 			  backgroundSizeMerging: false, // background-size to shorthand
 			  colors: true, // any kind of color transformations, like `#ff00ff` to `#f0f` or `#fff` into `red`
 			  iePrefixHack: false, // underscore / asterisk prefix hacks on IE
-			  ieSuffixHack: false, // \9 suffix hacks on IE
+			  ieSuffixHack: true, // \9 suffix hacks on IE6-9
 			  merging: true, // merging properties into one
 			  spaceAfterClosingBrace: true, // 'url() no-repeat' to 'url()no-repeat'
 			  urlQuotes: false, // whether to wrap content of `url()` into quotes or not

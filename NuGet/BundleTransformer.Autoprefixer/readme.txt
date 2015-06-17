@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Autoprefixer 1.9.65
+           README file for Bundle Transformer: Autoprefixer 1.9.67
  
    ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
    BundleTransformer.Autoprefixer contains one postprocessor-adapter for
    postprocessing of CSS-code - `AutoprefixCssPostProcessor`.
    `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's
-   Autoprefixer (http://github.com/postcss/autoprefixer) version 5.2.
+   Autoprefixer (http://github.com/postcss/autoprefixer) version 5.2.0.1.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
@@ -25,9 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of Autoprefixer version 5.2;
-   2. In configuration settings added new property - `Add`
-      (default `true`).
+   Added support of Autoprefixer version 5.2.0.1.
    
    ====================
    POST-INSTALL ACTIONS
