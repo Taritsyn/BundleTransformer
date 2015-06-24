@@ -1,8 +1,8 @@
 ##################################################################################
-# Sass v3.4.14
+# Sass v3.4.15
 # http://sass-lang.com
 #
-# Copyright (c) 2006-2014 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
+# Copyright (c) 2006-2015 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
 # Released under the MIT License
 ##################################################################################
 
@@ -270,6 +270,17 @@ module Sass
     # @return [Numeric]
     def restrict(value, range)
       [[value, range.first].max, range.last].min
+    end
+
+    # Like [Fixnum.round], but leaves rooms for slight floating-point
+    # differences.
+    #
+    # @param value [Numeric]
+    # @return [Numeric]
+    def round(value)
+      # If the number is within epsilon of X.5, round up.
+      return value.ceil if (value % 1) - 0.5 > -0.00001
+      value.round
     end
 
     # Concatenates all strings that are adjacent in an array,
@@ -2072,7 +2083,7 @@ module Sass
       return @@version if defined?(@@version)
 
       #BT- numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.4.13'.split('.') #BT+
+	  numbers = '3.4.15'.split('.') #BT+
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
       #BT- name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Selective Steve' #BT+
@@ -7425,7 +7436,7 @@ module Sass
       # @return [Fixnum]
       def line=(line)
         members.each {|m| m.line = line if m.is_a?(SimpleSequence)}
-        line
+        @line = line
       end
 
       # Sets the name of the file in which this selector was declared,
@@ -9539,6 +9550,9 @@ module Sass::Script
   #
   # ## List Functions {#list-functions}
   #
+  # Lists in Sass are immutable; all list functions return a new list rather
+  # than updating the existing list in-place.
+  #
   # All list functions work for maps as well, treating them as lists of pairs.
   #
   # \{#length length($list)}
@@ -9566,6 +9580,9 @@ module Sass::Script
   # : Returns the separator of a list.
   #
   # ## Map Functions {#map-functions}
+  #
+  # Maps in Sass are immutable; all map functions return a new map rather than
+  # updating the existing map in-place.
   #
   # \{#map_get map-get($map, $key)}
   # : Returns the value in a map associated with a given key.
@@ -10434,7 +10451,7 @@ module Sass::Script
     # @raise [ArgumentError] if `$color` isn't a color
     def ie_hex_str(color)
       assert_type color, :Color, :color
-      alpha = (color.alpha * 255).round.to_s(16).rjust(2, '0')
+      alpha = Sass::Util.round(color.alpha * 255).to_s(16).rjust(2, '0')
       identifier("##{alpha}#{color.send(:hex_str)[1..-1]}".upcase)
     end
     declare :ie_hex_str, [:color]
@@ -11093,7 +11110,7 @@ MESSAGE
     # @return [Sass::Script::Value::Number]
     # @raise [ArgumentError] if `$number` isn't a number
     def round(number)
-      numeric_transformation(number) {|n| n.round}
+      numeric_transformation(number) {|n| Sass::Util.round(n)}
     end
     declare :round, [:number]
 
@@ -11256,6 +11273,9 @@ MESSAGE
     # list. If both lists have fewer than two items, spaces are used for the
     # resulting list.
     #
+    # Like all list functions, `join()` returns a new list rather than modifying
+    # its arguments in place.
+    #
     # @example
     #   join(10px 20px, 30px 40px) => 10px 20px 30px 40px
     #   join((blue, red), (#abc, #def)) => blue, red, #abc, #def
@@ -11288,6 +11308,9 @@ MESSAGE
     #
     # Unless the `$separator` argument is passed, if the list had only one item,
     # the resulting list will be space-separated.
+    #
+    # Like all list functions, `append()` returns a new list rather than
+    # modifying its argument in place.
     #
     # @example
     #   append(10px 20px, 30px) => 10px 20px 30px
@@ -11412,6 +11435,9 @@ MESSAGE
     # same order as in `$map1`. New keys from `$map2` will be placed at the end
     # of the map.
     #
+    # Like all map functions, `map-merge()` returns a new map rather than
+    # modifying its arguments in place.
+    #
     # @example
     #   map-merge(("foo": 1), ("bar": 2)) => ("foo": 1, "bar": 2)
     #   map-merge(("foo": 1, "bar": 2), ("bar": 3)) => ("foo": 1, "bar": 3)
@@ -11428,6 +11454,9 @@ MESSAGE
     declare :map_merge, [:map1, :map2]
 
     # Returns a new map with keys removed.
+    #
+    # Like all map functions, `map-merge()` returns a new map rather than
+    # modifying its arguments in place.
     #
     # @example
     #   map-remove(("foo": 1, "bar": 2), "bar") => ("foo": 1)
@@ -15388,7 +15417,7 @@ module Sass::Script::Value
           raise ArgumentError.new("Color.new(array) expects a three- or four-element array")
         end
 
-        red, green, blue = attrs[0...3].map {|c| c.round}
+        red, green, blue = attrs[0...3].map {|c| Sass::Util.round(c)}
         @attrs = {:red => red, :green => green, :blue => blue}
         @attrs[:alpha] = attrs[3] ? attrs[3].to_f : 1
         @representation = representation
@@ -15414,7 +15443,7 @@ module Sass::Script::Value
 
       [:red, :green, :blue].each do |k|
         next if @attrs[k].nil?
-        @attrs[k] = Sass::Util.restrict(@attrs[k].round, 0..255)
+        @attrs[k] = Sass::Util.restrict(Sass::Util.round(@attrs[k]), 0..255)
       end
 
       [:saturation, :lightness].each do |k|
@@ -15763,7 +15792,7 @@ module Sass::Script::Value
 
       result = []
       (0...3).each do |i|
-        res = rgb[i].send(operation, other_num ? other.value : other.rgb[i])
+        res = rgb[i].to_f.send(operation, other_num ? other.value : other.rgb[i])
         result[i] = [[res, 255].min, 0].max
       end
 
@@ -15788,7 +15817,7 @@ module Sass::Script::Value
         hue_to_rgb(m1, m2, h + 1.0 / 3),
         hue_to_rgb(m1, m2, h),
         hue_to_rgb(m1, m2, h - 1.0 / 3)
-      ].map {|c| (c * 0xff).round}
+      ].map {|c| Sass::Util.round(c * 0xff)}
     end
 
     def hue_to_rgb(m1, m2, h)
@@ -18708,6 +18737,60 @@ WARNING
   end
 end
 #endregion
+
+#region URL: /sass/importers/deprecated_path.rb
+module Sass
+  module Importers
+    # This importer emits a deprecation warning the first time it is used to
+    # import a file. It is used to deprecate the current working
+    # directory from the list of automatic sass load paths.
+    class DeprecatedPath < Filesystem
+      # @param root [String] The absolute, expanded path to the folder that is deprecated.
+      def initialize(root)
+        @specified_root = root
+        @warning_given = false
+        super
+      end
+
+      # @see Sass::Importers::Base#find
+      def find(*args)
+        found = super
+        if found && !@warning_given
+          @warning_given = true
+          Sass::Util.sass_warn deprecation_warning
+        end
+        found
+      end
+
+      # @see Base#directories_to_watch
+      def directories_to_watch
+        # The current working directory was not watched in Sass 3.2,
+        # so we continue not to watch it while it's deprecated.
+        []
+      end
+
+      # @see Sass::Importers::Base#to_s
+      def to_s
+        "#{@root} (DEPRECATED)"
+      end
+
+      protected
+
+      # @return [String] The deprecation warning that will be printed the first
+      #   time an import occurs.
+      def deprecation_warning
+        path = @specified_root == "." ? "the current working directory" : @specified_root
+        <<WARNING
+DEPRECATION WARNING: Importing from #{path} will not be
+automatic in future versions of Sass.  To avoid future errors, you can add it
+to your environment explicitly by setting `SASS_PATH=#{@specified_root}`, by using the -I command
+line option, or by changing your Sass configuration options.
+WARNING
+      end
+    end
+  end
+end
+#endregion
 #endregion
 
 #region URL: /sass/shared.rb
@@ -19368,6 +19451,16 @@ module Sass
       options[:load_paths] = (options[:load_paths] + Sass.load_paths).map do |p|
         next p unless p.is_a?(String) || (defined?(Pathname) && p.is_a?(Pathname))
         options[:filesystem_importer].new(p.to_s)
+      end
+
+      # Remove any deprecated importers if the location is imported explicitly
+      options[:load_paths].reject! do |importer|
+        importer.is_a?(Sass::Importers::DeprecatedPath) &&
+          options[:load_paths].find do |other_importer|
+            other_importer.is_a?(Sass::Importers::Filesystem) &&
+              other_importer != importer &&
+              other_importer.root == importer.root
+          end
       end
 
       # Backwards compatibility
@@ -20358,4 +20451,5 @@ WARNING
     end
   end
 end
+#endregion
 #endregion

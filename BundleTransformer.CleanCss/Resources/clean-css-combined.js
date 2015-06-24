@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.3.3
+ * Clean-css v3.3.4
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -1800,6 +1800,17 @@ var CleanCss = (function(){
 		var MULTIPLEX_SEPARATOR = ',';
 		var SIZE_POSITION_SEPARATOR = '/';
 
+		function isInheritOnly(values) {
+		  for (var i = 0, l = values.length; i < l; i++) {
+			var value = values[i][0];
+
+			if (value != 'inherit' && value != MULTIPLEX_SEPARATOR && value != SIZE_POSITION_SEPARATOR)
+			  return false;
+		  }
+
+		  return true;
+		}
+
 		function background(property, compactable, lastInMultiplex) {
 		  var components = property.components;
 		  var restored = [];
@@ -1878,21 +1889,10 @@ var CleanCss = (function(){
 		  if (restored.length === 0)
 			restored.push([compactable[property.name].defaultValue]);
 
-		  if (_isInheritBackground(restored))
+		  if (isInheritOnly(restored))
 			return [restored[0]];
 
 		  return restored;
-		}
-
-		function _isInheritBackground(values) {
-		  for (var i = 0, l = values.length; i < l; i++) {
-			var value = values[i][0];
-
-			if (value != 'inherit' && value != MULTIPLEX_SEPARATOR && value != SIZE_POSITION_SEPARATOR)
-			  return false;
-		  }
-
-		  return true;
 		}
 
 		function borderRadius(property, compactable) {
@@ -2011,6 +2011,9 @@ var CleanCss = (function(){
 
 		  if (restored.length === 0)
 			restored.push([compactable[property.name].defaultValue]);
+
+		  if (isInheritOnly(restored))
+			return [restored[0]];
 
 		  return restored;
 		}

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS 1.9.64
+          README file for Bundle Transformer: Sass and SCSS 1.9.68
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter 
    `SassAndScssTranslator` (supports Sass (http://sass-lang.com) 
-   version 3.4.14). This adapter makes translation of Sass- and 
+   version 3.4.15). This adapter makes translation of Sass- and 
    SCSS-code to CSS-code. Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of 
    translated Sass- or SCSS-asset.
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Sass version 3.4.14.
+   Added support of Sass version 3.4.15.
    
    ====================
    POST-INSTALL ACTIONS
