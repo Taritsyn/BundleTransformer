@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.66
+           README file for Bundle Transformer: IntelliSense 1.9.69
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   In Clean CSS-minifier settings added definition for the
-   `semanticMerging` property.
+   Added definitions for new properties of TypeScript-translator.
    
    =============
    DOCUMENTATION

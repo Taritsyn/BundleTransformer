@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.4.23
+ * UglifyJS v2.4.24
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -6774,6 +6774,34 @@
 				}
 				break;
 			}
+			if (compressor.option("conditionals")) {
+				if (self.operator == "&&") {
+					var ll = self.left.evaluate(compressor);
+					var rr = self.right.evaluate(compressor);
+					if (ll.length > 1) {
+						if (ll[1]) {
+							compressor.warn("Condition left of && always true [{file}:{line},{col}]", self.start);
+							return rr[0];
+						} else {
+							compressor.warn("Condition left of && always false [{file}:{line},{col}]", self.start);
+							return ll[0];
+						}
+					}
+				}
+				else if (self.operator == "||") {
+					var ll = self.left.evaluate(compressor);
+					var rr = self.right.evaluate(compressor);
+					if (ll.length > 1) {
+						if (ll[1]) {
+							compressor.warn("Condition left of || always true [{file}:{line},{col}]", self.start);
+							return ll[0];
+						} else {
+							compressor.warn("Condition left of || always false [{file}:{line},{col}]", self.start);
+							return rr[0];
+						}
+					}
+				}
+			}
 			if (compressor.option("booleans") && compressor.in_boolean_context()) switch (self.operator) {
 			  case "&&":
 				var ll = self.left.evaluate(compressor);
@@ -6825,7 +6853,7 @@
 				}
 				break;
 			}
-			if (compressor.option("comparisons")) {
+			if (compressor.option("comparisons") && self.is_boolean()) {
 				if (!(compressor.parent() instanceof AST_Binary)
 					|| compressor.parent() instanceof AST_Assign) {
 					var negated = make_node(AST_UnaryPrefix, self, {
@@ -6900,10 +6928,11 @@
 					}
 				}
 			}
-			// x * (y * z)  ==>  x * y * z
+			// x && (y && z)  ==>  x && y && z
+			// x || (y || z)  ==>  x || y || z
 			if (self.right instanceof AST_Binary
 				&& self.right.operator == self.operator
-				&& (self.operator == "*" || self.operator == "&&" || self.operator == "||"))
+				&& (self.operator == "&&" || self.operator == "||"))
 			{
 				self.left = make_node(AST_Binary, self.left, {
 					operator : self.operator,

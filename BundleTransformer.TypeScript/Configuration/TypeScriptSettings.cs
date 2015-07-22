@@ -10,6 +10,17 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
+		/// Gets or sets a end of line sequence, that used when emitting files:
+		/// 'CRLF' (dos) or 'LF' (unix)
+		/// </summary>
+		[ConfigurationProperty("newLine", DefaultValue = NewLineMode.CrLf)]
+		public NewLineMode NewLine
+		{
+			get { return (NewLineMode)this["newLine"]; }
+			set { this["newLine"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit outputs
 		/// </summary>
 		[ConfigurationProperty("noEmit", DefaultValue = false)]
@@ -17,6 +28,16 @@
 		{
 			get { return (bool)this["noEmit"]; }
 			set { this["noEmit"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit helpers (e.g. <code>__extends</code> function)
+		/// </summary>
+		[ConfigurationProperty("noEmitHelpers", DefaultValue = false)]
+		public bool NoEmitHelpers
+		{
+			get { return (bool)this["noEmitHelpers"]; }
+			set { this["noEmitHelpers"] = value; }
 		}
 
 		/// <summary>

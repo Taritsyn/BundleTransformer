@@ -6,9 +6,28 @@
 	internal sealed class CompilationOptions
 	{
 		/// <summary>
+		/// Gets or sets a end of line sequence, that used when emitting files:
+		/// 'CRLF' (dos) or 'LF' (unix)
+		/// </summary>
+		public NewLineMode NewLine
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit outputs
 		/// </summary>
 		public bool NoEmit
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit helpers (e.g. <code>__extends</code> function)
+		/// </summary>
+		public bool NoEmitHelpers
 		{
 			get;
 			set;
@@ -97,7 +116,9 @@
 		/// </summary>
 		public CompilationOptions()
 		{
+			NewLine = NewLineMode.CrLf;
 			NoEmit = false;
+			NoEmitHelpers = false;
 			NoEmitOnError = false;
 			NoImplicitAny = false;
 			NoLib = false;

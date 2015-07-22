@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Text;
 	using System.Text.RegularExpressions;
 
 	using Resources;
@@ -166,6 +167,41 @@
 		public static bool StartsWithDataUriScheme(string url)
 		{
 			return url.StartsWith("data:", StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// Converts a long string (more than 65 519 characters) to its escaped representation
+		/// </summary>
+		/// <param name="stringToEscape">The long string to escape</param>
+		/// <returns>Escaped representation of long string</returns>
+		public static string EscapeLongDataString(string stringToEscape)
+		{
+			string result;
+			int length = stringToEscape.Length;
+			const int chunkSize = 65519;
+
+			if (length <= chunkSize)
+			{
+				result = Uri.EscapeDataString(stringToEscape);
+
+				return result;
+			}
+
+			var stringBuilder = new StringBuilder();
+			int chunkCount = length / chunkSize;
+
+			for (int chunkIndex = 0; chunkIndex <= chunkCount; chunkIndex++)
+			{
+				int startIndex = chunkSize * chunkIndex;
+				string chunk = (chunkIndex < chunkCount) ?
+					stringToEscape.Substring(startIndex, chunkSize) : stringToEscape.Substring(startIndex);
+
+				stringBuilder.Append(Uri.EscapeDataString(chunk));
+			}
+
+			result = stringBuilder.ToString();
+
+			return result;
 		}
 	}
 }

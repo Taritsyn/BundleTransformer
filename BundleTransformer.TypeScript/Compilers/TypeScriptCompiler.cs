@@ -231,7 +231,9 @@
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
 			var optionsJson = new JObject(
+				new JProperty("newLine", options.NewLine),
 				new JProperty("noEmit", options.NoEmit),
+				new JProperty("noEmitHelpers", options.NoEmitHelpers),
 				new JProperty("noEmitOnError", options.NoEmitOnError),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
 				new JProperty("noLib", options.NoLib),

@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.3.4
+ * Clean-css v3.3.6
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -3572,6 +3572,7 @@ var CleanCss = (function(){
 
 		var FONT_NUMERAL_WEIGHTS = ['100', '200', '300', '400', '500', '600', '700', '800', '900'];
 		var FONT_NAME_WEIGHTS = ['normal', 'bold', 'bolder', 'lighter'];
+		var FONT_NAME_WEIGHTS_WITHOUT_NORMAL = ['bold', 'bolder', 'lighter'];
 
 		function SimpleOptimizer(options) {
 		  this.options = options;
@@ -3780,7 +3781,13 @@ var CleanCss = (function(){
 			return;
 
 		  var toOptimize;
-		  if (FONT_NAME_WEIGHTS.indexOf(property[1][0]) > -1)
+		  if (FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(property[1][0]) > -1)
+			toOptimize = 1;
+		  else if (property[2] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(property[2][0]) > -1)
+			toOptimize = 2;
+		  else if (property[3] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(property[3][0]) > -1)
+			toOptimize = 3;
+		  else if (FONT_NAME_WEIGHTS.indexOf(property[1][0]) > -1)
 			toOptimize = 1;
 		  else if (property[2] && FONT_NAME_WEIGHTS.indexOf(property[2][0]) > -1)
 			toOptimize = 2;

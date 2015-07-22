@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
+    <Compile Include="NewLineMode.cs" />
     <Compile Include="TargetMode.cs" />
     <Compile Include="CompilationOptions.cs" />
     <Compile Include="Compilers\TypeScriptCompiler.cs" />

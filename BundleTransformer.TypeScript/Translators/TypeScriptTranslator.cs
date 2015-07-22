@@ -84,9 +84,28 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a end of line sequence, that used when emitting files:
+		/// 'CRLF' (dos) or 'LF' (unix)
+		/// </summary>
+		public NewLineMode NewLine
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit outputs
 		/// </summary>
 		public bool NoEmit
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not emit helpers (e.g. <code>__extends</code> function)
+		/// </summary>
+		public bool NoEmitHelpers
 		{
 			get;
 			set;
@@ -195,7 +214,9 @@
 			_relativePathResolver = relativePathResolver;
 			_tsScriptCache = new Dictionary<string, TsScript>();
 
+			NewLine = tsConfig.NewLine;
 			NoEmit = tsConfig.NoEmit;
+			NoEmitHelpers = tsConfig.NoEmitHelpers;
 			NoEmitOnError = tsConfig.NoEmitOnError;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			NoLib = tsConfig.NoLib;
@@ -351,7 +372,9 @@
 		{
 			var options = new CompilationOptions
 			{
+				NewLine = NewLine,
 				NoEmit = NoEmit,
+				NoEmitHelpers = NoEmitHelpers,
 				NoEmitOnError = NoEmitOnError,
 				NoImplicitAny = NoImplicitAny,
 				NoLib = NoLib,

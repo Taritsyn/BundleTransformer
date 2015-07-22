@@ -180,8 +180,8 @@
 							"clean",
 							@"
   * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode)",
-							"V8JsEngine")
+  * JavaScriptEngineSwitcher.Msie",
+							"MsieJsEngine")
 					);
 				}
 

@@ -6,6 +6,8 @@
 	using System.Net.Http.Headers;
 	using System.Text;
 
+	using Core.Helpers;
+
 	/// <summary>
 	/// A container for name/value tuples encoded using application/x-www-form-urlencoded MIME type
 	/// </summary>
@@ -52,37 +54,7 @@
 		private static string Encode(string data)
 		{
 			string result = (!string.IsNullOrEmpty(data)) ?
-				EscapeLongDataString(data).Replace("%20", "+") : string.Empty;
-
-			return result;
-		}
-
-		private static string EscapeLongDataString(string stringToEscape)
-		{
-			string result;
-			int length = stringToEscape.Length;
-			const int chunkSize = 65519;
-
-			if (length <= chunkSize)
-			{
-				result = Uri.EscapeDataString(stringToEscape);
-
-				return result;
-			}
-
-			var stringBuilder = new StringBuilder();
-			int chunkCount = length / chunkSize;
-
-			for (int chunkIndex = 0; chunkIndex <= chunkCount; chunkIndex++)
-			{
-				int startIndex = chunkSize * chunkIndex;
-				string chunk = (chunkIndex < chunkCount) ?
-					stringToEscape.Substring(startIndex, chunkSize) : stringToEscape.Substring(startIndex);
-
-				stringBuilder.Append(Uri.EscapeDataString(chunk));
-			}
-
-			result = stringBuilder.ToString();
+				UrlHelpers.EscapeLongDataString(data).Replace("%20", "+") : string.Empty;
 
 			return result;
 		}

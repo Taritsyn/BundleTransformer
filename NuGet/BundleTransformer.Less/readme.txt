@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.64
+               README file for Bundle Transformer: LESS 1.9.69
 
    ----------------------------------------------------------------------
 
@@ -29,7 +29,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 2.5.1.
+   Fixed a bug that occurred during generation of the non-base64 data URI
+   for large files.
    
    ====================
    POST-INSTALL ACTIONS

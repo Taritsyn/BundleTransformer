@@ -704,37 +704,47 @@
 				return string.Format(URL_RULE_FORMAT, assetUrl);
 			}
 
-			string processedAssetUrl = assetUrl;
+			string absoluteAssetUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
+			string absoluteAssetUrlWithoutFragment;
 			string fragment = string.Empty;
 
-			int fragmentPosition = assetUrl.IndexOf('#');
+			int fragmentPosition = absoluteAssetUrl.IndexOf('#');
 			if (fragmentPosition != -1)
 			{
-				fragment = assetUrl.Substring(fragmentPosition);
-				processedAssetUrl = assetUrl.Substring(0, fragmentPosition);
+				fragment = absoluteAssetUrl.Substring(fragmentPosition);
+				absoluteAssetUrlWithoutFragment = absoluteAssetUrl.Substring(0, fragmentPosition);
+			}
+			else
+			{
+				absoluteAssetUrlWithoutFragment = absoluteAssetUrl;
 			}
 
-			string absoluteAssetUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, processedAssetUrl);
+			int queryStringPosition = absoluteAssetUrlWithoutFragment.IndexOf('?');
+			string absoluteAssetPath = (queryStringPosition != -1) ?
+				absoluteAssetUrlWithoutFragment.Substring(0, queryStringPosition)
+				:
+				absoluteAssetUrlWithoutFragment
+				;
 
-			if (!_virtualFileSystemWrapper.FileExists(absoluteAssetUrl))
+			if (!_virtualFileSystemWrapper.FileExists(absoluteAssetPath))
 			{
 				throw new FileNotFoundException(
-					string.Format(CoreStrings.Common_FileNotExist, absoluteAssetUrl));
+					string.Format(CoreStrings.Common_FileNotExist, absoluteAssetPath));
 			}
 
 			bool useBase64;
 			if (string.IsNullOrWhiteSpace(mimeType))
 			{
-				string fileExtension = Path.GetExtension(absoluteAssetUrl);
+				string fileExtension = Path.GetExtension(absoluteAssetPath);
 				mimeType = MimeTypeHelpers.GetMimeType(fileExtension);
 				if (string.IsNullOrWhiteSpace(mimeType))
 				{
 					throw new UnknownMimeTypeException(
-						string.Format(CoreStrings.Common_UnknownMimeType, absoluteAssetUrl));
+						string.Format(CoreStrings.Common_UnknownMimeType, absoluteAssetPath));
 				}
 
 				Encoding encoding;
-				bool isTextContent = _virtualFileSystemWrapper.IsTextFile(absoluteAssetUrl, 256, out encoding);
+				bool isTextContent = _virtualFileSystemWrapper.IsTextFile(absoluteAssetPath, 256, out encoding);
 
 				useBase64 = !isTextContent;
 				if (useBase64)
@@ -750,13 +760,13 @@
 			string encodedContent;
 			if (useBase64)
 			{
-				byte[] binaryContent = _virtualFileSystemWrapper.GetFileBinaryContent(absoluteAssetUrl);
+				byte[] binaryContent = _virtualFileSystemWrapper.GetFileBinaryContent(absoluteAssetPath);
 				encodedContent = Convert.ToBase64String(binaryContent);
 			}
 			else
 			{
-				string textContent = _virtualFileSystemWrapper.GetFileTextContent(absoluteAssetUrl);
-				encodedContent = Uri.EscapeDataString(textContent);
+				string textContent = _virtualFileSystemWrapper.GetFileTextContent(absoluteAssetPath);
+				encodedContent = UrlHelpers.EscapeLongDataString(textContent);
 			}
 
 			string dataUri = string.Format(DATA_URI_FORMAT, mimeType, encodedContent, fragment);
@@ -764,13 +774,13 @@
 			{
 				// IE8 cannot handle a data-uri larger than 32,768 characters
 				result = string.Format(URL_RULE_FORMAT, absoluteAssetUrl);
-				processedDataUriFunctionAssetUrl = absoluteAssetUrl;
+				processedDataUriFunctionAssetUrl = absoluteAssetPath;
 
 				return result;
 			}
 
 			result = string.Format(URL_RULE_FORMAT, dataUri);
-			processedDataUriFunctionAssetUrl = absoluteAssetUrl;
+			processedDataUriFunctionAssetUrl = absoluteAssetPath;
 
 			return result;
 		}

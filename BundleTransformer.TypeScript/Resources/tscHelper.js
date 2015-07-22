@@ -7,9 +7,14 @@ var typeScriptHelper = (function (ts, undefined) {
 			charset: '',
 			emitBOM: false,
 			emitDecoratorMetadata: false,
+			experimentalDecorators: false,
+			inlineSourceMap: false,
+			inlineSources: false,
 			mapRoot: '',
 			module: 0 /* None */,
+			newLine: 0 /* CrLf */,
 			noEmit: false,
+			noEmitHelpers: false,
 			noEmitOnError: false,
 			noImplicitAny: false,
 			noLib: false,
@@ -19,7 +24,7 @@ var typeScriptHelper = (function (ts, undefined) {
 			preserveConstEnums: false,
 			removeComments: false,
 			rootDir: '',
-			separateCompilation: false,
+			isolatedModules: false,
 			sourceMap: false,
 			sourceRoot: '',
 			stripInternal: false,
@@ -164,7 +169,9 @@ var typeScriptHelper = (function (ts, undefined) {
 	//#endregion
 
 	//#region createBtCompilerHost function
-	function createBtCompilerHost() {
+	function createBtCompilerHost(options) {
+		var newLine = ts.getNewLineCharacter(options);
+
 		function getSourceFile(fileName, languageVersion, onError) {
 			var text;
 
@@ -211,7 +218,7 @@ var typeScriptHelper = (function (ts, undefined) {
 		}
 
 		function getNewLine() {
-			return ts.sys.newLine;
+			return newLine;
 		}
 
 		return {
@@ -332,7 +339,7 @@ var typeScriptHelper = (function (ts, undefined) {
 
 		// Compile code
 		ts.sys = new BtSystem(path, files);
-		defaultCompilerHost = createBtCompilerHost();
+		defaultCompilerHost = createBtCompilerHost(compilationOptions);
 
 		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors || [];
 		if (compilationErrors.length === 0) {

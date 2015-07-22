@@ -4,12 +4,23 @@ var uglifyJsHelper = (function (uglifyJs, undefined) {
 
 	var exports = {};
 
+	function extractRegex(str) {
+		if (/^\/.*\/[a-zA-Z]*$/.test(str)) {
+			var regexPosition = str.lastIndexOf("/");
+
+			return new RegExp(str.substr(1, regexPosition - 1), str.substr(regexPosition + 1));
+		}
+		else
+		{
+			throw new Error("Invalid regular expression: " + str);
+		}
+	}
+
 	function preprocessOptions(options) {
 		var uglificationOptions = options || {},
 			codeGenerationOptions = uglificationOptions.output,
 			comments,
-			processedComments,
-			regexPosition
+			processedComments
 			;
 
 		if (codeGenerationOptions) {
@@ -33,11 +44,8 @@ var uglifyJsHelper = (function (uglifyJs, undefined) {
 					};
 				}
 				else if (/^\/.*\/[a-zA-Z]*$/.test(comments)) {
-					regexPosition = comments.lastIndexOf('/');
-
 					try {
-						processedComments = new RegExp(comments.substr(1, regexPosition - 1),
-							comments.substr(regexPosition + 1));
+						processedComments = extractRegex(comments);
 					}
 					catch (e) {
 						throw new Error('Invalid value in the `output.comments` option.');

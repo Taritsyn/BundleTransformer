@@ -470,9 +470,25 @@
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
+		<xs:attribute name="newLine" use="optional" default="CrLf">
+			<xs:annotation>
+				<xs:documentation>End of line sequence, that used when emitting files: 'CRLF' (dos) or 'LF' (unix)</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="CrLf" />
+					<xs:enumeration value="Lf" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 		<xs:attribute name="noEmit" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not emit outputs</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="noEmitHelpers" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not emit helpers (e.g. `__extends` function)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="noEmitOnError" type="Boolean_SchemaType" use="optional" default="false">
