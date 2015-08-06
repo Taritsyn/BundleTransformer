@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.3.6
+ * Clean-css v3.3.8
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -459,7 +459,7 @@ var CleanCss = (function(){
 			  // NOTE: we do this slicing as value may contain metadata too, like for source maps
 			  size.value = [[sizeValue.pop()].concat(value.slice(1))];
 			  position.value = [[sizeValue.pop()].concat(value.slice(1))];
-			} else if ((color.value == compactable[color.name].defaultValue || color.value == 'none') && validator.isValidColor(value[0])) {
+			} else if ((color.value[0][0] == compactable[color.name].defaultValue || color.value[0][0] == 'none') && validator.isValidColor(value[0])) {
 			  color.value = [value];
 			} else if (validator.isValidUrl(value[0]) || validator.isValidFunction(value[0])) {
 			  image.value = [value];
@@ -3144,7 +3144,7 @@ var CleanCss = (function(){
 			}
 
 			for (i = properties.length - 1; i >= 0; i--) {
-			  allProperties.push(properties[i][3]);
+			  allProperties.unshift(properties[i][3]);
 			}
 
 			var newToken = ['selector', allSelectors, allProperties];
@@ -3279,7 +3279,7 @@ var CleanCss = (function(){
 			  }
 			}
 
-			for (j = 0, m = properties.length; j < m; j++) {
+			for (j = properties.length - 1; j >= 0; j--) {
 			  var property = properties[j];
 			  var movedSameProperty = false;
 
@@ -3673,7 +3673,7 @@ var CleanCss = (function(){
 		  if (/^(?:\-moz\-calc|\-webkit\-calc|calc)\(/.test(value))
 			return value;
 
-		  if (name == 'flex' || name == 'flex-basis')
+		  if (name == 'flex' || name == '-ms-flex' || name == '-webkit-flex' || name == 'flex-basis' || name == '-webkit-flex-basis')
 			return value;
 
 		  return value
@@ -5255,6 +5255,7 @@ var CleanCss = (function(){
 		  var nextStart = 0;
 		  var nextStartUpperCase = 0;
 		  var nextEnd = 0;
+		  var nextEndAhead = 0;
 		  var cursor = 0;
 		  var tempData = [];
 		  var hasUppercaseUrl = data.indexOf(UPPERCASE_URL_PREFIX) > -1;
@@ -5268,12 +5269,25 @@ var CleanCss = (function(){
 			if (nextStart == -1 && nextStartUpperCase > -1)
 			  nextStart = nextStartUpperCase;
 
-			if (data[nextStart + URL_PREFIX.length] == '"')
+			if (data[nextStart + URL_PREFIX.length] == '"') {
 			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
-			else if (data[nextStart + URL_PREFIX.length] == '\'')
+			} else if (data[nextStart + URL_PREFIX.length] == '\'') {
 			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
-			else
+			} else {
 			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
+
+			  while (true) {
+				nextEndAhead = data.indexOf(URL_SUFFIX, nextEnd + 1);
+				// if it has whitespace then we should be out of URL, otherwise keep iterating
+				// if it has not but content is not escaped, it has to be quoted so it will be captured
+				// by either of two clauses above
+				if (nextEndAhead == -1 || /\s/.test(data.substring(nextEnd, nextEndAhead)))
+				  break;
+
+				nextEnd = nextEndAhead;
+			  }
+			}
+
 
 			// Following lines are a safety mechanism to ensure
 			// incorrectly terminated urls are processed correctly.
@@ -5400,7 +5414,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false, // div+ nav Android stock browser hack
 			  ie7Hack: false, // *+html hack
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right)/ // special selectors which prevent merging
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder)/ // special selectors which prevent merging
 			},
 			units: {
 			  ch: true,
@@ -5431,7 +5445,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false,
 			  ie7Hack: false,
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder)/
 			},
 			units: {
 			  ch: false,
@@ -5462,7 +5476,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false,
 			  ie7Hack: true,
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not)/
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder)/
 			},
 			units: {
 			  ch: false,
