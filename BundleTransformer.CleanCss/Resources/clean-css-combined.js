@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.3.8
+ * Clean-css v3.3.9
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2014 JakubPawlowicz.com
@@ -5247,6 +5247,7 @@ var CleanCss = (function(){
 		var URL_PREFIX = 'url(';
 		var UPPERCASE_URL_PREFIX = 'URL(';
 		var URL_SUFFIX = ')';
+		var DATA_URI_PREFIX = 'data:';
 
 		var IMPORT_URL_PREFIX = '@import';
 		var UPPERCASE_IMPORT_URL_PREFIX = '@IMPORT';
@@ -5256,6 +5257,7 @@ var CleanCss = (function(){
 		  var nextStartUpperCase = 0;
 		  var nextEnd = 0;
 		  var nextEndAhead = 0;
+		  var isDataURI = false;
 		  var cursor = 0;
 		  var tempData = [];
 		  var hasUppercaseUrl = data.indexOf(UPPERCASE_URL_PREFIX) > -1;
@@ -5269,22 +5271,27 @@ var CleanCss = (function(){
 			if (nextStart == -1 && nextStartUpperCase > -1)
 			  nextStart = nextStartUpperCase;
 
+
 			if (data[nextStart + URL_PREFIX.length] == '"') {
 			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
 			} else if (data[nextStart + URL_PREFIX.length] == '\'') {
 			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
 			} else {
+			  isDataURI = data.substring(nextStart + URL_PREFIX.length).trim().indexOf(DATA_URI_PREFIX) === 0;
 			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
 
-			  while (true) {
-				nextEndAhead = data.indexOf(URL_SUFFIX, nextEnd + 1);
-				// if it has whitespace then we should be out of URL, otherwise keep iterating
-				// if it has not but content is not escaped, it has to be quoted so it will be captured
-				// by either of two clauses above
-				if (nextEndAhead == -1 || /\s/.test(data.substring(nextEnd, nextEndAhead)))
-				  break;
+			  if (isDataURI) {
+				// this is a fuzzy matching logic for unqoted data URIs
+				while (true) {
+				  nextEndAhead = data.indexOf(URL_SUFFIX, nextEnd + 1);
+				  // if it has whitespace then we should be out of URL, otherwise keep iterating
+				  // if it has not but content is not escaped, it has to be quoted so it will be captured
+				  // by either of two clauses above
+				  if (nextEndAhead == -1 || /\s/.test(data.substring(nextEnd, nextEndAhead)))
+					break;
 
-				nextEnd = nextEndAhead;
+				  nextEnd = nextEndAhead;
+				}
 			  }
 			}
 
