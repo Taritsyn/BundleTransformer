@@ -1,8 +1,8 @@
 /*!
- * Clean-css v3.3.9
+ * Clean-css v3.4.1
  * https://github.com/jakubpawlowicz/clean-css
  *
- * Copyright (C) 2014 JakubPawlowicz.com
+ * Copyright (C) 2015 JakubPawlowicz.com
  * Released under the terms of MIT license
  */
 var CleanCss = (function(){
@@ -352,7 +352,7 @@ var CleanCss = (function(){
 	modules['/properties/break-up'] = function () {
 		var wrapSingle = require('/properties/wrap-for-optimizing').single;
 
-		var Splitter = require('/utils/splitter');
+		var split = require('/utils/split');
 		var MULTIPLEX_SEPARATOR = ',';
 
 		function _colorFilter(validator) {
@@ -431,14 +431,14 @@ var CleanCss = (function(){
 				var previousValue = values[i - 1];
 
 				if (previousValue[0].indexOf('/') > 0) {
-				  var twoParts = new Splitter('/').split(previousValue[0]);
+				  var twoParts = split(previousValue[0], '/');
 				  // NOTE: we do this slicing as value may contain metadata too, like for source maps
 				  size.value = [[twoParts.pop()].concat(previousValue.slice(1)), value];
 				  values[i - 1] = [twoParts.pop()].concat(previousValue.slice(1));
 				} else if (i > 1 && values[i - 2] == '/') {
 				  size.value = [previousValue, value];
 				  i -= 2;
-				} else if (values[i - 1] == '/') {
+				} else if (previousValue[0] == '/') {
 				  size.value = [value];
 				} else {
 				  if (!positionSet)
@@ -455,7 +455,7 @@ var CleanCss = (function(){
 				positionSet = true;
 			  }
 			} else if (validator.isValidBackgroundPositionAndSize(value[0])) {
-			  var sizeValue = new Splitter('/').split(value[0]);
+			  var sizeValue = split(value[0], '/');
 			  // NOTE: we do this slicing as value may contain metadata too, like for source maps
 			  size.value = [[sizeValue.pop()].concat(value.slice(1))];
 			  position.value = [[sizeValue.pop()].concat(value.slice(1))];
@@ -644,7 +644,7 @@ var CleanCss = (function(){
 
 		  if (values.length > 0) {
 			matches = values.filter(_widthFilter(validator));
-			match = matches.length > 1 && (matches[0] == 'none' || matches[0] == 'auto') ? matches[1] : matches[0];
+			match = matches.length > 1 && (matches[0][0] == 'none' || matches[0][0] == 'auto') ? matches[1] : matches[0];
 			if (match) {
 			  width.value = [match];
 			  values.splice(values.indexOf(match), 1);
@@ -1186,7 +1186,7 @@ var CleanCss = (function(){
 		var compactOverrides = require('/properties/override-compactor');
 		var compactShorthands = require('/properties/shorthand-compactor');
 		var removeUnused = require('/properties/remove-unused');
-		var restoreShorthands = require('/properties/restore-shorthands');
+		var restoreFromOptimizing = require('/properties/restore-from-optimizing');
 		var stringifyProperty = require('/stringifier/one-time').property;
 
 		var shorthands = {
@@ -1370,12 +1370,18 @@ var CleanCss = (function(){
 		  populateComponents(_properties, validator);
 		  _optimize(_properties, mergeAdjacent, options.aggressiveMerging, validator);
 
+		  for (var i = 0, l = _properties.length; i < l; i++) {
+			var _property = _properties[i];
+			if (_property.variable && _property.block)
+			  optimize(selector, _property.value[0], mergeAdjacent, withCompacting, options, validator);
+		  }
+
 		  if (withCompacting && options.shorthandCompacting) {
 			compactOverrides(_properties, options.compatibility, validator);
 			compactShorthands(_properties/*, options.sourceMap*/, validator);
 		  }
 
-		  restoreShorthands(_properties);
+		  restoreFromOptimizing(_properties);
 		  removeUnused(_properties);
 		}
 
@@ -1390,7 +1396,7 @@ var CleanCss = (function(){
 		var deepClone = require('/properties/clone').deep;
 		var shallowClone = require('/properties/clone').shallow;
 		var hasInherit = require('/properties/has-inherit');
-		var restoreShorthands = require('/properties/restore-shorthands');
+		var restoreFromOptimizing = require('/properties/restore-from-optimizing');
 		var everyCombination = require('/properties/every-combination');
 		var sameVendorPrefixesIn = require('/properties/vendor-prefixes').same;
 
@@ -1539,10 +1545,10 @@ var CleanCss = (function(){
 		  var component;
 
 		  var multiplexClone = deepClone(multiplex);
-		  restoreShorthands([multiplexClone]);
+		  restoreFromOptimizing([multiplexClone]);
 
 		  var simpleClone = deepClone(simple);
-		  restoreShorthands([simpleClone]);
+		  restoreFromOptimizing([simpleClone]);
 
 		  var lengthBefore = lengthOf(multiplexClone) + 1 + lengthOf(simpleClone);
 
@@ -1555,7 +1561,7 @@ var CleanCss = (function(){
 			overrideByMultiplex(component, multiplexClone);
 		  }
 
-		  restoreShorthands([simpleClone]);
+		  restoreFromOptimizing([simpleClone]);
 
 		  var lengthAfter = lengthOf(simpleClone);
 
@@ -1613,12 +1619,18 @@ var CleanCss = (function(){
 			if (!isCompactable(right))
 			  continue;
 
+			if (right.variable)
+			  continue;
+
 			mayOverride = compactable[right.name].canOverride || canOverride.sameValue;
 
 			for (j = i - 1; j >= 0; j--) {
 			  left = properties[j];
 
 			  if (!isCompactable(left))
+				continue;
+
+			  if (left.variable)
 				continue;
 
 			  if (left.unused || right.unused)
@@ -1785,8 +1797,10 @@ var CleanCss = (function(){
 	modules['/properties/remove-unused'] = function () {
 		function removeUnused(properties) {
 		  for (var i = properties.length - 1; i >= 0; i--) {
-			if (properties[i].unused)
-			  properties[i].all.splice(i, 1);
+			var property = properties[i];
+
+			if (property.unused)
+			  property.all.splice(property.position, 1);
 		  }
 		}
 
@@ -2030,34 +2044,71 @@ var CleanCss = (function(){
 	};
 	//#endregion
 	
-	//#region URL: /properties/restore-shorthands
-	modules['/properties/restore-shorthands'] = function () {
+	//#region URL: /properties/restore-from-optimizing
+	modules['/properties/restore-from-optimizing'] = function () {
 		var compactable = require('/properties/compactable');
 
-		function restoreShorthands(properties) {
+		var BACKSLASH_HACK = '\\9';
+		var IMPORTANT_TOKEN = '!important';
+		var STAR_HACK = '*';
+		var UNDERSCORE_HACK = '_';
+		var BANG_HACK = '!ie';
+
+		function restoreImportant(property) {
+		  property.value[property.value.length - 1][0] += IMPORTANT_TOKEN;
+		}
+
+		function restoreHack(property) {
+		  if (property.hack == 'underscore')
+			property.name = UNDERSCORE_HACK + property.name;
+		  else if (property.hack == 'star')
+			property.name = STAR_HACK + property.name;
+		  else if (property.hack == 'backslash')
+			property.value[property.value.length - 1][0] += BACKSLASH_HACK;
+		  else if (property.hack == 'bang')
+			property.value[property.value.length - 1][0] += ' ' + BANG_HACK;
+		}
+
+		function restoreFromOptimizing(properties, simpleMode) {
 		  for (var i = properties.length - 1; i >= 0; i--) {
 			var property = properties[i];
 			var descriptor = compactable[property.name];
+			var restored;
 
-			if (descriptor && descriptor.shorthand && property.dirty && !property.unused) {
-			  var restored = descriptor.restore(property, compactable);
+			if (property.unused)
+			  continue;
+
+			if (!property.dirty && !property.important && !property.hack)
+			  continue;
+
+			if (!simpleMode && descriptor && descriptor.shorthand) {
+			  restored = descriptor.restore(property, compactable);
 			  property.value = restored;
-
-			  if (!('all' in property))
-				continue;
-
-			  var current = property.all[property.position];
-			  current.splice(1, current.length - 1);
-
-			  Array.prototype.push.apply(current, restored);
+			} else {
+			  restored = property.value;
 			}
+
+			if (property.important)
+			  restoreImportant(property);
+
+			if (property.hack)
+			  restoreHack(property);
+
+			if (!('all' in property))
+			  continue;
+
+			var current = property.all[property.position];
+			current[0][0] = property.name;
+
+			current.splice(1, current.length - 1);
+			Array.prototype.push.apply(current, restored);
 		  }
 		}
 
-		return restoreShorthands;
+		return restoreFromOptimizing;
 	};
 	//#endregion
-
+	
 	//#region URL: /properties/shorthand-compactor
 	modules['/properties/shorthand-compactor'] = function () {
 		var compactable = require('/properties/compactable');
@@ -2097,7 +2148,7 @@ var CleanCss = (function(){
 
 		function replaceWithShorthand(properties, candidateComponents, name/*, sourceMaps*/, validator) {
 		  var descriptor = compactable[name];
-		  var newValuePlaceholder = [[name, false, false], [descriptor.defaultValue]];
+		  var newValuePlaceholder = [[name], [descriptor.defaultValue]];
 		  var all;
 
 		  var newProperty = wrapSingle(newValuePlaceholder);
@@ -2135,7 +2186,6 @@ var CleanCss = (function(){
 		  newProperty.position = all.length;
 		  newProperty.all = all;
 		  newProperty.all.push(newValuePlaceholder);
-		  newValuePlaceholder[0][1] = newProperty.important;
 
 		  properties.push(newProperty);
 		}
@@ -2175,6 +2225,9 @@ var CleanCss = (function(){
 			if (property.hack)
 			  continue;
 
+			if (property.variable)
+			  continue;
+
 			var descriptor = compactable[property.name];
 			if (!descriptor || !descriptor.componentOf)
 			  continue;
@@ -2199,14 +2252,14 @@ var CleanCss = (function(){
 	modules['/properties/validator'] = function () {
 		// Validates various CSS property values
 
-		var Splitter = require('/utils/splitter');
+		var split = require('/utils/split');
 
 		var widthKeywords = ['thin', 'thick', 'medium', 'inherit', 'initial'];
 		var allUnits = ['px', '%', 'em', 'in', 'cm', 'mm', 'ex', 'pt', 'pc', 'ch', 'rem', 'vh', 'vm', 'vmin', 'vmax', 'vw'];
 		var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + allUnits.join('|') + '|)|auto|inherit)';
 		var cssCalcRegexStr = '(\\-moz\\-|\\-webkit\\-)?calc\\([^\\)]+\\)';
-		var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
-		var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(([A-Z]|[0-9]|\\ |\\,|\\#|\\+|\\-|\\%|\\.|\\(|\\))*\\)';
+		var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(.*?\\)';
+		var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(.*?\\)';
 		var cssVariableRegexStr = 'var\\(\\-\\-[^\\)]+\\)';
 		var cssFunctionAnyRegexStr = '(' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
 		var cssUnitOrCalcRegexStr = '(' + cssUnitRegexStr + '|' + cssCalcRegexStr + ')';
@@ -2345,7 +2398,7 @@ var CleanCss = (function(){
 		  if (s.indexOf('/') < 0)
 			return false;
 
-		  var twoParts = new Splitter('/').split(s);
+		  var twoParts = split(s, '/');
 		  return this.isValidBackgroundSizePart(twoParts.pop()) && this.isValidBackgroundPositionPart(twoParts.pop());
 		};
 
@@ -2418,6 +2471,12 @@ var CleanCss = (function(){
 	
 	//#region URL: /properties/wrap-for-optimizing
 	modules['/properties/wrap-for-optimizing'] = function () {
+		var BACKSLASH_HACK = '\\';
+		var IMPORTANT_TOKEN = '!important';
+		var STAR_HACK = '*';
+		var UNDERSCORE_HACK = '_';
+		var BANG_HACK = '!';
+
 		function wrapAll(properties) {
 		  var wrapped = [];
 
@@ -2443,18 +2502,79 @@ var CleanCss = (function(){
 		  return false;
 		}
 
+		function hackType(property) {
+		  var type = false;
+		  var name = property[0][0];
+		  var lastValue = property[property.length - 1];
+
+		  if (name[0] == UNDERSCORE_HACK) {
+			type = 'underscore';
+		  } else if (name[0] == STAR_HACK) {
+			type = 'star';
+		  } else if (lastValue[0][0] == BANG_HACK && lastValue[0].indexOf('important') == -1) {
+			type = 'bang';
+		  } else if (lastValue[0].indexOf(BANG_HACK) > 0 && lastValue[0].indexOf('important') == -1) {
+			type = 'bang';
+		  } else if (lastValue[0].indexOf(BACKSLASH_HACK) > 0 && lastValue[0].indexOf(BACKSLASH_HACK) == lastValue[0].length - BACKSLASH_HACK.length - 1) {
+			type = 'backslash';
+		  } else if (lastValue[0].indexOf(BACKSLASH_HACK) === 0 && lastValue[0].length == 2) {
+			type = 'backslash';
+		  }
+
+		  return type;
+		}
+
+		function isImportant(property) {
+		  return property.length > 1 ?
+			property[property.length - 1][0].indexOf(IMPORTANT_TOKEN) > 0 :
+			false;
+		}
+
+		function stripImportant(property) {
+		  if (property.length > 0)
+			property[property.length - 1][0] = property[property.length - 1][0].replace(IMPORTANT_TOKEN, '');
+		}
+
+		function stripPrefixHack(property) {
+		  property[0][0] = property[0][0].substring(1);
+		}
+
+		function stripSuffixHack(property, hackType) {
+		  var lastValue = property[property.length - 1];
+		  lastValue[0] = lastValue[0]
+			.substring(0, lastValue[0].indexOf(hackType == 'backslash' ? BACKSLASH_HACK : BANG_HACK))
+			.trim();
+
+		  if (lastValue[0].length === 0)
+			property.pop();
+		}
+
 		function wrapSingle(property) {
+		  var _isImportant = isImportant(property);
+		  if (_isImportant)
+			stripImportant(property);
+
+		  var _hackType = hackType(property);
+		  if (_hackType == 'star' || _hackType == 'underscore')
+			stripPrefixHack(property);
+		  else if (_hackType == 'backslash' || _hackType == 'bang')
+			stripSuffixHack(property, _hackType);
+
+		  var isVariable = property[0][0].indexOf('--') === 0;
+
 		  return {
+			block: isVariable && property[1] && Array.isArray(property[1][0][0]),
 			components: [],
 			dirty: false,
-			hack: property[0][2],
-			important: property[0][1],
+			hack: _hackType,
+			important: _isImportant,
 			name: property[0][0],
 			multiplex: property.length > 2 ? isMultiplex(property) : false,
 			position: 0,
 			shorthand: false,
 			unused: property.length < 2,
-			value: property.slice(1)
+			value: property.slice(1),
+			variable: isVariable
 		  };
 		}
 
@@ -2467,6 +2587,182 @@ var CleanCss = (function(){
 	};
 	//#endregion
 	
+	//#region URL: /selectors/advanced
+	modules['/selectors/advanced'] = function () {
+		var optimizeProperties = require('/properties/optimizer');
+
+		var removeDuplicates = require('/selectors/remove-duplicates');
+		var mergeAdjacent = require('/selectors/merge-adjacent');
+		var reduceNonAdjacent = require('/selectors/reduce-non-adjacent');
+		var mergeNonAdjacentBySelector = require('/selectors/merge-non-adjacent-by-selector');
+		var mergeNonAdjacentByBody = require('/selectors/merge-non-adjacent-by-body');
+		var restructure = require('/selectors/restructure');
+		var removeDuplicateMediaQueries = require('/selectors/remove-duplicate-media-queries');
+		var mergeMediaQueries = require('/selectors/merge-media-queries');
+
+		function removeEmpty(tokens) {
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+			var isEmpty = false;
+
+			switch (token[0]) {
+			  case 'selector':
+				isEmpty = token[1].length === 0 || token[2].length === 0;
+				break;
+			  case 'block':
+				removeEmpty(token[2]);
+				isEmpty = token[2].length === 0;
+			}
+
+			if (isEmpty) {
+			  tokens.splice(i, 1);
+			  i--;
+			  l--;
+			}
+		  }
+		}
+
+		function recursivelyOptimizeBlocks(tokens, options, validator) {
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+
+			if (token[0] == 'block') {
+			  var isKeyframes = /@(-moz-|-o-|-webkit-)?keyframes/.test(token[1][0]);
+			  optimize(token[2], options, validator, !isKeyframes);
+			}
+		  }
+		}
+
+		function recursivelyOptimizeProperties(tokens, options, validator) {
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+
+			switch (token[0]) {
+			  case 'selector':
+				optimizeProperties(token[1], token[2], false, true, options, validator);
+				break;
+			  case 'block':
+				recursivelyOptimizeProperties(token[2], options, validator);
+			}
+		  }
+		}
+
+		function optimize(tokens, options, validator, withRestructuring) {
+		  recursivelyOptimizeBlocks(tokens, options, validator);
+		  recursivelyOptimizeProperties(tokens, options, validator);
+
+		  removeDuplicates(tokens);
+		  mergeAdjacent(tokens, options, validator);
+		  reduceNonAdjacent(tokens, options, validator);
+
+		  mergeNonAdjacentBySelector(tokens, options, validator);
+		  mergeNonAdjacentByBody(tokens, options);
+
+		  if (options.restructuring && withRestructuring) {
+			restructure(tokens, options);
+			mergeAdjacent(tokens, options, validator);
+		  }
+
+		  if (options.mediaMerging) {
+			removeDuplicateMediaQueries(tokens);
+			var reduced = mergeMediaQueries(tokens);
+			for (var i = reduced.length - 1; i >= 0; i--) {
+			  optimize(reduced[i][2], options, validator, false);
+			}
+		  }
+
+		  removeEmpty(tokens);
+		}
+
+		return optimize;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/clean-up
+	modules['/selectors/clean-up'] = function () {
+		function removeWhitespace(match, value) {
+		  return '[' + value.replace(/ /g, '') + ']';
+		}
+
+		function selectorSorter(s1, s2) {
+		  return s1[0] > s2[0] ? 1 : -1;
+		}
+
+		var CleanUp = {
+		  selectors: function (selectors, removeUnsupported, adjacentSpace) {
+			var list = [];
+			var repeated = [];
+
+			for (var i = 0, l = selectors.length; i < l; i++) {
+			  var selector = selectors[i];
+			  var reduced = selector[0]
+				.replace(/\s+/g, ' ')
+				.replace(/ ?, ?/g, ',')
+				.replace(/\s*([>\+\~])\s*/g, '$1')
+				.trim();
+
+			  if (adjacentSpace && reduced.indexOf('nav') > 0)
+				reduced = reduced.replace(/\+nav(\S|$)/, '+ nav$1');
+
+			  if (removeUnsupported && (reduced.indexOf('*+html ') != -1 || reduced.indexOf('*:first-child+html ') != -1))
+				continue;
+
+			  if (reduced.indexOf('*') > -1) {
+				reduced = reduced
+				  .replace(/\*([:#\.\[])/g, '$1')
+				  .replace(/^(\:first\-child)?\+html/, '*$1+html');
+			  }
+
+			  if (reduced.indexOf('[') > -1)
+				reduced = reduced.replace(/\[([^\]]+)\]/g, removeWhitespace);
+
+			  if (repeated.indexOf(reduced) == -1) {
+				selector[0] = reduced;
+				repeated.push(reduced);
+				list.push(selector);
+			  }
+			}
+
+			return list.sort(selectorSorter);
+		  },
+
+		  selectorDuplicates: function (selectors) {
+			var list = [];
+			var repeated = [];
+
+			for (var i = 0, l = selectors.length; i < l; i++) {
+			  var selector = selectors[i];
+
+			  if (repeated.indexOf(selector[0]) == -1) {
+				repeated.push(selector[0]);
+				list.push(selector);
+			  }
+			}
+
+			return list.sort(selectorSorter);
+		  },
+
+		  block: function (values, spaceAfterClosingBrace) {
+			values[0] = values[0]
+			  .replace(/\s+/g, ' ')
+			  .replace(/(,|:|\() /g, '$1')
+			  .replace(/ \)/g, ')');
+
+			if (!spaceAfterClosingBrace)
+			  values[0] = values[0].replace(/\) /g, ')');
+		  },
+
+		  atRule: function (values) {
+			values[0] = values[0]
+			  .replace(/\s+/g, ' ')
+			  .trim();
+		  }
+		};
+
+		return CleanUp;
+	};
+	//#endregion
+	
 	//#region URL: /selectors/extractor
 	modules['/selectors/extractor'] = function () {
 		// This extractor is used in advanced optimizations
@@ -2476,19 +2772,27 @@ var CleanCss = (function(){
 		var stringifySelectors = require('/stringifier/one-time').selectors;
 		var stringifyValue = require('/stringifier/one-time').value;
 
+		var AT_RULE = 'at-rule';
+
 		function extract(token) {
 		  var properties = [];
 
 		  if (token[0] == 'selector') {
-			var inSimpleSelector = !/[\.\+#>~\s]/.test(stringifySelectors(token[1]));
+			var inSpecificSelector = !/[\.\+>~]/.test(stringifySelectors(token[1]));
 			for (var i = 0, l = token[2].length; i < l; i++) {
 			  var property = token[2][i];
 
 			  if (property.indexOf('__ESCAPED') === 0)
 				continue;
 
+			  if (property[0] == AT_RULE)
+				continue;
+
 			  var name = token[2][i][0][0];
 			  if (name.length === 0)
+				continue;
+
+			  if (name.indexOf('--') === 0)
 				continue;
 
 			  var value = stringifyValue(token[2], i);
@@ -2500,7 +2804,7 @@ var CleanCss = (function(){
 				token[2][i],
 				name + ':' + value,
 				token[1],
-				inSimpleSelector
+				inSpecificSelector
 			  ]);
 			}
 		  } else if (token[0] == 'block') {
@@ -2533,167 +2837,28 @@ var CleanCss = (function(){
 	};
 	//#endregion
 	
-	//#region URL: /selectors/optimization-metadata
-	modules['/selectors/optimization-metadata'] = function () {
-		// TODO: we should wrap it under `wrap for optimizing`
-
-		var BACKSLASH_HACK = '\\';
-		var IMPORTANT = '!important';
-		var STAR_HACK = '*';
-		var UNDERSCORE_HACK = '_';
-
-		function addOptimizationMetadata(tokens) {
-		  for (var i = tokens.length - 1; i >= 0; i--) {
-			var token = tokens[i];
-
-			switch (token[0]) {
-			  case 'flat-block':
-			  case 'selector':
-				addToProperties(token[2]);
-				break;
-			  case 'block':
-				addOptimizationMetadata(token[2]);
-				break;
-			}
-		  }
+	//#region URL: /selectors/is-special
+	modules['/selectors/is-special'] = function () {
+		function isSpecial(options, selector) {
+		  return options.compatibility.selectors.special.test(selector);
 		}
 
-		function addToProperties(properties) {
-		  for (var i = properties.length - 1; i >= 0; i--) {
-			if (typeof properties[i] != 'string')
-			  addToProperty(properties[i]);
-		  }
-		}
-
-		function addToProperty(property) {
-		  var name = property[0][0];
-		  var lastValue = property[property.length - 1];
-		  var isImportant = lastValue[0].indexOf(IMPORTANT) > 0;
-		  var hackType = false;
-
-		  if (name[0] == UNDERSCORE_HACK) {
-			property[0][0] = name.substring(1);
-			hackType = 'underscore';
-		  } else if (name[0] == STAR_HACK) {
-			property[0][0] = name.substring(1);
-			hackType = 'star';
-		  } else if (lastValue[0].indexOf(BACKSLASH_HACK) > 0 && lastValue[0].indexOf(BACKSLASH_HACK) == lastValue[0].length - BACKSLASH_HACK.length - 1) {
-			lastValue[0] = lastValue[0].substring(0, lastValue[0].length - BACKSLASH_HACK.length - 1);
-			hackType = 'suffix';
-		  } else if (lastValue[0].indexOf(BACKSLASH_HACK) === 0 && lastValue[0].length == 2) {
-			property.pop();
-			hackType = 'suffix';
-		  }
-
-		  // TODO: this should be done at tokenization step
-		  // with adding importance info
-		  if (isImportant)
-			lastValue[0] = lastValue[0].substring(0, lastValue[0].length - IMPORTANT.length);
-
-		  property[0].splice(1, 0, isImportant, hackType);
-		}
-
-		return addOptimizationMetadata;
+		return isSpecial;
 	};
 	//#endregion
 	
-	//#region URL: /selectors/optimizer
-	modules['/selectors/optimizer'] = function () {
-		var tokenize = require('/tokenizer/tokenize');
-		var SimpleOptimizer = require('/selectors/optimizers/simple');
-		var AdvancedOptimizer = require('/selectors/optimizers/advanced');
-		var addOptimizationMetadata = require('/selectors/optimization-metadata');
-
-		function SelectorsOptimizer(options, context) {
-		  this.options = options || {};
-		  this.context = context || {};
-		}
-
-		SelectorsOptimizer.prototype.process = function (data, stringify, restoreCallback/*, sourceMapTracker*/) {
-		  var tokens = tokenize(data, this.context);
-
-		  addOptimizationMetadata(tokens);
-
-		  new SimpleOptimizer(this.options).optimize(tokens);
-		  if (this.options.advanced)
-			new AdvancedOptimizer(this.options, this.context).optimize(tokens);
-
-		  return stringify(tokens, this.options, restoreCallback/*, sourceMapTracker*/);
-		};
-	
-		return SelectorsOptimizer;
-	};
-	//#endregion
-
-	//#region URL: /selectors/optimizers/advanced
-	modules['/selectors/optimizers/advanced'] = function () {
+	//#region URL: /selectors/merge-adjacent
+	modules['/selectors/merge-adjacent'] = function () {
 		var optimizeProperties = require('/properties/optimizer');
-		var CleanUp = require('/selectors/optimizers/clean-up');
 
-		var extractProperties = require('/selectors/extractor');
-		var canReorder = require('/selectors/reorderable').canReorder;
-		var canReorderSingle = require('/selectors/reorderable').canReorderSingle;
-		var stringifyAll = require('/stringifier/one-time').all;
 		var stringifyBody = require('/stringifier/one-time').body;
 		var stringifySelectors = require('/stringifier/one-time').selectors;
+		var cleanUpSelectors = require('/selectors/clean-up').selectors;
+		var isSpecial = require('/selectors/is-special');
 
-		function AdvancedOptimizer(options, context) {
-		  this.options = options;
-		  this.validator = context.validator;
-		}
-
-		function unsafeSelector(value) {
-		  return /\.|\*| :/.test(value);
-		}
-
-		function naturalSorter(a, b) {
-		  return a > b;
-		}
-
-		AdvancedOptimizer.prototype.isSpecial = function (selector) {
-		  return this.options.compatibility.selectors.special.test(selector);
-		};
-
-		AdvancedOptimizer.prototype.removeDuplicates = function (tokens) {
-		  var matched = {};
-		  var moreThanOnce = [];
-		  var id, token;
-		  var body, bodies;
-
-		  for (var i = 0, l = tokens.length; i < l; i++) {
-			token = tokens[i];
-			if (token[0] != 'selector')
-			  continue;
-
-			id = stringifySelectors(token[1]);
-
-			if (matched[id] && matched[id].length == 1)
-			  moreThanOnce.push(id);
-			else
-			  matched[id] = matched[id] || [];
-
-			matched[id].push(i);
-		  }
-
-		  for (i = 0, l = moreThanOnce.length; i < l; i++) {
-			id = moreThanOnce[i];
-			bodies = [];
-
-			for (var j = matched[id].length - 1; j >= 0; j--) {
-			  token = tokens[matched[id][j]];
-			  body = stringifyBody(token[2]);
-
-			  if (bodies.indexOf(body) > -1)
-				token[2] = [];
-			  else
-				bodies.push(body);
-			}
-		  }
-		};
-
-		AdvancedOptimizer.prototype.mergeAdjacent = function (tokens) {
+		function mergeAdjacent(tokens, options, validator) {
 		  var lastToken = [null, [], []];
-		  var adjacentSpace = this.options.compatibility.selectors.adjacentSpace;
+		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
 
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
@@ -2706,172 +2871,162 @@ var CleanCss = (function(){
 			if (lastToken[0] == 'selector' && stringifySelectors(token[1]) == stringifySelectors(lastToken[1])) {
 			  var joinAt = [lastToken[2].length];
 			  Array.prototype.push.apply(lastToken[2], token[2]);
-			  optimizeProperties(token[1], lastToken[2], joinAt, true, this.options, this.validator);
+			  optimizeProperties(token[1], lastToken[2], joinAt, true, options, validator);
 			  token[2] = [];
 			} else if (lastToken[0] == 'selector' && stringifyBody(token[2]) == stringifyBody(lastToken[2]) &&
-				!this.isSpecial(stringifySelectors(token[1])) && !this.isSpecial(stringifySelectors(lastToken[1]))) {
-			  lastToken[1] = CleanUp.selectors(lastToken[1].concat(token[1]), false, adjacentSpace);
+				!isSpecial(options, stringifySelectors(token[1])) && !isSpecial(options, stringifySelectors(lastToken[1]))) {
+			  lastToken[1] = cleanUpSelectors(lastToken[1].concat(token[1]), false, adjacentSpace);
 			  token[2] = [];
 			} else {
 			  lastToken = token;
 			}
 		  }
-		};
+		}
 
-		AdvancedOptimizer.prototype.reduceNonAdjacent = function (tokens) {
+		return mergeAdjacent;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/merge-media-queries
+	modules['/selectors/merge-media-queries'] = function () {
+		var canReorder = require('/selectors/reorderable').canReorder;
+		var extractProperties = require('/selectors/extractor');
+
+		function mergeMediaQueries(tokens) {
 		  var candidates = {};
-		  var repeated = [];
+		  var reduced = [];
 
 		  for (var i = tokens.length - 1; i >= 0; i--) {
 			var token = tokens[i];
+			if (token[0] != 'block')
+			  continue;
 
+			var candidate = candidates[token[1][0]];
+			if (!candidate) {
+			  candidate = [];
+			  candidates[token[1][0]] = candidate;
+			}
+
+			candidate.push(i);
+		  }
+
+		  for (var name in candidates) {
+			var positions = candidates[name];
+
+			positionLoop:
+			for (var j = positions.length - 1; j > 0; j--) {
+			  var positionOne = positions[j];
+			  var tokenOne = tokens[positionOne];
+			  var positionTwo = positions[j - 1];
+			  var tokenTwo = tokens[positionTwo];
+
+			  directionLoop:
+			  for (var direction = 1; direction >= -1; direction -= 2) {
+				var topToBottom = direction == 1;
+				var from = topToBottom ? positionOne + 1 : positionTwo - 1;
+				var to = topToBottom ? positionTwo : positionOne;
+				var delta = topToBottom ? 1 : -1;
+				var source = topToBottom ? tokenOne : tokenTwo;
+				var target = topToBottom ? tokenTwo : tokenOne;
+				var movedProperties = extractProperties(source);
+
+				while (from != to) {
+				  var traversedProperties = extractProperties(tokens[from]);
+				  from += delta;
+
+				  if (!canReorder(movedProperties, traversedProperties))
+					continue directionLoop;
+				}
+
+				target[2] = topToBottom ?
+				  source[2].concat(target[2]) :
+				  target[2].concat(source[2]);
+				source[2] = [];
+
+				reduced.push(target);
+				continue positionLoop;
+			  }
+			}
+		  }
+
+		  return reduced;
+		}
+
+		return mergeMediaQueries;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/merge-non-adjacent-by-body
+	modules['/selectors/merge-non-adjacent-by-body'] = function () {
+		var stringifyBody = require('/stringifier/one-time').body;
+		var stringifySelectors = require('/stringifier/one-time').selectors;
+		var cleanUpSelectors = require('/selectors/clean-up').selectors;
+		var isSpecial = require('/selectors/is-special');
+
+		function unsafeSelector(value) {
+		  return /\.|\*| :/.test(value);
+		}
+
+		function isBemElement(token) {
+		  var asString = stringifySelectors(token[1]);
+		  return asString.indexOf('__') > -1 || asString.indexOf('--') > -1;
+		}
+
+		function withoutModifier(selector) {
+		  return selector.replace(/--[^ ,>\+~:]+/g, '');
+		}
+
+		function removeAnyUnsafeElements(left, candidates) {
+		  var leftSelector = withoutModifier(stringifySelectors(left[1]));
+
+		  for (var body in candidates) {
+			var right = candidates[body];
+			var rightSelector = withoutModifier(stringifySelectors(right[1]));
+
+			if (rightSelector.indexOf(leftSelector) > -1 || leftSelector.indexOf(rightSelector) > -1)
+			  delete candidates[body];
+		  }
+		}
+
+		function mergeNonAdjacentByBody(tokens, options) {
+		  var candidates = {};
+		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
+
+		  for (var i = tokens.length - 1; i >= 0; i--) {
+			var token = tokens[i];
 			if (token[0] != 'selector')
 			  continue;
-			if (token[2].length === 0)
-			  continue;
 
-			var selectorAsString = stringifySelectors(token[1]);
-			var isComplexAndNotSpecial = token[1].length > 1 && !this.isSpecial(selectorAsString);
-			var selectors = isComplexAndNotSpecial ?
-			  [selectorAsString].concat(token[1]) :
-			  [selectorAsString];
+			if (token[2].length > 0 && (!options.semanticMerging && unsafeSelector(stringifySelectors(token[1]))))
+			  candidates = {};
 
-			for (var j = 0, m = selectors.length; j < m; j++) {
-			  var selector = selectors[j];
+			if (token[2].length > 0 && options.semanticMerging && isBemElement(token))
+			  removeAnyUnsafeElements(token, candidates);
 
-			  if (!candidates[selector])
-				candidates[selector] = [];
-			  else
-				repeated.push(selector);
+			var oldToken = candidates[stringifyBody(token[2])];
+			if (oldToken && !isSpecial(options, stringifySelectors(token[1])) && !isSpecial(options, stringifySelectors(oldToken[1]))) {
+			  token[1] = cleanUpSelectors(oldToken[1].concat(token[1]), false, adjacentSpace);
 
-			  candidates[selector].push({
-				where: i,
-				list: token[1],
-				isPartial: isComplexAndNotSpecial && j > 0,
-				isComplex: isComplexAndNotSpecial && j === 0
-			  });
-			}
-		  }
-
-		  this.reduceSimpleNonAdjacentCases(tokens, repeated, candidates);
-		  this.reduceComplexNonAdjacentCases(tokens, candidates);
-		};
-
-		AdvancedOptimizer.prototype.reduceSimpleNonAdjacentCases = function (tokens, repeated, candidates) {
-		  function filterOut(idx, bodies) {
-			return data[idx].isPartial && bodies.length === 0;
-		  }
-
-		  function reduceBody(token, newBody, processedCount, tokenIdx) {
-			if (!data[processedCount - tokenIdx - 1].isPartial)
-			  token[2] = newBody;
-		  }
-
-		  for (var i = 0, l = repeated.length; i < l; i++) {
-			var selector = repeated[i];
-			var data = candidates[selector];
-
-			this.reduceSelector(tokens, selector, data, {
-			  filterOut: filterOut,
-			  callback: reduceBody
-			});
-		  }
-		};
-
-		AdvancedOptimizer.prototype.reduceComplexNonAdjacentCases = function (tokens, candidates) {
-		  var localContext = {};
-
-		  function filterOut(idx) {
-			return localContext.data[idx].where < localContext.intoPosition;
-		  }
-
-		  function collectReducedBodies(token, newBody, processedCount, tokenIdx) {
-			if (tokenIdx === 0)
-			  localContext.reducedBodies.push(newBody);
-		  }
-
-		  allSelectors:
-		  for (var complexSelector in candidates) {
-			var into = candidates[complexSelector];
-			if (!into[0].isComplex)
-			  continue;
-
-			var intoPosition = into[into.length - 1].where;
-			var intoToken = tokens[intoPosition];
-			var reducedBodies = [];
-
-			var selectors = this.isSpecial(complexSelector) ?
-			  [complexSelector] :
-			  into[0].list;
-
-			localContext.intoPosition = intoPosition;
-			localContext.reducedBodies = reducedBodies;
-
-			for (var j = 0, m = selectors.length; j < m; j++) {
-			  var selector = selectors[j];
-			  var data = candidates[selector];
-
-			  if (data.length < 2)
-				continue allSelectors;
-
-			  localContext.data = data;
-
-			  this.reduceSelector(tokens, selector, data, {
-				filterOut: filterOut,
-				callback: collectReducedBodies
-			  });
-
-			  if (stringifyBody(reducedBodies[reducedBodies.length - 1]) != stringifyBody(reducedBodies[0]))
-				continue allSelectors;
+			  oldToken[2] = [];
+			  candidates[stringifyBody(token[2])] = null;
 			}
 
-			intoToken[2] = reducedBodies[0];
+			candidates[stringifyBody(token[2])] = token;
 		  }
-		};
+		}
 
-		AdvancedOptimizer.prototype.reduceSelector = function (tokens, selector, data, options) {
-		  var bodies = [];
-		  var bodiesAsList = [];
-		  var joinsAt = [];
-		  var processedTokens = [];
+		return mergeNonAdjacentByBody;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/merge-non-adjacent-by-selector
+	modules['/selectors/merge-non-adjacent-by-selector'] = function () {
+		var optimizeProperties = require('/properties/optimizer');
+		var stringifySelectors = require('/stringifier/one-time').selectors;
+		var extractProperties = require('/selectors/extractor');
+		var canReorder = require('/selectors/reorderable').canReorder;
 
-		  for (var j = data.length - 1, m = 0; j >= 0; j--) {
-			if (options.filterOut(j, bodies))
-			  continue;
-
-			var where = data[j].where;
-			var token = tokens[where];
-
-			bodies = bodies.concat(token[2]);
-			bodiesAsList.push(token[2]);
-			processedTokens.push(where);
-		  }
-
-		  for (j = 0, m = bodiesAsList.length; j < m; j++) {
-			if (bodiesAsList[j].length > 0)
-			  joinsAt.push((joinsAt[j - 1] || 0) + bodiesAsList[j].length);
-		  }
-
-		  optimizeProperties(selector, bodies, joinsAt, false, this.options, this.validator);
-
-		  var processedCount = processedTokens.length;
-		  var propertyIdx = bodies.length - 1;
-		  var tokenIdx = processedCount - 1;
-
-		  while (tokenIdx >= 0) {
-			 if ((tokenIdx === 0 || (bodies[propertyIdx] && bodiesAsList[tokenIdx].indexOf(bodies[propertyIdx]) > -1)) && propertyIdx > -1) {
-			  propertyIdx--;
-			  continue;
-			}
-
-			var newBody = bodies.splice(propertyIdx + 1);
-			options.callback(tokens[processedTokens[tokenIdx]], newBody, processedCount, tokenIdx);
-
-			tokenIdx--;
-		  }
-		};
-
-		AdvancedOptimizer.prototype.mergeNonAdjacentBySelector = function (tokens) {
+		function mergeNonAdjacentBySelector(tokens, options, validator) {
 		  var allSelectors = {};
 		  var repeatedSelectors = [];
 		  var i;
@@ -2934,67 +3089,368 @@ var CleanCss = (function(){
 				  Array.prototype.push.apply(target[2], moved[2]);
 				}
 
-				optimizeProperties(target[1], target[2], joinAt, true, this.options, this.validator);
+				optimizeProperties(target[1], target[2], joinAt, true, options, validator);
 				moved[2] = [];
 			  }
 			}
 		  }
-		};
-
-		function isBemElement(token) {
-		  var asString = stringifySelectors(token[1]);
-		  return asString.indexOf('__') > -1 || asString.indexOf('--') > -1;
 		}
 
-		function withoutModifier(selector) {
-		  return selector.replace(/--[^ ,>\+~:]+/g, '');
-		}
+		return mergeNonAdjacentBySelector;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/reduce-non-adjacent
+	modules['/selectors/reduce-non-adjacent'] = function () {
+		var optimizeProperties = require('/properties/optimizer');
+		var stringifyBody = require('/stringifier/one-time').body;
+		var stringifySelectors = require('/stringifier/one-time').selectors;
+		var isSpecial = require('/selectors/is-special');
 
-		function removeAnyUnsafeElements(left, candidates) {
-		  var leftSelector = withoutModifier(stringifySelectors(left[1]));
-
-		  for (var body in candidates) {
-			var right = candidates[body];
-			var rightSelector = withoutModifier(stringifySelectors(right[1]));
-
-			if (rightSelector.indexOf(leftSelector) > -1 || leftSelector.indexOf(rightSelector) > -1)
-			  delete candidates[body];
-		  }
-		}
-
-		AdvancedOptimizer.prototype.mergeNonAdjacentByBody = function (tokens) {
+		function reduceNonAdjacent(tokens, options, validator) {
 		  var candidates = {};
-		  var adjacentSpace = this.options.compatibility.selectors.adjacentSpace;
+		  var repeated = [];
 
 		  for (var i = tokens.length - 1; i >= 0; i--) {
 			var token = tokens[i];
+
+			if (token[0] != 'selector')
+			  continue;
+			if (token[2].length === 0)
+			  continue;
+
+			var selectorAsString = stringifySelectors(token[1]);
+			var isComplexAndNotSpecial = token[1].length > 1 && !isSpecial(options, selectorAsString);
+			var wrappedSelectors = /*options.sourceMap ? wrappedSelectorsFrom(token[1]) : */token[1];
+			var selectors = isComplexAndNotSpecial ?
+			  [selectorAsString].concat(wrappedSelectors) :
+			  [selectorAsString];
+
+			for (var j = 0, m = selectors.length; j < m; j++) {
+			  var selector = selectors[j];
+
+			  if (!candidates[selector])
+				candidates[selector] = [];
+			  else
+				repeated.push(selector);
+
+			  candidates[selector].push({
+				where: i,
+				list: wrappedSelectors,
+				isPartial: isComplexAndNotSpecial && j > 0,
+				isComplex: isComplexAndNotSpecial && j === 0
+			  });
+			}
+		  }
+
+		  reduceSimpleNonAdjacentCases(tokens, repeated, candidates, options, validator);
+		  reduceComplexNonAdjacentCases(tokens, candidates, options, validator);
+		}
+
+		function wrappedSelectorsFrom(list) {
+		  var wrapped = [];
+
+		  for (var i = 0; i < list.length; i++) {
+			wrapped.push([list[i][0]]);
+		  }
+
+		  return wrapped;
+		}
+
+		function reduceSimpleNonAdjacentCases(tokens, repeated, candidates, options, validator) {
+		  function filterOut(idx, bodies) {
+			return data[idx].isPartial && bodies.length === 0;
+		  }
+
+		  function reduceBody(token, newBody, processedCount, tokenIdx) {
+			if (!data[processedCount - tokenIdx - 1].isPartial)
+			  token[2] = newBody;
+		  }
+
+		  for (var i = 0, l = repeated.length; i < l; i++) {
+			var selector = repeated[i];
+			var data = candidates[selector];
+
+			reduceSelector(tokens, selector, data, {
+			  filterOut: filterOut,
+			  callback: reduceBody
+			}, options, validator);
+		  }
+		}
+
+		function reduceComplexNonAdjacentCases(tokens, candidates, options, validator) {
+		  var localContext = {};
+
+		  function filterOut(idx) {
+			return localContext.data[idx].where < localContext.intoPosition;
+		  }
+
+		  function collectReducedBodies(token, newBody, processedCount, tokenIdx) {
+			if (tokenIdx === 0)
+			  localContext.reducedBodies.push(newBody);
+		  }
+
+		  allSelectors:
+		  for (var complexSelector in candidates) {
+			var into = candidates[complexSelector];
+			if (!into[0].isComplex)
+			  continue;
+
+			var intoPosition = into[into.length - 1].where;
+			var intoToken = tokens[intoPosition];
+			var reducedBodies = [];
+
+			var selectors = isSpecial(options, complexSelector) ?
+			  [complexSelector] :
+			  into[0].list;
+
+			localContext.intoPosition = intoPosition;
+			localContext.reducedBodies = reducedBodies;
+
+			for (var j = 0, m = selectors.length; j < m; j++) {
+			  var selector = selectors[j];
+			  var data = candidates[selector];
+
+			  if (data.length < 2)
+				continue allSelectors;
+
+			  localContext.data = data;
+
+			  reduceSelector(tokens, selector, data, {
+				filterOut: filterOut,
+				callback: collectReducedBodies
+			  }, options, validator);
+
+			  if (stringifyBody(reducedBodies[reducedBodies.length - 1]) != stringifyBody(reducedBodies[0]))
+				continue allSelectors;
+			}
+
+			intoToken[2] = reducedBodies[0];
+		  }
+		}
+
+		function reduceSelector(tokens, selector, data, context, options, validator) {
+		  var bodies = [];
+		  var bodiesAsList = [];
+		  var joinsAt = [];
+		  var processedTokens = [];
+
+		  for (var j = data.length - 1, m = 0; j >= 0; j--) {
+			if (context.filterOut(j, bodies))
+			  continue;
+
+			var where = data[j].where;
+			var token = tokens[where];
+
+			bodies = bodies.concat(token[2]);
+			bodiesAsList.push(token[2]);
+			processedTokens.push(where);
+		  }
+
+		  for (j = 0, m = bodiesAsList.length; j < m; j++) {
+			if (bodiesAsList[j].length > 0)
+			  joinsAt.push((joinsAt[j - 1] || 0) + bodiesAsList[j].length);
+		  }
+
+		  optimizeProperties(selector, bodies, joinsAt, false, options, validator);
+
+		  var processedCount = processedTokens.length;
+		  var propertyIdx = bodies.length - 1;
+		  var tokenIdx = processedCount - 1;
+
+		  while (tokenIdx >= 0) {
+			 if ((tokenIdx === 0 || (bodies[propertyIdx] && bodiesAsList[tokenIdx].indexOf(bodies[propertyIdx]) > -1)) && propertyIdx > -1) {
+			  propertyIdx--;
+			  continue;
+			}
+
+			var newBody = bodies.splice(propertyIdx + 1);
+			context.callback(tokens[processedTokens[tokenIdx]], newBody, processedCount, tokenIdx);
+
+			tokenIdx--;
+		  }
+		}
+
+		return reduceNonAdjacent;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/remove-duplicate-media-queries
+	modules['/selectors/remove-duplicate-media-queries'] = function () {
+		var stringifyAll = require('/stringifier/one-time').all;
+
+		function removeDuplicateMediaQueries(tokens) {
+		  var candidates = {};
+
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+			if (token[0] != 'block')
+			  continue;
+
+			var key = token[1][0] + '%' + stringifyAll(token[2]);
+			var candidate = candidates[key];
+
+			if (candidate)
+			  candidate[2] = [];
+
+			candidates[key] = token;
+		  }
+		}
+
+		return removeDuplicateMediaQueries;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/remove-duplicates
+	modules['/selectors/remove-duplicates'] = function () {
+		var stringifyBody = require('/stringifier/one-time').body;
+		var stringifySelectors = require('/stringifier/one-time').selectors;
+
+		function removeDuplicates(tokens) {
+		  var matched = {};
+		  var moreThanOnce = [];
+		  var id, token;
+		  var body, bodies;
+
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			token = tokens[i];
 			if (token[0] != 'selector')
 			  continue;
 
-			if (token[2].length > 0 && (!this.options.semanticMerging && unsafeSelector(stringifySelectors(token[1]))))
-			  candidates = {};
+			id = stringifySelectors(token[1]);
 
-			if (token[2].length > 0 && this.options.semanticMerging && isBemElement(token))
-			  removeAnyUnsafeElements(token, candidates);
+			if (matched[id] && matched[id].length == 1)
+			  moreThanOnce.push(id);
+			else
+			  matched[id] = matched[id] || [];
 
-			var oldToken = candidates[stringifyBody(token[2])];
-			if (oldToken && !this.isSpecial(stringifySelectors(token[1])) && !this.isSpecial(stringifySelectors(oldToken[1]))) {
-			  token[1] = CleanUp.selectors(oldToken[1].concat(token[1]), false, adjacentSpace);
-
-			  oldToken[2] = [];
-			  candidates[stringifyBody(token[2])] = null;
-			}
-
-			candidates[stringifyBody(token[2])] = token;
+			matched[id].push(i);
 		  }
+
+		  for (i = 0, l = moreThanOnce.length; i < l; i++) {
+			id = moreThanOnce[i];
+			bodies = [];
+
+			for (var j = matched[id].length - 1; j >= 0; j--) {
+			  token = tokens[matched[id][j]];
+			  body = stringifyBody(token[2]);
+
+			  if (bodies.indexOf(body) > -1)
+				token[2] = [];
+			  else
+				bodies.push(body);
+			}
+		  }
+		}
+
+		return removeDuplicates;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/reorderable
+	modules['/selectors/reorderable'] = function () {
+		// TODO: it'd be great to merge it with the other canReorder functionality
+
+		var FLEX_PROPERTIES = /align\-items|box\-align|box\-pack|flex|justify/;
+		var BORDER_PROPERTIES = /^border\-(top|right|bottom|left|color|style|width|radius)/;
+
+		function canReorder(left, right) {
+		  for (var i = right.length - 1; i >= 0; i--) {
+			for (var j = left.length - 1; j >= 0; j--) {
+			  if (!canReorderSingle(left[j], right[i]))
+				return false;
+			}
+		  }
+
+		  return true;
+		}
+
+		function canReorderSingle(left, right) {
+		  var leftName = left[0];
+		  var leftValue = left[1];
+		  var leftNameRoot = left[2];
+		  var leftSelector = left[5];
+		  var leftInSpecificSelector = left[6];
+		  var rightName = right[0];
+		  var rightValue = right[1];
+		  var rightNameRoot = right[2];
+		  var rightSelector = right[5];
+		  var rightInSpecificSelector = right[6];
+
+		  if (leftName == 'font' && rightName == 'line-height' || rightName == 'font' && leftName == 'line-height')
+			return false;
+		  if (FLEX_PROPERTIES.test(leftName) && FLEX_PROPERTIES.test(rightName))
+			return false;
+		  if (leftNameRoot == rightNameRoot && unprefixed(leftName) == unprefixed(rightName) && (vendorPrefixed(leftName) ^ vendorPrefixed(rightName)))
+			return false;
+		  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot))
+			return false;
+		  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
+			return false;
+		  if (leftNameRoot != rightNameRoot)
+			return true;
+		  if (leftName == rightName && leftNameRoot == rightNameRoot && (leftValue == rightValue || withDifferentVendorPrefix(leftValue, rightValue)))
+			return true;
+		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftName != leftNameRoot && rightName != rightNameRoot)
+			return true;
+		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftValue == rightValue)
+			return true;
+		  if (rightInSpecificSelector && leftInSpecificSelector && selectorsDoNotOverlap(rightSelector, leftSelector))
+			return true;
+
+		  return false;
+		}
+
+		function vendorPrefixed(name) {
+		  return /^\-(?:moz|webkit|ms|o)\-/.test(name);
+		}
+
+		function unprefixed(name) {
+		  return name.replace(/^\-(?:moz|webkit|ms|o)\-/, '');
+		}
+
+		function withDifferentVendorPrefix(value1, value2) {
+		  return vendorPrefixed(value1) && vendorPrefixed(value2) && value1.split('-')[1] != value2.split('-')[2];
+		}
+
+		function selectorsDoNotOverlap(s1, s2) {
+		  for (var i = 0, l = s1.length; i < l; i++) {
+			for (var j = 0, m = s2.length; j < m; j++) {
+			  if (s1[i][0] == s2[j][0])
+				return false;
+			}
+		  }
+
+		  return true;
+		}
+
+		var exports = {
+		  canReorder: canReorder,
+		  canReorderSingle: canReorderSingle
 		};
 
-		AdvancedOptimizer.prototype.restructure = function (tokens) {
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /selectors/restructure
+	modules['/selectors/restructure'] = function () {
+		var extractProperties = require('/selectors/extractor');
+		var canReorderSingle = require('/selectors/reorderable').canReorderSingle;
+		var stringifyBody = require('/stringifier/one-time').body;
+		var stringifySelectors = require('/stringifier/one-time').selectors;
+		var cleanUpSelectorDuplicates = require('/selectors/clean-up').selectorDuplicates;
+		var isSpecial = require('/selectors/is-special');
+
+		function naturalSorter(a, b) {
+		  return a > b;
+		}
+
+		function restructure(tokens, options) {
 		  var movableTokens = {};
 		  var movedProperties = [];
 		  var multiPropertyMoveCache = {};
 		  var movedToBeDropped = [];
-		  var self = this;
 		  var maxCombinationsLevel = 2;
 		  var ID_JOIN_CHARACTER = '%';
 
@@ -3050,7 +3506,7 @@ var CleanCss = (function(){
 			var mergeableTokens = [];
 
 			for (var i = sourceTokens.length - 1; i >= 0; i--) {
-			  if (self.isSpecial(stringifySelectors(sourceTokens[i][1])))
+			  if (isSpecial(options, stringifySelectors(sourceTokens[i][1])))
 				continue;
 
 			  mergeableTokens.unshift(sourceTokens[i]);
@@ -3085,7 +3541,7 @@ var CleanCss = (function(){
 			  qualifiedTokens.unshift(bestFit[0][i]);
 			}
 
-			allSelectors = CleanUp.selectorDuplicates(allSelectors);
+			allSelectors = cleanUpSelectorDuplicates(allSelectors);
 			dropAsNewTokenAt(position, [movedProperty], allSelectors, qualifiedTokens);
 		  }
 
@@ -3223,7 +3679,7 @@ var CleanCss = (function(){
 			  qualifiedTokens.unshift(bestFit[0][i]);
 			}
 
-			allSelectors = CleanUp.selectorDuplicates(allSelectors);
+			allSelectors = cleanUpSelectorDuplicates(allSelectors);
 			dropAsNewTokenAt(position, properties, allSelectors, qualifiedTokens);
 
 			for (i = properties.length - 1; i >= 0; i--) {
@@ -3328,243 +3784,26 @@ var CleanCss = (function(){
 		  for (i = 0; i < movedProperties.length; i++) {
 			dropPropertiesAt(position, movedProperties[i]);
 		  }
-		};
-
-		AdvancedOptimizer.prototype.removeDuplicateMediaQueries = function (tokens) {
-		  var candidates = {};
-
-		  for (var i = 0, l = tokens.length; i < l; i++) {
-			var token = tokens[i];
-			if (token[0] != 'block')
-			  continue;
-
-			var key = token[1][0] + '%' + stringifyAll(token[2]);
-			var candidate = candidates[key];
-
-			if (candidate)
-			  candidate[2] = [];
-
-			candidates[key] = token;
-		  }
-		};
-
-		AdvancedOptimizer.prototype.mergeMediaQueries = function (tokens) {
-		  var candidates = {};
-		  var reduced = [];
-
-		  for (var i = tokens.length - 1; i >= 0; i--) {
-			var token = tokens[i];
-			if (token[0] != 'block')
-			  continue;
-
-			var candidate = candidates[token[1][0]];
-			if (!candidate) {
-			  candidate = [];
-			  candidates[token[1][0]] = candidate;
-			}
-
-			candidate.push(i);
-		  }
-
-		  for (var name in candidates) {
-			var positions = candidates[name];
-
-			positionLoop:
-			for (var j = positions.length - 1; j > 0; j--) {
-			  var source = tokens[positions[j]];
-			  var target = tokens[positions[j - 1]];
-			  var movedProperties = extractProperties(source);
-
-			  for (var k = positions[j] + 1; k < positions[j - 1]; k++) {
-				var traversedProperties = extractProperties(tokens[k]);
-
-				// moved then traversed as we move @media towards the end
-				if (!canReorder(movedProperties, traversedProperties))
-				  continue positionLoop;
-			  }
-
-			  target[2] = source[2].concat(target[2]);
-			  source[2] = [];
-
-			  reduced.push(target);
-			}
-		  }
-
-		  return reduced;
-		};
-
-		AdvancedOptimizer.prototype.removeEmpty = function (tokens) {
-		  for (var i = 0, l = tokens.length; i < l; i++) {
-			var token = tokens[i];
-			var isEmpty = false;
-
-			switch (token[0]) {
-			  case 'selector':
-				isEmpty = token[1].length === 0 || token[2].length === 0;
-				break;
-			  case 'block':
-				this.removeEmpty(token[2]);
-				isEmpty = token[2].length === 0;
-			}
-
-			if (isEmpty) {
-			  tokens.splice(i, 1);
-			  i--;
-			  l--;
-			}
-		  }
-		};
-
-		function recursivelyOptimizeProperties(tokens, options, validator) {
-		  for (var i = 0, l = tokens.length; i < l; i++) {
-			var token = tokens[i];
-
-			switch (token[0]) {
-			  case 'selector':
-				optimizeProperties(token[1], token[2], false, true, options, validator);
-				break;
-			  case 'block':
-				recursivelyOptimizeProperties(token[2], options, validator);
-			}
-		  }
 		}
 
-		AdvancedOptimizer.prototype.optimize = function (tokens) {
-		  var self = this;
-
-		  function _optimize(tokens, withRestructuring) {
-			tokens.forEach(function (token) {
-			  if (token[0] == 'block') {
-				var isKeyframes = /@(-moz-|-o-|-webkit-)?keyframes/.test(token[1][0]);
-				_optimize(token[2], !isKeyframes);
-			  }
-			});
-
-			recursivelyOptimizeProperties(tokens, self.options, self.validator);
-
-			self.removeDuplicates(tokens);
-			self.mergeAdjacent(tokens);
-			self.reduceNonAdjacent(tokens);
-
-			self.mergeNonAdjacentBySelector(tokens);
-			self.mergeNonAdjacentByBody(tokens);
-
-			if (self.options.restructuring && withRestructuring) {
-			  self.restructure(tokens);
-			  self.mergeAdjacent(tokens);
-			}
-
-			if (self.options.mediaMerging) {
-			  self.removeDuplicateMediaQueries(tokens);
-			  var reduced = self.mergeMediaQueries(tokens);
-			  for (var i = reduced.length - 1; i >= 0; i--) {
-				_optimize(reduced[i][2]);
-			  }
-			}
-
-			self.removeEmpty(tokens);
-		  }
-
-		  _optimize(tokens, true);
-		};
-		
-		return AdvancedOptimizer;
+		return restructure;
 	};
 	//#endregion
-
-	//#region URL: /selectors/optimizers/clean-up
-	modules['/selectors/optimizers/clean-up'] = function () {
-		function removeWhitespace(match, value) {
-		  return '[' + value.replace(/ /g, '') + ']';
-		}
-
-		function selectorSorter(s1, s2) {
-		  return s1[0] > s2[0] ? 1 : -1;
-		}
-
-		var CleanUp = {
-		  selectors: function (selectors, removeUnsupported, adjacentSpace) {
-			var list = [];
-			var repeated = [];
-
-			for (var i = 0, l = selectors.length; i < l; i++) {
-			  var selector = selectors[i];
-			  var reduced = selector[0]
-				.replace(/\s+/g, ' ')
-				.replace(/ ?, ?/g, ',')
-				.replace(/\s*([>\+\~])\s*/g, '$1')
-				.trim();
-
-			  if (adjacentSpace && reduced.indexOf('nav') > 0)
-				reduced = reduced.replace(/\+nav(\S|$)/, '+ nav$1');
-
-			  if (removeUnsupported && (reduced.indexOf('*+html ') != -1 || reduced.indexOf('*:first-child+html ') != -1))
-				continue;
-
-			  if (reduced.indexOf('*') > -1) {
-				reduced = reduced
-				  .replace(/\*([:#\.\[])/g, '$1')
-				  .replace(/^(\:first\-child)?\+html/, '*$1+html');
-			  }
-
-			  if (reduced.indexOf('[') > -1)
-				reduced = reduced.replace(/\[([^\]]+)\]/g, removeWhitespace);
-
-			  if (repeated.indexOf(reduced) == -1) {
-				selector[0] = reduced;
-				repeated.push(reduced);
-				list.push(selector);
-			  }
-			}
-
-			return list.sort(selectorSorter);
-		  },
-
-		  selectorDuplicates: function (selectors) {
-			var list = [];
-			var repeated = [];
-
-			for (var i = 0, l = selectors.length; i < l; i++) {
-			  var selector = selectors[i];
-
-			  if (repeated.indexOf(selector[0]) == -1) {
-				repeated.push(selector[0]);
-				list.push(selector);
-			  }
-			}
-
-			return list.sort(selectorSorter);
-		  },
-
-		  block: function (values, spaceAfterClosingBrace) {
-			values[0] = values[0]
-			  .replace(/\s+/g, ' ')
-			  .replace(/(,|:|\() /g, '$1')
-			  .replace(/ \)/g, ')');
-
-			if (!spaceAfterClosingBrace)
-			  values[0] = values[0].replace(/\) /g, ')');
-		  },
-
-		  atRule: function (values) {
-			values[0] = values[0]
-			  .replace(/\s+/g, ' ')
-			  .trim();
-		  }
-		};
-		
-		return CleanUp;
-	};
-	//#endregion
-
-	//#region URL: /selectors/optimizers/simple
-	modules['/selectors/optimizers/simple'] = function () {
-		var CleanUp = require('/selectors/optimizers/clean-up');
-		var Splitter = require('/utils/splitter');
+	
+	//#region URL: /selectors/simple
+	modules['/selectors/simple'] = function () {
+		var cleanUpSelectors = require('/selectors/clean-up').selectors;
+		var cleanUpBlock = require('/selectors/clean-up').block;
+		var cleanUpAtRule = require('/selectors/clean-up').atRule;
+		var split = require('/utils/split');
 
 		var RGB = require('/colors/rgb');
 		var HSL = require('/colors/hsl');
 		var HexNameShortener = require('/colors/hex-name-shortener');
+
+		var wrapForOptimizing = require('/properties/wrap-for-optimizing').all;
+		var restoreFromOptimizing = require('/properties/restore-from-optimizing');
+		var removeUnused = require('/properties/remove-unused');
 
 		var DEFAULT_ROUNDING_PRECISION = 2;
 		var CHARSET_TOKEN = '@charset';
@@ -3574,30 +3813,12 @@ var CleanCss = (function(){
 		var FONT_NAME_WEIGHTS = ['normal', 'bold', 'bolder', 'lighter'];
 		var FONT_NAME_WEIGHTS_WITHOUT_NORMAL = ['bold', 'bolder', 'lighter'];
 
-		function SimpleOptimizer(options) {
-		  this.options = options;
-
-		  var units = ['px', 'em', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', '%'];
-		  var otherUnits = ['ch', 'rem', 'vh', 'vm', 'vmax', 'vmin', 'vw'];
-
-		  otherUnits.forEach(function (unit) {
-			if (options.compatibility.units[unit])
-			  units.push(unit);
-		  });
-
-		  options.unitsRegexp = new RegExp('(^|\\s|\\(|,)0(?:' + units.join('|') + ')(\\W|$)', 'g');
-
-		  options.precision = {};
-		  options.precision.value = options.roundingPrecision === undefined ?
-			DEFAULT_ROUNDING_PRECISION :
-			options.roundingPrecision;
-		  options.precision.multiplier = Math.pow(10, options.precision.value);
-		  options.precision.regexp = new RegExp('(\\d*\\.\\d{' + (options.precision.value + 1) + ',})px', 'g');
-		}
+		var WHOLE_PIXEL_VALUE = /(?:^|\s|\()(-?\d+)px/;
+		var TIME_VALUE = /^(\-?[\d\.]+)(m?s)$/;
 
 		var valueMinifiers = {
 		  'background': function (value, index, total) {
-			return index == 1 && total == 2 && (value == 'none' || value == 'transparent') ? '0 0' : value;
+			return index === 0 && total == 1 && (value == 'none' || value == 'transparent') ? '0 0' : value;
 		  },
 		  'font-weight': function (value) {
 			if (value == 'normal')
@@ -3608,12 +3829,12 @@ var CleanCss = (function(){
 			  return value;
 		  },
 		  'outline': function (value, index, total) {
-			return index == 1 && total == 2 && value == 'none' ? '0' : value;
+			return index === 0 && total == 1 && value == 'none' ? '0' : value;
 		  }
 		};
 
 		function isNegative(property, idx) {
-		  return property[idx] && property[idx][0][0] == '-' && parseFloat(property[idx][0]) < 0;
+		  return property.value[idx] && property.value[idx][0][0] == '-' && parseFloat(property.value[idx][0]) < 0;
 		}
 
 		function zeroMinifier(name, value) {
@@ -3630,7 +3851,7 @@ var CleanCss = (function(){
 			.replace(/(^|\s)0+([1-9])/g, '$1$2')
 			.replace(/(^|\D)\.0+(\D|$)/g, '$10$2')
 			.replace(/(^|\D)\.0+(\D|$)/g, '$10$2')
-			.replace(/\.([1-9]*)0+(\D|$)/g, function(match, nonZeroPart, suffix) {
+			.replace(/\.([1-9]*)0+(\D|$)/g, function (match, nonZeroPart, suffix) {
 			  return (nonZeroPart.length > 0 ? '.' : '') + nonZeroPart + suffix;
 			})
 			.replace(/(^|\D)0\.(\d)/g, '$1.$2');
@@ -3663,7 +3884,7 @@ var CleanCss = (function(){
 			return value;
 
 		  return value
-			.replace(precisionOptions.regexp, function(match, number) {
+			.replace(precisionOptions.regexp, function (match, number) {
 			  return Math.round(parseFloat(number) * precisionOptions.multiplier) / precisionOptions.multiplier + 'px';
 			})
 			.replace(/(\d)\.($|\D)/g, '$1$2');
@@ -3676,17 +3897,28 @@ var CleanCss = (function(){
 		  if (name == 'flex' || name == '-ms-flex' || name == '-webkit-flex' || name == 'flex-basis' || name == '-webkit-flex-basis')
 			return value;
 
+		  if (value.indexOf('%') > 0 && (name == 'height' || name == 'max-height'))
+			return value;
+
 		  return value
 			.replace(unitsRegexp, '$1' + '0' + '$2')
 			.replace(unitsRegexp, '$1' + '0' + '$2');
 		}
 
 		function multipleZerosMinifier(property) {
-		  if (property.length == 5 && property[1][0] === '0' && property[2][0] === '0' && property[3][0] === '0' && property[4][0] === '0') {
-			if (property[0][0].indexOf('box-shadow') > -1)
-			  property.splice(3);
+		  var values = property.value;
+		  var spliceAt;
+
+		  if (values.length == 4 && values[0][0] === '0' && values[1][0] === '0' && values[2][0] === '0' && values[3][0] === '0') {
+			if (property.name.indexOf('box-shadow') > -1)
+			  spliceAt = 2;
 			else
-			  property.splice(2);
+			  spliceAt = 1;
+		  }
+
+		  if (spliceAt) {
+			property.value.splice(spliceAt);
+			property.dirty = true;
 		  }
 		}
 
@@ -3707,7 +3939,7 @@ var CleanCss = (function(){
 			  else
 				return prefix + '#' + color;
 			})
-			.replace(/(rgb|rgba|hsl|hsla)\(([^\)]+)\)/g, function(match, colorFunction, colorDef) {
+			.replace(/(rgb|rgba|hsl|hsla)\(([^\)]+)\)/g, function (match, colorFunction, colorDef) {
 			  var tokens = colorDef.split(',');
 			  var applies = (colorFunction == 'hsl' && tokens.length == 3) ||
 				(colorFunction == 'hsla' && tokens.length == 4) ||
@@ -3725,7 +3957,7 @@ var CleanCss = (function(){
 
 		  if (compatibility.colors.opacity) {
 			value = value.replace(/(?:rgba|hsla)\(0,0%?,0%?,0\)/g, function (match) {
-			  if (new Splitter(',').split(value).pop().indexOf('gradient(') > -1)
+			  if (split(value, ',').pop().indexOf('gradient(') > -1)
 				return match;
 
 			  return 'transparent';
@@ -3735,106 +3967,160 @@ var CleanCss = (function(){
 		  return HexNameShortener.shorten(value);
 		}
 
+		function pixelLengthMinifier(_, value, compatibility) {
+		  if (!WHOLE_PIXEL_VALUE.test(value))
+			return value;
+
+		  return value.replace(WHOLE_PIXEL_VALUE, function (match, val) {
+			var newValue;
+			var intVal = parseInt(val);
+
+			if (intVal === 0)
+			  return match;
+
+			if (compatibility.units.pt && intVal * 3 % 4 === 0)
+			  newValue = intVal * 3 / 4 + 'pt';
+
+			if (compatibility.units.pc && intVal % 16 === 0)
+			  newValue = intVal / 16 + 'pc';
+
+			if (compatibility.units.in && intVal % 96 === 0)
+			  newValue = intVal / 96 + 'in';
+
+			if (newValue)
+			  newValue = match.substring(0, match.indexOf(val)) + newValue;
+
+			return newValue && newValue.length < match.length ? newValue : match;
+		  });
+		}
+
+		function timeUnitMinifier(_, value) {
+		  if (!TIME_VALUE.test(value))
+			return value;
+
+		  return value.replace(TIME_VALUE, function (match, val, unit) {
+			var newValue;
+
+			if (unit == 'ms') {
+			  newValue = parseInt(val) / 1000 + 's';
+			} else if (unit == 's') {
+			  newValue = parseFloat(val) * 1000 + 'ms';
+			}
+
+			return newValue.length < match.length ? newValue : match;
+		  });
+		}
+
 		function minifyBorderRadius(property) {
-		  if (property.length == 4 && property[2][0] == '/' && property[1][0] == property[3][0])
-			property.splice(2);
-		  else if (property.length == 6 && property[3][0] == '/' && property[1][0] == property[4][0] && property[2][0] == property[5][0])
-			property.splice(3);
-		  else if (property.length == 8 && property[4][0] == '/' && property[1][0] == property[5][0] && property[2][0] == property[6][0] && property[3][0] == property[7][0])
-			property.splice(4);
-		  else if (property.length == 10 && property[5][0] == '/' && property[1][0] == property[6][0] && property[2][0] == property[7][0] && property[3][0] == property[8][0] && property[4][0] == property[9][0])
-			property.splice(5);
+		  var values = property.value;
+		  var spliceAt;
+
+		  if (values.length == 3 && values[1][0] == '/' && values[0][0] == values[2][0])
+			spliceAt = 1;
+		  else if (values.length == 5 && values[2][0] == '/' && values[0][0] == values[3][0] && values[1][0] == values[4][0])
+			spliceAt = 2;
+		  else if (values.length == 7 && values[3][0] == '/' && values[0][0] == values[4][0] && values[1][0] == values[5][0] && values[2][0] == values[6][0])
+			spliceAt = 3;
+		  else if (values.length == 9 && values[4][0] == '/' && values[0][0] == values[5][0] && values[1][0] == values[6][0] && values[2][0] == values[7][0] && values[3][0] == values[8][0])
+			spliceAt = 4;
+
+		  if (spliceAt) {
+			property.value.splice(spliceAt);
+			property.dirty = true;
+		  }
 		}
 
 		function minifyFilter(property) {
-		  if (property.length < 3) {
-			property[1][0] = property[1][0].replace(/progid:DXImageTransform\.Microsoft\.(Alpha|Chroma)(\W)/, function (match, filter, suffix) {
+		  if (property.value.length == 1) {
+			property.value[0][0] = property.value[0][0].replace(/progid:DXImageTransform\.Microsoft\.(Alpha|Chroma)(\W)/, function (match, filter, suffix) {
 			  return filter.toLowerCase() + suffix;
 			});
 		  }
 
-		  property[1][0] = property[1][0]
+		  property.value[0][0] = property.value[0][0]
 			.replace(/,(\S)/g, ', $1')
 			.replace(/ ?= ?/g, '=');
 		}
 
 		function minifyFont(property) {
-		  var hasNumeral = FONT_NUMERAL_WEIGHTS.indexOf(property[1][0]) > -1 ||
-			property[2] && FONT_NUMERAL_WEIGHTS.indexOf(property[2][0]) > -1 ||
-			property[3] && FONT_NUMERAL_WEIGHTS.indexOf(property[3][0]) > -1;
+		  var values = property.value;
+		  var hasNumeral = FONT_NUMERAL_WEIGHTS.indexOf(values[0][0]) > -1 ||
+			values[1] && FONT_NUMERAL_WEIGHTS.indexOf(values[1][0]) > -1 ||
+			values[2] && FONT_NUMERAL_WEIGHTS.indexOf(values[2][0]) > -1;
 
 		  if (hasNumeral)
 			return;
 
-		  if (property[2] == '/')
+		  if (values[1] == '/')
 			return;
 
 		  var normalCount = 0;
-		  if (property[1][0] == 'normal')
+		  if (values[0][0] == 'normal')
 			normalCount++;
-		  if (property[2] && property[2][0] == 'normal')
+		  if (values[1] && values[1][0] == 'normal')
 			normalCount++;
-		  if (property[3] && property[3][0] == 'normal')
+		  if (values[2] && values[2][0] == 'normal')
 			normalCount++;
 
 		  if (normalCount > 1)
 			return;
 
 		  var toOptimize;
-		  if (FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(property[1][0]) > -1)
+		  if (FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(values[0][0]) > -1)
+			toOptimize = 0;
+		  else if (values[1] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(values[1][0]) > -1)
 			toOptimize = 1;
-		  else if (property[2] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(property[2][0]) > -1)
+		  else if (values[2] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(values[2][0]) > -1)
 			toOptimize = 2;
-		  else if (property[3] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(property[3][0]) > -1)
-			toOptimize = 3;
-		  else if (FONT_NAME_WEIGHTS.indexOf(property[1][0]) > -1)
+		  else if (FONT_NAME_WEIGHTS.indexOf(values[0][0]) > -1)
+			toOptimize = 0;
+		  else if (values[1] && FONT_NAME_WEIGHTS.indexOf(values[1][0]) > -1)
 			toOptimize = 1;
-		  else if (property[2] && FONT_NAME_WEIGHTS.indexOf(property[2][0]) > -1)
+		  else if (values[2] && FONT_NAME_WEIGHTS.indexOf(values[2][0]) > -1)
 			toOptimize = 2;
-		  else if (property[3] && FONT_NAME_WEIGHTS.indexOf(property[3][0]) > -1)
-			toOptimize = 3;
 
-		  if (toOptimize)
-			property[toOptimize][0] = valueMinifiers['font-weight'](property[toOptimize][0]);
+		  if (toOptimize !== undefined) {
+			property.value[toOptimize][0] = valueMinifiers['font-weight'](values[toOptimize][0]);
+			property.dirty = true;
+		  }
 		}
 
 		function optimizeBody(properties, options) {
-		  var property, name, value, unused;
+		  var property, name, value;
+		  var _properties = wrapForOptimizing(properties);
 
-		  for (var i = 0, l = properties.length; i < l; i++) {
-			unused = false;
-			property = properties[i];
+		  for (var i = 0, l = _properties.length; i < l; i++) {
+			property = _properties[i];
+			name = property.name;
 
-			// FIXME: the check should be gone with #407
-			if (typeof property == 'string' && property.indexOf('__ESCAPED_') === 0)
+			if (property.hack && (
+				(property.hack == 'star' || property.hack == 'underscore') && !options.compatibility.properties.iePrefixHack ||
+				property.hack == 'backslash' && !options.compatibility.properties.ieSuffixHack ||
+				property.hack == 'bang' && !options.compatibility.properties.ieBangHack))
+			  property.unused = true;
+
+			if (name.indexOf('padding') === 0 && (isNegative(property, 0) || isNegative(property, 1) || isNegative(property, 2) || isNegative(property, 3)))
+			  property.unused = true;
+
+			if (property.unused)
 			  continue;
 
-			name = property[0][0];
-
-			var hackType = property[0][2];
-			if (hackType) {
-			  if ((hackType == 'star' || hackType == 'underscore') && !options.compatibility.properties.iePrefixHack || hackType == 'suffix' && !options.compatibility.properties.ieSuffixHack)
-				unused = true;
-			}
-
-			if (name.indexOf('padding') === 0 && (isNegative(property, 1) || isNegative(property, 2) || isNegative(property, 3) || isNegative(property, 4)))
-			  unused = true;
-
-			if (unused) {
-			  properties.splice(i, 1);
-			  i--;
-			  l--;
+			if (property.variable) {
+			  if (property.block)
+				optimizeBody(property.value[0], options);
 			  continue;
 			}
 
-			for (var j = 1, m = property.length; j < m; j++) {
-			  value = property[j][0];
+			for (var j = 0, m = property.value.length; j < m; j++) {
+			  value = property.value[j][0];
 
 			  if (valueMinifiers[name])
 				value = valueMinifiers[name](value, j, m);
 
 			  value = whitespaceMinifier(name, value);
 			  value = precisionMinifier(name, value, options.precision);
+			  value = pixelLengthMinifier(name, value, options.compatibility);
+			  value = timeUnitMinifier(name, value);
 			  value = zeroMinifier(name, value);
 			  if (options.compatibility.properties.zeroUnits) {
 				value = zeroDegMinifier(name, value);
@@ -3843,7 +4129,7 @@ var CleanCss = (function(){
 			  if (options.compatibility.properties.colors)
 				value = colorMininifier(name, value, options.compatibility);
 
-			  property[j][0] = value;
+			  property.value[j][0] = value;
 			}
 
 			multipleZerosMinifier(property);
@@ -3855,162 +4141,101 @@ var CleanCss = (function(){
 			else if (name == 'font')
 			  minifyFont(property);
 		  }
+
+		  restoreFromOptimizing(_properties, true);
+		  removeUnused(_properties);
 		}
 
-		SimpleOptimizer.prototype.optimize = function(tokens) {
-		  var self = this;
+		function cleanupCharsets(tokens) {
 		  var hasCharset = false;
-		  var options = this.options;
+
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
+
+			if (token[0] != 'at-rule')
+			  continue;
+
+			if (!CHARSET_REGEXP.test(token[1][0]))
+			  continue;
+
+			if (hasCharset || token[1][0].indexOf(CHARSET_TOKEN) == -1) {
+			  tokens.splice(i, 1);
+			  i--;
+			  l--;
+			} else {
+			  hasCharset = true;
+			  tokens.splice(i, 1);
+			  tokens.unshift(['at-rule', [token[1][0].replace(CHARSET_REGEXP, CHARSET_TOKEN)]]);
+			}
+		  }
+		}
+
+		function buildUnitRegexp(options) {
+		  var units = ['px', 'em', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', '%'];
+		  var otherUnits = ['ch', 'rem', 'vh', 'vm', 'vmax', 'vmin', 'vw'];
+
+		  otherUnits.forEach(function (unit) {
+			if (options.compatibility.units[unit])
+			  units.push(unit);
+		  });
+
+		  return new RegExp('(^|\\s|\\(|,)0(?:' + units.join('|') + ')(\\W|$)', 'g');
+		}
+
+		function buildPrecision(options) {
+		  var precision = {};
+
+		  precision.value = options.roundingPrecision === undefined ?
+			DEFAULT_ROUNDING_PRECISION :
+			options.roundingPrecision;
+		  precision.multiplier = Math.pow(10, precision.value);
+		  precision.regexp = new RegExp('(\\d*\\.\\d{' + (precision.value + 1) + ',})px', 'g');
+
+		  return precision;
+		}
+
+		function optimize(tokens, options) {
 		  var ie7Hack = options.compatibility.selectors.ie7Hack;
 		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
 		  var spaceAfterClosingBrace = options.compatibility.properties.spaceAfterClosingBrace;
+		  var mayHaveCharset = false;
 
-		  function _cleanupCharsets(tokens) {
-			for (var i = 0, l = tokens.length; i < l; i++) {
-			  var token = tokens[i];
+		  options.unitsRegexp = buildUnitRegexp(options);
+		  options.precision = buildPrecision(options);
 
-			  if (token[0] != 'at-rule')
-				continue;
+		  for (var i = 0, l = tokens.length; i < l; i++) {
+			var token = tokens[i];
 
-			  if (CHARSET_REGEXP.test(token[1][0])) {
-				if (hasCharset || token[1][0].indexOf(CHARSET_TOKEN) == -1) {
-				  tokens.splice(i, 1);
-				  i--;
-				  l--;
-				} else {
-				  hasCharset = true;
-				  tokens.splice(i, 1);
-				  tokens.unshift(['at-rule', [token[1][0].replace(CHARSET_REGEXP, CHARSET_TOKEN)]]);
-				}
-			  }
+			switch (token[0]) {
+			  case 'selector':
+				token[1] = cleanUpSelectors(token[1], !ie7Hack, adjacentSpace);
+				optimizeBody(token[2], options);
+				break;
+			  case 'block':
+				cleanUpBlock(token[1], spaceAfterClosingBrace);
+				optimize(token[2], options);
+				break;
+			  case 'flat-block':
+				cleanUpBlock(token[1], spaceAfterClosingBrace);
+				optimizeBody(token[2], options);
+				break;
+			  case 'at-rule':
+				cleanUpAtRule(token[1]);
+				mayHaveCharset = true;
+			}
+
+			if (token[1].length === 0 || (token[2] && token[2].length === 0)) {
+			  tokens.splice(i, 1);
+			  i--;
+			  l--;
 			}
 		  }
 
-		  function _optimize(tokens) {
-			var mayHaveCharset = false;
-
-			for (var i = 0, l = tokens.length; i < l; i++) {
-			  var token = tokens[i];
-
-			  switch (token[0]) {
-				case 'selector':
-				  token[1] = CleanUp.selectors(token[1], !ie7Hack, adjacentSpace);
-				  optimizeBody(token[2], self.options);
-				  break;
-				case 'block':
-				  CleanUp.block(token[1], spaceAfterClosingBrace);
-				  _optimize(token[2]);
-				  break;
-				case 'flat-block':
-				  CleanUp.block(token[1], spaceAfterClosingBrace);
-				  optimizeBody(token[2], self.options);
-				  break;
-				case 'at-rule':
-				  CleanUp.atRule(token[1]);
-				  mayHaveCharset = true;
-			  }
-
-			  if (token[1].length === 0 || (token[2] && token[2].length === 0)) {
-				tokens.splice(i, 1);
-				i--;
-				l--;
-			  }
-			}
-
-			if (mayHaveCharset)
-			  _cleanupCharsets(tokens);
-		  }
-
-		  _optimize(tokens);
-		};
-		
-		return SimpleOptimizer;
-	};
-	//#endregion
-	
-	//#region URL: /selectors/reorderable
-	modules['/selectors/reorderable'] = function () {
-		// TODO: it'd be great to merge it with the other canReorder functionality
-
-		var FLEX_PROPERTIES = /align\-items|box\-align|box\-pack|flex|justify/;
-		var BORDER_PROPERTIES = /^border\-(top|right|bottom|left|color|style|width|radius)/;
-
-		function canReorder(left, right) {
-		  for (var i = right.length - 1; i >= 0; i--) {
-			for (var j = left.length - 1; j >= 0; j--) {
-			  if (!canReorderSingle(left[j], right[i]))
-				return false;
-			}
-		  }
-
-		  return true;
+		  if (mayHaveCharset)
+			cleanupCharsets(tokens);
 		}
 
-		function canReorderSingle(left, right) {
-		  var leftName = left[0];
-		  var leftValue = left[1];
-		  var leftNameRoot = left[2];
-		  var leftSelector = left[5];
-		  var leftInSimpleSelector = left[6];
-		  var rightName = right[0];
-		  var rightValue = right[1];
-		  var rightNameRoot = right[2];
-		  var rightSelector = right[5];
-		  var rightInSimpleSelector = right[6];
-
-		  if (leftName == 'font' && rightName == 'line-height' || rightName == 'font' && leftName == 'line-height')
-			return false;
-		  if (FLEX_PROPERTIES.test(leftName) && FLEX_PROPERTIES.test(rightName))
-			return false;
-		  if (leftNameRoot == rightNameRoot && unprefixed(leftName) == unprefixed(rightName) && (vendorPrefixed(leftName) ^ vendorPrefixed(rightName)))
-			return false;
-		  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot))
-			return false;
-		  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
-			return false;
-		  if (leftNameRoot != rightNameRoot)
-			return true;
-		  if (leftName == rightName && leftNameRoot == rightNameRoot && (leftValue == rightValue || withDifferentVendorPrefix(leftValue, rightValue)))
-			return true;
-		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftName != leftNameRoot && rightName != rightNameRoot)
-			return true;
-		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftValue == rightValue)
-			return true;
-		  if (rightInSimpleSelector && leftInSimpleSelector && selectorsDoNotOverlap(rightSelector, leftSelector))
-			return true;
-
-		  return false;
-		}
-
-		function vendorPrefixed(name) {
-		  return /^\-(?:moz|webkit|ms|o)\-/.test(name);
-		}
-
-		function unprefixed(name) {
-		  return name.replace(/^\-(?:moz|webkit|ms|o)\-/, '');
-		}
-
-		function withDifferentVendorPrefix(value1, value2) {
-		  return vendorPrefixed(value1) && vendorPrefixed(value2) && value1.split('-')[1] != value2.split('-')[2];
-		}
-
-		function selectorsDoNotOverlap(s1, s2) {
-		  for (var i = 0, l = s1.length; i < l; i++) {
-			for (var j = 0, m = s2.length; j < m; j++) {
-			  if (s1[i][0] == s2[j][0])
-				return false;
-			}
-		  }
-
-		  return true;
-		}
-
-		var exports = {
-		  canReorder: canReorder,
-		  canReorderSingle: canReorderSingle
-		};
-
-		return exports;
+		return optimize;
 	};
 	//#endregion
 
@@ -4018,9 +4243,8 @@ var CleanCss = (function(){
 	modules['/stringifier/helpers'] = function () {
 		var lineBreak = require('os').EOL;
 
-		var STAR_HACK = '*';
-		var SUFFIX_HACK = '\\9';
-		var UNDERSCORE_HACK = '_';
+		var AT_RULE = 'at-rule';
+		var PROPERTY_SEPARATOR = ';';
 
 		function hasMoreProperties(tokens, index) {
 		  for (var i = index, l = tokens.length; i < l; i++) {
@@ -4071,14 +4295,6 @@ var CleanCss = (function(){
 			afterComma(token, valueIndex);
 		}
 
-		function storePrefixHack(name, context) {
-		  var hackType = name[2];
-		  if (hackType == 'underscore')
-			context.store(UNDERSCORE_HACK, context);
-		  else if (hackType == 'star')
-			context.store(STAR_HACK, context);
-		}
-
 		function selectors(tokens, context) {
 		  var store = context.store;
 
@@ -4102,32 +4318,42 @@ var CleanCss = (function(){
 
 		  if (typeof token == 'string') {
 			store(token, context);
+		  } else if (token[0] == AT_RULE) {
+			propertyAtRule(token[1], isLast, context);
 		  } else {
-			storePrefixHack(token[0], context);
 			store(token[0], context);
 			store(':', context);
 			value(tokens, position, isLast, context);
 		  }
 		}
 
+		function propertyAtRule(value, isLast, context) {
+		  var store = context.store;
+
+		  store(value, context);
+		  if (!isLast)
+			store(PROPERTY_SEPARATOR, context);
+		}
+
 		function value(tokens, position, isLast, context) {
 		  var store = context.store;
 		  var token = tokens[position];
-		  var isImportant = token[0][1];
-		  var hackType = token[0][2];
+		  var isVariableDeclaration = token[0][0].indexOf('--') === 0;
+
+		  if (isVariableDeclaration && Array.isArray(token[1][0][0])) {
+			store('{', context);
+			body(token[1], context);
+			store('};', context);
+			return;
+		  }
 
 		  for (var j = 1, m = token.length; j < m; j++) {
 			store(token[j], context);
 
-			if (j == m - 1 && hackType == 'suffix')
-			  store(SUFFIX_HACK, context);
-			if (j == m - 1 && isImportant)
-			  store('!important', context);
-
 			if (j < m - 1 && (inFilter(token) || !inSpecialContext(token, j, context))) {
 			  store(' ', context);
 			} else if (j == m - 1 && !isLast && hasMoreProperties(tokens, position + 1)) {
-			  store(';', context);
+			  store(PROPERTY_SEPARATOR, context);
 			}
 		  }
 		}
@@ -4367,7 +4593,6 @@ var CleanCss = (function(){
 		function restore(context, data, from, isSpecial) {
 		  var tempData = [];
 		  var cursor = 0;
-		  var addBreak;
 
 		  for (; cursor < data.length;) {
 			var nextMatch = from.nextMatch(data, cursor);
@@ -4379,13 +4604,12 @@ var CleanCss = (function(){
 
 			if (isSpecial && (context.keepAll || (context.keepOne && context.restored === 0))) {
 			  context.restored++;
-			  addBreak = context.keepBreaks && data[nextMatch.end] != '\n' && data.lastIndexOf('\r\n', nextMatch.end + 1) != nextMatch.end;
-			  tempData.push(comment, addBreak ? lineBreak : '');
-			} else {
-			  nextMatch.end += context.keepBreaks ? lineBreak.length : 0;
-			}
+			  tempData.push(comment);
 
-			cursor = nextMatch.end;
+			  cursor = nextMatch.end;
+			} else {
+			  cursor = nextMatch.end + (context.keepBreaks && data[nextMatch.end] == lineBreak ? 1 : 0);
+			}
 		  }
 
 		  return tempData.length > 0 ?
@@ -4598,7 +4822,7 @@ var CleanCss = (function(){
 		// Strip content tags by replacing them by the a special
 		// marker for further restoring. It's done via string scanning
 		// instead of regexps to speed up the process.
-		FreeTextProcessor.prototype.escape = function(data) {
+		FreeTextProcessor.prototype.escape = function (data) {
 		  var self = this;
 		  var breaksCount;
 		  var lastBreakAt;
@@ -4606,7 +4830,7 @@ var CleanCss = (function(){
 		  var metadata;
 //		  var saveWaypoints = this.saveWaypoints;
 
-		  return new QuoteScanner(data).each(function(match, store) {
+		  return new QuoteScanner(data).each(function (match, store) {
 //			if (saveWaypoints) {
 //			  breaksCount = match.split(lineBreak).length - 1;
 //			  lastBreakAt = match.lastIndexOf(lineBreak);
@@ -4621,10 +4845,16 @@ var CleanCss = (function(){
 		  });
 		};
 
-		function normalize(text, data, cursor) {
-		  // FIXME: this is a hack
-		  var lastSemicolon = data.lastIndexOf(';', cursor);
-		  var lastOpenBrace = data.lastIndexOf('{', cursor);
+		function normalize(text, data, prefixContext, cursor) {
+		  // FIXME: this is even a bigger hack now - see #407
+		  var searchIn = data;
+		  if (prefixContext) {
+			searchIn = prefixContext + data.substring(0, data.indexOf('__ESCAPED_FREE_TEXT_CLEAN_CSS'));
+			cursor = searchIn.length;
+		  }
+
+		  var lastSemicolon = searchIn.lastIndexOf(';', cursor);
+		  var lastOpenBrace = searchIn.lastIndexOf('{', cursor);
 		  var lastOne = 0;
 
 		  if (lastSemicolon > -1 && lastOpenBrace > -1)
@@ -4634,10 +4864,13 @@ var CleanCss = (function(){
 		  else
 			lastOne = lastSemicolon;
 
-		  var context = data.substring(lastOne + 1, cursor);
+		  var context = searchIn.substring(lastOne + 1, cursor);
 
-		  if (/\[[\w\d\-]+[\*\|\~\^\$]?=$/.test(context))
-			text = text.replace(/\\\n|\\\r\n/g, '');
+		  if (/\[[\w\d\-]+[\*\|\~\^\$]?=$/.test(context)) {
+			text = text
+			  .replace(/\\\n|\\\r\n/g, '')
+			  .replace(/\n|\r\n/g, '');
+		  }
 
 		  if (/^['"][a-zA-Z][a-zA-Z\d\-_]+['"]$/.test(text) && !/format\($/.test(context)) {
 			var isFont = /^(font|font\-family):/.test(context);
@@ -4652,7 +4885,7 @@ var CleanCss = (function(){
 		  return text;
 		}
 
-		FreeTextProcessor.prototype.restore = function(data) {
+		FreeTextProcessor.prototype.restore = function (data, prefixContext) {
 		  var tempData = [];
 		  var cursor = 0;
 
@@ -4662,7 +4895,7 @@ var CleanCss = (function(){
 			  break;
 
 			tempData.push(data.substring(cursor, nextMatch.start));
-			var text = normalize(this.matches.restore(nextMatch.match), data, nextMatch.start);
+			var text = normalize(this.matches.restore(nextMatch.match), data, prefixContext, nextMatch.start);
 			tempData.push(text);
 
 			cursor = nextMatch.end;
@@ -4754,45 +4987,14 @@ var CleanCss = (function(){
 	};
 	//#endregion
 	
-	//#region URL: /tokenizer/chunker
-	modules['/tokenizer/chunker'] = function () {
-		// Divides `data` into chunks of `chunkSize` for faster processing
-		function Chunker(data, breakString, chunkSize) {
-		  this.chunks = [];
-
-		  for (var cursor = 0, dataSize = data.length; cursor < dataSize;) {
-			var nextCursor = cursor + chunkSize > dataSize ?
-			  dataSize - 1 :
-			  cursor + chunkSize;
-
-			if (data[nextCursor] != breakString)
-			  nextCursor = data.indexOf(breakString, nextCursor);
-			if (nextCursor == -1)
-			  nextCursor = data.length - 1;
-
-			this.chunks.push(data.substring(cursor, nextCursor + breakString.length));
-			cursor = nextCursor + breakString.length;
-		  }
-		}
-
-		Chunker.prototype.isEmpty = function () {
-		  return this.chunks.length === 0;
-		};
-
-		Chunker.prototype.next = function () {
-		  return this.chunks.shift();
-		};
-
-		return Chunker;
-	};
-	//#endregion
-	
 	//#region URL: /tokenizer/extract-properties
 	modules['/tokenizer/extract-properties'] = function () {
-		var Splitter = require('/utils/splitter');
+		var split = require('/utils/split');
 
 		var COMMA = ',';
 		var FORWARD_SLASH = '/';
+
+		var AT_RULE = 'at-rule';
 
 		function selectorName(value) {
 		  return value[0];
@@ -4835,7 +5037,7 @@ var CleanCss = (function(){
 		function extractProperties(string, selectors, context) {
 		  var list = [];
 		  var innerComments = [];
-		  var splitter = new Splitter(/[ ,\/]/);
+		  var valueSeparator = /[ ,\/]/;
 
 		  if (typeof string != 'string')
 			return [];
@@ -4846,11 +5048,18 @@ var CleanCss = (function(){
 		  if (string.indexOf('ESCAPED_URL_CLEAN_CSS') > -1)
 			string = string.replace(/(ESCAPED_URL_CLEAN_CSS[^_]+?__)/g, /*context.sourceMap ? '$1 __ESCAPED_COMMENT_CLEAN_CSS(0,-1)__ ' : */'$1 ');
 
-		  var candidates = string.split(';');
+		  var candidates = split(string, ';', false, '{', '}');
 
 		  for (var i = 0, l = candidates.length; i < l; i++) {
 			var candidate = candidates[i];
 			var firstColonAt = candidate.indexOf(':');
+
+			var atRule = candidate.trim()[0] == '@';
+			if (atRule) {
+			  context.track(candidate);
+			  list.push([AT_RULE, candidate.trim()]);
+			  continue;
+			}
 
 			if (firstColonAt == -1) {
 			  context.track(candidate);
@@ -4859,7 +5068,7 @@ var CleanCss = (function(){
 			  continue;
 			}
 
-			if (candidate.indexOf('{') > 0) {
+			if (candidate.indexOf('{') > 0 && candidate.indexOf('{') < firstColonAt) {
 			  context.track(candidate);
 			  continue;
 			}
@@ -4880,7 +5089,23 @@ var CleanCss = (function(){
 
 			trackComments(innerComments, list, context);
 
-			var values = splitter.split(candidate.substring(firstColonAt + 1), true);
+			var firstBraceAt = candidate.indexOf('{');
+			var isVariable = name.trim().indexOf('--') === 0;
+			if (isVariable && firstBraceAt > 0) {
+			  var blockPrefix = candidate.substring(firstColonAt + 1, firstBraceAt + 1);
+			  var blockSuffix = candidate.substring(candidate.indexOf('}'));
+			  var blockContent = candidate.substring(firstBraceAt + 1, candidate.length - blockSuffix.length);
+
+			  context.track(blockPrefix);
+			  body.push(extractProperties(blockContent, selectors, context));
+			  list.push(body);
+			  context.track(blockSuffix);
+			  context.track(i < l - 1 ? ';' : '');
+
+			  continue;
+			}
+
+			var values = split(candidate.substring(firstColonAt + 1), valueSeparator, true);
 
 			if (values.length == 1 && values[0] === '') {
 			  context.warnings.push('Empty property \'' + name + '\' inside \'' + selectors.filter(selectorName).join(',') + '\' selector. Ignoring.');
@@ -4957,12 +5182,12 @@ var CleanCss = (function(){
 	
 	//#region URL: /tokenizer/extract-selectors
 	modules['/tokenizer/extract-selectors'] = function () {
-		var Splitter = require('/utils/splitter');
+		var split = require('/utils/split');
 
 		function extractSelectors(string, context) {
 		  var list = [];
 		  var metadata;
-		  var selectors = new Splitter(',').split(string);
+		  var selectors = split(string, ',');
 
 		  for (var i = 0, l = selectors.length; i < l; i++) {
 			metadata = context.track(selectors[i], true, i);
@@ -4979,23 +5204,23 @@ var CleanCss = (function(){
 	
 	//#region URL: /tokenizer/tokenize
 	modules['/tokenizer/tokenize'] = function () {
-		var Chunker = require('/tokenizer/chunker');
 		var extractProperties = require('/tokenizer/extract-properties');
 		var extractSelectors = require('/tokenizer/extract-selectors');
 //		var track = require('/source-maps/track');
+		var split = require('/utils/split');
 
 //		var path = require('path');
 
 		var flatBlock = /(@(font\-face|page|\-ms\-viewport|\-o\-viewport|viewport|counter\-style)|\\@.+?)/;
 
 		function tokenize(data, outerContext) {
-		  var chunker = new Chunker(normalize(data), '}', 128);
-		  if (chunker.isEmpty())
+		  var chunks = split(normalize(data), '}', true, '{', '}');
+		  if (chunks.length === 0)
 			return [];
 
 		  var context = {
-			chunk: chunker.next(),
-			chunker: chunker,
+			chunk: chunks.shift(),
+			chunks: chunks,
 			column: 0,
 			cursor: 0,
 			line: 1,
@@ -5039,18 +5264,22 @@ var CleanCss = (function(){
 		  var closest;
 
 		  if (chunk.length == context.cursor) {
-			if (context.chunker.isEmpty())
+			if (context.chunks.length === 0)
 			  return null;
 
-			context.chunk = chunk = context.chunker.next();
+			context.chunk = chunk = context.chunks.shift();
 			context.cursor = 0;
 		  }
 
 		  if (mode == 'body') {
-			closest = chunk.indexOf('}', context.cursor);
-			return closest > -1 ?
-			  [closest, 'bodyEnd'] :
-			  null;
+			if (chunk[context.cursor] == '}')
+			  return [context.cursor, 'bodyEnd'];
+
+			if (chunk.indexOf('}', context.cursor) == -1)
+			  return null;
+
+			closest = context.cursor + split(chunk.substring(context.cursor - 1), '}', true, '{', '}')[0].length - 2;
+			return [closest, 'bodyEnd'];
 		  }
 
 		  var nextSpecial = chunk.indexOf('@', context.cursor);
@@ -5411,6 +5640,7 @@ var CleanCss = (function(){
 			  backgroundOriginMerging: false, // background-origin to shorthand
 			  backgroundSizeMerging: false, // background-size to shorthand
 			  colors: true, // any kind of color transformations, like `#ff00ff` to `#f0f` or `#fff` into `red`
+			  ieBangHack: false, // !ie suffix hacks on IE<8
 			  iePrefixHack: false, // underscore / asterisk prefix hacks on IE
 			  ieSuffixHack: true, // \9 suffix hacks on IE6-9
 			  merging: true, // merging properties into one
@@ -5421,10 +5651,13 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false, // div+ nav Android stock browser hack
 			  ie7Hack: false, // *+html hack
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder)/ // special selectors which prevent merging
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|::content|\/deep\/|::shadow)/ // special selectors which prevent merging
 			},
 			units: {
 			  ch: true,
+			  in: true,
+			  pc: true,
+			  pt: true,
 			  rem: true,
 			  vh: true,
 			  vm: true, // vm is vmin on IE9+ see https://developer.mozilla.org/en-US/docs/Web/CSS/length
@@ -5442,6 +5675,7 @@ var CleanCss = (function(){
 			  backgroundOriginMerging: false,
 			  backgroundSizeMerging: false,
 			  colors: true,
+			  ieBangHack: false,
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
 			  merging: false,
@@ -5452,10 +5686,13 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false,
 			  ie7Hack: false,
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder)/
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder|:host|::content|\/deep\/|::shadow)/
 			},
 			units: {
 			  ch: false,
+			  in: true,
+			  pc: true,
+			  pt: true,
 			  rem: false,
 			  vh: false,
 			  vm: false,
@@ -5473,6 +5710,7 @@ var CleanCss = (function(){
 			  backgroundOriginMerging: false,
 			  backgroundSizeMerging: false,
 			  colors: true,
+			  ieBangHack: true,
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
 			  merging: false,
@@ -5483,10 +5721,13 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false,
 			  ie7Hack: true,
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder)/
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder|:host|::content|\/deep\/|::shadow)/
 			},
 			units: {
 			  ch: false,
+			  in: true,
+			  pc: true,
+			  pt: true,
 			  rem: false,
 			  vh: false,
 			  vm: false,
@@ -5546,6 +5787,24 @@ var CleanCss = (function(){
 		};
 		
 		return Compatibility;
+	};
+	//#endregion
+	
+	//#region URL: /utils/object
+	modules['/utils/object'] = function () {
+		var exports = {
+		  override: function (source1, source2) {
+			var target = {};
+			for (var key1 in source1)
+			  target[key1] = source1[key1];
+			for (var key2 in source2)
+			  target[key2] = source2[key2];
+
+			return target;
+		  }
+		};
+
+		return exports;
 	};
 	//#endregion
 
@@ -5791,23 +6050,23 @@ var CleanCss = (function(){
 		return SourceTracker;
 	};
 	//#endregion
+	
+	//#region URL: /utils/split
+	modules['/utils/split'] = function () {
+		function split(value, separator, includeSeparator, openLevel, closeLevel) {
+		  var withRegex = typeof separator != 'string';
+		  var hasSeparator = withRegex ?
+			separator.test(value) :
+			value.indexOf(separator);
 
-	//#region URL: /utils/splitter
-	modules['/utils/splitter'] = function () {
-		function Splitter(separator) {
-		  this.separator = separator;
-		  this.withRegex = typeof separator != 'string';
-		}
-
-		Splitter.prototype.split = function (value, withSeparator) {
-		  var hasSeparator = this.withRegex ?
-			this.separator.test(value) :
-			value.indexOf(this.separator);
 		  if (!hasSeparator)
 			return [value];
 
-		  if (value.indexOf('(') === -1 && !withSeparator)
-			return value.split(this.separator);
+		  openLevel = openLevel || '(';
+		  closeLevel = closeLevel || ')';
+
+		  if (value.indexOf(openLevel) == -1 && !includeSeparator)
+			return value.split(separator);
 
 		  var level = 0;
 		  var cursor = 0;
@@ -5815,24 +6074,34 @@ var CleanCss = (function(){
 		  var len = value.length;
 		  var tokens = [];
 
-		  while (cursor++ < len) {
-			if (value[cursor] == '(') {
+		  while (cursor < len) {
+			if (value[cursor] == openLevel) {
 			  level++;
-			} else if (value[cursor] == ')') {
+			} else if (value[cursor] == closeLevel) {
 			  level--;
-			} else if ((this.withRegex ? this.separator.test(value[cursor]) : value[cursor] == this.separator) && level === 0) {
-			  tokens.push(value.substring(lastStart, cursor + (withSeparator ? 1 : 0)));
+			}
+
+			if (level === 0 && cursor > 0 && cursor + 1 < len && (withRegex ? separator.test(value[cursor]) : value[cursor] == separator)) {
+			  tokens.push(value.substring(lastStart, cursor + (includeSeparator ? 1 : 0)));
 			  lastStart = cursor + 1;
 			}
+
+			cursor++;
 		  }
 
-		  if (lastStart < cursor + 1)
-			tokens.push(value.substring(lastStart));
+		  if (lastStart < cursor + 1) {
+			var lastValue = value.substring(lastStart);
+			var lastCharacter = lastValue[lastValue.length - 1];
+			if (!includeSeparator && (withRegex ? separator.test(lastCharacter) : lastCharacter == separator))
+			  lastValue = lastValue.substring(0, lastValue.length - 1);
+
+			tokens.push(lastValue);
+		  }
 
 		  return tokens;
-		};
-	
-		return Splitter;
+		}
+
+		return split;
 	};
 	//#endregion
 
@@ -5840,7 +6109,10 @@ var CleanCss = (function(){
 	modules['/clean'] = function () {
 //		var ImportInliner = require('/imports/inliner');
 //		var rebaseUrls = require('/urls/rebase');
-		var SelectorsOptimizer = require('/selectors/optimizer');
+
+		var tokenize = require('/tokenizer/tokenize');
+		var simpleOptimize = require('/selectors/simple');
+		var advancedOptimize = require('/selectors/advanced');
 
 		var simpleStringify = require('/stringifier/simple');
 //		var sourceMapStringify = require('/stringifier/source-maps');
@@ -5858,6 +6130,9 @@ var CleanCss = (function(){
 
 //		var fs = require('fs');
 //		var path = require('path');
+//		var url = require('url');
+
+		var override = require('/utils/object').override;
 
 		var DEFAULT_TIMEOUT = 5000;
 
@@ -5877,7 +6152,8 @@ var CleanCss = (function(){
 			keepSpecialComments: 'keepSpecialComments' in options ? options.keepSpecialComments : '*',
 			mediaMerging: undefined === options.mediaMerging ? true : !!options.mediaMerging,
 			processImport: undefined === options.processImport ? true : !!options.processImport,
-			rebase: undefined === options.rebase ? true : !!options.rebase,
+//			processImportFrom: importOptionsFrom(options.processImportFrom),
+//			rebase: undefined === options.rebase ? true : !!options.rebase,
 			relativeTo: options.relativeTo,
 			restructuring: undefined === options.restructuring ? true : !!options.restructuring,
 			root: options.root/* || process.cwd()*/,
@@ -5890,8 +6166,16 @@ var CleanCss = (function(){
 		  };
 
 //		  this.options.inliner.timeout = this.options.inliner.timeout || DEFAULT_TIMEOUT;
-//		  this.options.inliner.request = this.options.inliner.request || {};
+//		  this.options.inliner.request = override(
+//			/* jshint camelcase: false */
+//			proxyOptionsFrom(process.env.HTTP_PROXY || process.env.http_proxy),
+//			this.options.inliner.request || {}
+//		  );
 		};
+
+//		function importOptionsFrom(rules) {
+//		  return undefined === rules ? ['all'] : rules;
+//		}
 
 //		function missingDirectory(filepath) {
 //		  return !fs.existsSync(filepath) && !/\.css$/.test(filepath);
@@ -5901,7 +6185,16 @@ var CleanCss = (function(){
 //		  return fs.existsSync(filepath) && fs.statSync(filepath).isDirectory();
 //		}
 
-		CleanCSS.prototype.minify = function(data, callback) {
+//		function proxyOptionsFrom(httpProxy) {
+//		  return httpProxy ?
+//			{
+//			  hostname: url.parse(httpProxy).hostname,
+//			  port: parseInt(url.parse(httpProxy).port)
+//			} :
+//			{};
+//		}
+
+		CleanCSS.prototype.minify = function (data, callback) {
 		  var context = {
 //			stats: {},
 			errors: [],
@@ -5928,6 +6221,7 @@ var CleanCss = (function(){
 //			return runner(function () {
 //			  return new ImportInliner(context).process(data, {
 //				localOnly: context.localOnly,
+//				imports: context.options.processImportFrom,
 //				whenDone: runMinifier(callback, context)
 //			  });
 //			});
@@ -5998,14 +6292,12 @@ var CleanCss = (function(){
 
 		function minify(context, data) {
 		  var options = context.options;
-//		  var sourceMapTracker = context.inputSourceMapTracker;
 
 		  var commentsProcessor = new CommentsProcessor(context, options.keepSpecialComments, options.keepBreaks/*, options.sourceMap*/);
 		  var expressionsProcessor = new ExpressionsProcessor(/*options.sourceMap*/);
 		  var freeTextProcessor = new FreeTextProcessor(/*options.sourceMap*/);
 		  var urlsProcessor = new UrlsProcessor(context/*, options.sourceMap*/, options.compatibility.properties.urlQuotes);
 
-		  var selectorsOptimizer = new SelectorsOptimizer(options, context);
 		  var stringify = /*options.sourceMap ? sourceMapStringify : */simpleStringify;
 
 		  var run = function (processor, action) {
@@ -6022,17 +6314,22 @@ var CleanCss = (function(){
 		  run(urlsProcessor, 'escape');
 		  run(freeTextProcessor, 'escape');
 
-		  run(function() {
-			return selectorsOptimizer.process(data, stringify, function (data) {
-			  data = freeTextProcessor.restore(data);
-			  data = urlsProcessor.restore(data);
-//			  data = options.rebase ? rebaseUrls(data, context) : data;
-			  data = expressionsProcessor.restore(data);
-			  return commentsProcessor.restore(data);
-			}/*, sourceMapTracker*/);
-		  });
+		  function restoreEscapes(data, prefixContent) {
+			data = freeTextProcessor.restore(data, prefixContent);
+			data = urlsProcessor.restore(data);
+//			data = options.rebase ? rebaseUrls(data, context) : data;
+			data = expressionsProcessor.restore(data);
+			return commentsProcessor.restore(data);
+		  }
 
-		  return data;
+		  var tokens = tokenize(data, context);
+
+		  simpleOptimize(tokens, options);
+
+		  if (options.advanced)
+			advancedOptimize(tokens, options, context.validator, true);
+
+		  return stringify(tokens, options, restoreEscapes/*, context.inputSourceMapTracker*/);
 		}
 		
 		return CleanCSS;

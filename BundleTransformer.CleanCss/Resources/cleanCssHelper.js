@@ -14,6 +14,7 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 			keepSpecialComments: '*',
 			mediaMerging: true,
 			processImport: false,
+			processImportFrom: false,
 			rebase: false,
 			restructuring: true,
 			root: '',

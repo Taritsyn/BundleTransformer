@@ -1,5 +1,5 @@
 ##################################################################################
-# Sass v3.4.15
+# Sass v3.4.18
 # http://sass-lang.com
 #
 # Copyright (c) 2006-2015 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
@@ -705,6 +705,9 @@ module Sass
       return @listen_geq_2 unless @listen_geq_2.nil?
       @listen_geq_2 =
         begin
+          # Make sure we're loading listen/version from the same place that
+          # we're loading listen itself.
+          load_listen!
           require 'listen/version'
           version_geq(::Listen::VERSION, '2.0.0')
         rescue LoadError
@@ -1630,7 +1633,7 @@ end
           begin
           rescue LoadError => e
             if version_geq(RUBY_VERSION, "1.9.3")
-              version_constraint = "~> 2.7"
+              version_constraint = "~> 3.0"
             else
               version_constraint = "~> 1.1"
             end
@@ -2083,7 +2086,7 @@ module Sass
       return @@version if defined?(@@version)
 
       #BT- numbers = File.read(Sass::Util.scope('VERSION')).strip.split('.').
-	  numbers = '3.4.15'.split('.') #BT+
+	  numbers = '3.4.18'.split('.') #BT+
         map {|n| n =~ /^[0-9]+$/ ? n.to_i : n}
       #BT- name = File.read(Sass::Util.scope('VERSION_NAME')).strip
 	  name = 'Selective Steve' #BT+
@@ -4892,6 +4895,7 @@ WARNING
   def visit_import(node)
     if (path = node.css_import?)
       resolved_node = Sass::Tree::CssImportNode.resolved("url(#{path})")
+      resolved_node.options = node.options
       resolved_node.source_range = node.source_range
       return resolved_node
     end
@@ -5612,10 +5616,13 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
   def visit_children(parent)
     @tabs += 1
     return @format == :sass ? "\n" : " {}\n" if parent.children.empty?
+
+    res = visit_rule_level(parent.children)
+
     if @format == :sass
-      "\n"  + super.join.rstrip + "\n"
+      "\n"  + res.rstrip + "\n"
     else
-      " {\n" + super.join.rstrip + "\n#{ @tab_chars * (@tabs - 1)}}\n"
+      " {\n" + res.rstrip + "\n#{ @tab_chars * (@tabs - 1)}}\n"
     end
   ensure
     @tabs -= 1
@@ -5623,20 +5630,7 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
 
   # Ensures proper spacing between top-level nodes.
   def visit_root(node)
-    Sass::Util.enum_cons(node.children + [nil], 2).map do |child, nxt|
-      visit(child) +
-        if nxt &&
-            (child.is_a?(Sass::Tree::CommentNode) &&
-              child.line + child.lines + 1 == nxt.line) ||
-            (child.is_a?(Sass::Tree::ImportNode) && nxt.is_a?(Sass::Tree::ImportNode) &&
-              child.line + 1 == nxt.line) ||
-            (child.is_a?(Sass::Tree::VariableNode) && nxt.is_a?(Sass::Tree::VariableNode) &&
-              child.line + 1 == nxt.line)
-          ""
-        else
-          "\n"
-        end
-    end.join.rstrip + "\n"
+    visit_rule_level(node.children)
   end
 
   def visit_charset(node)
@@ -5693,7 +5687,7 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
     res = "#{tab_str}#{interp_to_src(node.value)}"
     res.gsub!(/^@import \#\{(.*)\}([^}]*)$/, '@import \1\2')
     return res + "#{semi}\n" unless node.has_children
-    res + yield + "\n"
+    res + yield
   end
 
   def visit_each(node)
@@ -5870,10 +5864,29 @@ class Sass::Tree::Visitors::Convert < Sass::Tree::Visitors::Base
   end
 
   def visit_keyframerule(node)
-    "#{tab_str}#{node.resolved_value}#{yield}\n"
+    "#{tab_str}#{node.resolved_value}#{yield}"
   end
 
   private
+
+  # Visit rule-level nodes and return their conversion with appropriate
+  # whitespace added.
+  def visit_rule_level(nodes)
+    Sass::Util.enum_cons(nodes + [nil], 2).map do |child, nxt|
+      visit(child) +
+        if nxt &&
+            (child.is_a?(Sass::Tree::CommentNode) && child.line + child.lines + 1 == nxt.line) ||
+            (child.is_a?(Sass::Tree::ImportNode) && nxt.is_a?(Sass::Tree::ImportNode) &&
+              child.line + 1 == nxt.line) ||
+            (child.is_a?(Sass::Tree::VariableNode) && nxt.is_a?(Sass::Tree::VariableNode) &&
+              child.line + 1 == nxt.line) ||
+            (child.is_a?(Sass::Tree::PropNode) && nxt.is_a?(Sass::Tree::PropNode))
+          ""
+        else
+          "\n"
+        end
+    end.join.rstrip + "\n"
+  end
 
   def interp_to_src(interp)
     interp.map {|r| r.is_a?(String) ? r : r.to_sass(@options)}.join
@@ -5981,6 +5994,10 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
     @source_mapping.add(source_range, target_range)
   end
 
+  def ends_with?(str)
+    @result.end_with?(str)
+  end
+
   # Move the output cursor back `chars` characters.
   def erase!(chars)
     return if chars == 0
@@ -6054,6 +6071,9 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
       end
     end
     rstrip!
+    if node.style == :compressed && ends_with?(";")
+      erase! 1
+    end
     return "" if @result.empty?
 
     output "\n"
@@ -6101,7 +6121,11 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
     if !node.has_children || node.children.empty?
       output(tab_str)
       for_node(node) {output(node.resolved_value)}
-      output(!node.has_children ? ";" : " {}")
+      if node.has_children
+        output("#{' ' unless node.style == :compressed}{}")
+      elsif node.children.empty?
+        output(";")
+      end
       return
     end
 
@@ -6111,18 +6135,18 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
     output(node.style == :compressed ? "{" : " {")
     output(node.style == :compact ? ' ' : "\n") if node.style != :compressed
 
-    was_prop = false
+    had_children = true
     first = true
     node.children.each do |child|
       next if child.invisible?
       if node.style == :compact
         if child.is_a?(Sass::Tree::PropNode)
-          with_tabs(first || was_prop ? 0 : @tabs + 1) do
+          with_tabs(first || !had_children ? 0 : @tabs + 1) do
             visit(child)
             output(' ')
           end
         else
-          if was_prop
+          unless had_children
             erase! 1
             output "\n"
           end
@@ -6136,18 +6160,23 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
           rstrip!
           output "\n"
         end
-        was_prop = child.is_a?(Sass::Tree::PropNode)
+        had_children = child.has_children
         first = false
       elsif node.style == :compressed
-        output(was_prop ? ";" : "")
+        unless had_children
+          output(";") unless ends_with?(";")
+        end
         with_tabs(0) {visit(child)}
-        was_prop = child.is_a?(Sass::Tree::PropNode)
+        had_children = child.has_children
       else
         with_tabs(@tabs + 1) {visit(child)}
         output "\n"
       end
     end
     rstrip!
+    if node.style == :compressed && ends_with?(";")
+      erase! 1
+    end
     if node.style == :expanded
       output("\n#{tab_str}")
     elsif node.style != :compressed
@@ -6268,9 +6297,17 @@ class Sass::Tree::Visitors::ToCss < Sass::Tree::Visitors::Base
 
       with_tabs(tabs) do
         node.children.each_with_index do |child, i|
-          output(separator) if i > 0
+          if i > 0
+            if separator.start_with?(";") && ends_with?(";")
+              erase! 1
+            end
+            output(separator)
+          end
           visit(child)
         end
+      end
+      if node.style == :compressed && ends_with?(";")
+        erase! 1
       end
 
       output(end_props)
@@ -7960,7 +7997,6 @@ module Sass
       def parent_superselector?(seq1, seq2)
         base = Sass::Selector::SimpleSequence.new([Sass::Selector::Placeholder.new('<temp>')],
                                                   false)
-
         seq1 = [] if seq1.nil? #BT+
         seq2 = [] if seq2.nil? #BT+
 
@@ -9044,8 +9080,13 @@ module Sass
 
       IMPORTANT = /!#{W}important/i
 
+      # A unit is like an IDENT, but disallows a hyphen followed by a digit.
+      # This allows "1px-2px" to be interpreted as subtraction rather than "1"
+      # with the unit "px-2px". It also allows "%".
+      UNIT = /-?#{NMSTART}(?:[a-zA-Z0-9_]|#{NONASCII}|#{ESCAPE}|-(?!\d))*|%/
+
       UNITLESS_NUMBER = /(?:[0-9]+|[0-9]*\.[0-9]+)(?:[eE][+-]?\d+)?/
-      NUMBER = /#{UNITLESS_NUMBER}(?:#{IDENT}|%)?/
+      NUMBER = /#{UNITLESS_NUMBER}(?:#{UNIT})?/
       PERCENTAGE = /#{UNITLESS_NUMBER}%/
 
       URI = /url\(#{W}(?:#{STRING}|#{URL})#{W}\)/i
@@ -9070,11 +9111,6 @@ module Sass
       ANY = /:(-[-\w]+-)?any\(/i
       OPTIONAL = /!#{W}optional/i
       IDENT_START = /-|#{NMSTART}/
-
-      # A unit is like an IDENT, but disallows a hyphen followed by a digit.
-      # This allows "1px-2px" to be interpreted as subtraction rather than "1"
-      # with the unit "px-2px". It also allows "%".
-      UNIT = /-?#{NMSTART}(?:[a-zA-Z0-9_]|#{NONASCII}|#{ESCAPE}|-(?!\d))*|%/
 
       IDENT_HYPHEN_INTERP = /-(#\{)/
       STRING1_NOINTERP = /\"((?:[^\n\r\f\\"#]|#(?!\{)|#{ESCAPE})*)\"/
@@ -9318,6 +9354,16 @@ module Sass::Script::Value
       err = "#{value.inspect} is not a compound selector"
       err = "$#{name.to_s.gsub('_', '-')}: #{err}" if name
       raise ArgumentError.new(err)
+    end
+
+    # Returns true when the literal is a string containing a calc()
+    #
+    # @param literal [Sass::Script::Value::Base] The value to check
+    # @return boolean
+    def calc?(literal)
+      if literal.is_a?(Sass::Script::Value::String)
+        literal.value =~ /calc\(/
+      end
     end
 
     private
@@ -10018,6 +10064,9 @@ module Sass::Script
     # @return [Sass::Script::Value::Color]
     # @raise [ArgumentError] if any parameter is the wrong type or out of bounds
     def rgb(red, green, blue)
+      if calc?(red) || calc?(green) || calc?(blue)
+        return unquoted_string("rgb(#{red}, #{green}, #{blue})")
+      end
       assert_type red, :Number, :red
       assert_type green, :Number, :green
       assert_type blue, :Number, :blue
@@ -10076,13 +10125,20 @@ module Sass::Script
         color, alpha = args
 
         assert_type color, :Color, :color
-        assert_type alpha, :Number, :alpha
-        check_alpha_unit alpha, 'rgba'
-
-        color.with(:alpha => alpha.value)
+        if calc?(alpha)
+          unquoted_string("rgba(#{color.red}, #{color.green}, #{color.blue}, #{alpha})")
+        else
+          assert_type alpha, :Number, :alpha
+          check_alpha_unit alpha, 'rgba'
+          color.with(:alpha => alpha.value)
+        end
       when 4
         red, green, blue, alpha = args
-        rgba(rgb(red, green, blue), alpha)
+        if calc?(red) || calc?(green) || calc?(blue) || calc?(alpha)
+          unquoted_string("rgba(#{red}, #{green}, #{blue}, #{alpha})")
+        else
+          rgba(rgb(red, green, blue), alpha)
+        end
       else
         raise ArgumentError.new("wrong number of arguments (#{args.size} for 4)")
       end
@@ -10107,7 +10163,11 @@ module Sass::Script
     # @raise [ArgumentError] if `$saturation` or `$lightness` are out of bounds
     #   or any parameter is the wrong type
     def hsl(hue, saturation, lightness)
-      hsla(hue, saturation, lightness, number(1))
+      if calc?(hue) || calc?(saturation) || calc?(lightness)
+        unquoted_string("hsl(#{hue}, #{saturation}, #{lightness})")
+      else
+        hsla(hue, saturation, lightness, number(1))
+      end
     end
     declare :hsl, [:hue, :saturation, :lightness]
 
@@ -10131,6 +10191,9 @@ module Sass::Script
     # @raise [ArgumentError] if `$saturation`, `$lightness`, or `$alpha` are out
     #   of bounds or any parameter is the wrong type
     def hsla(hue, saturation, lightness, alpha)
+      if calc?(hue) || calc?(saturation) || calc?(lightness) || calc?(alpha)
+        return unquoted_string("hsla(#{hue}, #{saturation}, #{lightness}, #{alpha})")
+      end
       assert_type hue, :Number, :hue
       assert_type saturation, :Number, :saturation
       assert_type lightness, :Number, :lightness
@@ -12833,6 +12896,7 @@ RUBY
           end
           return list unless (e = interpolation)
           list.elements << e
+          list.source_range.end_pos = list.elements.last.source_range.end_pos
         end
         list
       end
@@ -13032,15 +13096,12 @@ RUBY
 
       def paren
         return variable unless try_tok(:lparen)
-        was_in_parens = @in_parens
-        @in_parens = true
         start_pos = source_position
         e = map
+        e.force_division! if e
         end_pos = source_position
         assert_tok(:rparen)
-        return e || node(Sass::Script::Tree::ListLiteral.new([], nil), start_pos, end_pos)
-      ensure
-        @in_parens = was_in_parens
+        e || node(Sass::Script::Tree::ListLiteral.new([], nil), start_pos, end_pos)
       end
 
       def variable
@@ -13065,7 +13126,7 @@ RUBY
         tok = try_tok(:number)
         return selector unless tok
         num = tok.value
-        num.original = num.to_s unless @in_parens
+        num.original = num.to_s
         literal_node(num, tok.source_range.start_pos)
       end
 
@@ -13245,6 +13306,12 @@ module Sass::Script::Tree
     # @return [Node]
     def deep_copy
       Sass::Util.abstract(self)
+    end
+
+    # Forces any division operations with number literals in this expression to
+    # do real division, rather than returning strings.
+    def force_division!
+      children.each {|c| c.force_division!}
     end
 
     protected
@@ -14110,6 +14177,10 @@ module Sass::Script::Tree
       value.inspect
     end
 
+    def force_division!
+      value.original = nil if value.is_a?(Sass::Script::Value::Number)
+    end
+
     protected
 
     def _perform(environment)
@@ -14151,12 +14222,8 @@ module Sass::Script::Tree
     # @see Value#to_sass
     def to_sass(opts = {})
       return "()" if elements.empty?
-      precedence = Sass::Script::Parser.precedence_of(separator)
       members = elements.map do |v|
-        if v.is_a?(ListLiteral) && Sass::Script::Parser.precedence_of(v.separator) <= precedence ||
-            separator == :space && v.is_a?(UnaryOperation) &&
-              (v.operator == :minus || v.operator == :plus) ||
-            separator == :space && v.is_a?(Operation)
+        if element_needs_parens?(v)
           "(#{v.to_sass(opts)})"
         else
           v.to_sass(opts)
@@ -14179,6 +14246,10 @@ module Sass::Script::Tree
       "(#{elements.map {|e| e.inspect}.join(separator == :space ? ' ' : ', ')})"
     end
 
+    def force_division!
+      # Do nothing. Lists prevent division propagation.
+    end
+
     protected
 
     def _perform(environment)
@@ -14191,6 +14262,32 @@ module Sass::Script::Tree
     end
 
     private
+
+    # Returns whether an element in the list should be wrapped in parentheses
+    # when serialized to Sass.
+    def element_needs_parens?(element)
+      if element.is_a?(ListLiteral)
+        return Sass::Script::Parser.precedence_of(element.separator) <=
+               Sass::Script::Parser.precedence_of(separator)
+      end
+
+      return false unless separator == :space
+
+      if element.is_a?(UnaryOperation)
+        return element.operator == :minus || element.operator == :plus
+      end
+
+      return false unless element.is_a?(Operation)
+      return true unless element.operator == :div
+      !(is_literal_number?(element.operand1) && is_literal_number?(element.operand2))
+    end
+
+    # Returns whether a value is a number literal that shouldn't be divided.
+    def is_literal_number?(value)
+      value.is_a?(Literal) &&
+        value.value.is_a?((Sass::Script::Value::Number)) &&
+        !value.value.original.nil?
+    end
 
     def sep_str(opts = options)
       return ' ' if separator == :space
@@ -15783,11 +15880,27 @@ module Sass::Script::Value
       "##{red}#{green}#{blue}"
     end
 
+    def operation_name(operation)
+      case operation
+      when :+
+        "add"
+      when :-
+        "subtract"
+      when :*
+        "multiply"
+      when :/
+        "divide"
+      when :%
+        "modulo"
+      end
+    end
+
     def piecewise(other, operation)
       other_num = other.is_a? Number
       if other_num && !other.unitless?
         raise Sass::SyntaxError.new(
-          "Cannot add a number with units (#{other}) to a color (#{self}).")
+          "Cannot #{operation_name(operation)} a number with units (#{other}) to a color (#{self})."
+        )
       end
 
       result = []
