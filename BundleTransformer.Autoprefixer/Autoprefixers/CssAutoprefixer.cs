@@ -160,7 +160,6 @@
 			var optionsJson = new JObject(
 				new JProperty("browsers", new JArray(options.Browsers)),
 				new JProperty("cascade", options.Cascade),
-				new JProperty("safe", options.Safe),
 				new JProperty("remove", options.Remove),
 				new JProperty("add", options.Add)
 			);

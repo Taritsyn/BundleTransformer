@@ -6,7 +6,6 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		defaultOptions = {
 			browsers: null,
 			cascade: true,
-			safe: false,
 			remove: true,
 			add: true,
 			map: false
@@ -30,7 +29,6 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 	exports.process = function (code, options) {
 		var autoprefixOptions,
 			browsers,
-			postProcessor,
 			result = {},
 			processedCode = '',
 			errors = [],
@@ -42,7 +40,6 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		options = options || {};
 
 		autoprefixOptions = mix(mix({}, defaultOptions), options);
-		delete autoprefixOptions.safe;
 
 		browsers = autoprefixOptions.browsers;
 		if (browsers && browsers.length > 0) {
@@ -57,8 +54,7 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		autoprefixOptions.browsers = browsers;
 
 		try {
-			postProcessor = autoprefixer(autoprefixOptions);
-			processedCode = postProcessor.process(code, { 'safe': options.safe }).css;
+			processedCode = autoprefixer.process(code, autoprefixOptions).css;
 		}
 		catch (e) {
 			if (typeof e.line !== 'undefined' || typeof e.autoprefixer !== 'undefined') {

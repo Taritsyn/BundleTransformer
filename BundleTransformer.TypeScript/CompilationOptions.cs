@@ -6,6 +6,15 @@
 	internal sealed class CompilationOptions
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to enable experimental support for ES7 async functions
+		/// </summary>
+		public bool ExperimentalAsyncFunctions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -34,7 +43,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
+		/// Gets or sets a flag for whether to do not emit outputs if any errors were reported
 		/// </summary>
 		public bool NoEmitOnError
 		{
@@ -81,10 +90,28 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to skip a default library checking
+		/// </summary>
+		public bool SkipDefaultLibCheck
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>
 		public bool StripInternal
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to suppress excess property checks for object literals
+		/// </summary>
+		public bool SuppressExcessPropertyErrors
 		{
 			get;
 			set;
@@ -116,6 +143,7 @@
 		/// </summary>
 		public CompilationOptions()
 		{
+			ExperimentalAsyncFunctions = false;
 			NewLine = NewLineMode.CrLf;
 			NoEmit = false;
 			NoEmitHelpers = false;
@@ -124,7 +152,9 @@
 			NoLib = false;
 			PreserveConstEnums = false;
 			RemoveComments = false;
+			SkipDefaultLibCheck = false;
 			StripInternal = false;
+			SuppressExcessPropertyErrors = false;
 			SuppressImplicitAnyIndexErrors = false;
 			Target = TargetMode.EcmaScript3;
 		}

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.69
+            README file for Bundle Transformer: TypeScript 1.9.73
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains translator-adapter 
    `TypeScriptTranslator` (supports TypeScript
-   (http://www.typescriptlang.org) version 1.5.0). This adapter makes 
+   (http://www.typescriptlang.org) version 1.6 Beta). This adapter makes 
    translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text 
    output of translated TypeScript-asset.
@@ -30,11 +30,11 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of TypeScript version 1.5.0 RTM (please note: The
-      1.5.0 RTM release is also called '1.5.3');
-   2. In configuration settings of TypeScript-translator was added 2 new
-      properties - `NewLine` (default `CrLf`) and `NoEmitHelpers`
-      (default `false`).
+   1. Added support of TypeScript version 1.6 Beta;
+   2. In configuration settings of TypeScript-translator was added 3 new
+      properties: `ExperimentalAsyncFunctions` (default `false`),
+      `SkipDefaultLibCheck` (default `false`) and
+      `SuppressExcessPropertyErrors` (default `false`).
    
    ====================
    POST-INSTALL ACTIONS

@@ -84,6 +84,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable experimental support for ES7 async functions
+		/// </summary>
+		public bool ExperimentalAsyncFunctions
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -112,7 +121,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
+		/// Gets or sets a flag for whether to do not emit outputs if any errors were reported
 		/// </summary>
 		public bool NoEmitOnError
 		{
@@ -159,10 +168,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to suppress noImplicitAny errors for indexing objects lacking
-		/// index signatures
+		/// Gets or sets a flag for whether to skip a default library checking
 		/// </summary>
-		public bool SuppressImplicitAnyIndexErrors
+		public bool SkipDefaultLibCheck
 		{
 			get;
 			set;
@@ -173,6 +181,25 @@
 		/// <code>@internal</code> annotation
 		/// </summary>
 		public bool StripInternal
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to suppress excess property checks for object literals
+		/// </summary>
+		public bool SuppressExcessPropertyErrors
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to suppress noImplicitAny errors for indexing objects lacking
+		/// index signatures
+		/// </summary>
+		public bool SuppressImplicitAnyIndexErrors
 		{
 			get;
 			set;
@@ -214,6 +241,7 @@
 			_relativePathResolver = relativePathResolver;
 			_tsScriptCache = new Dictionary<string, TsScript>();
 
+			ExperimentalAsyncFunctions = tsConfig.ExperimentalAsyncFunctions;
 			NewLine = tsConfig.NewLine;
 			NoEmit = tsConfig.NoEmit;
 			NoEmitHelpers = tsConfig.NoEmitHelpers;
@@ -222,7 +250,9 @@
 			NoLib = tsConfig.NoLib;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
 			RemoveComments = tsConfig.RemoveComments;
+			SkipDefaultLibCheck = tsConfig.SkipDefaultLibCheck;
 			StripInternal = tsConfig.StripInternal;
+			SuppressExcessPropertyErrors = tsConfig.SuppressExcessPropertyErrors;
 			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
 			Target = tsConfig.Target;
 
@@ -372,6 +402,7 @@
 		{
 			var options = new CompilationOptions
 			{
+				ExperimentalAsyncFunctions = ExperimentalAsyncFunctions,
 				NewLine = NewLine,
 				NoEmit = NoEmit,
 				NoEmitHelpers = NoEmitHelpers,
@@ -380,7 +411,9 @@
 				NoLib = NoLib,
 				PreserveConstEnums = PreserveConstEnums,
 				RemoveComments = RemoveComments,
+				SkipDefaultLibCheck = SkipDefaultLibCheck,
 				StripInternal = StripInternal,
+				SuppressExcessPropertyErrors = SuppressExcessPropertyErrors,
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
 				Target = Target
 			};

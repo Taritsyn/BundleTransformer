@@ -7,6 +7,7 @@ var typeScriptHelper = (function (ts, undefined) {
 			charset: '',
 			emitBOM: false,
 			emitDecoratorMetadata: false,
+			experimentalAsyncFunctions: false,
 			experimentalDecorators: false,
 			inlineSourceMap: false,
 			inlineSources: false,
@@ -27,7 +28,9 @@ var typeScriptHelper = (function (ts, undefined) {
 			isolatedModules: false,
 			sourceMap: false,
 			sourceRoot: '',
+			skipDefaultLibCheck: false,
 			stripInternal: false,
+			suppressExcessPropertyErrors: false,
 			suppressImplicitAnyIndexErrors: false,
 			target: 0 /* ES3 */
 		},
@@ -111,6 +114,10 @@ var typeScriptHelper = (function (ts, undefined) {
 			var key = generateFileCacheItemKey(fileName);
 
 			this._files[key] = { path: fileName, content: data };
+		};
+
+		BtSystem.prototype.getCanonicalPath = function(path) {
+			return path.toLowerCase();
 		};
 
 		BtSystem.prototype.readDirectory = function() {
@@ -221,6 +228,14 @@ var typeScriptHelper = (function (ts, undefined) {
 			return newLine;
 		}
 
+		function fileExists(fileName) {
+			return ts.sys.fileExists(fileName);
+		}
+
+		function readFile(fileName) {
+			return ts.sys.readFile(fileName);
+		}
+
 		return {
 			getSourceFile: getSourceFile,
 			getDefaultLibFileName: getDefaultLibFileName,
@@ -228,7 +243,9 @@ var typeScriptHelper = (function (ts, undefined) {
 			getCurrentDirectory: getCurrentDirectory,
 			useCaseSensitiveFileNames: useCaseSensitiveFileNames,
 			getCanonicalFileName: getCanonicalFileName,
-			getNewLine: getNewLine
+			getNewLine: getNewLine,
+			fileExists: fileExists,
+			readFile: readFile
 		};
 	}
 	//#endregion
@@ -243,7 +260,7 @@ var typeScriptHelper = (function (ts, undefined) {
 		errors = program.getSyntacticDiagnostics();
 
 		if (errors.length === 0) {
-			errors = program.getGlobalDiagnostics();
+			errors = program.getOptionsDiagnostics().concat(program.getGlobalDiagnostics());
 			if (errors.length === 0) {
 				errors = program.getSemanticDiagnostics();
 			}

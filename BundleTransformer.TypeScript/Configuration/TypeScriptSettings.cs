@@ -10,6 +10,16 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to enable experimental support for ES7 async functions
+		/// </summary>
+		[ConfigurationProperty("experimentalAsyncFunctions", DefaultValue = false)]
+		public bool ExperimentalAsyncFunctions
+		{
+			get { return (bool)this["experimentalAsyncFunctions"]; }
+			set { this["experimentalAsyncFunctions"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -41,7 +51,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit outputs if any type checking errors were reported
+		/// Gets or sets a flag for whether to do not emit outputs if any errors were reported
 		/// </summary>
 		[ConfigurationProperty("noEmitOnError", DefaultValue = false)]
 		public bool NoEmitOnError
@@ -93,6 +103,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to skip a default library checking
+		/// </summary>
+		[ConfigurationProperty("skipDefaultLibCheck", DefaultValue = false)]
+		public bool SkipDefaultLibCheck
+		{
+			get { return (bool)this["skipDefaultLibCheck"]; }
+			set { this["skipDefaultLibCheck"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>
@@ -101,6 +121,16 @@
 		{
 			get { return (bool)this["stripInternal"]; }
 			set { this["stripInternal"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to suppress excess property checks for object literals
+		/// </summary>
+		[ConfigurationProperty("suppressExcessPropertyErrors", DefaultValue = false)]
+		public bool SuppressExcessPropertyErrors
+		{
+			get { return (bool)this["suppressExcessPropertyErrors"]; }
+			set { this["suppressExcessPropertyErrors"] = value; }
 		}
 
 		/// <summary>

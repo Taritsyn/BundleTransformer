@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.69
+           README file for Bundle Transformer: IntelliSense 1.9.73
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Added definitions for new properties of TypeScript-translator.
+   Updated definitions for configuration settings of
+   TypeScript-translator and Autoprefixer-postprocessor.
    
    =============
    DOCUMENTATION

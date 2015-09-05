@@ -29,16 +29,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable the special safe mode to parse broken CSS
-		/// </summary>
-		[ConfigurationProperty("safe", DefaultValue = false)]
-		public bool Safe
-		{
-			get { return (bool)this["safe"]; }
-			set { this["safe"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to remove outdated prefixes
 		/// </summary>
 		[ConfigurationProperty("remove", DefaultValue = true)]

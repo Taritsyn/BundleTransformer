@@ -55,15 +55,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable the special safe mode to parse broken CSS
-		/// </summary>
-		public bool Safe
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to remove outdated prefixes
 		/// </summary>
 		public bool Remove
@@ -102,7 +93,6 @@
 				.ToList()
 				;
 			Cascade = autoprefixerConfig.Cascade;
-			Safe = autoprefixerConfig.Safe;
 			Remove = autoprefixerConfig.Remove;
 			Add = autoprefixerConfig.Add;
 
@@ -115,8 +105,8 @@
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"autoprefixer",
 							@"
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.Msie",
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}
@@ -221,7 +211,6 @@
 			{
 				Browsers = Browsers,
 				Cascade = Cascade,
-				Safe = Safe,
 				Remove = Remove,
 				Add = Add
 			};

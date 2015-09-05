@@ -26,15 +26,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable the special safe mode to parse broken CSS
-		/// </summary>
-		public bool Safe
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to remove outdated prefixes
 		/// </summary>
 		public bool Remove
@@ -60,7 +51,6 @@
 		{
 			Browsers = new List<string>();
 			Cascade = true;
-			Safe = false;
 			Remove = true;
 			Add = true;
 		}
