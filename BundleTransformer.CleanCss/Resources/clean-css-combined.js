@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.1
+ * Clean-css v3.4.3
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -511,11 +511,11 @@ var CleanCss = (function(){
 			return [];
 
 		  if (value.length < 2)
-			value[1] = value[0];
+			value[1] = value[0].slice(0);
 		  if (value.length < 3)
-			value[2] = value[0];
+			value[2] = value[0].slice(0);
 		  if (value.length < 4)
-			value[3] = value[1];
+			value[3] = value[1].slice(0);
 
 		  for (var i = componentNames.length - 1; i >= 0; i--) {
 			var component = wrapSingle([[componentNames[i], property.important]]);
@@ -1295,7 +1295,7 @@ var CleanCss = (function(){
 			if (property.unused)
 			  continue;
 
-			if (position > 0 && _name == lastName && sameValue(position)) {
+			if (position > 0 && _name == lastName && isImportant == wasImportant && sameValue(position)) {
 			  property.unused = true;
 			  continue;
 			}
@@ -1698,6 +1698,9 @@ var CleanCss = (function(){
 				}
 			  } else if (left.shorthand && right.shorthand && left.name == right.name) {
 				// merge if all components can be merged
+
+				if (!left.multiplex && right.multiplex)
+				  continue;
 
 				if (!right.important && left.important) {
 				  right.unused = true;
@@ -3106,6 +3109,7 @@ var CleanCss = (function(){
 		var stringifyBody = require('/stringifier/one-time').body;
 		var stringifySelectors = require('/stringifier/one-time').selectors;
 		var isSpecial = require('/selectors/is-special');
+		var cloneArray = require('/utils/clone-array');
 
 		function reduceNonAdjacent(tokens, options, validator) {
 		  var candidates = {};
@@ -3241,9 +3245,10 @@ var CleanCss = (function(){
 
 			var where = data[j].where;
 			var token = tokens[where];
+			var clonedBody = cloneArray(token[2]);
 
-			bodies = bodies.concat(token[2]);
-			bodiesAsList.push(token[2]);
+			bodies = bodies.concat(clonedBody);
+			bodiesAsList.push(clonedBody);
 			processedTokens.push(where);
 		  }
 
@@ -3387,6 +3392,8 @@ var CleanCss = (function(){
 			return false;
 		  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
 			return false;
+		  if (leftNameRoot == 'border' && rightNameRoot == 'border' && leftName != rightName && (isSideBorder(leftName) && isStyleBorder(rightName) || isStyleBorder(leftName) && isSideBorder(rightName)))
+			return false;
 		  if (leftNameRoot != rightNameRoot)
 			return true;
 		  if (leftName == rightName && leftNameRoot == rightNameRoot && (leftValue == rightValue || withDifferentVendorPrefix(leftValue, rightValue)))
@@ -3407,6 +3414,14 @@ var CleanCss = (function(){
 
 		function unprefixed(name) {
 		  return name.replace(/^\-(?:moz|webkit|ms|o)\-/, '');
+		}
+
+		function isSideBorder(name) {
+		  return name == 'border-top' || name == 'border-right' || name == 'border-bottom' || name == 'border-left';
+		}
+
+		function isStyleBorder(name) {
+		  return name == 'border-color' || name == 'border-style' || name == 'border-width';
 		}
 
 		function withDifferentVendorPrefix(value1, value2) {
@@ -3978,13 +3993,13 @@ var CleanCss = (function(){
 			if (intVal === 0)
 			  return match;
 
-			if (compatibility.units.pt && intVal * 3 % 4 === 0)
+			if (compatibility.properties.shorterLengthUnits && compatibility.units.pt && intVal * 3 % 4 === 0)
 			  newValue = intVal * 3 / 4 + 'pt';
 
-			if (compatibility.units.pc && intVal % 16 === 0)
+			if (compatibility.properties.shorterLengthUnits && compatibility.units.pc && intVal % 16 === 0)
 			  newValue = intVal / 16 + 'pc';
 
-			if (compatibility.units.in && intVal % 96 === 0)
+			if (compatibility.properties.shorterLengthUnits && compatibility.units.in && intVal % 96 === 0)
 			  newValue = intVal / 96 + 'in';
 
 			if (newValue)
@@ -5626,6 +5641,23 @@ var CleanCss = (function(){
 	};
 	//#endregion
 
+	//#region URL: /utils/clone-array
+	modules['/utils/clone-array'] = function () {
+		function cloneArray(array) {
+		  var cloned = array.slice(0);
+
+		  for (var i = 0, l = cloned.length; i < l; i++) {
+			if (Array.isArray(cloned[i]))
+			  cloned[i] = cloneArray(cloned[i]);
+		  }
+
+		  return cloned;
+		}
+
+		return cloneArray;
+	};
+	//#endregion
+
 	//#region URL: /utils/compatibility
 	modules['/utils/compatibility'] = function () {
 		var util = require('util');
@@ -5644,6 +5676,7 @@ var CleanCss = (function(){
 			  iePrefixHack: false, // underscore / asterisk prefix hacks on IE
 			  ieSuffixHack: true, // \9 suffix hacks on IE6-9
 			  merging: true, // merging properties into one
+			  shorterLengthUnits: false, // optimize pixel units into `pt`, `pc` or `in` units
 			  spaceAfterClosingBrace: true, // 'url() no-repeat' to 'url()no-repeat'
 			  urlQuotes: false, // whether to wrap content of `url()` into quotes or not
 			  zeroUnits: true // 0[unit] -> 0
@@ -5679,6 +5712,7 @@ var CleanCss = (function(){
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
 			  merging: false,
+			  shorterLengthUnits: false,
 			  spaceAfterClosingBrace: true,
 			  urlQuotes: false,
 			  zeroUnits: true
@@ -5714,6 +5748,7 @@ var CleanCss = (function(){
 			  iePrefixHack: true,
 			  ieSuffixHack: true,
 			  merging: false,
+			  shorterLengthUnits: false,
 			  spaceAfterClosingBrace: true,
 			  urlQuotes: false,
 			  zeroUnits: true
