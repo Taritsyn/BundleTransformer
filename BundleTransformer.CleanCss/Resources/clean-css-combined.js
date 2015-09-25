@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.3
+ * Clean-css v3.4.4
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -1267,6 +1267,7 @@ var CleanCss = (function(){
 		function _optimize(properties, mergeAdjacent, aggressiveMerging, validator) {
 		  var overrideMapping = {};
 		  var lastName = null;
+		  var lastProperty;
 		  var j;
 
 		  function mergeablePosition(position) {
@@ -1295,7 +1296,7 @@ var CleanCss = (function(){
 			if (property.unused)
 			  continue;
 
-			if (position > 0 && _name == lastName && isImportant == wasImportant && sameValue(position)) {
+			if (position > 0 && lastProperty && _name == lastName && isImportant == lastProperty.important && isHack == lastProperty.hack && sameValue(position) && !lastProperty.unused) {
 			  property.unused = true;
 			  continue;
 			}
@@ -1333,6 +1334,7 @@ var CleanCss = (function(){
 
 				if (wasImportant && !isImportant || wasImportant && isHack) {
 				  property.unused = true;
+				  lastProperty = property;
 				  continue propertyLoop;
 				} else {
 				  anyRemoved = true;
@@ -1362,6 +1364,7 @@ var CleanCss = (function(){
 			}
 
 			lastName = _name;
+			lastProperty = property;
 		  }
 		}
 
@@ -4623,7 +4626,7 @@ var CleanCss = (function(){
 
 			  cursor = nextMatch.end;
 			} else {
-			  cursor = nextMatch.end + (context.keepBreaks && data[nextMatch.end] == lineBreak ? 1 : 0);
+			  cursor = nextMatch.end + (context.keepBreaks && data.substring(nextMatch.end, nextMatch.end + lineBreak.length) == lineBreak ? lineBreak.length : 0);
 			}
 		  }
 
@@ -5496,6 +5499,8 @@ var CleanCss = (function(){
 		var IMPORT_URL_PREFIX = '@import';
 		var UPPERCASE_IMPORT_URL_PREFIX = '@IMPORT';
 
+		var COMMENT_END_MARKER = /\*\//;
+
 		function byUrl(data, context, callback) {
 		  var nextStart = 0;
 		  var nextStartUpperCase = 0;
@@ -5615,7 +5620,7 @@ var CleanCss = (function(){
 			nextEnd = data.indexOf(withQuote, nextStart + 1);
 
 			untilNextQuote = data.substring(nextImport, nextEnd);
-			if (nextEnd == -1 || /^@import\s+(url\(|__ESCAPED)/i.test(untilNextQuote)) {
+			if (nextEnd == -1 || /^@import\s+(url\(|__ESCAPED)/i.test(untilNextQuote) || COMMENT_END_MARKER.test(untilNextQuote)) {
 			  cursor = nextStart;
 			  break;
 			}

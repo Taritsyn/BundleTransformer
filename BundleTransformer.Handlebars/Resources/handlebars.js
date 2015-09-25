@@ -1,6 +1,6 @@
 /*!
 
- handlebars v4.0.2
+ handlebars v4.0.3
 
 Copyright (C) 2011-2015 by Yehuda Katz
 
@@ -1870,13 +1870,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  setupHelper: function setupHelper(paramSize, name, blockHelper) {
 	    var params = [],
 	        paramsInit = this.setupHelperArgs(name, paramSize, params, blockHelper);
-	    var foundHelper = this.nameLookup('helpers', name, 'helper');
+	    var foundHelper = this.nameLookup('helpers', name, 'helper'),
+	        callContext = this.aliasable(this.contextName(0) + ' != null ? ' + this.contextName(0) + ' : {}');
 
 	    return {
 	      params: params,
 	      paramsInit: paramsInit,
 	      name: foundHelper,
-	      callParams: [this.contextName(0)].concat(params)
+	      callParams: [callContext].concat(params)
 	    };
 	  },
 
@@ -2233,7 +2234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _logger2 = _interopRequireDefault(_logger);
 
-	var VERSION = '4.0.2';
+	var VERSION = '4.0.3';
 	exports.VERSION = VERSION;
 	var COMPILER_REVISION = 7;
 
@@ -2759,6 +2760,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var partialBlock = undefined;
 	  if (options.fn && options.fn !== noop) {
+	    options.data = _base.createFrame(options.data);
 	    partialBlock = options.data['partial-block'] = options.fn;
 
 	    if (partialBlock.partials) {
@@ -3518,7 +3520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return 72;
 	                    break;
 	                case 42:
-	                    return 72;
+	                    yy_.yytext = yy_.yytext.replace(/\\([\\\]])/g, '$1');return 72;
 	                    break;
 	                case 43:
 	                    return 'INVALID';
@@ -3528,7 +3530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    break;
 	            }
 	        };
-	        lexer.rules = [/^(?:[^\x00]*?(?=(\{\{)))/, /^(?:[^\x00]+)/, /^(?:[^\x00]{2,}?(?=(\{\{|\\\{\{|\\\\\{\{|$)))/, /^(?:\{\{\{\{(?=[^/]))/, /^(?:\{\{\{\{\/[^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=[=}\s\/.])\}\}\}\})/, /^(?:[^\x00]*?(?=(\{\{\{\{)))/, /^(?:[\s\S]*?--(~)?\}\})/, /^(?:\()/, /^(?:\))/, /^(?:\{\{\{\{)/, /^(?:\}\}\}\})/, /^(?:\{\{(~)?>)/, /^(?:\{\{(~)?#>)/, /^(?:\{\{(~)?#\*?)/, /^(?:\{\{(~)?\/)/, /^(?:\{\{(~)?\^\s*(~)?\}\})/, /^(?:\{\{(~)?\s*else\s*(~)?\}\})/, /^(?:\{\{(~)?\^)/, /^(?:\{\{(~)?\s*else\b)/, /^(?:\{\{(~)?\{)/, /^(?:\{\{(~)?&)/, /^(?:\{\{(~)?!--)/, /^(?:\{\{(~)?![\s\S]*?\}\})/, /^(?:\{\{(~)?\*?)/, /^(?:=)/, /^(?:\.\.)/, /^(?:\.(?=([=~}\s\/.)|])))/, /^(?:[\/.])/, /^(?:\s+)/, /^(?:\}(~)?\}\})/, /^(?:(~)?\}\})/, /^(?:"(\\["]|[^"])*")/, /^(?:'(\\[']|[^'])*')/, /^(?:@)/, /^(?:true(?=([~}\s)])))/, /^(?:false(?=([~}\s)])))/, /^(?:undefined(?=([~}\s)])))/, /^(?:null(?=([~}\s)])))/, /^(?:-?[0-9]+(?:\.[0-9]+)?(?=([~}\s)])))/, /^(?:as\s+\|)/, /^(?:\|)/, /^(?:([^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=([=~}\s\/.)|]))))/, /^(?:\[[^\]]*\])/, /^(?:.)/, /^(?:$)/];
+	        lexer.rules = [/^(?:[^\x00]*?(?=(\{\{)))/, /^(?:[^\x00]+)/, /^(?:[^\x00]{2,}?(?=(\{\{|\\\{\{|\\\\\{\{|$)))/, /^(?:\{\{\{\{(?=[^/]))/, /^(?:\{\{\{\{\/[^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=[=}\s\/.])\}\}\}\})/, /^(?:[^\x00]*?(?=(\{\{\{\{)))/, /^(?:[\s\S]*?--(~)?\}\})/, /^(?:\()/, /^(?:\))/, /^(?:\{\{\{\{)/, /^(?:\}\}\}\})/, /^(?:\{\{(~)?>)/, /^(?:\{\{(~)?#>)/, /^(?:\{\{(~)?#\*?)/, /^(?:\{\{(~)?\/)/, /^(?:\{\{(~)?\^\s*(~)?\}\})/, /^(?:\{\{(~)?\s*else\s*(~)?\}\})/, /^(?:\{\{(~)?\^)/, /^(?:\{\{(~)?\s*else\b)/, /^(?:\{\{(~)?\{)/, /^(?:\{\{(~)?&)/, /^(?:\{\{(~)?!--)/, /^(?:\{\{(~)?![\s\S]*?\}\})/, /^(?:\{\{(~)?\*?)/, /^(?:=)/, /^(?:\.\.)/, /^(?:\.(?=([=~}\s\/.)|])))/, /^(?:[\/.])/, /^(?:\s+)/, /^(?:\}(~)?\}\})/, /^(?:(~)?\}\})/, /^(?:"(\\["]|[^"])*")/, /^(?:'(\\[']|[^'])*')/, /^(?:@)/, /^(?:true(?=([~}\s)])))/, /^(?:false(?=([~}\s)])))/, /^(?:undefined(?=([~}\s)])))/, /^(?:null(?=([~}\s)])))/, /^(?:-?[0-9]+(?:\.[0-9]+)?(?=([~}\s)])))/, /^(?:as\s+\|)/, /^(?:\|)/, /^(?:([^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=([=~}\s\/.)|]))))/, /^(?:\[(\\\]|[^\]])*\])/, /^(?:.)/, /^(?:$)/];
 	        lexer.conditions = { "mu": { "rules": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44], "inclusive": false }, "emu": { "rules": [2], "inclusive": false }, "com": { "rules": [6], "inclusive": false }, "raw": { "rules": [3, 4, 5], "inclusive": false }, "INITIAL": { "rules": [0, 1, 44], "inclusive": true } };
 	        return lexer;
 	    })();
@@ -4242,6 +4244,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	exports.__esModule = true;
+
+	var _utils = __webpack_require__(13);
+
 	var logger = {
 	  methodMap: ['debug', 'info', 'warn', 'error'],
 	  level: 'info',
@@ -4249,7 +4254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Maps a given level value to the `methodMap` indexes above.
 	  lookupLevel: function lookupLevel(level) {
 	    if (typeof level === 'string') {
-	      var levelMap = logger.methodMap.indexOf(level.toLowerCase());
+	      var levelMap = _utils.indexOf(logger.methodMap, level.toLowerCase());
 	      if (levelMap >= 0) {
 	        level = levelMap;
 	      } else {
@@ -4368,12 +4373,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function execIteration(field, index, last) {
-	      // Don't iterate over undefined values since we can't execute blocks against them
-	      // in non-strict (js) mode.
-	      if (context[field] == null) {
-	        return;
-	      }
-
 	      if (data) {
 	        data.key = field;
 	        data.index = index;
@@ -4394,7 +4393,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (context && typeof context === 'object') {
 	      if (_utils.isArray(context)) {
 	        for (var j = context.length; i < j; i++) {
-	          execIteration(i, i, i === context.length - 1);
+	          if (i in context) {
+	            execIteration(i, i, i === context.length - 1);
+	          }
 	        }
 	      } else {
 	        var priorKey = undefined;

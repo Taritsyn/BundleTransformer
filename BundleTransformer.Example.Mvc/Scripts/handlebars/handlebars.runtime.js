@@ -1,6 +1,6 @@
 /*!
 
- handlebars v4.0.2
+ handlebars v4.0.3
 
 Copyright (C) 2011-2015 by Yehuda Katz
 
@@ -169,7 +169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _logger2 = _interopRequireDefault(_logger);
 
-	var VERSION = '4.0.2';
+	var VERSION = '4.0.3';
 	exports.VERSION = VERSION;
 	var COMPILER_REVISION = 7;
 
@@ -695,6 +695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var partialBlock = undefined;
 	  if (options.fn && options.fn !== noop) {
+	    options.data = _base.createFrame(options.data);
 	    partialBlock = options.data['partial-block'] = options.fn;
 
 	    if (partialBlock.partials) {
@@ -872,6 +873,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	exports.__esModule = true;
+
+	var _utils = __webpack_require__(4);
+
 	var logger = {
 	  methodMap: ['debug', 'info', 'warn', 'error'],
 	  level: 'info',
@@ -879,7 +883,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Maps a given level value to the `methodMap` indexes above.
 	  lookupLevel: function lookupLevel(level) {
 	    if (typeof level === 'string') {
-	      var levelMap = logger.methodMap.indexOf(level.toLowerCase());
+	      var levelMap = _utils.indexOf(logger.methodMap, level.toLowerCase());
 	      if (levelMap >= 0) {
 	        level = levelMap;
 	      } else {
@@ -998,12 +1002,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function execIteration(field, index, last) {
-	      // Don't iterate over undefined values since we can't execute blocks against them
-	      // in non-strict (js) mode.
-	      if (context[field] == null) {
-	        return;
-	      }
-
 	      if (data) {
 	        data.key = field;
 	        data.index = index;
@@ -1024,7 +1022,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (context && typeof context === 'object') {
 	      if (_utils.isArray(context)) {
 	        for (var j = context.length; i < j; i++) {
-	          execIteration(i, i, i === context.length - 1);
+	          if (i in context) {
+	            execIteration(i, i, i === context.length - 1);
+	          }
 	        }
 	      } else {
 	        var priorKey = undefined;

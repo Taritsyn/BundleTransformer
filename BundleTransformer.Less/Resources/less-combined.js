@@ -1,8 +1,8 @@
 /*!
- * Less - Leaner CSS v2.5.1
+ * Less - Leaner CSS v2.5.3
  * http://lesscss.org
  *
- * Copyright (c) 2009-2014, Alexis Sellier <self@cloudhead.net>
+ * Copyright (c) 2009-2015, Alexis Sellier <self@cloudhead.net>
  * Licensed under the Apache v2 License.
  *
  */
@@ -551,7 +551,7 @@ var Less = (function(){
 		//
 		// RGB Colors - #ff0014, #eee
 		//
-		var Color = function (rgb, a) {
+		var Color = function (rgb, a, originalForm) {
 			//
 			// The end goal here, is to parse the arguments
 			// into an integer triplet, such as `128, 255, 0`
@@ -570,6 +570,9 @@ var Less = (function(){
 				});
 			}
 			this.alpha = typeof a === 'number' ? a : 1;
+			if (typeof originalForm !== 'undefined') {
+				this.value = originalForm;
+			}
 		};
 
 		Color.prototype = new Node();
@@ -888,6 +891,24 @@ var Less = (function(){
 								  "!important",
 								  this.merge,
 								  this.index, this.currentFileInfo, this.inline);
+		};
+
+		// Recursive marking for rules
+		var mark = function(value) {
+			if (!Array.isArray(value)) {
+				if (value.markReferenced) {
+					value.markReferenced();
+				}
+			} else {
+				value.forEach(function (ar) {
+					mark(ar);
+				});
+			}
+		};
+		Rule.prototype.markReferenced = function () {
+			if (this.value) {
+				mark(this.value);
+			}
 		};
 
 		return Rule;
@@ -2764,60 +2785,9 @@ var Less = (function(){
 				return !(v instanceof Comment);
 			});
 		};
-
-		var Node = require('/tree/node'),
-			Paren = require('/tree/paren'),
-			Comment = require('/tree/comment');
-
-		var Expression = function (value) {
-			this.value = value;
-			if (!value) {
-				throw new Error("Expression requires an array parameter");
-			}
-		};
-		Expression.prototype = new Node();
-		Expression.prototype.type = "Expression";
-		Expression.prototype.accept = function (visitor) {
-			this.value = visitor.visitArray(this.value);
-		};
-		Expression.prototype.eval = function (context) {
-			var returnValue,
-				inParenthesis = this.parens && !this.parensInOp,
-				doubleParen = false;
-			if (inParenthesis) {
-				context.inParenthesis();
-			}
-			if (this.value.length > 1) {
-				returnValue = new Expression(this.value.map(function (e) {
-					return e.eval(context);
-				}));
-			} else if (this.value.length === 1) {
-				if (this.value[0].parens && !this.value[0].parensInOp) {
-					doubleParen = true;
-				}
-				returnValue = this.value[0].eval(context);
-			} else {
-				returnValue = this;
-			}
-			if (inParenthesis) {
-				context.outOfParenthesis();
-			}
-			if (this.parens && this.parensInOp && !(context.isMathOn()) && !doubleParen) {
-				returnValue = new Paren(returnValue);
-			}
-			return returnValue;
-		};
-		Expression.prototype.genCSS = function (context, output) {
-			for (var i = 0; i < this.value.length; i++) {
-				this.value[i].genCSS(context, output);
-				if (i + 1 < this.value.length) {
-					output.add(" ");
-				}
-			}
-		};
-		Expression.prototype.throwAwayComments = function () {
-			this.value = this.value.filter(function(v) {
-				return !(v instanceof Comment);
+		Expression.prototype.markReferenced = function () {
+			this.value.forEach(function (value) {
+				if (value.markReferenced) { value.markReferenced(); }
 			});
 		};
 
@@ -2957,17 +2927,18 @@ var Less = (function(){
 	modules['/tree/anonymous'] = function () {
 		var Node = require('/tree/node');
 
-		var Anonymous = function (value, index, currentFileInfo, mapLines, rulesetLike) {
+		var Anonymous = function (value, index, currentFileInfo, mapLines, rulesetLike, referenced) {
 			this.value = value;
 			this.index = index;
 			this.mapLines = mapLines;
 			this.currentFileInfo = currentFileInfo;
 			this.rulesetLike = (typeof rulesetLike === 'undefined') ? false : rulesetLike;
+			this.isReferenced = referenced || false;
 		};
 		Anonymous.prototype = new Node();
 		Anonymous.prototype.type = "Anonymous";
 		Anonymous.prototype.eval = function () {
-			return new Anonymous(this.value, this.index, this.currentFileInfo, this.mapLines, this.rulesetLike);
+			return new Anonymous(this.value, this.index, this.currentFileInfo, this.mapLines, this.rulesetLike, this.isReferenced);
 		};
 		Anonymous.prototype.compare = function (other) {
 			return other.toCSS && this.toCSS() === other.toCSS() ? 0 : undefined;
@@ -2977,6 +2948,12 @@ var Less = (function(){
 		};
 		Anonymous.prototype.genCSS = function (context, output) {
 			output.add(this.value, this.currentFileInfo, this.index, this.mapLines);
+		};
+		Anonymous.prototype.markReferenced = function () {
+			this.isReferenced = true;
+		};
+		Anonymous.prototype.getIsReferenced = function () {
+			return !this.currentFileInfo || !this.currentFileInfo.reference || this.isReferenced;
 		};
 
 		return Anonymous;
@@ -3263,7 +3240,12 @@ var Less = (function(){
 			}
 
 			if (this.options.inline) {
-				var contents = new Anonymous(this.root, 0, {filename: this.importedFilename}, true, true);
+				var contents = new Anonymous(this.root, 0,
+				  {
+					  filename: this.importedFilename,
+					  reference: this.path.currentFileInfo && this.path.currentFileInfo.reference
+				  }, true, true, false);
+
 				return this.features ? new Media([contents], this.features.value) : [contents];
 			} else if (this.css) {
 				var newImport = new Import(this.evalPath(context), features, this.options, this.index);
@@ -3302,14 +3284,17 @@ var Less = (function(){
 			this.arity = params.length;
 			this.rules = rules;
 			this._lookups = {};
+			var optionalParameters = [];
 			this.required = params.reduce(function (count, p) {
 				if (!p.name || (p.name && !p.value)) {
 					return count + 1;
 				}
 				else {
+					optionalParameters.push(p.name);
 					return count;
 				}
 			}, 0);
+			this.optionalParameters = optionalParameters;
 			this.frames = frames;
 		};
 		Definition.prototype = new Ruleset();
@@ -3447,22 +3432,30 @@ var Less = (function(){
 			return true;
 		};
 		Definition.prototype.matchArgs = function (args, context) {
-			var argsLength = (args && args.length) || 0, len;
+			var allArgsCnt = (args && args.length) || 0, len, optionalParameters = this.optionalParameters;
+			var requiredArgsCnt = !args ? 0 : args.reduce(function (count, p) {
+				if (optionalParameters.indexOf(p.name) < 0) {
+					return count + 1;
+				} else {
+					return count;
+				}
+			}, 0);
 
 			if (! this.variadic) {
-				if (argsLength < this.required) {
+				if (requiredArgsCnt < this.required) {
 					return false;
 				}
-				if (argsLength > this.params.length) {
+				if (allArgsCnt > this.params.length) {
 					return false;
 				}
 			} else {
-				if (argsLength < (this.required - 1)) {
+				if (requiredArgsCnt < (this.required - 1)) {
 					return false;
 				}
 			}
 
-			len = Math.min(argsLength, this.arity);
+			// check patterns
+			len = Math.min(requiredArgsCnt, this.arity);
 
 			for (var i = 0; i < len; i++) {
 				if (!this.params[i].name && !this.params[i].variadic) {
@@ -3487,7 +3480,7 @@ var Less = (function(){
 
 		var MixinCall = function (elements, args, index, currentFileInfo, important) {
 			this.selector = new Selector(elements);
-			this.arguments = (args && args.length) ? args : null;
+			this.arguments = args || [];
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
 			this.important = important;
@@ -3498,17 +3491,18 @@ var Less = (function(){
 			if (this.selector) {
 				this.selector = visitor.visit(this.selector);
 			}
-			if (this.arguments) {
+			if (this.arguments.length) {
 				this.arguments = visitor.visitArray(this.arguments);
 			}
 		};
 		MixinCall.prototype.eval = function (context) {
-			var mixins, mixin, mixinPath, args, rules = [], match = false, i, m, f, isRecursive, isOneFound, rule,
+			var mixins, mixin, mixinPath, args = [], arg, argValue,
+				rules = [], rule, match = false, i, m, f, isRecursive, isOneFound,
 				candidates = [], candidate, conditionResult = [], defaultResult, defFalseEitherCase = -1,
 				defNone = 0, defTrue = 1, defFalse = 2, count, originalRuleset, noArgumentsFilter;
 
 			function calcDefGroup(mixin, mixinPath) {
-				var p, namespace;
+				var f, p, namespace;
 
 				for (f = 0; f < 2; f++) {
 					conditionResult[f] = true;
@@ -3534,9 +3528,18 @@ var Less = (function(){
 				return defFalseEitherCase;
 			}
 
-			args = this.arguments && this.arguments.map(function (a) {
-				return { name: a.name, value: a.value.eval(context) };
-			});
+			for (i = 0; i < this.arguments.length; i++) {
+				arg = this.arguments[i];
+				argValue = arg.value.eval(context);
+				if (arg.expand && Array.isArray(argValue.value)) {
+					argValue = argValue.value;
+					for (m = 0; m < argValue.length; m++) {
+						args.push({value: argValue[m]});
+					}
+				} else {
+					args.push({name: arg.name, value: argValue});
+				}
+			}
 
 			noArgumentsFilter = function(rule) {return rule.matchArgs(null, context);};
 
@@ -4433,6 +4436,7 @@ var Less = (function(){
 				var importVisitor = this,
 					inlineCSS = importNode.options.inline,
 //					isPlugin = importNode.options.plugin,
+					isOptional = importNode.options.optional,
 					duplicateImport = importedAtRoot || fullPath in importVisitor.recursionDetector;
 
 				if (!context.importMultiple) {
@@ -4447,6 +4451,10 @@ var Less = (function(){
 							return false;
 						};
 					}
+				}
+
+				if (!fullPath && isOptional) {
+					importNode.skip = true;
 				}
 
 				if (root) {
@@ -5325,6 +5333,15 @@ var Less = (function(){
 						rule.value = toValue(spacedGroups);
 					}
 				});
+			},
+
+			visitAnonymous: function(anonymousNode, visitArgs) {
+				if (!anonymousNode.getIsReferenced()) {
+					return ;
+				}
+
+				anonymousNode.accept(this._visitor);
+				return anonymousNode;
 			}
 		};
 
@@ -6300,7 +6317,7 @@ var Less = (function(){
 								if (!colorCandidateString.match(/^[A-Fa-f0-9]+$/)) { // verify if candidate consists only of allowed HEX characters
 									error("Invalid HEX color code");
 								}
-								return new(tree.Color)(rgb[1]);
+								return new(tree.Color)(rgb[1], undefined, '#' + colorCandidateString);
 							}
 						},
 
@@ -6498,7 +6515,8 @@ var Less = (function(){
 							var entities = parsers.entities,
 								returner = { args:null, variadic: false },
 								expressions = [], argsSemiColon = [], argsComma = [],
-								isSemiColonSeparated, expressionContainsNamed, name, nameLoop, value, arg;
+								isSemiColonSeparated, expressionContainsNamed, name, nameLoop,
+								value, arg, expand;
 
 							parserInput.save();
 
@@ -6560,14 +6578,18 @@ var Less = (function(){
 											}
 										}
 										nameLoop = (name = val.name);
-									} else if (!isCall && parserInput.$str("...")) {
-										returner.variadic = true;
-										if (parserInput.$char(";") && !isSemiColonSeparated) {
-											isSemiColonSeparated = true;
+									} else if (parserInput.$str("...")) {
+										if (!isCall) {
+											returner.variadic = true;
+											if (parserInput.$char(";") && !isSemiColonSeparated) {
+												isSemiColonSeparated = true;
+											}
+											(isSemiColonSeparated ? argsSemiColon : argsComma)
+												.push({ name: arg.name, variadic: true });
+											break;
+										} else {
+											expand = true;
 										}
-										(isSemiColonSeparated ? argsSemiColon : argsComma)
-											.push({ name: arg.name, variadic: true });
-										break;
 									} else if (!isCall) {
 										name = nameLoop = val.name;
 										value = null;
@@ -6578,7 +6600,7 @@ var Less = (function(){
 									expressions.push(value);
 								}
 
-								argsComma.push({ name:nameLoop, value:value });
+								argsComma.push({ name:nameLoop, value:value, expand:expand });
 
 								if (parserInput.$char(',')) {
 									continue;
@@ -6595,7 +6617,7 @@ var Less = (function(){
 									if (expressions.length > 1) {
 										value = new(tree.Value)(expressions);
 									}
-									argsSemiColon.push({ name:name, value:value });
+									argsSemiColon.push({ name:name, value:value, expand:expand });
 
 									name = null;
 									expressions = [];
@@ -7159,7 +7181,7 @@ var Less = (function(){
 
 						if (dir) {
 							error("BundleTransformer.Less does not support `@plugin` directive.");
-						
+
 //							var options = { plugin : true };
 //
 //							if ((path = this.entities.quoted() || this.entities.url())) {
@@ -8006,8 +8028,8 @@ var Less = (function(){
 	
 	//#region URL: /functions/math
 	modules['/functions/math'] = function () {
-		var Dimension = require('/tree/dimension'),
-			functionRegistry = require('/functions/function-registry');
+		var functionRegistry = require('/functions/function-registry'),
+			mathHelper = require('/functions/math-helper');
 
 		var mathFunctions = {
 			// name,  unit
@@ -8023,7 +8045,28 @@ var Less = (function(){
 			acos:  "rad"
 		};
 
-		function _math(fn, unit, n) {
+		for (var f in mathFunctions) {
+			if (mathFunctions.hasOwnProperty(f)) {
+				mathFunctions[f] = mathHelper._math.bind(null, Math[f], mathFunctions[f]);
+			}
+		}
+
+		mathFunctions.round = function (n, f) {
+			var fraction = typeof f === "undefined" ? 0 : f.value;
+			return mathHelper._math(function(num) { return num.toFixed(fraction); }, null, n);
+		};
+
+		functionRegistry.addMultiple(mathFunctions);
+	};
+	//#endregion
+	
+	//#region URL: /functions/math-helper
+	modules['/functions/math-helper'] = function () {
+		var Dimension = require('/tree/dimension');
+
+		var MathHelper = function() {
+		};
+		MathHelper._math = function (fn, unit, n) {
 			if (!(n instanceof Dimension)) {
 				throw { type: "Argument", message: "argument must be a number" };
 			}
@@ -8033,20 +8076,9 @@ var Less = (function(){
 				n = n.unify();
 			}
 			return new Dimension(fn(parseFloat(n.value)), unit);
-		}
-
-		for (var f in mathFunctions) {
-			if (mathFunctions.hasOwnProperty(f)) {
-				mathFunctions[f] = _math.bind(null, Math[f], mathFunctions[f]);
-			}
-		}
-
-		mathFunctions.round = function (n, f) {
-			var fraction = typeof f === "undefined" ? 0 : f.value;
-			return _math(function(num) { return num.toFixed(fraction); }, null, n);
 		};
 
-		functionRegistry.addMultiple(mathFunctions);
+		return MathHelper;
 	};
 	//#endregion
 	
@@ -8054,7 +8086,8 @@ var Less = (function(){
 	modules['/functions/number'] = function () {
 		var Dimension = require('/tree/dimension'),
 			Anonymous = require('/tree/anonymous'),
-			functionRegistry = require('/functions/function-registry');
+			functionRegistry = require('/functions/function-registry'),
+			mathHelper = require('/functions/math-helper');
 
 		var minMax = function (isMin, args) {
 			args = Array.prototype.slice.call(args);
@@ -8125,7 +8158,11 @@ var Less = (function(){
 				return new Dimension(Math.pow(x.value, y.value), x.unit);
 			},
 			percentage: function (n) {
-				return new Dimension(n.value * 100, '%');
+				var result = mathHelper._math(function(num) {
+					return num * 100;
+				}, '%', n);
+
+				return result;
 			}
 		});
 	};
@@ -8802,7 +8839,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 5, 1],
+				version: [2, 5, 3],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),
