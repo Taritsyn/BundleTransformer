@@ -179,8 +179,8 @@
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"clean",
 							@"
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.Msie",
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

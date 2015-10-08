@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.3.11
+* CSSO (CSS Optimizer) v1.3.12
 * http://github.com/css/csso
 *
 * Copyright 2014, Sergey Kryzhanovsky
@@ -189,6 +189,11 @@ var CSSO = (function(){
 
 			function _getTokens(s) {
 				if (!s) return [];
+
+				// Remove BOM from UTF-8 encoded input
+				if (s.charCodeAt(0) === 0xFEFF) {
+					s = s.slice(1);
+				}
 
 				tokens = [];
 
@@ -2639,10 +2644,16 @@ var CSSO = (function(){
 
 		TRBL.prototype.isOkToMinimize = function() {
 			var s = this.sides,
-				imp;
+				imp,
+				ieReg = /\\9$/;
 
 			if (!!(s.top && s.right && s.bottom && s.left)) {
 				imp = s.top.imp + s.right.imp + s.bottom.imp + s.left.imp;
+
+				if (ieReg.test(s.top.s) || ieReg.test(s.right.s) || ieReg.test(s.bottom.s) || ieReg.test(s.left.s)) {
+					return false;
+				}
+
 				return (imp === 0 || imp === 4 || imp === this.imp);
 			}
 			return false;
@@ -2687,6 +2698,7 @@ var CSSO = (function(){
 
 			return r;
 		};
+		var NON_LENGTH_UNIT = ['deg', 'grad', 'rad', 'turn', 's', 'ms', 'Hz', 'kHz', 'dpi', 'dpcm', 'dppx'];
 
 		function CSSOCompressor() {}
 
@@ -3228,7 +3240,7 @@ var CSSO = (function(){
 
 			if (nr === 'unknown') token[2] = '\n';
 			else {
-				if (!(container[1] === 'atrulerq' && !pr) && !this.issue16(container, i) && !this.issue165(container, pr, nr)) {
+				if (!(container[1] === 'atrulerq' && !pr) && !this.issue16(container, i) && !this.issue165(container, pr, nr) && !this.issue134(pr, nr)) {
 					if (nr !== null && pr !== null) {
 						if (this._cleanWhitespace(nr, false) || this._cleanWhitespace(pr, true)) return null;
 					} else return null;
@@ -3248,6 +3260,11 @@ var CSSO = (function(){
 		//See https://github.com/css/csso/issues/165
 		CSSOCompressor.prototype.issue165 = function(container, pr, nr) {
 			return container[1] === 'atrulerq' && pr === 'braces' && nr === 'ident';
+		};
+
+		//See https://github.com/css/csso/issues/134
+		CSSOCompressor.prototype.issue134 = function(pr, nr) {
+			return pr === 'funktion' && (nr === 'funktion' || nr === 'vhash');
 		};
 
 		CSSOCompressor.prototype._cleanWhitespace = function(r, left) {
@@ -3395,14 +3412,12 @@ var CSSO = (function(){
 		};
 
 		CSSOCompressor.prototype.compressDimension = function(token) {
-			var declaration;
 			if (token[2][2] === '0') {
-				if ((token[3][2] === 's' || token[3][2] === 'ms') && (declaration = this.findDeclaration(token))) {
-					var declName = declaration[2][2][2];
-					if  (declName === '-moz-transition' || declName === 'transition') return; // https://github.com/css/csso/issues/82, also support recent Fx versions
-					if  (declName === '-moz-animation' || declName === 'animation') return; // https://github.com/css/csso/issues/100
-				}
-				return token[2];
+			  if (NON_LENGTH_UNIT.indexOf(token[3][2]) >= 0) {
+				return;
+			  }
+
+			  return token[2]
 			}
 		};
 

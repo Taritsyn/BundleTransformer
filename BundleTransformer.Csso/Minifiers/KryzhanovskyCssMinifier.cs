@@ -71,9 +71,9 @@
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"csso",
 							@"
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.Msie (only in the `ChakraJsRt` mode)",
-							"V8JsEngine")
+  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.V8",
+							"MsieJsEngine")
 					);
 				}
 

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.CleanCss</id>
-		<version>1.9.76</version>
+		<version>1.9.77</version>
 		<title>Bundle Transformer: Clean-css</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -10,11 +10,11 @@
 		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
 		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=725495</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (http://github.com/jakubpawlowicz/clean-css) version 3.4.4.
+		<description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (http://github.com/jakubpawlowicz/clean-css) version 3.4.5.
 	 
-As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie.</description>
-		<summary>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css version 3.4.4.</summary>
-		<releaseNotes>Added support of Clean-css version 3.4.4.</releaseNotes>
+As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.Msie or JavaScriptEngineSwitcher.V8.</description>
+		<summary>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css version 3.4.5.</summary>
+		<releaseNotes>Added support of Clean-css version 3.4.5.</releaseNotes>
 		<copyright>Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Clean-css</tags>

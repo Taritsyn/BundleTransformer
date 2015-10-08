@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.4
+ * Clean-css v3.4.5
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -1344,7 +1344,10 @@ var CleanCss = (function(){
 
 			  if (anyRemoved) {
 				position = -1;
+				lastProperty = null;
+				lastName = null;
 				overrideMapping = {};
+				continue;
 			  }
 			} else {
 			  overrideMapping[_name] = overrideMapping[_name] || [];
@@ -3405,7 +3408,7 @@ var CleanCss = (function(){
 			return true;
 		  if (leftName != rightName && leftNameRoot == rightNameRoot && leftValue == rightValue)
 			return true;
-		  if (rightInSpecificSelector && leftInSpecificSelector && selectorsDoNotOverlap(rightSelector, leftSelector))
+		  if (rightInSpecificSelector && leftInSpecificSelector && !inheritable(leftNameRoot) && !inheritable(rightNameRoot) && selectorsDoNotOverlap(rightSelector, leftSelector))
 			return true;
 
 		  return false;
@@ -3440,6 +3443,12 @@ var CleanCss = (function(){
 		  }
 
 		  return true;
+		}
+
+		function inheritable(name) {
+		  // According to http://www.w3.org/TR/CSS21/propidx.html
+		  // Others will be catched by other, preceeding rules
+		  return name == 'font' || name == 'line-height' || name == 'list-style';
 		}
 
 		var exports = {
