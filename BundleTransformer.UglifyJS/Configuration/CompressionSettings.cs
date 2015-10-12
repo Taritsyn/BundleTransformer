@@ -147,7 +147,7 @@
 		/// Gets or sets a flag for whether to prevent the compressor from discarding
 		/// unused function arguments
 		/// </summary>
-		[ConfigurationProperty("keepFunctionArgs", DefaultValue = false)]
+		[ConfigurationProperty("keepFunctionArgs", DefaultValue = true)]
 		public bool KeepFunctionArgs
 		{
 			get { return (bool)this["keepFunctionArgs"]; }

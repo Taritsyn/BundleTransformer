@@ -249,7 +249,7 @@
 			Loops = true;
 			Unused = true;
 			HoistFunctions = true;
-			KeepFunctionArgs = false;
+			KeepFunctionArgs = true;
 			HoistVars = false;
 			IfReturn = true;
 			JoinVars = true;
