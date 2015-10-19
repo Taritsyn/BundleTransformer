@@ -7,11 +7,15 @@ var cssoHelper = (function (csso, undefined) {
 	exports.minify = function (code, disableRestructuring) {
 		var result = {},
 			errors = [],
-			minifiedCode = ''
+			minifiedCode = '',
+			options = {
+				restructuring: !disableRestructuring,
+				debug: false
+			}
 			;
 
 		try {
-			minifiedCode = csso.justDoIt(code, disableRestructuring, true);
+			minifiedCode = csso.minify(code, options);
 		}
 		catch (e) {
 			if (e.message) {

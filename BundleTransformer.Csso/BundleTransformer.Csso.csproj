@@ -83,10 +83,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\csso-combined.js" />
+    <Content Include="Resources\LICENSE.txt" />
     <EmbeddedResource Include="Resources\csso-combined.min.js" />
     <Content Include="Resources\cssoHelper.js" />
     <EmbeddedResource Include="Resources\cssoHelper.min.js" />
-    <Content Include="Resources\MIT-LICENSE.txt" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>

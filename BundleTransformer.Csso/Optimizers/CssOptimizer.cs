@@ -1,12 +1,16 @@
 ﻿namespace BundleTransformer.Csso.Optimizers
 {
 	using System;
+	using System.Globalization;
+	using System.Text;
+	using System.Text.RegularExpressions;
 
 	using JavaScriptEngineSwitcher.Core;
 	using JavaScriptEngineSwitcher.Core.Helpers;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using CssoStrings = Resources.Strings;
@@ -40,6 +44,11 @@
 		/// JS engine
 		/// </summary>
 		private IJsEngine _jsEngine;
+
+		/// <summary>
+		/// Regular expression for working with the string representation of error
+		/// </summary>
+		private static readonly Regex _errorStringRegex = new Regex(@" line #(?<lineNumber>\d+)$");
 
 		/// <summary>
 		/// Synchronizer of optimization
@@ -87,9 +96,10 @@
 		/// "Optimizes" a CSS-code by using Sergey Kryzhanovsky's CSSO
 		/// </summary>
 		/// <param name="content">Text content of CSS-asset</param>
+		/// <param name="path">Path to CSS-file</param>
 		/// <param name="disableRestructuring">Flag for whether to disable structure minification</param>
 		/// <returns>Minified text content of CSS-asset</returns>
-		public string Optimize(string content, bool disableRestructuring = false)
+		public string Optimize(string content, string path, bool disableRestructuring = false)
 		{
 			string newContent;
 
@@ -109,7 +119,7 @@
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new CssOptimizingException(errors[0].Value<string>());
+						throw new CssOptimizingException(FormatErrorDetails(errors[0].Value<string>(), content, path));
 					}
 
 					newContent = json.Value<string>("minifiedCode");
@@ -123,6 +133,60 @@
 			}
 
 			return newContent;
+		}
+
+		/// <summary>
+		/// Generates a detailed error message
+		/// </summary>
+		/// <param name="errorDetails">String representation of error</param>
+		/// <param name="sourceCode">Source code</param>
+		/// <param name="currentFilePath">Path to current CSS-file</param>
+		/// <rereturns>Detailed error message</rereturns>
+		private static string FormatErrorDetails(string errorDetails, string sourceCode, string currentFilePath)
+		{
+			string errorMessage;
+
+			Match errorStringMatch = _errorStringRegex.Match(errorDetails);
+			if (errorStringMatch.Success)
+			{
+				string message = errorDetails;
+				string file = currentFilePath;
+				int lineNumber = int.Parse(errorStringMatch.Groups["lineNumber"].Value);
+				int columnNumber = 0;
+				string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
+					new SourceCodeNodeCoordinates(lineNumber, columnNumber));
+
+				var errorMessageBuilder = new StringBuilder();
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
+					message);
+				if (!string.IsNullOrWhiteSpace(file))
+				{
+					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, file);
+				}
+				if (lineNumber > 0)
+				{
+					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+						lineNumber.ToString(CultureInfo.InvariantCulture));
+				}
+				if (columnNumber > 0)
+				{
+					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+						columnNumber.ToString(CultureInfo.InvariantCulture));
+				}
+				if (!string.IsNullOrWhiteSpace(sourceFragment))
+				{
+					errorMessageBuilder.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+						CoreStrings.ErrorDetails_SourceError, sourceFragment);
+				}
+
+				errorMessage = errorMessageBuilder.ToString();
+			}
+			else
+			{
+				errorMessage = errorDetails;
+			}
+
+			return errorMessage;
 		}
 
 		/// <summary>

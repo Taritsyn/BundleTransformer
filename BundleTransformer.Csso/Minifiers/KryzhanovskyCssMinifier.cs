@@ -152,7 +152,7 @@
 
 			try
 			{
-				newContent = cssOptimizer.Optimize(asset.Content, disableRestructuring);
+				newContent = cssOptimizer.Optimize(asset.Content, assetUrl, disableRestructuring);
 			}
 			catch (CssOptimizingException e)
 			{
