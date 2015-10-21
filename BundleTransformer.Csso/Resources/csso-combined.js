@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.4.0
+* CSSO (CSS Optimizer) v1.4.1
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -447,7 +447,12 @@ var CSSO = (function(){
 			if (nextType === 'unknown') {
 				token[2] = '\n';
 			} else {
-				if ((parentType !== 'atrulerq' || prevType) &&
+				if (parentType === 'simpleselector') {
+					if (!prevType || prevType === 'combinator' ||
+						!nextType || nextType === 'combinator') {
+						return null;
+					}
+				} else if ((parentType !== 'atrulerq' || prevType) &&
 					!this.issue16(prevType, nextType) &&
 					!this.issue165(parent, prevType, nextType) &&
 					!this.issue134(prevType, nextType) &&
@@ -946,7 +951,21 @@ var CSSO = (function(){
 						break;
 
 					case 'funktion':
-						functions[value[i][2][2]] = true;
+						var name = value[i][2][2];
+
+						if (name === 'rect') {
+							// there are 2 forms of rect:
+							//   rect(<top>, <right>, <bottom>, <left>) - standart
+							//   rect(<top> <right> <bottom> <left>) – backwards compatible syntax
+							// only the same form values can be merged
+							if (value[i][3].slice(2).some(function(token) {
+								return token[1] === 'operator' && token[2] === ',';
+							})) {
+								name = 'rect-backward';
+							}
+						}
+
+						functions[name] = true;
 						break;
 
 					case 'dimension':
@@ -964,10 +983,6 @@ var CSSO = (function(){
 							case 'vm': // IE9 supporting "vm" instead of "vmin".
 								units[unit] = true;
 								break;
-
-							default:
-								// regular units
-								units.safe = true;
 						}
 						break;
 				}
@@ -1855,7 +1870,7 @@ var CSSO = (function(){
 	//#region URL: /compressor/const
 	modules['/compressor/const'] = function () {
 		var exports = {};
-		
+
 		exports.nonLengthUnits = {
 			'deg': 1,
 			'grad': 1,
@@ -2057,9 +2072,7 @@ var CSSO = (function(){
 		};
 
 		exports.dontRestructure = {
-			'src': 1, // https://github.com/afelix/csso/issues/50
-			'clip': 1, // https://github.com/afelix/csso/issues/57
-			'display': 1 // https://github.com/afelix/csso/issues/71
+			'src': 1 // https://github.com/afelix/csso/issues/50
 		};
 
 		exports.vendorID = {
@@ -2115,7 +2128,7 @@ var CSSO = (function(){
 			'after': 1,
 			'before': 1
 		};
-		
+
 		return exports;
 	};
 	//#endregion
@@ -3984,16 +3997,18 @@ var CSSO = (function(){
 
 		// node: S
 		function checkS(_i) {
-			if (tokens[_i].ws) return tokens[_i].ws_last - _i + 1;
+			if (tokens[_i].type === TokenType.Space) {
+				return 1;
+			}
 
 			return fail(tokens[_i]);
 		}
 
 		function getS() {
 			var startPos = pos,
-				s = joinValues(pos, tokens[pos].ws_last);
+				s = tokens[pos].value;
 
-			pos = tokens[pos].ws_last + 1;
+			pos++;
 
 			return needInfo? [getInfo(startPos), NodeType.SType, s] : [NodeType.SType, s];
 		}
@@ -4444,8 +4459,6 @@ var CSSO = (function(){
 				var type = tokens[_i++].type;
 
 				if (type === TokenType.Space ||
-					type === TokenType.Tab ||
-					type === TokenType.Newline ||
 					type === TokenType.LeftParenthesis ||
 					type === TokenType.RightParenthesis) {
 					break;
@@ -4479,50 +4492,6 @@ var CSSO = (function(){
 			return s;
 		}
 
-		function markSC() {
-			var ws = -1, // whitespaces
-				sc = -1, // ws and comments
-				t;
-
-			for (var i = 0; i < tokens.length; i++) {
-				t = tokens[i];
-				switch (t.type) {
-					case TokenType.Space:
-					case TokenType.Tab:
-					case TokenType.Newline:
-						t.ws = true;
-						t.sc = true;
-
-						if (ws === -1) ws = i;
-						if (sc === -1) sc = i;
-
-						break;
-					case TokenType.CommentML:
-						if (ws !== -1) {
-							tokens[ws].ws_last = i - 1;
-							ws = -1;
-						}
-
-						t.sc = true;
-
-						break;
-					default:
-						if (ws !== -1) {
-							tokens[ws].ws_last = i - 1;
-							ws = -1;
-						}
-
-						if (sc !== -1) {
-							tokens[sc].sc_last = i - 1;
-							sc = -1;
-						}
-				}
-			}
-
-			if (ws !== -1) tokens[ws].ws_last = i - 1;
-			if (sc !== -1) tokens[sc].sc_last = i - 1;
-		}
-
 		function parse(source, rule, _needInfo) {
 			tokens = tokenize(source);
 			rule = rule || 'stylesheet';
@@ -4530,11 +4499,11 @@ var CSSO = (function(){
 			pos = 0;
 			failLN = 0;
 
-			markSC();
-
-			return CSSPRules[rule]();
+			var ast = CSSPRules[rule]();
+			//console.log(require('../utils/stringify.js')(require('../utils/cleanInfo.js')(ast), true));
+			return ast;
 		};
-		
+
 		return parse;
 	};
 	//#endregion
@@ -4595,16 +4564,11 @@ var CSSO = (function(){
 	//#region URL: /parser/tokenize
 	modules['/parser/tokenize'] = function () {
 		var TokenType = require('/parser/const');
-		var Punctuation;
-		var urlMode;
-		var source;
-		var tokens;
 		var pos;
-		var lastPos;
 		var lineStartPos;
 		var ln;
 
-		Punctuation = {
+		var Punctuation = {
 			' ': TokenType.Space,
 			'\n': TokenType.Newline,
 			'\r': TokenType.Newline,
@@ -4642,53 +4606,63 @@ var CSSO = (function(){
 		};
 
 		function isDecimalDigit(c) {
-			return '0123456789'.indexOf(c) >= 0;
+			return '0123456789'.indexOf(c) !== -1;
 		}
 
 		function tokenize(s) {
+			function pushToken(type, ln, column, value) {
+				tokens.push(x = {
+					type: type,
+					value: value,
+
+					offset: lastPos,
+					line: ln,
+					column: column
+				});
+
+				lastPos = pos;
+			}
+
 			if (!s) {
 				return [];
 			}
 
-			source = s;
-			tokens = [];
-			ln = 1;
-			urlMode = false;
+			var tokens = [];
+			var urlMode = false;
 
 			// ignore first char if it is byte order marker (UTF-8 BOM)
 			pos = s.charCodeAt(0) === 0xFEFF ? 1 : 0;
-			lastPos = pos;
-			lineStartPos = 0;
+			var lastPos = pos;
+			ln = 1;
+			lineStartPos = -1;
 
 			var blockMode = 0;
 			var c;
 			var cn;
+			var ident;
 
 			for (; pos < s.length; pos++) {
 				c = s.charAt(pos);
 				cn = s.charAt(pos + 1);
 
 				if (c === '/' && cn === '*') {
-					parseMLComment(s);
+					pushToken(TokenType.CommentML, ln, pos - lineStartPos, parseMLComment(s));
 				} else if (!urlMode && c === '/' && s.substr(pos + 1, 5) === 'deep/') {
-					pushToken(TokenType.Deep, '/deep/');
+					pushToken(TokenType.Deep, ln, pos - lineStartPos, '/deep/');
 					pos += 5;
 				} else if (!urlMode && c === '/' && cn === '/') {
 					if (blockMode > 0) {
-						parseIdentifier(s);
+						pushToken(TokenType.Identifier, ln, pos - lineStartPos, ident = parseIdentifier(s));
+						urlMode = urlMode || ident === 'url';
 					} else {
-						parseSLComment(s);
+						pushToken(TokenType.CommentSL, ln, pos - lineStartPos, parseSLComment(s));
 					}
 				} else if (c === '"' || c === "'") {
-					parseString(s, c);
-				} else if (c === ' ') {
-					parseSpaces(s);
+					pushToken(c === '"' ? TokenType.StringDQ : TokenType.StringSQ, ln, pos - lineStartPos, parseString(s, c));
+				} else if (c === ' ' || c === '\n' || c === '\r' || c === '\t') {
+					pushToken(TokenType.Space, ln, pos - lineStartPos, parseSpaces(s));
 				} else if (c in Punctuation) {
-					pushToken(Punctuation[c], c);
-					if (c === '\n') {
-						ln++;
-						lineStartPos = pos;
-					}
+					pushToken(Punctuation[c], ln, pos - lineStartPos, c);
 					if (c === ')') {
 						urlMode = false;
 					}
@@ -4699,41 +4673,33 @@ var CSSO = (function(){
 						blockMode--;
 					}
 				} else if (isDecimalDigit(c)) {
-					parseDecimalNumber(s);
+					pushToken(TokenType.DecimalNumber, ln, pos - lineStartPos, parseDecimalNumber(s));
 				} else {
-					parseIdentifier(s);
+					pushToken(TokenType.Identifier, ln, pos - lineStartPos, ident = parseIdentifier(s));
+					urlMode = urlMode || ident === 'url';
 				}
 			}
 
-			mark();
+			mark(tokens);
 
 			return tokens;
-		}
-
-		function pushToken(type, value) {
-			tokens.push({
-				type: type,
-				value: value,
-
-				offset: lastPos,
-				line: ln,
-				column: lastPos - lineStartPos + 1
-			});
-
-			lastPos += value.length;
 		}
 
 		function parseSpaces(s) {
 			var start = pos;
 
 			for (; pos < s.length; pos++) {
-				if (s.charAt(pos) !== ' ') {
+				var c = s.charAt(pos);
+				if (c === '\n') {
+					ln++;
+					lineStartPos = pos;
+				} else if (c !== ' ' && c !== '\r' && c !== '\t') {
 					break;
 				}
 			}
 
-			pushToken(TokenType.Space, s.substring(start, pos));
 			pos--;
+			return s.substring(start, pos + 1);
 		}
 
 		function parseMLComment(s) {
@@ -4752,7 +4718,7 @@ var CSSO = (function(){
 				}
 			}
 
-			pushToken(TokenType.CommentML, s.substring(start, pos + 1));
+			return s.substring(start, pos + 1);
 		}
 
 		function parseSLComment(s) {
@@ -4765,8 +4731,8 @@ var CSSO = (function(){
 				}
 			}
 
-			pushToken(TokenType.CommentSL, s.substring(start, pos));
 			pos--;
+			return s.substring(start, pos + 1);
 		}
 
 		function parseString(s, q) {
@@ -4780,7 +4746,7 @@ var CSSO = (function(){
 				}
 			}
 
-			pushToken(q === '"' ? TokenType.StringDQ : TokenType.StringSQ, s.substring(start, pos + 1));
+			return s.substring(start, pos + 1);
 		}
 
 		function parseDecimalNumber(s) {
@@ -4792,8 +4758,8 @@ var CSSO = (function(){
 				}
 			}
 
-			pushToken(TokenType.DecimalNumber, s.substring(start, pos));
 			pos--;
+			return s.substring(start, pos + 1);
 		}
 
 		function parseIdentifier(s) {
@@ -4804,32 +4770,29 @@ var CSSO = (function(){
 			}
 
 			for (; pos < s.length; pos++) {
-				if (s.charAt(pos) === '\\') {
+				c = s.charAt(pos);
+				if (c === '\\') {
 					pos++;
-				} else if (s.charAt(pos) in Punctuation) {
+				} else if (c in Punctuation && c !== '_') {
 					break;
 				}
 			}
 
-			var ident = s.substring(start, pos);
-
-			urlMode = urlMode || ident === 'url';
-
-			pushToken(TokenType.Identifier, ident);
 			pos--;
+
+			return s.substring(start, pos + 1);
 		}
 
 		// ====================================
 		// second run
 		// ====================================
 
-		function mark() {
+		function mark(tokens) {
 			var ps = []; // Parenthesis
 			var sbs = []; // SquareBracket
 			var cbs = []; // CurlyBracket
-			var t;
 
-			for (var i = 0; i < tokens.length; i++) {
+			for (var i = 0, t; i < tokens.length; i++) {
 				t = tokens[i];
 				switch (t.type) {
 					case TokenType.LeftParenthesis:
@@ -4837,8 +4800,7 @@ var CSSO = (function(){
 						break;
 					case TokenType.RightParenthesis:
 						if (ps.length) {
-							t.left = ps.pop();
-							tokens[t.left].right = i;
+							tokens[ps.pop()].right = i;
 						}
 						break;
 					case TokenType.LeftSquareBracket:
@@ -4846,8 +4808,7 @@ var CSSO = (function(){
 						break;
 					case TokenType.RightSquareBracket:
 						if (sbs.length) {
-							t.left = sbs.pop();
-							tokens[t.left].right = i;
+							tokens[sbs.pop()].right = i;
 						}
 						break;
 					case TokenType.LeftCurlyBracket:
@@ -4855,14 +4816,13 @@ var CSSO = (function(){
 						break;
 					case TokenType.RightCurlyBracket:
 						if (cbs.length) {
-							t.left = cbs.pop();
-							tokens[t.left].right = i;
+							tokens[cbs.pop()].right = i;
 						}
 						break;
 				}
 			}
 		}
-		
+
 		return tokenize;
 	};
 	//#endregion
