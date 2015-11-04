@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.Core.FileSystem
 {
 	using System;
-	using System.IO;
 
 	using Core;
 	using Helpers;
@@ -36,44 +35,81 @@
 
 
 		/// <summary>
-		/// Transforms relative path to absolute
+		/// Transforms a relative path to absolute
 		/// </summary>
 		/// <param name="basePath">The base path</param>
 		/// <param name="relativePath">The relative path</param>
 		public string ResolveRelativePath(string basePath, string relativePath)
 		{
-			if (string.IsNullOrWhiteSpace(basePath))
+			if (basePath == null)
 			{
-				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "basePath"), "basePath");
+				throw new ArgumentNullException("basePath",
+					string.Format(Strings.Common_ArgumentIsNull, "basePath"));
 			}
 
-			if (string.IsNullOrWhiteSpace(relativePath))
+			if (relativePath == null)
 			{
-				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "relativePath"), "relativePath");
+				throw new ArgumentNullException("relativePath",
+					string.Format(Strings.Common_ArgumentIsNull, "relativePath"));
 			}
 
+			// Convert backslashes to forward slashes
+			string processedBasePath = UrlHelpers.ProcessBackSlashes(basePath);
 			string processedRelativePath = UrlHelpers.ProcessBackSlashes(relativePath);
 
-			if (processedRelativePath.StartsWith("/") || UrlHelpers.StartsWithProtocol(processedRelativePath))
+			// Trying to convert paths to absolute paths
+			string absoluteRelativePath;
+			if (TryConvertToAbsolutePath(processedRelativePath, out absoluteRelativePath))
 			{
-				return processedRelativePath;
+				return UrlHelpers.Normalize(absoluteRelativePath);
 			}
 
-			if (processedRelativePath.StartsWith("~/"))
+			string absoluteBasePath;
+			if (TryConvertToAbsolutePath(processedBasePath, out absoluteBasePath))
 			{
-				return _virtualFileSystemWrapper.ToAbsolutePath(processedRelativePath);
+				processedBasePath = absoluteBasePath;
 			}
 
-			string processedBasePath = UrlHelpers.ProcessBackSlashes(Path.GetDirectoryName(basePath));
-
-			string absolutePath = UrlHelpers.Combine(processedBasePath, processedRelativePath);
-			if (absolutePath.IndexOf("./", StringComparison.Ordinal) != -1)
+			if (string.IsNullOrWhiteSpace(processedBasePath))
 			{
-				absolutePath = UrlHelpers.Normalize(absolutePath);
+				return UrlHelpers.Normalize(processedRelativePath);
 			}
-			absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(absolutePath);
+
+			if (string.IsNullOrWhiteSpace(processedRelativePath))
+			{
+				return UrlHelpers.Normalize(processedBasePath);
+			}
+
+			string baseDirectoryName = UrlHelpers.GetDirectoryName(processedBasePath);
+			string absolutePath = UrlHelpers.Combine(baseDirectoryName, processedRelativePath);
 
 			return absolutePath;
+		}
+
+		/// <summary>
+		/// Converts a relative path to an absolute path.
+		/// A return value indicates whether the conversion succeeded.
+		/// </summary>
+		/// <param name="relativePath">The relative path</param>
+		/// <param name="absolutePath">The absolute path</param>
+		/// <returns>true if path was converted successfully; otherwise, false</returns>
+		private bool TryConvertToAbsolutePath(string relativePath, out string absolutePath)
+		{
+			absolutePath = null;
+
+			if (relativePath.StartsWith("/") || UrlHelpers.StartsWithProtocol(relativePath))
+			{
+				absolutePath = relativePath;
+				return true;
+			}
+
+			if (relativePath.StartsWith("~/"))
+			{
+				absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(relativePath);
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

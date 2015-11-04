@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,21 +40,9 @@
     <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IronRuby, Version=1.1.4.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Binaries\IronRuby\IronRuby.dll</HintPath>
-    </Reference>
-    <Reference Include="IronRuby.Libraries, Version=1.1.4.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Binaries\IronRuby\IronRuby.Libraries.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Dynamic, Version=1.1.0.30, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Binaries\IronRuby\Microsoft.Dynamic.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Scripting, Version=1.1.0.30, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Binaries\IronRuby\Microsoft.Scripting.dll</HintPath>
+    <Reference Include="LibSassHost, Version=0.3.1.0, Culture=neutral, PublicKeyToken=3e24e88796a38e46, processorArchitecture=MSIL">
+      <HintPath>..\packages\LibSassHost.0.3.1\lib\net40-client\LibSassHost.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -62,21 +52,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="CompilationOptions.cs" />
-    <Compile Include="Compilers\SassAndScssCompilingException.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
     <Compile Include="Constants\AssetTypeCode.cs" />
-    <Compile Include="Constants\FileExtension.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
-    <Compile Include="Helpers\FileExtensionHelper.cs" />
+    <Compile Include="IndentType.cs" />
+    <Compile Include="LineFeedType.cs" />
+    <Compile Include="SassFileManager.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
-    <Compile Include="Compilers\ResourceRedirectionPlatformAdaptationLayer.cs" />
-    <Compile Include="Compilers\SassAndScssCompiler.cs" />
-    <Compile Include="Compilers\SassAndScssCompilerScriptHost.cs" />
-    <Compile Include="SassAndScssNodeMatch.cs" />
-    <Compile Include="SassAndScssNodeType.cs" />
-    <Compile Include="SassAndScssStylesheet.cs" />
-    <Compile Include="SyntaxType.cs" />
     <Compile Include="Translators\SassAndScssTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -87,75 +69,28 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\ironruby\digest.rb" />
-    <Content Include="Resources\ironruby\digest\sha1.rb" />
-    <Content Include="Resources\ironruby\enumerator.rb" />
-    <Content Include="Resources\ironruby\rbconfig.rb" />
-    <Content Include="Resources\ironruby\stringio.rb" />
-    <Content Include="Resources\ironruby\strscan.rb" />
-    <Content Include="Resources\ruby\1.9.1\find.rb" />
-    <Content Include="Resources\ruby\1.9.1\pathname.rb" />
-    <Content Include="Resources\ruby\1.9.1\set.rb" />
-    <Content Include="Resources\ruby\1.9.1\tsort.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\common.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\ftp.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\generic.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\http.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\https.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\ldap.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\ldaps.rb" />
-    <Content Include="Resources\ruby\1.9.1\uri\mailto.rb" />
-    <EmbeddedResource Include="Resources\ironruby\digest.min.rb" />
-    <EmbeddedResource Include="Resources\ironruby\digest\sha1.min.rb" />
-    <EmbeddedResource Include="Resources\ironruby\enumerator.min.rb" />
-    <EmbeddedResource Include="Resources\ironruby\rbconfig.min.rb" />
-    <EmbeddedResource Include="Resources\ironruby\stringio.min.rb" />
-    <EmbeddedResource Include="Resources\ironruby\strscan.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\find.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\pathname.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\set.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\tsort.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\common.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ftp.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\generic.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\http.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\https.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldap.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\ldaps.min.rb" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\uri\mailto.min.rb" />
-    <Content Include="Resources\sass-combined.rb" />
     <None Include="..\BundleTransformer.snk">
       <Link>BundleTransformer.snk</Link>
     </None>
     <None Include="app.config" />
-    <EmbeddedResource Include="Resources\ruby\1.9.1\rational18.min.rb" />
-    <Content Include="Resources\ruby\1.9.1\rational18.rb" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\LICENSE.txt" />
-    <EmbeddedResource Include="Resources\sass-combined.min.rb" />
+    <None Include="LibSassHost.Native\LibSassHost.Native-32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="LibSassHost.Native\LibSassHost.Native-64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>@echo off
-setlocal enabledelayedexpansion
-
-cd "$(ProjectDir)..\Binaries\RubyMin\"
-
-for /f "delims=" %25%25A in ('dir "$(ProjectDir)\Resources\*.rb" /b/s') do (
-	set inputFilePath=%25%25A
-	set inputFileExtension=!inputFilePath:~-7!
-	set outputFileExtension=.min.rb
-	set outputFilePath=!inputFilePath:~0,-3!!outputFileExtension!
-	
-	if /i not !inputFileExtension!==!outputFileExtension! (
-		del "!outputFilePath!"
-		start /b/wait RBMin.exe "!inputFilePath!" -o "!outputFilePath!" -k -r
-	)
-)</PreBuildEvent>
-  </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

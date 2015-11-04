@@ -13,139 +13,16 @@
 	public static class UrlHelpers
 	{
 		/// <summary>
-		/// Regular expression to find first slash
-		/// </summary>
-		private static readonly Regex _firstSlashRegExp = new Regex(@"^(?:/|\\)");
-
-		/// <summary>
-		/// Regular expression to find last slash
-		/// </summary>
-		private static readonly Regex _lastSlashRegExp = new Regex(@"(?:/|\\)$");
-
-		/// <summary>
 		/// Regular expression for determine protocol in URL
 		/// </summary>
 		private static readonly Regex _protocolRegExp = new Regex(@"^(?:(?:https?|ftp)\://)|(?://)",
 			RegexOptions.IgnoreCase);
 
-
 		/// <summary>
-		/// Process a back slashes in URL
+		/// Regular expression for working with multiple forward slashes
 		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>Processed URL</returns>
-		public static string ProcessBackSlashes(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
-			}
+		private static readonly Regex _multipleForwardSlashesRegex = new Regex("/{2,}");
 
-			string result = url.Replace(@"\", @"/");
-
-			return result;
-		}
-
-		/// <summary>
-		/// Removes a first slash from URL
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>URL without the first slash</returns>
-		public static string RemoveFirstSlash(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
-			}
-
-			string result = _firstSlashRegExp.Replace(url, string.Empty);
-
-			return result;
-		}
-
-		/// <summary>
-		/// Removes a last slash from URL
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>URL without the last slash</returns>
-		public static string RemoveLastSlash(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
-			}
-
-			string result = _lastSlashRegExp.Replace(url, string.Empty);
-
-			return result;
-		}
-
-		/// <summary>
-		/// Combines a two URLs
-		/// </summary>
-		/// <param name="baseUrl">The base URL</param>
-		/// <param name="relativeUrl">The relative URL to add to the base URL</param>
-		/// <returns>The absolute URL</returns>
-		public static string Combine(string baseUrl, string relativeUrl)
-		{
-			string result = baseUrl + (!baseUrl.EndsWith("/") ? "/" : string.Empty) + relativeUrl;
-
-			return result;
-		}
-
-		/// <summary>
-		/// Normalizes a URL
-		/// </summary>
-		/// <param name="url">URL</param>
-		/// <returns>Normalized URL</returns>
-		public static string Normalize(string url)
-		{
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				throw new ArgumentException(string.Format(Strings.Common_ArgumentIsEmpty, "url"), "url");
-			}
-
-			string[] urlParts = url.Split('/');
-			int urlPartCount = urlParts.Length;
-			if (urlPartCount == 0)
-			{
-				return url;
-			}
-
-			var resultUrlParts = new List<string>();
-
-			for (int urlPartIndex = 0; urlPartIndex < urlPartCount; urlPartIndex++)
-			{
-				string urlPart = urlParts[urlPartIndex];
-
-				switch(urlPart)
-				{
-					case "..":
-						int resultUrlPartCount = resultUrlParts.Count;
-						int resultUrlPartLastIndex = resultUrlPartCount - 1;
-
-						if (resultUrlPartCount == 0 || resultUrlParts[resultUrlPartLastIndex] == "..")
-						{
-							resultUrlParts.Add(urlPart);
-						}
-						else
-						{
-							resultUrlParts.RemoveAt(resultUrlPartLastIndex);
-						}
-						break;
-					case ".":
-						break;
-					default:
-						resultUrlParts.Add(urlPart);
-						break;
-				}
-			}
-
-			string resultUrl = string.Join("/", resultUrlParts);
-			resultUrlParts.Clear();
-
-			return resultUrl;
-		}
 
 		/// <summary>
 		/// Determines whether the beginning of this url matches the protocol
@@ -167,6 +44,276 @@
 		public static bool StartsWithDataUriScheme(string url)
 		{
 			return url.StartsWith("data:", StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// Converts a back slashes to forward slashes
+		/// </summary>
+		/// <param name="url">URL with back slashes</param>
+		/// <returns>URL with forward slashes</returns>
+		public static string ProcessBackSlashes(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				return url;
+			}
+
+			string result = url.Replace("\\", "/");
+
+			return result;
+		}
+
+		/// <summary>
+		/// Removes a first slash from URL
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>URL without the first slash</returns>
+		public static string RemoveFirstSlash(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				return url;
+			}
+
+			if (!url.StartsWith("/"))
+			{
+				return url;
+			}
+
+			string result = url.TrimStart('/');
+
+			return result;
+		}
+
+		/// <summary>
+		/// Removes a last slash from URL
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>URL without the last slash</returns>
+		public static string RemoveLastSlash(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				return url;
+			}
+
+			if (!url.EndsWith("/"))
+			{
+				return url;
+			}
+
+			string result = url.TrimEnd('/');
+
+			return result;
+		}
+
+
+		/// <summary>
+		/// Finds a last directory seperator
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>Position of last directory seperator</returns>
+		private static int FindLastDirectorySeparator(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			int lastDirectorySeparatorPosition;
+			int forwardSlashPosition = url.LastIndexOf('/');
+			int backSlashPosition = url.LastIndexOf('\\');
+
+			if (forwardSlashPosition != -1 && backSlashPosition != -1)
+			{
+				lastDirectorySeparatorPosition = Math.Max(forwardSlashPosition, backSlashPosition);
+			}
+			else if (forwardSlashPosition != -1)
+			{
+				lastDirectorySeparatorPosition = forwardSlashPosition;
+			}
+			else
+			{
+				lastDirectorySeparatorPosition = backSlashPosition;
+			}
+
+			return lastDirectorySeparatorPosition;
+		}
+
+		/// <summary>
+		/// Gets a directory name for the specified URL
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>The string containing directory name for URL</returns>
+		public static string GetDirectoryName(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			int lastDirectorySeparatorPosition = FindLastDirectorySeparator(url);
+			string directoryName = (lastDirectorySeparatorPosition != -1) ?
+				url.Substring(0, lastDirectorySeparatorPosition + 1) : string.Empty;
+
+			return directoryName;
+		}
+
+		/// <summary>
+		/// Gets a file name and extension of the specified URL
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>The consisting of the characters after the last directory character in URL</returns>
+		public static string GetFileName(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			int lastDirectorySeparatorPosition = FindLastDirectorySeparator(url);
+			string fileName = (lastDirectorySeparatorPosition != -1) ?
+				url.Substring(lastDirectorySeparatorPosition + 1) : url;
+
+			return fileName;
+		}
+
+		/// <summary>
+		/// Normalizes a URL
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>Normalized URL</returns>
+		public static string Normalize(string url)
+		{
+			if (url == null)
+			{
+				throw new ArgumentNullException("url",
+					string.Format(Strings.Common_ArgumentIsNull, "url"));
+			}
+
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				return url;
+			}
+
+			string resultUrl = url;
+
+			if (resultUrl.IndexOf("./", StringComparison.Ordinal) != -1)
+			{
+				string[] urlParts = resultUrl.Split('/');
+				int urlPartCount = urlParts.Length;
+				if (urlPartCount == 0)
+				{
+					return url;
+				}
+
+				var resultUrlParts = new List<string>();
+
+				for (int urlPartIndex = 0; urlPartIndex < urlPartCount; urlPartIndex++)
+				{
+					string urlPart = urlParts[urlPartIndex];
+
+					switch (urlPart)
+					{
+						case "..":
+							int resultUrlPartCount = resultUrlParts.Count;
+							int resultUrlPartLastIndex = resultUrlPartCount - 1;
+
+							if (resultUrlPartCount == 0 || resultUrlParts[resultUrlPartLastIndex] == "..")
+							{
+								resultUrlParts.Add(urlPart);
+							}
+							else
+							{
+								resultUrlParts.RemoveAt(resultUrlPartLastIndex);
+							}
+							break;
+						case ".":
+							break;
+						default:
+							resultUrlParts.Add(urlPart);
+							break;
+					}
+				}
+
+				resultUrl = string.Join("/", resultUrlParts);
+				resultUrlParts.Clear();
+			}
+
+			// Collapse multiple forward slashes into a single one
+			resultUrl = _multipleForwardSlashesRegex.Replace(resultUrl, "/");
+
+			return resultUrl;
+		}
+
+		/// <summary>
+		/// Combines a two URLs
+		/// </summary>
+		/// <param name="baseUrl">The base URL</param>
+		/// <param name="relativeUrl">The relative URL to add to the base URL</param>
+		/// <returns>The absolute URL</returns>
+		public static string Combine(string baseUrl, string relativeUrl)
+		{
+			if (baseUrl == null)
+			{
+				throw new ArgumentNullException("baseUrl",
+					string.Format(Strings.Common_ArgumentIsNull, "baseUrl"));
+			}
+
+			if (relativeUrl == null)
+			{
+				throw new ArgumentNullException("relativeUrl",
+					string.Format(Strings.Common_ArgumentIsNull, "relativeUrl"));
+			}
+
+			// Convert backslashes to forward slashes
+			string processedBaseUrl = ProcessBackSlashes(baseUrl);
+			string processedRelativeUrl = ProcessBackSlashes(relativeUrl);
+
+			string combinedUrl = processedBaseUrl;
+
+			if (combinedUrl.EndsWith("/"))
+			{
+				if (processedRelativeUrl.StartsWith("/"))
+				{
+					processedRelativeUrl = processedRelativeUrl.TrimStart('/');
+				}
+			}
+			else
+			{
+				if (!processedRelativeUrl.StartsWith("/"))
+				{
+					combinedUrl += '/';
+				}
+			}
+
+			combinedUrl += processedRelativeUrl;
+
+			// Normalize URL
+			combinedUrl = Normalize(combinedUrl);
+
+			return combinedUrl;
 		}
 
 		/// <summary>

@@ -220,7 +220,7 @@
 				}
 			}
 
-			response.End();
+			context.ApplicationInstance.CompleteRequest();
 		}
 
 		/// <summary>

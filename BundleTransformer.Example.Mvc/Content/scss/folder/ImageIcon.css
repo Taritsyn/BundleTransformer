@@ -1,5 +1,5 @@
 ﻿.icon-image
 {
 	display: inline;
-	background-image: url("../image.png") !important;
+	background-image: url("#{$icon-path}image.png") !important;
 }

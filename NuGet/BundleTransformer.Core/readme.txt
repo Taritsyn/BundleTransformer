@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.69
+           README file for Bundle Transformer: Core 1.9.81 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -45,7 +45,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #111 “Mime types and data uri function”.
+   Fixed bug #115 “Response.End() causes ThreadAbortExceptions”.
 
    ====================
    POST-INSTALL ACTIONS

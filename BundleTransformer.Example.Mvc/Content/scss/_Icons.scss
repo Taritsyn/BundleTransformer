@@ -1,0 +1,9 @@
+﻿.icon-plug
+{
+	display: inline;
+	background-image: url("#{$icon-path}$plug.png");
+}
+
+@import "folder/GitIcon", 'folder/HourglassIcon', "folder/ImageIcon", url(folder/JsonIcon.css);
+@import url('folder/KeyIcon.css');
+@import 'folder/LayoutIcon.css' screen and (orientation:landscape) and (color), (color);

@@ -101,7 +101,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SassAndScss\Translators\SassAndScssTranslatorTests.cs" />
     <Compile Include="TypeScript\Translators\TypeScriptTranslatorTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -18,34 +18,56 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to output the line number and file within comments
+		/// Gets or sets a indent type
 		/// </summary>
-		[ConfigurationProperty("lineNumbers", DefaultValue = false)]
-		public bool LineNumbers
+		[ConfigurationProperty("indentType", DefaultValue = IndentType.Space)]
+		public IndentType IndentType
 		{
-			get { return (bool)this["lineNumbers"]; }
-			set { this["lineNumbers"] = value; }
+			get { return (IndentType)this["indentType"]; }
+			set { this["indentType"] = value; }
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to output the full trace of imports
-		/// and mixins before each selector
+		/// Gets or sets a number of spaces or tabs to be used for indentation
 		/// </summary>
-		[ConfigurationProperty("traceSelectors", DefaultValue = false)]
-		public bool TraceSelectors
+		[ConfigurationProperty("indentWidth", DefaultValue = 2)]
+		[IntegerValidator(MinValue = 0, MaxValue = int.MaxValue, ExcludeRange = false)]
+		public int IndentWidth
 		{
-			get { return (bool)this["traceSelectors"]; }
-			set { this["traceSelectors"] = value; }
+			get { return (int)this["indentWidth"]; }
+			set { this["indentWidth"] = value; }
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to output the line number and file within a fake media query
+		/// Gets or sets a line feed type
 		/// </summary>
-		[ConfigurationProperty("debugInfo", DefaultValue = false)]
-		public bool DebugInfo
+		[ConfigurationProperty("lineFeedType", DefaultValue = LineFeedType.CrLf)]
+		public LineFeedType LineFeedType
 		{
-			get { return (bool)this["debugInfo"]; }
-			set { this["debugInfo"] = value; }
+			get { return (LineFeedType)this["lineFeedType"]; }
+			set { this["lineFeedType"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a precision for fractional numbers
+		/// </summary>
+		[ConfigurationProperty("precision", DefaultValue = 5)]
+		[IntegerValidator(MinValue = -1, MaxValue = int.MaxValue, ExcludeRange = false)]
+		public int Precision
+		{
+			get { return (int)this["precision"]; }
+			set { this["precision"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to emit comments in the generated CSS
+		/// indicating the corresponding source line
+		/// </summary>
+		[ConfigurationProperty("sourceComments", DefaultValue = false)]
+		public bool SourceComments
+		{
+			get { return (bool)this["sourceComments"]; }
+			set { this["sourceComments"] = value; }
 		}
 	}
 }
