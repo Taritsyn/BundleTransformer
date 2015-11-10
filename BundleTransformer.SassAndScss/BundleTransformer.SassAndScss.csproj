@@ -40,8 +40,8 @@
     <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibSassHost, Version=0.3.1.0, Culture=neutral, PublicKeyToken=3e24e88796a38e46, processorArchitecture=MSIL">
-      <HintPath>..\packages\LibSassHost.0.3.1\lib\net40-client\LibSassHost.dll</HintPath>
+    <Reference Include="LibSassHost, Version=0.4.0.0, Culture=neutral, PublicKeyToken=3e24e88796a38e46, processorArchitecture=MSIL">
+      <HintPath>..\packages\LibSassHost.0.4.0\lib\net40-client\LibSassHost.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

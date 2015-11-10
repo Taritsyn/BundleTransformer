@@ -6,12 +6,13 @@
 	using LibSassHost;
 
 	using Core.FileSystem;
+	using Core.Helpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
 	/// Sass file manager
 	/// </summary>
-	internal sealed class SassFileManager : FileManagerBase
+	internal sealed class SassFileManager : IFileManager
 	{
 		/// <summary>
 		/// Virtual file system wrapper
@@ -42,7 +43,7 @@
 				string сurrentDirectoryName = value;
 				if (!string.IsNullOrWhiteSpace(сurrentDirectoryName))
 				{
-					сurrentDirectoryName = BackSlashesToForwardSlashes(сurrentDirectoryName);
+					сurrentDirectoryName = UrlHelpers.ProcessBackSlashes(сurrentDirectoryName);
 					if (!сurrentDirectoryName.EndsWith("/"))
 					{
 						сurrentDirectoryName += "/";
@@ -79,7 +80,7 @@
 
 		#region IFileManager implementation
 
-		public override string GetCurrentDirectory()
+		public string GetCurrentDirectory()
 		{
 			string currentDirectoryName = !string.IsNullOrWhiteSpace(_currentDirectoryName) ?
 				_currentDirectoryName : _defaultDirectoryName;
@@ -87,7 +88,7 @@
 			return currentDirectoryName;
 		}
 
-		public override bool FileExists(string path)
+		public bool FileExists(string path)
 		{
 			if (path == null)
 			{
@@ -100,7 +101,7 @@
 			return result;
 		}
 
-		public override bool IsAbsolutePath(string path)
+		public bool IsAbsolutePath(string path)
 		{
 			if (path == null)
 			{
@@ -113,7 +114,7 @@
 			return result;
 		}
 
-		public override string ReadFile(string path)
+		public string ReadFile(string path)
 		{
 			if (path == null)
 			{
