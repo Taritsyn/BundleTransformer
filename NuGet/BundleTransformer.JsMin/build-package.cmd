@@ -1,2 +1,2 @@
 \Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj /p:Configuration=Release
-..\nuget.exe pack ..\BundleTransformer.JsMin\BundleTransformer.JsMin.nuspec
+..\..\.nuget\nuget.exe pack ..\BundleTransformer.JsMin\BundleTransformer.JsMin.nuspec

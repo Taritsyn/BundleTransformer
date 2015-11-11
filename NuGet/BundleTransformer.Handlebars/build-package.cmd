@@ -1,2 +1,2 @@
 \Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj /p:Configuration=Release
-..\nuget.exe pack ..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.nuspec
+..\..\.nuget\nuget.exe pack ..\BundleTransformer.Handlebars\BundleTransformer.Handlebars.nuspec

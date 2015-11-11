@@ -64,7 +64,7 @@
 				return url;
 			}
 
-			string result = url.Replace("\\", "/");
+			string result = url.Replace('\\', '/');
 
 			return result;
 		}

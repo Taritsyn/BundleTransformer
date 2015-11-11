@@ -1,2 +1,2 @@
 \Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj /p:Configuration=Release
-..\nuget.exe pack ..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.nuspec
+..\..\.nuget\nuget.exe pack ..\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.nuspec

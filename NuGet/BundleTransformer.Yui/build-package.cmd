@@ -1,2 +1,2 @@
 \Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.Yui\BundleTransformer.Yui.csproj /p:Configuration=Release
-..\nuget.exe pack ..\BundleTransformer.Yui\BundleTransformer.Yui.nuspec
+..\..\.nuget\nuget.exe pack ..\BundleTransformer.Yui\BundleTransformer.Yui.nuspec

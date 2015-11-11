@@ -1,1 +1,1 @@
-..\nuget.exe pack ..\BundleTransformer.ConfigurationIntelliSense\BundleTransformer.ConfigurationIntelliSense.nuspec
+..\..\.nuget\nuget.exe pack ..\BundleTransformer.ConfigurationIntelliSense\BundleTransformer.ConfigurationIntelliSense.nuspec

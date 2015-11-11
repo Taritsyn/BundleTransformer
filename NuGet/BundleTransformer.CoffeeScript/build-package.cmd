@@ -1,2 +1,2 @@
 \Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj /p:Configuration=Release
-..\nuget.exe pack ..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.nuspec
+..\..\.nuget\nuget.exe pack ..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.nuspec
