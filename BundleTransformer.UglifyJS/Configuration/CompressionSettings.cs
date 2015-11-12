@@ -225,8 +225,8 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the function names list,
-		/// which UglifyJS will assume that those functions do not produce side effects
+		/// Gets or sets a string representation of the functions list,
+		/// that can be safely removed if their return value is not used
 		/// </summary>
 		[ConfigurationProperty("pureFunctions", DefaultValue = "")]
 		public string PureFunctions

@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.5.0
+ * UglifyJS v2.6.0
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -326,7 +326,7 @@
 		return ctor;
 	};
 
-	var AST_Token = DEFNODE("Token", "type value line col pos endline endcol endpos nlb comments_before file", {
+	var AST_Token = DEFNODE("Token", "type value line col pos endline endcol endpos nlb comments_before file raw", {
 	}, null);
 
 	var AST_Node = DEFNODE("Node", "start end", {
@@ -1168,27 +1168,36 @@
 	function TreeWalker(callback) {
 		this.visit = callback;
 		this.stack = [];
+		this.directives = Object.create(null);
 	};
 	TreeWalker.prototype = {
 		_visit: function(node, descend) {
-			this.stack.push(node);
+			this.push(node);
 			var ret = this.visit(node, descend ? function(){
 				descend.call(node);
 			} : noop);
 			if (!ret && descend) {
 				descend.call(node);
 			}
-			this.stack.pop();
+			this.pop(node);
 			return ret;
 		},
 		parent: function(n) {
 			return this.stack[this.stack.length - 2 - (n || 0)];
 		},
 		push: function (node) {
+			if (node instanceof AST_Lambda) {
+				this.directives = Object.create(this.directives);
+			} else if (node instanceof AST_Directive) {
+				this.directives[node.value] = this.directives[node.value] ? "up" : true;
+			}
 			this.stack.push(node);
 		},
-		pop: function() {
-			return this.stack.pop();
+		pop: function(node) {
+			this.stack.pop();
+			if (node instanceof AST_Lambda) {
+				this.directives = Object.getPrototypeOf(this.directives);
+			}
 		},
 		self: function() {
 			return this.stack[this.stack.length - 1];
@@ -1201,7 +1210,16 @@
 			}
 		},
 		has_directive: function(type) {
-			return this.find_parent(AST_Scope).has_directive(type);
+			var dir = this.directives[type];
+			if (dir) return dir;
+			var node = this.stack[this.stack.length - 1];
+			if (node instanceof AST_Scope) {
+				for (var i = 0; i < node.body.length; ++i) {
+					var st = node.body[i];
+					if (!(st instanceof AST_Directive)) break;
+					if (st.value == type) return true;
+				}
+			}
 		},
 		in_boolean_context: function() {
 			var stack = this.stack;
@@ -1255,7 +1273,6 @@
 
 	var RE_HEX_NUMBER = /^0x[0-9a-f]+$/i;
 	var RE_OCT_NUMBER = /^0[0-7]+$/;
-	var RE_DEC_NUMBER = /^\d*\.?\d*(?:e[+-]?\d*(?:\d\.?|\.?\d)\d*)?$/i;
 
 	var OPERATORS = makePredicate([
 		"in",
@@ -1378,8 +1395,9 @@
 			return parseInt(num.substr(2), 16);
 		} else if (RE_OCT_NUMBER.test(num)) {
 			return parseInt(num.substr(1), 8);
-		} else if (RE_DEC_NUMBER.test(num)) {
-			return parseFloat(num);
+		} else {
+			var val = parseFloat(num);
+			if (val == num) return val;
 		}
 	};
 
@@ -1481,6 +1499,9 @@
 				nlb     : S.newline_before,
 				file    : filename
 			};
+			if (/^(?:num|string|regexp)$/i.test(type)) {
+				ret.raw = $TEXT.substring(ret.pos, ret.endpos);
+			}
 			if (!is_comment) {
 				ret.comments_before = S.comments_before;
 				S.comments_before = [];
@@ -1531,11 +1552,7 @@
 			if (prefix) num = prefix + num;
 			var valid = parse_js_number(num);
 			if (!isNaN(valid)) {
-				var tok = token("num", valid);
-				if (num.indexOf('.') >= 0) {
-					tok.literal = num;
-				}
-				return tok;
+				return token("num", valid);
 			} else {
 				parse_error("Invalid syntax: " + num);
 			}
@@ -2348,7 +2365,7 @@
 				ret = _make_symbol(AST_SymbolRef);
 				break;
 			  case "num":
-				ret = new AST_Number({ start: tok, end: tok, value: tok.value, literal: tok.literal });
+				ret = new AST_Number({ start: tok, end: tok, value: tok.value });
 				break;
 			  case "string":
 				ret = new AST_String({
@@ -2728,7 +2745,7 @@
 						if (y !== undefined) x = y;
 					}
 				}
-				tw.pop();
+				tw.pop(this);
 				return x;
 			});
 		};
@@ -2928,6 +2945,7 @@
 		// pass 1: setup scope chaining and handle definitions
 		var self = this;
 		var scope = self.parent_scope = null;
+		var labels = new Dictionary();
 		var defun = null;
 		var nesting = 0;
 		var tw = new TreeWalker(function(node, descend){
@@ -2944,20 +2962,24 @@
 				node.init_scope_vars(nesting);
 				var save_scope = node.parent_scope = scope;
 				var save_defun = defun;
+				var save_labels = labels;
 				defun = scope = node;
+				labels = new Dictionary();
 				++nesting; descend(); --nesting;
 				scope = save_scope;
 				defun = save_defun;
+				labels = save_labels;
 				return true;        // don't descend again in TreeWalker
 			}
-			if (node instanceof AST_Directive) {
-				node.scope = scope;
-				push_uniq(scope.directives, node.value);
-				return true;
-			}
-			if (node instanceof AST_Number) {
-				node.scope = scope;
-				return true;
+			if (node instanceof AST_LabeledStatement) {
+				var l = node.label;
+				if (labels.has(l.name)) {
+					throw new Error(string_template("Label {name} defined twice", l));
+				}
+				labels.set(l.name, l);
+				descend();
+				labels.del(l.name);
+				return true;        // no descend again
 			}
 			if (node instanceof AST_With) {
 				for (var s = scope; s; s = s.parent_scope)
@@ -2966,6 +2988,10 @@
 			}
 			if (node instanceof AST_Symbol) {
 				node.scope = scope;
+			}
+			if (node instanceof AST_Label) {
+				node.thedef = node;
+				node.references = [];
 			}
 			if (node instanceof AST_SymbolLambda) {
 				defun.def_function(node);
@@ -2988,6 +3014,15 @@
 				(options.screw_ie8 ? scope : defun)
 					.def_variable(node);
 			}
+			else if (node instanceof AST_LabelRef) {
+				var sym = labels.get(node.name);
+				if (!sym) throw new Error(string_template("Undefined label {name} [{line},{col}]", {
+					name: node.name,
+					line: node.start.line,
+					col: node.start.col
+				}));
+				node.thedef = sym;
+			}
 		});
 		self.walk(tw);
 
@@ -3000,6 +3035,10 @@
 				func = node;
 				descend();
 				func = prev_func;
+				return true;
+			}
+			if (node instanceof AST_LoopControl && node.label) {
+				node.label.thedef.references.push(node);
 				return true;
 			}
 			if (node instanceof AST_SymbolRef) {
@@ -3038,7 +3077,6 @@
 	});
 
 	AST_Scope.DEFMETHOD("init_scope_vars", function(nesting){
-		this.directives = [];     // contains the directives defined in this scope, i.e. "use strict"
 		this.variables = new Dictionary(); // map name to AST_SymbolVar (variables defined in this scope; includes functions)
 		this.functions = new Dictionary(); // map name to AST_SymbolDefun (functions defined in this scope)
 		this.uses_with = false;   // will be set to true if this or some nested scope uses the `with` statement
@@ -3047,10 +3085,6 @@
 		this.enclosed = [];       // a list of variables from this or outer scope(s) that are referenced from this or inner scopes
 		this.cname = -1;          // the current index for mangling functions/variables
 		this.nesting = nesting;   // the nesting level of this scope (0 means toplevel)
-	});
-
-	AST_Scope.DEFMETHOD("strict", function(){
-		return this.has_directive("use strict");
 	});
 
 	AST_Lambda.DEFMETHOD("init_scope_vars", function(){
@@ -3074,11 +3108,6 @@
 		if (name instanceof AST_Symbol) name = name.name;
 		return this.variables.get(name)
 			|| (this.parent_scope && this.parent_scope.find_variable(name));
-	});
-
-	AST_Scope.DEFMETHOD("has_directive", function(value){
-		return this.parent_scope && this.parent_scope.has_directive(value)
-			|| (this.directives.indexOf(value) >= 0 ? this : null);
 	});
 
 	AST_Scope.DEFMETHOD("def_function", function(symbol){
@@ -3489,13 +3518,14 @@
 
 		function make_string(str, quote) {
 			var dq = 0, sq = 0;
-			str = str.replace(/[\\\b\f\n\r\t\x22\x27\u2028\u2029\0\ufeff]/g, function(s){
+			str = str.replace(/[\\\b\f\n\r\v\t\x22\x27\u2028\u2029\0\ufeff]/g, function(s){
 				switch (s) {
 				  case "\\": return "\\\\";
 				  case "\b": return "\\b";
 				  case "\f": return "\\f";
 				  case "\n": return "\\n";
 				  case "\r": return "\\r";
+				  case "\x0B": return options.screw_ie8 ? "\\v" : "\\x0B";
 				  case "\u2028": return "\\u2028";
 				  case "\u2029": return "\\u2029";
 				  case '"': ++dq; return '"';
@@ -3526,8 +3556,11 @@
 
 		function encode_string(str, quote) {
 			var ret = make_string(str, quote);
-			if (options.inline_script)
+			if (options.inline_script) {
 				ret = ret.replace(/<\x2fscript([>\/\t\n\f\r ])/gi, "<\\/script$1");
+				ret = ret.replace(/\x3c!--/g, "\\x3c!--");
+				ret = ret.replace(/--\x3e/g, "--\\x3e");
+			}
 			return ret;
 		};
 
@@ -3779,8 +3812,13 @@
 			nodetype.DEFMETHOD("_codegen", generator);
 		};
 
+		var use_asm = false;
+
 		AST_Node.DEFMETHOD("print", function(stream, force_parens){
-			var self = this, generator = self._codegen;
+			var self = this, generator = self._codegen, prev_use_asm = use_asm;
+			if (self instanceof AST_Directive && self.value == "use asm") {
+				use_asm = true;
+			}
 			function doit() {
 				self.add_comments(stream);
 				self.add_source_map(stream);
@@ -3793,6 +3831,9 @@
 				doit();
 			}
 			stream.pop_node();
+			if (self instanceof AST_Lambda) {
+				use_asm = prev_use_asm;
+			}
 		});
 
 		AST_Node.DEFMETHOD("print_to_string", function(options){
@@ -4446,16 +4487,24 @@
 			output.print(self.operator);
 		});
 		DEFPRINT(AST_Binary, function(self, output){
+			var op = self.operator;
 			self.left.print(output);
-			output.space();
-			output.print(self.operator);
-			if (self.operator == "<"
+			if (op[0] == ">" /* ">>" ">>>" ">" ">=" */
+				&& self.left instanceof AST_UnaryPostfix
+				&& self.left.operator == "--") {
+				// space is mandatory to avoid outputting -->
+				output.print(" ");
+			} else {
+				// the space is optional depending on "beautify"
+				output.space();
+			}
+			output.print(op);
+			if ((op == "<" || op == "<<")
 				&& self.right instanceof AST_UnaryPrefix
 				&& self.right.operator == "!"
 				&& self.right.expression instanceof AST_UnaryPrefix
 				&& self.right.expression.operator == "--") {
 				// space is mandatory to avoid outputting <!--
-				// http://javascript.spec.whatwg.org/#comment-syntax
 				output.print(" ");
 			} else {
 				// the space is optional depending on "beautify"
@@ -4559,10 +4608,8 @@
 			output.print_string(self.getValue(), self.quote);
 		});
 		DEFPRINT(AST_Number, function(self, output){
-			if (self.literal !== undefined
-				&& +self.literal === self.value  /* paranoid check */
-				&& self.scope && self.scope.has_directive('use asm')) {
-				output.print(self.literal);
+			if (use_asm && self.start.raw != null) {
+				output.print(self.start.raw);
 			} else {
 				output.print(make_num(self.getValue()));
 			}
@@ -4741,6 +4788,12 @@
 		DEFMAP(AST_Finally, basic_sourcemap_gen);
 		DEFMAP(AST_Definitions, basic_sourcemap_gen);
 		DEFMAP(AST_Constant, basic_sourcemap_gen);
+		DEFMAP(AST_ObjectSetter, function(self, output){
+			output.add_mapping(self.start, self.key.name);
+		});
+		DEFMAP(AST_ObjectGetter, function(self, output){
+			output.add_mapping(self.start, self.key.name);
+		});
 		DEFMAP(AST_ObjectProperty, function(self, output){
 			output.add_mapping(self.start, self.key);
 		});
@@ -5699,7 +5752,7 @@
 		/* -----[ optimizers ]----- */
 
 		OPT(AST_Directive, function(self, compressor){
-			if (self.scope.has_directive(self.value) !== self.scope) {
+			if (compressor.has_directive(self.value) === "up") {
 				return make_node(AST_EmptyStatement, self);
 			}
 			return self;
@@ -7227,6 +7280,13 @@
 		OPT(AST_Object, literals_in_boolean_context);
 		OPT(AST_RegExp, literals_in_boolean_context);
 
+		OPT(AST_Return, function(self, compressor){
+			if (self.value instanceof AST_Undefined) {
+				self.value = null;
+			}
+			return self;
+		});
+
 	})();
 	//#endregion
 	
@@ -7336,7 +7396,14 @@
 				  case "boolean":
 					return new (val ? AST_True : AST_False)(args);
 				  default:
-					args.value = val;
+					var rx = M.regex;
+					if (rx && rx.pattern) {
+						// RegExpLiteral as per ESTree AST spec
+						args.value = new RegExp(rx.pattern, rx.flags).toString();
+					} else {
+						// support legacy RegExp
+						args.value = M.regex && M.raw ? M.raw : val;
+					}
 					return new AST_RegExp(args);
 				}
 			},
@@ -7524,6 +7591,19 @@
 			};
 		});
 
+		def_to_moz(AST_RegExp, function To_Moz_RegExpLiteral(M) {
+			var value = M.value;
+			return {
+				type: "Literal",
+				value: value,
+				raw: value.toString(),
+				regex: {
+					pattern: value.source,
+					flags: value.toString().match(/[gimuy]*$/)[0]
+				}
+			};
+		});
+
 		def_to_moz(AST_Constant, function To_Moz_Literal(M) {
 			var value = M.value;
 			if (typeof value === 'number' && (value < 0 || (value === 0 && 1 / value < 0))) {
@@ -7533,13 +7613,15 @@
 					prefix: true,
 					argument: {
 						type: "Literal",
-						value: -value
+						value: -value,
+						raw: M.start.raw
 					}
 				};
 			}
 			return {
 				type: "Literal",
-				value: value
+				value: value,
+				raw: M.start.raw
 			};
 		});
 
@@ -7559,6 +7641,12 @@
 
 		/* -----[ tools ]----- */
 
+		function raw_token(moznode) {
+			if (moznode.type == "Literal") {
+				return moznode.raw != null ? moznode.raw : moznode.value + "";
+			}
+		}
+
 		function my_start_token(moznode) {
 			var loc = moznode.loc, start = loc && loc.start;
 			var range = moznode.range;
@@ -7569,7 +7657,8 @@
 				pos     : range ? range[0] : moznode.start,
 				endline : start && start.line,
 				endcol  : start && start.column,
-				endpos  : range ? range[0] : moznode.start
+				endpos  : range ? range[0] : moznode.start,
+				raw     : raw_token(moznode)
 			});
 		};
 
@@ -7583,7 +7672,8 @@
 				pos     : range ? range[1] : moznode.end,
 				endline : end && end.line,
 				endcol  : end && end.column,
-				endpos  : range ? range[1] : moznode.end
+				endpos  : range ? range[1] : moznode.end,
+				raw     : raw_token(moznode)
 			});
 		};
 
@@ -7730,9 +7820,9 @@
 			output       : null,
 			compress     : {}
 		});
+		UglifyJS.base54.reset();
 
 		// 1. parse
-		var haveScope = false;
 		var toplevel = parse(code, options.parse);
 
 		// 2. compress
@@ -7740,7 +7830,6 @@
 			var compress = { warnings: options.warnings };
 			merge(compress, options.compress);
 			toplevel.figure_out_scope();
-			haveScope = true;
 			var sq = Compressor(compress);
 			toplevel = toplevel.transform(sq);
 		}
@@ -7748,17 +7837,11 @@
 		// 3. mangle
 		if (options.mangle) {
 			toplevel.figure_out_scope(options.mangle);
-			haveScope = true;
 			toplevel.compute_char_frequency(options.mangle);
 			toplevel.mangle_names(options.mangle);
 		}
 		
-		// 4. scope (if needed)
-		if (!haveScope) {
-			toplevel.figure_out_scope();
-		}
-
-		// 5. output
+		// 4. output
 		var stream = OutputStream(options.output);
 		toplevel.print(stream);
 		return {

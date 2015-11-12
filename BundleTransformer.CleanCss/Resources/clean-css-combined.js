@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.5
+ * Clean-css v3.4.7
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -1521,9 +1521,9 @@ var CleanCss = (function(){
 		  return count > 1;
 		}
 
-		function mergingIntoFunction(left, right, validator) {
-		  for (var i = 0, l = left.components.length; i < l; i++) {
-			if (anyValue(validator.isValidFunction, left.components[i]))
+		function overridingFunction(shorthand, validator) {
+		  for (var i = 0, l = shorthand.components.length; i < l; i++) {
+			if (anyValue(validator.isValidFunction, shorthand.components[i]))
 			  return true;
 		  }
 
@@ -1659,6 +1659,9 @@ var CleanCss = (function(){
 				if (!sameVendorPrefixesIn([left], right.components))
 				  continue;
 
+				if (!anyValue(validator.isValidFunction, left) && overridingFunction(right, validator))
+				  continue;
+
 				component = right.components.filter(nameMatchFilter(left))[0];
 				mayOverride = (compactable[left.name] && compactable[left.name].canOverride) || canOverride.sameValue;
 				if (everyCombination(mayOverride, left, component, validator)) {
@@ -1673,7 +1676,7 @@ var CleanCss = (function(){
 				if (moreSameShorthands(properties, i - 1, left.name))
 				  continue;
 
-				if (mergingIntoFunction(left, right, validator))
+				if (overridingFunction(left, validator))
 				  continue;
 
 				component = left.components.filter(nameMatchFilter(right))[0];
@@ -3949,7 +3952,7 @@ var CleanCss = (function(){
 		  }
 		}
 
-		function colorMininifier(_, value, compatibility) {
+		function colorMininifier(name, value, compatibility) {
 		  if (value.indexOf('#') === -1 && value.indexOf('rgb') == -1 && value.indexOf('hsl') == -1)
 			return HexNameShortener.shorten(value);
 
@@ -3982,7 +3985,7 @@ var CleanCss = (function(){
 			  return colorFunction + '(' + tokens.join(',') + ')';
 			});
 
-		  if (compatibility.colors.opacity) {
+		  if (compatibility.colors.opacity && name.indexOf('background') == -1) {
 			value = value.replace(/(?:rgba|hsla)\(0,0%?,0%?,0\)/g, function (match) {
 			  if (split(value, ',').pop().indexOf('gradient(') > -1)
 				return match;
@@ -6042,7 +6045,8 @@ var CleanCss = (function(){
 //			  imports: true,
 //			  rebase: self.outerContext.options.rebase,
 //			  fromBase: absoluteSourcePath,
-//			  toBase: isRemote ? absoluteSourcePath : toBase
+//			  toBase: isRemote ? absoluteSourcePath : toBase,
+//			  urlQuotes: self.outerContext.options.compatibility.properties.urlQuotes
 //			};
 //			styles = rewriteUrls(styles, rewriteOptions, self.outerContext);
 

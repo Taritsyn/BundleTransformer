@@ -1709,7 +1709,7 @@ to preserve references to external symbols.</xs:documentation>
 		</xs:attribute>
 		<xs:attribute name="pureFunctions" type="xs:string" use="optional" default="">
 			<xs:annotation>
-				<xs:documentation>String representation of the function names list, which UglifyJS will assume that those functions do not produce side effects</xs:documentation>
+				<xs:documentation>String representation of the functions list, that can be safely removed if their return value is not used</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="dropConsole" type="Boolean_SchemaType" use="optional" default="false">

@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.4.1
+* CSSO (CSS Optimizer) v1.4.2
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -40,13 +40,6 @@ var CSSO = (function(){
 		var packNumber = require('/compressor/utils').packNumber;
 
 		function CSSOCompressor() {
-			this.props = {};
-			this.shorts = {};
-			this.shorts2 = {};
-
-			this.shortGroupID = 0;
-			this.lastShortGroupID = 0;
-			this.lastShortSelector = 0;
 		}
 
 		CSSOCompressor.prototype.injectInfo = function(token) {
@@ -153,6 +146,14 @@ var CSSO = (function(){
 		};
 
 		function compressBlock(ast, restructuring) {
+			this.props = {};
+			this.shorts = {};
+			this.shorts2 = {};
+
+			this.shortGroupID = 0;
+			this.lastShortGroupID = 0;
+			this.lastShortSelector = 0;
+
 			// compression without restructure
 			ast = this.walk(rules.cleanComments, ast, '/0', 'cleanComments');
 			ast = this.walk(rules.compress, ast, '/0', 'compress');
@@ -3137,16 +3138,32 @@ var CSSO = (function(){
 		function checkCombinator(_i) {
 			if (tokens[_i].type === TokenType.PlusSign ||
 				tokens[_i].type === TokenType.GreaterThanSign ||
-				tokens[_i].type === TokenType.Deep ||
-				tokens[_i].type === TokenType.Tilde) return 1;
+				tokens[_i].type === TokenType.Tilde) {
+				return 1;
+			}
+
+			if (tokens[_i + 0].type === TokenType.Solidus &&
+				tokens[_i + 1].type === TokenType.Identifier && tokens[_i + 1].value === 'deep' &&
+				tokens[_i + 2].type === TokenType.Solidus) {
+				return 3;
+			}
 
 			return fail(tokens[_i]);
 		}
 
 		function getCombinator() {
+			var combinator = tokens[pos].value;
+
+			if (tokens[pos].type === TokenType.Solidus) {
+				combinator = '/deep/';
+				pos += 3;
+			} else {
+				pos += 1;
+			}
+
 			return needInfo?
-					[getInfo(pos), NodeType.CombinatorType, tokens[pos++].value] :
-					[NodeType.CombinatorType, tokens[pos++].value];
+					[getInfo(pos), NodeType.CombinatorType, combinator] :
+					[NodeType.CombinatorType, combinator];
 		}
 
 		// node: Comment
@@ -3850,8 +3867,14 @@ var CSSO = (function(){
 
 			if (l = checkSC(_i)) _i += l;
 
-			if ((x = joinValues2(_i, 6)) === 'progid:DXImageTransform.Microsoft.') {
-				_i += 6;
+			if (_i < tokens.length - 1 && tokens[_i].value === 'progid' && tokens[_i + 1].type === TokenType.Colon) {
+				_i += 2;
+			} else return fail(tokens[_i]);
+
+			if (l = checkSC(_i)) _i += l;
+
+			if ((x = joinValues2(_i, 4)) === 'DXImageTransform.Microsoft.') {
+				_i += 4;
 			} else return fail(tokens[_i - 1]);
 
 			if (l = checkIdent(_i)) _i += l;
@@ -4551,7 +4574,6 @@ var CSSO = (function(){
 			VerticalLine: 'VerticalLine',               // |
 			RightCurlyBracket: 'RightCurlyBracket',     // }
 			Tilde: 'Tilde',                             // ~
-			Deep: 'Deep',                               // /deep/
 
 			Identifier: 'Identifier',
 			DecimalNumber: 'DecimalNumber'
@@ -4611,7 +4633,7 @@ var CSSO = (function(){
 
 		function tokenize(s) {
 			function pushToken(type, ln, column, value) {
-				tokens.push(x = {
+				tokens.push({
 					type: type,
 					value: value,
 
@@ -4647,9 +4669,6 @@ var CSSO = (function(){
 
 				if (c === '/' && cn === '*') {
 					pushToken(TokenType.CommentML, ln, pos - lineStartPos, parseMLComment(s));
-				} else if (!urlMode && c === '/' && s.substr(pos + 1, 5) === 'deep/') {
-					pushToken(TokenType.Deep, ln, pos - lineStartPos, '/deep/');
-					pos += 5;
 				} else if (!urlMode && c === '/' && cn === '/') {
 					if (blockMode > 0) {
 						pushToken(TokenType.Identifier, ln, pos - lineStartPos, ident = parseIdentifier(s));
@@ -4659,7 +4678,7 @@ var CSSO = (function(){
 					}
 				} else if (c === '"' || c === "'") {
 					pushToken(c === '"' ? TokenType.StringDQ : TokenType.StringSQ, ln, pos - lineStartPos, parseString(s, c));
-				} else if (c === ' ' || c === '\n' || c === '\r' || c === '\t') {
+				} else if (c === ' ' || c === '\n' || c === '\r' || c === '\t' || c === '\f') {
 					pushToken(TokenType.Space, ln, pos - lineStartPos, parseSpaces(s));
 				} else if (c in Punctuation) {
 					pushToken(Punctuation[c], ln, pos - lineStartPos, c);
@@ -4690,10 +4709,18 @@ var CSSO = (function(){
 
 			for (; pos < s.length; pos++) {
 				var c = s.charAt(pos);
-				if (c === '\n') {
+				// \n or \f
+				if (c === '\n' || c === '\f') {
 					ln++;
 					lineStartPos = pos;
-				} else if (c !== ' ' && c !== '\r' && c !== '\t') {
+				// \r + optional \n
+				} else if (c === '\r') {
+					ln++;
+					if (s.charAt(pos + 1) === '\n') {
+						pos++;
+					}
+					lineStartPos = pos;
+				} else if (c !== ' ' && c !== '\t') {
 					break;
 				}
 			}
@@ -4726,27 +4753,42 @@ var CSSO = (function(){
 
 			for (pos = pos + 2; pos < s.length; pos++) {
 				if (s.charAt(pos) === '\n' || s.charAt(pos) === '\r') {
-					pos++;
 					break;
 				}
 			}
 
-			pos--;
 			return s.substring(start, pos + 1);
 		}
 
 		function parseString(s, q) {
 			var start = pos;
+			var res = '';
 
 			for (pos = pos + 1; pos < s.length; pos++) {
 				if (s.charAt(pos) === '\\') {
-					pos++;
+					var next = s.charAt(pos + 1);
+					// \n or \f
+					if (next === '\n' || next === '\f') {
+						res += s.substring(start, pos);
+						start = pos + 2;
+						pos++;
+					// \r + optional \n
+					} else if (next === '\r') {
+						res += s.substring(start, pos);
+						if (s.charAt(pos + 2) === '\n') {
+							pos++;
+						}
+						start = pos + 2;
+						pos++;
+					} else {
+						pos++;
+					}
 				} else if (s.charAt(pos) === q) {
 					break;
 				}
 			}
 
-			return s.substring(start, pos + 1);
+			return res + s.substring(start, pos + 1);
 		}
 
 		function parseDecimalNumber(s) {
@@ -4770,7 +4812,7 @@ var CSSO = (function(){
 			}
 
 			for (; pos < s.length; pos++) {
-				c = s.charAt(pos);
+				var c = s.charAt(pos);
 				if (c === '\\') {
 					pos++;
 				} else if (c in Punctuation && c !== '_') {
