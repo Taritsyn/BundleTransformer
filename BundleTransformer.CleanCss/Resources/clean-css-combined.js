@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.7
+ * Clean-css v3.4.8
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -5545,10 +5545,10 @@ var CleanCss = (function(){
 				// this is a fuzzy matching logic for unqoted data URIs
 				while (true) {
 				  nextEndAhead = data.indexOf(URL_SUFFIX, nextEnd + 1);
-				  // if it has whitespace then we should be out of URL, otherwise keep iterating
-				  // if it has not but content is not escaped, it has to be quoted so it will be captured
-				  // by either of two clauses above
-				  if (nextEndAhead == -1 || /\s/.test(data.substring(nextEnd, nextEndAhead)))
+				  // if it has whitespace, curly braces, or semicolon then we should be out of URL,
+				  // otherwise keep iterating if it has not but content is not escaped,
+				  // it has to be quoted so it will be captured by either of two clauses above
+				  if (nextEndAhead == -1 || /[\s\{\};]/.test(data.substring(nextEnd, nextEndAhead)))
 					break;
 
 				  nextEnd = nextEndAhead;

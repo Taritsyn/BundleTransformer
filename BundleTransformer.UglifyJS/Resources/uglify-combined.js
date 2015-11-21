@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.6.0
+ * UglifyJS v2.6.1
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -4960,7 +4960,7 @@
 		};
 
 		function tighten_body(statements, compressor) {
-			var CHANGED;
+			var CHANGED, max_iter = 10;
 			do {
 				CHANGED = false;
 				if (compressor.option("angular")) {
@@ -4979,7 +4979,7 @@
 				if (compressor.option("join_vars")) {
 					statements = join_consecutive_vars(statements, compressor);
 				}
-			} while (CHANGED);
+			} while (CHANGED && max_iter-- > 0);
 
 			if (compressor.option("negate_iife")) {
 				negate_iifes(statements, compressor);
@@ -5145,7 +5145,12 @@
 								continue loop;
 							}
 							//---
-							if (ret.length == 1 && in_lambda && ret[0] instanceof AST_SimpleStatement
+							// XXX: what was the intention of this case?
+							// if sequences is not enabled, this can lead to an endless loop (issue #866).
+							// however, with sequences on this helps producing slightly better output for
+							// the example code.
+							if (compressor.option("sequences")
+								&& ret.length == 1 && in_lambda && ret[0] instanceof AST_SimpleStatement
 								&& (!stat.alternative || stat.alternative instanceof AST_SimpleStatement)) {
 								CHANGED = true;
 								ret.push(make_node(AST_Return, ret[0], {
