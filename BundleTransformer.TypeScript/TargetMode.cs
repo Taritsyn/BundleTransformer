@@ -5,8 +5,9 @@
 	/// </summary>
 	public enum TargetMode
 	{
-		EcmaScript3,
-		EcmaScript5,
-		EcmaScript6
+		EcmaScript3 = 0,
+		EcmaScript5 = 1,
+		EcmaScript6 = 2,
+		EcmaScript2015 = 2
 	}
 }

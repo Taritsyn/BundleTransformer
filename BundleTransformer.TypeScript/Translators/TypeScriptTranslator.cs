@@ -84,15 +84,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable experimental support for ES7 async functions
-		/// </summary>
-		public bool ExperimentalAsyncFunctions
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -241,7 +232,6 @@
 			_relativePathResolver = relativePathResolver;
 			_tsScriptCache = new Dictionary<string, TsScript>();
 
-			ExperimentalAsyncFunctions = tsConfig.ExperimentalAsyncFunctions;
 			NewLine = tsConfig.NewLine;
 			NoEmit = tsConfig.NoEmit;
 			NoEmitHelpers = tsConfig.NoEmitHelpers;
@@ -402,7 +392,6 @@
 		{
 			var options = new CompilationOptions
 			{
-				ExperimentalAsyncFunctions = ExperimentalAsyncFunctions,
 				NewLine = NewLine,
 				NoEmit = NoEmit,
 				NoEmitHelpers = NoEmitHelpers,

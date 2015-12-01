@@ -10,16 +10,6 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to enable experimental support for ES7 async functions
-		/// </summary>
-		[ConfigurationProperty("experimentalAsyncFunctions", DefaultValue = false)]
-		public bool ExperimentalAsyncFunctions
-		{
-			get { return (bool)this["experimentalAsyncFunctions"]; }
-			set { this["experimentalAsyncFunctions"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>

@@ -6,15 +6,6 @@
 	internal sealed class CompilationOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to enable experimental support for ES7 async functions
-		/// </summary>
-		public bool ExperimentalAsyncFunctions
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -143,7 +134,6 @@
 		/// </summary>
 		public CompilationOptions()
 		{
-			ExperimentalAsyncFunctions = false;
 			NewLine = NewLineMode.CrLf;
 			NoEmit = false;
 			NoEmitHelpers = false;

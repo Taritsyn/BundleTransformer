@@ -7,7 +7,6 @@ var typeScriptHelper = (function (ts, undefined) {
 			charset: '',
 			emitBOM: false,
 			emitDecoratorMetadata: false,
-			experimentalAsyncFunctions: false,
 			experimentalDecorators: false,
 			inlineSourceMap: false,
 			inlineSources: false,

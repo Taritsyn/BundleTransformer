@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.82
+           README file for Bundle Transformer: IntelliSense 1.9.85
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of Uglify JS-minifier.
+   Updated definitions for configuration settings of TypeScript-translator.
    
    =============
    DOCUMENTATION

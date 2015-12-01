@@ -1,52 +1,54 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.75
+            README file for Bundle Transformer: TypeScript 1.9.85
 
    ----------------------------------------------------------------------
 
       Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
-		  
+
 
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.TypeScript contains translator-adapter 
+   BundleTransformer.TypeScript contains translator-adapter
    `TypeScriptTranslator` (supports TypeScript
-   (http://www.typescriptlang.org) version 1.6 RTM). This adapter makes 
+   (http://www.typescriptlang.org) version 1.7 RTM). This adapter makes
    translation of TypeScript-code to JS-code. Also contains debugging
-   HTTP-handler `TypeScriptAssetHandler`, which is responsible for text 
+   HTTP-handler `TypeScriptAssetHandler`, which is responsible for text
    output of translated TypeScript-asset.
-       
-   BundleTransformer.TypeScript does not support external modules 
+
+   BundleTransformer.TypeScript does not support external modules
    (CommonJS, AMD, SystemJS, UMD and ES6 modules).
-   
-   As a JS-engine is used the JavaScript Engine Switcher library 
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
-   working of this module is recommended to install one of the following 
-   NuGet packages: JavaScriptEngineSwitcher.Msie or 
+
+   As a JS-engine is used the JavaScript Engine Switcher library
+   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
+   working of this module is recommended to install one of the following
+   NuGet packages: JavaScriptEngineSwitcher.Msie or
    JavaScriptEngineSwitcher.V8.
 
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 1.6 RTM (please note: The 1.6 RTM
-   release is also called '1.6.2').
-   
+   1. Added support of TypeScript version 1.7 RTM (please note: The 1.7
+      RTM release is also called '1.7.3');
+   2. From configuration settings of TypeScript-translator removed one
+      property - `ExperimentalAsyncFunctions`.
+
    ====================
    POST-INSTALL ACTIONS
    ====================
-   For correct working of this module is recommended to install one of 
-   the following NuGet packages: JavaScriptEngineSwitcher.Msie or 
-   JavaScriptEngineSwitcher.V8. After package is installed, need set a 
+   For correct working of this module is recommended to install one of
+   the following NuGet packages: JavaScriptEngineSwitcher.Msie or
+   JavaScriptEngineSwitcher.V8. After package is installed, need set a
    name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
-   attribute of `/configuration/bundleTransformer/typeScript/jsEngine` 
+   attribute of `/configuration/bundleTransformer/typeScript/jsEngine`
    configuration element.
-   
+
    To use a debugging HTTP-handler in the IIS Classic mode, you need add
-   to the `/configuration/system.web/httpHandlers` element of the 
+   to the `/configuration/system.web/httpHandlers` element of the
    Web.config file a following code:
-   
+
    <add
 	path="*.ts" verb="GET"
 	type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" />
@@ -54,5 +56,5 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex - 
+   See documentation on CodePlex -
    http://bundletransformer.codeplex.com/documentation
