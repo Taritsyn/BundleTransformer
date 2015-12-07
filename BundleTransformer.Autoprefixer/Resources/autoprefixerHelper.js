@@ -26,6 +26,19 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		return destination;
 	}
 
+	exports.setupCountryStatistics = function(db) {
+		if (!db) {
+			return;
+		}
+
+		if (autoprefixer.regionUsageDb) {
+			mix(autoprefixer.regionUsageDb, db);
+		}
+		else {
+			autoprefixer.regionUsageDb = db;
+		}
+	};
+
 	exports.process = function (code, options) {
 		var autoprefixOptions,
 			browsers,

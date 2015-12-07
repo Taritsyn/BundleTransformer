@@ -1,8 +1,11 @@
 ﻿namespace BundleTransformer.Autoprefixer.AutoPrefixers
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
+	using System.Reflection;
 	using System.Text;
+	using System.Text.RegularExpressions;
 
 	using JavaScriptEngineSwitcher.Core;
 	using JavaScriptEngineSwitcher.Core.Helpers;
@@ -11,6 +14,8 @@
 
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
+
+	using Resources;
 
 	/// <summary>
 	/// CSS-autoprefixer
@@ -33,9 +38,30 @@
 		private const string AUTOPREFIXER_HELPER_FILE_NAME = "autoprefixerHelper.min.js";
 
 		/// <summary>
+		/// Name of directory, which contains a Autoprefixer country statistics
+		/// </summary>
+		private const string AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME = "CountryStatistics";
+
+		/// <summary>
+		/// Template of function call, which is responsible for setup the country statistics
+		/// </summary>
+		private const string AUTOPREFIXER_SETUP_COUNTRY_STATISTICS_FUNCTION_CALL_TEMPLATE =
+			@"autoprefixerHelper.setupCountryStatistics({0});";
+
+		/// <summary>
 		/// Template of function call, which is responsible for autoprefixing
 		/// </summary>
-		private const string AUTOPREFIXER_FUNCTION_CALL_TEMPLATE = @"autoprefixerHelper.process({0}, {1});";
+		private const string AUTOPREFIXER_PROCESS_FUNCTION_CALL_TEMPLATE = @"autoprefixerHelper.process({0}, {1});";
+
+		/// <summary>
+		/// Regular expression for working with country conditional expressions
+		/// </summary>
+		private static readonly Regex _countryExpressionRegex = new Regex(@"^> (?:\d+\.?\d*)% in (?<countryCode>\w\w)$");
+
+		/// <summary>
+		/// Default autoprefixing options
+		/// </summary>
+		private readonly AutoprefixingOptions _defaultOptions;
 
 		/// <summary>
 		/// String representation of the default autoprefixing options
@@ -79,8 +105,9 @@
 		public CssAutoprefixer(Func<IJsEngine> createJsEngineInstance, AutoprefixingOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
-			_defaultOptionsString = (defaultOptions != null) ?
-				ConvertAutoprefixingOptionsToJson(defaultOptions).ToString() : "null";
+
+			_defaultOptions = defaultOptions ?? new AutoprefixingOptions();
+			_defaultOptionsString = ConvertAutoprefixingOptionsToJson(_defaultOptions).ToString();
 		}
 
 
@@ -95,6 +122,15 @@
 
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + AUTOPREFIXER_LIBRARY_FILE_NAME, type);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + AUTOPREFIXER_HELPER_FILE_NAME, type);
+
+				IDictionary<string, JObject> commonCountryStatistics = GetCountryStatistics(_defaultOptions.Browsers);
+				if (commonCountryStatistics != null)
+				{
+					_jsEngine.Execute(string.Format(
+						AUTOPREFIXER_SETUP_COUNTRY_STATISTICS_FUNCTION_CALL_TEMPLATE,
+						JsonConvert.SerializeObject(commonCountryStatistics))
+					);
+				}
 
 				_initialized = true;
 			}
@@ -111,10 +147,12 @@
 		{
 			string newContent;
 			string currentOptionsString;
+			IDictionary<string, JObject> countryStatistics = null;
 
 			if (options != null)
 			{
 				currentOptionsString = ConvertAutoprefixingOptionsToJson(options).ToString();
+				countryStatistics = GetCountryStatistics(options.Browsers);
 			}
 			else
 			{
@@ -125,10 +163,18 @@
 			{
 				Initialize();
 
+				if (countryStatistics != null)
+				{
+					_jsEngine.Execute(string.Format(
+						AUTOPREFIXER_SETUP_COUNTRY_STATISTICS_FUNCTION_CALL_TEMPLATE,
+						JsonConvert.SerializeObject(countryStatistics))
+					);
+				}
+
 				try
 				{
 					var result = _jsEngine.Evaluate<string>(
-						string.Format(AUTOPREFIXER_FUNCTION_CALL_TEMPLATE,
+						string.Format(AUTOPREFIXER_PROCESS_FUNCTION_CALL_TEMPLATE,
 							JsonConvert.SerializeObject(content), currentOptionsString));
 
 					var json = JObject.Parse(result);
@@ -165,6 +211,70 @@
 			);
 
 			return optionsJson;
+		}
+
+		/// <summary>
+		/// Gets a country statistics by conditional expressions
+		/// </summary>
+		/// <param name="expressions">List of browser conditional expressions</param>
+		/// <returns>Country statistics</returns>
+		private static IDictionary<string, JObject> GetCountryStatistics(IList<string> expressions)
+		{
+			IDictionary<string, JObject> statistics = null;
+
+			if (expressions.Count > 0)
+			{
+				statistics = new Dictionary<string, JObject>();
+
+				foreach (string expression in expressions)
+				{
+					Match countryExpressionMatch = _countryExpressionRegex.Match(expression);
+					if (countryExpressionMatch.Success)
+					{
+						string countryCode = countryExpressionMatch.Groups["countryCode"].Value.ToUpperInvariant();
+
+						if (!statistics.ContainsKey(countryCode))
+						{
+							JObject statisticsForCountry = GetStatisticsForCountry(countryCode);
+							statistics.Add(countryCode, statisticsForCountry);
+						}
+					}
+				}
+
+				if (statistics.Count == 0)
+				{
+					statistics = null;
+				}
+			}
+
+			return statistics;
+		}
+
+		/// <summary>
+		/// Gets a statistics for country
+		/// </summary>
+		/// <param name="countryCode">Two-letter country code</param>
+		/// <returns>Statistics for country</returns>
+		private static JObject GetStatisticsForCountry(string countryCode)
+		{
+			JObject statistics;
+			string resourceName = RESOURCES_NAMESPACE + "." +
+				AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + "." +
+				countryCode + ".json"
+				;
+
+			try
+			{
+				string resourceContent = Utils.GetResourceAsString(resourceName, Assembly.GetExecutingAssembly());
+				statistics = JObject.Parse(resourceContent);
+			}
+			catch (NullReferenceException)
+			{
+				throw new CssAutoprefixingException(
+					string.Format(Strings.PostProcessors_CountryStatisticsNotFound, countryCode));
+			}
+
+			return statistics;
 		}
 
 		/// <summary>

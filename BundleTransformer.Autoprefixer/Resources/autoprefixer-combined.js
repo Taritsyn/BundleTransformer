@@ -4859,7 +4859,17 @@ browserslist.queries = {
             var usage = browserslist.usage[country];
             if ( !usage ) {
                 usage = { };
-                var data = require('caniuse-db/region-usage-json/' + country);
+//              var data = require('caniuse-db/region-usage-json/' + country);
+                var regionUsageDb = Autoprefixer.regionUsageDb;
+                var data = null;
+
+                if (regionUsageDb && regionUsageDb[country]) {
+                    data = regionUsageDb[country];
+                }
+                else {
+                    throw new Error("Could not find the statistics for country code '" + country + "'.");
+                }
+				
                 for ( var i in data.data ) {
                     fillUsage(usage, i, data.data[i]);
                 }

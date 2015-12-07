@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Autoprefixer 1.9.85
+           README file for Bundle Transformer: Autoprefixer 1.9.86
 
    ----------------------------------------------------------------------
 
@@ -24,7 +24,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 6.1.2.
+   Fixed bug #117 “Autoprefixer country support”.
 
    ====================
    POST-INSTALL ACTIONS
