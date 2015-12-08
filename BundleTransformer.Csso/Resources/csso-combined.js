@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.4.2
+* CSSO (CSS Optimizer) v1.4.3
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -3537,7 +3537,7 @@ var CSSO = (function(){
 				var unicodeRange = getUnicodeRange(_i + 2, true);
 				if (unicodeRange) {
 					tokens[start].ident_last = unicodeRange - 1;
-					return unicodeRange + 2;
+					return unicodeRange - start;
 				}
 			}
 
