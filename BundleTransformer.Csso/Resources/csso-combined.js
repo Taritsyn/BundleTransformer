@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.4.3
+* CSSO (CSS Optimizer) v1.4.4
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -487,7 +487,7 @@ var CSSO = (function(){
 
 		// See https://github.com/css/csso/issues/165
 		CSSOCompressor.prototype.issue165 = function(parent, prevType, nextType) {
-			return parent[1] === 'atrulerq' && prevType === 'braces' && nextType === 'ident';
+			return prevType === 'braces' && nextType === 'ident';
 		};
 
 		// See https://github.com/css/csso/issues/134
