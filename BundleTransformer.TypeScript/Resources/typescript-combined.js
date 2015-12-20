@@ -14974,8 +14974,9 @@ var ts;
                 }
                 else {
                     source = getApparentType(source);
-                    if (source.flags & 80896 && (target.flags & (4096 | 8192) ||
-                        (target.flags & 65536) && target.symbol && target.symbol.flags & (8192 | 2048 | 32))) {
+                    if (source.flags & 80896 && (target.flags & 4096 && target.typeArguments ||
+                        target.flags & 8192 ||
+                        target.flags & 65536 && target.symbol && target.symbol.flags & (8192 | 2048 | 32))) {
                         if (isInProcess(source, target)) {
                             return;
                         }
@@ -29531,7 +29532,7 @@ var ts;
     ts.ioReadTime = 0;
     ts.ioWriteTime = 0;
     var emptyArray = [];
-    ts.version = "1.7.3";
+    ts.version = "1.7.5";
     function findConfigFile(searchPath) {
         var fileName = "tsconfig.json";
         while (true) {

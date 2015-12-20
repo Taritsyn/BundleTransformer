@@ -13,6 +13,6 @@
 		/// <summary>
 		/// JavaScript content type
 		/// </summary>
-		public static readonly string Js = "application/x-javascript";
+		public static readonly string Js = "application/javascript";
 	}
 }

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.81
+               README file for Bundle Transformer: Core 1.9.89
 
    ----------------------------------------------------------------------
 
@@ -45,7 +45,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #115 “Response.End() causes ThreadAbortExceptions”.
+   Fixed bug #119 “JS ContentType is out of date”.
 
    ====================
    POST-INSTALL ACTIONS
