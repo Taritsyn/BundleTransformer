@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: TypeScript 1.9.89
+        README file for Bundle Transformer: TypeScript 1.9.92 Alpha 1
 
    ----------------------------------------------------------------------
 
-      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -30,7 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 1.7.5.
+   No longer made preprocessing of `reference` comments.
 
    ====================
    POST-INSTALL ACTIONS

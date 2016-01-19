@@ -1,12 +1,23 @@
-﻿namespace BundleTransformer.Core.Helpers
+﻿namespace BundleTransformer.Less
 {
+	using System;
 	using System.Collections.Generic;
+	using System.IO;
+	using System.Text;
+
+	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
-	/// MIME type helpers
+	/// LESS environment
 	/// </summary>
-	public static class MimeTypeHelpers
+	public sealed class LessEnvironment
 	{
+		/// <summary>
+		/// Instance of LESS environment
+		/// </summary>
+		private static readonly Lazy<LessEnvironment> _instance =
+			new Lazy<LessEnvironment>(() => new LessEnvironment());
+
 		/// <summary>
 		/// List of MIME types
 		/// </summary>
@@ -191,13 +202,84 @@
 		};
 
 		/// <summary>
-		/// Determines a MIME-type by the file extension
+		/// Gets a instance of LESS environment
 		/// </summary>
-		/// <param name="fileExtension">File extension</param>
-		/// <returns>MIME-type</returns>
-		public static string GetMimeType(string fileExtension)
+		public static LessEnvironment Instance
 		{
-			string processedFileExtension = fileExtension
+			get { return _instance.Value; }
+		}
+
+
+		/// <summary>
+		/// Constructs a instance of LESS environment
+		/// </summary>
+		private LessEnvironment()
+		{ }
+
+
+		/// <summary>
+		/// Encodes a text content to Base64
+		/// </summary>
+		/// <param name="value">Text content</param>
+		/// <returns>Base64-encoded content</returns>
+		public string EncodeToBase64(string value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "value"));
+			}
+
+			byte[] bytes = Encoding.UTF8.GetBytes(value);
+			string encodedValue = Convert.ToBase64String(bytes);
+
+			return encodedValue;
+		}
+
+		/// <summary>
+		/// Encodes a binary content to Base64
+		/// </summary>
+		/// <param name="value">Binary content</param>
+		/// <returns>Base64-encoded content</returns>
+		public string EncodeToBase64(byte[] value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "value"));
+			}
+
+			string encodedValue = Convert.ToBase64String(value);
+
+			return encodedValue;
+		}
+
+		/// <summary>
+		/// Determines a MIME-type by the file name
+		/// </summary>
+		/// <param name="fileName">File name</param>
+		/// <returns>MIME-type</returns>
+		public string GetMimeType(string fileName)
+		{
+			if (fileName == null)
+			{
+				throw new ArgumentNullException("fileName",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "fileName"));
+			}
+
+			if (string.IsNullOrWhiteSpace(fileName))
+			{
+				throw new ArgumentException(
+					string.Format(CoreStrings.Common_ArgumentIsEmpty, "fileName"), "fileName");
+			}
+
+			string fileExtension = Path.GetExtension(fileName);
+			if (string.IsNullOrWhiteSpace(fileExtension))
+			{
+				return string.Empty;
+			}
+
+			string processedFileExtension = Path.GetExtension(fileName)
 				.TrimStart('.')
 				.ToLowerInvariant()
 				;

@@ -92,6 +92,19 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		[ConfigurationProperty("severity", DefaultValue = 0)]
+		[IntegerValidator(MinValue = 0, MaxValue = 1, ExcludeRange = false)]
+		public int Severity
+		{
+			get { return (int)this["severity"]; }
+			set { this["severity"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JavaScript engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

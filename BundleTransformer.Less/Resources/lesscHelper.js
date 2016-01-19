@@ -1,5 +1,5 @@
-/*global Less */
-var lessHelper = (function (less, undefined) {
+/*global Less, LessEnvironment, VirtualFileManager  */
+var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined) {
 	'use strict';
 
 	var exports = {},
@@ -23,8 +23,9 @@ var lessHelper = (function (less, undefined) {
 			chunkInput: false,
 			processImports: true
 		},
-		environment,
-		FileManager
+		btEnvironment,
+		BtFileManager,
+		BtLogger
 		;
 
 	function mix(destination, source) {
@@ -60,102 +61,21 @@ var lessHelper = (function (less, undefined) {
 		return result;
 	}
 
-	function generateFileCacheItemKey(path) {
-		var key = path.toLocaleUpperCase();
-
-		return key;
-	}
-
-	//#region environment
-	environment = (function () {
-		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'environment.{0}' is not implemented.",
-			symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
-			;
-
-		//#region Internal Methods
-		function encodeUtf8(value) {
-			var result,
-				processedValue,
-				charIndex,
-				charCount,
-				charCode,
-				strFromCharCode = String.fromCharCode
-				;
-
-			result = '';
-			processedValue = value.replace(/\r\n/g, '\n');
-			charCount = processedValue.length;
-
-			for (charIndex = 0; charIndex < charCount; charIndex++) {
-				charCode = processedValue.charCodeAt(charIndex);
-
-				if (charCode < 128) {
-					result += strFromCharCode(charCode);
-				}
-				else if ((charCode > 127) && (charCode < 2048)) {
-					result += strFromCharCode((charCode >> 6) | 192);
-					result += strFromCharCode((charCode & 63) | 128);
-				}
-				else {
-					result += strFromCharCode((charCode >> 12) | 224);
-					result += strFromCharCode(((charCode >> 6) & 63) | 128);
-					result += strFromCharCode((charCode & 63) | 128);
-				}
-			}
-
-			return result;
-		}
-		//#endregion
+	//#region btEnvironment object
+	btEnvironment = (function () {
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'btEnvironment.{0}' is not implemented.";
 
 		function encodeBase64(value) {
-			var result,
-				processedValue,
-				charIndex,
-				charCount,
-				charCode1,
-				charCode2,
-				charCode3,
-				encodedCharCode1,
-				encodedCharCode2,
-				encodedCharCode3,
-				encodedCharCode4
-				;
-
-			result = '';
-			processedValue = encodeUtf8(value);
-			charCount = processedValue.length;
-
-			for (charIndex = 0; charIndex < charCount;) {
-				charCode1 = processedValue.charCodeAt(charIndex++);
-				charCode2 = processedValue.charCodeAt(charIndex++);
-				charCode3 = processedValue.charCodeAt(charIndex++);
-
-				encodedCharCode1 = charCode1 >> 2;
-				encodedCharCode2 = ((charCode1 & 3) << 4) | (charCode2 >> 4);
-				encodedCharCode3 = ((charCode2 & 15) << 2) | (charCode3 >> 6);
-				encodedCharCode4 = charCode3 & 63;
-
-				if (isNaN(charCode2)) {
-					encodedCharCode3 = encodedCharCode4 = 64;
-				} else if (isNaN(charCode3)) {
-					encodedCharCode4 = 64;
-				}
-
-				result += symbols.charAt(encodedCharCode1);
-				result += symbols.charAt(encodedCharCode2);
-				result += symbols.charAt(encodedCharCode3);
-				result += symbols.charAt(encodedCharCode4);
-			}
-
-			return result;
+			return lessEnvironment.EncodeToBase64(value);
 		}
 
-		function mimeLookup() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'mimeLookup'));
+		function mimeLookup(filename) {
+			return lessEnvironment.GetMimeType(filename);
 		}
 
-		function charsetLookup() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'charsetLookup'));
+		function charsetLookup(mimeType) {
+			// Assume text types are utf8
+			return (/^text\//).test(mimeType) ? 'UTF-8' : null;
 		}
 
 		function getSourceMapGenerator() {
@@ -171,105 +91,140 @@ var lessHelper = (function (less, undefined) {
 	}());
 	//#endregion
 
-	//#region FileManager
-	FileManager = (function(AbstractFileManager) {
-		function FileManager(files) {
-			this._files = files;
+	//#region BtFileManager class
+	BtFileManager = (function (AbstractFileManager) {
+		function BtFileManager() {
+			this._includedFilePaths = [];
 		}
 
-		FileManager.prototype = new AbstractFileManager();
+		BtFileManager.prototype = new AbstractFileManager();
 
-		FileManager.prototype.supports = function () {
+
+		BtFileManager.prototype.supports = function () {
 			return true;
 		};
 
-		FileManager.prototype.supportsSync = function () {
+		BtFileManager.prototype.supportsSync = function () {
 			return true;
 		};
 
-		FileManager.prototype.loadFile = function (filename, currentDirectory, options, environment, callback) {
-			var result = this.loadFileSync(filename);
+		BtFileManager.prototype.loadFile = function (filename, currentDirectory, options, environment, callback) {
+			var result = this.loadFileSync(filename, currentDirectory, options, environment, 'utf-8');
 			callback(result.error, result);
 		};
 
-		FileManager.prototype.loadFileSync = function (filename) {
+		BtFileManager.prototype.loadFileSync = function (filename, currentDirectory, options, environment, encoding) {
 			var result,
-				key,
+				fullFilename,
+				isAbsoluteFilename,
 				isFileExists,
 				data,
 				err
 				;
 
-			key = generateFileCacheItemKey(filename);
-			isFileExists = (typeof this._files[key] !== 'undefined');
+			isAbsoluteFilename = this.isPathAbsolute(filename);
+			fullFilename = isAbsoluteFilename ?
+				filename : this.extractUrlParts(this.join(currentDirectory, filename)).fileUrl;
+			isFileExists = virtualFileManager.FileExists(fullFilename);
 
 			if (isFileExists) {
-				data = this._files[key].content;
-				result = { contents: data, filename: filename };
+				if (encoding) {
+					data = virtualFileManager.ReadTextFile(fullFilename);
+				}
+				else {
+					data = virtualFileManager.ReadBinaryFile(fullFilename);
+				}
+
+				result = { contents: data, filename: fullFilename };
 			}
 			else {
-				err = { type: 'File', message: "'" + filename + "' wasn't found." };
+				err = { type: 'File', message: "'" + fullFilename + "' wasn't found." };
 				result = { error: err };
 			}
+
+			this._includedFilePaths.push(fullFilename);
 
 			return result;
 		};
 
-		FileManager.prototype.dispose = function () {
-			this._files = null;
+		BtFileManager.prototype.getIncludedFilePaths = function () {
+			return this._includedFilePaths;
 		};
 
-		return FileManager;
+		BtFileManager.prototype.dispose = function () {
+			this._includedFilePaths = null;
+		};
+
+		return BtFileManager;
 	})(less.AbstractFileManager);
 	//#endregion
 
-	exports.compile = function (code, path, dependencies, options) {
+	//#region BtLogger class
+	BtLogger = (function () {
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'BtLogger.{0}' is not implemented.";
+
+		function BtLogger() {
+			this._warnings = [];
+		}
+
+
+		BtLogger.prototype.error = function () {};
+
+		BtLogger.prototype.warn = function (msg) {
+			this._warnings.push(msg);
+		};
+
+		BtLogger.prototype.info = function () {};
+
+		BtLogger.prototype.debug = function () {};
+
+		BtLogger.prototype.addListener = function () {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'addListener'));
+		};
+
+		BtLogger.prototype.removeListener = function () {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'removeListener'));
+		};
+
+		BtLogger.prototype.getWarnings = function () {
+			return this._warnings;
+		};
+
+		BtLogger.prototype.dispose = function () {
+			this._warnings = null;
+		};
+
+		return BtLogger;
+	})();
+	//#endregion
+
+	exports.compile = function (code, path, options) {
 		var result = {
 				compiledCode: '',
-				errors: []
+				includedFilePaths: []
 			},
 			compilationOptions,
-			inputFilePath = path,
-			inputFileKey,
-			files,
-			dependency,
-			dependencyIndex,
-			dependencyCount,
-			dependencyKey,
-			errors = [],
 			fileManager,
-			lessCompiler
+			logger,
+			lessCompiler,
+			errors = [],
+			warnings
 			;
 
 		code = code.replace(/^\uFEFF/, '');
 		options = options || {};
 
-		// Fill file cache
-		files = {};
-
-		if (dependencies) {
-			dependencyCount = dependencies.length;
-
-			for (dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
-				dependency = dependencies[dependencyIndex];
-				dependencyKey = generateFileCacheItemKey(dependency.path);
-
-				files[dependencyKey] = dependency;
-			}
-		}
-
-		inputFileKey = generateFileCacheItemKey(inputFilePath);
-		files[inputFileKey] = { path: inputFilePath, content: code };
-
 		// Compile code
-		fileManager = new FileManager(files);
+		fileManager = new BtFileManager();
+		logger = new BtLogger();
 
 		compilationOptions = mix(mix({}, defaultOptions), options);
-		compilationOptions.filename = inputFilePath;
-		compilationOptions.rootpath = fileManager.getPath(inputFilePath);
+		compilationOptions.filename = path;
+		compilationOptions.rootpath = fileManager.getPath(path);
 		compilationOptions.relativeUrls = true;
 
-		lessCompiler = less.createFromEnvironment(environment, [fileManager]);
+		lessCompiler = less.createFromEnvironment(btEnvironment, [fileManager]);
+		less.logger = logger;
 
 		try {
 			lessCompiler.render(code, compilationOptions,
@@ -287,6 +242,7 @@ var lessHelper = (function (less, undefined) {
 					}
 
 					result.compiledCode = stylesheet.css;
+					result.includedFilePaths = fileManager.getIncludedFilePaths();
 				}
 			);
 		}
@@ -309,10 +265,18 @@ var lessHelper = (function (less, undefined) {
 			result.errors = errors;
 		}
 
+		warnings = logger.getWarnings();
+		if (warnings.length > 0) {
+			result.warnings = warnings;
+		}
+
 		fileManager.dispose();
+		logger.dispose();
+
+		less.logger = null;
 
 		return JSON.stringify(result);
 	};
 
 	return exports;
-} (Less));
+}(Less, LessEnvironment, VirtualFileManager));

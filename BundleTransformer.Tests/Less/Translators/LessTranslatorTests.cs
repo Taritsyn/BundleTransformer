@@ -1,7 +1,7 @@
 ﻿namespace BundleTransformer.Tests.Less.Translators
 {
 	using System;
-	using System.Text;
+	using System.Collections.Generic;
 
 	using JavaScriptEngineSwitcher.Core;
 	using Moq;
@@ -11,7 +11,6 @@
 	using BundleTransformer.Core.FileSystem;
 	using BundleTransformer.Core.Helpers;
 
-	using BundleTransformer.Less;
 	using BundleTransformer.Less.Configuration;
 	using BundleTransformer.Less.Translators;
 
@@ -19,14 +18,48 @@
 	public class LessTranslatorTests
 	{
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "/Content/";
-		private const string STYLES_DIRECTORY_URL = "/Content/";
 
 		[Test]
-		public void FillingOfImportedLessFilePathsIsCorrect()
+		public void FillingOfDependenciesIsCorrect()
 		{
 			// Arrange
 			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
-			var encoding = Encoding.Default;
+
+			string testLessLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TestLess.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(testLessLessAssetVirtualPath))
+				.Returns(testLessLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(testLessLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(testLessLessAssetVirtualPath))
+				.Returns(@"@import (once) ""Mixins.less"";
+@import (reference) ""Variables.less"";
+@import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
+
+.translators #less
+{
+	float: left;
+	.visible();
+	padding: 0.2em 0.5em 0.2em 0.5em;
+	background-color: @bg-color;
+	color: @caption-color;
+	font-weight: bold;
+	border: 1px solid @bg-color;
+	.border-radius(5px);
+}
+
+.icon-monitor
+{
+	display: inline;
+	background-image: url(""@{icons-path}monitor.png"");
+}
+
+@import (once) ""TestLessImport.less"";")
+				;
 
 			string mixinsLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Mixins.less");
 			virtualFileSystemMock
@@ -40,21 +73,26 @@
   -webkit-border-radius: @radius;
      -moz-border-radius: @radius;
           border-radius: @radius;
-}")
-				;
+}
 
-			string selectorsLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Selectors.less");
-			virtualFileSystemMock
-				.Setup(fs => fs.FileExists(selectorsLessAssetVirtualPath))
-				.Returns(true)
-				;
-			virtualFileSystemMock
-				.Setup(fs => fs.GetFileTextContent(selectorsLessAssetVirtualPath))
-				.Returns(@"// Visible
+// Visible
 .visible
 {
 	display: block;
 }")
+				;
+
+			string variablesLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Variables.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(variablesLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(variablesLessAssetVirtualPath))
+				.Returns(@"@bg-color: #7AC0DA;
+@caption-color: #FFFFFF;
+@stylesheets-path: ""/Content/"";
+@icons-path: ""/Content/images/icons/"";")
 				;
 
 			string testLessImportLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
@@ -75,7 +113,7 @@
 .icon-headphone
 {
 	display: inline;
-	background-image: data-uri('headphone.gif');
+	background-image: data-uri('@{icons-path}headphone.gif');
 }
 
 .icon-google-plus
@@ -85,7 +123,7 @@
 }
 
 @import (multiple) url(		""TestLessImport.Sub1.less""	);
-.singleline-comment { content: ""//"" } .triple-slash-directive { content: '///' } @import 'TestLessImport.Sub2';
+.singleline-comment { content: ""//"" } .triple-slash-directive { content: '///' } @import '@{stylesheets-path}TestLessImport.Sub2';
 /*@import 'TestLessImport.Sub3.less';
 @import 'TestLessImport.Sub4.less';*/
 // @import ""TestLessImport.Sub5.less"";
@@ -96,14 +134,10 @@
 				;
 
 
-			string headphoneGifAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "headphone.gif");
+			string headphoneGifAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "images/icons/headphone.gif");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(headphoneGifAssetVirtualPath))
 				.Returns(true)
-				;
-			virtualFileSystemMock
-				.Setup(fs => fs.IsTextFile(headphoneGifAssetVirtualPath, 256, out encoding))
-				.Returns(false)
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileBinaryContent(headphoneGifAssetVirtualPath))
@@ -114,10 +148,6 @@
 			string googlePlusSvgAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "google-plus.svg");
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(googlePlusSvgAssetVirtualPath))
-				.Returns(true)
-				;
-			virtualFileSystemMock
-				.Setup(fs => fs.IsTextFile(googlePlusSvgAssetVirtualPath, 256, out encoding))
 				.Returns(true)
 				;
 			virtualFileSystemMock
@@ -159,10 +189,6 @@
 				.Returns(true)
 				;
 			virtualFileSystemMock
-				.Setup(fs => fs.IsTextFile(networkPngAssetVirtualPath, 256, out encoding))
-				.Returns(false)
-				;
-			virtualFileSystemMock
 				.Setup(fs => fs.GetFileBinaryContent(networkPngAssetVirtualPath))
 				.Returns(new byte[0])
 				;
@@ -192,7 +218,7 @@
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(testLessImportSub2LessAssetVirtualPath))
 				.Returns(@"@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext';
-@import (css) ""UsbFlashDriveIcon"";
+@import (css) ""UsbFlashDriveIcon.css"";
 @import (less) ""ValidationIcon.css"";
 @import (inline) ""MicroformatsIcon.css"";
 @import (inline, css) 'NodeIcon.less';
@@ -299,128 +325,34 @@
 				.Returns(false)
 				;
 
-			Func<IJsEngine> createJsEngineInstance = () => (new Mock<IJsEngine>()).Object;
+			Func<IJsEngine> createJsEngineInstance =
+				() => JsEngineSwitcher.Current.CreateDefaultJsEngineInstance();
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
-			IRelativePathResolver relativePathResolver = new MockRelativePathResolver();
 			var lessConfig = new LessSettings();
 
 			var lessTranslator = new LessTranslator(createJsEngineInstance,
-				virtualFileSystemWrapper, relativePathResolver, lessConfig);
-			const string assetContent = @"@import (once) ""Mixins.less"";
-@import (reference) ""Selectors.less"";
-@import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
-
-@bg-color: #7AC0DA;
-@caption-color: #FFFFFF;
-@monitor-icon-url: ""monitor.png"";
-
-.translators #less
-{
-	float: left;
-	.visible();
-	padding: 0.2em 0.5em 0.2em 0.5em;
-	background-color: @bg-color;
-	color: @caption-color;
-	font-weight: bold;
-	border: 1px solid @bg-color;
-	.border-radius(5px);
-}
-
-.icon-monitor
-{
-	display: inline;
-	background-image: url(""@{monitor-icon-url}"");
-}
-
-@import (once) ""TestLessImport.less"";";
-			string assetUrl = UrlHelpers.Combine(STYLES_DIRECTORY_URL, "TestLess.less");
-			LessStylesheet stylesheet = lessTranslator.PreprocessStylesheet(assetContent, assetUrl,
-				new LessImportOptions(".less"));
-			var dependencies = new DependencyCollection();
+				virtualFileSystemWrapper, lessConfig);
+			IAsset asset = new Asset(testLessLessAssetVirtualPath, virtualFileSystemWrapper);
 
 			// Act
-			lessTranslator.FillDependencies(assetUrl, stylesheet, dependencies);
+			asset = lessTranslator.Translate(asset);
+			IList<string> dependencies = asset.VirtualPathDependencies;
 
 			// Assert
-			Assert.AreEqual(17, dependencies.Count);
-
-			Dependency mixinsLessAsset = dependencies[0];
-			Dependency selectorsLessAsset = dependencies[1];
-			Dependency testLessImportLessAsset = dependencies[2];
-			Dependency headphoneGifAsset = dependencies[3];
-			Dependency googlePlusSvgAsset = dependencies[4];
-			Dependency testLessImportSub1LessAsset = dependencies[5];
-			Dependency networkPngAsset = dependencies[6];
-			Dependency googleFontAsset = dependencies[7];
-			Dependency tagIconCssAsset = dependencies[8];
-			Dependency testLessImportSub2LessAsset = dependencies[9];
-			Dependency usbFlashDriveIconCssAsset = dependencies[10];
-			Dependency validationIconCssAsset = dependencies[11];
-			Dependency microformatsIconCssAsset = dependencies[12];
-			Dependency nodeIconLessAsset = dependencies[13];
-			Dependency openIdIconLessAsset = dependencies[14];
-			Dependency printerIconLessAsset = dependencies[15];
-			Dependency nonExistentIconLessAsset = dependencies[16];
-
-			Assert.AreEqual(mixinsLessAssetVirtualPath, mixinsLessAsset.Url);
-			Assert.AreEqual(true, mixinsLessAsset.IsObservable);
-
-			Assert.AreEqual(selectorsLessAssetVirtualPath, selectorsLessAsset.Url);
-			Assert.AreEqual(true, selectorsLessAsset.IsObservable);
-
-			Assert.AreEqual(testLessImportLessAssetVirtualPath, testLessImportLessAsset.Url);
-			Assert.AreEqual(true, testLessImportLessAsset.IsObservable);
-
-			Assert.AreEqual(headphoneGifAssetVirtualPath, headphoneGifAsset.Url);
-			Assert.AreEqual(true, headphoneGifAsset.IsObservable);
-
-			Assert.AreEqual(googlePlusSvgAssetVirtualPath, googlePlusSvgAsset.Url);
-			Assert.AreEqual(true, googlePlusSvgAsset.IsObservable);
-
-			Assert.AreEqual(testLessImportSub1LessAssetVirtualPath, testLessImportSub1LessAsset.Url);
-			Assert.AreEqual(true, testLessImportSub1LessAsset.IsObservable);
-
-			Assert.AreEqual(networkPngAssetVirtualPath, networkPngAsset.Url);
-			Assert.AreEqual(true, networkPngAsset.IsObservable);
-
-			Assert.AreEqual("http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext",
-				googleFontAsset.Url);
-			Assert.AreEqual(false, googleFontAsset.IsObservable);
-
-			Assert.AreEqual(tagIconCssAssetVirtualPath, tagIconCssAsset.Url);
-			Assert.AreEqual(false, tagIconCssAsset.IsObservable);
-
-			Assert.AreEqual(testLessImportSub2LessAssetVirtualPath, testLessImportSub2LessAsset.Url);
-			Assert.AreEqual(true, testLessImportSub2LessAsset.IsObservable);
-
-			Assert.AreEqual(usbFlashDriveIconCssAssetVirtualPath, usbFlashDriveIconCssAsset.Url);
-			Assert.AreEqual(false, usbFlashDriveIconCssAsset.IsObservable);
-
-			Assert.AreEqual(validationIconCssAssetVirtualPath, validationIconCssAsset.Url);
-			Assert.AreEqual(true, validationIconCssAsset.IsObservable);
-
-			Assert.AreEqual(microformatsIconCssAssetVirtualPath, microformatsIconCssAsset.Url);
-			Assert.AreEqual(true, microformatsIconCssAsset.IsObservable);
-
-			Assert.AreEqual(nodeIconLessAssetVirtualPath, nodeIconLessAsset.Url);
-			Assert.AreEqual(true, nodeIconLessAsset.IsObservable);
-
-			Assert.AreEqual(openIdIconLessAssetVirtualPath, openIdIconLessAsset.Url);
-			Assert.AreEqual(false, openIdIconLessAsset.IsObservable);
-
-			Assert.AreEqual(printerIconLessAssetVirtualPath, printerIconLessAsset.Url);
-			Assert.AreEqual(true, printerIconLessAsset.IsObservable);
-
-			Assert.AreEqual(nonExistentIconLessAssetVirtualPath, nonExistentIconLessAsset.Url);
-			Assert.AreEqual(true, nonExistentIconLessAsset.IsObservable);
-		}
-
-		private class MockRelativePathResolver : IRelativePathResolver
-		{
-			public string ResolveRelativePath(string basePath, string relativePath)
-			{
-				return UrlHelpers.Combine(STYLES_DIRECTORY_URL, relativePath);
-			}
+			Assert.AreEqual(13, dependencies.Count);
+			Assert.AreEqual(mixinsLessAssetVirtualPath, dependencies[0]);
+			Assert.AreEqual(variablesLessAssetVirtualPath, dependencies[1]);
+			Assert.AreEqual(testLessImportLessAssetVirtualPath, dependencies[2]);
+			Assert.AreEqual(testLessImportSub1LessAssetVirtualPath, dependencies[3]);
+			Assert.AreEqual(testLessImportSub2LessAssetVirtualPath, dependencies[4]);
+			Assert.AreEqual(validationIconCssAssetVirtualPath, dependencies[5]);
+			Assert.AreEqual(microformatsIconCssAssetVirtualPath, dependencies[6]);
+			Assert.AreEqual(nodeIconLessAssetVirtualPath, dependencies[7]);
+			Assert.AreEqual(printerIconLessAssetVirtualPath, dependencies[8]);
+			Assert.AreEqual(nonExistentIconLessAssetVirtualPath, dependencies[9]);
+			Assert.AreEqual(headphoneGifAssetVirtualPath, dependencies[10]);
+			Assert.AreEqual(googlePlusSvgAssetVirtualPath, dependencies[11]);
+			Assert.AreEqual(networkPngAssetVirtualPath, dependencies[12]);
 		}
 	}
 }

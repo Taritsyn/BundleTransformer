@@ -45,17 +45,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="JavaScriptEngineSwitcher.Core, Version=1.2.4.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.2.4\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
+    <Reference Include="JavaScriptEngineSwitcher.Core, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
+      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0-alpha1\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="JavaScriptEngineSwitcher.Msie, Version=1.4.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\packages\JavaScriptEngineSwitcher.Msie.1.4.0\lib\net40\JavaScriptEngineSwitcher.Msie.dll</HintPath>
+    <Reference Include="JavaScriptEngineSwitcher.Msie, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
+      <HintPath>..\packages\JavaScriptEngineSwitcher.Msie.1.5.0-alpha2\lib\net40\JavaScriptEngineSwitcher.Msie.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="MsieJavaScriptEngine, Version=1.6.0.0, Culture=neutral, PublicKeyToken=a3a2846a37ac0d3e, processorArchitecture=MSIL">
-      <HintPath>..\packages\MsieJavaScriptEngine.1.6.0\lib\net40\MsieJavaScriptEngine.dll</HintPath>
+    <Reference Include="MsieJavaScriptEngine, Version=1.7.0.0, Culture=neutral, PublicKeyToken=a3a2846a37ac0d3e, processorArchitecture=MSIL">
+      <HintPath>..\packages\MsieJavaScriptEngine.1.7.0-alpha2\lib\net40\MsieJavaScriptEngine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -137,6 +137,7 @@
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
     <Content Include="Content\fonts\blogger-sans\blogger-sans-webfont.svg" />
+    <Content Include="Content\images\icons\monitor.png" />
     <Content Include="Content\less\folder\google-plus.svg" />
     <Content Include="Content\less\folder\MicroformatsIcon.css" />
     <Content Include="Content\fonts\blogger-sans\blogger-sans-webfont.eot" />
@@ -145,8 +146,10 @@
     <Content Include="Content\fonts\blogger-sans\blogger-sans-webfont.woff2" />
     <None Include="Content\less\folder\OpenIdIcon.less" />
     <Content Include="Content\less\folder\PrinterIcon.less" />
+    <Content Include="Content\less\folder\qr-code.gif" />
     <Content Include="Content\less\Fonts.less" />
-    <None Include="Content\less\Selectors.less" />
+    <Content Include="Content\less\folder\QrCodeIcon.less" />
+    <None Include="Content\less\Variables.less" />
     <Content Include="Content\sass\_Icons.sass" />
     <None Include="Content\sass\_Variables.sass" />
     <None Include="Content\sass\_Mixins.sass" />
@@ -205,7 +208,6 @@
     <Content Include="AlternativeContent\images\icons\joystick[2].png" />
     <Content Include="AlternativeContent\images\icons\keyboard{3}.png" />
     <Content Include="AlternativeContent\images\icons\open_source.png" />
-    <Content Include="Content\less\folder\monitor.png" />
     <Content Include="Content\BundleTransformer.css" />
     <Content Include="Content\Fonts.css" />
     <Content Include="Content\fonts\bitstream-vera-sans-bold\vera-bold-webfont.svg" />

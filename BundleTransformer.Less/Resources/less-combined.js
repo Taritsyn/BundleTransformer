@@ -11,14 +11,14 @@ var Less = (function(){
 		loadedModules = {},
 		require = function(name) {
 			var result;
-		
+
 			if (typeof loadedModules[name] !== 'undefined') {
 				result = loadedModules[name];
 			}
 			else {
 				if (typeof modules[name] !== 'undefined') {
 					result = modules[name].call(this);
-					
+
 					loadedModules[name] = (typeof result !== 'undefined') ? result : null;
 					modules[name] = undefined;
 				}
@@ -26,7 +26,7 @@ var Less = (function(){
 					throw new Error("Can't load '" + name + "' module.");
 				}
 			}
-		
+
 			return result;
 		}
 		;
@@ -187,7 +187,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /data/unit-conversions
 	modules['/data/unit-conversions'] = function () {
 		var exports = {
@@ -215,7 +215,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /data
 	modules['/data'] = function () {
 		var exports = {
@@ -226,7 +226,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /contexts
 	modules['/contexts'] = function () {
 		var contexts = {};
@@ -344,7 +344,7 @@ var Less = (function(){
 		return contexts;
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/function-registry
 	modules['/functions/function-registry'] = function () {
 		function makeRegistry( base ) {
@@ -378,7 +378,7 @@ var Less = (function(){
 		return makeRegistry( null );
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/function-caller
 	modules['/functions/function-caller'] = function () {
 		var Expression = require('/tree/expression');
@@ -428,7 +428,7 @@ var Less = (function(){
 
 		return functionCaller;
 	};
-	//#endregion	
+	//#endregion
 
 	//#region URL: /tree/node
 	modules['/tree/node'] = function () {
@@ -509,7 +509,7 @@ var Less = (function(){
 		return Node;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/alpha
 	modules['/tree/alpha'] = function () {
 		var Node = require('/tree/node');
@@ -542,7 +542,7 @@ var Less = (function(){
 		return Alpha;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/color
 	modules['/tree/color'] = function () {
 		var Node = require('/tree/node'),
@@ -737,7 +737,7 @@ var Less = (function(){
 		return Color;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/value
 	modules['/tree/value'] = function () {
 		var Node = require('/tree/node');
@@ -777,7 +777,7 @@ var Less = (function(){
 		return Value;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/keyword
 	modules['/tree/keyword'] = function () {
 		var Node = require('/tree/node');
@@ -796,7 +796,7 @@ var Less = (function(){
 		return Keyword;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/rule
 	modules['/tree/rule'] = function () {
 		var Node = require('/tree/node'),
@@ -914,7 +914,7 @@ var Less = (function(){
 		return Rule;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/selector
 	modules['/tree/selector'] = function () {
 		var Node = require('/tree/node'),
@@ -1036,7 +1036,7 @@ var Less = (function(){
 		return Selector;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/paren
 	modules['/tree/paren'] = function () {
 		var Node = require('/tree/node');
@@ -1058,7 +1058,7 @@ var Less = (function(){
 		return Paren;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/combinator
 	modules['/tree/combinator'] = function () {
 		var Node = require('/tree/node');
@@ -1087,7 +1087,7 @@ var Less = (function(){
 		return Combinator;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/element
 	modules['/tree/element'] = function () {
 		var Node = require('/tree/node'),
@@ -1146,7 +1146,7 @@ var Less = (function(){
 		return Element;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/debug-info
 	modules['/tree/debug-info'] = function () {
 		var debugInfo = function(context, ctx, lineSeparator) {
@@ -1189,7 +1189,7 @@ var Less = (function(){
 		return debugInfo;
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/default
 	modules['/functions/default'] = function () {
 		var Keyword = require('/tree/keyword'),
@@ -1221,7 +1221,7 @@ var Less = (function(){
 		return defaultFunc;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/ruleset
 	modules['/tree/ruleset'] = function () {
 		var Node = require('/tree/node'),
@@ -1954,7 +1954,7 @@ var Less = (function(){
 		return Ruleset;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/directive
 	modules['/tree/directive'] = function () {
 		var Node = require('/tree/node'),
@@ -2108,7 +2108,7 @@ var Less = (function(){
 		return Directive;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/detached-ruleset
 	modules['/tree/detached-ruleset'] = function () {
 		var Node = require('/tree/node'),
@@ -2135,7 +2135,7 @@ var Less = (function(){
 		return DetachedRuleset;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/unit
 	modules['/tree/unit'] = function () {
 		var Node = require('/tree/node'),
@@ -2261,7 +2261,7 @@ var Less = (function(){
 		return Unit;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/dimension
 	modules['/tree/dimension'] = function () {
 		var Node = require('/tree/node'),
@@ -2424,7 +2424,7 @@ var Less = (function(){
 		return Dimension;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/operation
 	modules['/tree/operation'] = function () {
 		var Node = require('/tree/node'),
@@ -2477,7 +2477,7 @@ var Less = (function(){
 		return Operation;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/variable
 	modules['/tree/variable'] = function () {
 		var Node = require('/tree/node');
@@ -2536,7 +2536,7 @@ var Less = (function(){
 		return Variable;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/attribute
 	modules['/tree/attribute'] = function () {
 		var Node = require('/tree/node');
@@ -2569,7 +2569,7 @@ var Less = (function(){
 		return Attribute;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/js-eval-node
 	modules['/tree/js-eval-node'] = function () {
 		var Node = require('/tree/node'),
@@ -2635,7 +2635,7 @@ var Less = (function(){
 		return JsEvalNode;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/quoted
 	modules['/tree/quoted'] = function () {
 		var Node = require('/tree/node'),
@@ -2696,7 +2696,7 @@ var Less = (function(){
 		return Quoted;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/comment
 	modules['/tree/comment'] = function () {
 		var Node = require('/tree/node'),
@@ -2727,7 +2727,7 @@ var Less = (function(){
 		return Comment;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/expression
 	modules['/tree/expression'] = function () {
 		var Node = require('/tree/node'),
@@ -2794,7 +2794,7 @@ var Less = (function(){
 		return Expression;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/call
 	modules['/tree/call'] = function () {
 		var Node = require('/tree/node'),
@@ -2862,7 +2862,7 @@ var Less = (function(){
 		return Call;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/url
 	modules['/tree/url'] = function () {
 		var Node = require('/tree/node');
@@ -2922,7 +2922,7 @@ var Less = (function(){
 		return URL;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/anonymous
 	modules['/tree/anonymous'] = function () {
 		var Node = require('/tree/node');
@@ -2959,7 +2959,7 @@ var Less = (function(){
 		return Anonymous;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/media
 	modules['/tree/media'] = function () {
 		var Ruleset = require('/tree/ruleset'),
@@ -3107,7 +3107,7 @@ var Less = (function(){
 		return Media;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/import
 	modules['/tree/import'] = function () {
 		var Node = require('/tree/node'),
@@ -3265,7 +3265,7 @@ var Less = (function(){
 		return Import;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/mixin-definition
 	modules['/tree/mixin-definition'] = function () {
 		var Selector = require('/tree/selector'),
@@ -3470,7 +3470,7 @@ var Less = (function(){
 		return Definition;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/mixin-call
 	modules['/tree/mixin-call'] = function () {
 		var Node = require('/tree/node'),
@@ -3655,7 +3655,7 @@ var Less = (function(){
 		return MixinCall;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/javascript
 	modules['/tree/javascript'] = function () {
 		var JsEvalNode = require('/tree/js-eval-node'),
@@ -3688,7 +3688,7 @@ var Less = (function(){
 		return JavaScript;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/assignment
 	modules['/tree/assignment'] = function () {
 		var Node = require('/tree/node');
@@ -3721,7 +3721,7 @@ var Less = (function(){
 		return Assignment;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/condition
 	modules['/tree/condition'] = function () {
 		var Node = require('/tree/node');
@@ -3764,7 +3764,7 @@ var Less = (function(){
 		return Condition;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/unicode-descriptor
 	modules['/tree/unicode-descriptor'] = function () {
 		var Node = require('/tree/node');
@@ -3778,7 +3778,7 @@ var Less = (function(){
 		return UnicodeDescriptor;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/negative
 	modules['/tree/negative'] = function () {
 		var Node = require('/tree/node'),
@@ -3804,7 +3804,7 @@ var Less = (function(){
 		return Negative;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/extend
 	modules['/tree/extend'] = function () {
 		var Node = require('/tree/node');
@@ -3861,7 +3861,7 @@ var Less = (function(){
 		return Extend;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree/ruleset-call
 	modules['/tree/ruleset-call'] = function () {
 		var Node = require('/tree/node'),
@@ -3880,7 +3880,7 @@ var Less = (function(){
 		return RulesetCall;
 	};
 	//#endregion
-	
+
 	//#region URL: /tree
 	modules['/tree'] = function () {
 		var tree = {};
@@ -3926,7 +3926,7 @@ var Less = (function(){
 		return tree;
 	};
 	//#endregion
-	
+
 	//#region URL: /environment/environment
 	modules['/environment/environment'] = function () {
 //		var logger = require('/logger');
@@ -3950,13 +3950,13 @@ var Less = (function(){
 		};
 
 		environment.prototype.getFileManager = function (filename, currentDirectory, options, environment, isSync) {
-
-//			if (!filename) {
-//				logger.warn("getFileManager called with no filename.. Please report this issue. continuing.");
-//			}
-//			if (currentDirectory == null) {
-//				logger.warn("getFileManager called with null directory.. Please report this issue. continuing.");
-//			}
+			var logger = Less.logger;
+			if (!filename) {
+				logger.warn("getFileManager called with no filename.. Please report this issue. continuing.");
+			}
+			if (currentDirectory == null) {
+				logger.warn("getFileManager called with null directory.. Please report this issue. continuing.");
+			}
 
 			var fileManagers = this.fileManagers;
 //			if (options.pluginManager) {
@@ -3982,7 +3982,7 @@ var Less = (function(){
 		return environment;
 	};
 	//#endregion
-	
+
 	//#region URL: /environment/abstract-file-manager
 	modules['/environment/abstract-file-manager'] = function () {
 		var abstractFileManager = function() {
@@ -4110,7 +4110,7 @@ var Less = (function(){
 		return abstractFileManager;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors/visitor
 	modules['/visitors/visitor'] = function () {
 		var tree = require('/tree');
@@ -4268,7 +4268,7 @@ var Less = (function(){
 		return Visitor;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors/import-sequencer
 	modules['/visitors/import-sequencer'] = function () {
 		function ImportSequencer(onSequencerEmpty) {
@@ -4327,7 +4327,7 @@ var Less = (function(){
 		return ImportSequencer;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors/import-visitor
 	modules['/visitors/import-visitor'] = function () {
 		var contexts = require('/contexts'),
@@ -4522,7 +4522,7 @@ var Less = (function(){
 		return ImportVisitor;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors/extend-visitor
 	modules['/visitors/extend-visitor'] = function () {
 		var tree = require('/tree'),
@@ -4632,6 +4632,7 @@ var Less = (function(){
 				return newRoot;
 			},
 			checkExtendsForNonMatched: function(extendList) {
+				var logger = Less.logger;
 				var indicies = this.extendIndicies;
 				extendList.filter(function(extend) {
 					return !extend.hasFoundMatches && extend.parent_ids.length == 1;
@@ -4644,7 +4645,7 @@ var Less = (function(){
 
 						if (!indicies[extend.index + ' ' + selector]) {
 							indicies[extend.index + ' ' + selector] = true;
-//							logger.warn("extend '" + selector + "' has no matches");
+							logger.warn("extend '" + selector + "' has no matches");
 						}
 					});
 			},
@@ -4978,7 +4979,7 @@ var Less = (function(){
 		return ProcessExtendsVisitor;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors/join-selector-visitor
 	modules['/visitors/join-selector-visitor'] = function () {
 		var Visitor = require('/visitors/visitor');
@@ -5034,7 +5035,7 @@ var Less = (function(){
 		return JoinSelectorVisitor;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors/to-css-visitor
 	modules['/visitors/to-css-visitor'] = function () {
 		var tree = require('/tree'),
@@ -5348,7 +5349,7 @@ var Less = (function(){
 		return ToCSSVisitor;
 	};
 	//#endregion
-	
+
 	//#region URL: /visitors
 	modules['/visitors'] = function () {
 		var visitors = {
@@ -5362,7 +5363,7 @@ var Less = (function(){
 		return visitors;
 	};
 	//#endregion
-	
+
 	//#region URL: /utils
 	modules['/utils'] = function () {
 		var exports = exports = {
@@ -5389,7 +5390,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /less-error
 	modules['/less-error'] = function () {
 		var utils = require('/utils');
@@ -5438,7 +5439,7 @@ var Less = (function(){
 		return LessError;
 	};
 	//#endregion
-	
+
 	//#region URL: /parser/chunker
 	modules['/parser/chunker'] = function () {
 		// Split the input into chunks.
@@ -5557,7 +5558,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /parser/parser-input
 	modules['/parser/parser-input'] = function () {
 		var chunker = require('/parser/chunker');
@@ -5823,7 +5824,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /parser/parser
 	modules['/parser/parser'] = function () {
 		var LessError = require('/less-error'),
@@ -7602,7 +7603,7 @@ var Less = (function(){
 		return Parser;
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/color
 	modules['/functions/color'] = function () {
 		var Dimension = require('/tree/dimension'),
@@ -7926,7 +7927,7 @@ var Less = (function(){
 		functionRegistry.addMultiple(colorFunctions);
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/color-blending
 	modules['/functions/color-blending'] = function () {
 		var Color = require('/tree/color'),
@@ -8005,27 +8006,106 @@ var Less = (function(){
 		functionRegistry.addMultiple(colorBlend);
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/data-uri
 	modules['/functions/data-uri'] = function () {
 		var exports = function(environment) {
-			var /*Quoted = require('/tree/quoted'),
-				*/URL = require('/tree/url'),
-				functionRegistry = require('/functions/function-registry'),
+			var Quoted = require("/tree/quoted"),
+				URL = require("/tree/url"),
+				functionRegistry = require("/functions/function-registry"),
 				fallback = function(functionThis, node) {
 					return new URL(node, functionThis.index, functionThis.currentFileInfo).eval(functionThis.context);
 				}/*,
 				logger = require('/logger')*/;
 
 			functionRegistry.add("data-uri", function(mimetypeNode, filePathNode) {
-				return fallback(this, filePathNode || mimetypeNode);
+				var logger = Less.logger;
+
+				if (!filePathNode) {
+					filePathNode = mimetypeNode;
+					mimetypeNode = null;
+				}
+
+				var mimetype = mimetypeNode && mimetypeNode.value;
+				var filePath = filePathNode.value;
+				var currentFileInfo = this.currentFileInfo;
+				var currentDirectory = currentFileInfo.relativeUrls ?
+					currentFileInfo.currentDirectory : currentFileInfo.entryPath;
+
+				var fragmentStart = filePath.indexOf('#');
+				var fragment = '';
+				if (fragmentStart !== -1) {
+					fragment = filePath.slice(fragmentStart);
+					filePath = filePath.slice(0, fragmentStart);
+				}
+
+				var queryStringStart = filePath.indexOf('?');
+				if (queryStringStart !== -1) {
+					filePath = filePath.slice(0, queryStringStart);
+				}
+
+				var fileManager = environment.getFileManager(filePath, currentDirectory, this.context, environment, true);
+
+				if (!fileManager) {
+					return fallback(this, filePathNode);
+				}
+
+				var useBase64 = false;
+
+				// detect the mimetype if not given
+				if (!mimetypeNode) {
+
+					mimetype = environment.mimeLookup(filePath);
+
+					if (mimetype === "image/svg+xml") {
+						useBase64 = false;
+					} else {
+						// use base 64 unless it's an ASCII or UTF-8 format
+						var charset = environment.charsetLookup(mimetype);
+						useBase64 = ['US-ASCII', 'UTF-8'].indexOf(charset) < 0;
+					}
+					if (useBase64) { mimetype += ';base64'; }
+				}
+				else {
+					useBase64 = /;base64$/.test(mimetype);
+				}
+
+				var encoding = !useBase64 ? 'utf-8' : null;
+				var fileSync = fileManager.loadFileSync(filePath, currentDirectory, this.context, environment, encoding);
+				if (!fileSync.contents) {
+					logger.warn("Skipped data-uri embedding of " + filePath + " because file not found");
+					return fallback(this, filePathNode || mimetypeNode);
+				}
+				var buf = fileSync.contents;
+				if (useBase64 && !environment.encodeBase64) {
+					return fallback(this, filePathNode);
+				}
+
+				buf = useBase64 ? environment.encodeBase64(buf) : encodeURIComponent(buf);
+
+				var uri = "data:" + mimetype + ',' + buf + fragment;
+
+				// IE8 cannot handle a data-uri larger than 32,768 characters. If this is exceeded
+				// and the --ieCompat flag is enabled, return a normal url() instead.
+				var DATA_URI_MAX = 32768;
+				if (uri.length >= DATA_URI_MAX) {
+
+					if (this.context.ieCompat !== false) {
+						logger.warn("Skipped data-uri embedding of " + filePath + " because its size (" + uri.length +
+							" characters) exceeds IE8-safe " + DATA_URI_MAX + " characters!");
+
+						return fallback(this, filePathNode || mimetypeNode);
+					}
+				}
+
+				return new URL(new Quoted('"' + uri + '"', uri, false, this.index, this.currentFileInfo), this.index, this.currentFileInfo);
 			});
 		};
 
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/math
 	modules['/functions/math'] = function () {
 		var functionRegistry = require('/functions/function-registry'),
@@ -8059,7 +8139,7 @@ var Less = (function(){
 		functionRegistry.addMultiple(mathFunctions);
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/math-helper
 	modules['/functions/math-helper'] = function () {
 		var Dimension = require('/tree/dimension');
@@ -8081,7 +8161,7 @@ var Less = (function(){
 		return MathHelper;
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/number
 	modules['/functions/number'] = function () {
 		var Dimension = require('/tree/dimension'),
@@ -8167,7 +8247,7 @@ var Less = (function(){
 		});
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/string
 	modules['/functions/string'] = function () {
 		var Quoted = require('/tree/quoted'),
@@ -8209,7 +8289,7 @@ var Less = (function(){
 		});
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/svg
 	modules['/functions/svg'] = function () {
 		var exports = function(environment) {
@@ -8304,7 +8384,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /functions/types
 	modules['/functions/types'] = function () {
 		var Keyword = require('/tree/keyword'),
@@ -8398,7 +8478,7 @@ var Less = (function(){
 		});
 	};
 	//#endregion
-	
+
 	//#region URL: /functions
 	modules['/functions'] = function () {
 		var exports = function(environment) {
@@ -8424,7 +8504,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /transform-tree
 	modules['/transform-tree'] = function () {
 		var contexts = require('/contexts'),
@@ -8504,7 +8584,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /parse-tree
 	modules['/parse-tree'] = function () {
 		var LessError = require('/less-error'),
@@ -8571,7 +8651,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /import-manager
 	modules['/import-manager'] = function () {
 		var contexts = require('/contexts'),
@@ -8709,7 +8789,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /render
 	modules['/render'] = function () {
 //		var PromiseConstructor;
@@ -8757,7 +8837,7 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /parse
 	modules['/parse'] = function () {
 		var /*PromiseConstructor,*/
@@ -8868,9 +8948,10 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
 	return {
 		AbstractFileManager: require('/environment/abstract-file-manager'),
-		createFromEnvironment: require('/')
+		createFromEnvironment: require('/'),
+		logger: null
 	};
 })();

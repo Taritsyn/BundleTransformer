@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Less.Compilers
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
 	using System.Text;
@@ -10,7 +11,6 @@
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
-	using Core.Assets;
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
@@ -39,7 +39,12 @@
 		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"lessHelper.compile({0}, {1}, {2}, {3});";
+		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"lessHelper.compile({0}, {1}, {2});";
+
+		/// <summary>
+		/// Virtual file manager
+		/// </summary>
+		private VirtualFileManager _virtualFileManager;
 
 		/// <summary>
 		/// Default compilation options
@@ -76,18 +81,23 @@
 		/// Constructs a instance of LESS-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
-		public LessCompiler(Func<IJsEngine> createJsEngineInstance)
-			: this(createJsEngineInstance, null)
+		/// <param name="virtualFileManager">Virtual file manager</param>
+		public LessCompiler(Func<IJsEngine> createJsEngineInstance, VirtualFileManager virtualFileManager)
+			: this(createJsEngineInstance, virtualFileManager, null)
 		{ }
 
 		/// <summary>
 		/// Constructs a instance of LESS-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="virtualFileManager">Virtual file manager</param>
 		/// <param name="defaultOptions">Default compilation options</param>
-		public LessCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
+		public LessCompiler(Func<IJsEngine> createJsEngineInstance,
+			VirtualFileManager virtualFileManager,
+			CompilationOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
+			_virtualFileManager = virtualFileManager;
 			_defaultOptions = defaultOptions ?? new CompilationOptions();
 			_defaultOptionsString = (defaultOptions != null) ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
@@ -101,6 +111,9 @@
 		{
 			if (!_initialized)
 			{
+				_jsEngine.EmbedHostObject("LessEnvironment", LessEnvironment.Instance);
+				_jsEngine.EmbedHostObject("VirtualFileManager", _virtualFileManager);
+
 				Type type = GetType();
 
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESS_LIBRARY_FILE_NAME, type);
@@ -115,13 +128,11 @@
 		/// </summary>
 		/// <param name="content">Text content written on LESS</param>
 		/// <param name="path">Path to LESS-file</param>
-		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
-		/// <returns>Translated LESS-code</returns>
-		public string Compile(string content, string path, DependencyCollection dependencies,
-			CompilationOptions options = null)
+		/// <returns>Compilation result</returns>
+		public CompilationResult Compile(string content, string path, CompilationOptions options = null)
 		{
-			string newContent;
+			CompilationResult compilationResult;
 			CompilationOptions currentOptions;
 			string currentOptionsString;
 
@@ -167,18 +178,32 @@
 					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
 						JsonConvert.SerializeObject(processedContent),
 						JsonConvert.SerializeObject(path),
-						ConvertDependenciesToJson(dependencies),
 						currentOptionsString));
 					var json = JObject.Parse(result);
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new LessCompilingException(FormatErrorDetails(errors[0], processedContent, path,
-							dependencies));
+						throw new LessCompilingException(FormatErrorDetails(errors[0], processedContent, path));
 					}
 
-					newContent = json.Value<string>("compiledCode");
+					if (currentOptions.Severity > 0)
+					{
+						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
+						if (warnings != null && warnings.Count > 0)
+						{
+							throw new LessCompilingException(FormatWarningList(warnings));
+						}
+					}
+
+					compilationResult = new CompilationResult
+					{
+						CompiledContent = json.Value<string>("compiledCode"),
+						IncludedFilePaths = json.Value<JArray>("includedFilePaths")
+							.ToObject<IList<string>>()
+							.Distinct(StringComparer.OrdinalIgnoreCase)
+							.ToList()
+					};
 				}
 				catch (JsRuntimeException e)
 				{
@@ -187,26 +212,7 @@
 				}
 			}
 
-			return newContent;
-		}
-
-		/// <summary>
-		/// Converts a list of dependencies to JSON
-		/// </summary>
-		/// <param name="dependencies">List of dependencies</param>
-		/// <returns>List of dependencies in JSON format</returns>
-		private static JArray ConvertDependenciesToJson(DependencyCollection dependencies)
-		{
-			var dependenciesJson = new JArray(
-				dependencies
-					.Where(d => d.Content != null)
-					.Select(d => new JObject(
-						new JProperty("path", d.Url),
-						new JProperty("content", d.Content))
-					)
-			);
-
-			return dependenciesJson;
+			return compilationResult;
 		}
 
 		/// <summary>
@@ -315,10 +321,8 @@
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
 		/// <param name="currentFilePath">Path to current LESS-file</param>
-		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath,
-			DependencyCollection dependencies)
+		private string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath)
 		{
 			var type = errorDetails.Value<string>("type");
 			var message = errorDetails.Value<string>("message");
@@ -330,18 +334,14 @@
 			var lineNumber = errorDetails.Value<int>("lineNumber");
 			var columnNumber = errorDetails.Value<int>("columnNumber");
 
-			string newSourceCode = string.Empty;
+			string newSourceCode;
 			if (string.Equals(filePath, currentFilePath, StringComparison.OrdinalIgnoreCase))
 			{
 				newSourceCode = sourceCode;
 			}
 			else
 			{
-				var dependency = dependencies.GetByUrl(filePath);
-				if (dependency != null)
-				{
-					newSourceCode = dependency.Content;
-				}
+				newSourceCode = _virtualFileManager.ReadTextFile(filePath);
 			}
 
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(newSourceCode,
@@ -377,6 +377,27 @@
 		}
 
 		/// <summary>
+		/// Generates a warning message
+		/// </summary>
+		/// <param name="warningList">List of warnings</param>
+		/// <returns>Warning message</returns>
+		private string FormatWarningList(JArray warningList)
+		{
+			var warningMessage = new StringBuilder();
+
+			warningMessage.AppendLine(Strings.WarningList_Header);
+			warningMessage.AppendLine();
+
+			foreach (string warning in warningList)
+			{
+				warningMessage.AppendFormatLine(" * {0}", warning);
+				warningMessage.AppendLine();
+			}
+
+			return warningMessage.ToString();
+		}
+
+		/// <summary>
 		/// Destroys object
 		/// </summary>
 		public void Dispose()
@@ -390,6 +411,8 @@
 					_jsEngine.Dispose();
 					_jsEngine = null;
 				}
+
+				_virtualFileManager = null;
 			}
 		}
 	}

@@ -6,7 +6,7 @@ module TranslatorBadges {
 	var TS_BADGE_COLOR: string = "#0074C1";
 
 	/**
-	* Creates a TypeScript-translator badge 
+	* Creates a TypeScript-translator badge
 	*
 	* @returns {void}
 	* @static

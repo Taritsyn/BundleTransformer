@@ -1,5 +1,5 @@
-/*global ts */
-var typeScriptHelper = (function (ts, undefined) {
+/*global ts, VirtualFileManager */
+var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 	'use strict';
 
 	var exports = {},
@@ -69,50 +69,42 @@ var typeScriptHelper = (function (ts, undefined) {
 		return result;
 	}
 
-	function generateFileCacheItemKey(path) {
-		var key = path.toLocaleUpperCase();
-
-		return key;
-	}
-
 	//#region BtSystem class
 	BtSystem = (function () {
 		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'ts.sys.{0}' is not implemented.";
 
-		function BtSystem(path, files) {
-			this._path = path;
-			this._files = files;
-
+		function BtSystem(defaultLibFileName) {
 			this.args = [];
 			this.newLine = '\r\n';
 			this.useCaseSensitiveFileNames = false;
+
+			this._defaultLibFileName = defaultLibFileName;
+			this._includedFilePaths = [];
+			this._outputFiles = {};
 		}
 
 		BtSystem.prototype.write = function() {
 			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'write'));
 		};
 
-		BtSystem.prototype.readFile = function(fileName) {
-			var key,
-				content
-				;
-
-			key = generateFileCacheItemKey(fileName);
-
-			if (typeof this._files[key] !== 'undefined') {
-				content = this._files[key].content;
+		BtSystem.prototype.readFile = function (fileName) {
+			var canonicalPath = this.getCanonicalPath(fileName);
+			if (typeof this._outputFiles[canonicalPath] !== 'undefined') {
+				return this._outputFiles[canonicalPath];
 			}
-			else {
-				content = undefined;
+
+			var content = virtualFileManager.ReadFile(fileName);
+
+			if (fileName !== this._defaultLibFileName) {
+				this._includedFilePaths.push(fileName);
 			}
 
 			return content;
 		};
 
-		BtSystem.prototype.writeFile = function(fileName, data) {
-			var key = generateFileCacheItemKey(fileName);
-
-			this._files[key] = { path: fileName, content: data };
+		BtSystem.prototype.writeFile = function (fileName, data) {
+			var canonicalPath = this.getCanonicalPath(fileName);
+			this._outputFiles[canonicalPath] = data;
 		};
 
 		BtSystem.prototype.getCanonicalPath = function(path) {
@@ -127,13 +119,13 @@ var typeScriptHelper = (function (ts, undefined) {
 			return path;
 		};
 
-		BtSystem.prototype.fileExists = function(path) {
-			var key,
-				isFileExists
-				;
+		BtSystem.prototype.fileExists = function (path) {
+			var canonicalPath = this.getCanonicalPath(path);
+			if (typeof this._outputFiles[canonicalPath] !== 'undefined') {
+				return true;
+			}
 
-			key = generateFileCacheItemKey(path);
-			isFileExists = (typeof this._files[key] !== 'undefined');
+			var isFileExists = virtualFileManager.FileExists(path);
 
 			return isFileExists;
 		};
@@ -151,13 +143,7 @@ var typeScriptHelper = (function (ts, undefined) {
 		};
 
 		BtSystem.prototype.getCurrentDirectory = function () {
-			var directoryName = '',
-				lastSlashPosition = this._path.lastIndexOf('/')
-				;
-
-			if (lastSlashPosition !== -1) {
-				directoryName = this._path.substring(0, lastSlashPosition + 1);
-			}
+			var directoryName = virtualFileManager.GetCurrentDirectory();
 
 			return directoryName;
 		};
@@ -166,8 +152,13 @@ var typeScriptHelper = (function (ts, undefined) {
 			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'exit'));
 		};
 
+		BtSystem.prototype.getIncludedFilePaths = function () {
+			return this._includedFilePaths;
+		};
+
 		BtSystem.prototype.dispose = function () {
-			this._files = null;
+			this._includedFilePaths = null;
+			this._outputFiles = null;
 		};
 
 		return BtSystem;
@@ -318,48 +309,31 @@ var typeScriptHelper = (function (ts, undefined) {
 		return errors;
 	}
 
-	exports.compile = function (code, path, dependencies, options) {
-		var result = { compiledCode: '' },
+	exports.compile = function (path, options) {
+		var result = {
+				compiledCode: '',
+				includedFilePaths: []
+		    },
 			compilationErrors,
 			compilationOptions,
 			inputFilePath = path,
-			inputFileKey,
 			outputFilePath = inputFilePath.replace(/\.ts$/i, '.js'),
-			files,
-			dependency,
-			dependencyIndex,
-			dependencyCount,
-			dependencyKey,
+			defaultLibFileName,
 			defaultCompilerHost
 			;
 
 		options = options || {};
 		compilationOptions = mix(mix({}, defaultOptions), options);
-
-		// Fill file cache
-		files = {};
-
-		if (dependencies) {
-			dependencyCount = dependencies.length;
-
-			for (dependencyIndex = 0; dependencyIndex < dependencyCount; dependencyIndex++) {
-				dependency = dependencies[dependencyIndex];
-				dependencyKey = generateFileCacheItemKey(dependency.path);
-
-				files[dependencyKey] = dependency;
-			}
-		}
-
-		inputFileKey = generateFileCacheItemKey(inputFilePath);
-		files[inputFileKey] = { path: inputFilePath, content: code };
+		defaultLibFileName = ts.getDefaultLibFileName(compilationOptions);
 
 		// Compile code
-		ts.sys = new BtSystem(path, files);
+		ts.sys = new BtSystem(defaultLibFileName);
 		defaultCompilerHost = createBtCompilerHost(compilationOptions);
 
 		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors || [];
 		if (compilationErrors.length === 0) {
 			result.compiledCode = ts.sys.readFile(outputFilePath);
+			result.includedFilePaths = ts.sys.getIncludedFilePaths();
 		}
 		else {
 			result.errors = getErrorsFromDiagnostics(compilationErrors);
@@ -372,4 +346,4 @@ var typeScriptHelper = (function (ts, undefined) {
 	};
 
 	return exports;
-}(ts));
+}(ts, VirtualFileManager));

@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Autoprefixer 1.9.91
+       README file for Bundle Transformer: Autoprefixer 1.9.92 Alpha 1
 
    ----------------------------------------------------------------------
 
-      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -14,7 +14,7 @@
    BundleTransformer.Autoprefixer contains one postprocessor-adapter for
    postprocessing of CSS-code - `AutoprefixCssPostProcessor`.
    `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's
-   Autoprefixer (http://github.com/postcss/autoprefixer) version 6.2.3.
+   Autoprefixer (http://github.com/postcss/autoprefixer) version 6.3.1.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
@@ -24,7 +24,12 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 6.2.3.
+   1. No longer made preprocessing of country conditional expressions;
+   2. Added support of Autoprefixer version 6.3.1;
+   3. In configuration settings of Autoprefixer-postprocessor was added
+      4 new properties: `Supports` (default `true`), `Flexbox` (default
+      `true`), `Grid` (default `true`) and `Stats` (default `empty
+      string`).
 
    ====================
    POST-INSTALL ACTIONS

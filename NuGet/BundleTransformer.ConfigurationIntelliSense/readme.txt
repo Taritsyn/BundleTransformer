@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: IntelliSense 1.9.85
+       README file for Bundle Transformer: IntelliSense 1.9.92 Alpha 1
 
    ----------------------------------------------------------------------
 
-      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 		  
    ===========
@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of TypeScript-translator.
+   Updated definitions for configuration settings of LESS-translator and
+   Autoprefixer-postprocessor.
    
    =============
    DOCUMENTATION

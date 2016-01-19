@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: Core 1.9.89
+           README file for Bundle Transformer: Core 1.9.92 Alpha 1
 
    ----------------------------------------------------------------------
 
-      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 		  
    ===========
@@ -45,7 +45,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed bug #119 “JS ContentType is out of date”.
+   Removed `MimeTypeHelpers` class.
 
    ====================
    POST-INSTALL ACTIONS

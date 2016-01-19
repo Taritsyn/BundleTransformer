@@ -35,9 +35,9 @@
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Sass file manager
+		/// Virtual file manager
 		/// </summary>
-		private readonly SassFileManager _fileManager;
+		private readonly VirtualFileManager _virtualFileManager;
 
 		/// <summary>
 		/// Synchronizer of translation
@@ -107,7 +107,7 @@
 		public SassAndScssTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			SassAndScssSettings sassAndScssConfig)
 		{
-			_fileManager = new SassFileManager(virtualFileSystemWrapper);
+			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
 
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 			IndentType = sassAndScssConfig.IndentType;
@@ -134,7 +134,7 @@
 			{
 				bool enableNativeMinification = NativeMinificationEnabled;
 
-				using (var sassCompiler = new SassCompiler(_fileManager))
+				using (var sassCompiler = new SassCompiler(_virtualFileManager))
 				{
 					InnerTranslate(asset, sassCompiler, enableNativeMinification);
 				}
@@ -171,7 +171,7 @@
 			{
 				bool enableNativeMinification = NativeMinificationEnabled;
 
-				using (var sassCompiler = new SassCompiler(_fileManager))
+				using (var sassCompiler = new SassCompiler(_virtualFileManager))
 				{
 					foreach (var asset in assetsToProcessing)
 					{
@@ -191,7 +191,7 @@
 			IList<string> dependencies;
 			CompilationOptions options = CreateCompilationOptions(asset.AssetTypeCode, enableNativeMinification);
 
-			_fileManager.CurrentDirectoryName = UrlHelpers.GetDirectoryName(assetUrl);
+			_virtualFileManager.CurrentDirectoryName = UrlHelpers.GetDirectoryName(assetUrl);
 
 			try
 			{
@@ -217,7 +217,7 @@
 			}
 			finally
 			{
-				_fileManager.CurrentDirectoryName = null;
+				_virtualFileManager.CurrentDirectoryName = null;
 			}
 
 			asset.Content = newContent;

@@ -10,8 +10,8 @@ module TranslatorBadges {
 	* @class
 	* @export
 	*/
-    export class ColoredTranslatorBadge 
-        extends TranslatorBadge 
+    export class ColoredTranslatorBadge
+        extends TranslatorBadge
         implements IColoredTranslatorBadge
     {
 		/**

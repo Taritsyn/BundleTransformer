@@ -415,6 +415,21 @@
 				<xs:documentation>String representation of variable list, that modifies a variables already declared in the file (semicolon-separated list of values of the form VAR=VALUE)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="severity" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>
+					Severity level of errors:
+					0 - only error messages;
+					1 - only error messages and warnings.
+				</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="0" />
+					<xs:maxInclusive value="1" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 	</xs:complexType>
 	<!-- /LESS settings -->
 
@@ -709,14 +724,34 @@
 				<xs:documentation>Flag for whether to create nice visual cascade of prefixes</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="add" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to add new prefixes</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="remove" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to remove outdated prefixes</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="add" type="Boolean_SchemaType" use="optional" default="true">
+		<xs:attribute name="supports" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to add new prefixes</xs:documentation>
+				<xs:documentation>Flag for whether to add prefixes for `@supports` parameters</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flexbox" type="xs:string" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to add prefixes for flexbox properties. With 'no-2009' value Autoprefixer will add prefixes only for final and IE versions of specification.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grid" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to add IE prefixes for Grid Layout properties</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="stats" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>Virtual path to file, that contains custom usage statistics for `&gt; 10% in my stats` browsers query</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>

@@ -79,6 +79,17 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings.
+		/// </summary>
+		public int Severity
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the LESS compilation options
@@ -93,6 +104,7 @@
 			JavascriptEnabled = true;
 			GlobalVariables = string.Empty;
 			ModifyVariables = string.Empty;
+			Severity = 0;
 		}
 	}
 }

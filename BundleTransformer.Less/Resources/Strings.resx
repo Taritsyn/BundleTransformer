@@ -120,4 +120,7 @@
   <data name="VariablesParsing_InvalidNameValueFormat" xml:space="preserve">
     <value>The value '{1}' of LESS translator property `{0}` does not correspond to the format of `VAR=VALUE`.</value>
   </data>
+  <data name="WarningList_Header" xml:space="preserve">
+    <value>Issued the following warnings:</value>
+  </data>
 </root>

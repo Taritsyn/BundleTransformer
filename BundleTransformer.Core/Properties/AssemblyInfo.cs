@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundle Transformer: Core")]
-[assembly: AssemblyCopyright("Copyright © 2012-2015 Andrey Taritsyn")]
+[assembly: AssemblyCopyright("Copyright © 2012-2016 Andrey Taritsyn")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
 [assembly: Guid("21a312ea-97da-4a1d-9cc1-97e04b18813f")]
 
-[assembly: AssemblyVersion("1.9.89.0")]
-[assembly: AssemblyFileVersion("1.9.89.0")]
+[assembly: AssemblyVersion("1.9.92.0")]
+[assembly: AssemblyFileVersion("1.9.92.0")]

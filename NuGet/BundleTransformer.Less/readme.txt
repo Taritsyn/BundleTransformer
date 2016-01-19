@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: LESS 1.9.76
+           README file for Bundle Transformer: LESS 1.9.92 Alpha 1
 
    ----------------------------------------------------------------------
 
-      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 		  
 
    ===========
@@ -17,8 +17,7 @@
    HTTP-handler `LessAssetHandler`, which is responsible for text output 
    of translated LESS-asset.
    
-   BundleTransformer.Less does not support: the string interpolation in
-   file paths and loading of plugins.
+   BundleTransformer.Less does not support loading of plugins.
    
    As a JS-engine is used the JavaScript Engine Switcher library 
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct 
@@ -29,7 +28,11 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 2.5.3.
+   1. No longer made preprocessing of `@import` directives and `data-uri`
+      functions;
+   2. Interpolation in file paths is now supported;
+   3. In configuration settings of LESS-translator was added one new
+      property - `Severity` (default `0`).
    
    ====================
    POST-INSTALL ACTIONS

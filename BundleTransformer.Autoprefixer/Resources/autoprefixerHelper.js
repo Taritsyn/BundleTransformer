@@ -6,8 +6,12 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		defaultOptions = {
 			browsers: null,
 			cascade: true,
-			remove: true,
 			add: true,
+			remove: true,
+			supports: true,
+			flexbox: true,
+			grid: true,
+			stats: null,
 			map: false
 		}
 		;
@@ -25,19 +29,6 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 
 		return destination;
 	}
-
-	exports.setupCountryStatistics = function(db) {
-		if (!db) {
-			return;
-		}
-
-		if (autoprefixer.regionUsageDb) {
-			mix(autoprefixer.regionUsageDb, db);
-		}
-		else {
-			autoprefixer.regionUsageDb = db;
-		}
-	};
 
 	exports.process = function (code, options) {
 		var autoprefixOptions,

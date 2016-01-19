@@ -11,20 +11,16 @@
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 
-	using Core.Assets;
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
+
+	using Helpers;
 
 	/// <summary>
 	/// TypeScript-compiler
 	/// </summary>
 	internal sealed class TypeScriptCompiler : IDisposable
 	{
-		/// <summary>
-		/// Namespace for resources
-		/// </summary>
-		private const string RESOURCES_NAMESPACE = "BundleTransformer.TypeScript.Resources";
-
 		/// <summary>
 		/// Name of file, which contains a TypeScript-library
 		/// </summary>
@@ -36,34 +32,19 @@
 		private const string TSC_HELPER_FILE_NAME = "tscHelper.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a default <code>lib.d.ts</code> with global declarations
-		/// </summary>
-		private const string DEFAULT_LIBRARY_FILE_NAME = "lib.d.ts";
-
-		/// <summary>
-		/// Name of file, which contains a default <code>lib.es6.d.ts</code> with global declarations
-		/// </summary>
-		private const string DEFAULT_LIBRARY_ES6_FILE_NAME = "lib.es6.d.ts";
-
-		/// <summary>
 		/// Template of function call, which is responsible for compilation
 		/// </summary>
-		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"typeScriptHelper.compile({0}, {1}, {2}, {3});";
+		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"typeScriptHelper.compile({0}, {1});";
 
 		/// <summary>
-		/// Default compilation options
+		/// Virtual file manager
 		/// </summary>
-		private readonly CompilationOptions _defaultOptions;
+		private VirtualFileManager _virtualFileManager;
 
 		/// <summary>
 		/// String representation of the default compilation options
 		/// </summary>
 		private readonly string _defaultOptionsString;
-
-		/// <summary>
-		/// Common types definitions
-		/// </summary>
-		private Dictionary<string, string> _commonTypesDefinitions;
 
 		/// <summary>
 		/// JS engine
@@ -90,35 +71,25 @@
 		/// Constructs a instance of TypeScript-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
-		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance)
-			: this(createJsEngineInstance, null)
+		/// <param name="virtualFileManager">Virtual file manager</param>
+		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance, VirtualFileManager virtualFileManager)
+			: this(createJsEngineInstance, virtualFileManager, null)
 		{ }
 
 		/// <summary>
 		/// Constructs a instance of TypeScript-compiler
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="virtualFileManager">Virtual file manager</param>
 		/// <param name="defaultOptions">Default compilation options</param>
-		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions defaultOptions)
+		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance,
+			VirtualFileManager virtualFileManager,
+			CompilationOptions defaultOptions)
 		{
 			_jsEngine = createJsEngineInstance();
-			_defaultOptions = defaultOptions;
-			_defaultOptionsString = (defaultOptions != null) ?
+			_virtualFileManager = virtualFileManager;
+			_defaultOptionsString = defaultOptions != null ?
 				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
-
-			Type type = GetType();
-
-			_commonTypesDefinitions = new Dictionary<string, string>
-			{
-				{
-					DEFAULT_LIBRARY_FILE_NAME,
-					Utils.GetResourceAsString(RESOURCES_NAMESPACE + "." + DEFAULT_LIBRARY_FILE_NAME, type)
-				},
-				{
-					DEFAULT_LIBRARY_ES6_FILE_NAME,
-					Utils.GetResourceAsString(RESOURCES_NAMESPACE + "." + DEFAULT_LIBRARY_ES6_FILE_NAME, type)
-				}
-			};
 		}
 
 
@@ -129,10 +100,12 @@
 		{
 			if (!_initialized)
 			{
+				_jsEngine.EmbedHostObject("VirtualFileManager", _virtualFileManager);
+
 				Type type = GetType();
 
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + TYPESCRIPT_LIBRARY_FILE_NAME, type);
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + TSC_HELPER_FILE_NAME, type);
+				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TYPESCRIPT_LIBRARY_FILE_NAME), type);
+				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TSC_HELPER_FILE_NAME), type);
 
 				_initialized = true;
 			}
@@ -141,38 +114,14 @@
 		/// <summary>
 		/// "Compiles" a TypeScript-code to JS-code
 		/// </summary>
-		/// <param name="content">Text content written on TypeScript</param>
 		/// <param name="path">Path to TypeScript-file</param>
-		/// <param name="dependencies">List of dependencies</param>
 		/// <param name="options">Compilation options</param>
-		/// <returns>Translated TypeScript-code</returns>
-		public string Compile(string content, string path, DependencyCollection dependencies,
-			CompilationOptions options = null)
+		/// <returns>Compilation result</returns>
+		public CompilationResult Compile(string path, CompilationOptions options = null)
 		{
-			string newContent;
-			CompilationOptions currentOptions;
-			string currentOptionsString;
-
-			if (options != null)
-			{
-				currentOptions = options;
-				currentOptionsString = ConvertCompilationOptionsToJson(options).ToString();
-			}
-			else
-			{
-				currentOptions = _defaultOptions;
-				currentOptionsString = _defaultOptionsString;
-			}
-
-			var newDependencies = new DependencyCollection();
-			if (!currentOptions.NoLib)
-			{
-				string defaultLibFileName = (currentOptions.Target == TargetMode.EcmaScript6) ?
-					DEFAULT_LIBRARY_ES6_FILE_NAME : DEFAULT_LIBRARY_FILE_NAME;
-				var defaultLibDependency = new Dependency(defaultLibFileName, _commonTypesDefinitions[defaultLibFileName]);
-				newDependencies.Add(defaultLibDependency);
-			}
-			newDependencies.AddRange(dependencies);
+			CompilationResult compilationResult;
+			string currentOptionsString = options != null ?
+				ConvertCompilationOptionsToJson(options).ToString() : _defaultOptionsString;
 
 			lock (_compilationSynchronizer)
 			{
@@ -181,20 +130,25 @@
 				try
 				{
 					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
-						JsonConvert.SerializeObject(content),
 						JsonConvert.SerializeObject(path),
-						ConvertDependenciesToJson(newDependencies),
 						currentOptionsString));
 					var json = JObject.Parse(result);
 
-					var errors = (json["errors"] != null) ? json["errors"] as JArray : null;
+					var errors = json["errors"] != null ? json["errors"] as JArray : null;
 					if (errors != null && errors.Count > 0)
 					{
-						throw new TypeScriptCompilingException(FormatErrorDetails(errors[0], content, path,
-							newDependencies));
+						throw new TypeScriptCompilingException(FormatErrorDetails(errors[0], path));
 					}
 
-					newContent = json.Value<string>("compiledCode");
+					compilationResult = new CompilationResult
+					{
+						CompiledContent = json.Value<string>("compiledCode"),
+						IncludedFilePaths = json.Value<JArray>("includedFilePaths")
+							.ToObject<IList<string>>()
+							.Distinct(StringComparer.OrdinalIgnoreCase)
+							.Where(p => !p.Equals(path, StringComparison.OrdinalIgnoreCase))
+							.ToList()
+					};
 				}
 				catch (JsRuntimeException e)
 				{
@@ -203,24 +157,7 @@
 				}
 			}
 
-			return newContent;
-		}
-
-		/// <summary>
-		/// Converts a list of dependencies to JSON
-		/// </summary>
-		/// <param name="dependencies">List of dependencies</param>
-		/// <returns>List of dependencies in JSON format</returns>
-		private static JArray ConvertDependenciesToJson(DependencyCollection dependencies)
-		{
-			var dependenciesJson = new JArray(
-				dependencies.Select(d => new JObject(
-					new JProperty("path", d.Url),
-					new JProperty("content", d.Content))
-				)
-			);
-
-			return dependenciesJson;
+			return compilationResult;
 		}
 
 		/// <summary>
@@ -253,12 +190,9 @@
 		/// Generates a detailed error message
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
-		/// <param name="sourceCode">Source code</param>
 		/// <param name="currentFilePath">Path to current TypeScript-file</param>
-		/// <param name="dependencies">List of dependencies</param>
 		/// <returns>Detailed error message</returns>
-		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath,
-			DependencyCollection dependencies)
+		private string FormatErrorDetails(JToken errorDetails, string currentFilePath)
 		{
 			var message = errorDetails.Value<string>("message");
 			var filePath = errorDetails.Value<string>("fileName");
@@ -268,21 +202,7 @@
 			}
 			var lineNumber = errorDetails.Value<int>("lineNumber");
 			var columnNumber = errorDetails.Value<int>("columnNumber");
-
-			string newSourceCode = string.Empty;
-			if (string.Equals(filePath, currentFilePath, StringComparison.OrdinalIgnoreCase))
-			{
-				newSourceCode = sourceCode;
-			}
-			else
-			{
-				var dependency = dependencies.GetByUrl(filePath);
-				if (dependency != null)
-				{
-					newSourceCode = dependency.Content;
-				}
-			}
-
+			string newSourceCode = _virtualFileManager.ReadFile(filePath);
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(newSourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
@@ -326,11 +246,7 @@
 					_jsEngine = null;
 				}
 
-				if (_commonTypesDefinitions != null)
-				{
-					_commonTypesDefinitions.Clear();
-					_commonTypesDefinitions = null;
-				}
+				_virtualFileManager = null;
 			}
 		}
 	}

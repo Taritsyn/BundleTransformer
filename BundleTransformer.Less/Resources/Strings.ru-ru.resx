@@ -120,4 +120,7 @@
   <data name="VariablesParsing_InvalidNameValueFormat" xml:space="preserve">
     <value>Значение "{1}" свойства LESS-транслятора `{0}` не соответствует формату `ПЕРЕМЕННАЯ=ЗНАЧЕНИЕ`!</value>
   </data>
+  <data name="WarningList_Header" xml:space="preserve">
+    <value>Были выданы следующие предупреждения:</value>
+  </data>
 </root>

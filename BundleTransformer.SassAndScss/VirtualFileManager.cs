@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.SassAndScss
 {
 	using System;
-	using System.Web;
 
 	using LibSassHost;
 
@@ -10,9 +9,9 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
-	/// Sass file manager
+	/// Virtual file manager
 	/// </summary>
-	internal sealed class SassFileManager : IFileManager
+	internal sealed class VirtualFileManager : IFileManager
 	{
 		/// <summary>
 		/// Virtual file system wrapper
@@ -56,10 +55,10 @@
 
 
 		/// <summary>
-		/// Constructs a instance of Sass file manager
+		/// Constructs a instance of virtual file manager
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		public SassFileManager(IVirtualFileSystemWrapper virtualFileSystemWrapper)
+		public VirtualFileManager(IVirtualFileSystemWrapper virtualFileSystemWrapper)
 		{
 			_virtualFileSystemWrapper = virtualFileSystemWrapper;
 			_defaultDirectoryName = GetDefaultDirectory();
@@ -71,9 +70,9 @@
 		/// Gets a default working directory of the application
 		/// </summary>
 		/// <returns>The string containing the path of the default working directory</returns>
-		private static string GetDefaultDirectory()
+		private string GetDefaultDirectory()
 		{
-			string defaultDirectoryName = VirtualPathUtility.ToAbsolute("~/");
+			string defaultDirectoryName = _virtualFileSystemWrapper.ToAbsolutePath("~/");
 
 			return defaultDirectoryName;
 		}

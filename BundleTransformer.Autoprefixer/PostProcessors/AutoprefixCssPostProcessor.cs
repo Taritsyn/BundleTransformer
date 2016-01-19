@@ -9,6 +9,7 @@
 
 	using Core;
 	using Core.Assets;
+	using Core.FileSystem;
 	using Core.PostProcessors;
 	using CoreStrings = Core.Resources.Strings;
 
@@ -37,6 +38,11 @@
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
+		/// Virtual file system wrapper
+		/// </summary>
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+
+		/// <summary>
 		/// Gets or sets a list of browser conditional expressions
 		/// </summary>
 		public IList<string> Browsers
@@ -55,6 +61,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to add new prefixes
+		/// </summary>
+		public bool Add
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to remove outdated prefixes
 		/// </summary>
 		public bool Remove
@@ -64,9 +79,38 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add new prefixes
+		/// Gets or sets a flag for whether to add prefixes for <code>@supports</code> parameters
 		/// </summary>
-		public bool Add
+		public bool Supports
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to add prefixes for flexbox properties.
+		/// With "no-2009" value Autoprefixer will add prefixes only for final and IE versions of specification.
+		/// </summary>
+		public object Flexbox
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to add IE prefixes for Grid Layout properties
+		/// </summary>
+		public bool Grid
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a virtual path to file, that contains custom usage statistics for
+		/// <code>&gt; 10% in my stats</code> browsers query
+		/// </summary>
+		public string Stats
 		{
 			get;
 			set;
@@ -77,24 +121,35 @@
 		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
 		/// </summary>
 		public AutoprefixCssPostProcessor()
-			: this(null, BundleTransformerContext.Current.Configuration.GetAutoprefixerSettings())
+			: this(null,
+				BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.Configuration.GetAutoprefixerSettings())
 		{ }
 
 		/// <summary>
 		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="autoprefixerConfig">Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor</param>
-		public AutoprefixCssPostProcessor(Func<IJsEngine> createJsEngineInstance, AutoprefixerSettings autoprefixerConfig)
+		public AutoprefixCssPostProcessor(Func<IJsEngine> createJsEngineInstance,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper,
+			AutoprefixerSettings autoprefixerConfig)
 		{
+			_virtualFileSystemWrapper = virtualFileSystemWrapper;
+
 			Browsers = autoprefixerConfig.Browsers
 				.Cast<BrowserConditionalExpression>()
 				.Select(b => b.ConditionalExpression)
 				.ToList()
 				;
 			Cascade = autoprefixerConfig.Cascade;
-			Remove = autoprefixerConfig.Remove;
 			Add = autoprefixerConfig.Add;
+			Remove = autoprefixerConfig.Remove;
+			Supports = autoprefixerConfig.Supports;
+			Flexbox = ParseFlexboxProperty(autoprefixerConfig.Flexbox);
+			Grid = autoprefixerConfig.Grid;
+			Stats = autoprefixerConfig.Stats;
 
 			if (createJsEngineInstance == null)
 			{
@@ -111,12 +166,30 @@
 					);
 				}
 
-				createJsEngineInstance = (() =>
-					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+				createJsEngineInstance = () =>
+					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}
 
+
+		/// <summary>
+		/// Parses a string representation of the <code>Flexbox</code> property
+		/// </summary>
+		/// <param name="flexboxString">String representation of the <code>Flexbox</code> property</param>
+		/// <returns>Parsed value of the <code>Flexbox</code> property</returns>
+		private static object ParseFlexboxProperty(string flexboxString)
+		{
+			object result = flexboxString;
+			bool flexboxBoolean;
+
+			if (bool.TryParse(flexboxString, out flexboxBoolean))
+			{
+				result = flexboxBoolean;
+			}
+
+			return result;
+		}
 
 		/// <summary>
 		/// Actualizes a vendor prefixes in CSS-asset by using Andrey Sitnik's Autoprefixer
@@ -132,7 +205,7 @@
 
 			AutoprefixingOptions options = CreateAutoprefixingOptions();
 
-			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, options))
+			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, _virtualFileSystemWrapper, options))
 			{
 				InnerPostProcess(asset, cssAutoprefixer);
 			}
@@ -165,7 +238,7 @@
 
 			AutoprefixingOptions options = CreateAutoprefixingOptions();
 
-			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, options))
+			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, _virtualFileSystemWrapper, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
@@ -211,8 +284,12 @@
 			{
 				Browsers = Browsers,
 				Cascade = Cascade,
+				Add = Add,
 				Remove = Remove,
-				Add = Add
+				Supports = Supports,
+				Flexbox = Flexbox,
+				Grid = Grid,
+				Stats = Stats
 			};
 
 			return options;

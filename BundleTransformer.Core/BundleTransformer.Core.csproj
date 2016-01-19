@@ -131,7 +131,6 @@
     <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
     <Compile Include="Helpers\FileExtensionHelpers.cs" />
     <Compile Include="Helpers\Interval.cs" />
-    <Compile Include="Helpers\MimeTypeHelpers.cs" />
     <Compile Include="Helpers\StylesheetHelpers.cs" />
     <Compile Include="Helpers\UrlHelpers.cs" />
     <Compile Include="Transformers\CssTransformer.cs" />
