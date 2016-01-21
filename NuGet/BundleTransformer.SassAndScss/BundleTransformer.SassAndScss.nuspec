@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.SassAndScss</id>
-		<version>1.9.92-alpha1</version>
+		<version>1.9.92-alpha2</version>
 		<title>Bundle Transformer: Sass and SCSS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -10,17 +10,17 @@
 		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
 		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476849</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET (http://github.com/Taritsyn/LibSassHost) version 0.4.2 (supports libSass version 3.3.2). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.
+		<description>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET (http://github.com/Taritsyn/LibSassHost) version 0.4.3 (supports libSass version 3.3.3). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.
 
 For correct working of the LibSass Host require assemblies `msvcp120.dll` and `msvcr120.dll` from the Visual C++ Redistributable Packages for Visual Studio 2013.</description>
-		<summary>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET version 0.4.2 (supports libSass version 3.3.2). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
+		<summary>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET version 0.4.3 (supports libSass version 3.3.3). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
 		<copyright>Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
-		<releaseNotes>Fixed a bug “Sass compilation sometimes fails with native exception in 32 bit mode”.</releaseNotes>
+		<releaseNotes>Added support of libSass version 3.3.3.</releaseNotes>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
 		<dependencies>
 			<dependency id="BundleTransformer.Core" version="1.9.92-alpha1" />
-			<dependency id="LibSassHost" version="0.4.2" />
+			<dependency id="LibSassHost" version="0.4.3" />
 		</dependencies>
 		<references>
 			<reference file="BundleTransformer.SassAndScss.dll" />

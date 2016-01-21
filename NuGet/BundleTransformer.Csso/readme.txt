@@ -1,11 +1,11 @@
 
 
    ----------------------------------------------------------------------
-               README file for Bundle Transformer: CSSO 1.9.88
+           README file for Bundle Transformer: CSSO 1.9.92 Alpha 2
 
    ----------------------------------------------------------------------
 
-      Copyright (c) 2012-2015 Andrey Taritsyn - http://www.taritsyn.ru
+      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -14,7 +14,7 @@
    BundleTransformer.Csso contains one minifier-adapter for
    minification of CSS-code - `KryzhanovskyCssMinifier`.
    `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's
-   CSSO (http://github.com/css/csso) version 1.4.4.
+   CSSO (http://github.com/css/csso) version 1.5.1.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CSSO version 1.4.4.
+   Added support of CSSO version 1.5.1.
 
    ====================
    POST-INSTALL ACTIONS

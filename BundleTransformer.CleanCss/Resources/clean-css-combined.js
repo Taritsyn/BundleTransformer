@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.8
+ * Clean-css v3.4.9
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -363,7 +363,7 @@ var CleanCss = (function(){
 
 		function _styleFilter(validator) {
 		  return function (value) {
-			return value[0] != 'inherit' && validator.isValidStyle(value[0]);
+			return value[0] != 'inherit' && validator.isValidStyle(value[0]) && !validator.isValidColorValue(value[0]);
 		  };
 		}
 
@@ -379,7 +379,7 @@ var CleanCss = (function(){
 
 		function _widthFilter(validator) {
 		  return function (value) {
-			return value[0] != 'inherit' && validator.isValidWidth(value[0]);
+			return value[0] != 'inherit' && validator.isValidWidth(value[0]) && !validator.isValidStyleKeyword(value[0]) && !validator.isValidColorValue(value[0]);
 		  };
 		}
 
@@ -727,6 +727,11 @@ var CleanCss = (function(){
 
 		  var color1 = property1.value[0][0];
 		  var color2 = property2.value[0][0];
+
+		  if (!validator.colorOpacity && (validator.isValidRgbaColor(color1) || validator.isValidHslaColor(color1)))
+			return false;
+		  if (!validator.colorOpacity && (validator.isValidRgbaColor(color2) || validator.isValidHslaColor(color2)))
+			return false;
 
 		  // (hex | named)
 		  if (validator.isValidNamedColor(color2) || validator.isValidHexColor(color2))
@@ -2302,6 +2307,8 @@ var CleanCss = (function(){
 		  var compatibleCssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + validUnits.join('|') + '|)|auto|inherit)';
 		  this.compatibleCssUnitRegex = new RegExp('^' + compatibleCssUnitRegexStr + '$', 'i');
 		  this.compatibleCssUnitAnyRegex = new RegExp('^(none|' + widthKeywords.join('|') + '|' + compatibleCssUnitRegexStr + '|' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')$', 'i');
+
+		  this.colorOpacity = compatibility.colors.opacity;
 		}
 
 		Validator.prototype.isValidHexColor = function (s) {
@@ -2329,11 +2336,15 @@ var CleanCss = (function(){
 
 		Validator.prototype.isValidColor = function (s) {
 		  return this.isValidNamedColor(s) ||
-			this.isValidHexColor(s) ||
-			this.isValidRgbaColor(s) ||
-			this.isValidHslaColor(s) ||
+			this.isValidColorValue(s) ||
 			this.isValidVariable(s) ||
 			this.isValidVendorPrefixedValue(s);
+		};
+
+		Validator.prototype.isValidColorValue = function (s) {
+		  return this.isValidHexColor(s) ||
+			this.isValidRgbaColor(s) ||
+			this.isValidHslaColor(s);
 		};
 
 		Validator.prototype.isValidUrl = function (s) {
@@ -2423,11 +2434,19 @@ var CleanCss = (function(){
 		};
 
 		Validator.prototype.isValidStyle = function (s) {
-		  return styleKeywords.indexOf(s) >= 0 || this.isValidVariable(s);
+		  return this.isValidStyleKeyword(s) || this.isValidVariable(s);
+		};
+
+		Validator.prototype.isValidStyleKeyword = function (s) {
+		  return styleKeywords.indexOf(s) >= 0;
 		};
 
 		Validator.prototype.isValidWidth = function (s) {
-		  return this.isValidUnit(s) || widthKeywords.indexOf(s) >= 0 || this.isValidVariable(s);
+		  return this.isValidUnit(s) || this.isValidWidthKeyword(s) || this.isValidVariable(s);
+		};
+
+		Validator.prototype.isValidWidthKeyword = function (s) {
+		  return widthKeywords.indexOf(s) >= 0;
 		};
 
 		Validator.prototype.isValidVendorPrefixedValue = function (s) {
@@ -2443,7 +2462,7 @@ var CleanCss = (function(){
 
 		  return f1name === f2name;
 		};
-		
+
 		return Validator;
 	};
 	//#endregion
@@ -3015,12 +3034,15 @@ var CleanCss = (function(){
 			if (token[2].length > 0 && options.semanticMerging && isBemElement(token))
 			  removeAnyUnsafeElements(token, candidates);
 
-			var oldToken = candidates[stringifyBody(token[2])];
+			var candidateBody = stringifyBody(token[2]);
+			var oldToken = candidates[candidateBody];
 			if (oldToken && !isSpecial(options, stringifySelectors(token[1])) && !isSpecial(options, stringifySelectors(oldToken[1]))) {
-			  token[1] = cleanUpSelectors(oldToken[1].concat(token[1]), false, adjacentSpace);
+			  token[1] = token[2].length > 0 ?
+				cleanUpSelectors(oldToken[1].concat(token[1]), false, adjacentSpace) :
+				oldToken[1].concat(token[1]);
 
 			  oldToken[2] = [];
-			  candidates[stringifyBody(token[2])] = null;
+			  candidates[candidateBody] = null;
 			}
 
 			candidates[stringifyBody(token[2])] = token;
@@ -3471,9 +3493,17 @@ var CleanCss = (function(){
 		var stringifySelectors = require('/stringifier/one-time').selectors;
 		var cleanUpSelectorDuplicates = require('/selectors/clean-up').selectorDuplicates;
 		var isSpecial = require('/selectors/is-special');
+		var cloneArray = require('/utils/clone-array');
 
 		function naturalSorter(a, b) {
 		  return a > b;
+		}
+
+		function cloneAndMergeSelectors(propertyA, propertyB) {
+		  var cloned = cloneArray(propertyA);
+		  cloned[5] = cloned[5].concat(propertyB[5]);
+
+		  return cloned;
 		}
 
 		function restructure(tokens, options) {
@@ -3740,6 +3770,7 @@ var CleanCss = (function(){
 			var token = tokens[i];
 			var isSelector;
 			var j, k, m;
+			var samePropertyAt;
 
 			if (token[0] == 'selector') {
 			  isSelector = true;
@@ -3781,8 +3812,13 @@ var CleanCss = (function(){
 				  }
 				}
 
-				if (!movedSameProperty)
+				if (!movedSameProperty) {
 				  movedSameProperty = property[0] == movedProperty[0] && property[1] == movedProperty[1];
+
+				  if (movedSameProperty) {
+					samePropertyAt = k;
+				  }
+				}
 			  }
 
 			  if (!isSelector || unmovableInCurrentToken.indexOf(j) > -1)
@@ -3792,8 +3828,11 @@ var CleanCss = (function(){
 			  movableTokens[key] = movableTokens[key] || [];
 			  movableTokens[key].push(token);
 
-			  if (!movedSameProperty)
+			  if (movedSameProperty) {
+				movedProperties[samePropertyAt] = cloneAndMergeSelectors(movedProperties[samePropertyAt], property);
+			  } else {
 				movedProperties.push(property);
+			  }
 			}
 
 			movedToBeDropped = movedToBeDropped.sort(naturalSorter);
@@ -4370,7 +4409,7 @@ var CleanCss = (function(){
 		  var token = tokens[position];
 		  var isVariableDeclaration = token[0][0].indexOf('--') === 0;
 
-		  if (isVariableDeclaration && Array.isArray(token[1][0][0])) {
+		  if (isVariableDeclaration && atRulesOrProperties(token[1])) {
 			store('{', context);
 			body(token[1], context);
 			store('};', context);
@@ -4386,6 +4425,15 @@ var CleanCss = (function(){
 			  store(PROPERTY_SEPARATOR, context);
 			}
 		  }
+		}
+
+		function atRulesOrProperties(values) {
+		  for (var i = 0, l = values.length; i < l; i++) {
+			if (values[i][0] == AT_RULE || Array.isArray(values[i][0]))
+			  return true;
+		  }
+
+		  return false;
 		}
 
 		function all(tokens, context) {

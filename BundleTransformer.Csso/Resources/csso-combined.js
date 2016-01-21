@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.4.4
+* CSSO (CSS Optimizer) v1.5.1
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -32,26 +32,51 @@ var CSSO = (function(){
 		
 	//#region URL: /compressor
 	modules['/compressor'] = function () {
-		var translate = require('/utils/translate');
-		var constants = require('/compressor/const');
-		var rules = require('/compressor/rules');
-		var TRBL = require('/compressor/trbl');
-		var color = require('/compressor/color');
-		var packNumber = require('/compressor/utils').packNumber;
+		var convertToInternal = require('/compressor/ast/gonzalesToInternal');
+		var convertToGonzales = require('/compressor/ast/internalToGonzales');
+		var internalTranslate = require('/compressor/ast/translate');
+		var internalWalkAll = require('/compressor/ast/walk').all;
+		var cleanFn = require('/compressor/clean');
+		var compressFn = require('/compressor/compress');
+		var restructureAst = require('/compressor/restructure');
 
-		function CSSOCompressor() {
-		}
+//		function createLogger(level) {
+//			var lastDebug;
+//
+//			if (!level) {
+//				// no output
+//				return function() {};
+//			}
+//
+//			return function debugOutput(name, token, reset) {
+//				var line = (!reset ? '(' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 'ms) ' : '') + name;
+//
+//				if (level > 1 && token) {
+//					var css = internalTranslate(token, true).trim();
+//
+//					// when level 2, limit css to 256 symbols
+//					if (level === 2 && css.length > 256) {
+//						css = css.substr(0, 256) + '...';
+//					}
+//
+//					line += '\n  ' + css + '\n';
+//				}
+//
+//				console.error(line);
+//				lastDebug = Date.now();
+//			};
+//		};
 
-		CSSOCompressor.prototype.injectInfo = function(token) {
+		function injectInfo(token) {
 			for (var i = token.length - 1; i > -1; i--) {
 				var child = token[i];
 
 				if (Array.isArray(child)) {
-					this.injectInfo(child);
+					injectInfo(child);
 					child.unshift({});
 				}
 			}
-		};
+		}
 
 		function readBlock(stylesheet, offset) {
 			var buffer = [];
@@ -85,1310 +110,1581 @@ var CSSO = (function(){
 			};
 		}
 
-		CSSOCompressor.prototype.process = function(rules, token, container, idx, path, stack) {
-			var type = token[1];
-			var rule = rules[type];
-			var result;
+		function compressBlock(ast, restructuring, num/*, debug*/) {
+			function walk(name, fn) {
+				internalWalkAll(internalAst, fn);
 
-			if (rule) {
-				result = token;
-
-				for (var i = 0; i < rule.length; i++) {
-					var tmp = this[rule[i]](result, type, container, idx, path, stack);
-
-					if (tmp === null) {
-						return null;
-					}
-
-					if (tmp !== undefined) {
-						result = tmp;
-					}
-				}
+//				debug(name, internalAst);
 			}
 
-			return result;
-		};
+//			debug('Compress block #' + num, null, true);
 
-		CSSOCompressor.prototype.walk = function(rules, token, path, name, stack) {
-			if (!stack) {
-				stack = [token];
-			}
+			var internalAst = convertToInternal(ast);
+//			debug('convertToInternal', internalAst);
 
-			for (var i = token.length - 1; i >= 2; i--) {
-				var child = token[i];
-
-				if (Array.isArray(child)) {
-					stack.push(child);
-					child = this.walk(rules, child, path + '/' + i, null, stack); // go inside
-					stack.pop();
-
-					if (child === null) {
-						token.splice(i, 1);
-					} else {
-						child = this.process(rules, child, token, i, path, stack);
-						if (child) {
-							// compressed not null
-							token[i] = child;
-						} else if (child === null) {
-							// null is the mark to delete token
-							token.splice(i, 1);
-						}
-					}
-				}
-			}
-
-//			if (this.debug && name) {
-//				console.log(name + '\n  ' + translate(token, true).trim());
-//				console.log('');
-//			}
-
-			return token.length ? token : null;
-		};
-
-		function compressBlock(ast, restructuring) {
-			this.props = {};
-			this.shorts = {};
-			this.shorts2 = {};
-
-			this.shortGroupID = 0;
-			this.lastShortGroupID = 0;
-			this.lastShortSelector = 0;
-
-			// compression without restructure
-			ast = this.walk(rules.cleanComments, ast, '/0', 'cleanComments');
-			ast = this.walk(rules.compress, ast, '/0', 'compress');
-			ast = this.walk(rules.prepare, ast, '/0', 'prepare');
-			ast = this.walk(rules.freezeRuleset, ast, '/0', 'freezeRuleset');
+			internalAst.firstAtrulesAllowed = ast.firstAtrulesAllowed;
+			walk('clean', cleanFn);
+			walk('compress', compressFn);
 
 			// structure optimisations
 			if (restructuring) {
-				var initAst = this.copyArray(ast);
-				var initLength = translate(initAst, true).length;
-
-				ast = this.walk(rules.rejoinRuleset, ast, '/0', 'rejoinRuleset');
-				this.disjoin(ast);
-				ast = this.walk(rules.markShorthand, ast, '/0', 'markShorthand');
-				ast = this.walk(rules.cleanShortcut, ast, '/0', 'cleanShortcut');
-				ast = this.walk(rules.restructureBlock, ast, '/0', 'restructureBlock');
-
-				var curLength = Infinity;
-				var minLength;
-				var astSnapshot;
-				do {
-					minLength = curLength;
-					astSnapshot = this.copyArray(ast);
-					ast = this.walk(rules.rejoinRuleset, ast, '/0', 'rejoinRuleset');
-					ast = this.walk(rules.restructureRuleset, ast, '/0', 'restructureRuleset');
-					curLength = translate(ast, true).length;
-				} while (minLength > curLength);
-
-				if (initLength < minLength && initLength < curLength) {
-					ast = initAst;
-				} else if (minLength < curLength) {
-					ast = astSnapshot;
-				}
+				restructureAst(internalAst/*, debug*/);
 			}
 
-			ast = this.walk(rules.finalize, ast, '/0');
-
-			return ast;
+			return internalAst;
 		}
 
-		CSSOCompressor.prototype.compress = function(ast, options) {
-//			this.debug = Boolean(options.debug);
-
+		var exports = function compress(ast, options) {
 			ast = ast || [{}, 'stylesheet'];
+			options = options || {};
+
+//			var debug = createLogger(options.debug);
+			var restructuring = options.restructuring || options.restructuring === undefined;
+			var result = [];
+			var block = { offset: 2 };
+			var firstAtrulesAllowed = true;
+			var blockNum = 1;
 
 			if (typeof ast[0] === 'string') {
-				this.injectInfo([ast]);
+				injectInfo([ast]);
 			}
-
-			var result = [{}, 'stylesheet'];
-			var block = { offset: 2 };
-			var restructuring = options.restructuring || options.restructuring === undefined;
-			var firstAtrulesAllowed = true;
 
 			do {
 				block = readBlock(ast, block.offset);
 				block.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
-				block.stylesheet = compressBlock.call(this, block.stylesheet, restructuring);
+				block.stylesheet = compressBlock(block.stylesheet, restructuring, blockNum++/*, debug*/);
 
 				if (block.comment) {
 					// add \n before comment if there is another content in result
-					if (result.length > 2) {
-						result.push([{}, 's', '\n']);
+					if (result.length) {
+						result.push({
+							type: 'Raw',
+							value: '\n'
+						});
 					}
 
-					result.push(block.comment);
+					result.push({
+						type: 'Comment',
+						value: block.comment[2]
+					});
 
 					// add \n after comment if block is not empty
-					if (block.stylesheet.length > 2) {
-						result.push([{}, 's', '\n']);
+					if (block.stylesheet.rules.length) {
+						result.push({
+							type: 'Raw',
+							value: '\n'
+						});
 					}
 				}
 
-				result.push.apply(result, block.stylesheet.slice(2));
+				result.push.apply(result, block.stylesheet.rules);
 
-				if (firstAtrulesAllowed && result.length > 2) {
-					firstAtrulesAllowed = this.cleanImport(
-						null, null, block.stylesheet, block.stylesheet.length
-					) !== null;
+				if (firstAtrulesAllowed && result.length) {
+					var lastRule = result[result.length - 1];
+
+					if (lastRule.type !== 'Atrule' ||
+					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
+						firstAtrulesAllowed = false;
+					}
 				}
 			} while (block.offset < ast.length);
 
-			return result;
-		};
-
-		CSSOCompressor.prototype.disjoin = function(token) {
-			for (var i = token.length - 1; i >= 2; i--) {
-				var child = token[i];
-
-				if (!Array.isArray(child)) {
-					continue;
-				}
-
-				if (child[1] === 'ruleset') {
-					var selector = child[2];
-
-					child[0].shortGroupID = this.shortGroupID++;
-
-					// there are more than 1 simple selector split for rulesets
-					if (selector.length > 3) {
-						// generate new rule sets:
-						// .a, .b { color: red; }
-						// ->
-						// .a { color: red; }
-						// .b { color: red; }
-						for (var j = selector.length - 1; j >= 2; j--) {
-							var selectorInfo = this.copyObject(selector[0]);
-							var newRuleset = [
-							  this.copyObject(child[0]),
-							  'ruleset',
-							  [selectorInfo, 'selector', selector[j]],
-							  this.copyArray(child[3])
-							];
-
-							selectorInfo.s = selector[j][0].s;
-							token.splice(i + 1, 0, newRuleset);
-						}
-
-						// delete old ruleset
-						token.splice(i, 1);
-					}
-				} else {
-					// try disjoin nested stylesheets, i.e. @media, @support etc.
-					this.disjoin(child);
-				}
+			if (!options.outputAst || options.outputAst === 'gonzales') {
+				return convertToGonzales({
+					type: 'StyleSheet',
+					rules: result
+				});
 			}
 
-//			if (this.debug) {
-//				console.log('disjoin\n  ' + translate(token, true).trim());
-//				console.log('');
-//			}
-		};
-
-		CSSOCompressor.prototype.freezeRulesets = function(token) {
-			var info = token[0];
-			var selector = token[2];
-
-			info.freeze = this.freezeNeeded(selector);
-			info.freezeID = this.selectorSignature(selector);
-			info.pseudoID = this.composePseudoID(selector);
-			info.pseudoSignature = this.pseudoSelectorSignature(selector, constants.allowedPClasses, true);
-			this.markSimplePseudo(selector);
-
-			return token;
-		};
-
-		CSSOCompressor.prototype.markSimplePseudo = function(selector) {
-			var hash = {};
-
-			for (var i = 2; i < selector.length; i++) {
-				var simpleSelector = selector[i];
-
-				simpleSelector[0].pseudo = this.containsPseudo(simpleSelector);
-				simpleSelector[0].sg = hash;
-				hash[simpleSelector[0].s] = 1;
-			}
-		};
-
-		CSSOCompressor.prototype.composePseudoID = function(selector) {
-			var pseudos = [];
-
-			for (var i = 2; i < selector.length; i++) {
-				var simpleSelector = selector[i];
-
-				if (this.containsPseudo(simpleSelector)) {
-					pseudos.push(simpleSelector[0].s);
-				}
-			}
-
-			return pseudos.sort().join(',');
-		};
-
-		CSSOCompressor.prototype.containsPseudo = function(sselector) {
-			for (var j = 2; j < sselector.length; j++) {
-				switch (sselector[j][1]) {
-					case 'pseudoc':
-					case 'pseudoe':
-					case 'nthselector':
-						if (sselector[j][2][2] in constants.notFPClasses === false) {
-							return true;
-						}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.selectorSignature = function(selector) {
-			var parts = [];
-
-			for (var i = 2; i < selector.length; i++) {
-				parts.push(translate(selector[i], true));
-			}
-
-			return parts.sort().join(',');
-		};
-
-		CSSOCompressor.prototype.pseudoSelectorSignature = function(selector, exclude, dontAppendExcludeMark) {
-			var pseudos = {};
-			var wasExclude = false;
-
-			exclude = exclude || {};
-
-			for (var i = 2; i < selector.length; i++) {
-				var simpleSelector = selector[i];
-
-				for (var j = 2; j < simpleSelector.length; j++) {
-					switch (simpleSelector[j][1]) {
-						case 'pseudoc':
-						case 'pseudoe':
-						case 'nthselector':
-							if (!exclude.hasOwnProperty(simpleSelector[j][2][2])) {
-								pseudos[simpleSelector[j][2][2]] = 1;
-							} else {
-								wasExclude = true;
-							}
-							break;
-					}
-				}
-			}
-
-			return Object.keys(pseudos).sort().join(',') + (dontAppendExcludeMark ? '' : wasExclude);
-		};
-
-		CSSOCompressor.prototype.freezeNeeded = function(selector) {
-			for (var i = 2; i < selector.length; i++) {
-				var simpleSelector = selector[i];
-
-				for (var j = 2; j < simpleSelector.length; j++) {
-					switch (simpleSelector[j][1]) {
-						case 'pseudoc':
-							if (!(simpleSelector[j][2][2] in constants.notFPClasses)) {
-								return true;
-							}
-							break;
-
-						case 'pseudoe':
-							if (!(simpleSelector[j][2][2] in constants.notFPElements)) {
-								return true;
-							}
-							break;
-
-						case 'nthselector':
-							return true;
-					}
-				}
-			}
-
-			return false;
-		};
-
-		CSSOCompressor.prototype.cleanCharset = function(token, rule, parent, i) {
-			if (token[2][2][2] === 'charset') {
-				for (i = i - 1; i > 1; i--) {
-					if (parent[i][1] !== 's' && parent[i][1] !== 'comment') {
-						return null;
-					}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.cleanImport = function(token, rule, parent, i) {
-			if (!parent.firstAtrulesAllowed) {
-				return null;
-			}
-
-			for (i = i - 1; i > 1; i--) {
-				var type = parent[i][1];
-
-				if (type !== 's' && type !== 'comment') {
-					if (type === 'atrules') {
-						var atrule = parent[i][2][2][2];
-
-						if (atrule !== 'import' && atrule !== 'charset') {
-							return null;
-						}
-					} else {
-						return null;
-					}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.cleanComment = function(token, rule, parent, i) {
-			return null;
-		};
-
-		CSSOCompressor.prototype.cleanWhitespace = function(token, rule, parent, i) {
-			var parentType = parent[1];
-			var prevType = (parentType === 'braces' && i === 4) ||
-						   (parentType !== 'braces' && i === 2) ? null : parent[i - 1][1];
-			var nextType = i === parent.length - 1 ? null : parent[i + 1][1];
-
-			if (nextType === 'unknown') {
-				token[2] = '\n';
-			} else {
-				if (parentType === 'simpleselector') {
-					if (!prevType || prevType === 'combinator' ||
-						!nextType || nextType === 'combinator') {
-						return null;
-					}
-				} else if ((parentType !== 'atrulerq' || prevType) &&
-					!this.issue16(prevType, nextType) &&
-					!this.issue165(parent, prevType, nextType) &&
-					!this.issue134(prevType, nextType) &&
-					!this.issue228(prevType, nextType)) {
-
-					if (nextType !== null && prevType !== null) {
-						if ((prevType === 'ident' && parent[i - 1][2] === '*') ||
-							(nextType === 'ident' && parent[i + 1][2] === '*')) {
-							return null;
-						}
-
-						if (this._cleanWhitespace(nextType, false) ||
-							this._cleanWhitespace(prevType, true)) {
-							return null;
-						}
-					} else {
-						return null;
-					}
-				}
-
-				token[2] = ' ';
-			}
-
-			return token;
-		};
-
-		// See https://github.com/afelix/csso/issues/16
-		CSSOCompressor.prototype.issue16 = function(prevType, nextType) {
-			return nextType && prevType === 'uri';
-		};
-
-		// See https://github.com/css/csso/issues/165
-		CSSOCompressor.prototype.issue165 = function(parent, prevType, nextType) {
-			return prevType === 'braces' && nextType === 'ident';
-		};
-
-		// See https://github.com/css/csso/issues/134
-		CSSOCompressor.prototype.issue134 = function(prevType, nextType) {
-			return prevType === 'funktion' && (nextType === 'funktion' || nextType === 'vhash');
-		};
-
-		CSSOCompressor.prototype.issue228 = function(prevType, nextType) {
-			return prevType === 'braces' && nextType === 'unary';
-		};
-
-		CSSOCompressor.prototype._cleanWhitespace = function(type, left) {
-			switch (type) {
-				case 's':
-				case 'operator':
-				case 'attrselector':
-				case 'block':
-				case 'decldelim':
-				case 'ruleset':
-				case 'declaration':
-				case 'atruleb':
-				case 'atrules':
-				case 'atruler':
-				case 'important':
-				case 'nth':
-				case 'combinator':
-					return true;
-			}
-
-			if (left) {
-				switch (type) {
-					case 'funktion':
-					case 'braces':
-					case 'uri':
-						return true;
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.cleanDecldelim = function(token) {
-			for (var i = token.length - 1; i > 1; i--) {
-				var type = token[i][1];
-				var nextType = token[i + 1][1];
-
-				if (type === 'decldelim' && nextType !== 'declaration') {
-					token.splice(i, 1);
-				}
-			}
-
-			if (token[2][1] === 'decldelim') {
-				token.splice(2, 1);
-			}
-
-			return token;
-		};
-
-		CSSOCompressor.prototype.compressNumber = function(token) {
-			var value = packNumber(token[2]);
-
-			token[2] = value;
-			token[0].s = value;
-
-			return token;
-		};
-
-		CSSOCompressor.prototype.cleanUnary = function(token, rule, parent, i) {
-			var next = parent[i + 1];
-
-			if (next && next[1] === 'number' && next[2] === '0') {
-				return null;
-			}
-
-			return token;
-		};
-
-		CSSOCompressor.prototype.compressColor = function(token, rule, parent, i) {
-			switch (rule) {
-				case 'vhash':
-					return color.compressHex(token);
-
-				case 'funktion':
-					return color.compressFunction(token, rule, parent, i);
-
-				case 'ident':
-					return color.compressIdent(token, rule, parent, i);
-			}
-		};
-
-		CSSOCompressor.prototype.compressDimension = function(token, rule, parent, i, path, stack) {
-			var value = token[2][2];
-			var unit = token[3][2];
-
-			if (value === '0' && !constants.nonLengthUnits[unit]) {
-				// issue #200: don't remove units in flex property as it could change value meaning
-				if (parent[1] === 'value' && stack[stack.length - 2][2][2][2] === 'flex') {
-					return;
-				}
-
-				// issue #222: don't remove units inside calc
-				var i = stack.length - 1;
-				while (i > 0 && (stack[i][1] === 'braces' || stack[i][1] === 'functionBody')) {
-					i--;
-					if (stack[i][1] === 'funktion' && stack[i][2][2] === 'calc') {
-						return;
-					}
-				}
-
-				return token[2];
-			}
-		};
-
-		CSSOCompressor.prototype.compressString = function(token) {
-			// remove escaped \n, i.e.
-			// .a { content: "foo\
-			// bar"}
-			// ->
-			// .a { content: "foobar" }
-			token[2] = token[2].replace(/\\\n/g, '');
-		};
-
-		CSSOCompressor.prototype.compressFontWeight = function(token) {
-			var property = token[2];
-			var value = token[3];
-
-			if (/font-weight$/.test(property[2][2]) && value[2][1] === 'ident') {
-				switch (value[2][2]) {
-					case 'normal':
-						value[2] = [{}, 'number', '400'];
-						break;
-					case 'bold':
-						value[2] = [{}, 'number', '700'];
-						break;
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.compressFont = function(token) {
-			var property = token[2];
-			var value = token[3];
-
-			if (/font$/.test(property[2][2]) && value.length) {
-				value.splice(2, 0, [{}, 's', '']);
-
-				for (var i = value.length - 1; i > 2; i--) {
-					if (value[i][1] === 'ident') {
-						var ident = value[i][2];
-						if (ident === 'bold') {
-							value[i] = [{}, 'number', '700'];
-						} else if (ident === 'normal') {
-							var t = value[i - 1];
-
-							if (t[1] === 'operator' && t[2] === '/') {
-								value.splice(--i, 2);
-							} else {
-								value.splice(i, 1);
-							}
-
-							if (value[i - 1][1] === 's') {
-								value.splice(--i, 1);
-							}
-						} else if (ident === 'medium' && value[i + 1] && value[i + 1][2] !== '/') {
-							value.splice(i, 1);
-							if (value[i - 1][1] === 's') {
-								value.splice(--i, 1);
-							}
-						}
-					}
-				}
-
-				if (value.length > 2 && value[2][1] === 's') {
-					value.splice(2, 1);
-				}
-
-				if (value.length === 2) {
-					value.push([{}, 'ident', 'normal']);
-				}
-
-				return token;
-			}
-		};
-
-		CSSOCompressor.prototype.compressBackground = function(token) {
-			function lastType() {
-				if (sequence.length) {
-					return sequence[sequence.length - 1][1];
-				}
-			}
-
-			function flush() {
-				if (lastType() === 's') {
-					sequence.pop();
-				}
-
-				if (!sequence.length ||
-					(sequence.length === 1 && sequence[0][1] === 'important')) {
-					value.push(
-						[{}, 'number', '0'],
-						[{}, 's', ' '],
-						[{}, 'number', '0']
-					);
-				}
-
-				value.push.apply(value, sequence);
-				sequence = [];
-			}
-
-			var property = token[2];
-			var value = token[3];
-
-			if (/background$/.test(property[2][2]) && value.length) {
-				var current = value.splice(2);
-				var sequence = [];
-
-				for (var i = 0; i < current.length; i++) {
-					var node = current[i];
-					var type = node[1];
-					var val = node[2];
-
-					// flush collected sequence
-					if (type === 'operator' && val === ',') {
-						flush();
-						value.push(node);
-						continue;
-					}
-
-					// remove defaults
-					if (type === 'ident') {
-						if (val === 'transparent' ||
-							val === 'none' ||
-							val === 'repeat' ||
-							val === 'scroll') {
-							continue;
-						}
-					}
-
-					// don't add redundant spaces
-					if (type === 's' && (!sequence.length || lastType() === 's')) {
-						continue;
-					}
-
-					sequence.push(node);
-				}
-
-				flush();
-
-				return token;
-			}
-		};
-
-		CSSOCompressor.prototype.cleanEmpty = function(token, rule) {
-			switch (rule) {
-				case 'ruleset':
-					if (!token[3] || token[3].length === 2) {
-						return null;
-					}
-					break;
-
-				case 'atruleb':
-					if (token[token.length - 1].length < 3) {
-						return null;
-					}
-					break;
-
-				case 'atruler':
-					if (token[4].length < 3) {
-						return null;
-					}
-					break;
-			}
-		};
-
-		CSSOCompressor.prototype.destroyDelims = function() {
-			return null;
-		};
-
-		CSSOCompressor.prototype.preTranslate = function(token) {
-			token[0].s = translate(token, true);
-			return token;
-		};
-
-		CSSOCompressor.prototype.markShorthands = function(token, rule, parent, j, path) {
-			var selector = '';
-			var freeze = false;
-			var freezeID = 'fake';
-			var shortGroupID = parent[0].shortGroupID;
-			var pre;
-			var sh;
-
-			if (parent[1] === 'ruleset') {
-				selector = parent[2][2][0].s,
-				freeze = parent[0].freeze,
-				freezeID = parent[0].freezeID;
-			}
-
-			pre = this.pathUp(path) + '/' + (freeze ? '&' + freezeID + '&' : '') + selector + '/';
-
-			for (var i = token.length - 1; i > -1; i--) {
-				var createNew = true;
-				var child = token[i];
-
-				if (child[1] === 'declaration') {
-					var childInfo = child[0];
-					var property = child[2][0].s;
-					var value = child[3];
-					var important = value[value.length - 1][1] === 'important';
-
-					childInfo.id = path + '/' + i;
-
-					if (property in TRBL.props) {
-						var key = pre + TRBL.extractMain(property);
-						var shorts = this.shorts2[key] || [];
-
-						if (!this.lastShortSelector ||
-							selector === this.lastShortSelector ||
-							shortGroupID === this.lastShortGroupID) {
-							if (shorts.length) {
-								sh = shorts[shorts.length - 1];
-								createNew = false;
-							}
-						}
-
-						if (createNew) {
-							sh = new TRBL(property, important);
-							shorts.push(sh);
-							childInfo.replaceByShort = true;
-						} else {
-							childInfo.removeByShort = true;
-						}
-
-						childInfo.shorthandKey = { key: key, i: shorts.length - 1 };
-
-						sh.add(property, value[0].s, value.slice(2), important);
-
-						this.shorts2[key] = shorts;
-
-						this.lastShortSelector = selector;
-						this.lastShortGroupID = shortGroupID;
-					}
-				}
-			}
-
-			return token;
-		};
-
-		CSSOCompressor.prototype.cleanShorthands = function(token) {
-			var info = token[0];
-
-			if (info.removeByShort || info.replaceByShort) {
-				var sKey = info.shorthandKey;
-				var shorthand = this.shorts2[sKey.key][sKey.i];
-
-				if (shorthand.isOkToMinimize()) {
-					if (info.replaceByShort) {
-						var shorterToken  = [{}, 'declaration', shorthand.getProperty(), shorthand.getValue()];
-						shorterToken[0].s = translate(shorterToken, true);
-						return shorterToken;
-					} else {
-						return null;
-					}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.restructureBlock = function(token, rule, parent, j, path) {
-			var props = {};
-			var isPseudo = false;
-			var selector = '';
-			var freeze = false;
-			var freezeID = 'fake';
-			var pseudoID = 'fake';
-			var sg = {};
-
-			if (parent[1] === 'ruleset') {
-				var parentInfo = parent[0];
-				var parentSelectorInfo = parent[2][2][0];
-
-				props = this.props;
-				isPseudo = parentSelectorInfo.pseudo;
-				selector = parentSelectorInfo.s;
-				freeze = parentInfo.freeze;
-				freezeID = parentInfo.freezeID;
-				pseudoID = parentInfo.pseudoID;
-				sg = parentSelectorInfo.sg;
-			}
-
-			for (var i = token.length - 1; i > -1; i--) {
-				var child = token[i];
-
-				if (child[1] === 'declaration') {
-					var value = child[3];
-					var important = value[value.length - 1][1] === 'important';
-					var property = child[2][0].s;
-					var pre = this.pathUp(path) + '/' + selector + '/';
-					var ppre = this.buildPPre(pre, property, value, child, freeze);
-					var ppreProps = props[ppre];
-					var id = path + '/' + i;
-
-					child[0].id = id;
-
-					if (!constants.dontRestructure[property] && ppreProps) {
-						if ((isPseudo && freezeID === ppreProps.freezeID) || // pseudo from equal selectors group
-							(!isPseudo && pseudoID === ppreProps.pseudoID) || // not pseudo from equal pseudo signature group
-							(isPseudo && pseudoID === ppreProps.pseudoID && this.hashInHash(sg, ppreProps.sg))) { // pseudo from covered selectors group
-							if (important && !ppreProps.important) {
-								props[ppre] = {
-									block: token,
-									important: important,
-									id: id,
-									sg: sg,
-									freeze: freeze,
-									path: path,
-									freezeID: freezeID,
-									pseudoID: pseudoID
-								};
-
-								this.deleteProperty(ppreProps.block, ppreProps.id);
-							} else {
-								token.splice(i, 1);
-							}
-						}
-					} else if (this.needless(property, props, pre, important, value, child, freeze)) {
-						token.splice(i, 1);
-					} else {
-						props[ppre] = {
-							block: token,
-							important: important,
-							id: id,
-							sg: sg,
-							freeze: freeze,
-							path: path,
-							freezeID: freezeID,
-							pseudoID: pseudoID
-						};
-					}
-				}
-			}
-			return token;
-		};
-
-		CSSOCompressor.prototype.buildPPre = function(pre, property, value, d, freeze) {
-			var fp = freeze ? 'ft:' : 'ff:';
-
-			if (property.indexOf('background') !== -1) {
-				return fp + pre + d[0].s;
-			}
-
-			var vendorId = '';
-			var hack9 = 0;
-			var functions = {};
-			var units = {};
-
-			for (var i = 2; i < value.length; i++) {
-				if (!vendorId) {
-					vendorId = this.getVendorIDFromToken(value[i]);
-				}
-
-				switch (value[i][1]) {
-					case 'ident':
-						if (value[i][2] === '\\9') {
-							hack9 = 1;
-						}
-						break;
-
-					case 'funktion':
-						var name = value[i][2][2];
-
-						if (name === 'rect') {
-							// there are 2 forms of rect:
-							//   rect(<top>, <right>, <bottom>, <left>) - standart
-							//   rect(<top> <right> <bottom> <left>) – backwards compatible syntax
-							// only the same form values can be merged
-							if (value[i][3].slice(2).some(function(token) {
-								return token[1] === 'operator' && token[2] === ',';
-							})) {
-								name = 'rect-backward';
-							}
-						}
-
-						functions[name] = true;
-						break;
-
-					case 'dimension':
-						var unit = value[i][3][2];
-						switch (unit) {
-							// is not supported until IE11
-							case 'rem':
-
-							// v* units is too buggy across browsers and better
-							// don't merge values with those units
-							case 'vw':
-							case 'vh':
-							case 'vmin':
-							case 'vmax':
-							case 'vm': // IE9 supporting "vm" instead of "vmin".
-								units[unit] = true;
-								break;
-						}
-						break;
-				}
-			}
-
-			return (
-				fp + pre + property +
-				'[' + Object.keys(functions) + ']' +
-				Object.keys(units) +
-				hack9 + vendorId
-			);
-		};
-
-		CSSOCompressor.prototype.getVendorIDFromToken = function(token) {
-			var vendorId;
-
-			switch (token[1]) {
-				case 'ident':
-					vendorId = this.getVendorFromString(token[2]);
-					break;
-
-				case 'funktion':
-					vendorId = this.getVendorFromString(token[2][2]);
-					break;
-			}
-
-			if (vendorId) {
-				return constants.vendorID[vendorId] || '';
-			}
-
-			return '';
-		};
-
-		CSSOCompressor.prototype.getVendorFromString = function(string) {
-			if (string[0] === '-') {
-				var secondDashIndex = string.indexOf('-', 2);
-				if (secondDashIndex !== -1) {
-					return string.substr(0, secondDashIndex + 1);
-				}
-			}
-
-			return '';
-		};
-
-		CSSOCompressor.prototype.deleteProperty = function(block, id) {
-			for (var i = block.length - 1; i > 1; i--) {
-				var child = block[i];
-
-				if (Array.isArray(child) &&
-					child[1] === 'declaration' &&
-					child[0].id === id) {
-					block.splice(i, 1);
-					return;
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.needless = function(name, props, pre, important, v, d, freeze) {
-			var hack = name[0];
-
-			if (hack === '*' || hack === '_' || hack === '$') {
-				name = name.substr(1);
-			} else if (hack === '/' && name[1] === '/') {
-				hack = '//';
-				name = name.substr(2);
-			} else {
-				hack = '';
-			}
-
-			var vendor = this.getVendorFromString(name);
-			var table = constants.nlTable[name.substr(vendor.length)];
-
-			if (table) {
-				for (var i = 0; i < table.length; i++) {
-					var ppre = this.buildPPre(pre, hack + vendor + table[i], v, d, freeze);
-					var property = props[ppre];
-
-					if (property) {
-						return (!important || property.important);
-					}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.rejoinRuleset = function(token, rule, container, i) {
-			var prev = i === 2 || container[i - 1][1] === 'unknown' ? null : container[i - 1];
-			var prevSelector = prev ? prev[2] : [];
-			var prevBlock = prev ? prev[3] : [];
-			var selector = token[2];
-			var block = token[3];
-
-			if (block.length === 2) {
-				return null;
-			}
-
-			if (prevSelector.length > 2 &&
-				prevBlock.length > 2 &&
-				token[0].pseudoSignature == prev[0].pseudoSignature) {
-				if (token[1] !== prev[1]) {
-					return;
-				}
-
-				// try to join by selectors
-				var prevHash = this.getHash(prevSelector);
-				var hash = this.getHash(selector);
-
-				if (this.equalHash(hash, prevHash)) {
-					prev[3] = prev[3].concat(token[3].splice(2));
-					return null;
-				}
-				if (this.okToJoinByProperties(token, prev)) {
-					// try to join by properties
-					var r = this.analyze(token, prev);
-					if (!r.ne1.length && !r.ne2.length) {
-						prev[2] = this.cleanSelector(prev[2].concat(token[2].splice(2)));
-						prev[2][0].s = translate(prev[2], true);
-						return null;
-					}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.okToJoinByProperties = function(token1, token2) {
-			var info1 = token1[0];
-			var info2 = token2[0];
-
-			// same frozen ruleset
-			if (info1.freezeID === info2.freezeID) {
-				return true;
-			}
-
-			// same pseudo-classes in selectors
-			if (info1.pseudoID === info2.pseudoID) {
-				return true;
-			}
-
-			// different frozen rulesets
-			if (info1.freeze && info2.freeze) {
-				var signature1 = this.pseudoSelectorSignature(token1[2], constants.allowedPClasses);
-				var signature2 = this.pseudoSelectorSignature(token2[2], constants.allowedPClasses);
-
-				return signature1 === signature2;
-			}
-
-			// is it frozen at all?
-			return !info1.freeze && !info2.freeze;
-		};
-
-		CSSOCompressor.prototype.containsOnlyAllowedPClasses = function(selector) {
-			for (var i = 2; i < selector.length; i++) {
-				var simpleSelector = selector[i];
-
-				for (var j = 2; j < simpleSelector.length; j++) {
-					if (simpleSelector[j][1] == 'pseudoc' ||
-						simpleSelector[j][1] == 'pseudoe') {
-						if (!constants.allowedPClasses[simpleSelector[j][2][2]]) {
-							return false;
-						}
-					}
-				}
-			}
-
-			return true;
-		};
-
-		CSSOCompressor.prototype.restructureRuleset = function(token, rule, parent, i) {
-			var prevToken = (i === 2 || parent[i - 1][1] === 'unknown') ? null : parent[i - 1];
-			var prevSelector = prevToken ? prevToken[2] : [];
-			var prevBlock = prevToken ? prevToken[3] : [];
-			var selector = token[2];
-			var block = token[3];
-
-			if (block.length < 3) {
-				return null;
-			}
-
-			if (prevSelector.length > 2 &&
-				prevBlock.length > 2 &&
-				token[0].pseudoSignature == prevToken[0].pseudoSignature) {
-				if (token[1] !== prevToken[1]) {
-					return;
-				}
-
-				// try to join by properties
-				var analyzeInfo = this.analyze(token, prevToken);
-
-				if (analyzeInfo.eq.length && (analyzeInfo.ne1.length || analyzeInfo.ne2.length)) {
-					if (analyzeInfo.ne1.length && !analyzeInfo.ne2.length) {
-						// prevToken in token
-						var simpleSelectorCount = selector.length - 2; // - type and info
-						var selectorStr = translate(selector, true);
-						var selectorLength = selectorStr.length +
-											 simpleSelectorCount - 1; // delims count
-						var blockLength = this.calcLength(analyzeInfo.eq) + // declarations length
-										  analyzeInfo.eq.length - 1; // decldelims length
-
-						if (selectorLength < blockLength) {
-							prevToken[2] = this.cleanSelector(prevSelector.concat(selector.slice(2)));
-							token[3] = [block[0], block[1]].concat(analyzeInfo.ne1);
-							return token;
-						}
-					} else if (analyzeInfo.ne2.length && !analyzeInfo.ne1.length) {
-						// token in prevToken
-						var simpleSelectorCount = prevSelector.length - 2; // - type and info
-						var selectorStr = translate(prevSelector, true);
-						// selectorLength = selector str - delims count
-						var selectorLength = selectorStr.length + simpleSelectorCount - 1;
-						var blockLength = this.calcLength(analyzeInfo.eq) + // declarations length
-										  analyzeInfo.eq.length - 1; // decldelims length
-
-						if (selectorLength < blockLength) {
-							token[2] = this.cleanSelector(prevSelector.concat(selector.slice(2)));
-							prevToken[3] = [prevBlock[0], prevBlock[1]].concat(analyzeInfo.ne2);
-							return token;
-						}
-					} else {
-						// extract equal block?
-						var newSelector = this.cleanSelector(prevSelector.concat(selector.slice(2)));
-						var newSelectorStr = translate(newSelector, true);
-						var newSelectorLength = newSelectorStr.length + // selector length
-												newSelector.length - 1 + // delims length
-												2; // braces length
-						var blockLength = this.calcLength(analyzeInfo.eq) + // declarations length
-										  analyzeInfo.eq.length - 1; // decldelims length
-
-						// ok, it's good enough to extract
-						if (blockLength >= newSelectorLength) {
-							var newRuleset = [
-								{},
-								'ruleset',
-								newSelector,
-								[{}, 'block'].concat(analyzeInfo.eq)
-							];
-
-							newSelector[0].s = newSelectorStr;
-							token[3] = [block[0], block[1]].concat(analyzeInfo.ne1);
-							prevToken[3] = [prevBlock[0], prevBlock[1]].concat(analyzeInfo.ne2);
-							parent.splice(i, 0, newRuleset);
-							return newRuleset;
-						}
-					}
-				}
-			}
-		};
-
-		CSSOCompressor.prototype.calcLength = function(tokens) {
-			var length = 0;
-
-			for (var i = 0; i < tokens.length; i++) {
-				length += tokens[i][0].s.length;
+			return {
+				type: 'StyleSheet',
+				rules: result
 			};
-
-			return length;
-		};
-
-		CSSOCompressor.prototype.cleanSelector = function(token) {
-			if (token.length === 2) {
-				return null;
-			}
-
-			var saw = {};
-
-			for (var i = 2; i < token.length; i++) {
-				var selector = token[i][0].s;
-				if (saw.hasOwnProperty(selector)) {
-					token.splice(i, 1);
-					i--;
-				} else {
-					saw[selector] = true;
-				}
-			}
-
-			return token;
-		};
-
-		CSSOCompressor.prototype.analyze = function(token1, token2) {
-			var result = {
-				eq: [],
-				ne1: [],
-				ne2: []
-			};
-
-			if (token1[1] !== token2[1]) {
-				return result;
-			}
-
-			var items1 = token1[3];
-			var items2 = token2[3];
-			var hash1 = this.getHash(items1);
-			var hash2 = this.getHash(items2);
-
-			for (var i = 2; i < items1.length; i++) {
-				var item = items1[i];
-
-				if (item[0].s in hash2) {
-					result.eq.push(item);
-				} else {
-					result.ne1.push(item);
-				}
-			}
-
-			for (var i = 2; i < items2.length; i++) {
-				var item = items2[i];
-
-				if (item[0].s in hash1 === false) {
-					result.ne2.push(item);
-				}
-			}
-
-			return result;
-		};
-
-		CSSOCompressor.prototype.equalHash = function(h0, h1) {
-			for (var key in h0) {
-				if (key in h1 === false) {
-					return false;
-				}
-			}
-
-			for (var key in h1) {
-				if (key in h0 === false) {
-					return false;
-				}
-			}
-
-			return true;
-		};
-
-		CSSOCompressor.prototype.getHash = function(tokens) {
-			var hash = {};
-
-			for (var i = 2; i < tokens.length; i++) {
-				hash[tokens[i][0].s] = true;
-			}
-
-			return hash;
-		};
-
-		CSSOCompressor.prototype.hashInHash = function(hash1, hash2) {
-			for (var key in hash1) {
-				if (key in hash2 === false) {
-					return false;
-				}
-			}
-
-			return true;
-		};
-
-		CSSOCompressor.prototype.delimSelectors = function(token) {
-			for (var i = token.length - 1; i > 2; i--) {
-				token.splice(i, 0, [{}, 'delim']);
-			}
-		};
-
-		CSSOCompressor.prototype.delimBlocks = function(token) {
-			for (var i = token.length - 1; i > 2; i--) {
-				token.splice(i, 0, [{}, 'decldelim']);
-			}
-		};
-
-		CSSOCompressor.prototype.copyObject = function(obj) {
-			var result = {};
-
-			for (var key in obj) {
-				result[key] = obj[key];
-			}
-
-			return result;
-		};
-
-		CSSOCompressor.prototype.copyArray = function(token) {
-			var result = token.slice();
-			var oldInfo = token[0];
-			var newInfo = {};
-
-			for (var key in oldInfo) {
-				newInfo[key] = oldInfo[key];
-			}
-
-			result[0] = newInfo;
-
-			for (var i = 2; i < token.length; i++) {
-				if (Array.isArray(token[i])) {
-					result[i] = this.copyArray(token[i]);
-				}
-			}
-
-			return result;
-		};
-
-		CSSOCompressor.prototype.pathUp = function(path) {
-			return path.substr(0, path.lastIndexOf('/'));
-		};
-
-		var exports = function(tree, options) {
-			return new CSSOCompressor().compress(tree, options || {});
 		};
 
 		return exports;
 	};
 	//#endregion
 	
-	//#region URL: /compressor/color
-	modules['/compressor/color'] = function () {
-		var packNumber = require('/compressor/utils').packNumber;
+	//#region URL: /compressor/ast/gonzalesToInternal
+	modules['/compressor/ast/gonzalesToInternal'] = function () {
+		var StyleSheet = function(token) {
+			return {
+				type: 'StyleSheet',
+				info: token[0],
+				rules: token.filter(function(item, idx) {
+					return idx >= 2 &&
+						   item[1] !== 's' &&
+						   item[1] !== 'comment' &&
+						   item[1] !== 'unknown';
+				}).map(convertToInternal)
+			};
+		};
+
+		function skipSC(token, offset) {
+			for (; offset < token.length; offset++) {
+				var type = token[offset][1];
+				if (type !== 's' && type !== 'comment') {
+					break;
+				}
+			}
+
+			return offset;
+		}
+
+		function trimSC(token, start, end) {
+			start = skipSC(token, start);
+			for (; end >= start; end--) {
+				var type = token[end][1];
+				if (type !== 's' && type !== 'comment') {
+					break;
+				}
+			}
+
+			if (end < start) {
+				return [];
+			}
+
+			return token
+				.slice(start, end + 1)
+				.map(convertToInternal)
+				.filter(Boolean);
+		}
+
+		function argumentList(token) {
+			var result = [];
+			var args = token;
+			var start = 2;
+
+			for (var i = start; i < args.length; i++) {
+				if (args[i][1] === 'operator' && args[i][2] === ',') {
+					result.push({
+						type: 'Argument',
+						info: {},
+						sequence: trimSC(args, start, i - 1)
+					});
+					start = i + 1;
+				}
+			}
+
+			var lastArg = trimSC(args, start, args.length - 1);
+			if (lastArg.length || result.length) {
+				result.push({
+					type: 'Argument',
+					info: {},
+					sequence: lastArg
+				});
+			}
+
+			return result;
+		}
+
+		var types = {
+			atkeyword: false,
+			atruleb: function(token) {
+				return {
+					type: 'Atrule',
+					info: token[0],
+					name: token[2][2][2],
+					expression: {
+						type: 'AtruleExpression',
+						info: {},
+						sequence: trimSC(token, 3, token.length - 2)
+					},
+					block: convertToInternal(token[token.length - 1])
+				};
+			},
+			atruler: function(token) {
+				return {
+					type: 'Atrule',
+					info: token[0],
+					name: token[2][2][2],
+					expression: convertToInternal(token[3]),
+					block: convertToInternal(token[4])
+				};
+			},
+			atrulerq: function(token) {
+				return {
+					type: 'AtruleExpression',
+					info: token[0],
+					sequence: trimSC(token, 2, token.length - 1)
+				};
+			},
+			atrulers: StyleSheet,
+			atrules: function(token) {
+				return {
+					type: 'Atrule',
+					info: token[0],
+					name: token[2][2][2],
+					expression: {
+						type: 'AtruleExpression',
+						info: {},
+						sequence: trimSC(token, 3, token.length - 1)
+					},
+					block: null
+				};
+			},
+			attrib: function(token) {
+				var offset = 2;
+
+				offset = skipSC(token, 2);
+				var name = convertToInternal(token[offset]);
+
+				if (token[offset + 1] && token[offset + 1][1] === 'namespace') {
+					name.name += '|' + token[offset + 2][2];
+					offset += 2;
+				}
+
+				offset = skipSC(token, offset + 1);
+				var operator = token[offset] ? token[offset][2] : null;
+
+				offset = skipSC(token, offset + 1);
+				var value = convertToInternal(token[offset]);
+
+				return {
+					type: 'Attribute',
+					info: token[0],
+					name: name,
+					operator: operator,
+					value: value
+				};
+			},
+			attrselector: false,
+			block: function(token) {
+				return {
+					type: 'Block',
+					info: token[0],
+					declarations: token.filter(function(item, idx) {
+						return idx >= 2 && (item[1] === 'declaration' || item[1] === 'filter');
+					}).map(convertToInternal)
+				};
+			},
+			braces: function(token) {
+				return {
+					type: 'Braces',
+					info: token[0],
+					open: token[2],
+					close: token[3],
+					sequence: trimSC(token, 4, token.length - 1)
+				};
+			},
+			clazz: function(token) {
+				return {
+					type: 'Class',
+					info: token[0],
+					name: token[2][2]
+				};
+			},
+			combinator: function(token) {
+				return {
+					type: 'Combinator',
+					info: token[0],
+					name: token[2]
+				};
+			},
+			comment: false,
+			declaration: function(token) {
+				return {
+					type: 'Declaration',
+					info: token[0],
+					property: convertToInternal(token[2]),
+					value: convertToInternal(token[3])
+				};
+			},
+			decldelim: false, // redundant
+			delim: false,     // redundant
+			dimension: function(token) {
+				return {
+					type: 'Dimension',
+					info: token[0],
+					value: token[2][2],
+					unit: token[3][2]
+				};
+			},
+			filter: function(token) {
+				return {
+					type: 'Declaration',
+					info: token[0],
+					property: convertToInternal(token[2]),
+					value: convertToInternal(token[3])
+				};
+			},
+			filterv: function(token) {
+				return {
+					type: 'Value',
+					info: token[0],
+					sequence: trimSC(token, 2, token.length - 1)
+				};
+			},
+			functionExpression: function(token) {
+				return {
+					type: 'Function',
+					name: 'expression',
+					arguments: [{
+						type: 'Argument',
+						sequence: [{
+							type: 'Raw',
+							value: token[2]
+						}]
+					}]
+				};
+			},
+			funktion: function(token) {
+				return {
+					type: 'Function',
+					info: token[0],
+					name: token[2][2],
+					arguments: argumentList(token[3])
+				};
+			},
+			functionBody: false,  // redundant
+			ident: function(token) {
+				return {
+					type: 'Identifier',
+					info: token[0],
+					name: token[2]
+				};
+			},
+			important: function(token) {
+				return {
+					type: 'Important',
+					info: token[0]
+				};
+			},
+			namespace: false,
+			nth: function(token) {
+				return {
+					type: 'Nth',
+					value: token[2]
+				};
+			},
+			nthselector: function(token) {
+				return {
+					type: 'FunctionalPseudo',
+					info: token[0],
+					name: token[2][2],
+					arguments: [{
+						type: 'Argument',
+						sequence: token.filter(function(item, idx) {
+							return idx >= 3 && item[1] !== 's' && item[1] !== 'comment';
+						}).map(convertToInternal)
+					}]
+				};
+			},
+			number: function(token) {
+				return {
+					type: 'Number',
+					info: token[0],
+					value: token[2]
+				};
+			},
+			operator: function(token) {
+				return {
+					type: 'Operator',
+					info: token[0],
+					value: token[2]
+				};
+			},
+			percentage: function(token) {
+				return {
+					type: 'Percentage',
+					info: token[0],
+					value: token[2][2]
+				};
+			},
+			progid: function(token) {
+				return {
+					type: 'Progid',
+					info: token[0],
+					value: trimSC(token, 2, token.length - 1)[0]
+				};
+			},
+			property: function(token) {
+				return {
+					type: 'Property',
+					info: token[0],
+					name: token[2][2]
+				};
+			},
+			pseudoc: function(token) {
+				var value = token[2];
+
+				if (value[1] === 'funktion') {
+					var name = value[2][2];
+
+					if (name === 'not') {
+						return {
+							type: 'Negation',
+							sequence: [
+								types.simpleselector(value[3][2])
+							]
+						};
+					}
+
+					return {
+						type: 'FunctionalPseudo',
+						info: value[0],
+						name: name,
+						arguments: argumentList(value[3])
+					};
+				}
+
+				return {
+					type: 'PseudoClass',
+					info: token[0],
+					name: value[2]
+				};
+			},
+			pseudoe: function(token) {
+				var value = token[2];
+
+				return {
+					type: 'PseudoElement',
+					info: token[0],
+					name: value[2]
+				};
+			},
+			raw: function(token) {
+				return {
+					type: 'Raw',
+					info: token[0],
+					value: token[2]
+				};
+			},
+			ruleset: function(token) {
+				var selector = convertToInternal(token[2]);
+				var block;
+
+				if (token.length === 4) {
+					block = convertToInternal(token[3]);
+				} else {
+					block = selector;
+					selector = null;
+				}
+
+				return {
+					type: 'Ruleset',
+					info: token[0],
+					selector: selector,
+					block: block
+				};
+			},
+			s: function(token) {
+				return {
+					type: 'Space',
+					info: token[0]
+				};
+			},
+			selector: function(token) {
+				var last = 'delim';
+				var badSelector = false;
+				var selectors = token.filter(function(item, idx) {
+					var type = item[1];
+
+					if (type === 'simpleselector' || type === 'delim') {
+						if (last === type) {
+							badSelector = true;
+						}
+						last = type;
+					}
+
+					return idx >= 2 && type === 'simpleselector';
+				}).map(convertToInternal);
+
+				// check selector is valid since gonzales parses selectors
+				// like "foo," or "foo,,bar" as correct;
+				// w/o this check broken selector will be repaired and broken ruleset apply;
+				// return null in this case so compressor could remove ruleset with no selector
+				if (badSelector ||
+					last === 'delim' ||
+					selectors.length === 0 ||
+					selectors[selectors.length - 1].sequence.length === 0) {
+					return null;
+				}
+
+				return {
+					type: 'Selector',
+					info: token[0],
+					selectors: selectors
+				};
+			},
+			shash: function(token) {
+				return {
+					type: 'Id',
+					info: token[0],
+					name: token[2]
+				};
+			},
+			simpleselector: function(token) {
+				var sequence = [];
+				for (var i = skipSC(token, 2), needCombinator = false; i < token.length; i++) {
+					var item = token[i];
+					switch (item[1]) {
+						case 'combinator':
+							needCombinator = false;
+							sequence.push(item);
+							break;
+
+						case 's':
+							if (sequence[sequence.length - 1][1] !== 'combinator') {
+								needCombinator = item;
+							}
+							break;
+
+						case 'comment':
+							break;
+
+						case 'namespace':
+							// ident namespace ident -> ident '|' ident
+							sequence[sequence.length - 1] = [
+								{},
+								'ident',
+								sequence[sequence.length - 1][2] + '|' + token[i + 1][2]
+							];
+							i++;
+							break;
+
+						default:
+							if (needCombinator) {
+								sequence.push([needCombinator[0], 'combinator', ' ']);
+							}
+							needCombinator = false;
+							sequence.push(item);
+					}
+				}
+
+				return {
+					type: 'SimpleSelector',
+					info: token[0],
+					sequence: sequence.map(convertToInternal)
+				};
+			},
+			string: function(token) {
+				return {
+					type: 'String',
+					info: token[0],
+					value: token[2]
+				};
+			},
+			stylesheet: StyleSheet,
+			unary: function(token) {
+				return {
+					type: 'Operator',
+					info: token[0],
+					value: token[2]
+				};
+			},
+			unknown: false,
+			uri: function(token) {
+				return {
+					type: 'Url',
+					info: token[0],
+					value: trimSC(token, 2, token.length - 1)[0]
+				};
+			},
+			value: function(token) {
+				return {
+					type: 'Value',
+					info: token[0],
+					sequence: trimSC(token, 2, token.length - 1)
+				};
+			},
+			vhash: function(token) {
+				return {
+					type: 'Hash',
+					info: token[0],
+					value: token[2]
+				};
+			}
+		};
+
+		function convertToInternal(token, parent, stack) {
+			if (token) {
+				var type = token[1];
+
+				if (types.hasOwnProperty(type) && typeof types[type] === 'function') {
+					return types[type](token);
+				}
+			}
+
+			return null;
+		}
+		
+		return convertToInternal;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/ast/internalToGonzales
+	modules['/compressor/ast/internalToGonzales'] = function () {
+		function eachDelim(node, type, itemsProperty, delimeter) {
+			var result = [node.info, type];
+			var items = node[itemsProperty];
+
+			for (var i = 0; i < items.length; i++) {
+				result.push(toGonzales(items[i]));
+
+				if (i !== items.length - 1) {
+					result.push(delimeter.slice());
+				}
+			}
+
+			return result;
+		}
+
+		function buildArguments(body, args) {
+			for (var i = 0; i < args.length; i++) {
+				body.push.apply(body, args[i].sequence.map(toGonzales));
+				if (i !== args.length - 1) {
+					body.push([{}, 'operator', ',']);
+				}
+			}
+		}
+
+		function toGonzales(node) {
+			switch (node.type) {
+				case 'StyleSheet':
+					return [
+						node.info || {},
+						'stylesheet'
+					].concat(node.rules.map(toGonzales).filter(Boolean));
+
+				case 'Atrule':
+					var type = 'atruler';
+
+					if (!node.block) {
+						type = 'atrules';
+					} else {
+						if (node.block.type === 'Block') {
+							type = 'atruleb';
+						}
+					}
+
+					var result = [
+						node.info,
+						type,
+						[{}, 'atkeyword', [{}, 'ident', node.name]]
+					];
+
+					if (node.expression && node.expression.sequence.length) {
+						if (type === 'atruler') {
+							result.push([
+								node.expression.info,
+								'atrulerq',
+								[{}, 's', ' ']
+							].concat(node.expression.sequence.map(toGonzales)));
+						} else {
+							result.push([{}, 's', ' ']);
+							result = result.concat(node.expression.sequence.map(toGonzales));
+						}
+					} else {
+						if (type === 'atruler') {
+							result.push([
+								{},
+								'atrulerq'
+							]);
+						}
+					}
+
+					if (node.block) {
+						if (type === 'atruler') {
+							result.push([
+								node.block.info,
+								'atrulers'
+							].concat(node.block.rules.map(toGonzales)));
+						} else {
+							result.push(toGonzales(node.block));
+						}
+					}
+
+					return result;
+
+				case 'Ruleset':
+					return node.selector
+						? [
+							node.info,
+							'ruleset',
+							toGonzales(node.selector),
+							toGonzales(node.block)
+						]
+						: [
+							node.info,
+							'ruleset',
+							toGonzales(node.block)
+						];
+
+				case 'Selector':
+					return eachDelim(node, 'selector', 'selectors', [{}, 'delim']);
+
+				case 'SimpleSelector':
+					var result = [
+						node.info,
+						'simpleselector'
+					];
+
+					node.sequence.forEach(function(item) {
+						item = toGonzales(item);
+						if (item[1] === 'ident' && /\|/.test(item[2])) {
+							result.push(
+								[{}, 'ident', item[2].split('|')[0]],
+								[{}, 'namespace'],
+								[{}, 'ident', item[2].split('|')[1]]
+							);
+						} else {
+							result.push(item);
+						}
+					});
+
+					return result;
+
+				case 'Negation':
+					var body = eachDelim(node, 'functionBody', 'sequence', [{}, 'delim']);
+
+					return [
+						node.info,
+						'pseudoc',
+						[
+							{},
+							'funktion',
+							[{}, 'ident', 'not'],
+							body
+						]
+					];
+
+				case 'Attribute':
+					var result = [
+						node.info,
+						'attrib'
+					];
+
+					if (/\|/.test(node.name.name)) {
+						result = result.concat([
+							[{}, 'ident', node.name.name.split('|')[0]],
+							[{}, 'namespace'],
+							[{}, 'ident', node.name.name.split('|')[1]]
+						]);
+					} else {
+						result.push([{}, 'ident', node.name.name]);
+					}
+
+					if (node.operator) {
+						result.push([{}, 'attrselector', node.operator]);
+					}
+					if (node.value) {
+						result.push(toGonzales(node.value));
+					}
+					return result;
+
+				case 'FunctionalPseudo':
+					if (/^nth-/.test(node.name)) {
+						var result = [
+							node.info,
+							'nthselector',
+							[{}, 'ident', node.name]
+						];
+
+						buildArguments(result, node.arguments);
+
+						return result;
+					} else {
+						var body = [
+							{},
+							'functionBody'
+						];
+
+						buildArguments(body, node.arguments);
+
+						return [
+							node.info,
+							'pseudoc',
+							[
+								{},
+								'funktion',
+								[{}, 'ident', node.name],
+								body
+							]
+						];
+					}
+
+				case 'Function':
+					var body = [
+						{},
+						'functionBody'
+					];
+
+					buildArguments(body, node.arguments);
+
+					if (node.name === 'expression') {
+						return [{}, 'functionExpression', body[2][2]];
+					}
+
+					return [
+						node.info,
+						'funktion',
+						[{}, 'ident', node.name],
+						body
+					];
+
+				case 'Argument':
+					return;
+
+				case 'Block':
+					return eachDelim(node, 'block', 'declarations', [{}, 'decldelim']);
+
+				case 'Declaration':
+					return [
+						node.info,
+						node.value.sequence.length &&
+						node.value.sequence[0].type === 'Progid' &&
+						/(-[a-z]+-|[\*-_])?filter$/.test(node.property.name)
+							? 'filter'
+							: 'declaration',
+						toGonzales(node.property),
+						toGonzales(node.value)
+					];
+
+				case 'Braces':
+					return [
+						node.info,
+						'braces',
+						node.open,
+						node.close
+					].concat(node.sequence.map(toGonzales));
+
+				// case 'AtruleExpression':
+
+				case 'Value':
+					return [
+						node.info,
+						node.sequence.length &&
+						node.sequence[0].type === 'Progid'
+							? 'filterv'
+							: 'value'
+					].concat(node.sequence.map(toGonzales));
+
+				case 'Url':
+					return [node.info, 'uri', toGonzales(node.value)];
+
+				case 'Progid':
+					return [node.info, 'progid', toGonzales(node.value)];
+
+				case 'Property':
+					return [node.info, 'property', [{}, 'ident', node.name]];
+
+				case 'Combinator':
+					return node.name === ' '
+						? [node.info, 's', node.name]
+						: [node.info, 'combinator', node.name];
+
+				case 'Identifier':
+					return [node.info, 'ident', node.name];
+
+				case 'PseudoElement':
+					return [node.info, 'pseudoe', [{}, 'ident', node.name]];
+
+				case 'PseudoClass':
+					return [node.info, 'pseudoc', [{}, 'ident', node.name]];
+
+				case 'Class':
+					return [node.info, 'clazz', [{}, 'ident', node.name]];
+
+				case 'Id':
+					return [node.info, 'shash', node.name];
+
+				case 'Nth':
+					return [node.info, 'nth', node.value];
+
+				case 'Hash':
+					return [node.info, 'vhash', node.value];
+
+				case 'Number':
+					return [node.info, 'number', node.value];
+
+				case 'Dimension':
+					return [
+						node.info,
+						'dimension',
+						[{}, 'number', node.value],
+						[{}, 'ident', node.unit]
+					];
+
+				case 'Operator':
+					return [
+						node.info,
+						node.value === '+' || node.value === '-' ? 'unary' : 'operator',
+						node.value
+					];
+
+				case 'Raw':
+					return [node.info, node.value && /\S/.test(node.value) ? 'raw' : 's', node.value];
+
+				case 'String':
+					return [node.info, 'string', node.value];
+
+				case 'Important':
+					return [node.info, 'important'];
+
+				case 'Percentage':
+					return [node.info, 'percentage', [{}, 'number', node.value]];
+
+				case 'Space':
+					return [node.info, 's', ' '];
+
+				case 'Comment':
+					return [node.info, 'comment', node.value];
+
+				default:
+					console.warn('Unknown node type:', node);
+			}
+		}
+
+		var exports = function(node) {
+			return node ? toGonzales(node) : [];
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/ast/translate
+	modules['/compressor/ast/translate'] = function () {
+		function each(array, buffer) {
+			for (var i = 0; i < array.length; i++) {
+				translate(array[i], buffer, array, i);
+			}
+		}
+
+		function eachDelim(array, buffer, delimeter) {
+			for (var i = 0; i < array.length; i++) {
+				translate(array[i], buffer, array, i);
+
+				if (i !== array.length - 1) {
+					buffer.push(delimeter);
+				}
+			}
+		}
+
+		function translate(node, buffer, array, i) {
+			switch (node.type) {
+				case 'Atrule':
+					buffer.push('@', node.name);
+					if (node.expression && node.expression.sequence.length) {
+						buffer.push(' ');
+						translate(node.expression, buffer);
+					}
+					if (node.block) {
+						buffer.push('{');
+						translate(node.block, buffer);
+						buffer.push('}');
+					} else {
+						buffer.push(';');
+					}
+					break;
+
+				case 'Declaration':
+					translate(node.property, buffer);
+					buffer.push(':');
+					translate(node.value, buffer);
+					break;
+
+				case 'Attribute':
+					buffer.push('[');
+					translate(node.name, buffer);
+					if (node.operator) {
+						buffer.push(node.operator);
+					}
+					if (node.value) {
+						translate(node.value, buffer);
+					}
+					buffer.push(']');
+					break;
+
+				case 'FunctionalPseudo':
+					buffer.push(':', node.name, '(');
+					eachDelim(node.arguments, buffer, ',');
+					buffer.push(')');
+					break;
+
+				case 'Function':
+					buffer.push(node.name, '(');
+					eachDelim(node.arguments, buffer, ',');
+					buffer.push(')');
+					break;
+
+				case 'Block':
+					eachDelim(node.declarations, buffer, ';');
+					break;
+
+				case 'Ruleset':
+					if (node.selector) {
+						translate(node.selector, buffer);
+					}
+					buffer.push('{');
+					translate(node.block, buffer);
+					buffer.push('}');
+					break;
+
+				case 'Selector':
+					eachDelim(node.selectors, buffer, ',');
+					break;
+
+				case 'Negation':
+					buffer.push(':not(');
+					eachDelim(node.sequence, buffer, ',');
+					buffer.push(')');
+					break;
+
+				case 'Braces':
+					buffer.push(node.open);
+					each(node.sequence, buffer);
+					buffer.push(node.close);
+					break;
+
+				case 'Argument':
+				case 'AtruleExpression':
+				case 'Value':
+				case 'SimpleSelector':
+					each(node.sequence, buffer);
+					break;
+
+				case 'StyleSheet':
+					each(node.rules, buffer);
+					break;
+
+				case 'Url':
+					buffer.push('url(');
+					translate(node.value, buffer);
+					buffer.push(')');
+					break;
+
+				case 'Progid':
+					translate(node.value, buffer);
+					break;
+
+				case 'Property':
+				case 'Combinator':
+				case 'Identifier':
+					buffer.push(node.name);
+					break;
+
+				case 'PseudoClass':
+					buffer.push(':', node.name);
+					break;
+
+				case 'PseudoElement':
+					buffer.push('::', node.name);
+					break;
+
+				case 'Class':
+					buffer.push('.', node.name);
+					break;
+
+				case 'Dimension':
+					buffer.push(node.value, node.unit);
+					break;
+
+				case 'Id':
+					buffer.push('#', node.name);
+					break;
+				case 'Hash':
+					buffer.push('#', node.value);
+					break;
+
+				case 'Nth':
+				case 'Number':
+				case 'String':
+				case 'Operator':
+				case 'Raw':
+					buffer.push(node.value);
+					break;
+
+				case 'Important': // remove
+					buffer.push('!important');
+					break;
+
+				case 'Percentage':
+					buffer.push(node.value, '%');
+					break;
+
+				case 'Space':
+					buffer.push(' ');
+					break;
+
+				case 'Comment':
+					buffer.push('/*', node.value, '*/');
+					break;
+
+				default:
+					console.warn('Unknown node type:', node);
+			}
+		}
+
+		var exports = function(node) {
+			var buffer = [];
+
+			translate(node, buffer);
+
+			return buffer.join('');
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/ast/walk
+	modules['/compressor/ast/walk'] = function () {
+		function each(array, walker, parent) {
+			for (var i = 0; i < array.length; i++) {
+				var item = array[i];
+				var result = walker.call(this, item, parent, array, i);
+
+				if (result === null) {
+					array.splice(i, 1);
+					i--;
+				} else if (result && result !== item) {
+					array.splice(i, 1, result);
+				}
+			}
+		}
+
+		function eachRight(array, walker, parent) {
+			for (var i = array.length - 1; i >= 0; i--) {
+				var item = array[i];
+				var result = walker.call(this, item, parent, array, i);
+
+				if (result === null) {
+					array.splice(i, 1);
+				} else if (result && result !== item) {
+					array.splice(i, 1, result);
+				}
+			}
+		}
+
+		function walkRules(node, parent, array, index) {
+			switch (node.type) {
+				case 'StyleSheet':
+					each.call(this, node.rules, walkRules, node);
+					break;
+
+				case 'Atrule':
+					if (node.block) {
+						walkRules.call(this, node.block);
+					}
+					return this.fn(node, parent, array, index);
+
+				case 'Ruleset':
+					return this.fn(node, parent, array, index);
+			}
+		}
+
+		function walkRulesRight(node, parent, array, index) {
+			switch (node.type) {
+				case 'StyleSheet':
+					eachRight.call(this, node.rules, walkRulesRight, node);
+					break;
+
+				case 'Atrule':
+					if (node.block) {
+						walkRulesRight.call(this, node.block);
+					}
+					return this.fn(node, parent, array, index);
+
+				case 'Ruleset':
+					return this.fn(node, parent, array, index);
+			}
+		}
+
+		function walkAll(node, parent, array, index) {
+			this.stack.push(node);
+
+			switch (node.type) {
+				case 'Atrule':
+					if (node.expression) {
+						walkAll.call(this, node.expression, node);
+					}
+					if (node.block) {
+						walkAll.call(this, node.block, node);
+					}
+					break;
+
+				case 'Declaration':
+					walkAll.call(this, node.property, node);
+					walkAll.call(this, node.value, node);
+					break;
+
+				case 'Attribute':
+					walkAll.call(this, node.name, node);
+					if (node.value) {
+						walkAll.call(this, node.value, node);
+					}
+					break;
+
+				case 'FunctionalPseudo':
+				case 'Function':
+					each.call(this, node.arguments, walkAll, node);
+					break;
+
+				case 'Block':
+					each.call(this, node.declarations, walkAll, node);
+					break;
+
+				case 'Ruleset':
+					if (node.selector) {
+						walkAll.call(this, node.selector, node);
+					}
+					walkAll.call(this, node.block, node);
+					break;
+
+				case 'Selector':
+					each.call(this, node.selectors, walkAll, node);
+					break;
+
+				case 'Argument':
+				case 'AtruleExpression':
+				case 'Braces':
+				case 'Negation':
+				case 'Value':
+				case 'SimpleSelector':
+					each.call(this, node.sequence, walkAll, node);
+					break;
+
+				case 'StyleSheet':
+					each.call(this, node.rules, walkAll, node);
+					break;
+
+				case 'Url':
+				case 'Progid':
+					walkAll.call(this, node.value, node);
+					break;
+
+				case 'Property':
+				case 'Combinator':
+				case 'Dimension':
+				case 'Hash':
+				case 'Identifier':
+				case 'Important': // remove
+				case 'Nth':
+				case 'Class':
+				case 'Id':
+				case 'Percentage':
+				case 'PseudoClass':
+				case 'PseudoElement':
+				case 'Space':
+				case 'Number':
+				case 'String':
+				case 'Operator':
+				case 'Raw':
+					break;
+			}
+
+			this.stack.pop(node);
+
+			return this.fn(node, parent, array, index);
+		}
+
+		var exports = {
+			all: function(root, fn) {
+				walkAll.call({
+					fn: fn,
+					root: root,
+					stack: []
+				}, root);
+			},
+			rules: function(root, fn) {
+				walkRules.call({
+					fn: fn,
+					root: root,
+					stack: []
+				}, root);
+			},
+			rulesRight: function(root, fn) {
+				walkRulesRight.call({
+					fn: fn,
+					root: root,
+					stack: []
+				}, root);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /compressor/clean
+	modules['/compressor/clean'] = function () {
+		var handlers = {
+			Space: require('/compressor/clean/Space'),
+			Atrule: require('/compressor/clean/Atrule'),
+			Ruleset: require('/compressor/clean/Ruleset'),
+			Declaration: require('/compressor/clean/Declaration')
+		};
+
+		var exports = function(node, parent, array, index) {
+			if (handlers.hasOwnProperty(node.type)) {
+				return handlers[node.type].call(this, node, parent, array, index);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /compressor/clean/Atrule
+	modules['/compressor/clean/Atrule'] = function () {
+		var exports = function cleanAtrule(node, parent, array, i) {
+			if (node.block) {
+				// otherwise removed at-rule don't prevent @import for removal
+				this.root.firstAtrulesAllowed = false;
+
+				if (node.block.type === 'Block' && !node.block.declarations.length) {
+					return null;
+				}
+
+				if (node.block.type === 'StyleSheet' && !node.block.rules.length) {
+					return null;
+				}
+			}
+
+			switch (node.name) {
+				case 'charset':
+					if (!node.expression.sequence.length) {
+						return null;
+					}
+
+					// if there is any rule before @charset -> remove it
+					if (i) {
+						return null;
+					}
+
+					break;
+
+				case 'import':
+					if (!this.root.firstAtrulesAllowed) {
+						return null;
+					}
+
+					// if there are some rules that not an @import or @charset before @import
+					// remove it
+					for (i = i - 1; i >= 0; i--) {
+						var rule = array[i];
+						if (rule.type === 'Atrule') {
+							if (rule.name === 'import' || rule.name === 'charset') {
+								continue;
+							}
+						}
+
+						this.root.firstAtrulesAllowed = false;
+						return null;
+					}
+
+					break;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/clean/Declaration
+	modules['/compressor/clean/Declaration'] = function () {
+		var exports = function cleanDeclartion(node) {
+			if (!node.value.sequence.length) {
+				return null;
+			}
+		};
+		
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/clean/Ruleset
+	modules['/compressor/clean/Ruleset'] = function () {
+		var exports = function cleanRuleset(node) {
+			if (!node.selector || !node.block.declarations.length) {
+				return null;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/clean/Space
+	modules['/compressor/clean/Space'] = function () {
+		function canCleanWhitespace(node, left) {
+			switch (node.type) {
+				case 'Important':
+				case 'Nth':
+					return true;
+
+				case 'Operator':
+					return node.value !== '+' && node.value !== '-';
+			}
+
+			if (left) {
+				switch (node.type) {
+					case 'Function':
+					case 'Braces':
+					case 'Url':
+						return true;
+				}
+			}
+		}
+
+		var exports = function cleanWhitespace(node, parent, array, index) {
+			var prev = array[index - 1];
+			var next = array[index + 1];
+			var prevType = prev.type;
+			var nextType = next.type;
+
+			// See https://github.com/css/csso/issues/16
+			if (prevType === 'Url' && nextType) {
+				return;
+			}
+
+			// See https://github.com/css/csso/issues/165
+			if (prevType === 'Braces' && nextType === 'Identifier') {
+				return;
+			}
+
+			// See https://github.com/css/csso/issues/134
+			if (prevType === 'Function' && (nextType === 'Function' || nextType === 'Hash')) {
+				return;
+			}
+
+			// See https://github.com/css/csso/issues/228
+			if (prevType === 'Braces' && nextType === 'Operator' && (next.value === '+' || next.value === '-')) {
+				return;
+			}
+
+			if ((prevType === 'Identifier' && prev.name === '*') ||
+				(nextType === 'Identifier' && next.name === '*')) {
+				return null;
+			}
+
+			if (canCleanWhitespace(next, false) ||
+				canCleanWhitespace(prev, true)) {
+				return null;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress
+	modules['/compressor/compress'] = function () {
+		var handlers = {
+			Atrule: require('/compressor/compress/Atrule'),
+			Attribute: require('/compressor/compress/Attribute'),
+			Value: require('/compressor/compress/Value'),
+			Dimension: require('/compressor/compress/Dimension'),
+			Percentage: require('/compressor/compress/Number'),
+			Number: require('/compressor/compress/Number'),
+			String: require('/compressor/compress/String'),
+			Hash: require('/compressor/compress/color').compressHex,
+			Identifier: require('/compressor/compress/color').compressIdent,
+			Function: require('/compressor/compress/color').compressFunction
+		};
+
+		var exports = function(node, parent, array, index) {
+			if (handlers.hasOwnProperty(node.type)) {
+				return handlers[node.type].call(this, node, parent, array, index);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/atrule/keyframes
+	modules['/compressor/compress/atrule/keyframes'] = function () {
+		var exports = function(node) {
+			node.block.rules.forEach(function(ruleset) {
+				ruleset.selector.selectors.forEach(function(simpleselector) {
+					var array = simpleselector.sequence;
+
+					for (var i = 0; i < array.length; i++) {
+						var part = array[i];
+						if (part.type === 'Percentage' && part.value === '100') {
+							array[i] = {
+								type: 'Identifier',
+								info: array[i].info,
+								name: 'to'
+							};
+						} else if (part.type === 'Identifier' && part.name === 'from') {
+							array[i] = {
+								type: 'Percentage',
+								info: array[i].info,
+								value: '0'
+							};
+						}
+					}
+				});
+			});
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/Atrule
+	modules['/compressor/compress/Atrule'] = function () {
+		var compressKeyframes = require('/compressor/compress/atrule/keyframes');
+
+		var exports = function(node, parent, array, index) {
+			// compress @keyframe selectors
+			if (/^(-[a-z\d]+-)?keyframes$/.test(node.name)) {
+				compressKeyframes(node, parent, array, index);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/Attribute
+	modules['/compressor/compress/Attribute'] = function () {
+		// Can unquote attribute detection
+		// Adopted implementation of Mathias Bynens
+		// https://github.com/mathiasbynens/mothereff.in/blob/master/unquoted-attributes/eff.js
+		var escapesRx = /\\([0-9A-Fa-f]{1,6})[ \t\n\f\r]?|\\./g;
+		var blockUnquoteRx = /^(-?\d|--)|[\u0000-\u002c\u002e\u002f\u003A-\u0040\u005B-\u005E\u0060\u007B-\u009f]/;
+
+		function canUnquote(value) {
+			if (value === '' || value === '-') {
+				return;
+			}
+
+			// Escapes are valid, so replace them with a valid non-empty string
+			value = value.replace(escapesRx, 'a');
+
+			return !blockUnquoteRx.test(value);
+		}
+
+		var exports = function(node) {
+			var attrValue = node.value;
+
+			if (!attrValue || attrValue.type !== 'String') {
+				return;
+			}
+
+			var unquotedValue = attrValue.value.replace(/^(.)(.*)\1$/, '$2');
+			if (canUnquote(unquotedValue)) {
+				node.value = {
+					type: 'Identifier',
+					info: attrValue.info,
+					name: unquotedValue
+				};
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/color
+	modules['/compressor/compress/color'] = function () {
+		var packNumber = require('/compressor/compress/Number').pack;
 
 		// http://www.w3.org/TR/css3-color/#svg-color
 		var NAME_TO_HEX = {
@@ -1631,43 +1927,40 @@ var CSSO = (function(){
 			return value.length === 1 ? '0' + value : value;
 		}
 
-		function parseFunctionArgs(body, count, rgb) {
+		function parseFunctionArgs(functionArgs, count, rgb) {
 			var args = [];
 
-			for (var i = 2, unary = false; i < body.length; i++) {
-				var child = body[i];
-				var type = child[1];
+			for (var i = 0; i < functionArgs.length; i++) {
+				// each arguments should just one node
+				var items = functionArgs[i].sequence;
+				var wasValue = false;
 
-				switch (type) {
-					case 'number':
-					case 'percentage':
-						// fit value to 0..255 range
-						args.push({
-							type: type,
-							unary: unary,
-							value: Number(type === 'number' ? body[i][2] : body[i][2][2])
-						});
-						break;
+				for (var j = 0; j < items.length; j++) {
+					var value = items[j];
+					var type = value.type;
+					switch (type) {
+						case 'Number':
+						case 'Percentage':
+							if (wasValue) {
+								return;
+							}
 
-					case 'unary':
-						if (child[2] === '+' || child[2] === '-') {
-							unary = child[2];
+							wasValue = true;
+							args.push({
+								type: type,
+								value: Number(value.value)
+							});
 							break;
-						}
-						// only + and - allowed
-						return;
-
-					case 'operator':
-						if (child[2] === ',') {
-							unary = false;
+						case 'Operator':
+							if (wasValue || value.value !== '+') {
+								return;
+							}
 							break;
-						}
-						// only comma operator allowed
-						return;
 
-					default:
-						// something we couldn't understand
-						return;
+						default:
+							// something we couldn't understand
+							return;
+					}
 				}
 			}
 
@@ -1678,13 +1971,13 @@ var CSSO = (function(){
 			}
 
 			if (args.length === 4) {
-				if (args[3].type !== 'number') {
+				if (args[3].type !== 'Number') {
 					// 4th argument should be a number
 					// TODO: remove those tokens
 					return;
 				}
 
-				args[3].type = 'alpha';
+				args[3].type = 'Alpha';
 			}
 
 			if (rgb) {
@@ -1694,26 +1987,28 @@ var CSSO = (function(){
 					return;
 				}
 			} else {
-				if (args[0].type !== 'number' ||
-					args[1].type !== 'percentage' ||
-					args[2].type !== 'percentage') {
+				if (args[0].type !== 'Number' ||
+					args[1].type !== 'Percentage' ||
+					args[2].type !== 'Percentage') {
 					// invalid color, for hsl values should be: number, percentage, percentage
 					// TODO: remove those tokens
 					return;
 				}
 
-				args[0].type = 'angle';
+				args[0].type = 'Angle';
 			}
 
 			return args.map(function(arg, idx) {
-				var value = arg.unary === '-' ? 0 : arg.value;
+				var value = Math.max(0, arg.value);
 
 				switch (arg.type) {
-					case 'number':
+					case 'Number':
+						// fit value to [0..255] range
 						value = Math.min(value, 255);
 						break;
 
-					case 'percentage':
+					case 'Percentage':
+						// convert 0..100% to value in [0..255] range
 						value = Math.min(value, 100) / 100;
 
 						if (!rgb) {
@@ -1723,11 +2018,12 @@ var CSSO = (function(){
 						value = 255 * value;
 						break;
 
-					case 'angle':
+					case 'Angle':
+						// fit value to (-360..360) range
 						return (((value % 360) + 360) % 360) / 360;
 
-					case 'alpha':
-						// 0..1
+					case 'Alpha':
+						// fit value to [0..1] range
 						return Math.min(value, 1);
 				}
 
@@ -1735,13 +2031,12 @@ var CSSO = (function(){
 			});
 		}
 
-		function compressFunction(token, rule, parent, idx) {
-			var functionName = token[2][2];
-			var body = token[3];
+		function compressFunction(node, parent, array, index) {
+			var functionName = node.name;
 			var args;
 
 			if (functionName === 'rgba' || functionName === 'hsla') {
-				args = parseFunctionArgs(body, 4, functionName === 'rgba');
+				args = parseFunctionArgs(node.arguments, 4, functionName === 'rgba');
 
 				if (!args) {
 					// something went wrong
@@ -1750,28 +2045,23 @@ var CSSO = (function(){
 
 				if (functionName === 'hsla') {
 					args = hslToRgb.apply(null, args);
-					token[2][2] = 'rgba';
+					node.name = 'rgba';
 				}
 
 				if (args[3] !== 1) {
 					// replace argument values for normalized/interpolated
-					token[3] = body.filter(function(argToken, idx) {
-						// ignore body's info and type
-						if (idx < 2) {
-							return true;
+					node.arguments.forEach(function(argument, idx) {
+						var value = argument.sequence[0];
+
+						if (value.type === 'Operator') {
+							value = argument.sequence[1];
 						}
 
-						var type = argToken[1];
-
-						if (type === 'number' || type === 'percentage') {
-							var number = packNumber(String(args.shift()));
-							argToken[0].s = number;
-							argToken[1] = 'number';
-							argToken[2] = number;
-							return true;
-						}
-
-						return type === 'operator';
+						argument.sequence = [{
+							type: 'Number',
+							info: value.info,
+							value: packNumber(args[idx])
+						}];
 					});
 
 					return;
@@ -1782,7 +2072,7 @@ var CSSO = (function(){
 			}
 
 			if (functionName === 'hsl') {
-				args = args || parseFunctionArgs(body, 3, false);
+				args = args || parseFunctionArgs(node.arguments, 3, false);
 
 				if (!args) {
 					// something went wrong
@@ -1795,393 +2085,577 @@ var CSSO = (function(){
 			}
 
 			if (functionName === 'rgb') {
-				args = args || parseFunctionArgs(body, 3, true);
+				args = args || parseFunctionArgs(node.arguments, 3, true);
 
 				if (!args) {
 					// something went wrong
 					return;
 				}
 
-				var color = toHex(args[0]) + toHex(args[1]) + toHex(args[2]);
-				var vhash = compressHex(color, {});
-				var next = parent[idx + 1];
-
 				// check if color is not at the end and not followed by space
-				if (next && next[1] != 's') {
-					parent.splice(idx + 1, 0, [{}, 's', ' ']);
+				var next = array && index < array.length - 1 ? array[index + 1] : null;
+				if (next && next.type !== 'Space') {
+					array.splice(index + 1, 0, {
+						type: 'Space'
+					});
 				}
 
-				return vhash;
+				var color = {
+					type: 'Hash',
+					info: node.info,
+					value: toHex(args[0]) + toHex(args[1]) + toHex(args[2])
+				};
+
+				return compressHex(color) || color;
 			}
 		}
 
-		function compressIdent(token, rule, parent) {
-			var parentType = parent[1];
+		function compressIdent(node, parent) {
+			var parentType = parent.type;
 
-			if (parentType === 'value' || parentType === 'functionBody') {
-				var color = token[2].toLowerCase();
-				var hex = NAME_TO_HEX[color];
+			if (parentType !== 'Value' && parentType !== 'Function') {
+				return;
+			}
 
-				if (hex) {
-					if (hex.length + 1 <= color.length) {
-						// replace for shorter hex value
-						return [{}, 'vhash', hex];
-					} else {
-						// special case for consistent colors
-						if (color === 'grey') {
-							color = 'gray';
-						}
+			var color = node.name.toLowerCase();
+			var hex = NAME_TO_HEX[color];
 
-						// just replace value for lower cased name
-						token[2] = color;
+			if (hex) {
+				if (hex.length + 1 <= color.length) {
+					// replace for shorter hex value
+					return {
+						type: 'Hash',
+						info: node.info,
+						value: hex
+					};
+				} else {
+					// special case for consistent colors
+					if (color === 'grey') {
+						color = 'gray';
 					}
+
+					// just replace value for lower cased name
+					node.name = color;
 				}
 			}
 		}
 
-		function compressHex(color, info) {
-			var minColor = color.toLowerCase();
+		function compressHex(node) {
+			var color = node.value.toLowerCase();
 
+			// #112233 -> #123
 			if (color.length === 6 &&
 				color[0] === color[1] &&
 				color[2] === color[3] &&
 				color[4] === color[5]) {
-				minColor = color[0] + color[2] + color[4];
+				color = color[0] + color[2] + color[4];
 			}
 
-			if (HEX_TO_NAME[minColor]) {
-				return [info, 'ident', HEX_TO_NAME[minColor]];
+			if (HEX_TO_NAME[color]) {
+				return {
+					type: 'Identifier',
+					info: node.info,
+					name: HEX_TO_NAME[color]
+				};
+			} else {
+				node.value = color;
 			}
-
-			return [info, 'vhash', minColor];
 		}
 
 		var exports = {
 			compressFunction: compressFunction,
 			compressIdent: compressIdent,
-			compressHex: function(token) {
-				return compressHex(token[2], token[0]);
-			}
+			compressHex: compressHex
 		};
-		
+
 		return exports;
 	};
 	//#endregion
 	
-	//#region URL: /compressor/const
-	modules['/compressor/const'] = function () {
+	//#region URL: /compressor/compress/Dimension
+	modules['/compressor/compress/Dimension'] = function () {
+		var packNumber = require('/compressor/compress/Number').pack;
+		var NON_LENGTH_UNIT = {
+			'deg': true,
+			'grad': true,
+			'rad': true,
+			'turn': true,
+			's': true,
+			'ms': true,
+			'Hz': true,
+			'kHz': true,
+			'dpi': true,
+			'dpcm': true,
+			'dppx': true
+		};
+
+		var exports = function compressDimension(node, parent) {
+			var value = packNumber(node.value);
+			var unit = node.unit;
+
+			node.value = value;
+
+			if (value === '0' && !NON_LENGTH_UNIT[unit]) {
+				// issue #200: don't remove units in flex property as it could change value meaning
+				if (parent.type === 'Value' && this.stack[this.stack.length - 2].property.name === 'flex') {
+					return;
+				}
+
+				// issue #222: don't remove units inside calc
+				for (var i = this.stack.length - 1; i >= 0; i--) {
+					var cursor = this.stack[i];
+					if (cursor.type === 'Function' && cursor.name === 'calc') {
+						return;
+					}
+					if (cursor.type !== 'Braces' && cursor.type !== 'Argument') {
+						break;
+					}
+				}
+
+				return {
+					type: 'Number',
+					info: node.info,
+					value: value
+				};
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/Number
+	modules['/compressor/compress/Number'] = function () {
+		function packNumber(value) {
+			// 100 -> '100'
+			// 00100 -> '100'
+			// +100 -> '100'
+			// -100 -> '-100'
+			// 0.123 -> '.123'
+			// 0.12300 -> '.123'
+			// 0.0 -> ''
+			// 0 -> ''
+			value = String(value).replace(/^(?:\+|(-))?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/, '$1$2$3');
+
+			if (value === '' || value === '-') {
+				value = '0';
+			}
+
+			return value;
+		};
+
 		var exports = {};
-
-		exports.nonLengthUnits = {
-			'deg': 1,
-			'grad': 1,
-			'rad': 1,
-			'turn': 1,
-			's': 1,
-			'ms': 1,
-			'Hz': 1,
-			'kHz': 1,
-			'dpi': 1,
-			'dpcm': 1,
-			'dppx': 1
+		exports = function(node) {
+			node.value = packNumber(node.value);
 		};
-
-		exports.cleanCfg = {
-			'cleanComment': 1
-		};
-
-		exports.defCCfg = {
-			'cleanCharset': 1,
-			'cleanImport': 1,
-			'cleanWhitespace': 1,
-			'cleanDecldelim': 1,
-			'compressNumber': 1,
-			'cleanUnary': 1,
-			'compressColor': 1,
-			'compressDimension': 1,
-			'compressString': 1,
-			'compressFontWeight': 1,
-			'compressFont': 1,
-			'compressBackground': 1,
-			'cleanEmpty': 1
-		};
-
-		exports.defRBCfg = {
-			'restructureBlock': 1
-		};
-
-		exports.defRJCfg = {
-			'rejoinRuleset': 1,
-			'cleanEmpty': 1
-		};
-
-		exports.defRRCfg = {
-			'restructureRuleset': 1,
-			'cleanEmpty': 1
-		};
-
-		exports.defFCfg = {
-			'cleanEmpty': 1,
-			'delimSelectors': 1,
-			'delimBlocks': 1
-		};
-
-		exports.preCfg = {
-			'destroyDelims': 1,
-			'preTranslate': 1
-		};
-
-		exports.msCfg = {
-			'markShorthands': 1
-		};
-
-		exports.frCfg = {
-			'freezeRulesets': 1
-		};
-
-		exports.csCfg = {
-			'cleanShorthands': 1,
-			'cleanEmpty': 1
-		};
-
-		exports.order = [
-			'cleanCharset',
-			'cleanImport',
-			'cleanComment',
-			'cleanWhitespace',
-			'compressNumber',
-			'cleanUnary',
-			'compressColor',
-			'compressDimension',
-			'compressString',
-			'compressFontWeight',
-			'compressFont',
-			'compressBackground',
-			'freezeRulesets',
-			'destroyDelims',
-			'preTranslate',
-			'markShorthands',
-			'cleanShorthands',
-			'restructureBlock',
-			'rejoinRuleset',
-			'restructureRuleset',
-			'cleanEmpty',
-			'delimSelectors',
-			'delimBlocks'
-		];
-
-		exports.profile = {
-			'cleanCharset': {
-				'atrules': 1
-			},
-			'cleanImport': {
-				'atrules': 1
-			},
-			'cleanWhitespace': {
-				's': 1
-			},
-			'compressNumber': {
-				'number': 1
-			},
-			'cleanUnary': {
-				'unary': 1
-			},
-			'compressColor': {
-				'vhash': 1,
-				'funktion': 1,
-				'ident': 1
-			},
-			'compressDimension': {
-				'dimension': 1
-			},
-			'compressString': {
-				'string': 1
-			},
-			'compressFontWeight': {
-				'declaration': 1
-			},
-			'compressFont': {
-				'declaration': 1
-			},
-			'compressBackground': {
-				'declaration': 1
-			},
-			'cleanComment': {
-				'comment': 1
-			},
-			'cleanDecldelim': {
-				'block': 1
-			},
-			'cleanEmpty': {
-				'ruleset': 1,
-				'atruleb': 1,
-				'atruler': 1
-			},
-			'destroyDelims': {
-				'decldelim': 1,
-				'delim': 1
-			},
-			'preTranslate': {
-				'declaration': 1,
-				'property': 1,
-				'simpleselector': 1,
-				'filter': 1,
-				'value': 1,
-				'number': 1,
-				'percentage': 1,
-				'dimension': 1,
-				'ident': 1
-			},
-			'restructureBlock': {
-				'block': 1
-			},
-			'rejoinRuleset': {
-				'ruleset': 1
-			},
-			'restructureRuleset': {
-				'ruleset': 1
-			},
-			'delimSelectors': {
-				'selector': 1
-			},
-			'delimBlocks': {
-				'block': 1
-			},
-			'markShorthands': {
-				'block': 1
-			},
-			'cleanShorthands': {
-				'declaration': 1
-			},
-			'freezeRulesets': {
-				'ruleset': 1
-			}
-		};
-
-		exports.notFPClasses = {
-			'link': 1,
-			'visited': 1,
-			'hover': 1,
-			'active': 1,
-			'first-letter': 1,
-			'first-line': 1
-		};
-
-		exports.notFPElements = {
-			'first-letter': 1,
-			'first-line': 1
-		};
-
-		exports.dontRestructure = {
-			'src': 1 // https://github.com/afelix/csso/issues/50
-		};
-
-		exports.vendorID = {
-			'-o-': 'o',
-			'-moz-': 'm',
-			'-webkit-': 'w',
-			'-ms-': 'i',
-			'-epub-': 'e',
-			'-apple-': 'a',
-			'-xv-': 'x',
-			'-wap-': 'p'
-		};
-
-		exports.nlTable = {
-			'border-width': ['border'],
-			'border-style': ['border'],
-			'border-color': ['border'],
-			'border-top': ['border'],
-			'border-right': ['border'],
-			'border-bottom': ['border'],
-			'border-left': ['border'],
-			'border-top-width': ['border-top', 'border-width', 'border'],
-			'border-right-width': ['border-right', 'border-width', 'border'],
-			'border-bottom-width': ['border-bottom', 'border-width', 'border'],
-			'border-left-width': ['border-left', 'border-width', 'border'],
-			'border-top-style': ['border-top', 'border-style', 'border'],
-			'border-right-style': ['border-right', 'border-style', 'border'],
-			'border-bottom-style': ['border-bottom', 'border-style', 'border'],
-			'border-left-style': ['border-left', 'border-style', 'border'],
-			'border-top-color': ['border-top', 'border-color', 'border'],
-			'border-right-color': ['border-right', 'border-color', 'border'],
-			'border-bottom-color': ['border-bottom', 'border-color', 'border'],
-			'border-left-color': ['border-left', 'border-color', 'border'],
-			'margin-top': ['margin'],
-			'margin-right': ['margin'],
-			'margin-bottom': ['margin'],
-			'margin-left': ['margin'],
-			'padding-top': ['padding'],
-			'padding-right': ['padding'],
-			'padding-bottom': ['padding'],
-			'padding-left': ['padding'],
-			'font-style': ['font'],
-			'font-variant': ['font'],
-			'font-weight': ['font'],
-			'font-size': ['font'],
-			'font-family': ['font'],
-			'list-style-type': ['list-style'],
-			'list-style-position': ['list-style'],
-			'list-style-image': ['list-style']
-		};
-
-		exports.allowedPClasses = {
-			'after': 1,
-			'before': 1
-		};
+		exports.pack = packNumber;
 
 		return exports;
 	};
 	//#endregion
 	
-	//#region URL: /compressor/rules
-	modules['/compressor/rules'] = function () {
-		var constants = require('/compressor/const');
+	//#region URL: /compressor/compress/property/background
+	modules['/compressor/compress/property/background'] = function () {
+		var exports = function compressBackground(value) {
+			function lastType() {
+				if (buffer.length) {
+					return buffer[buffer.length - 1].type;
+				}
+			}
 
-		function initRules(config) {
-			var store = {};
-			var order = constants.order;
-			var profile = constants.profile;
-			var rules = order.filter(function(key) {
-				return key in config;
+			function flush() {
+				if (lastType() === 'Space') {
+					buffer.pop();
+				}
+
+				if (!buffer.length ||
+					(buffer.length === 1 && buffer[0].type === 'Important')) {
+					buffer.unshift(
+						{
+							type: 'Number',
+							value: '0'
+						},
+						{
+							type: 'Space'
+						},
+						{
+							type: 'Number',
+							value: '0'
+						}
+					);
+				}
+
+				newValue.push.apply(newValue, buffer);
+
+				buffer = [];
+			}
+
+			var newValue = [];
+			var buffer = [];
+
+			value.sequence.forEach(function(node) {
+				if (node.type === 'Operator' && node.value === ',') {
+					flush();
+					newValue.push(node);
+					return;
+				}
+
+				// remove defaults
+				if (node.type === 'Identifier') {
+					if (node.name === 'transparent' ||
+						node.name === 'none' ||
+						node.name === 'repeat' ||
+						node.name === 'scroll') {
+						return;
+					}
+				}
+
+				// don't add redundant spaces
+				if (node.type === 'Space' && (!buffer.length || lastType() === 'Space')) {
+					return;
+				}
+
+				buffer.push(node);
 			});
 
-			if (!rules.length) {
-				rules = order;
+			flush();
+			value.sequence = newValue;
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/property/font
+	modules['/compressor/compress/property/font'] = function () {
+		var exports = function compressFont(value) {
+			var array = value.sequence;
+
+			for (var i = array.length - 1; i >= 0; i--) {
+				var node = array[i];
+
+				if (node.type === 'Identifier') {
+					if (node.name === 'bold') {
+						array[i] = {
+							type: 'Number',
+							info: value.info,
+							value: '700'
+						};
+					} else if (node.name === 'normal') {
+						var prev = i ? array[i - 1] : null;
+
+						if (prev && prev.type === 'Operator' && prev.value === '/') {
+							array.splice(--i, 2);
+						} else {
+							array.splice(i, 1);
+						}
+					} else if (node.name === 'medium') {
+						var next = i < array.length - 1 ? array[i + 1] : null;
+
+						if (!next || next.type !== 'Operator') {
+							array.splice(i, 1);
+						}
+					}
+				}
 			}
 
-			rules.forEach(function(rule) {
-				Object.keys(profile[rule]).forEach(function(key) {
-					if (store[key]) {
-						store[key].push(rule);
-					} else {
-						store[key] = [rule];
+			// remove redundant spaces
+			for (var i = 0; i < array.length; i++) {
+				if (array[i].type === 'Space') {
+					if (!i || i === array.length - 1 || array[i + 1].type === 'Space') {
+						array.splice(i, 1);
+						i--;
+					}
+				}
+			}
+
+			if (!array.length) {
+				array.push({
+					type: 'Identifier',
+					name: 'normal'
+				});
+			}
+
+			value.sequence = array;
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/property/font-weight
+	modules['/compressor/compress/property/font-weight'] = function () {
+		var exports = function compressFontWeight(node) {
+			var value = node.sequence[0];
+
+			if (value.type === 'Identifier') {
+				switch (value.name) {
+					case 'normal':
+						node.sequence[0] = {
+							type: 'Number',
+							info: value.info,
+							value: '400'
+						};
+						break;
+					case 'bold':
+						node.sequence[0] = {
+							type: 'Number',
+							info: value.info,
+							value: '700'
+						};
+						break;
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/String
+	modules['/compressor/compress/String'] = function () {
+		var exports = function(node) {
+			var value = node.value;
+
+			// remove escaped \n, i.e.
+			// .a { content: "foo\
+			// bar"}
+			// ->
+			// .a { content: "foobar" }
+			value = value.replace(/\\\n/g, '');
+
+			node.value = value;
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/compress/Value
+	modules['/compressor/compress/Value'] = function () {
+		var compressFont = require('/compressor/compress/property/font');
+		var compressFontWeight = require('/compressor/compress/property/font-weight');
+		var compressBackground = require('/compressor/compress/property/background');
+
+		var exports = function compressValue(node, parent) {
+			var property = parent.property.name;
+
+			if (/background$/.test(property)) {
+				compressBackground(node);
+			} else if (/font$/.test(property)) {
+				compressFont(node);
+			} else if (/font-weight$/.test(property)) {
+				compressFontWeight(node);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure
+	modules['/compressor/restructure'] = function () {
+		var internalWalkAll = require('/compressor/ast/walk').all;
+		var internalWalkRules = require('/compressor/ast/walk').rules;
+		var internalWalkRulesRight = require('/compressor/ast/walk').rulesRight;
+		var prepare = require('/compressor/restructure/prepare');
+		var markShorthands = require('/compressor/restructure/markShorthands');
+		var processShorthands = require('/compressor/restructure/processShorthands');
+		var disjoin = require('/compressor/restructure/disjoinRuleset');
+		var rejoinRuleset = require('/compressor/restructure/rejoinRuleset');
+		var initialRejoinRuleset = require('/compressor/restructure/initialRejoinRuleset');
+		var rejoinAtrule = require('/compressor/restructure/rejoinAtrule');
+		var restructBlock = require('/compressor/restructure/restructBlock');
+		var restructRuleset = require('/compressor/restructure/restructRuleset');
+
+		var exports = function(ast/*, debug*/) {
+			function walk(name, fn) {
+				internalWalkAll(ast, fn);
+
+//				debug(name, ast);
+			}
+
+			function walkRulesets(name, fn) {
+				// console.log(require('../ast/translate.js')(ast));
+				internalWalkRules(ast, function(node) {
+					if (node.type === 'Ruleset') {
+						return fn.apply(this, arguments);
+						// console.log(require('../ast/translate.js')(ast));
 					}
 				});
+
+//				debug(name, ast);
+			}
+
+			function walkRulesetsRight(name, fn) {
+				internalWalkRulesRight(ast, function(node) {
+					if (node.type === 'Ruleset') {
+						return fn.apply(this, arguments);
+					}
+				});
+
+//				debug(name, ast);
+			}
+
+			function walkAtrules(name, fn) {
+				internalWalkRulesRight(ast, function(node) {
+					if (node.type === 'Atrule') {
+						return fn.apply(this, arguments);
+					}
+				});
+
+//				debug(name, ast);
+			}
+
+			// prepare ast for restructing
+			walk('prepare', prepare);
+
+			// todo: remove initial rejoin
+			walkRulesetsRight('initialRejoinRuleset', initialRejoinRuleset);
+			walkAtrules('rejoinAtrule', rejoinAtrule);
+			walkRulesetsRight('disjoin', disjoin);
+
+			var shortDeclarations = [];
+			walkRulesetsRight('buildMaps', function(ruleset, stylesheet) {
+				var map = stylesheet.info.selectorsMap;
+				if (!map) {
+					map = stylesheet.info.selectorsMap = {};
+					stylesheet.info.shortDeclarations = shortDeclarations;
+					stylesheet.info.lastShortSelector = null;
+				}
+
+				var selector = ruleset.selector.selectors[0].info.s;
+				if (selector in map === false) {
+					map[selector] = {
+						props: {},
+						shorts: {}
+					};
+				}
 			});
 
-			return store;
+			walkRulesetsRight('markShorthands', markShorthands);
+			processShorthands(shortDeclarations);
+//			debug('processShorthand', ast);
+
+			walkRulesetsRight('restructBlock', restructBlock);
+			// console.log(require('../ast/translate.js')(ast));
+			walkRulesets('rejoinRuleset', rejoinRuleset);
+			walkRulesetsRight('restructRuleset', restructRuleset);
 		};
 
-		var exports = {
-			cleanComments: initRules(constants.cleanCfg), // special case to resolve ambiguity
-			compress: initRules(constants.defCCfg),
-			prepare: initRules(constants.preCfg),
-			freezeRuleset: initRules(constants.frCfg),
-			markShorthand: initRules(constants.msCfg),
-			cleanShortcut: initRules(constants.csCfg),
-			restructureBlock: initRules(constants.defRBCfg),
-			rejoinRuleset: initRules(constants.defRJCfg),
-			restructureRuleset: initRules(constants.defRRCfg),
-			finalize: initRules(constants.defFCfg)
-		};
-		
 		return exports;
 	};
 	//#endregion
 	
-	//#region URL: /compressor/trbl
-	modules['/compressor/trbl'] = function () {
+	//#region URL: /compressor/restructure/disjoinRuleset
+	modules['/compressor/restructure/disjoinRuleset'] = function () {
+		var utils = require('/compressor/restructure/utils');
+
+		var exports = function disjoin(node, parent, array, i) {
+			var selectors = node.selector.selectors;
+
+			// there are more than 1 simple selector split for rulesets
+			if (selectors.length > 1) {
+				// generate new rule sets:
+				// .a, .b { color: red; }
+				// ->
+				// .a { color: red; }
+				// .b { color: red; }
+				for (var j = selectors.length - 1; j >= 1; j--) {
+					array.splice(i + 1, 0, {
+						type: 'Ruleset',
+						info: utils.copyObject(node.info),
+						selector: {
+							type: 'Selector',
+							info: utils.copyObject(node.selector.info),
+							selectors: [
+								selectors[j]
+							]
+						},
+						block: {
+							type: 'Block',
+							info: utils.copyObject(node.block.info),
+							declarations: node.block.declarations.slice()
+						}
+					});
+				}
+
+				// delete all selectors except first one
+				node.selector.selectors = [
+					node.selector.selectors[0]
+				];
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/initialRejoinRuleset
+	modules['/compressor/restructure/initialRejoinRuleset'] = function () {
+		var utils = require('/compressor/restructure/utils');
+
+		var exports = function rejoinRuleset(node, parent, array, i) {
+			var selector = node.selector.selectors;
+			var block = node.block;
+
+			if (!block.declarations.length) {
+				return null;
+			}
+
+			for (i = i - 1; i >= 0; i--) {
+				var prev = array[i];
+
+				if (prev.type !== 'Ruleset') {
+					return;
+				}
+
+				var prevSelector = prev.selector.selectors;
+				var prevBlock = prev.block;
+
+				if (node.info.pseudoSignature !== prev.info.pseudoSignature) {
+					return;
+				}
+
+				// try to join by selectors
+				var prevHash = utils.getHash(prevSelector);
+				var hash = utils.getHash(selector);
+
+				if (utils.equalHash(hash, prevHash)) {
+					prevBlock.declarations.push.apply(prevBlock.declarations, block.declarations);
+					return null;
+				}
+
+				if (!utils.isCompatibleSignatures(node, prev)) {
+					return;
+				}
+
+				// try to join by properties
+				var diff = utils.compareRulesets(node, prev);
+
+				if (!diff.ne1.length && !diff.ne2.length) {
+					utils.addToSelector(prevSelector, selector);
+
+					return null;
+				}
+
+				// go to next ruleset if simpleselectors has no equal specifity and element selector
+				for (var j = 0; j < prevSelector.length; j++) {
+					for (var k = 0; k < selector.length; k++) {
+						if (prevSelector[j].info.compareMarker === selector[k].info.compareMarker) {
+							return;
+						}
+					}
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/markShorthands
+	modules['/compressor/restructure/markShorthands'] = function () {
 		var unsafeToMerge = /vh|vw|vmin|vmax|vm|rem|\\9/;
 
 		var TOP = 0;
@@ -2194,10 +2668,24 @@ var CSSO = (function(){
 			'margin-right': 'right',
 			'margin-bottom': 'bottom',
 			'margin-left': 'left',
+
 			'padding-top': 'top',
 			'padding-right': 'right',
 			'padding-bottom': 'bottom',
-			'padding-left': 'left'
+			'padding-left': 'left',
+
+			'border-top-color': 'top',
+			'border-right-color': 'right',
+			'border-bottom-color': 'bottom',
+			'border-left-color': 'left',
+			'border-top-width': 'top',
+			'border-right-width': 'right',
+			'border-bottom-width': 'bottom',
+			'border-left-width': 'left',
+			'border-top-style': 'top',
+			'border-right-style': 'right',
+			'border-bottom-style': 'bottom',
+			'border-left-style': 'left'
 		};
 		var MAIN_PROPERTY = {
 			'margin': 'margin',
@@ -2205,11 +2693,28 @@ var CSSO = (function(){
 			'margin-right': 'margin',
 			'margin-bottom': 'margin',
 			'margin-left': 'margin',
+
 			'padding': 'padding',
 			'padding-top': 'padding',
 			'padding-right': 'padding',
 			'padding-bottom': 'padding',
-			'padding-left': 'padding'
+			'padding-left': 'padding',
+
+			'border-color': 'border-color',
+			'border-top-color': 'border-color',
+			'border-right-color': 'border-color',
+			'border-bottom-color': 'border-color',
+			'border-left-color': 'border-color',
+			'border-width': 'border-width',
+			'border-top-width': 'border-width',
+			'border-right-width': 'border-width',
+			'border-bottom-width': 'border-width',
+			'border-left-width': 'border-width',
+			'border-style': 'border-style',
+			'border-top-style': 'border-style',
+			'border-right-style': 'border-style',
+			'border-bottom-style': 'border-style',
+			'border-left-style': 'border-style'
 		};
 
 		function TRBL(name, important) {
@@ -2246,24 +2751,16 @@ var CSSO = (function(){
 		};
 
 		TRBL.prototype.add = function(name, sValue, tValue, important) {
-			function add(token, str) {
-				if (wasUnary) {
-					var last = values[values.length - 1];
-					last.t.push(token);
-					last.s += str;
-					wasUnary = false;
-				} else {
-					values.push({
-						s: str,
-						t: [token],
-						important: important
-					});
-				}
+			function add(node, str) {
+				values.push({
+					s: str,
+					node: node,
+					important: important
+				});
 			}
 
 			var sides = this.sides;
 			var side = SIDE[name];
-			var wasUnary = false;
 			var values = [];
 
 			important = important ? 1 : 0;
@@ -2275,9 +2772,7 @@ var CSSO = (function(){
 					if (!currentValue || (important && !currentValue.important)) {
 						sides[side] = {
 							s: important ? sValue.substring(0, sValue.length - 10) : sValue,
-							t: tValue[0][1] === 'unary'
-								? [tValue[0], tValue[1]]
-								: [tValue[0]],
+							node: tValue[0],
 							important: important
 						};
 					}
@@ -2288,28 +2783,25 @@ var CSSO = (function(){
 				for (var i = 0; i < tValue.length; i++) {
 					var child = tValue[i];
 
-					switch (child[1]) {
-						case 'unary':
-							add(child, child[2]);
-							wasUnary = true;
+					switch (child.type) {
+						case 'Identifier':
+							add(child, child.name);
 							break;
 
-						case 'number':
-						case 'ident':
-							add(child, child[2]);
+						case 'Number':
+							add(child, child.value);
 							break;
 
-						case 'percentage':
-							add(child, child[2][2] + '%');
+						case 'Percentage':
+							add(child, child.value + '%');
 							break;
 
-						case 'dimension':
-							add(child, child[2][2] + child[3][2]);
+						case 'Dimension':
+							add(child, child.value + child.unit);
 							break;
 
-						case 's':
-						case 'comment':
-						case 'important':
+						case 'Space':
+						case 'Important':
 							break;
 
 						default:
@@ -2364,7 +2856,11 @@ var CSSO = (function(){
 		};
 
 		TRBL.prototype.getValue = function() {
-			var result = [{}, 'value'];
+			var result = {
+				type: 'Value',
+				info: {},
+				sequence: []
+			};
 			var sides = this.sides;
 			var values = [
 				sides.top,
@@ -2383,46 +2879,1024 @@ var CSSO = (function(){
 				}
 			}
 
-			result = result.concat(values[TOP].t);
+			result.sequence.push(values[TOP].node);
 			for (var i = 1; i < values.length; i++) {
-				result.push([{ s: ' ' }, 's', ' ']);
-				result = result.concat(values[i].t);
+				result.sequence.push(
+					{ type: 'Space' },
+					values[i].node
+				);
 			}
 
 			if (this.impSum()) {
-				result.push([{ s: '!important' }, 'important']);
+				result.sequence.push({ type: 'Important' });
 			}
 
 			return result;
 		};
 
 		TRBL.prototype.getProperty = function() {
-			return [
-				{ s: this.name },
-				'property',
-				[{ s: this.name }, 'ident', this.name]
-			];
+			return {
+				type: 'Property',
+				info: { s: this.name },
+				name: this.name
+			};
 		};
-		
-		return TRBL;
+
+		var exports = function markShorthands(ruleset, parent) {
+			var declarations = ruleset.block.declarations;
+			var selector = ruleset.selector.selectors[0].info.s;
+			var freezeID = ruleset.info.freezeID || '';
+			var shorts = parent.info.selectorsMap[selector].shorts;
+
+			for (var i = declarations.length - 1; i >= 0; i--) {
+				var child = declarations[i];
+
+				if (child.type === 'Declaration') {
+					var childInfo = child.info;
+					var property = child.property.info.s;
+					var value = child.value;
+					var important = value.sequence[value.sequence.length - 1].type === 'Important';
+
+					if (property in TRBL.props) {
+						var key = freezeID + TRBL.extractMain(property);
+						var shorthand = null;
+
+						if (!parent.info.lastShortSelector || selector === parent.info.lastShortSelector) {
+							if (key in shorts) {
+								shorthand = shorts[key];
+								childInfo.removeByShort = true;
+							}
+						}
+
+						if (!shorthand) {
+							shorthand = new TRBL(property, important);
+							childInfo.replaceByShort = true;
+						}
+
+						shorthand.add(property, value.info.s, value.sequence.slice(0), important);
+
+						shorts[key] = shorthand;
+						parent.info.shortDeclarations.push({
+							info: shorthand,
+							block: declarations,
+							declaration: child,
+							pos: i
+						});
+
+						parent.info.lastShortSelector = selector;
+					}
+				}
+			}
+		};
+
+		return exports;
 	};
 	//#endregion
 	
-	//#region URL: /compressor/utils
-	modules['/compressor/utils'] = function () {
-		function packNumber(value) {
-			value = value
-				.replace(/^0+/, '')
-				.replace(/\.0*$/, '')
-				.replace(/(\..*\d+)0+$/, '$1');
+	//#region URL: /compressor/restructure/prepare
+	modules['/compressor/restructure/prepare'] = function () {
+		var translate = require('/compressor/ast/translate');
+		var specificity = require('/compressor/restructure/prepare/specificity');
+		var freeze = require('/compressor/restructure/prepare/freeze');
 
-			return value === '.' || value === '' ? '0' : value;
+		function translateNode(node) {
+			node.info.s = translate(node);
+		}
+
+		var handlers = {
+			Ruleset: freeze,
+
+			Atrule: function(node, root) {
+				var name = node.name;
+
+				// compare keyframe selectors by its values
+				// NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
+				if (/^(-[a-z\d]+-)?keyframes$/.test(name)) {
+					node.block.rules.forEach(function(ruleset) {
+						ruleset.selector.selectors.forEach(function(simpleselector) {
+							simpleselector.info.compareMarker = simpleselector.info.s;
+						});
+					});
+				}
+			},
+
+			SimpleSelector: function(node) {
+				var info = node.info;
+				var array = node.sequence;
+				var tagName = '*';
+				var last;
+
+				for (var i = array.length - 1; i >= 0; i--) {
+					if (array[i].type === 'Combinator') {
+						break;
+					}
+
+					last = array[i];
+				}
+
+				if (last.type === 'Identifier') {
+					tagName = last.name;
+				}
+
+				info.compareMarker = specificity(node) + ',' + tagName;
+				info.s = translate(node);
+			},
+
+			AtruleExpression: translateNode,
+			Declaration: translateNode,
+			Property: translateNode,
+			Value: translateNode
+		};
+
+		var exports = function(node, parent) {
+			if (handlers[node.type]) {
+				return handlers[node.type].call(this, node, parent);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/prepare/freeze
+	modules['/compressor/restructure/prepare/freeze'] = function () {
+		var allowedPseudoClasses = {
+			'after': 1,
+			'before': 1
+		};
+		var nonFreezePreudoElements = {
+			'first-letter': true,
+			'first-line': true
+		};
+		var nonFreezePseudoClasses = {
+			'link': true,
+			'visited': true,
+			'hover': true,
+			'active': true,
+			'first-letter': true,
+			'first-line': true
+		};
+
+		function containsPseudo(simpleSelector) {
+			return simpleSelector.sequence.some(function(node) {
+				switch (node.type) {
+					case 'PseudoClass':
+					case 'PseudoElement':
+					case 'FunctionalPseudo':
+						if (node.name in nonFreezePseudoClasses === false) {
+							return true;
+						}
+				}
+			});
+		}
+
+		function selectorSignature(selector) {
+			// looks wrong and non-efficient
+			return selector.selectors.map(function(node) {
+				return node.info.s;
+			}).sort().join(',');
+		}
+
+		function freezeNeeded(selector) {
+			return selector.selectors.some(function(simpleSelector) {
+				return simpleSelector.sequence.some(function(node) {
+					switch (node.type) {
+						case 'PseudoClass':
+							if (node.name in nonFreezePseudoClasses === false) {
+								return true;
+							}
+							break;
+
+						case 'PseudoElement':
+							if (node.name in nonFreezePreudoElements === false) {
+								return true;
+							}
+							break;
+
+						case 'FunctionalPseudo':
+							return true;
+					}
+				});
+			});
+		}
+
+		function composePseudoID(selector) {
+			var pseudos = [];
+
+			selector.selectors.forEach(function(simpleSelector) {
+				if (containsPseudo(simpleSelector)) {
+					pseudos.push(simpleSelector.info.s);
+				}
+			});
+
+			return pseudos.sort().join(',');
+		}
+
+		function pseudoSelectorSignature(selector, exclude) {
+			var pseudos = {};
+			var wasExclude = false;
+
+			selector.selectors.forEach(function(simpleSelector) {
+				simpleSelector.sequence.forEach(function(node) {
+					switch (node.type) {
+						case 'PseudoClass':
+						case 'PseudoElement':
+						case 'FunctionalPseudo':
+							if (!exclude.hasOwnProperty(node.name)) {
+								pseudos[node.name] = 1;
+							} else {
+								wasExclude = true;
+							}
+							break;
+					}
+				});
+			});
+
+			return Object.keys(pseudos).sort().join(',') + wasExclude;
+		}
+
+		function markSimplePseudo(selector) {
+			var hash = {};
+
+			selector.selectors.forEach(function(simpleSelector) {
+				var info = simpleSelector.info;
+
+				info.pseudo = containsPseudo(simpleSelector);
+				info.sg = hash;
+				hash[info.s] = true;
+			});
+		}
+
+		var exports = function freeze(node) {
+			var selector = node.selector;
+			var freeze = freezeNeeded(selector);
+
+			if (freeze) {
+				var info = node.info;
+
+				info.freeze = freeze;
+				info.freezeID = selectorSignature(selector);
+				info.pseudoID = composePseudoID(selector);
+				info.pseudoSignature = pseudoSelectorSignature(selector, allowedPseudoClasses);
+				markSimplePseudo(selector);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/prepare/specificity
+	modules['/compressor/restructure/prepare/specificity'] = function () {
+		var A = 2;
+		var B = 1;
+		var C = 0;
+
+		var exports = function specificity(simpleSelector) {
+			var specificity = [0, 0, 0];
+
+			simpleSelector.sequence.forEach(function walk(item) {
+				switch (item.type) {
+					case 'SimpleSelector':
+					case 'Negation':
+						item.sequence.forEach(walk);
+						break;
+
+					case 'Id':
+						specificity[C]++;
+						break;
+
+					case 'Class':
+					case 'Attribute':
+					case 'FunctionalPseudo':
+						specificity[B]++;
+						break;
+
+					case 'Identifier':
+						if (item.name !== '*') {
+							specificity[A]++;
+						}
+						break;
+
+					case 'PseudoElement':
+						specificity[A]++;
+						break;
+
+					case 'PseudoClass':
+						var name = item.name.toLowerCase();
+						if (name === 'before' ||
+							name === 'after' ||
+							name === 'first-line' ||
+							name === 'first-letter') {
+							specificity[A]++;
+						} else {
+							specificity[B]++;
+						}
+						break;
+				}
+			});
+
+			return specificity;
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/processShorthands
+	modules['/compressor/restructure/processShorthands'] = function () {
+		var translate = require('/compressor/ast/translate');
+
+		function processShorthand(item) {
+			var info = item.declaration.info;
+
+			if (info.removeByShort || info.replaceByShort) {
+				var shorthand = item.info;
+
+				if (shorthand.isOkToMinimize()) {
+					if (info.replaceByShort) {
+						var shorterToken = {
+							type: 'Declaration',
+							info: {},
+							property: shorthand.getProperty(),
+							value: shorthand.getValue()
+						};
+						shorterToken.info.s = translate(shorterToken);
+						item.block.splice(item.pos, 1, shorterToken);
+					} else {
+						item.block.splice(item.pos, 1);
+					}
+				}
+			}
+		}
+
+		var exports = function processShorthands(shortDeclarations) {
+			shortDeclarations.forEach(processShorthand);
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/rejoinAtrule
+	modules['/compressor/restructure/rejoinAtrule'] = function () {
+		function isMediaRule(node) {
+			return node.type === 'Atrule' && node.name === 'media';
+		}
+
+		var exports = function rejoinAtrule(node, parent, array, i) {
+			if (!isMediaRule(node)) {
+				return;
+			}
+
+			var prev = i ? array[i - 1] : null;
+
+			if (!prev || !isMediaRule(prev)) {
+				return;
+			}
+
+			// merge @media with same query
+			if (node.expression.info.s === prev.expression.info.s) {
+				Array.prototype.push.apply(prev.block.rules, node.block.rules);
+				return null;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/rejoinRuleset
+	modules['/compressor/restructure/rejoinRuleset'] = function () {
+		var utils = require('/compressor/restructure/utils');
+
+		var exports = function rejoinRuleset(node, parent, array, i) {
+			var selector = node.selector.selectors;
+			var block = node.block.declarations;
+
+			if (!block.length) {
+				return null;
+			}
+
+			var compareMarkers = {};
+			compareMarkers[selector[0].info.compareMarker] = true;
+
+			for (i = i + 1; i < array.length; i++) {
+				var next = array[i];
+
+				if (next.type !== 'Ruleset') {
+					return;
+				}
+
+				if (node.info.pseudoSignature !== next.info.pseudoSignature) {
+					return;
+				}
+
+				var nextFirstSelector = next.selector.selectors[0];
+				var nextBlock = next.block.declarations;
+
+				// try to join by selectors
+				if (selector.length === 1) {
+					if (selector[0].info.s === nextFirstSelector.info.s) {
+						block.push.apply(block, nextBlock);
+						array.splice(i, 1);
+						i--;
+
+						continue;
+					}
+				}
+
+				if (!utils.isCompatibleSignatures(node, next)) {
+					return;
+				}
+
+				// try to join by properties
+				var nextCompareMarker = nextFirstSelector.info.compareMarker;
+				var equalBlocks = true;
+
+				if (block.length === nextBlock.length) {
+					for (var j = 0; j < block.length; j++) {
+						if (block[j].info.s !== nextBlock[j].info.s) {
+							equalBlocks = false;
+							break;
+						}
+					}
+
+					if (equalBlocks) {
+						var nextStr = nextFirstSelector.info.s;
+
+						for (var j = selector.length; j >= 0; j--) {
+							if (!j || nextStr > selector[j - 1].info.s) {
+								selector.splice(j, 0, nextFirstSelector);
+								break;
+							}
+						}
+
+						compareMarkers[nextCompareMarker] = true;
+						array.splice(i, 1);
+						i--;
+
+						continue;
+					}
+				}
+
+				// go to next ruleset if simpleselectors has no equal specifity and element selector
+				if (nextCompareMarker in compareMarkers) {
+					return;
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/restructBlock
+	modules['/compressor/restructure/restructBlock'] = function () {
+		var utils = require('/compressor/restructure/utils');
+		var nameVendorMap = {};
+		var propertyInfoMap = {};
+		var dontRestructure = {
+			'src': 1 // https://github.com/afelix/csso/issues/50
+		};
+
+		var NEEDLESS_TABLE = {
+			'border-width': ['border'],
+			'border-style': ['border'],
+			'border-color': ['border'],
+			'border-top': ['border'],
+			'border-right': ['border'],
+			'border-bottom': ['border'],
+			'border-left': ['border'],
+			'border-top-width': ['border-top', 'border-width', 'border'],
+			'border-right-width': ['border-right', 'border-width', 'border'],
+			'border-bottom-width': ['border-bottom', 'border-width', 'border'],
+			'border-left-width': ['border-left', 'border-width', 'border'],
+			'border-top-style': ['border-top', 'border-style', 'border'],
+			'border-right-style': ['border-right', 'border-style', 'border'],
+			'border-bottom-style': ['border-bottom', 'border-style', 'border'],
+			'border-left-style': ['border-left', 'border-style', 'border'],
+			'border-top-color': ['border-top', 'border-color', 'border'],
+			'border-right-color': ['border-right', 'border-color', 'border'],
+			'border-bottom-color': ['border-bottom', 'border-color', 'border'],
+			'border-left-color': ['border-left', 'border-color', 'border'],
+			'margin-top': ['margin'],
+			'margin-right': ['margin'],
+			'margin-bottom': ['margin'],
+			'margin-left': ['margin'],
+			'padding-top': ['padding'],
+			'padding-right': ['padding'],
+			'padding-bottom': ['padding'],
+			'padding-left': ['padding'],
+			'font-style': ['font'],
+			'font-variant': ['font'],
+			'font-weight': ['font'],
+			'font-size': ['font'],
+			'font-family': ['font'],
+			'list-style-type': ['list-style'],
+			'list-style-position': ['list-style'],
+			'list-style-image': ['list-style']
+		};
+
+		function getVendorIDFromToken(token) {
+			var name;
+
+			switch (token.type) {
+				case 'Identifier':
+				case 'Function':
+					name = getVendorFromString(token.name);
+					break;
+			}
+
+			return name || '';
+		}
+
+		function getVendorFromString(string) {
+			if (string[0] === '-') {
+				if (string in nameVendorMap) {
+					return nameVendorMap[string];
+				}
+
+				var secondDashIndex = string.indexOf('-', 2);
+				if (secondDashIndex !== -1) {
+					return nameVendorMap[string] = string.substr(0, secondDashIndex + 1);
+				}
+			}
+
+			return '';
+		}
+
+		function getPropertyInfo(name) {
+			if (name in propertyInfoMap) {
+				return propertyInfoMap[name];
+			}
+
+			var hack = name[0];
+
+			if (hack === '*' || hack === '_' || hack === '$') {
+				name = name.substr(1);
+			} else if (hack === '/' && name[1] === '/') {
+				hack = '//';
+				name = name.substr(2);
+			} else {
+				hack = '';
+			}
+
+			var vendor = getVendorFromString(name);
+
+			return propertyInfoMap[name] = {
+				prefix: hack + vendor,
+				hack: hack,
+				vendor: vendor,
+				table: NEEDLESS_TABLE[name.substr(vendor.length)]
+			};
+		}
+
+		function getPropertyFingerprint(property, value, declaration, freeze) {
+			var fp = freeze ? 'freeze:' : '';
+
+			if (property.indexOf('background') !== -1 ||
+			   (property.indexOf('filter') !== -1 && value[0].type === 'Progid')) {
+				return fp + declaration.info.s;
+			}
+
+			var vendorId = '';
+			var hack9 = 0;
+			var functions = {};
+			var units = {};
+
+			for (var i = 0; i < value.length; i++) {
+				if (!vendorId) {
+					vendorId = getVendorIDFromToken(value[i]);
+				}
+
+				switch (value[i].type) {
+					case 'Identifier':
+						if (value[i].name === '\\9') {
+							hack9 = 1;
+						}
+						break;
+
+					case 'Function':
+						var name = value[i].name;
+
+						if (name === 'rect') {
+							// there are 2 forms of rect:
+							//   rect(<top>, <right>, <bottom>, <left>) - standart
+							//   rect(<top> <right> <bottom> <left>) – backwards compatible syntax
+							// only the same form values can be merged
+							if (value[i].arguments.length < 4) {
+								name = 'rect-backward';
+							}
+						}
+
+						functions[name] = true;
+						break;
+
+					case 'Dimension':
+						var unit = value[i].unit;
+						switch (unit) {
+							// is not supported until IE11
+							case 'rem':
+
+							// v* units is too buggy across browsers and better
+							// don't merge values with those units
+							case 'vw':
+							case 'vh':
+							case 'vmin':
+							case 'vmax':
+							case 'vm': // IE9 supporting "vm" instead of "vmin".
+								units[unit] = true;
+								break;
+						}
+						break;
+				}
+			}
+
+			return (
+				fp + property +
+				'[' + Object.keys(functions) + ']' +
+				Object.keys(units) +
+				hack9 + vendorId
+			);
+		}
+
+		function needless(name, props, important, v, d, freeze) {
+			var info = getPropertyInfo(name);
+			var table = info.table;
+
+			if (table) {
+				for (var i = 0; i < table.length; i++) {
+					var ppre = getPropertyFingerprint(info.prefix + table[i], v, d, freeze);
+					var property = props[ppre];
+
+					if (property) {
+						return !important || property.important;
+					}
+				}
+			}
+		}
+
+		var exports = function restructureBlock(ruleset, parent) {
+			var rulesetInfo = ruleset.info;
+			var selectorInfo = ruleset.selector.selectors[0].info;
+			var declarations = ruleset.block.declarations;
+
+			var freeze = rulesetInfo.freeze;
+			var freezeID = rulesetInfo.freezeID;
+			var pseudoID = rulesetInfo.pseudoID;
+			var isPseudo = selectorInfo.pseudo;
+			var sg = selectorInfo.sg;
+			var props = parent.info.selectorsMap[selectorInfo.s].props;
+
+			for (var i = declarations.length - 1; i >= 0; i--) {
+				var child = declarations[i];
+
+				if (child.type === 'Declaration') {
+					var value = child.value.sequence;
+					var important = value[value.length - 1].type === 'Important';
+					var property = child.property.info.s;
+					var fingerprint = getPropertyFingerprint(property, value, child, freeze);
+					var ppreProps = props[fingerprint];
+
+					if (!dontRestructure[property] && ppreProps) {
+						if ((isPseudo && freezeID === ppreProps.freezeID) || // pseudo from equal selectors group
+							(!isPseudo && pseudoID === ppreProps.pseudoID) || // not pseudo from equal pseudo signature group
+							(isPseudo && pseudoID === ppreProps.pseudoID && utils.hashInHash(sg, ppreProps.sg))) { // pseudo from covered selectors group
+							if (important && !ppreProps.important) {
+								props[fingerprint] = {
+									block: declarations,
+									child: child,
+									important: important,
+									sg: sg,
+									freezeID: freezeID,
+									pseudoID: pseudoID
+								};
+
+								ppreProps.block.splice(ppreProps.block.indexOf(ppreProps.child), 1);
+							} else {
+								declarations.splice(i, 1);
+							}
+						}
+					} else if (needless(property, props, important, value, child, freeze)) {
+						declarations.splice(i, 1);
+					} else {
+						child.info.fingerprint = fingerprint;
+
+						props[fingerprint] = {
+							block: declarations,
+							child: child,
+							important: important,
+							sg: sg,
+							freezeID: freezeID,
+							pseudoID: pseudoID
+						};
+					}
+				}
+			}
+
+			if (!declarations.length) {
+				return null;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/restructRuleset
+	modules['/compressor/restructure/restructRuleset'] = function () {
+		var utils = require('/compressor/restructure/utils');
+
+		function calcLength(tokens) {
+			var length = 0;
+
+			for (var i = 0; i < tokens.length; i++) {
+				length += tokens[i].info.s.length;
+			}
+
+			return length;
+		}
+
+		var exports = function restructureRuleset(node, parent, array, i) {
+			var selector = node.selector.selectors;
+			var block = node.block;
+
+			for (i = i - 1; i >= 0; i--) {
+				var prevNode = array[i];
+
+				if (prevNode.type !== 'Ruleset') {
+					return;
+				}
+
+				var prevSelector = prevNode.selector.selectors;
+				var prevBlock = prevNode.block;
+
+				if (node.info.pseudoSignature !== prevNode.info.pseudoSignature) {
+					return;
+				}
+
+				// try to join by selectors
+				var prevHash = utils.getHash(prevSelector);
+				var hash = utils.getHash(selector);
+
+				if (utils.equalHash(hash, prevHash)) {
+					prevBlock.declarations.push.apply(prevBlock.declarations, block.declarations);
+					return null;
+				}
+
+				// try to join by properties
+				var diff = utils.compareRulesets(node, prevNode);
+
+				// console.log(diff.eq, diff.ne1, diff.ne2);
+
+				if (diff.eq.length) {
+					if (!diff.ne1.length && !diff.ne2.length) {
+						if (utils.isCompatibleSignatures(node, prevNode)) {
+							utils.addToSelector(prevSelector, selector);
+							return null;
+						}
+					} else {
+						if (diff.ne1.length && !diff.ne2.length) {
+							// prevBlock is subset block
+							var simpleSelectorCount = selector.length - 2; // - type and info
+							var selectorLength = calcLength(selector) + // selectors length
+												 simpleSelectorCount - 1; // delims count
+							var blockLength = calcLength(diff.eq) + // declarations length
+											  diff.eq.length - 1; // decldelims length
+
+							if (selectorLength < blockLength) {
+								utils.addToSelector(prevSelector, selector);
+								node.block = {
+									type: 'Block',
+									info: block.info,
+									declarations: diff.ne1
+								};
+							}
+						} else if (!diff.ne1.length && diff.ne2.length) {
+							// node is subset of prevBlock
+							var simpleSelectorCount = prevSelector.length - 2; // - type and info
+							var selectorLength = calcLength(prevSelector) + // selectors length
+												 simpleSelectorCount - 1; // delims count
+							var blockLength = calcLength(diff.eq) + // declarations length
+											  diff.eq.length - 1; // decldelims length
+
+							if (selectorLength < blockLength) {
+								utils.addToSelector(selector, prevSelector);
+								prevNode.block = {
+									type: 'Block',
+									info: prevBlock.info,
+									declarations: diff.ne2
+								};
+							}
+						} else {
+							// diff.ne1.length && diff.ne2.length
+							// extract equal block
+							var newSelector = {
+								type: 'Selector',
+								info: {},
+								selectors: utils.addToSelector(prevSelector.slice(), selector)
+							};
+							var newSelectorLength = calcLength(newSelector.selectors) + // selectors length
+													newSelector.selectors.length - 1 + // delims length
+													2; // braces length
+							var blockLength = calcLength(diff.eq) + // declarations length
+											  diff.eq.length - 1; // decldelims length
+
+							// ok, it's good enough to extract
+							if (blockLength >= newSelectorLength) {
+								var newRuleset = {
+									type: 'Ruleset',
+									info: {},
+									selector: newSelector,
+									block: {
+										type: 'Block',
+										info: {},
+										declarations: diff.eq
+									}
+								};
+
+								node.block = {
+									type: 'Block',
+									info: block.info,
+									declarations: diff.ne1
+								};
+								prevNode.block = {
+									type: 'Block',
+									info: prevBlock.info,
+									declarations: diff.ne2.concat(diff.ne2overrided)
+								};
+								array.splice(i, 0, newRuleset);
+								return;
+							}
+						}
+					}
+				}
+
+				// go to next ruleset if simpleselectors has no equal specifity and element selector
+				for (var j = 0; j < prevSelector.length; j++) {
+					for (var k = 0; k < selector.length; k++) {
+						if (prevSelector[j].info.compareMarker === selector[k].info.compareMarker) {
+							return;
+						}
+					}
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+	
+	//#region URL: /compressor/restructure/utils
+	modules['/compressor/restructure/utils'] = function () {
+		function copyObject(obj) {
+			var result = {};
+
+			for (var key in obj) {
+				result[key] = obj[key];
+			}
+
+			return result;
+		}
+
+		function equalHash(h0, h1) {
+			for (var key in h0) {
+				if (key in h1 === false) {
+					return false;
+				}
+			}
+
+			for (var key in h1) {
+				if (key in h0 === false) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		function getHash(tokens) {
+			var hash = {};
+
+			for (var i = 0; i < tokens.length; i++) {
+				hash[tokens[i].info.s] = true;
+			}
+
+			return hash;
+		}
+
+		function hashInHash(hash1, hash2) {
+			for (var key in hash1) {
+				if (key in hash2 === false) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		function compareRulesets(ruleset1, ruleset2) {
+			var result = {
+				eq: [],
+				ne1: [],
+				ne2: [],
+				ne2overrided: []
+			};
+
+			var items1 = ruleset1.block.declarations;  // token
+			var items2 = ruleset2.block.declarations;  // prev
+			var hash1 = getHash(items1);
+			var hash2 = getHash(items2);
+			var fingerprints = {};
+
+			for (var i = 0; i < items1.length; i++) {
+				if (items1[i].info.fingerprint) {
+					fingerprints[items1[i].info.fingerprint] = true;
+				}
+			}
+
+			for (var i = 0; i < items1.length; i++) {
+				var item = items1[i];
+
+				if (item.info.s in hash2) {
+					result.eq.push(item);
+				} else {
+					result.ne1.push(item);
+				}
+			}
+
+			for (var i = 0; i < items2.length; i++) {
+				var item = items2[i];
+
+				if (item.info.s in hash1 === false) {
+					// if ruleset1 has overriding declaration, this is not a difference
+					if (item.info.fingerprint in fingerprints === false) {
+						result.ne2.push(item);
+					} else {
+						result.ne2overrided.push(item);
+					}
+				}
+			}
+
+			return result;
+		}
+
+		function addToSelector(dest, source) {
+			ignore:
+			for (var i = 0; i < source.length; i++) {
+				var simpleSelectorStr = source[i].info.s;
+				for (var j = dest.length; j > 0; j--) {
+					var prevSimpleSelectorStr = dest[j - 1].info.s;
+					if (prevSimpleSelectorStr === simpleSelectorStr) {
+						continue ignore;
+					}
+					if (prevSimpleSelectorStr < simpleSelectorStr) {
+						break;
+					}
+				}
+				dest.splice(j, 0, source[i]);
+			}
+
+			return dest;
+		}
+
+		function isCompatibleSignatures(token1, token2) {
+			var info1 = token1.info;
+			var info2 = token2.info;
+
+			// same frozen ruleset
+			if (info1.freezeID === info2.freezeID) {
+				return true;
+			}
+
+			// same pseudo-classes in selectors
+			if (info1.pseudoID === info2.pseudoID) {
+				return true;
+			}
+
+			// different frozen rulesets
+			if (info1.freeze && info2.freeze) {
+				var signature1 = info1.pseudoSignature;
+				var signature2 = info2.pseudoSignature;
+
+				return signature1 === signature2;
+			}
+
+			// is it frozen at all?
+			return !info1.freeze && !info2.freeze;
 		}
 
 		var exports = {
-			packNumber: packNumber
+			copyObject: copyObject,
+			equalHash: equalHash,
+			getHash: getHash,
+			hashInHash: hashInHash,
+			isCompatibleSignatures: isCompatibleSignatures,
+			compareRulesets: compareRulesets,
+			addToSelector: addToSelector
 		};
-		
+
 		return exports;
 	};
 	//#endregion
@@ -3775,8 +5249,18 @@ var CSSO = (function(){
 		}
 
 		// node: Number
-		function checkNumber(_i) {
+		function checkNumber(_i, sign) {
 			if (_i < tokens.length && tokens[_i].number_l) return tokens[_i].number_l;
+
+			if (!sign && _i < tokens.length && tokens[_i].type === TokenType.HyphenMinus) {
+				var x = checkNumber(_i + 1, true);
+				if (x) {
+					tokens[_i].number_l = x + 1;
+					return tokens[_i].number_l;
+				} else {
+					fail(tokens[_i])
+				}
+			}
 
 			if (_i < tokens.length && tokens[_i].type === TokenType.DecimalNumber &&
 				(!tokens[_i + 1] ||
@@ -4148,6 +5632,10 @@ var CSSO = (function(){
 
 			while (pos < tokens.length && _checkSimpleSelector(pos)) {
 				t = _getSimpleSelector();
+
+				if (!t) {
+					throwError();
+				}
 
 				if ((needInfo && typeof t[1] === 'string') || typeof t[0] === 'string') ss.push(t);
 				else ss = ss.concat(t);
@@ -4523,6 +6011,11 @@ var CSSO = (function(){
 			failLN = 0;
 
 			var ast = CSSPRules[rule]();
+
+			if (!ast && rule === 'stylesheet') {
+				return needInfo ? [{}, rule] : [rule];
+			}
+
 			//console.log(require('../utils/stringify.js')(require('../utils/cleanInfo.js')(ast), true));
 			return ast;
 		};
@@ -5157,12 +6650,110 @@ var CSSO = (function(){
 		
 		return exports;
 	};
-	//#endregion	
+	//#endregion
+	
+	//#region URL: /utils/walker
+	modules['/utils/walker'] = function () {
+		var offset;
+		var process;
+
+		function walk(token, parent, stack) {
+			process(token, parent, stack);
+			stack.push(token);
+
+			switch (token[offset + 0])
+			{
+				case 'simpleselector':
+				case 'dimension':
+				case 'selector':
+				case 'property':
+				case 'value':
+				case 'filterv':
+				case 'progid':
+				case 'ruleset':
+				case 'atruleb':
+				case 'atrulerq':
+				case 'atrulers':
+				case 'stylesheet':
+				case 'attrib':
+				case 'important':
+				case 'block':
+				case 'atrules':
+				case 'uri':
+					for (var i = offset + 1; i < token.length; i++) {
+						walk(token[i], token, stack);
+					}
+					break;
+
+				case 'percentage':
+				case 'clazz':
+				case 'atkeyword':
+				case 'pseudoe':
+				case 'pseudoc':
+					walk(token[offset + 1], token, stack);
+					break;
+
+				case 'declaration':
+				case 'filter':
+					walk(token[offset + 1], token, stack);
+					walk(token[offset + 2], token, stack);
+					break;
+
+				case 'atruler':
+					walk(token[offset + 1], token, stack);
+					walk(token[offset + 2], token, stack);
+					walk(token[offset + 3], token, stack);
+					break;
+
+				case 'braces':
+					for (var i = offset + 3; i < token.length; i++) {
+						walk(token[i], token, stack);
+					}
+					break;
+
+				case 'nthselector':
+					process(token[offset + 1], token, stack);
+					for (var i = offset + 2; i < token.length; i++) {
+						walk(token[i], token, stack);
+					}
+					break;
+
+				case 'funktion':
+					process(token[offset + 1], token, stack);
+					process(token[offset + 2], token, stack);
+
+					token = token[offset + 2];
+					stack.push(token);
+					for (var i = offset + 1; i < token.length; i++) {
+						walk(token[i], token, stack);
+					}
+					stack.pop();
+					break;
+			}
+
+			stack.pop();
+		}
+
+		var exports = function(tree, fn, hasInfo) {
+			offset = hasInfo ? 1 : 0;
+
+			if (typeof fn === 'function') {
+				process = fn;
+
+				walk(tree, null, []);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
 
 	//#region URL: /
 	modules['/'] = function () {
 		var parse = require('/parser');
 		var compress = require('/compressor');
+		var traslateInternal = require('/compressor/ast/translate');
+		var walk = require('/utils/walker');
 		var translate = require('/utils/translate');
 		var stringify = require('/utils/stringify');
 		var cleanInfo = require('/utils/cleanInfo');
@@ -5172,18 +6763,42 @@ var CSSO = (function(){
 //
 //			var ast = parse(src, 'stylesheet', needInfo);
 //			var compressed = compress(ast, {
-//				restructuring: !noStructureOptimizations
+//				restructuring: !noStructureOptimizations,
+//				outputAst: 'internal'
 //			});
-//			return translate(compressed, true);
+//
+//			return traslateInternal(compressed);
 //		};
 
 		var minify = function(src, options) {
+			var minifyOptions = {
+				outputAst: 'internal'
+			};
+
+			if (options) {
+				for (var key in options) {
+					minifyOptions[key] = options[key];
+				}
+			}
+
+//			var t = Date.now();
 			var ast = parse(src, 'stylesheet', true);
-			var compressed = compress(ast, options);
-			return translate(compressed, true);
+//			if (minifyOptions.debug) {
+//				console.error('## parsing done in %d ms\n', Date.now() - t);
+//			}
+
+//			var t = Date.now();
+			var compressed = compress(ast, minifyOptions);
+//			if (minifyOptions.debug) {
+//				console.error('## compressing done in %d ms\n', Date.now() - t);
+//			}
+
+			return traslateInternal(compressed);
 		};
 
 		var exports = {
+			version: '1.5.1',
+
 			// main method
 			minify: minify,
 
@@ -5192,13 +6807,14 @@ var CSSO = (function(){
 			compress: compress,
 			translate: translate,
 
+			walk: walk,
 			stringify: stringify,
 			cleanInfo: cleanInfo,
 
 //			// deprecated
 //			justDoIt: justDoIt
 		};
-		
+
 		return exports;
 	};
 	//#endregion
