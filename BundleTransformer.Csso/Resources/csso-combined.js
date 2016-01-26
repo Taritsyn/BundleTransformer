@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.5.1
+* CSSO (CSS Optimizer) v1.5.3
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -3278,8 +3278,8 @@ var CSSO = (function(){
 				return null;
 			}
 
-			var compareMarkers = {};
-			compareMarkers[selector[0].info.compareMarker] = true;
+			var nodeCompareMarker = selector[0].info.compareMarker;
+			var skippedCompareMarkers = {};
 
 			for (i = i + 1; i < array.length; i++) {
 				var next = array[i];
@@ -3294,6 +3294,12 @@ var CSSO = (function(){
 
 				var nextFirstSelector = next.selector.selectors[0];
 				var nextBlock = next.block.declarations;
+				var nextCompareMarker = nextFirstSelector.info.compareMarker;
+
+				// if next ruleset has same marked as one of skipped then stop joining
+				if (nextCompareMarker in skippedCompareMarkers) {
+					return;
+				}
 
 				// try to join by selectors
 				if (selector.length === 1) {
@@ -3311,10 +3317,9 @@ var CSSO = (function(){
 				}
 
 				// try to join by properties
-				var nextCompareMarker = nextFirstSelector.info.compareMarker;
-				var equalBlocks = true;
-
 				if (block.length === nextBlock.length) {
+					var equalBlocks = true;
+
 					for (var j = 0; j < block.length; j++) {
 						if (block[j].info.s !== nextBlock[j].info.s) {
 							equalBlocks = false;
@@ -3332,7 +3337,6 @@ var CSSO = (function(){
 							}
 						}
 
-						compareMarkers[nextCompareMarker] = true;
 						array.splice(i, 1);
 						i--;
 
@@ -3340,10 +3344,12 @@ var CSSO = (function(){
 					}
 				}
 
-				// go to next ruleset if simpleselectors has no equal specifity and element selector
-				if (nextCompareMarker in compareMarkers) {
+				// go to next ruleset if current one can be skipped (has no equal specificity nor element selector)
+				if (nextCompareMarker === nodeCompareMarker) {
 					return;
 				}
+
+				skippedCompareMarkers[nextCompareMarker] = true;
 			}
 		};
 
@@ -3359,6 +3365,10 @@ var CSSO = (function(){
 		var dontRestructure = {
 			'src': 1 // https://github.com/afelix/csso/issues/50
 		};
+
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/display#Browser_compatibility
+		var IS_DISPLAY = /display$/;
+		var DISPLAY_DONT_MIX_VALUE = /table|ruby|flex|-(flex)?box$|grid|contents|run-in/;
 
 		var NEEDLESS_TABLE = {
 			'border-width': ['border'],
@@ -3463,7 +3473,7 @@ var CSSO = (function(){
 			var vendorId = '';
 			var hack9 = 0;
 			var functions = {};
-			var units = {};
+			var special = {};
 
 			for (var i = 0; i < value.length; i++) {
 				if (!vendorId) {
@@ -3472,9 +3482,16 @@ var CSSO = (function(){
 
 				switch (value[i].type) {
 					case 'Identifier':
-						if (value[i].name === '\\9') {
+						var name = value[i].name;
+
+						if (name === '\\9') {
 							hack9 = 1;
 						}
+
+						if (IS_DISPLAY.test(property) && DISPLAY_DONT_MIX_VALUE.test(name)) {
+							special[name] = true;
+						}
+
 						break;
 
 					case 'Function':
@@ -3495,6 +3512,7 @@ var CSSO = (function(){
 
 					case 'Dimension':
 						var unit = value[i].unit;
+
 						switch (unit) {
 							// is not supported until IE11
 							case 'rem':
@@ -3506,7 +3524,7 @@ var CSSO = (function(){
 							case 'vmin':
 							case 'vmax':
 							case 'vm': // IE9 supporting "vm" instead of "vmin".
-								units[unit] = true;
+								special[unit] = true;
 								break;
 						}
 						break;
@@ -3516,7 +3534,7 @@ var CSSO = (function(){
 			return (
 				fp + property +
 				'[' + Object.keys(functions) + ']' +
-				Object.keys(units) +
+				Object.keys(special) +
 				hack9 + vendorId
 			);
 		}

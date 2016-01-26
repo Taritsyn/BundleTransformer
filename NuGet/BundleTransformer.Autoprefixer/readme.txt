@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Autoprefixer 1.9.92 Alpha 1
+       README file for Bundle Transformer: Autoprefixer 1.9.92 Alpha 3
 
    ----------------------------------------------------------------------
 
@@ -24,12 +24,8 @@
    =============
    RELEASE NOTES
    =============
-   1. No longer made preprocessing of country conditional expressions;
-   2. Added support of Autoprefixer version 6.3.1;
-   3. In configuration settings of Autoprefixer-postprocessor was added
-      4 new properties: `Supports` (default `true`), `Flexbox` (default
-      `true`), `Grid` (default `true`) and `Stats` (default `empty
-      string`).
+   Now the path to custom statistics file is added to the asset
+   dependencies.
 
    ====================
    POST-INSTALL ACTIONS

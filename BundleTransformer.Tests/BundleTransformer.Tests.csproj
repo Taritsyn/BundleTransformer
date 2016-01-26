@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationSetup.cs" />
+    <Compile Include="Autoprefixer\PostProcessors\AutoprefixCssPostProcessorTests.cs" />
     <Compile Include="Core\Assets\AssetTests.cs" />
     <Compile Include="Core\Filters\StyleDuplicateAssetsFilterTests.cs">
       <SubType>Code</SubType>
@@ -114,6 +115,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj">
+      <Project>{05911325-5bf6-4845-98af-4aef698993ae}</Project>
+      <Name>BundleTransformer.Autoprefixer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj">
       <Project>{0648FFE9-2A1A-4E17-AF5D-AE0048378617}</Project>
       <Name>BundleTransformer.CoffeeScript</Name>

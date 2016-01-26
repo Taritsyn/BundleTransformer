@@ -253,10 +253,13 @@
 		{
 			string newContent;
 			string assetUrl = asset.Url;
+			IList<string> dependencies;
 
 			try
 			{
-				newContent = cssAutoprefixer.Process(asset.Content, asset.Url);
+				AutoprefixingResult result = cssAutoprefixer.Process(asset.Content, asset.Url);
+				newContent = result.ProcessedContent;
+				dependencies = result.IncludedFilePaths;
 			}
 			catch (CssAutoprefixingException e)
 			{
@@ -272,6 +275,7 @@
 			}
 
 			asset.Content = newContent;
+			asset.VirtualPathDependencies = asset.VirtualPathDependencies.Union(dependencies).ToList();
 		}
 
 		/// <summary>

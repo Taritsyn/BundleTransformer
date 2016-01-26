@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Autoprefixer.AutoPrefixers
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
 	using System.Text;
@@ -122,12 +123,23 @@
 		/// <param name="content">Text content of CSS-asset</param>
 		/// <param name="path">Path to CSS-asset</param>
 		/// <param name="options">Autoprefixing options</param>
-		/// <returns>Processed text content of CSS-asset</returns>
-		public string Process(string content, string path, AutoprefixingOptions options = null)
+		/// <returns>Autoprefixing result</returns>
+		public AutoprefixingResult Process(string content, string path, AutoprefixingOptions options = null)
 		{
-			string newContent;
-			string currentOptionsString = options != null ?
-				ConvertAutoprefixingOptionsToJson(options).ToString() : _defaultOptionsString;
+			AutoprefixingResult autoprefixingResult;
+			AutoprefixingOptions currentOptions;
+			string currentOptionsString;
+
+			if (options != null)
+			{
+				currentOptions = options;
+				currentOptionsString = ConvertAutoprefixingOptionsToJson(options).ToString();
+			}
+			else
+			{
+				currentOptions = _defaultOptions;
+				currentOptionsString = _defaultOptionsString;
+			}
 
 			lock (_autoprefixingSynchronizer)
 			{
@@ -147,7 +159,11 @@
 						throw new CssAutoprefixingException(FormatErrorDetails(errors[0], content, path));
 					}
 
-					newContent = json.Value<string>("processedCode");
+					autoprefixingResult = new AutoprefixingResult
+					{
+						ProcessedContent = json.Value<string>("processedCode"),
+						IncludedFilePaths = GetIncludedFilePaths(currentOptions.Stats)
+					};
 				}
 				catch (JsRuntimeException e)
 				{
@@ -155,7 +171,7 @@
 				}
 			}
 
-			return newContent;
+			return autoprefixingResult;
 		}
 
 		/// <summary>
@@ -199,6 +215,22 @@
 			JObject statistics = JObject.Parse(_virtualFileSystemWrapper.GetFileTextContent(path));
 
 			return statistics;
+		}
+
+		/// <summary>
+		/// Gets a list of included files
+		/// </summary>
+		/// <param name="path">Virtual path to file, that contains custom statistics</param>
+		/// <returns>List of included files</returns>
+		private IList<string> GetIncludedFilePaths(string path)
+		{
+			var includedFilePaths = new List<string>();
+			if (!string.IsNullOrWhiteSpace(path))
+			{
+				includedFilePaths.Add(_virtualFileSystemWrapper.ToAbsolutePath(path));
+			}
+
+			return includedFilePaths;
 		}
 
 		/// <summary>
