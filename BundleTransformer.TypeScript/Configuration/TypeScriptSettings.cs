@@ -10,6 +10,36 @@
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to do not report errors on unreachable code
+		/// </summary>
+		[ConfigurationProperty("allowUnreachableCode", DefaultValue = false)]
+		public bool AllowUnreachableCode
+		{
+			get { return (bool)this["allowUnreachableCode"]; }
+			set { this["allowUnreachableCode"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not report errors on unused labels
+		/// </summary>
+		[ConfigurationProperty("allowUnusedLabels", DefaultValue = false)]
+		public bool AllowUnusedLabels
+		{
+			get { return (bool)this["allowUnusedLabels"]; }
+			set { this["allowUnusedLabels"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
+		/// </summary>
+		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = false)]
+		public bool ForceConsistentCasingInFileNames
+		{
+			get { return (bool)this["forceConsistentCasingInFileNames"]; }
+			set { this["forceConsistentCasingInFileNames"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -51,6 +81,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to report errors for fallthrough cases in switch statement
+		/// </summary>
+		[ConfigurationProperty("noFallthroughCasesInSwitch", DefaultValue = false)]
+		public bool NoFallthroughCasesInSwitch
+		{
+			get { return (bool)this["noFallthroughCasesInSwitch"]; }
+			set { this["noFallthroughCasesInSwitch"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to raise error on expressions and declarations
 		/// with an implied <code>any</code> type
 		/// </summary>
@@ -59,6 +99,16 @@
 		{
 			get { return (bool)this["noImplicitAny"]; }
 			set { this["noImplicitAny"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to report error when not all code paths in function return a value
+		/// </summary>
+		[ConfigurationProperty("noImplicitReturns", DefaultValue = false)]
+		public bool NoImplicitReturns
+		{
+			get { return (bool)this["noImplicitReturns"]; }
+			set { this["noImplicitReturns"] = value; }
 		}
 
 		/// <summary>
@@ -136,7 +186,7 @@
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// or `EcmaScript6` (experimental)
+		/// or `EcmaScript2015` (experimental)
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
 		public TargetMode Target

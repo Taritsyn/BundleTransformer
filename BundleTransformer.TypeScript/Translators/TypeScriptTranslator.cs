@@ -57,6 +57,33 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not report errors on unreachable code
+		/// </summary>
+		public bool AllowUnreachableCode
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not report errors on unused labels
+		/// </summary>
+		public bool AllowUnusedLabels
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
+		/// </summary>
+		public bool ForceConsistentCasingInFileNames
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a end of line sequence, that used when emitting files:
 		/// 'CRLF' (dos) or 'LF' (unix)
 		/// </summary>
@@ -94,10 +121,28 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to report errors for fallthrough cases in switch statement
+		/// </summary>
+		public bool NoFallthroughCasesInSwitch
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to raise error on expressions and declarations
 		/// with an implied <code>any</code> type
 		/// </summary>
 		public bool NoImplicitAny
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to report error when not all code paths in function return a value
+		/// </summary>
+		public bool NoImplicitReturns
 		{
 			get;
 			set;
@@ -171,7 +216,7 @@
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// or `EcmaScript6` (experimental)
+		/// or `EcmaScript2015` (experimental)
 		/// </summary>
 		public TargetMode Target
 		{
@@ -201,11 +246,16 @@
 		{
 			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
 
+			AllowUnreachableCode = tsConfig.AllowUnreachableCode;
+			AllowUnusedLabels = tsConfig.AllowUnusedLabels;
+			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
 			NewLine = tsConfig.NewLine;
 			NoEmit = tsConfig.NoEmit;
 			NoEmitHelpers = tsConfig.NoEmitHelpers;
 			NoEmitOnError = tsConfig.NoEmitOnError;
+			NoFallthroughCasesInSwitch = tsConfig.NoFallthroughCasesInSwitch;
 			NoImplicitAny = tsConfig.NoImplicitAny;
+			NoImplicitReturns = tsConfig.NoImplicitReturns;
 			NoLib = tsConfig.NoLib;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
 			RemoveComments = tsConfig.RemoveComments;
@@ -345,11 +395,16 @@
 		{
 			var options = new CompilationOptions
 			{
+				AllowUnreachableCode = AllowUnreachableCode,
+				AllowUnusedLabels = AllowUnusedLabels,
+				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
 				NewLine = NewLine,
 				NoEmit = NoEmit,
 				NoEmitHelpers = NoEmitHelpers,
 				NoEmitOnError = NoEmitOnError,
+				NoFallthroughCasesInSwitch = NoFallthroughCasesInSwitch,
 				NoImplicitAny = NoImplicitAny,
+				NoImplicitReturns = NoImplicitReturns,
 				NoLib = NoLib,
 				PreserveConstEnums = PreserveConstEnums,
 				RemoveComments = RemoveComments,

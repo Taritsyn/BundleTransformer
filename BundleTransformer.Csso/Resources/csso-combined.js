@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.5.3
+* CSSO (CSS Optimizer) v1.5.4
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -2972,6 +2972,7 @@ var CSSO = (function(){
 				// compare keyframe selectors by its values
 				// NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
 				if (/^(-[a-z\d]+-)?keyframes$/.test(name)) {
+					node.block.info.isKeyframes = true;
 					node.block.rules.forEach(function(ruleset) {
 						ruleset.selector.selectors.forEach(function(simpleselector) {
 							simpleselector.info.compareMarker = simpleselector.info.s;
@@ -3640,6 +3641,8 @@ var CSSO = (function(){
 			var selector = node.selector.selectors;
 			var block = node.block;
 
+			var skippedCompareMarkers = {};
+
 			for (i = i - 1; i >= 0; i--) {
 				var prevNode = array[i];
 
@@ -3652,6 +3655,13 @@ var CSSO = (function(){
 
 				if (node.info.pseudoSignature !== prevNode.info.pseudoSignature) {
 					return;
+				}
+
+				// try prev ruleset if simpleselectors has no equal specifity and element selector
+				for (var j = 0; j < prevSelector.length; j++) {
+					if (prevSelector[j].info.compareMarker in skippedCompareMarkers) {
+						return;
+					}
 				}
 
 				// try to join by selectors
@@ -3670,11 +3680,15 @@ var CSSO = (function(){
 
 				if (diff.eq.length) {
 					if (!diff.ne1.length && !diff.ne2.length) {
+						// equal blocks
 						if (utils.isCompatibleSignatures(node, prevNode)) {
-							utils.addToSelector(prevSelector, selector);
-							return null;
+							utils.addToSelector(selector, prevSelector);
+							array.splice(i, 1);
+							return;
 						}
-					} else {
+					} else if (!parent.info.isKeyframes) { /* probably we don't need to prevent those merges for @keyframes
+															 TODO: need to be checked */
+
 						if (diff.ne1.length && !diff.ne2.length) {
 							// prevBlock is subset block
 							var simpleSelectorCount = selector.length - 2; // - type and info
@@ -3751,13 +3765,8 @@ var CSSO = (function(){
 					}
 				}
 
-				// go to next ruleset if simpleselectors has no equal specifity and element selector
 				for (var j = 0; j < prevSelector.length; j++) {
-					for (var k = 0; k < selector.length; k++) {
-						if (prevSelector[j].info.compareMarker === selector[k].info.compareMarker) {
-							return;
-						}
-					}
+					skippedCompareMarkers[prevSelector[j].info.compareMarker] = true;
 				}
 			}
 		};
@@ -6679,8 +6688,7 @@ var CSSO = (function(){
 			process(token, parent, stack);
 			stack.push(token);
 
-			switch (token[offset + 0])
-			{
+			switch (token[offset + 0]) {
 				case 'simpleselector':
 				case 'dimension':
 				case 'selector':

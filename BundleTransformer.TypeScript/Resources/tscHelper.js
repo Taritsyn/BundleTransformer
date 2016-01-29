@@ -4,10 +4,15 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 	var exports = {},
 		defaultOptions = {
+			allowJs: false,
+			allowSyntheticDefaultImports: false,
+			allowUnreachableCode: false,
+			allowUnusedLabels: false,
 			charset: '',
 			emitBOM: false,
 			emitDecoratorMetadata: false,
 			experimentalDecorators: false,
+			forceConsistentCasingInFileNames: false,
 			inlineSourceMap: false,
 			inlineSources: false,
 			mapRoot: '',
@@ -16,12 +21,15 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			noEmit: false,
 			noEmitHelpers: false,
 			noEmitOnError: false,
+			noFallthroughCasesInSwitch: false,
 			noImplicitAny: false,
+			noImplicitReturns: false,
 			noLib: false,
 			noResolve: false,
 			out: '',
 			outDir: '',
 			preserveConstEnums: false,
+			reactNamespace: '',
 			removeComments: false,
 			rootDir: '',
 			isolatedModules: false,
@@ -226,6 +234,10 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			return ts.sys.readFile(fileName);
 		}
 
+		function directoryExists(directoryName) {
+			return ts.sys.directoryExists(directoryName);
+		}
+
 		return {
 			getSourceFile: getSourceFile,
 			getDefaultLibFileName: getDefaultLibFileName,
@@ -235,7 +247,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			getCanonicalFileName: getCanonicalFileName,
 			getNewLine: getNewLine,
 			fileExists: fileExists,
-			readFile: readFile
+			readFile: readFile,
+			directoryExists: directoryExists
 		};
 	}
 	//#endregion

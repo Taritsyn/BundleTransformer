@@ -168,11 +168,16 @@
 		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
 			var optionsJson = new JObject(
+				new JProperty("allowUnreachableCode", options.AllowUnreachableCode),
+				new JProperty("allowUnusedLabels", options.AllowUnusedLabels),
+				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
 				new JProperty("newLine", options.NewLine),
 				new JProperty("noEmit", options.NoEmit),
 				new JProperty("noEmitHelpers", options.NoEmitHelpers),
 				new JProperty("noEmitOnError", options.NoEmitOnError),
+				new JProperty("noFallthroughCasesInSwitch", options.NoFallthroughCasesInSwitch),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
+				new JProperty("noImplicitReturns", options.NoImplicitReturns),
 				new JProperty("noLib", options.NoLib),
 				new JProperty("preserveConstEnums", options.PreserveConstEnums),
 				new JProperty("removeComments", options.RemoveComments),

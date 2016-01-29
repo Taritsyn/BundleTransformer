@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: IntelliSense 1.9.92 Alpha 1
+       README file for Bundle Transformer: IntelliSense 1.9.92 Alpha 4
 
    ----------------------------------------------------------------------
 
@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of LESS-translator and
-   Autoprefixer-postprocessor.
+   Updated definitions for configuration settings of TypeScript-translator.
    
    =============
    DOCUMENTATION

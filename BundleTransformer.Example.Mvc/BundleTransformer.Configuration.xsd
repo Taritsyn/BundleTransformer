@@ -521,6 +521,21 @@
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
+		<xs:attribute name="allowUnreachableCode" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not report errors on unreachable code</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="allowUnusedLabels" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not report errors on unused labels</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disallow inconsistently-cased references to the same file</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="newLine" use="optional" default="CrLf">
 			<xs:annotation>
 				<xs:documentation>End of line sequence, that used when emitting files: 'CRLF' (dos) or 'LF' (unix)</xs:documentation>
@@ -547,9 +562,19 @@
 				<xs:documentation>Flag for whether to do not emit outputs if any errors were reported</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noFallthroughCasesInSwitch" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to report errors for fallthrough cases in switch statement</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noImplicitAny" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to raise error on expressions and declarations with an implied `any` type</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="noImplicitReturns" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to report error when not all code paths in function return a value</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="noLib" type="Boolean_SchemaType" use="optional" default="false">
@@ -589,7 +614,7 @@
 		</xs:attribute>
 		<xs:attribute name="target" use="optional" default="EcmaScript3">
 			<xs:annotation>
-				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, or `EcmaScript6` (experimental)</xs:documentation>
+				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, or `EcmaScript2015` (experimental)</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
