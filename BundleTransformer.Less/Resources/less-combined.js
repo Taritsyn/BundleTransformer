@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.5.3
+ * Less - Leaner CSS v2.6.0
  * http://lesscss.org
  *
  * Copyright (c) 2009-2015, Alexis Sellier <self@cloudhead.net>
@@ -260,7 +260,6 @@ var Less = (function(){
 			// context
 			'processImports',   // option & context - whether to process imports. if false then imports will not be imported.
 								// Used by the import manager to stop multiple import visitors being created.
-			'reference',        // Used to indicate that the contents are imported by reference
 			'pluginManager'     // Used as the plugin manager for the session
 		];
 
@@ -504,6 +503,55 @@ var Less = (function(){
 			return a  <  b ? -1
 				: a === b ?  0
 				: a  >  b ?  1 : undefined;
+		};
+		// Returns true if this node represents root of ast imported by reference
+		Node.prototype.blocksVisibility = function () {
+			if (this.visibilityBlocks == null) {
+				this.visibilityBlocks = 0;
+			}
+			return this.visibilityBlocks !== 0;
+		};
+		Node.prototype.addVisibilityBlock = function () {
+			if (this.visibilityBlocks == null) {
+				this.visibilityBlocks = 0;
+			}
+			this.visibilityBlocks = this.visibilityBlocks + 1;
+		};
+		Node.prototype.removeVisibilityBlock = function () {
+			if (this.visibilityBlocks == null) {
+				this.visibilityBlocks = 0;
+			}
+			this.visibilityBlocks = this.visibilityBlocks - 1;
+		};
+		//Turns on node visibility - if called node will be shown in output regardless
+		//of whether it comes from import by reference or not
+		Node.prototype.ensureVisibility = function () {
+			this.nodeVisible = true;
+		};
+		//Turns off node visibility - if called node will NOT be shown in output regardless
+		//of whether it comes from import by reference or not
+		Node.prototype.ensureInvisibility = function () {
+			this.nodeVisible = false;
+		};
+		// return values:
+		// false - the node must not be visible
+		// true - the node must be visible
+		// undefined or null - the node has the same visibility as its parent
+		Node.prototype.isVisible = function () {
+			return this.nodeVisible;
+		};
+		Node.prototype.visibilityInfo = function() {
+			return {
+				visibilityBlocks: this.visibilityBlocks,
+				nodeVisible: this.nodeVisible
+			};
+		};
+		Node.prototype.copyVisibilityInfo = function(info) {
+			if (!info) {
+				return;
+			}
+			this.visibilityBlocks = info.visibilityBlocks;
+			this.nodeVisible = info.nodeVisible;
 		};
 
 		return Node;
@@ -893,24 +941,6 @@ var Less = (function(){
 								  this.index, this.currentFileInfo, this.inline);
 		};
 
-		// Recursive marking for rules
-		var mark = function(value) {
-			if (!Array.isArray(value)) {
-				if (value.markReferenced) {
-					value.markReferenced();
-				}
-			} else {
-				value.forEach(function (ar) {
-					mark(ar);
-				});
-			}
-		};
-		Rule.prototype.markReferenced = function () {
-			if (this.value) {
-				mark(this.value);
-			}
-		};
-
 		return Rule;
 	};
 	//#endregion
@@ -920,15 +950,15 @@ var Less = (function(){
 		var Node = require('/tree/node'),
 			Element = require('/tree/element');
 
-		var Selector = function (elements, extendList, condition, index, currentFileInfo, isReferenced) {
+		var Selector = function (elements, extendList, condition, index, currentFileInfo, visibilityInfo) {
 			this.elements = elements;
 			this.extendList = extendList;
 			this.condition = condition;
 			this.currentFileInfo = currentFileInfo || {};
-			this.isReferenced = isReferenced;
 			if (!condition) {
 				this.evaldCondition = true;
 			}
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 		Selector.prototype = new Node();
 		Selector.prototype.type = "Selector";
@@ -944,8 +974,9 @@ var Less = (function(){
 			}
 		};
 		Selector.prototype.createDerived = function(elements, extendList, evaldCondition) {
+			var info = this.visibilityInfo();
 			evaldCondition = (evaldCondition != null) ? evaldCondition : this.evaldCondition;
-			var newSelector = new Selector(elements, extendList || this.extendList, null, this.index, this.currentFileInfo, this.isReferenced);
+			var newSelector = new Selector(elements, extendList || this.extendList, null, this.index, this.currentFileInfo, info);
 			newSelector.evaldCondition = evaldCondition;
 			newSelector.mediaEmpty = this.mediaEmpty;
 			return newSelector;
@@ -1023,12 +1054,6 @@ var Less = (function(){
 				}
 			}
 		};
-		Selector.prototype.markReferenced = function () {
-			this.isReferenced = true;
-		};
-		Selector.prototype.getIsReferenced = function() {
-			return !this.currentFileInfo.reference || this.isReferenced;
-		};
 		Selector.prototype.getIsOutput = function() {
 			return this.evaldCondition;
 		};
@@ -1094,7 +1119,7 @@ var Less = (function(){
 			Paren = require('/tree/paren'),
 			Combinator = require('/tree/combinator');
 
-		var Element = function (combinator, value, index, currentFileInfo) {
+		var Element = function (combinator, value, index, currentFileInfo, info) {
 			this.combinator = combinator instanceof Combinator ?
 							  combinator : new Combinator(combinator);
 
@@ -1107,6 +1132,7 @@ var Less = (function(){
 			}
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
+			this.copyVisibilityInfo(info);
 		};
 		Element.prototype = new Node();
 		Element.prototype.type = "Element";
@@ -1121,7 +1147,13 @@ var Less = (function(){
 			return new Element(this.combinator,
 									 this.value.eval ? this.value.eval(context) : this.value,
 									 this.index,
-									 this.currentFileInfo);
+									 this.currentFileInfo, this.visibilityInfo());
+		};
+		Element.prototype.clone = function () {
+			return new Element(this.combinator,
+				this.value,
+				this.index,
+				this.currentFileInfo, this.visibilityInfo());
 		};
 		Element.prototype.genCSS = function (context, output) {
 			output.add(this.toCSS(context), this.currentFileInfo, this.index);
@@ -1234,11 +1266,12 @@ var Less = (function(){
 			defaultFunc = require('/functions/default'),
 			getDebugInfo = require('/tree/debug-info');
 
-		var Ruleset = function (selectors, rules, strictImports) {
+		var Ruleset = function (selectors, rules, strictImports, visibilityInfo) {
 			this.selectors = selectors;
 			this.rules = rules;
 			this._lookups = {};
 			this.strictImports = strictImports;
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 		Ruleset.prototype = new Node();
 		Ruleset.prototype.type = "Ruleset";
@@ -1246,7 +1279,7 @@ var Less = (function(){
 		Ruleset.prototype.isRulesetLike = true;
 		Ruleset.prototype.accept = function (visitor) {
 			if (this.paths) {
-				visitor.visitArray(this.paths, true);
+				this.paths = visitor.visitArray(this.paths, true);
 			} else if (this.selectors) {
 				this.selectors = visitor.visitArray(this.selectors);
 			}
@@ -1277,7 +1310,7 @@ var Less = (function(){
 			}
 
 			var rules = this.rules ? this.rules.slice(0) : null,
-				ruleset = new Ruleset(selectors, rules, this.strictImports),
+				ruleset = new Ruleset(selectors, rules, this.strictImports, this.visibilityInfo()),
 				rule, subRule;
 
 			ruleset.originalRuleset = this;
@@ -1385,6 +1418,7 @@ var Less = (function(){
 
 						for (var j = 0; j < rule.rules.length; j++) {
 							subRule = rule.rules[j];
+							subRule.copyVisibilityInfo(rule.visibilityInfo());
 							if (!(subRule instanceof Rule) || !subRule.variable) {
 								rsRules.splice(++i, 0, subRule);
 							}
@@ -1412,7 +1446,7 @@ var Less = (function(){
 			for (i = 0; i < rules.length; i++) {
 				if (rules[i].type === "Import") {
 					importRules = rules[i].eval(context);
-					if (importRules && importRules.length) {
+					if (importRules && (importRules.length || importRules.length === 0)) {
 						rules.splice.apply(rules, [i, 1].concat(importRules));
 						i+= importRules.length - 1;
 					} else {
@@ -1429,7 +1463,7 @@ var Less = (function(){
 				} else {
 					return r;
 				}
-			}), this.strictImports);
+			}), this.strictImports, this.visibilityInfo());
 
 			return result;
 		};
@@ -1657,46 +1691,6 @@ var Less = (function(){
 				output.add('\n');
 			}
 		};
-		Ruleset.prototype.markReferenced = function () {
-			var s;
-			if (this.selectors) {
-				for (s = 0; s < this.selectors.length; s++) {
-					this.selectors[s].markReferenced();
-				}
-			}
-
-			if (this.rules) {
-				for (s = 0; s < this.rules.length; s++) {
-					if (this.rules[s].markReferenced) {
-						this.rules[s].markReferenced();
-					}
-				}
-			}
-		};
-		Ruleset.prototype.getIsReferenced = function() {
-			var i, j, path, selector;
-
-			if (this.paths) {
-				for (i = 0; i < this.paths.length; i++) {
-					path = this.paths[i];
-					for (j = 0; j < path.length; j++) {
-						if (path[j].getIsReferenced && path[j].getIsReferenced()) {
-							return true;
-						}
-					}
-				}
-			}
-
-			if (this.selectors) {
-				for (i = 0; i < this.selectors.length; i++) {
-					selector = this.selectors[i];
-					if (selector.getIsReferenced && selector.getIsReferenced()) {
-						return true;
-					}
-				}
-			}
-			return false;
-		};
 
 		Ruleset.prototype.joinSelectors = function (paths, context, selectors) {
 			for (var s = 0; s < selectors.length; s++) {
@@ -1840,6 +1834,7 @@ var Less = (function(){
 						paths.push(newSelectors[i]);
 						lastSelector = newSelectors[i][length - 1];
 						newSelectors[i][length - 1] = lastSelector.createDerived(lastSelector.elements, inSelector.extendList);
+						//newSelectors[i][length - 1].copyVisibilityInfo(inSelector.visibilityInfo());
 					}
 				}
 
@@ -1886,7 +1881,11 @@ var Less = (function(){
 
 				//put together the parent selectors after the join (e.g. the rest of the parent)
 				if (addPath.length > 1) {
-					newSelectorPath = newSelectorPath.concat(addPath.slice(1));
+					var restOfPath = addPath.slice(1);
+					restOfPath = restOfPath.map(function (selector) {
+						return selector.createDerived(selector.elements, []);
+					});
+					newSelectorPath = newSelectorPath.concat(restOfPath);
 				}
 				return newSelectorPath;
 			}
@@ -1927,6 +1926,12 @@ var Less = (function(){
 				}
 			}
 
+			function deriveSelector(visibilityInfo, deriveFrom) {
+				var newSelector = deriveFrom.createDerived(deriveFrom.elements, deriveFrom.extendList, deriveFrom.evaldCondition);
+				newSelector.copyVisibilityInfo(visibilityInfo);
+				return newSelector;
+			}
+
 			// joinSelector code follows
 			var i, newPaths, hadParentSelector;
 
@@ -1937,7 +1942,16 @@ var Less = (function(){
 				if (context.length > 0) {
 					newPaths = [];
 					for (i = 0; i < context.length; i++) {
-						newPaths.push(context[i].concat(selector));
+						//var concatenated = [];
+						//context[i].forEach(function(entry) {
+						//    var newEntry = entry.createDerived(entry.elements, entry.extendList, entry.evaldCondition);
+						//    newEntry.copyVisibilityInfo(selector.visibilityInfo());
+						//    concatenated.push(newEntry);
+						//}, this);
+						var concatenated = context[i].map(deriveSelector.bind(this, selector.visibilityInfo()));
+
+						concatenated.push(selector);
+						newPaths.push(concatenated);
 					}
 				}
 				else {
@@ -1961,7 +1975,7 @@ var Less = (function(){
 			Selector = require('/tree/selector'),
 			Ruleset = require('/tree/ruleset');
 
-		var Directive = function (name, value, rules, index, currentFileInfo, debugInfo, isReferenced, isRooted) {
+		var Directive = function (name, value, rules, index, currentFileInfo, debugInfo, isRooted, visibilityInfo) {
 			var i;
 
 			this.name  = name;
@@ -1980,8 +1994,8 @@ var Less = (function(){
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
 			this.debugInfo = debugInfo;
-			this.isReferenced = isReferenced;
 			this.isRooted = isRooted || false;
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 
 		Directive.prototype = new Node();
@@ -2038,7 +2052,7 @@ var Less = (function(){
 			context.mediaBlocks = mediaBlocksBackup;
 
 			return new Directive(this.name, value, rules,
-				this.index, this.currentFileInfo, this.debugInfo, this.isReferenced, this.isRooted);
+				this.index, this.currentFileInfo, this.debugInfo, this.isRooted, this.visibilityInfo());
 		};
 		Directive.prototype.variable = function (name) {
 			if (this.rules) {
@@ -2057,21 +2071,6 @@ var Less = (function(){
 				// assuming that there is only one rule at this point - that is how parser constructs the rule
 				return Ruleset.prototype.rulesets.apply(this.rules[0]);
 			}
-		};
-		Directive.prototype.markReferenced = function () {
-			var i, rules;
-			this.isReferenced = true;
-			if (this.rules) {
-				rules = this.rules;
-				for (i = 0; i < rules.length; i++) {
-					if (rules[i].markReferenced) {
-						rules[i].markReferenced();
-					}
-				}
-			}
-		};
-		Directive.prototype.getIsReferenced = function () {
-			return !this.currentFileInfo || !this.currentFileInfo.reference || this.isReferenced;
 		};
 		Directive.prototype.outputRuleset = function (context, output, rules) {
 			var ruleCnt = rules.length, i;
@@ -2716,12 +2715,8 @@ var Less = (function(){
 			output.add(this.value);
 		};
 		Comment.prototype.isSilent = function(context) {
-			var isReference = (this.currentFileInfo && this.currentFileInfo.reference && !this.isReferenced),
-				isCompressed = context.compress && this.value[2] !== "!";
-			return this.isLineComment || isReference || isCompressed;
-		};
-		Comment.prototype.markReferenced = function () {
-			this.isReferenced = true;
+			var isCompressed = context.compress && this.value[2] !== "!";
+			return this.isLineComment || isCompressed;
 		};
 
 		return Comment;
@@ -2783,11 +2778,6 @@ var Less = (function(){
 		Expression.prototype.throwAwayComments = function () {
 			this.value = this.value.filter(function(v) {
 				return !(v instanceof Comment);
-			});
-		};
-		Expression.prototype.markReferenced = function () {
-			this.value.forEach(function (value) {
-				if (value.markReferenced) { value.markReferenced(); }
 			});
 		};
 
@@ -2927,18 +2917,19 @@ var Less = (function(){
 	modules['/tree/anonymous'] = function () {
 		var Node = require('/tree/node');
 
-		var Anonymous = function (value, index, currentFileInfo, mapLines, rulesetLike, referenced) {
+		var Anonymous = function (value, index, currentFileInfo, mapLines, rulesetLike, visibilityInfo) {
 			this.value = value;
 			this.index = index;
 			this.mapLines = mapLines;
 			this.currentFileInfo = currentFileInfo;
 			this.rulesetLike = (typeof rulesetLike === 'undefined') ? false : rulesetLike;
-			this.isReferenced = referenced || false;
+
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 		Anonymous.prototype = new Node();
 		Anonymous.prototype.type = "Anonymous";
 		Anonymous.prototype.eval = function () {
-			return new Anonymous(this.value, this.index, this.currentFileInfo, this.mapLines, this.rulesetLike, this.isReferenced);
+			return new Anonymous(this.value, this.index, this.currentFileInfo, this.mapLines, this.rulesetLike, this.visibilityInfo());
 		};
 		Anonymous.prototype.compare = function (other) {
 			return other.toCSS && this.toCSS() === other.toCSS() ? 0 : undefined;
@@ -2948,12 +2939,6 @@ var Less = (function(){
 		};
 		Anonymous.prototype.genCSS = function (context, output) {
 			output.add(this.value, this.currentFileInfo, this.index, this.mapLines);
-		};
-		Anonymous.prototype.markReferenced = function () {
-			this.isReferenced = true;
-		};
-		Anonymous.prototype.getIsReferenced = function () {
-			return !this.currentFileInfo || !this.currentFileInfo.reference || this.isReferenced;
 		};
 
 		return Anonymous;
@@ -2969,7 +2954,7 @@ var Less = (function(){
 			Expression = require('/tree/expression'),
 			Directive = require('/tree/directive');
 
-		var Media = function (value, features, index, currentFileInfo) {
+		var Media = function (value, features, index, currentFileInfo, visibilityInfo) {
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
 
@@ -2978,6 +2963,7 @@ var Less = (function(){
 			this.features = new Value(features);
 			this.rules = [new Ruleset(selectors, value)];
 			this.rules[0].allowImports = true;
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 		Media.prototype = new Directive();
 		Media.prototype.type = "Media";
@@ -3001,7 +2987,7 @@ var Less = (function(){
 				context.mediaPath = [];
 			}
 
-			var media = new Media(null, [], this.index, this.currentFileInfo);
+			var media = new Media(null, [], this.index, this.currentFileInfo, this.visibilityInfo());
 			if (this.debugInfo) {
 				this.rules[0].debugInfo = this.debugInfo;
 				media.debugInfo = this.debugInfo;
@@ -3041,6 +3027,7 @@ var Less = (function(){
 				var selectors = (new Selector([], null, null, this.index, this.currentFileInfo)).createEmptySelectors();
 				result = new Ruleset(selectors, context.mediaBlocks);
 				result.multiMedia = true;
+				result.copyVisibilityInfo(this.visibilityInfo());
 			}
 
 			delete context.mediaBlocks;
@@ -3129,7 +3116,7 @@ var Less = (function(){
 		// `import,push`, we also pass it a callback, which it'll call once
 		// the file has been fetched, and parsed.
 		//
-		var Import = function (path, features, options, index, currentFileInfo) {
+		var Import = function (path, features, options, index, currentFileInfo, visibilityInfo) {
 			this.options = options;
 			this.index = index;
 			this.path = path;
@@ -3144,6 +3131,7 @@ var Less = (function(){
 					this.css = true;
 				}
 			}
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 
 		//
@@ -3199,7 +3187,7 @@ var Less = (function(){
 				path = path.value;
 			}
 
-			return new Import(path.eval(context), this.features, this.options, this.index, this.currentFileInfo);
+			return new Import(path.eval(context), this.features, this.options, this.index, this.currentFileInfo, this.visibilityInfo());
 		};
 		Import.prototype.evalPath = function (context) {
 			var path = this.path.eval(context);
@@ -3219,6 +3207,20 @@ var Less = (function(){
 			return path;
 		};
 		Import.prototype.eval = function (context) {
+			var result = this.doEval(context);
+			if (this.options.reference || this.blocksVisibility()) {
+				if (result.length || result.length === 0) {
+					result.forEach(function (node) {
+							node.addVisibilityBlock();
+						}
+					);
+				} else {
+					result.addVisibilityBlock();
+				}
+			}
+			return result;
+		};
+		Import.prototype.doEval = function (context) {
 			var ruleset, registry,
 				features = this.features && this.features.eval(context);
 
@@ -3238,13 +3240,12 @@ var Less = (function(){
 					return [];
 				}
 			}
-
 			if (this.options.inline) {
 				var contents = new Anonymous(this.root, 0,
 				  {
 					  filename: this.importedFilename,
 					  reference: this.path.currentFileInfo && this.path.currentFileInfo.reference
-				  }, true, true, false);
+				  }, true, true);
 
 				return this.features ? new Media([contents], this.features.value) : [contents];
 			} else if (this.css) {
@@ -3255,7 +3256,6 @@ var Less = (function(){
 				return newImport;
 			} else {
 				ruleset = new Ruleset(null, this.root.rules.slice(0));
-
 				ruleset.evalImports(context);
 
 				return this.features ? new Media(ruleset.rules, this.features.value) : ruleset.rules;
@@ -3275,7 +3275,7 @@ var Less = (function(){
 			Expression = require('/tree/expression'),
 			contexts = require('/contexts');
 
-		var Definition = function (name, params, rules, condition, variadic, frames) {
+		var Definition = function (name, params, rules, condition, variadic, frames, visibilityInfo) {
 			this.name = name;
 			this.selectors = [new Selector([new Element(null, name, this.index, this.currentFileInfo)])];
 			this.params = params;
@@ -3296,6 +3296,7 @@ var Less = (function(){
 			}, 0);
 			this.optionalParameters = optionalParameters;
 			this.frames = frames;
+			this.copyVisibilityInfo(visibilityInfo);
 		};
 		Definition.prototype = new Ruleset();
 		Definition.prototype.type = "MixinDefinition";
@@ -3497,7 +3498,7 @@ var Less = (function(){
 		};
 		MixinCall.prototype.eval = function (context) {
 			var mixins, mixin, mixinPath, args = [], arg, argValue,
-				rules = [], rule, match = false, i, m, f, isRecursive, isOneFound,
+				rules = [], match = false, i, m, f, isRecursive, isOneFound,
 				candidates = [], candidate, conditionResult = [], defaultResult, defFalseEitherCase = -1,
 				defNone = 0, defTrue = 1, defFalse = 2, count, originalRuleset, noArgumentsFilter;
 
@@ -3602,11 +3603,12 @@ var Less = (function(){
 								mixin = candidates[m].mixin;
 								if (!(mixin instanceof MixinDefinition)) {
 									originalRuleset = mixin.originalRuleset || mixin;
-									mixin = new MixinDefinition("", [], mixin.rules, null, false);
+									mixin = new MixinDefinition("", [], mixin.rules, null, false, null, originalRuleset.visibilityInfo());
 									mixin.originalRuleset = originalRuleset;
 								}
-								Array.prototype.push.apply(
-									rules, mixin.evalCall(context, args, this.important).rules);
+								var newRules = mixin.evalCall(context, args, this.important).rules;
+								this._setVisibilityToReplacement(newRules);
+								Array.prototype.push.apply(rules, newRules);
 							} catch (e) {
 								throw { message: e.message, index: this.index, filename: this.currentFileInfo.filename, stack: e.stack };
 							}
@@ -3614,14 +3616,6 @@ var Less = (function(){
 					}
 
 					if (match) {
-						if (!this.currentFileInfo || !this.currentFileInfo.reference) {
-							for (i = 0; i < rules.length; i++) {
-								rule = rules[i];
-								if (rule.markReferenced) {
-									rule.markReferenced();
-								}
-							}
-						}
 						return rules;
 					}
 				}
@@ -3634,6 +3628,16 @@ var Less = (function(){
 				throw { type:    'Name',
 					message: this.selector.toCSS().trim() + " is undefined",
 					index:   this.index, filename: this.currentFileInfo.filename };
+			}
+		};
+
+		MixinCall.prototype._setVisibilityToReplacement = function (replacement) {
+			var i, rule;
+			if (this.blocksVisibility()) {
+				for (i = 0; i < replacement.length; i++) {
+					rule = replacement[i];
+					rule.addVisibilityBlock();
+				}
 			}
 		};
 		MixinCall.prototype.format = function (args) {
@@ -3807,14 +3811,17 @@ var Less = (function(){
 
 	//#region URL: /tree/extend
 	modules['/tree/extend'] = function () {
-		var Node = require('/tree/node');
+		var Node = require('/tree/node'),
+			Selector = require('/tree/selector');
 
-		var Extend = function Extend(selector, option, index) {
+		var Extend = function Extend(selector, option, index, currentFileInfo, visibilityInfo) {
 			this.selector = selector;
 			this.option = option;
 			this.index = index;
 			this.object_id = Extend.next_id++;
 			this.parent_ids = [this.object_id];
+			this.currentFileInfo = currentFileInfo || {};
+			this.copyVisibilityInfo(visibilityInfo);
 
 			switch(option) {
 				case "all":
@@ -3835,11 +3842,12 @@ var Less = (function(){
 			this.selector = visitor.visit(this.selector);
 		};
 		Extend.prototype.eval = function (context) {
-			return new Extend(this.selector.eval(context), this.option, this.index);
+			return new Extend(this.selector.eval(context), this.option, this.index, this.currentFileInfo, this.visibilityInfo());
 		};
 		Extend.prototype.clone = function (context) {
-			return new Extend(this.selector, this.option, this.index);
+			return new Extend(this.selector, this.option, this.index, this.currentFileInfo, this.visibilityInfo());
 		};
+		//it concatenates (joins) all selectors in selector array
 		Extend.prototype.findSelfSelectors = function (selectors) {
 			var selfElements = [],
 				i,
@@ -3855,7 +3863,8 @@ var Less = (function(){
 				selfElements = selfElements.concat(selectors[i].elements);
 			}
 
-			this.selfSelectors = [{ elements: selfElements }];
+			this.selfSelectors = [new Selector(selfElements)];
+			this.selfSelectors[0].copyVisibilityInfo(this.visibilityInfo());
 		};
 
 		return Extend;
@@ -4684,17 +4693,17 @@ var Less = (function(){
 						matches = extendVisitor.findMatch(extend, selectorPath);
 
 						if (matches.length) {
-
 							extend.hasFoundMatches = true;
 
 							// we found a match, so for each self selector..
 							extend.selfSelectors.forEach(function(selfSelector) {
+								var info = targetExtend.visibilityInfo();
 
 								// process the extend as usual
-								newSelector = extendVisitor.extendSelector(matches, selectorPath, selfSelector);
+								newSelector = extendVisitor.extendSelector(matches, selectorPath, selfSelector, extend.isVisible());
 
 								// but now we create a new extend from it
-								newExtend = new(tree.Extend)(targetExtend.selector, targetExtend.option, 0);
+								newExtend = new(tree.Extend)(targetExtend.selector, targetExtend.option, 0, targetExtend.currentFileInfo, info);
 								newExtend.selfSelectors = newSelector;
 
 								// add the extend onto the list of extends for that selector
@@ -4775,7 +4784,9 @@ var Less = (function(){
 							allExtends[extendIndex].hasFoundMatches = true;
 
 							allExtends[extendIndex].selfSelectors.forEach(function(selfSelector) {
-								selectorsToAdd.push(extendVisitor.extendSelector(matches, selectorPath, selfSelector));
+								var extendedSelectors;
+								extendedSelectors = extendVisitor.extendSelector(matches, selectorPath, selfSelector, allExtends[extendIndex].isVisible());
+								selectorsToAdd.push(extendedSelectors);
 							});
 						}
 					}
@@ -4891,7 +4902,7 @@ var Less = (function(){
 				}
 				return false;
 			},
-			extendSelector:function (matches, selectorPath, replacementSelector) {
+			extendSelector:function (matches, selectorPath, replacementSelector, isVisible) {
 
 				//for a set of matches, replace each match with the replacement selector
 
@@ -4951,10 +4962,17 @@ var Less = (function(){
 				}
 
 				path = path.concat(selectorPath.slice(currentSelectorPathIndex, selectorPath.length));
-
+				path = path.map(function (currentValue) {
+					// we can re-use elements here, because the visibility property matters only for selectors
+					var derived = currentValue.createDerived(currentValue.elements);
+					if (isVisible) {
+						derived.ensureVisibility();
+					} else {
+						derived.ensureInvisibility();
+					}
+					return derived;
+				});
 				return path;
-			},
-			visitRulesetOut: function (rulesetNode) {
 			},
 			visitMedia: function (mediaNode, visitArgs) {
 				var newAllExtends = mediaNode.allExtends.concat(this.allExtendsStack[this.allExtendsStack.length - 1]);
@@ -5035,15 +5053,147 @@ var Less = (function(){
 		return JoinSelectorVisitor;
 	};
 	//#endregion
+	
+	//#region URL: /visitors/set-tree-visibility-visitor
+	modules['/visitors/set-tree-visibility-visitor'] = function () {
+		var SetTreeVisibilityVisitor = function(visible) {
+			this.visible = visible;
+		};
+		SetTreeVisibilityVisitor.prototype.run = function(root) {
+			this.visit(root);
+		};
+		SetTreeVisibilityVisitor.prototype.visitArray = function(nodes) {
+			if (!nodes) {
+				return nodes;
+			}
+
+			var cnt = nodes.length, i;
+			for (i = 0; i < cnt; i++) {
+				this.visit(nodes[i]);
+			}
+			return nodes;
+		};
+		SetTreeVisibilityVisitor.prototype.visit = function(node) {
+			if (!node) {
+				return node;
+			}
+			if (node.constructor === Array) {
+				return this.visitArray(node);
+			}
+
+			if (!node.blocksVisibility || node.blocksVisibility()) {
+				return node;
+			}
+			if (this.visible) {
+				node.ensureVisibility();
+			} else {
+				node.ensureInvisibility();
+			}
+
+			node.accept(this);
+			return node;
+		};
+
+		return SetTreeVisibilityVisitor;
+	};
+	//#endregion
 
 	//#region URL: /visitors/to-css-visitor
 	modules['/visitors/to-css-visitor'] = function () {
 		var tree = require('/tree'),
 			Visitor = require('/visitors/visitor');
 
+		var CSSVisitorUtils = function(context) {
+			this._visitor = new Visitor(this);
+			this._context = context;
+		};
+
+		CSSVisitorUtils.prototype = {
+			containsSilentNonBlockedChild: function(bodyRules) {
+				var rule;
+				if (bodyRules == null) {
+					return false;
+				}
+				for (var r = 0; r < bodyRules.length; r++) {
+					rule = bodyRules[r];
+					if (rule.isSilent && rule.isSilent(this._context) && !rule.blocksVisibility()) {
+						//the directive contains something that was referenced (likely by extend)
+						//therefore it needs to be shown in output too
+						return true;
+					}
+				}
+				return false;
+			},
+
+			keepOnlyVisibleChilds: function(owner) {
+				if (owner == null || owner.rules == null) {
+					return ;
+				}
+
+				owner.rules = owner.rules.filter(function(thing) {
+						return thing.isVisible();
+					}
+				);
+			},
+
+			isEmpty: function(owner) {
+				if (owner == null || owner.rules == null) {
+					return true;
+				}
+				return owner.rules.length === 0;
+			},
+
+			hasVisibleSelector: function(rulesetNode) {
+				if (rulesetNode == null || rulesetNode.paths == null) {
+					return false;
+				}
+				return rulesetNode.paths.length > 0;
+			},
+
+			resolveVisibility: function (node, originalRules) {
+				if (!node.blocksVisibility()) {
+					if (this.isEmpty(node) && !this.containsSilentNonBlockedChild(originalRules)) {
+						return ;
+					}
+
+					return node;
+				}
+
+				var compiledRulesBody = node.rules[0];
+				this.keepOnlyVisibleChilds(compiledRulesBody);
+
+				if (this.isEmpty(compiledRulesBody)) {
+					return ;
+				}
+
+				node.ensureVisibility();
+				node.removeVisibilityBlock();
+
+				return node;
+			},
+
+			isVisibleRuleset: function(rulesetNode) {
+				if (rulesetNode.firstRoot) {
+					return true;
+				}
+
+				if (this.isEmpty(rulesetNode)) {
+					return false;
+				}
+
+				if (!rulesetNode.root && !this.hasVisibleSelector(rulesetNode)) {
+					return false;
+				}
+
+				return true;
+			}
+
+		};
+
 		var ToCSSVisitor = function(context) {
 			this._visitor = new Visitor(this);
 			this._context = context;
+			this.utils = new CSSVisitorUtils(context);
 		};
 
 		ToCSSVisitor.prototype = {
@@ -5053,7 +5203,7 @@ var Less = (function(){
 			},
 
 			visitRule: function (ruleNode, visitArgs) {
-				if (ruleNode.variable) {
+				if (ruleNode.blocksVisibility() || ruleNode.variable) {
 					return;
 				}
 				return ruleNode;
@@ -5069,34 +5219,71 @@ var Less = (function(){
 			},
 
 			visitComment: function (commentNode, visitArgs) {
-				if (commentNode.isSilent(this._context)) {
+				if (commentNode.blocksVisibility() || commentNode.isSilent(this._context)) {
 					return;
 				}
 				return commentNode;
 			},
 
 			visitMedia: function(mediaNode, visitArgs) {
+				var originalRules = mediaNode.rules[0].rules;
 				mediaNode.accept(this._visitor);
 				visitArgs.visitDeeper = false;
 
-				if (!mediaNode.rules.length) {
-					return;
-				}
-				return mediaNode;
+				return this.utils.resolveVisibility(mediaNode, originalRules);
 			},
 
 			visitImport: function (importNode, visitArgs) {
-				if (importNode.path.currentFileInfo.reference !== undefined && importNode.css) {
-					return;
+				if (importNode.blocksVisibility()) {
+					return ;
 				}
 				return importNode;
 			},
 
 			visitDirective: function(directiveNode, visitArgs) {
-				if (directiveNode.name === "@charset") {
-					if (!directiveNode.getIsReferenced()) {
-						return;
+				if (directiveNode.rules && directiveNode.rules.length) {
+					return this.visitDirectiveWithBody(directiveNode, visitArgs);
+				} else {
+					return this.visitDirectiveWithoutBody(directiveNode, visitArgs);
+				}
+				return directiveNode;
+			},
+
+			visitDirectiveWithBody: function(directiveNode, visitArgs) {
+				//if there is only one nested ruleset and that one has no path, then it is
+				//just fake ruleset
+				function hasFakeRuleset(directiveNode) {
+					var bodyRules = directiveNode.rules;
+					return bodyRules.length === 1 && (!bodyRules[0].paths || bodyRules[0].paths.length === 0);
+				}
+				function getBodyRules(directiveNode) {
+					var nodeRules = directiveNode.rules;
+					if (hasFakeRuleset(directiveNode)) {
+						return nodeRules[0].rules;
 					}
+
+					return nodeRules;
+				}
+				//it is still true that it is only one ruleset in array
+				//this is last such moment
+				//process childs
+				var originalRules = getBodyRules(directiveNode);
+				directiveNode.accept(this._visitor);
+				visitArgs.visitDeeper = false;
+
+				if (!this.utils.isEmpty(directiveNode)) {
+					this._mergeRules(directiveNode.rules[0].rules);
+				}
+
+				return this.utils.resolveVisibility(directiveNode, originalRules);
+			},
+
+			visitDirectiveWithoutBody: function(directiveNode, visitArgs) {
+				if (directiveNode.blocksVisibility()) {
+					return;
+				}
+
+				if (directiveNode.name === "@charset") {
 					// Only output the debug info together with subsequent @charset definitions
 					// a comment (or @media statement) before the actual @charset directive would
 					// be considered illegal css as it has to be on the first line
@@ -5110,59 +5297,7 @@ var Less = (function(){
 					}
 					this.charset = true;
 				}
-				function hasVisibleChild(directiveNode) {
-					//prepare list of childs
-					var rule, bodyRules = directiveNode.rules;
-					//if there is only one nested ruleset and that one has no path, then it is
-					//just fake ruleset that got not replaced and we need to look inside it to
-					//get real childs
-					if (bodyRules.length === 1 && (!bodyRules[0].paths || bodyRules[0].paths.length === 0)) {
-						bodyRules = bodyRules[0].rules;
-					}
-					for (var r = 0; r < bodyRules.length; r++) {
-						rule = bodyRules[r];
-						if (rule.getIsReferenced && rule.getIsReferenced()) {
-							//the directive contains something that was referenced (likely by extend)
-							//therefore it needs to be shown in output too
-							return true;
-						}
-					}
-					return false;
-				}
 
-				if (directiveNode.rules && directiveNode.rules.length) {
-					//it is still true that it is only one ruleset in array
-					//this is last such moment
-					this._mergeRules(directiveNode.rules[0].rules);
-					//process childs
-					directiveNode.accept(this._visitor);
-					visitArgs.visitDeeper = false;
-
-					// the directive was directly referenced and therefore needs to be shown in the output
-					if (directiveNode.getIsReferenced()) {
-						return directiveNode;
-					}
-
-					if (!directiveNode.rules || !directiveNode.rules.length) {
-						return ;
-					}
-
-					//the directive was not directly referenced - we need to check whether some of its childs
-					//was referenced
-					if (hasVisibleChild(directiveNode)) {
-						//marking as referenced in case the directive is stored inside another directive
-						directiveNode.markReferenced();
-						return directiveNode;
-					}
-
-					//The directive was not directly referenced and does not contain anything that
-					//was referenced. Therefore it must not be shown in output.
-					return ;
-				} else {
-					if (!directiveNode.getIsReferenced()) {
-						return;
-					}
-				}
 				return directiveNode;
 			},
 
@@ -5178,28 +5313,16 @@ var Less = (function(){
 			},
 
 			visitRuleset: function (rulesetNode, visitArgs) {
+				//at this point rulesets are nested into each other
 				var rule, rulesets = [];
 				if (rulesetNode.firstRoot) {
 					this.checkPropertiesInRoot(rulesetNode.rules);
 				}
 				if (! rulesetNode.root) {
-					if (rulesetNode.paths) {
-						rulesetNode.paths = rulesetNode.paths
-							.filter(function(p) {
-								var i;
-								if (p[0].elements[0].combinator.value === ' ') {
-									p[0].elements[0].combinator = new(tree.Combinator)('');
-								}
-								for (i = 0; i < p.length; i++) {
-									if (p[i].getIsReferenced() && p[i].getIsOutput()) {
-										return true;
-									}
-								}
-								return false;
-							});
-					}
+					//remove invisible paths
+					this._compileRulesetPaths(rulesetNode);
 
-					// Compile rules and rulesets
+					// remove rulesets from this ruleset body and compile them separately
 					var nodeRules = rulesetNode.rules, nodeRuleCnt = nodeRules ? nodeRules.length : 0;
 					for (var i = 0; i < nodeRuleCnt; ) {
 						rule = nodeRules[i];
@@ -5213,7 +5336,8 @@ var Less = (function(){
 						i++;
 					}
 					// accept the visitor to remove rules and refactor itself
-					// then we can decide now whether we want it or not
+					// then we can decide nogw whether we want it or not
+					// compile body
 					if (nodeRuleCnt > 0) {
 						rulesetNode.accept(this._visitor);
 					} else {
@@ -5221,31 +5345,44 @@ var Less = (function(){
 					}
 					visitArgs.visitDeeper = false;
 
-					nodeRules = rulesetNode.rules;
-					if (nodeRules) {
-						this._mergeRules(nodeRules);
-						nodeRules = rulesetNode.rules;
-					}
-					if (nodeRules) {
-						this._removeDuplicateRules(nodeRules);
-						nodeRules = rulesetNode.rules;
-					}
-
-					// now decide whether we keep the ruleset
-					if (nodeRules && nodeRules.length > 0 && rulesetNode.paths.length > 0) {
-						rulesets.splice(0, 0, rulesetNode);
-					}
-				} else {
+				} else { //if (! rulesetNode.root) {
 					rulesetNode.accept(this._visitor);
 					visitArgs.visitDeeper = false;
-					if (rulesetNode.firstRoot || (rulesetNode.rules && rulesetNode.rules.length > 0)) {
-						rulesets.splice(0, 0, rulesetNode);
-					}
 				}
+
+				if (rulesetNode.rules) {
+					this._mergeRules(rulesetNode.rules);
+					this._removeDuplicateRules(rulesetNode.rules);
+				}
+
+				//now decide whether we keep the ruleset
+				if (this.utils.isVisibleRuleset(rulesetNode)) {
+					rulesetNode.ensureVisibility();
+					rulesets.splice(0, 0, rulesetNode);
+				}
+
 				if (rulesets.length === 1) {
 					return rulesets[0];
 				}
 				return rulesets;
+			},
+
+			_compileRulesetPaths: function(rulesetNode) {
+				if (rulesetNode.paths) {
+					rulesetNode.paths = rulesetNode.paths
+						.filter(function(p) {
+							var i;
+							if (p[0].elements[0].combinator.value === ' ') {
+								p[0].elements[0].combinator = new(tree.Combinator)('');
+							}
+							for (i = 0; i < p.length; i++) {
+								if (p[i].isVisible() && p[i].getIsOutput()) {
+									return true;
+								}
+							}
+							return false;
+						});
+				}
 			},
 
 			_removeDuplicateRules: function(rules) {
@@ -5337,10 +5474,9 @@ var Less = (function(){
 			},
 
 			visitAnonymous: function(anonymousNode, visitArgs) {
-				if (!anonymousNode.getIsReferenced()) {
+				if (anonymousNode.blocksVisibility()) {
 					return ;
 				}
-
 				anonymousNode.accept(this._visitor);
 				return anonymousNode;
 			}
@@ -5355,6 +5491,7 @@ var Less = (function(){
 		var visitors = {
 			Visitor: require('/visitors/visitor'),
 			ImportVisitor: require('/visitors/import-visitor'),
+			MarkVisibleSelectorsVisitor: require('/visitors/set-tree-visibility-visitor'),
 			ExtendVisitor: require('/visitors/extend-visitor'),
 			JoinSelectorVisitor: require('/visitors/join-selector-visitor'),
 			ToCSSVisitor: require('/visitors/to-css-visitor')
@@ -5864,7 +6001,7 @@ var Less = (function(){
 		//    Token matching is done with the `$` function, which either takes
 		//    a terminal string or regexp, or a non-terminal function to call.
 		//    It also takes care of moving all the indices forwards.
-		//
+		//`
 		//
 		var Parser = function Parser(context, imports, fileInfo) {
 			var parsers,
@@ -6154,6 +6291,26 @@ var Less = (function(){
 							}
 						},
 
+						namedColor: function () {
+							parserInput.save();
+							var autoCommentAbsorb = parserInput.autoCommentAbsorb;
+							parserInput.autoCommentAbsorb = false;
+							var k = parserInput.$re(/^[_A-Za-z-][_A-Za-z0-9-]*/);
+							parserInput.autoCommentAbsorb = autoCommentAbsorb;
+							if (!k) {
+								parserInput.forget();
+								return ;
+							}
+							var result = tree.Color.fromKeyword(k);
+							if (!result) {
+								parserInput.restore();
+							} else {
+								parserInput.forget();
+								return result;
+							}
+
+						},
+
 						//
 						// A function call
 						//
@@ -6320,6 +6477,8 @@ var Less = (function(){
 								}
 								return new(tree.Color)(rgb[1], undefined, '#' + colorCandidateString);
 							}
+
+							return this.namedColor();
 						},
 
 						//
@@ -6332,7 +6491,7 @@ var Less = (function(){
 								return;
 							}
 
-							var value = parserInput.$re(/^([+-]?\d*\.?\d+)(%|[a-z]+)?/i);
+							var value = parserInput.$re(/^([+-]?\d*\.?\d+)(%|[a-z_]+)?/i);
 							if (value) {
 								return new(tree.Dimension)(value[1], value[2]);
 							}
@@ -6432,7 +6591,7 @@ var Less = (function(){
 							if (!elements) {
 								error("Missing target selector for :extend().");
 							}
-							extend = new(tree.Extend)(new(tree.Selector)(elements), option, index);
+							extend = new(tree.Extend)(new(tree.Selector)(elements), option, index, fileInfo);
 							if (extendList) {
 								extendList.push(extend);
 							} else {
@@ -7098,12 +7257,10 @@ var Less = (function(){
 									} else if (e) {
 										nodes.push(new(tree.Paren)(e));
 									} else {
-										parserInput.restore("badly formed media feature definition");
-										return null;
+										error("badly formed media feature definition");
 									}
 								} else {
-									parserInput.restore("Missing closing ')'");
-									return null;
+									error("Missing closing ')'", "Parse");
 								}
 							}
 						} while (e);
@@ -7148,8 +7305,7 @@ var Less = (function(){
 							rules = this.block();
 
 							if (!rules) {
-								parserInput.restore("media definitions require block statements after any features");
-								return;
+								error("media definitions require block statements after any features");
 							}
 
 							parserInput.forget();
@@ -7229,33 +7385,6 @@ var Less = (function(){
 						}
 
 						switch(nonVendorSpecificName) {
-							/*
-							case "@font-face":
-							case "@viewport":
-							case "@top-left":
-							case "@top-left-corner":
-							case "@top-center":
-							case "@top-right":
-							case "@top-right-corner":
-							case "@bottom-left":
-							case "@bottom-left-corner":
-							case "@bottom-center":
-							case "@bottom-right":
-							case "@bottom-right-corner":
-							case "@left-top":
-							case "@left-middle":
-							case "@left-bottom":
-							case "@right-top":
-							case "@right-middle":
-							case "@right-bottom":
-								hasBlock = true;
-								isRooted = true;
-								break;
-							*/
-							case "@counter-style":
-								hasIdentifier = true;
-								hasBlock = true;
-								break;
 							case "@charset":
 								hasIdentifier = true;
 								hasBlock = false;
@@ -7265,16 +7394,16 @@ var Less = (function(){
 								hasBlock = false;
 								break;
 							case "@keyframes":
+							case "@counter-style":
 								hasIdentifier = true;
-								break;
-							case "@host":
-							case "@page":
-								hasUnknown = true;
 								break;
 							case "@document":
 							case "@supports":
 								hasUnknown = true;
 								isRooted = false;
+								break;
+							default:
+								hasUnknown = true;
 								break;
 						}
 
@@ -7292,6 +7421,7 @@ var Less = (function(){
 							}
 						} else if (hasUnknown) {
 							value = (parserInput.$re(/^[^{;]+/) || '').trim();
+							hasBlock = (parserInput.currentChar() == '{');
 							if (value) {
 								value = new(tree.Anonymous)(value);
 							}
@@ -7305,7 +7435,6 @@ var Less = (function(){
 							parserInput.forget();
 							return new (tree.Directive)(name, value, rules, index, fileInfo,
 								context.dumpLineNumbers ? getDebugInfo(index) : null,
-								false,
 								isRooted
 							);
 						}
@@ -7429,11 +7558,71 @@ var Less = (function(){
 						}
 					},
 					condition: function () {
-						var entities = this.entities, index = parserInput.i, negate = false,
-							a, b, c, op;
+						var result, logical, next;
+						function or() {
+							return parserInput.$str("or");
+						}
 
-						if (parserInput.$str("not")) { negate = true; }
-						expectChar('(');
+						result = this.conditionAnd(this);
+						if (!result) {
+							return ;
+						}
+						logical = or();
+						if (logical) {
+							next = this.condition();
+							if (next) {
+								result = new(tree.Condition)(logical, result, next);
+							} else {
+								return ;
+							}
+						}
+						return result;
+					},
+					conditionAnd: function () {
+						var result, logical, next;
+						function insideCondition(me) {
+							return me.negatedCondition() || me.parenthesisCondition();
+						}
+						function and() {
+							return parserInput.$str("and");
+						}
+
+						result = insideCondition(this);
+						if (!result) {
+							return ;
+						}
+						logical = and();
+						if (logical) {
+							next = this.conditionAnd();
+							if (next) {
+								result = new(tree.Condition)(logical, result, next);
+							} else {
+								return ;
+							}
+						}
+						return result;
+					},
+					negatedCondition: function () {
+						if (parserInput.$str("not")) {
+							var result = this.parenthesisCondition();
+							if (result) {
+								result.negate = !result.negate;
+							}
+							return result;
+						}
+					},
+					parenthesisCondition: function () {
+						var body;
+						if (!parserInput.$str("(")) {
+							return ;
+						}
+						body = this.condition() || this.atomicCondition();
+						expectChar(')');
+						return body;
+					},
+					atomicCondition: function () {
+						var entities = this.entities, index = parserInput.i, a, b, c, op;
+
 						a = this.addition() || entities.keyword() || entities.quoted();
 						if (a) {
 							if (parserInput.$char('>')) {
@@ -7462,15 +7651,14 @@ var Less = (function(){
 							if (op) {
 								b = this.addition() || entities.keyword() || entities.quoted();
 								if (b) {
-									c = new(tree.Condition)(op, a, b, index, negate);
+									c = new(tree.Condition)(op, a, b, index, false);
 								} else {
 									error('expected expression');
 								}
 							} else {
-								c = new(tree.Condition)('=', a, new(tree.Keyword)('true'), index, negate);
+								c = new(tree.Condition)('=', a, new(tree.Keyword)('true'), index, false);
 							}
-							expectChar(')');
-							return parserInput.$str("and") ? new(tree.Condition)('and', c, this.condition()) : c;
+							return c;
 						}
 					},
 
@@ -7486,8 +7674,8 @@ var Less = (function(){
 						}
 
 						var o = this.sub() || entities.dimension() ||
-								entities.color() || entities.variable() ||
-								entities.call();
+								entities.variable() ||
+								entities.call() || entities.color();
 
 						if (negate) {
 							o.parensInOp = true;
@@ -8010,9 +8198,9 @@ var Less = (function(){
 	//#region URL: /functions/data-uri
 	modules['/functions/data-uri'] = function () {
 		var exports = function(environment) {
-			var Quoted = require("/tree/quoted"),
-				URL = require("/tree/url"),
-				functionRegistry = require("/functions/function-registry"),
+			var Quoted = require('/tree/quoted'),
+				URL = require('/tree/url'),
+				functionRegistry = require('/functions/function-registry'),
 				fallback = function(functionThis, node) {
 					return new URL(node, functionThis.index, functionThis.currentFileInfo).eval(functionThis.context);
 				}/*,
@@ -8548,6 +8736,7 @@ var Less = (function(){
 			var preEvalVisitors = [],
 				visitors = [
 					new visitor.JoinSelectorVisitor(),
+					new visitor.MarkVisibleSelectorsVisitor(true),
 					new visitor.ExtendVisitor(),
 					new visitor.ToCSSVisitor({compress: Boolean(options.compress)})
 				], i;
@@ -8912,6 +9101,41 @@ var Less = (function(){
 		return exports;
 	};
 	//#endregion
+	
+	//#region URL: /image-size
+	modules['/image-size'] = function () {
+		var exports = function() {
+
+			var functionRegistry = require("/functions/function-registry");
+
+			function imageSize() {
+				throw {
+					type: "Runtime",
+					message: "Image size functions are not supported in BundleTransformer.Less."
+				};
+			}
+
+			var imageFunctions = {
+				"image-size": function(filePathNode) {
+					imageSize(this, filePathNode);
+					return -1;
+				},
+				"image-width": function(filePathNode) {
+					imageSize(this, filePathNode);
+					return -1;
+				},
+				"image-height": function(filePathNode) {
+					imageSize(this, filePathNode);
+					return -1;
+				}
+			};
+
+			functionRegistry.addMultiple(imageFunctions);
+		};
+		
+		return exports;
+	};
+	//#endregion
 
 	//#region URL: /
 	modules['/'] = function () {
@@ -8919,7 +9143,7 @@ var Less = (function(){
 			var /*SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 5, 3],
+				version: [2, 6, 0],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),
@@ -8941,6 +9165,7 @@ var Less = (function(){
 //				PluginManager: require('/plugin-manager'),
 //				logger: require('/logger')
 			};
+			require('/image-size')(less.environment);
 
 			return less;
 		};
