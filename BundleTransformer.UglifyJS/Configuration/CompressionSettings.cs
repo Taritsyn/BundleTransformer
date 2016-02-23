@@ -186,6 +186,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to collapse single-use <code>var</code> and
+		/// <code>const</code> definitions when possible
+		/// </summary>
+		[ConfigurationProperty("collapseVars", DefaultValue = false)]
+		public bool CollapseVars
+		{
+			get { return (bool)this["collapseVars"]; }
+			set { this["collapseVars"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to small optimization for sequences
 		/// (for example: transform <code>x, x</code> into <code>x</code>
 		/// and <code>x = something(), x</code> into <code>x = something()</code>)

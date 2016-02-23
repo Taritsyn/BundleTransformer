@@ -250,6 +250,7 @@
 					new JProperty("hoist_vars", compressionOptions.HoistVars),
 					new JProperty("if_return", compressionOptions.IfReturn),
 					new JProperty("join_vars", compressionOptions.JoinVars),
+					new JProperty("collapse_vars", compressionOptions.CollapseVars),
 					new JProperty("cascade", compressionOptions.Cascade),
 					new JProperty("screw_ie8", options.ScrewIe8),
 					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),

@@ -167,6 +167,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to collapse single-use <code>var</code> and
+		/// <code>const</code> definitions when possible
+		/// </summary>
+		public bool CollapseVars
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to small optimization for sequences
 		/// (for example: transform <code>x, x</code> into <code>x</code>
 		/// and <code>x = something(), x</code> into <code>x = something()</code>)
@@ -253,6 +263,7 @@
 			HoistVars = false;
 			IfReturn = true;
 			JoinVars = true;
+			CollapseVars = false;
 			Cascade = true;
 			GlobalDefinitions = string.Empty;
 			PureGetters = false;

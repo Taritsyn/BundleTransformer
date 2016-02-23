@@ -149,6 +149,7 @@
 				HoistVars = compressionConfig.HoistVars,
 				IfReturn = compressionConfig.IfReturn,
 				JoinVars = compressionConfig.JoinVars,
+				CollapseVars = compressionConfig.CollapseVars,
 				Cascade = compressionConfig.Cascade,
 				GlobalDefinitions = compressionConfig.GlobalDefinitions,
 				PureGetters = compressionConfig.PureGetters,
