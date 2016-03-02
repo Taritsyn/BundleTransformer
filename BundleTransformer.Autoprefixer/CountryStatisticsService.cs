@@ -1,12 +1,17 @@
 ﻿namespace BundleTransformer.Autoprefixer
 {
 	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
 	using System.Reflection;
 
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
+	using AutoPrefixers;
 	using Helpers;
+	using Resources;
 
 	/// <summary>
 	/// Country statistics service
@@ -17,6 +22,11 @@
 		/// Name of directory, which contains a Autoprefixer country statistics
 		/// </summary>
 		private const string AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME = "CountryStatistics";
+
+		/// <summary>
+		/// Set of country codes for which there are statistics
+		/// </summary>
+		private readonly ISet<string> _countryCodes;
 
 		/// <summary>
 		/// Instance of country statistics service
@@ -32,6 +42,38 @@
 			get { return _instance.Value; }
 		}
 
+
+		/// <summary>
+		/// Constructs a instance of country statistics service
+		/// </summary>
+		private CountryStatisticsService()
+		{
+			string[] allResourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+			string countryResourcePrefix = AutoprefixingResourceHelpers.ResourcesNamespace + "." +
+				AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + ".";
+			int countryResourcePrefixLength = countryResourcePrefix.Length;
+			string[] countryCodes = allResourceNames
+				.Where(r => r.StartsWith(countryResourcePrefix, StringComparison.Ordinal))
+				.Select(r => Path.GetFileNameWithoutExtension(r.Substring(countryResourcePrefixLength)))
+				.ToArray()
+				;
+
+			_countryCodes = new HashSet<string>(countryCodes);
+		}
+
+
+		/// <summary>
+		/// Determines whether the statistics database contains the specified country
+		/// </summary>
+		/// <param name="countryCode">Two-letter country code</param>
+		/// <returns>true if the statistics database contains an country with the specified code;
+		/// otherwise, false</returns>
+		public bool ContainsCountry(string countryCode)
+		{
+			bool result = _countryCodes.Contains(countryCode);
+
+			return result;
+		}
 
 		/// <summary>
 		/// Gets a statistics for country
@@ -50,7 +92,8 @@
 			}
 			catch (NullReferenceException)
 			{
-				statistics = null;
+				throw new CssAutoprefixingException(
+					string.Format(Strings.PostProcessors_CountryStatisticsNotFound, countryCode));
 			}
 
 			return statistics;

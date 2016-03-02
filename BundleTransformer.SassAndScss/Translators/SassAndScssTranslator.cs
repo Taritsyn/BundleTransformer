@@ -17,7 +17,6 @@
 	using Core.Resources;
 	using Core.Translators;
 	using Core.Utilities;
-	using CoreFileExtensionHelpers = Core.Helpers.FileExtensionHelpers;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;

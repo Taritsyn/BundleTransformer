@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CSSO 1.9.92 Alpha 4
+           README file for Bundle Transformer: CSSO 1.9.92 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -14,28 +14,29 @@
    BundleTransformer.Csso contains one minifier-adapter for
    minification of CSS-code - `KryzhanovskyCssMinifier`.
    `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's
-   CSSO (http://github.com/css/csso) version 1.5.4.
+   CSSO (http://github.com/css/csso) version 1.6.4.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
    working of this module is recommended to install the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie or
-   JavaScriptEngineSwitcher.V8.
+   NuGet packages: JavaScriptEngineSwitcher.Msie,
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
 
    =============
    RELEASE NOTES
    =============
-   Added support of CSSO version 1.5.4.
+   Added support of CSSO version 1.6.4.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module is recommended to install the
-   following NuGet packages: JavaScriptEngineSwitcher.Msie or
-   JavaScriptEngineSwitcher.V8. After package is installed, need set a
-   name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
-   attribute of `/configuration/bundleTransformer/csso/jsEngine`
-   configuration element.
+   following NuGet packages: JavaScriptEngineSwitcher.Msie,
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   After package is installed, need set a name of JavaScript engine (for
+   example, `MsieJsEngine`) to the `name` attribute of
+   `/configuration/bundleTransformer/csso/jsEngine` configuration
+   element.
 
    To make `KryzhanovskyCssMinifier` is the default CSS-minifier, you need
    to make changes to the Web.config file. In the `defaultMinifier`

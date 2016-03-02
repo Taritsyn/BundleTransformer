@@ -10,6 +10,14 @@
 		/// </summary>
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.Autoprefixer.Resources";
 
+		/// <summary>
+		/// Gets a namespace for resources
+		/// </summary>
+		public static string ResourcesNamespace
+		{
+			get { return RESOURCES_NAMESPACE; }
+		}
+
 
 		/// <summary>
 		/// Gets a resource name

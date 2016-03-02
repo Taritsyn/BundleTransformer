@@ -129,12 +129,7 @@
     <Compile Include="FileSystem\VirtualFileSystemWrapper.cs" />
     <Compile Include="FileSystem\IRelativePathResolver.cs" />
     <Compile Include="FileSystem\CommonRelativePathResolver.cs" />
-    <Compile Include="Helpers\FileExtensionHelpers.cs" />
-    <Compile Include="Helpers\Interval.cs" />
-    <Compile Include="Helpers\StylesheetHelpers.cs" />
     <Compile Include="Helpers\UrlHelpers.cs" />
-    <Compile Include="Transformers\CssTransformer.cs" />
-    <Compile Include="Transformers\JsTransformer.cs" />
     <Compile Include="Utilities\SourceCodeNavigator.cs" />
     <Compile Include="Utilities\SourceCodeNodeCoordinates.cs" />
     <Compile Include="HttpHandlers\JsAssetHandler.cs" />
@@ -153,7 +148,6 @@
     <Compile Include="AssetNodeMatchBase.cs" />
     <Compile Include="Assets\StyleContext.cs" />
     <Compile Include="Transformers\ITransformer.cs" />
-    <Compile Include="UnknownMimeTypeException.cs" />
     <Compile Include="FileSystem\IVirtualFileSystemWrapper.cs" />
     <Compile Include="Filters\StyleUnnecessaryAssetsFilter.cs" />
     <Compile Include="Filters\StyleDuplicateAssetsFilter.cs" />

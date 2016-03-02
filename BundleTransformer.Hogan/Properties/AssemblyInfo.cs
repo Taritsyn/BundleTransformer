@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundle Transformer: Hogan")]
-[assembly: AssemblyCopyright("Copyright © 2012-2015 Andrey Taritsyn")]
+[assembly: AssemblyCopyright("Copyright © 2012-2016 Andrey Taritsyn")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
 [assembly: Guid("bee7a42e-bf6f-479d-a972-6767f709bc00")]
 
-[assembly: AssemblyVersion("1.9.52.0")]
-[assembly: AssemblyFileVersion("1.9.52.0")]
+[assembly: AssemblyVersion("1.9.92.0")]
+[assembly: AssemblyFileVersion("1.9.92.0")]

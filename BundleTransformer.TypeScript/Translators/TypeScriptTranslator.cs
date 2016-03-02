@@ -275,7 +275,8 @@
 							"typeScript",
 							@"
   * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8",
+  * JavaScriptEngineSwitcher.V8
+  * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")
 					);
 				}

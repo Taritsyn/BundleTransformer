@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Autoprefixer 1.9.92 Alpha 8
+       README file for Bundle Transformer: Autoprefixer 1.9.92 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -19,22 +19,19 @@
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
    working of this module is recommended to install the following NuGet
-   packages: JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.Msie.
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Autoprefixer version 6.3.3.1.
+   packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8
+   or JavaScriptEngineSwitcher.ChakraCore.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module is recommended to install the
-   following NuGet packages: JavaScriptEngineSwitcher.V8 or
-   JavaScriptEngineSwitcher.Msie. After package is installed, need set a
-   name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
-   attribute of `/configuration/bundleTransformer/autoprefixer/jsEngine`
-   configuration element.
+   following NuGet packages: JavaScriptEngineSwitcher.Msie,
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   After package is installed, need set a name of JavaScript engine (for
+   example, `MsieJsEngine`) to the `name` attribute of
+   `/configuration/bundleTransformer/autoprefixer/jsEngine` configuration
+   element.
 
    To make `AutoprefixCssPostProcessor` is one of the default
    CSS-postprocessors, you need to make changes to the Web.config file.

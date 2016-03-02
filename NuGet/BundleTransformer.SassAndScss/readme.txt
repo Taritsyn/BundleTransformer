@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-      README file for Bundle Transformer: Sass and SCSS 1.9.92 Alpha 2
+       README file for Bundle Transformer: Sass and SCSS 1.9.92 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -22,11 +22,6 @@
    For correct working of the LibSass Host require assemblies
    `msvcp120.dll` and `msvcr120.dll` from the Visual C++ Redistributable
    Packages for Visual Studio 2013.
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of libSass version 3.3.3.
 
    ====================
    POST-INSTALL ACTIONS

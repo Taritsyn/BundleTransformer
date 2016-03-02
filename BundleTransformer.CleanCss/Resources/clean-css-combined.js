@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.9
+ * Clean-css v3.4.10
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2015 JakubPawlowicz.com
@@ -2719,6 +2719,15 @@ var CleanCss = (function(){
 		  return s1[0] > s2[0] ? 1 : -1;
 		}
 
+		function whitespaceReplacements(_, p1, p2, p3) {
+		  if (p1 && p2 && p3.length)
+			return p1 + p2 + ' ';
+		  else if (p1 && p2)
+			return p1 + p2;
+		  else
+			return p2;
+		}
+
 		var CleanUp = {
 		  selectors: function (selectors, removeUnsupported, adjacentSpace) {
 			var list = [];
@@ -2729,7 +2738,7 @@ var CleanCss = (function(){
 			  var reduced = selector[0]
 				.replace(/\s+/g, ' ')
 				.replace(/ ?, ?/g, ',')
-				.replace(/\s*([>\+\~])\s*/g, '$1')
+				.replace(/\s*(\\)?([>+~])(\s*)/g, whitespaceReplacements)
 				.trim();
 
 			  if (adjacentSpace && reduced.indexOf('nav') > 0)

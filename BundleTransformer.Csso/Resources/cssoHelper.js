@@ -9,7 +9,9 @@ var cssoHelper = (function (csso, undefined) {
 			errors = [],
 			minifiedCode = '',
 			options = {
-				restructuring: !disableRestructuring,
+				filename: '',
+				sourceMap: null,
+				restructure: !disableRestructuring,
 				debug: false
 			}
 			;

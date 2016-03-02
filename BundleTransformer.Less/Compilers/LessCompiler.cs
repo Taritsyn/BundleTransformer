@@ -42,6 +42,16 @@
 		private const string COMPILATION_FUNCTION_CALL_TEMPLATE = @"lessHelper.compile({0}, {1}, {2});";
 
 		/// <summary>
+		/// Name of variable, which contains a LESS environment
+		/// </summary>
+		private const string LESS_ENVIRONMENT_VARIABLE_NAME = "LessEnvironment";
+
+		/// <summary>
+		/// Name of variable, which contains a virtual file manager
+		/// </summary>
+		private const string VIRTUAL_FILE_MANAGER_VARIABLE_NAME = "VirtualFileManager";
+
+		/// <summary>
 		/// Virtual file manager
 		/// </summary>
 		private VirtualFileManager _virtualFileManager;
@@ -111,8 +121,8 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine.EmbedHostObject("LessEnvironment", LessEnvironment.Instance);
-				_jsEngine.EmbedHostObject("VirtualFileManager", _virtualFileManager);
+				_jsEngine.EmbedHostObject(LESS_ENVIRONMENT_VARIABLE_NAME, LessEnvironment.Instance);
+				_jsEngine.EmbedHostObject(VIRTUAL_FILE_MANAGER_VARIABLE_NAME, _virtualFileManager);
 
 				Type type = GetType();
 
@@ -408,6 +418,9 @@
 
 				if (_jsEngine != null)
 				{
+					_jsEngine.RemoveVariable(LESS_ENVIRONMENT_VARIABLE_NAME);
+					_jsEngine.RemoveVariable(VIRTUAL_FILE_MANAGER_VARIABLE_NAME);
+
 					_jsEngine.Dispose();
 					_jsEngine = null;
 				}

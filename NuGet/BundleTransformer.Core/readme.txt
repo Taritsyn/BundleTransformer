@@ -1,16 +1,16 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Core 1.9.92 Alpha 1
+           README file for Bundle Transformer: Core 1.9.92 Beta 1
 
    ----------------------------------------------------------------------
 
       Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
-		  
-		  
+
+
    ===========
    DESCRIPTION
-   ===========   
+   ===========
    Bundle Transformer - a modular extension for System.Web.Optimization
    (also known as the Microsoft ASP.NET Web Optimization Framework).
    Classes `StyleTransformer` and `ScriptTransformer`, included in the
@@ -41,11 +41,11 @@
 
    This extension will help your web applications successfully pass a
    most part of the tests in YSlow.
-   
+
    =============
    RELEASE NOTES
    =============
-   Removed `MimeTypeHelpers` class.
+   Removed obsolete classes.
 
    ====================
    POST-INSTALL ACTIONS
@@ -62,7 +62,7 @@
 
    To do this in the IIS Integrated mode, you need add to the
    `/configuration/system.webServer/handlers` element the following code:
-   
+
    <add name="CssAssetHandler"
       path="*.css" verb="GET"
       type="BundleTransformer.Core.HttpHandlers.CssAssetHandler, BundleTransformer.Core"
@@ -71,19 +71,19 @@
       path="*.js" verb="GET"
       type="BundleTransformer.Core.HttpHandlers.JsAssetHandler, BundleTransformer.Core"
       resourceType="File" preCondition="" />
-   
+
    To do this in the IIS Classic mode, you need add to the
    `/configuration/system.web/httpHandlers` element the following code:
- 
+
    <add
       path="*.css" verb="GET"
       type="BundleTransformer.Core.HttpHandlers.CssAssetHandler, BundleTransformer.Core" />
    <add
       path="*.js" verb="GET"
       type="BundleTransformer.Core.HttpHandlers.JsAssetHandler, BundleTransformer.Core" />
-   
+
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex - 
+   See documentation on CodePlex -
    http://bundletransformer.codeplex.com/documentation

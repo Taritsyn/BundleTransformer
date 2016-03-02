@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-        README file for Bundle Transformer: Clean-css 1.9.92 Alpha 2
+         README file for Bundle Transformer: Clean-css 1.9.92 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -14,28 +14,29 @@
    BundleTransformer.CleanCss contains one minifier-adapter for
    minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is
    based on the Clean-css (http://github.com/jakubpawlowicz/clean-css)
-   version 3.4.9.
+   version 3.4.10.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
    working of this module is recommended to install the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie or
-   JavaScriptEngineSwitcher.V8.
+   NuGet packages: JavaScriptEngineSwitcher.Msie,
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
 
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 3.4.9.
+   Added support of Clean-css version 3.4.10.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module is recommended to install the
-   following NuGet packages: JavaScriptEngineSwitcher.Msie or
-   JavaScriptEngineSwitcher.V8. After package is installed, need set a
-   name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
-   attribute of `/configuration/bundleTransformer/clean/jsEngine`
-   configuration element.
+   following NuGet packages: JavaScriptEngineSwitcher.Msie,
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   After package is installed, need set a name of JavaScript engine (for
+   example, `MsieJsEngine`) to the `name` attribute of
+   `/configuration/bundleTransformer/clean/jsEngine` configuration
+   element.
 
    To make `CleanCssMinifier` is the default CSS-minifier, you need
    to make changes to the Web.config file. In the `defaultMinifier`

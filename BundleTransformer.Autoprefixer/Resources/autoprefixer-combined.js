@@ -5641,11 +5641,11 @@ browserslist.queries = {
                 usage = { };
 //              var data = require(
 //                  'caniuse-db/region-usage-json/' + country + '.json');
-                var rawData = countryStatisticsService.GetStatisticsForCountry(country);
-                if (!rawData) {
+                if (!countryStatisticsService.ContainsCountry(country)) {
                     throw new Error("Could not find the statistics for country code '" + country + "'.");
                 }
-				
+
+                var rawData = countryStatisticsService.GetStatisticsForCountry(country);
                 var data = JSON.parse(rawData);
                 for ( var i in data.data ) {
                     fillUsage(usage, i, data.data[i]);

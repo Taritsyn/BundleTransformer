@@ -38,6 +38,11 @@
 		private const string AUTOPREFIXING_FUNCTION_CALL_TEMPLATE = @"autoprefixerHelper.process({0}, {1});";
 
 		/// <summary>
+		/// Name of variable, which contains a country statistics service
+		/// </summary>
+		private const string COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME = "CountryStatisticsService";
+
+		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
 		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
@@ -106,7 +111,7 @@
 		{
 			if (!_initialized)
 			{
-				_jsEngine.EmbedHostObject("CountryStatisticsService", CountryStatisticsService.Instance);
+				_jsEngine.EmbedHostObject(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME, CountryStatisticsService.Instance);
 
 				Type type = GetType();
 
@@ -286,6 +291,8 @@
 
 				if (_jsEngine != null)
 				{
+					_jsEngine.RemoveVariable(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME);
+
 					_jsEngine.Dispose();
 					_jsEngine = null;
 				}

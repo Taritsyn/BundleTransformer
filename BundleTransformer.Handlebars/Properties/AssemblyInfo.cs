@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundle Transformer: Handlebars")]
-[assembly: AssemblyCopyright("Copyright © 2012-2015 Andrey Taritsyn")]
+[assembly: AssemblyCopyright("Copyright © 2012-2016 Andrey Taritsyn")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
 [assembly: Guid("2429d220-9312-4245-832f-9ef9d0dfaae1")]
 
-[assembly: AssemblyVersion("1.9.83.0")]
-[assembly: AssemblyFileVersion("1.9.83.0")]
+[assembly: AssemblyVersion("1.9.92.0")]
+[assembly: AssemblyFileVersion("1.9.92.0")]

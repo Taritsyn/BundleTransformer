@@ -83,13 +83,13 @@
 							"packer",
 							@"
   * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8",
+  * JavaScriptEngineSwitcher.V8
+  * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")
 					);
 				}
 
-				createJsEngineInstance = (() =>
-					JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName));
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}
