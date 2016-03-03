@@ -108,7 +108,7 @@
 					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
 			}
 
-			bool result = path.StartsWith(_currentDirectoryName, StringComparison.OrdinalIgnoreCase);
+			bool result = path.StartsWith("/");
 
 			return result;
 		}

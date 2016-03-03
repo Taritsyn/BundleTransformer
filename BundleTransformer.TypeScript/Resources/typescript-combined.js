@@ -19223,6 +19223,7 @@ var ts;
                 checkGrammarForGenerator(node);
             }
             if (contextualMapper === identityMapper && isContextSensitive(node)) {
+                checkNodeDeferred(node);
                 return anyFunctionType;
             }
             var links = getNodeLinks(node);
@@ -24498,7 +24499,7 @@ var ts;
     function getDeclarationDiagnostics(host, resolver, targetSourceFile) {
         var declarationDiagnostics = ts.createDiagnosticCollection();
         ts.forEachExpectedEmitFile(host, getDeclarationDiagnosticsFromFile, targetSourceFile);
-        return declarationDiagnostics.getDiagnostics(targetSourceFile.fileName);
+        return declarationDiagnostics.getDiagnostics(targetSourceFile ? targetSourceFile.fileName : undefined);
         function getDeclarationDiagnosticsFromFile(_a, sources, isBundledEmit) {
             var declarationFilePath = _a.declarationFilePath;
             emitDeclarations(host, resolver, declarationDiagnostics, declarationFilePath, sources, isBundledEmit);
@@ -32021,7 +32022,7 @@ var ts;
     ts.ioReadTime = 0;
     ts.ioWriteTime = 0;
     var emptyArray = [];
-    ts.version = "1.8.2";
+    ts.version = "1.8.7";
     function findConfigFile(searchPath, fileExists) {
         var fileName = "tsconfig.json";
         while (true) {
@@ -32461,7 +32462,13 @@ var ts;
             return getDiagnosticsHelper(sourceFile, getSemanticDiagnosticsForFile, cancellationToken);
         }
         function getDeclarationDiagnostics(sourceFile, cancellationToken) {
-            return getDiagnosticsHelper(sourceFile, getDeclarationDiagnosticsForFile, cancellationToken);
+            var options = program.getCompilerOptions();
+            if (!sourceFile || options.out || options.outFile) {
+                return getDeclarationDiagnosticsWorker(sourceFile, cancellationToken);
+            }
+            else {
+                return getDiagnosticsHelper(sourceFile, getDeclarationDiagnosticsForFile, cancellationToken);
+            }
         }
         function getSyntacticDiagnosticsForFile(sourceFile, cancellationToken) {
             return sourceFile.parseDiagnostics;
@@ -32642,14 +32649,15 @@ var ts;
                 }
             });
         }
-        function getDeclarationDiagnosticsForFile(sourceFile, cancellationToken) {
+        function getDeclarationDiagnosticsWorker(sourceFile, cancellationToken) {
             return runWithCancellationToken(function () {
-                if (!ts.isDeclarationFile(sourceFile)) {
-                    var resolver = getDiagnosticsProducingTypeChecker().getEmitResolver(sourceFile, cancellationToken);
-                    var writeFile_1 = function () { };
-                    return ts.getDeclarationDiagnostics(getEmitHost(writeFile_1), resolver, sourceFile);
-                }
+                var resolver = getDiagnosticsProducingTypeChecker().getEmitResolver(sourceFile, cancellationToken);
+                var writeFile = function () { };
+                return ts.getDeclarationDiagnostics(getEmitHost(writeFile), resolver, sourceFile);
             });
+        }
+        function getDeclarationDiagnosticsForFile(sourceFile, cancellationToken) {
+            return ts.isDeclarationFile(sourceFile) ? [] : getDeclarationDiagnosticsWorker(sourceFile, cancellationToken);
         }
         function getOptionsDiagnostics() {
             var allDiagnostics = [];

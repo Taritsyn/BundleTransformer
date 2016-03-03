@@ -47,9 +47,9 @@
 		private VirtualFileManager _virtualFileManager;
 
 		/// <summary>
-		/// String representation of the default compilation options
+		/// String representation of the compilation options
 		/// </summary>
-		private readonly string _defaultOptionsString;
+		private readonly string _optionsString;
 
 		/// <summary>
 		/// JS engine
@@ -86,15 +86,14 @@
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="virtualFileManager">Virtual file manager</param>
-		/// <param name="defaultOptions">Default compilation options</param>
+		/// <param name="options">Compilation options</param>
 		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance,
 			VirtualFileManager virtualFileManager,
-			CompilationOptions defaultOptions)
+			CompilationOptions options)
 		{
 			_jsEngine = createJsEngineInstance();
 			_virtualFileManager = virtualFileManager;
-			_defaultOptionsString = defaultOptions != null ?
-				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
+			_optionsString = ConvertCompilationOptionsToJson(options ?? new CompilationOptions()).ToString();
 		}
 
 
@@ -120,13 +119,10 @@
 		/// "Compiles" a TypeScript-code to JS-code
 		/// </summary>
 		/// <param name="path">Path to TypeScript-file</param>
-		/// <param name="options">Compilation options</param>
 		/// <returns>Compilation result</returns>
-		public CompilationResult Compile(string path, CompilationOptions options = null)
+		public CompilationResult Compile(string path)
 		{
 			CompilationResult compilationResult;
-			string currentOptionsString = options != null ?
-				ConvertCompilationOptionsToJson(options).ToString() : _defaultOptionsString;
 
 			lock (_compilationSynchronizer)
 			{
@@ -136,7 +132,7 @@
 				{
 					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
 						JsonConvert.SerializeObject(path),
-						currentOptionsString));
+						_optionsString));
 					var json = JObject.Parse(result);
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
