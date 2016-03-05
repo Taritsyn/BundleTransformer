@@ -57,14 +57,14 @@
 		private VirtualFileManager _virtualFileManager;
 
 		/// <summary>
-		/// Default compilation options
+		/// Compilation options
 		/// </summary>
-		private readonly CompilationOptions _defaultOptions;
+		private readonly CompilationOptions _options;
 
 		/// <summary>
-		/// String representation of the default compilation options
+		/// String representation of the compilation options
 		/// </summary>
-		private readonly string _defaultOptionsString;
+		private readonly string _optionsString;
 
 		/// <summary>
 		/// JS engine
@@ -101,16 +101,15 @@
 		/// </summary>
 		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
 		/// <param name="virtualFileManager">Virtual file manager</param>
-		/// <param name="defaultOptions">Default compilation options</param>
+		/// <param name="options">Compilation options</param>
 		public LessCompiler(Func<IJsEngine> createJsEngineInstance,
 			VirtualFileManager virtualFileManager,
-			CompilationOptions defaultOptions)
+			CompilationOptions options)
 		{
 			_jsEngine = createJsEngineInstance();
 			_virtualFileManager = virtualFileManager;
-			_defaultOptions = defaultOptions ?? new CompilationOptions();
-			_defaultOptionsString = (defaultOptions != null) ?
-				ConvertCompilationOptionsToJson(defaultOptions).ToString() : "null";
+			_options = options ?? new CompilationOptions();
+			_optionsString = ConvertCompilationOptionsToJson(_options).ToString();
 		}
 
 
@@ -138,28 +137,13 @@
 		/// </summary>
 		/// <param name="content">Text content written on LESS</param>
 		/// <param name="path">Path to LESS-file</param>
-		/// <param name="options">Compilation options</param>
 		/// <returns>Compilation result</returns>
-		public CompilationResult Compile(string content, string path, CompilationOptions options = null)
+		public CompilationResult Compile(string content, string path)
 		{
 			CompilationResult compilationResult;
-			CompilationOptions currentOptions;
-			string currentOptionsString;
-
-			if (options != null)
-			{
-				currentOptions = options;
-				currentOptionsString = ConvertCompilationOptionsToJson(options).ToString();
-			}
-			else
-			{
-				currentOptions = _defaultOptions;
-				currentOptionsString = _defaultOptionsString;
-			}
-
 			string processedContent = content;
-			string globalVariables = currentOptions.GlobalVariables;
-			string modifyVariables = currentOptions.ModifyVariables;
+			string globalVariables = _options.GlobalVariables;
+			string modifyVariables = _options.ModifyVariables;
 
 			if (!string.IsNullOrWhiteSpace(globalVariables)
 				|| !string.IsNullOrWhiteSpace(modifyVariables))
@@ -188,7 +172,7 @@
 					var result = _jsEngine.Evaluate<string>(string.Format(COMPILATION_FUNCTION_CALL_TEMPLATE,
 						JsonConvert.SerializeObject(processedContent),
 						JsonConvert.SerializeObject(path),
-						currentOptionsString));
+						_optionsString));
 					var json = JObject.Parse(result);
 
 					var errors = json["errors"] != null ? json["errors"] as JArray : null;
@@ -197,7 +181,7 @@
 						throw new LessCompilingException(FormatErrorDetails(errors[0], processedContent, path));
 					}
 
-					if (currentOptions.Severity > 0)
+					if (_options.Severity > 0)
 					{
 						var warnings = json["warnings"] != null ? json["warnings"] as JArray : null;
 						if (warnings != null && warnings.Count > 0)

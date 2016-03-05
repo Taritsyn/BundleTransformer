@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: LESS 1.9.92 Beta 1
+           README file for Bundle Transformer: LESS 1.9.92 Beta 3
 
    ----------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.Less contains translator-adapter `LessTranslator`
-   (supports LESS (http://lesscss.org) version 2.6.0). This adapter makes
+   (supports LESS (http://lesscss.org) version 2.6.1). This adapter makes
    translation of LESS-code to CSS-code. Also contains debugging
    HTTP-handler `LessAssetHandler`, which is responsible for text output
    of translated LESS-asset.
@@ -24,6 +24,11 @@
    working of this module is recommended to install one of the following
    NuGet packages: JavaScriptEngineSwitcher.Msie,
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+
+   =============
+   RELEASE NOTES
+   =============
+   Added support of LESS version 2.6.1.
 
    ====================
    POST-INSTALL ACTIONS
