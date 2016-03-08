@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: UglifyJS 1.9.92 Beta 1
+            README file for Bundle Transformer: UglifyJS v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -21,6 +21,13 @@
    working of this module is recommended to install one of the following
    NuGet packages: JavaScriptEngineSwitcher.Msie,
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of UglifyJS version 2.6.2;
+   2. In compression settings was added one new property - `CollapseVars`
+      (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

@@ -25,6 +25,10 @@
 		{
 			// Arrange
 			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath("~/"))
+				.Returns("/")
+				;
 
 
 			string testTypeScriptTsAssetVirtualPath = UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,

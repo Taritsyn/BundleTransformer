@@ -12,8 +12,8 @@
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
 
-	using Compilers;
 	using Configuration;
+	using Internal;
 	using Resources;
 
 	/// <summary>
@@ -381,7 +381,7 @@
 			{
 				newContent = closureCompiler.Compile(asset.Content, assetUrl, assetExternsDependencies);
 			}
-			catch (ClosureCompilingException e)
+			catch (ClosureCompilationException e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,

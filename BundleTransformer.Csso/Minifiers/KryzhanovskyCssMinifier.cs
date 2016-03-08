@@ -13,7 +13,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
-	using Optimizers;
+	using Internal;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code
@@ -71,7 +71,7 @@
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"csso",
 							@"
-  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
   * JavaScriptEngineSwitcher.V8
   * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")
@@ -101,9 +101,11 @@
 				return asset;
 			}
 
-			using (var cssOptimizer = new CssOptimizer(_createJsEngineInstance))
+			OptimizationOptions options = CreateOptimizationOptions();
+
+			using (var cssOptimizer = new CssOptimizer(_createJsEngineInstance, options))
 			{
-				InnerMinify(asset, cssOptimizer, DisableRestructuring);
+				InnerMinify(asset, cssOptimizer);
 			}
 
 			return asset;
@@ -132,29 +134,29 @@
 				return assets;
 			}
 
-			bool disableRestructuring = DisableRestructuring;
+			OptimizationOptions options = CreateOptimizationOptions();
 
-			using (var cssOptimizer = new CssOptimizer(_createJsEngineInstance))
+			using (var cssOptimizer = new CssOptimizer(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					InnerMinify(asset, cssOptimizer, disableRestructuring);
+					InnerMinify(asset, cssOptimizer);
 				}
 			}
 
 			return assets;
 		}
 
-		private void InnerMinify(IAsset asset, CssOptimizer cssOptimizer, bool disableRestructuring)
+		private void InnerMinify(IAsset asset, CssOptimizer cssOptimizer)
 		{
 			string newContent;
 			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = cssOptimizer.Optimize(asset.Content, assetUrl, disableRestructuring);
+				newContent = cssOptimizer.Optimize(asset.Content, assetUrl);
 			}
-			catch (CssOptimizingException e)
+			catch (CssOptimizationException e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
@@ -169,6 +171,20 @@
 
 			asset.Content = newContent;
 			asset.Minified = true;
+		}
+
+		/// <summary>
+		/// Creates a optimization options
+		/// </summary>
+		/// <returns>Optimization options</returns>
+		private OptimizationOptions CreateOptimizationOptions()
+		{
+			var options = new OptimizationOptions
+			{
+				Restructure = !DisableRestructuring
+			};
+
+			return options;
 		}
 	}
 }

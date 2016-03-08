@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: LESS 1.9.92 Beta 3
+              README file for Bundle Transformer: LESS v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -28,7 +28,12 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 2.6.1.
+   1. Added support of LESS version 2.6.1;
+   2. No longer made preprocessing of `@import` directives and `data-uri`
+      functions;
+   3. Interpolation in file paths is now supported;
+   4. In configuration settings of LESS-translator was added one new
+      property - `Severity` (default `0`).
 
    ====================
    POST-INSTALL ACTIONS

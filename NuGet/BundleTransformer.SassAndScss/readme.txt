@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Sass and SCSS 1.9.92 Beta 2
+          README file for Bundle Transformer: Sass and SCSS v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -26,8 +26,11 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a bug, that occurred when processing relative paths, which are
-   located at higher level, than the current directory.
+   1. Added support of libSass version 3.3.3;
+   2. Fixed a bug “Sass compilation sometimes fails with native exception
+      in 32 bit mode”;
+   3. Fixed a bug, that occurred when processing relative paths, which
+      are located at higher level, than the current directory.
 
    ====================
    POST-INSTALL ACTIONS

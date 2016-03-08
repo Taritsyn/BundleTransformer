@@ -12,8 +12,8 @@
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
-	using Compilers;
 	using Configuration;
+	using Internal;
 	using Resources;
 
 	/// <summary>
@@ -189,23 +189,23 @@
 		private void InnerTranslate(IAsset asset, HoganCompiler hoganCompiler, bool enableNativeMinification)
 		{
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
+			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = hoganCompiler.Compile(asset.Content, assetVirtualPath);
+				newContent = hoganCompiler.Compile(asset.Content, assetUrl);
 			}
-			catch (HoganCompilingException e)
+			catch (HoganCompilationException e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 
 			asset.Content = newContent;

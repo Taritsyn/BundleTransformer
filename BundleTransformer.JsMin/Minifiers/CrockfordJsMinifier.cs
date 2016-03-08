@@ -8,7 +8,7 @@
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
 
-	using DouglasCrockford;
+	using Internal;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code

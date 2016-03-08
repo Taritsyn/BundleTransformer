@@ -163,17 +163,17 @@
 		{
 			string content = asset.Content;
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
+			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = (!string.IsNullOrEmpty(content)) ? _cssCompressor.Compress(content) : string.Empty;
+				newContent = !string.IsNullOrEmpty(content) ? _cssCompressor.Compress(content) : string.Empty;
 			}
 			catch (Exception e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 			}
 
 			asset.Content = newContent;

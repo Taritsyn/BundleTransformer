@@ -13,8 +13,8 @@
 	using Core.PostProcessors;
 	using CoreStrings = Core.Resources.Strings;
 
-	using AutoPrefixers;
 	using Configuration;
+	using Internal;
 
 	/// <summary>
 	/// Postprocessor that actualizes a vendor prefixes in CSS-code

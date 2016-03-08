@@ -239,11 +239,11 @@
 		{
 			string content = asset.Content;
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
+			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = (!string.IsNullOrEmpty(content)) ? _jsCompressor.Compress(content) : string.Empty;
+				newContent = !string.IsNullOrEmpty(content) ? _jsCompressor.Compress(content) : string.Empty;
 
 				var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
 				if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
@@ -264,25 +264,25 @@
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 			}
 			catch (EcmaScriptException e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 			}
 			catch (YuiCompressingException e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 			}
 			catch (Exception e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message), e);
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message), e);
 			}
 
 			asset.Content = newContent;

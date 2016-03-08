@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: IntelliSense 1.9.92 Beta 1
+          README file for Bundle Transformer: IntelliSense v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -14,6 +14,13 @@
    BundleTransformer.ConfigurationIntelliSense adds IntelliSense support
    when editing the `bundleTransformer` configuration section in the
    Web.config file.
+
+   =============
+   RELEASE NOTES
+   =============
+   Updated definitions for configuration settings of LESS-translator,
+   TypeScript-translator, Autoprefixer-postprocessor and Uglify
+   JS-minifier.
 
    =============
    DOCUMENTATION

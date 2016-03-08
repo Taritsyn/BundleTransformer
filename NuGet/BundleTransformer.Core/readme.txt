@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Core 1.9.92 Beta 1
+              README file for Bundle Transformer: Core v1.9.92
 
    ----------------------------------------------------------------------
 

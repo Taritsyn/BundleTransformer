@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-         README file for Bundle Transformer: Clean-css 1.9.92 Beta 1
+            README file for Bundle Transformer: Clean-css v1.9.92
 
    ----------------------------------------------------------------------
 

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.Less</id>
-		<version>1.9.92-beta3</version>
+		<version>1.9.92</version>
 		<title>Bundle Transformer: LESS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -16,14 +16,17 @@ BundleTransformer.Less does not support loading of plugins.
 
 As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
 		<summary>BundleTransformer.Less contains translator-adapter `LessTranslator` (supports LESS version 2.6.1). This adapter makes translation of LESS-code to CSS-code. Also contains debugging HTTP-handler `LessAssetHandler`, which is responsible for text output of translated LESS-asset.</summary>
-		<releaseNotes>Added support of LESS version 2.6.1.</releaseNotes>
+		<releaseNotes>1. Added support of LESS version 2.6.1;
+2. No longer made preprocessing of `@import` directives and `data-uri` functions;
+3. Interpolation in file paths is now supported;
+4. In configuration settings of LESS-translator was added one new property - `Severity` (default `0`).</releaseNotes>
 		<copyright>Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling LESS Translation Translator Compilation Compiler</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.92-beta1" />
-			<dependency id="JavaScriptEngineSwitcher.Core" version="1.5.0-beta1" />
-			<dependency id="Newtonsoft.Json" version="6.0.8" />
+			<dependency id="BundleTransformer.Core" version="1.9.92" />
+			<dependency id="JavaScriptEngineSwitcher.Core" version="1.5.0" />
+			<dependency id="Newtonsoft.Json" version="8.0.2" />
 		</dependencies>
 		<references>
 			<reference file="BundleTransformer.Less.dll" />

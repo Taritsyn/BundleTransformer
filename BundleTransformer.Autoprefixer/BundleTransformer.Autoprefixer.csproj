@@ -40,28 +40,28 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="JavaScriptEngineSwitcher.Core, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0-beta1\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Autoprefixers\CssAutoprefixer.cs" />
-    <Compile Include="Autoprefixers\CssAutoprefixingException.cs" />
-    <Compile Include="AutoprefixingOptions.cs" />
-    <Compile Include="AutoprefixingResult.cs" />
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\AutoprefixerSettings.cs" />
     <Compile Include="Configuration\BrowserConditionalExpression.cs" />
     <Compile Include="Configuration\BrowserConditionalExpressionCollection.cs" />
-    <Compile Include="CountryStatisticsService.cs" />
-    <Compile Include="Helpers\AutoprefixingResourceHelpers.cs" />
+    <Compile Include="Internal\AutoprefixingOptions.cs" />
+    <Compile Include="Internal\AutoprefixingResult.cs" />
+    <Compile Include="Internal\CountryStatisticsService.cs" />
+    <Compile Include="Internal\CssAutoprefixer.cs" />
+    <Compile Include="Internal\CssAutoprefixingException.cs" />
+    <Compile Include="Internal\ResourceHelpers.cs" />
     <Compile Include="PostProcessors\AutoprefixCssPostProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Strings.Designer.cs">

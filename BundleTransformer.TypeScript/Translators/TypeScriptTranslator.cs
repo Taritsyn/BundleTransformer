@@ -10,12 +10,11 @@
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
-	using Core.Helpers;
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
-	using Compilers;
 	using Configuration;
+	using Internal;
 
 	/// <summary>
 	/// Translator that responsible for translation of TypeScript-code to JS-code
@@ -41,11 +40,6 @@
 		/// Virtual file manager
 		/// </summary>
 		private readonly VirtualFileManager _virtualFileManager;
-
-		/// <summary>
-		/// Synchronizer of translation
-		/// </summary>
-		private readonly object _translationSynchronizer = new object();
 
 		/// <summary>
 		/// Gets or sets a flag that web application is in debug mode
@@ -299,15 +293,12 @@
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			lock (_translationSynchronizer)
-			{
-				CompilationOptions options = CreateCompilationOptions();
+			CompilationOptions options = CreateCompilationOptions();
 
-				using (var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance,
-					_virtualFileManager, options))
-				{
-					InnerTranslate(asset, typeScriptCompiler);
-				}
+			using (var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance,
+				_virtualFileManager, options))
+			{
+				InnerTranslate(asset, typeScriptCompiler);
 			}
 
 			return asset;
@@ -336,17 +327,14 @@
 				return assets;
 			}
 
-			lock (_translationSynchronizer)
-			{
-				CompilationOptions options = CreateCompilationOptions();
+			CompilationOptions options = CreateCompilationOptions();
 
-				using (var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance,
-					_virtualFileManager, options))
+			using (var typeScriptCompiler = new TypeScriptCompiler(_createJsEngineInstance,
+				_virtualFileManager, options))
+			{
+				foreach (var asset in assetsToProcessing)
 				{
-					foreach (var asset in assetsToProcessing)
-					{
-						InnerTranslate(asset, typeScriptCompiler);
-					}
+					InnerTranslate(asset, typeScriptCompiler);
 				}
 			}
 
@@ -359,15 +347,13 @@
 			string assetUrl = asset.Url;
 			IList<string> dependencies;
 
-			_virtualFileManager.CurrentDirectoryName = UrlHelpers.GetDirectoryName(assetUrl);
-
 			try
 			{
 				CompilationResult result = typeScriptCompiler.Compile(assetUrl);
 				newContent = result.CompiledContent;
 				dependencies = result.IncludedFilePaths;
 			}
-			catch (TypeScriptCompilingException e)
+			catch (TypeScriptCompilationException e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
@@ -378,10 +364,6 @@
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
 						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
-			}
-			finally
-			{
-				_virtualFileManager.CurrentDirectoryName = null;
 			}
 
 			asset.Content = newContent;

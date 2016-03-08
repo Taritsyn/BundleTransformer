@@ -12,8 +12,8 @@
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
-	using Compilers;
 	using Configuration;
+	using Internal;
 
 	/// <summary>
 	/// Translator that responsible for translation of CoffeeScript-code to JS-code
@@ -106,7 +106,9 @@
 				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
 			}
 
-			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(_createJsEngineInstance))
+			CompilationOptions options = CreateCompilationOptions();
+
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(_createJsEngineInstance, options))
 			{
 				InnerTranslate(asset, coffeeScriptCompiler);
 			}
@@ -138,7 +140,9 @@
 				return assets;
 			}
 
-			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(_createJsEngineInstance))
+			CompilationOptions options = CreateCompilationOptions();
+
+			using (var coffeeScriptCompiler = new CoffeeScriptCompiler(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
@@ -152,25 +156,23 @@
 		private void InnerTranslate(IAsset asset, CoffeeScriptCompiler coffeeScriptCompiler)
 		{
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
-			bool isLiterate = (asset.AssetTypeCode == Constants.AssetTypeCode.LiterateCoffeeScript);
-			CompilationOptions options = CreateCompilationOptions(isLiterate);
+			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = coffeeScriptCompiler.Compile(asset.Content, assetVirtualPath, options);
+				newContent = coffeeScriptCompiler.Compile(asset.Content, assetUrl);
 			}
-			catch (CoffeeScriptCompilingException e)
+			catch (CoffeeScriptCompilationException e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationFailed,
-						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetVirtualPath, e.Message));
+						INPUT_CODE_TYPE, OUTPUT_CODE_TYPE, assetUrl, e.Message));
 			}
 
 			asset.Content = newContent;
@@ -179,14 +181,12 @@
 		/// <summary>
 		/// Creates a compilation options
 		/// </summary>
-		/// <param name="isLiterate">Flag for whether to enable "literate" mode</param>
 		/// <returns>Compilation options</returns>
-		private CompilationOptions CreateCompilationOptions(bool isLiterate)
+		private CompilationOptions CreateCompilationOptions()
 		{
 			var options = new CompilationOptions
 			{
-				Bare = Bare,
-				Literate = isLiterate
+				Bare = Bare
 			};
 
 			return options;

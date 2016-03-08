@@ -42,8 +42,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DouglasCrockford\JsMinificationException.cs" />
-    <Compile Include="DouglasCrockford\JsMinifier.cs" />
+    <Compile Include="Internal\JsMinificationException.cs" />
+    <Compile Include="Internal\JsMinifier.cs" />
     <Compile Include="Minifiers\CrockfordJsMinifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

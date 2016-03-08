@@ -13,13 +13,13 @@
 	using Core;
 	using Core.Assets;
 	using Core.FileSystem;
-	using Core.Helpers;
 	using Core.Resources;
 	using Core.Translators;
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
+	using Internal;
 	using BtIndentType = IndentType;
 	using BtLineFeedType = LineFeedType;
 
@@ -37,11 +37,6 @@
 		/// Virtual file manager
 		/// </summary>
 		private readonly VirtualFileManager _virtualFileManager;
-
-		/// <summary>
-		/// Synchronizer of translation
-		/// </summary>
-		private readonly object _translationSynchronizer = new object();
 
 		/// <summary>
 		/// Gets or sets a indent type
@@ -129,14 +124,9 @@
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
 			}
 
-			lock (_translationSynchronizer)
+			using (var sassCompiler = new SassCompiler(_virtualFileManager))
 			{
-				bool enableNativeMinification = NativeMinificationEnabled;
-
-				using (var sassCompiler = new SassCompiler(_virtualFileManager))
-				{
-					InnerTranslate(asset, sassCompiler, enableNativeMinification);
-				}
+				InnerTranslate(asset, sassCompiler, NativeMinificationEnabled);
 			}
 
 			return asset;
@@ -166,16 +156,13 @@
 				return assets;
 			}
 
-			lock (_translationSynchronizer)
-			{
-				bool enableNativeMinification = NativeMinificationEnabled;
+			bool enableNativeMinification = NativeMinificationEnabled;
 
-				using (var sassCompiler = new SassCompiler(_virtualFileManager))
+			using (var sassCompiler = new SassCompiler(_virtualFileManager))
+			{
+				foreach (var asset in assetsToProcessing)
 				{
-					foreach (var asset in assetsToProcessing)
-					{
-						InnerTranslate(asset, sassCompiler, enableNativeMinification);
-					}
+					InnerTranslate(asset, sassCompiler, enableNativeMinification);
 				}
 			}
 
@@ -184,13 +171,11 @@
 
 		private void InnerTranslate(IAsset asset, SassCompiler sassCompiler, bool enableNativeMinification)
 		{
-			string assetTypeName = (asset.AssetTypeCode == Constants.AssetTypeCode.Sass) ? "Sass" : "SCSS";
+			string assetTypeName = asset.AssetTypeCode == Constants.AssetTypeCode.Sass ? "Sass" : "SCSS";
 			string newContent;
 			string assetUrl = asset.Url;
 			IList<string> dependencies;
 			CompilationOptions options = CreateCompilationOptions(asset.AssetTypeCode, enableNativeMinification);
-
-			_virtualFileManager.CurrentDirectoryName = UrlHelpers.GetDirectoryName(assetUrl);
 
 			try
 			{
@@ -214,10 +199,6 @@
 					string.Format(CoreStrings.Translators_TranslationFailed,
 						assetTypeName, OUTPUT_CODE_TYPE, assetUrl, e.Message), e);
 			}
-			finally
-			{
-				_virtualFileManager.CurrentDirectoryName = null;
-			}
 
 			asset.Content = newContent;
 			asset.Minified = enableNativeMinification;
@@ -235,7 +216,7 @@
 		{
 			var options = new CompilationOptions
 			{
-				IndentedSyntax = (assetTypeCode == Constants.AssetTypeCode.Sass),
+				IndentedSyntax = assetTypeCode == Constants.AssetTypeCode.Sass,
 				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, LshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
 				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, LshLineFeedType>(LineFeedType),

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-        README file for Bundle Transformer: TypeScript 1.9.92 Beta 2
+           README file for Bundle Transformer: TypeScript v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -30,7 +30,14 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 1.8.7.
+   1. Added support of TypeScript version 1.8.7;
+   2. No longer made preprocessing of `reference` comments;
+   3. In configuration settings of TypeScript-translator was added 5 new
+      properties: `AllowUnreachableCode` (default `false`),
+      `AllowUnusedLabels` (default `false`),
+      `ForceConsistentCasingInFileNames` (default `false`),
+      `NoFallthroughCasesInSwitch` (default `false`) and
+      `NoImplicitReturns` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

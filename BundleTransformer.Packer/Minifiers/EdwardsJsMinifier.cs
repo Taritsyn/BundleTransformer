@@ -13,7 +13,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
-	using Packers;
+	using Internal;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
@@ -112,9 +112,11 @@
 				return asset;
 			}
 
-			using (var jsPacker = new JsPacker(_createJsEngineInstance))
+			PackingOptions options = CreatePackingOptions();
+
+			using (var jsPacker = new JsPacker(_createJsEngineInstance, options))
 			{
-				InnerMinify(asset, jsPacker, ShrinkVariables, Base62Encode);
+				InnerMinify(asset, jsPacker);
 			}
 
 			return asset;
@@ -143,44 +145,58 @@
 				return assets;
 			}
 
-			bool shrinkVariables = ShrinkVariables;
-			bool base62Encode = Base62Encode;
+			PackingOptions options = CreatePackingOptions();
 
-			using (var jsPacker = new JsPacker(_createJsEngineInstance))
+			using (var jsPacker = new JsPacker(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					InnerMinify(asset, jsPacker, shrinkVariables, base62Encode);
+					InnerMinify(asset, jsPacker);
 				}
 			}
 
 			return assets;
 		}
 
-		private void InnerMinify(IAsset asset, JsPacker jsPacker, bool shrinkVariables, bool base62Encode)
+		private void InnerMinify(IAsset asset, JsPacker jsPacker)
 		{
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
+			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = jsPacker.Pack(asset.Content, base62Encode, shrinkVariables);
+				newContent = jsPacker.Pack(asset.Content);
 			}
 			catch (JsPackingException e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 
 			asset.Content = newContent;
 			asset.Minified = true;
+		}
+
+		/// <summary>
+		/// Creates a packing options
+		/// </summary>
+		/// <returns>Packing options</returns>
+		private PackingOptions CreatePackingOptions()
+		{
+			var options = new PackingOptions
+			{
+				ShrinkVariables = ShrinkVariables,
+				Base62Encode = Base62Encode
+			};
+
+			return options;
 		}
 	}
 }

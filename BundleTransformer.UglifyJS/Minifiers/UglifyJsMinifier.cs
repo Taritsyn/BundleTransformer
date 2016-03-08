@@ -13,7 +13,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
-	using Uglifiers;
+	using Internal;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
@@ -279,23 +279,23 @@
 		{
 			string content = asset.Content;
 			string newContent;
-			string assetVirtualPath = asset.VirtualPath;
+			string assetUrl = asset.Url;
 
 			try
 			{
-				newContent = jsUglifier.Uglify(content, assetVirtualPath);
+				newContent = jsUglifier.Uglify(content, assetUrl);
 			}
-			catch (JsUglifyingException e)
+			catch (JsUglificationException e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationSyntaxError,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 			catch (Exception e)
 			{
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
-						CODE_TYPE, assetVirtualPath, MINIFIER_NAME, e.Message));
+						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
 			}
 
 			asset.Content = newContent;

@@ -41,12 +41,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="JavaScriptEngineSwitcher.Core, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0-beta1\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -55,13 +55,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="CompilationOptions.cs" />
-    <Compile Include="Compilers\CoffeeScriptCompilingException.cs" />
-    <Compile Include="Compilers\CoffeeScriptCompiler.cs" />
     <Compile Include="Configuration\CoffeeScriptSettings.cs" />
     <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="HttpHandlers\CoffeeScriptAssetHandler.cs" />
+    <Compile Include="Internal\CoffeeScriptCompilationException.cs" />
+    <Compile Include="Internal\CoffeeScriptCompiler.cs" />
+    <Compile Include="Internal\CompilationOptions.cs" />
     <Compile Include="Translators\CoffeeScriptTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

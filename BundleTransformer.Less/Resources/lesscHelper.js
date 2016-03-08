@@ -220,7 +220,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 
 		compilationOptions = mix(mix({}, defaultOptions), options);
 		compilationOptions.filename = path;
-		compilationOptions.rootpath = fileManager.getPath(path);
+		compilationOptions.rootpath = '';
 		compilationOptions.relativeUrls = true;
 
 		lessCompiler = less.createFromEnvironment(btEnvironment, [fileManager]);

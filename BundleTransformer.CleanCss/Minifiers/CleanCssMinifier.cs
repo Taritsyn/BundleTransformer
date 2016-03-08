@@ -13,7 +13,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
-	using Cleaners;
+	using Internal;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code

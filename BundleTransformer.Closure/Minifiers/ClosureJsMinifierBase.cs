@@ -12,6 +12,7 @@
 	using CoreStrings = Core.Resources.Strings;
 
 	using Configuration;
+	using Internal;
 
 	/// <summary>
 	/// Base class of minifier, which produces minifiction of JS-code

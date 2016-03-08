@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: CSSO 1.9.92 Beta 1
+              README file for Bundle Transformer: CSSO v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -19,8 +19,9 @@
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
    working of this module is recommended to install the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie,
-   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT
+   modes), JavaScriptEngineSwitcher.V8 or
+   JavaScriptEngineSwitcher.ChakraCore.
 
    =============
    RELEASE NOTES
@@ -31,12 +32,12 @@
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module is recommended to install the
-   following NuGet packages: JavaScriptEngineSwitcher.Msie,
-   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
-   After package is installed, need set a name of JavaScript engine (for
-   example, `MsieJsEngine`) to the `name` attribute of
-   `/configuration/bundleTransformer/csso/jsEngine` configuration
-   element.
+   following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the
+   Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or
+   JavaScriptEngineSwitcher.ChakraCore. After package is installed, need
+   set a name of JavaScript engine (for example, `MsieJsEngine`) to the
+   `name` attribute of
+   `/configuration/bundleTransformer/csso/jsEngine` configuration element.
 
    To make `KryzhanovskyCssMinifier` is the default CSS-minifier, you need
    to make changes to the Web.config file. In the `defaultMinifier`

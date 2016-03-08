@@ -1,0 +1,27 @@
+﻿namespace BundleTransformer.CoffeeScript.Internal
+{
+	/// <summary>
+	/// CoffeeScript compilation options
+	/// </summary>
+	internal sealed class CompilationOptions
+	{
+		/// <summary>
+		/// Gets or sets a flag for whether to allow compilation to JavaScript
+		/// without the top-level function safety wrapper
+		/// </summary>
+		public bool Bare
+		{
+			get;
+			set;
+		}
+
+
+		/// <summary>
+		/// Constructs a instance of the CoffeeScript compilation options
+		/// </summary>
+		public CompilationOptions()
+		{
+			Bare = true;
+		}
+	}
+}

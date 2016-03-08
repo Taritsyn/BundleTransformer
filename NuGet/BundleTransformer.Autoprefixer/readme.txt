@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Autoprefixer 1.9.92 Beta 1
+          README file for Bundle Transformer: Autoprefixer v1.9.92
 
    ----------------------------------------------------------------------
 
@@ -21,6 +21,16 @@
    working of this module is recommended to install the following NuGet
    packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8
    or JavaScriptEngineSwitcher.ChakraCore.
+
+   =============
+   RELEASE NOTES
+   =============
+   1. Added support of Autoprefixer version 6.3.3.1;
+   2. No longer made preprocessing of country conditional expressions;
+   3. In configuration settings of Autoprefixer-postprocessor was added 4
+      new properties: `Supports` (default `true`), `Flexbox` (default
+      `true`), `Grid` (default `true`) and `Stats` (default
+      `empty string`).
 
    ====================
    POST-INSTALL ACTIONS

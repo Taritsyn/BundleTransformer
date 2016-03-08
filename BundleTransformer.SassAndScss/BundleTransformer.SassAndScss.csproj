@@ -56,8 +56,8 @@
     <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
     <Compile Include="IndentType.cs" />
+    <Compile Include="Internal\VirtualFileManager.cs" />
     <Compile Include="LineFeedType.cs" />
-    <Compile Include="VirtualFileManager.cs" />
     <Compile Include="HttpHandlers\SassAndScssAssetHandler.cs" />
     <Compile Include="Translators\SassAndScssTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

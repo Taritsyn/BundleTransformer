@@ -40,27 +40,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="JavaScriptEngineSwitcher.Core, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0-beta1\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
+      <HintPath>..\packages\JavaScriptEngineSwitcher.Core.1.5.0\lib\net40\JavaScriptEngineSwitcher.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="CodeGenerationOptions.cs" />
     <Compile Include="CompressionOptions.cs" />
+    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\CodeGenerationSettings.cs" />
     <Compile Include="Configuration\CompressionSettings.cs" />
     <Compile Include="Configuration\JsMinifierSettings.cs" />
     <Compile Include="Configuration\ManglingSettings.cs" />
     <Compile Include="Configuration\ParsingSettings.cs" />
     <Compile Include="Configuration\UglifySettings.cs" />
+    <Compile Include="Internal\JsUglificationException.cs" />
+    <Compile Include="Internal\JsUglifier.cs" />
+    <Compile Include="Internal\UglificationOptions.cs" />
     <Compile Include="ManglingOptions.cs" />
     <Compile Include="Minifiers\UglifyJsMinifier.cs" />
     <Compile Include="ParsingOptions.cs" />
@@ -76,9 +79,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Strings.ru-ru.resx</DependentUpon>
     </Compile>
-    <Compile Include="UglificationOptions.cs" />
-    <Compile Include="Uglifiers\JsUglifier.cs" />
-    <Compile Include="Uglifiers\JsUglifyingException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\BundleTransformer.snk">

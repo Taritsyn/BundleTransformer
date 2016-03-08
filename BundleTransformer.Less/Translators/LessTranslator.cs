@@ -14,8 +14,8 @@
 	using Core.Translators;
 	using CoreStrings = Core.Resources.Strings;
 
-	using Compilers;
 	using Configuration;
+	using Internal;
 
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
@@ -248,7 +248,7 @@
 			{
 				throw;
 			}
-			catch (LessCompilingException e)
+			catch (LessCompilationException e)
 			{
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
@@ -263,7 +263,7 @@
 
 			asset.Content = newContent;
 			asset.Minified = enableNativeMinification;
-			asset.RelativePathsResolved = true;
+			asset.RelativePathsResolved = false;
 			asset.VirtualPathDependencies = dependencies;
 		}
 
