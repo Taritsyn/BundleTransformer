@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.6.4
+* CSSO (CSS Optimizer) v1.7.0
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -35,38 +35,10 @@ var CSSO = (function(){
 		var List = require('/utils/list');
 		var convertToInternal = require('/compressor/ast/gonzalesToInternal');
 		var convertToGonzales = require('/compressor/ast/internalToGonzales');
-		var internalTranslate = require('/compressor/ast/translate');
 		var internalWalkAll = require('/compressor/ast/walk').all;
-		var cleanFn = require('/compressor/clean');
-		var compressFn = require('/compressor/compress');
+		var clean = require('/compressor/clean');
+		var compress = require('/compressor/compress');
 		var restructureAst = require('/compressor/restructure');
-
-//		function createLogger(level) {
-//			var lastDebug;
-//
-//			if (!level) {
-//				// no output
-//				return function() {};
-//			}
-//
-//			return function debugOutput(name, token, reset) {
-//				var line = (!reset ? '(' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 'ms) ' : '') + name;
-//
-//				if (level > 1 && token) {
-//					var css = internalTranslate(token, true).trim();
-//
-//					// when level 2, limit css to 256 symbols
-//					if (level === 2 && css.length > 256) {
-//						css = css.substr(0, 256) + '...';
-//					}
-//
-//					line += '\n  ' + css + '\n';
-//				}
-//
-//				console.error(line);
-//				lastDebug = Date.now();
-//			};
-//		};
 
 		function injectInfo(token) {
 			for (var i = token.length - 1; i > -1; i--) {
@@ -111,25 +83,25 @@ var CSSO = (function(){
 			};
 		}
 
-		function compressBlock(ast, restructuring, num/*, debug*/) {
-//			debug('Compress block #' + num, null, true);
+		function compressBlock(ast, restructuring, num/*, logger*/) {
+//			logger('Compress block #' + num, null, true);
 
 			var internalAst = convertToInternal(ast);
-//			debug('convertToInternal', internalAst);
+//			logger('convertToInternal', internalAst);
 
 			internalAst.firstAtrulesAllowed = ast.firstAtrulesAllowed;
 
 			// remove useless
-			internalWalkAll(internalAst, cleanFn);
-//			debug('clean', internalAst);
+			internalWalkAll(internalAst, clean);
+//			logger('clean', internalAst);
 
 			// compress nodes
-			internalWalkAll(internalAst, compressFn);
-//			debug('compress', internalAst);
+			internalWalkAll(internalAst, compress);
+//			logger('compress', internalAst);
 
 			// structure optimisations
 			if (restructuring) {
-				restructureAst(internalAst/*, debug*/);
+				restructureAst(internalAst/*, logger*/);
 			}
 
 			return internalAst;
@@ -139,7 +111,7 @@ var CSSO = (function(){
 			ast = ast || [{}, 'stylesheet'];
 			options = options || {};
 
-//			var debug = createLogger(options.debug);
+//			var logger = typeof options.logger === 'function' ? options.logger : Function();
 			var restructuring =
 				'restructure' in options ? options.restructure :
 				'restructuring' in options ? options.restructuring :
@@ -156,7 +128,7 @@ var CSSO = (function(){
 			do {
 				block = readBlock(ast, block.offset);
 				block.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
-				block.stylesheet = compressBlock(block.stylesheet, restructuring, blockNum++/*, debug*/);
+				block.stylesheet = compressBlock(block.stylesheet, restructuring, blockNum++/*, logger*/);
 
 				if (block.comment) {
 					// add \n before comment if there is another content in result
@@ -862,7 +834,17 @@ var CSSO = (function(){
 
 					node.sequence.each(function(data) {
 						var node = toGonzales(data);
-						result.push(node);
+
+						// add extra spaces around /deep/ combinator since comment beginning/ending may to be produced
+						if (data.type === 'Combinator' && data.name === '/deep/') {
+							result.push(
+								[{}, 's', ' '],
+								node,
+								[{}, 's', ' ']
+							);
+						} else {
+							result.push(node);
+						}
 					});
 
 					return result;
@@ -1070,12 +1052,90 @@ var CSSO = (function(){
 			}
 		}
 
-		var exports = toGonzales;
+		return toGonzales;
+	};
+	//#endregion
+
+	//#region URL: /compressor/ast/names
+	modules['/compressor/ast/names'] = function () {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var knownKeywords = Object.create(null);
+		var knownProperties = Object.create(null);
+
+		function getVendorPrefix(string) {
+			if (string[0] === '-') {
+				// skip 2 chars to avoid wrong match with variables names
+				var secondDashIndex = string.indexOf('-', 2);
+
+				if (secondDashIndex !== -1) {
+					return string.substr(0, secondDashIndex + 1);
+				}
+			}
+
+			return '';
+		}
+
+		function getKeywordInfo(keyword) {
+			if (hasOwnProperty.call(knownKeywords, keyword)) {
+				return knownKeywords[keyword];
+			}
+
+			var lowerCaseKeyword = keyword.toLowerCase();
+			var vendor = getVendorPrefix(lowerCaseKeyword);
+			var name = lowerCaseKeyword;
+
+			if (vendor) {
+				name = name.substr(vendor.length);
+			}
+
+			return knownKeywords[keyword] = Object.freeze({
+				vendor: vendor,
+				prefix: vendor,
+				name: name
+			});
+		}
+
+		function getPropertyInfo(property) {
+			if (hasOwnProperty.call(knownProperties, property)) {
+				return knownProperties[property];
+			}
+
+			var lowerCaseProperty = property.toLowerCase();
+			var hack = lowerCaseProperty[0];
+
+			if (hack === '*' || hack === '_' || hack === '$') {
+				lowerCaseProperty = lowerCaseProperty.substr(1);
+			} else if (hack === '/' && property[1] === '/') {
+				hack = '//';
+				lowerCaseProperty = lowerCaseProperty.substr(2);
+			} else {
+				hack = '';
+			}
+
+			var vendor = getVendorPrefix(lowerCaseProperty);
+			var name = lowerCaseProperty;
+
+			if (vendor) {
+				name = name.substr(vendor.length);
+			}
+
+			return knownProperties[property] = Object.freeze({
+				hack: hack,
+				vendor: vendor,
+				prefix: hack + vendor,
+				name: name
+			});
+		}
+
+		var exports = {
+			keyword: getKeywordInfo,
+			property: getPropertyInfo
+		};
 
 		return exports;
 	};
 	//#endregion
-	
+
 	//#region URL: /compressor/ast/translate
 	modules['/compressor/ast/translate'] = function () {
 		function each(list) {
@@ -1119,7 +1179,14 @@ var CSSO = (function(){
 					return eachDelim(node.selectors, ',');
 
 				case 'SimpleSelector':
-					return each(node.sequence);
+					return node.sequence.map(function(node) {
+						// add extra spaces around /deep/ combinator since comment beginning/ending may to be produced
+						if (node.type === 'Combinator' && node.name === '/deep/') {
+							return ' ' + translate(node) + ' ';
+						}
+
+						return translate(node);
+					}).join('');
 
 				case 'Declaration':
 					return translate(node.property) + ':' + translate(node.value);
@@ -1316,7 +1383,12 @@ var CSSO = (function(){
 					break;
 
 				case 'Selector':
+					var oldSelector = this.selector;
+					this.selector = node;
+
 					node.selectors.each(walkAll, this);
+
+					this.selector = oldSelector;
 					break;
 
 				case 'Block':
@@ -1390,6 +1462,7 @@ var CSSO = (function(){
 				root: root,
 				stylesheet: null,
 				ruleset: null,
+				selector: null,
 				declaration: null,
 				function: null
 			};
@@ -1419,7 +1492,8 @@ var CSSO = (function(){
 			Space: require('/compressor/clean/Space'),
 			Atrule: require('/compressor/clean/Atrule'),
 			Ruleset: require('/compressor/clean/Ruleset'),
-			Declaration: require('/compressor/clean/Declaration')
+			Declaration: require('/compressor/clean/Declaration'),
+			Identifier: require('/compressor/clean/Identifier')
 		};
 
 		var exports = function(node, item, list) {
@@ -1504,7 +1578,23 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
+
+	//#region URL: /compressor/clean/Identifier
+	modules['/compressor/clean/Identifier'] = function () {
+		var exports = function(node, item, list) {
+			// remove useless universal selector
+			if (this.selector !== null && node.name === '*') {
+				// remove when universal selector isn't last
+				if (item.next && item.next.data.type !== 'Combinator') {
+					list.remove(item);
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
 	//#region URL: /compressor/clean/Ruleset
 	modules['/compressor/clean/Ruleset'] = function () {
 		var exports = function cleanRuleset(node, item, list) {
@@ -1628,12 +1718,13 @@ var CSSO = (function(){
 	
 	//#region URL: /compressor/compress/Atrule
 	modules['/compressor/compress/Atrule'] = function () {
+		var resolveKeyword = require('/compressor/ast/names').keyword;
 		var compressKeyframes = require('/compressor/compress/atrule/keyframes');
 
-		var exports = function(node, item, list) {
+		var exports = function(node) {
 			// compress @keyframe selectors
-			if (/^(-[a-z\d]+-)?keyframes$/.test(node.name)) {
-				compressKeyframes(node, item, list);
+			if (resolveKeyword(node.name).name === 'keyframes') {
+				compressKeyframes(node);
 			}
 		};
 
@@ -2467,23 +2558,22 @@ var CSSO = (function(){
 	
 	//#region URL: /compressor/compress/Value
 	modules['/compressor/compress/Value'] = function () {
-		var compressFont = require('/compressor/compress/property/font');
-		var compressFontWeight = require('/compressor/compress/property/font-weight');
-		var compressBackground = require('/compressor/compress/property/background');
+		var resolveName = require('/compressor/ast/names').property;
+		var handlers = {
+			'font': require('/compressor/compress/property/font'),
+			'font-weight': require('/compressor/compress/property/font-weight'),
+			'background': require('/compressor/compress/property/background')
+		};
 
 		var exports = function compressValue(node) {
 			if (!this.declaration) {
 				return;
 			}
 
-			var property = this.declaration.property.name;
+			var property = resolveName(this.declaration.property.name);
 
-			if (/background$/.test(property)) {
-				compressBackground(node);
-			} else if (/font$/.test(property)) {
-				compressFont(node);
-			} else if (/font-weight$/.test(property)) {
-				compressFontWeight(node);
+			if (handlers.hasOwnProperty(property.name)) {
+				handlers[property.name](node);
 			}
 		};
 
@@ -2720,7 +2810,6 @@ var CSSO = (function(){
 		var List = require('/utils/list');
 		var translate = require('/compressor/ast/translate');
 		var internalWalkRulesRight = require('/compressor/ast/walk').rulesRight;
-		var unsafeToMerge = /vh|vw|vmin|vmax|vm|rem|\\9/;
 
 		var REPLACE = 1;
 		var REMOVE = 2;
@@ -2786,6 +2875,7 @@ var CSSO = (function(){
 		function TRBL(name) {
 			this.name = name;
 			this.info = null;
+			this.iehack = undefined;
 			this.sides = {
 				'top': null,
 				'right': null,
@@ -2794,35 +2884,155 @@ var CSSO = (function(){
 			};
 		}
 
-		TRBL.prototype.impSum = function() {
-			var sideCount = 0;
-			var important = 0;
+		TRBL.prototype.getValueSequence = function(value, count) {
+			var values = [];
+			var iehack = false;
+			var hasBadValues = value.sequence.some(function(child) {
+				var special = false;
 
-			for (var side in this.sides) {
-				if (this.sides[side]) {
-					sideCount++;
-					if (this.sides[side].important) {
-						important++;
-					}
+				switch (child.type) {
+					case 'Identifier':
+						switch (child.name) {
+							case '\\9':
+								iehack = true;
+								return;
+
+							case 'inherit':
+							case 'initial':
+							case 'unset':
+							case 'revert':
+								special = child.name;
+								break;
+						}
+						break;
+
+					case 'Dimension':
+						switch (child.unit) {
+							// is not supported until IE11
+							case 'rem':
+
+							// v* units is too buggy across browsers and better
+							// don't merge values with those units
+							case 'vw':
+							case 'vh':
+							case 'vmin':
+							case 'vmax':
+							case 'vm': // IE9 supporting "vm" instead of "vmin".
+								special = child.unit;
+								break;
+						}
+						break;
+
+					case 'Number':
+					case 'Percentage':
+						break;
+
+					case 'Space':
+						return false; // ignore space
+
+					default:
+						return true;  // bad value
 				}
+
+				values.push({
+					node: child,
+					special: special,
+					important: value.important
+				});
+			});
+
+			if (hasBadValues || values.length > count) {
+				return false;
 			}
 
-			return important === sideCount ? important : 0;
+			if (typeof this.iehack === 'boolean' && this.iehack !== iehack) {
+				return false;
+			}
+
+			this.iehack = iehack; // move outside
+
+			return values;
+		};
+
+		TRBL.prototype.canOverride = function(side, value) {
+			var currentValue = this.sides[side];
+
+			return !currentValue || (value.important && !currentValue.important);
 		};
 
 		TRBL.prototype.add = function(name, value, info) {
-			function add(node, str) {
-				values.push({
-					s: str,
-					node: node,
-					important: important
-				});
+			function attemptToAdd() {
+				var sides = this.sides;
+				var side = SIDE[name];
+
+				if (side) {
+					if (side in sides) {
+						var values = this.getValueSequence(value, 1);
+
+						if (!values || !values.length) {
+							return false;
+						}
+
+						// can mix only if specials are equal
+						for (var key in sides) {
+							if (sides[key] !== null && sides[key].special !== values[0].special) {
+								return false;
+							}
+						}
+
+						if (!this.canOverride(side, values[0])) {
+							return true;
+						}
+
+						sides[side] = values[0];
+						return true;
+					}
+				} else if (name === this.name) {
+					var values = this.getValueSequence(value, 4);
+
+					if (!values || !values.length) {
+						return false;
+					}
+
+					switch (values.length) {
+						case 1:
+							values[RIGHT] = values[TOP];
+							values[BOTTOM] = values[TOP];
+							values[LEFT] = values[TOP];
+							break;
+
+						case 2:
+							values[BOTTOM] = values[TOP];
+							values[LEFT] = values[RIGHT];
+							break;
+
+						case 3:
+							values[LEFT] = values[RIGHT];
+							break;
+					}
+
+					// can mix only if specials are equal
+					for (var i = 0; i < 4; i++) {
+						for (var key in sides) {
+							if (sides[key] !== null && sides[key].special !== values[i].special) {
+								return false;
+							}
+						}
+					}
+
+					for (var i = 0; i < 4; i++) {
+						if (this.canOverride(SIDES[i], values[i])) {
+							sides[SIDES[i]] = values[i];
+						}
+					}
+
+					return true;
+				}
 			}
 
-			var sides = this.sides;
-			var side = SIDE[name];
-			var values = [];
-			var important = value.important ? 1 : 0;
+			if (!attemptToAdd.call(this)) {
+				return false;
+			}
 
 			if (this.info) {
 				this.info = {
@@ -2833,73 +3043,7 @@ var CSSO = (function(){
 				this.info = info;
 			}
 
-			if (side) {
-				if (side in sides) {
-					var currentValue = sides[side];
-
-					if (!currentValue || (important && !currentValue.important)) {
-						sides[side] = {
-							s: translate({ // translate w/o important
-								type: 'Value',
-								important: false,
-								sequence: value.sequence
-							}),
-							node: value.sequence.first(),
-							important: important
-						};
-					}
-
-					return true;
-				}
-			} else if (name === this.name) {
-				var broken = value.sequence.some(function(child) {
-					switch (child.type) {
-						case 'Identifier':
-							add(child, child.name);
-							break;
-
-						case 'Number':
-							add(child, child.value);
-							break;
-
-						case 'Percentage':
-							add(child, child.value + '%');
-							break;
-
-						case 'Dimension':
-							add(child, child.value + child.unit);
-							break;
-
-						case 'Space':
-							break;
-
-						default:
-							return true; // bad value
-					}
-				});
-
-				if (broken || values.length > 4) {
-					return false;
-				}
-
-				if (!values[RIGHT]) {
-					values[RIGHT] = values[TOP];
-				}
-				if (!values[BOTTOM]) {
-					values[BOTTOM] = values[TOP];
-				}
-				if (!values[LEFT]) {
-					values[LEFT] = values[RIGHT];
-				}
-
-				for (var i = 0; i < 4; i++) {
-					if (!sides[SIDES[i]] || (important && !sides[SIDES[i]].important)) {
-						sides[SIDES[i]] = values[i];
-					}
-				}
-
-				return true;
-			}
+			return true;
 		};
 
 		TRBL.prototype.isOkToMinimize = function() {
@@ -2909,14 +3053,11 @@ var CSSO = (function(){
 			var left = this.sides.left;
 
 			if (top && right && bottom && left) {
-				if (unsafeToMerge.test([top.s, right.s, bottom.s, left.s].join(' '))) {
-					return false;
-				}
-
-				var important = top.important +
-								right.important +
-								bottom.important +
-								left.important;
+				var important =
+					top.important +
+					right.important +
+					bottom.important +
+					left.important;
 
 				return important === 0 || important === 4;
 			}
@@ -2933,29 +3074,43 @@ var CSSO = (function(){
 				sides.bottom,
 				sides.left
 			];
+			var stringValues = [
+				translate(sides.top.node),
+				translate(sides.right.node),
+				translate(sides.bottom.node),
+				translate(sides.left.node)
+			];
 
-			if (sides.left.s === sides.right.s) {
+			if (stringValues[LEFT] === stringValues[RIGHT]) {
 				values.pop();
-				if (sides.bottom.s === sides.top.s) {
+				if (stringValues[BOTTOM] === stringValues[TOP]) {
 					values.pop();
-					if (sides.right.s === sides.top.s) {
+					if (stringValues[RIGHT] === stringValues[TOP]) {
 						values.pop();
 					}
 				}
 			}
 
-			result.push(values[TOP].node);
-			for (var i = 1; i < values.length; i++) {
-				result.push(
-					{ type: 'Space' },
-					values[i].node
-				);
+			for (var i = 0; i < values.length; i++) {
+				if (i) {
+					result.push({ type: 'Space' });
+				}
+
+				result.push(values[i].node);
+			}
+
+			if (this.iehack) {
+				result.push({ type: 'Space' }, {
+					type: 'Identifier',
+					info: {},
+					name: '\\9'
+				});
 			}
 
 			return {
 				type: 'Value',
 				info: {},
-				important: Boolean(this.impSum()),
+				important: sides.top.important,
 				sequence: new List(result)
 			};
 		};
@@ -2985,17 +3140,16 @@ var CSSO = (function(){
 
 				if (!lastShortSelector || selector === lastShortSelector) {
 					if (key in shorts) {
-						shorthand = shorts[key];
 						operation = REMOVE;
+						shorthand = shorts[key];
 					}
 				}
 
-				if (!shorthand) {
-					shorthand = new TRBL(key);
+				if (!shorthand || !shorthand.add(property, declaration.value, declaration.info)) {
 					operation = REPLACE;
+					shorthand = new TRBL(key);
+					shorthand.add(property, declaration.value, declaration.info);
 				}
-
-				shorthand.add(property, declaration.value, declaration.info);
 
 				shorts[key] = shorthand;
 				shortDeclarations.push({
@@ -3077,16 +3231,20 @@ var CSSO = (function(){
 	
 	//#region URL: /compressor/restructure/6-restructBlock
 	modules['/compressor/restructure/6-restructBlock'] = function () {
+		var resolveProperty = require('/compressor/ast/names').property;
+		var resolveKeyword = require('/compressor/ast/names').keyword;
 		var internalWalkRulesRight = require('/compressor/ast/walk').rulesRight;
 		var translate = require('/compressor/ast/translate');
-		var nameVendorMap = Object.create(null);
-		var propertyInfoMap = Object.create(null);
 		var dontRestructure = {
 			'src': 1 // https://github.com/afelix/csso/issues/50
 		};
 
-		// https://developer.mozilla.org/en-US/docs/Web/CSS/display#Browser_compatibility
-		var DISPLAY_DONT_MIX_VALUE = /table|ruby|flex|-(flex)?box$|grid|contents|run-in/;
+		var DONT_MIX_VALUE = {
+			// https://developer.mozilla.org/en-US/docs/Web/CSS/display#Browser_compatibility
+			'display': /table|ruby|flex|-(flex)?box$|grid|contents|run-in/i,
+			// https://developer.mozilla.org/en/docs/Web/CSS/text-align
+			'text-align': /^(start|end|match-parent|justify-all)$/i
+		};
 
 		var NEEDLESS_TABLE = {
 			'border-width': ['border'],
@@ -3126,55 +3284,8 @@ var CSSO = (function(){
 			'list-style-image': ['list-style']
 		};
 
-		function getVendorFromString(string) {
-			if (string[0] === '-') {
-				if (string in nameVendorMap) {
-					return nameVendorMap[string];
-				}
-
-				var secondDashIndex = string.indexOf('-', 2);
-				if (secondDashIndex !== -1) {
-					return nameVendorMap[string] = string.substr(0, secondDashIndex + 1);
-				}
-			}
-
-			return '';
-		}
-
-		function getPropertyInfo(name) {
-			name = name.toLowerCase();
-
-			var info = propertyInfoMap[name];
-
-			if (info) {
-				return info;
-			}
-
-			var hack = name[0];
-
-			if (hack === '*' || hack === '_' || hack === '$') {
-				name = name.substr(1);
-			} else if (hack === '/' && name[1] === '/') {
-				hack = '//';
-				name = name.substr(2);
-			} else {
-				hack = '';
-			}
-
-			var vendor = getVendorFromString(name);
-			name = name.substr(vendor.length);
-
-			return propertyInfoMap[name] = {
-				name: name,
-				prefix: hack + vendor,
-				hack: hack,
-				vendor: vendor,
-				table: NEEDLESS_TABLE[name]
-			};
-		}
-
 		function getPropertyFingerprint(propertyName, declaration, fingerprints) {
-			var realName = getPropertyInfo(propertyName).name;
+			var realName = resolveProperty(propertyName).name;
 
 			if (realName === 'background' ||
 			   (realName === 'filter' && declaration.value.sequence.first().type === 'Progid')) {
@@ -3187,7 +3298,6 @@ var CSSO = (function(){
 			if (!fingerprint) {
 				var vendorId = '';
 				var hack9 = '';
-				var functions = {};
 				var special = {};
 
 				declaration.value.sequence.each(function(node) {
@@ -3196,14 +3306,15 @@ var CSSO = (function(){
 							var name = node.name;
 
 							if (!vendorId) {
-								vendorId = getVendorFromString(name);
+								vendorId = resolveKeyword(name).vendor;
 							}
 
 							if (name === '\\9') {
 								hack9 = name;
 							}
 
-							if (realName === 'display' && DISPLAY_DONT_MIX_VALUE.test(name)) {
+							if (DONT_MIX_VALUE.hasOwnProperty(realName) &&
+								DONT_MIX_VALUE[realName].test(name)) {
 								special[name] = true;
 							}
 
@@ -3213,7 +3324,7 @@ var CSSO = (function(){
 							var name = node.name;
 
 							if (!vendorId) {
-								vendorId = getVendorFromString(name);
+								vendorId = resolveKeyword(name).vendor;
 							}
 
 							if (name === 'rect') {
@@ -3226,7 +3337,7 @@ var CSSO = (function(){
 								}
 							}
 
-							functions[name] = true;
+							special[name + '()'] = true;
 							break;
 
 						case 'Dimension':
@@ -3250,10 +3361,7 @@ var CSSO = (function(){
 					}
 				});
 
-				fingerprint =
-					'|' + Object.keys(functions).sort() + '|' +
-					Object.keys(special).sort() + '|' +
-					hack9 + vendorId;
+				fingerprint = '|' + Object.keys(special).sort() + '|' + hack9 + vendorId;
 
 				fingerprints[declarationId] = fingerprint;
 			}
@@ -3262,12 +3370,13 @@ var CSSO = (function(){
 		}
 
 		function needless(props, declaration, fingerprints) {
-			var propertyInfo = getPropertyInfo(declaration.property.name);
-			var table = propertyInfo.table;
+			var property = resolveProperty(declaration.property.name);
 
-			if (table) {
+			if (NEEDLESS_TABLE.hasOwnProperty(property.name)) {
+				var table = NEEDLESS_TABLE[property.name];
+
 				for (var i = 0; i < table.length; i++) {
-					var ppre = getPropertyFingerprint(propertyInfo.prefix + table[i], declaration, fingerprints);
+					var ppre = getPropertyFingerprint(property.prefix + table[i], declaration, fingerprints);
 					var prev = props[ppre];
 
 					if (prev && (!declaration.value.important || prev.item.data.value.important)) {
@@ -3583,6 +3692,7 @@ var CSSO = (function(){
 
 	//#region URL: /compressor/restructure/prepare
 	modules['/compressor/restructure/prepare'] = function () {
+		var resolveKeyword = require('/compressor/ast/names').keyword;
 		var translate = require('/compressor/ast/translate');
 		var processSelector = require('/compressor/restructure/prepare/processSelector');
 
@@ -3600,7 +3710,7 @@ var CSSO = (function(){
 
 					// compare keyframe selectors by its values
 					// NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
-					if (/^(-[a-z\d]+-)?keyframes$/.test(node.name)) {
+					if (resolveKeyword(node.name).name === 'keyframes') {
 						node.block.avoidRulesMerge = true;  /* probably we don't need to prevent those merges for @keyframes
 															   TODO: need to be checked */
 						node.block.rules.each(function(ruleset) {
@@ -3749,6 +3859,8 @@ var CSSO = (function(){
 
 	//#region URL: /compressor/restructure/utils
 	modules['/compressor/restructure/utils'] = function () {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+
 		function isEqualLists(a, b) {
 			var cursor1 = a.head;
 			var cursor2 = b.head;
@@ -3792,7 +3904,7 @@ var CSSO = (function(){
 				var data = cursor.data;
 
 				if (data.fingerprint) {
-					fingerprints[data.fingerprint] = true;
+					fingerprints[data.fingerprint] = data.value.important;
 				}
 
 				if (declarations2hash[data.id]) {
@@ -3808,10 +3920,12 @@ var CSSO = (function(){
 
 				if (declarations2hash[data.id]) {
 					// if declarations1 has overriding declaration, this is not a difference
-					if (!fingerprints[data.fingerprint]) {
-						result.ne2.push(data);
-					} else {
+					// but take in account !important - prev should be equal or greater than follow
+					if (hasOwnProperty.call(fingerprints, data.fingerprint) &&
+						Number(fingerprints[data.fingerprint]) >= Number(data.value.important)) {
 						result.ne2overrided.push(data);
+					} else {
+						result.ne2.push(data);
 					}
 				}
 			}
@@ -3868,6 +3982,24 @@ var CSSO = (function(){
 		var tokens;
 		var pos;
 
+		var SCOPE_ATRULE_EXPRESSION = 1;
+		var SCOPE_SELECTOR = 2;
+		var SCOPE_VALUE = 3;
+
+		var specialFunctions = {};
+		specialFunctions[SCOPE_ATRULE_EXPRESSION] = {
+			url: getUri
+		};
+		specialFunctions[SCOPE_SELECTOR] = {
+			url: getUri,
+			not: getNotFunction
+		};
+		specialFunctions[SCOPE_VALUE] = {
+			url: getUri,
+			expression: getOldIEExpression,
+			var: getVarFunction
+		};
+
 		var rules = {
 			'atkeyword': getAtkeyword,
 			'atruleb': getAtrule,
@@ -3883,7 +4015,7 @@ var CSSO = (function(){
 			'declaration': getDeclaration,
 			'dimension': getDimension,
 			'filter': getDeclaration,
-			'functionExpression': getFunctionExpression,
+			'functionExpression': getOldIEExpression,
 			'funktion': getFunction,
 			'ident': getIdentifier,
 			'important': getImportant,
@@ -4100,11 +4232,11 @@ var CSSO = (function(){
 						break;
 
 					case TokenType.LeftParenthesis:
-						node.push(getBraces());
+						node.push(getBraces(SCOPE_ATRULE_EXPRESSION));
 						break;
 
 					default:
-						node.push(getAny());
+						node.push(getAny(SCOPE_ATRULE_EXPRESSION));
 				}
 			}
 
@@ -4253,7 +4385,7 @@ var CSSO = (function(){
 			return node;
 		}
 
-		function getDeclaration() {
+		function getDeclaration(nested) {
 			var startPos = pos;
 			var info = getInfo(pos);
 			var property = getProperty();
@@ -4279,7 +4411,7 @@ var CSSO = (function(){
 				info,
 				NodeType.DeclarationType,
 				property,
-				getValue()
+				getValue(nested)
 			];
 		}
 
@@ -4305,12 +4437,12 @@ var CSSO = (function(){
 				[
 					info,
 					NodeType.IdentType,
-					name + readIdent()
+					name + readIdent(true)
 				]
 			]);
 		}
 
-		function getValue() {
+		function getValue(nested) {
 			var node = [getInfo(pos), NodeType.ValueType];
 
 			scan:
@@ -4318,6 +4450,12 @@ var CSSO = (function(){
 				switch (tokens[pos].type) {
 					case TokenType.RightCurlyBracket:
 					case TokenType.Semicolon:
+						break scan;
+
+					case TokenType.RightParenthesis:
+						if (!nested) {
+							parseError('Unexpected input');
+						}
 						break scan;
 
 					case TokenType.Space:
@@ -4339,7 +4477,7 @@ var CSSO = (function(){
 
 					case TokenType.LeftParenthesis:
 					case TokenType.LeftSquareBracket:
-						node.push(getBraces());
+						node.push(getBraces(SCOPE_VALUE));
 						break;
 
 					case TokenType.ExclamationMark:
@@ -4364,7 +4502,7 @@ var CSSO = (function(){
 							}
 						}
 
-						node.push(getAny());
+						node.push(getAny(SCOPE_VALUE));
 				}
 			}
 
@@ -4372,7 +4510,7 @@ var CSSO = (function(){
 		}
 
 		// any = string | percentage | dimension | number | uri | functionExpression | funktion | unary | operator | ident
-		function getAny() {
+		function getAny(scope) {
 			var startPos = pos;
 
 			switch (tokens[pos].type) {
@@ -4423,16 +4561,8 @@ var CSSO = (function(){
 			var ident = getIdentifier();
 
 			if (pos < tokens.length && tokens[pos].type === TokenType.LeftParenthesis) {
-				switch (ident[2]) {
-					case 'url':
-						return getUri(startPos, ident);
-
-					case 'expression':
-						return getFunctionExpression(startPos, ident);
-
-					default:
-						return getFunction(startPos, ident);
-				}
+				pos = startPos;
+				return getFunction(scope);
 			}
 
 			return ident;
@@ -4504,7 +4634,7 @@ var CSSO = (function(){
 			return [getInfo(startPos), NodeType.AttrselectorType, name];
 		}
 
-		function getBraces() {
+		function getBraces(scope) {
 			expectAny('Parenthesis or square bracket',
 				TokenType.LeftParenthesis,
 				TokenType.LeftSquareBracket
@@ -4549,7 +4679,7 @@ var CSSO = (function(){
 
 					case TokenType.LeftParenthesis:
 					case TokenType.LeftSquareBracket:
-						node.push(getBraces());
+						node.push(getBraces(scope));
 						break;
 
 					case TokenType.Solidus:
@@ -4560,7 +4690,7 @@ var CSSO = (function(){
 						break;
 
 					default:
-						node.push(getAny());
+						node.push(getAny(scope));
 				}
 			}
 
@@ -4638,28 +4768,46 @@ var CSSO = (function(){
 			return [getInfo(pos++), NodeType.CommentType, value.substring(2, len)];
 		}
 
+		// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
+		function readUnit() {
+			if (pos < tokens.length && tokens[pos].type === TokenType.Identifier) {
+				var unit = tokens[pos].value;
+				var backSlashPos = unit.indexOf('\\');
+
+				// no backslash in unit name
+				if (backSlashPos === -1) {
+					pos++;
+					return unit;
+				}
+
+				// patch token
+				tokens[pos].value = unit.substr(backSlashPos);
+				tokens[pos].offset += backSlashPos;
+				tokens[pos].column += backSlashPos;
+
+				// return unit w/o backslash part
+				return unit.substr(0, backSlashPos);
+			}
+
+			parseError('Identifier is expected');
+		}
+
 		// number ident
 		function getDimension(startPos, number) {
 			return [
 				getInfo(startPos || pos),
 				NodeType.DimensionType,
 				number || getNumber(),
-				getIdentifier()
+				[getInfo(pos), NodeType.IdentType, readUnit()]
 			];
 		}
 
 		// expression '(' raw ')'
-		function getFunctionExpression(startPos, ident) {
+		function getOldIEExpression(startPos, ident) {
 			var raw = '';
 			var balance = 0;
-
-			if (!startPos) {
-				startPos = pos;
-			}
-
-			if (!ident) {
-				ident = getIdentifier();
-			}
+			var startPos = pos;
+			var ident = getIdentifier();
 
 			if (ident[2] !== 'expression') {
 				parseError('`expression` is expected');
@@ -4692,25 +4840,47 @@ var CSSO = (function(){
 
 		// ident '(' functionBody ')' |
 		// not '(' <simpleSelector>* ')'
-		function getFunction(startPos, ident) {
-			if (!startPos) {
-				startPos = pos;
+		function getFunction(scope) {
+			var body = getFunctionBody;
+
+			// parse special functions
+			if (pos + 1 < tokens.length && tokens[pos].type === TokenType.Identifier) {
+				var name = tokens[pos].value;
+
+				if (tokens[pos + 1].type === TokenType.LeftParenthesis) {
+					if (specialFunctions.hasOwnProperty(scope)) {
+						if (specialFunctions[scope].hasOwnProperty(name)) {
+							return specialFunctions[scope][name](scope);
+						}
+					}
+				}
 			}
 
-			if (!ident) {
-				ident = getIdentifier();
-			}
+			return getFunctionInternal(body, scope);
+		}
+
+		function getNotFunction(scope) {
+			return getFunctionInternal(getNotFunctionBody, scope);
+		}
+
+		function getVarFunction(scope) {
+			return getFunctionInternal(getVarFunctionBody, scope);
+		}
+
+		function getFunctionInternal(functionBodyReader, scope) {
+			var startPos = pos;
+			var ident = getIdentifier();
 
 			eat(TokenType.LeftParenthesis);
 
-			var body = ident[2] === 'not'
-				? getNotFunctionBody()
-				: getFunctionBody();
+			var body = functionBodyReader(scope);
 
-			return [getInfo(startPos), NodeType.FunktionType, ident, body];
+			eat(TokenType.RightParenthesis);
+
+			return [getInfo(startPos), NodeType.FunctionType, ident, body];
 		}
 
-		function getFunctionBody() {
+		function getFunctionBody(scope) {
 			var node = [getInfo(pos), NodeType.FunctionBodyType];
 
 			scan:
@@ -4733,7 +4903,7 @@ var CSSO = (function(){
 
 					case TokenType.LeftParenthesis:
 					case TokenType.LeftSquareBracket:
-						node.push(getBraces());
+						node.push(getBraces(scope));
 						break;
 
 					case TokenType.Solidus:
@@ -4745,11 +4915,9 @@ var CSSO = (function(){
 						break;
 
 					default:
-						node.push(getAny());
+						node.push(getAny(scope));
 				}
 			}
-
-			eat(TokenType.RightParenthesis);
 
 			return node;
 		}
@@ -4786,7 +4954,71 @@ var CSSO = (function(){
 				}
 			}
 
-			eat(TokenType.RightParenthesis);
+			return node;
+		}
+
+		// var '(' ident (',' <declaration-value>)? ')'
+		function getVarFunctionBody() {
+			var node = [getInfo(pos), NodeType.FunctionBodyType];
+
+			readSC(node);
+			node.push(getIdentifier(true));
+			readSC(node);
+
+			if (pos < tokens.length && tokens[pos].type === TokenType.Comma) {
+				node.push(
+					getOperator(),
+					getValue(true)
+				);
+				readSC(node);
+			}
+
+			return node;
+		}
+
+		// url '(' ws* (string | raw) ws* ')'
+		function getUri() {
+			var startPos = pos;
+			var node = [getInfo(startPos), NodeType.UriType];
+			var ident = getIdentifier();
+
+			if (ident[2] !== 'url') {
+				parseError('`url` is expected');
+			}
+
+			eat(TokenType.LeftParenthesis); // (
+
+			readSC(node);
+
+			if (tokens[pos].type === TokenType.String) {
+				node.push(getString());
+				readSC(node);
+			} else {
+				var rawStart = pos;
+				var raw = '';
+
+				while (pos < tokens.length) {
+					var type = tokens[pos].type;
+
+					if (type === TokenType.Space ||
+						type === TokenType.LeftParenthesis ||
+						type === TokenType.RightParenthesis) {
+						break;
+					}
+
+					raw += tokens[pos++].value;
+				}
+
+				node.push([
+					getInfo(rawStart),
+					NodeType.RawType,
+					raw
+				]);
+
+				readSC(node);
+			}
+
+			eat(TokenType.RightParenthesis); // )
 
 			return node;
 		}
@@ -4836,13 +5068,18 @@ var CSSO = (function(){
 			return hex;
 		}
 
-		function readIdent() {
+		function readIdent(varAllowed) {
 			var name = '';
 
 			// optional first -
 			if (pos < tokens.length && tokens[pos].type === TokenType.HyphenMinus) {
 				name = '-';
 				pos++;
+
+				if (varAllowed && pos < tokens.length && tokens[pos].type === TokenType.HyphenMinus) {
+					name = '--';
+					pos++;
+				}
 			}
 
 			expectAny('Identifier',
@@ -4919,8 +5156,8 @@ var CSSO = (function(){
 			];
 		}
 
-		function getIdentifier() {
-			return [getInfo(pos), NodeType.IdentType, readIdent()];
+		function getIdentifier(varAllowed) {
+			return [getInfo(pos), NodeType.IdentType, readIdent(varAllowed)];
 		}
 
 		// ! ws* important
@@ -5231,16 +5468,17 @@ var CSSO = (function(){
 		// : ( ident | function )
 		function getPseudoc() {
 			var startPos = pos;
-			var value = eat(TokenType.Colon) && getIdentifier();
+			var node = eat(TokenType.Colon) && getIdentifier();
 
 			if (pos < tokens.length && tokens[pos].type === TokenType.LeftParenthesis) {
-				value = getFunction(startPos, value);
+				pos = startPos + 1;
+				node = getFunction(SCOPE_SELECTOR);
 			}
 
 			return [
 				getInfo(startPos),
 				NodeType.PseudocType,
-				value
+				node
 			];
 		}
 
@@ -5292,55 +5530,6 @@ var CSSO = (function(){
 			return [getInfo(pos - 1), NodeType.UnknownType, tokens[pos - 1].value];
 		}
 
-		// url '(' ws* (string | raw) ws* ')'
-		function getUri(startPos, ident) {
-			var node = [getInfo(startPos || pos), NodeType.UriType];
-
-			if (!ident) {
-				ident = getIdentifier();
-			}
-
-			if (ident[2] !== 'url') {
-				parseError('`url` is expected');
-			}
-
-			eat(TokenType.LeftParenthesis); // (
-
-			readSC(node);
-
-			if (tokens[pos].type === TokenType.String) {
-				node.push(getString());
-				readSC(node);
-			} else {
-				var rawStart = pos;
-				var raw = '';
-
-				while (pos < tokens.length) {
-					var type = tokens[pos].type;
-
-					if (type === TokenType.Space ||
-						type === TokenType.LeftParenthesis ||
-						type === TokenType.RightParenthesis) {
-						break;
-					}
-
-					raw += tokens[pos++].value;
-				}
-
-				node.push([
-					getInfo(rawStart),
-					NodeType.RawType,
-					raw
-				]);
-
-				readSC(node);
-			}
-
-			eat(TokenType.RightParenthesis); // )
-
-			return node;
-		}
-
 		// # ident
 		function getVhash() {
 			eat(TokenType.NumberSign);
@@ -5384,7 +5573,7 @@ var CSSO = (function(){
 			rule = rule || 'stylesheet';
 			pos = 0;
 
-			tokens = tokenize(source);
+			tokens = tokenize(source, options.line, options.column);
 
 			if (tokens.length) {
 				ast = rules[rule]();
@@ -5481,7 +5670,7 @@ var CSSO = (function(){
 			FiltervType: 'filterv',
 			FunctionBodyType: 'functionBody',
 			FunctionExpressionType: 'functionExpression',
-			FunktionType: 'funktion',
+			FunctionType: 'funktion',
 			IdentType: 'ident',
 			ImportantType: 'important',
 			NamespaceType: 'namespace',
@@ -5609,7 +5798,7 @@ var CSSO = (function(){
 		// main part
 		//
 
-		function tokenize(source) {
+		function tokenize(source, initLine, initColumn) {
 			function pushToken(type, line, column, value) {
 				tokens.push({
 					type: type,
@@ -5638,8 +5827,8 @@ var CSSO = (function(){
 			// ignore first char if it is byte order marker (UTF-8 BOM)
 			pos = source.charCodeAt(0) === 0xFEFF ? 1 : 0;
 			lastPos = pos;
-			line = 1;
-			lineStartPos = -1;
+			line = typeof initLine === 'undefined' ? 1 : initLine;
+			lineStartPos = typeof initColumn === 'undefined' ? -1 : -initColumn;
 
 			for (; pos < source.length; pos++) {
 				code = source.charCodeAt(pos);
@@ -6649,7 +6838,33 @@ var CSSO = (function(){
 			return data;
 		}
 
-		function compressOptions(options) {
+//		function createDefaultLogger(level) {
+//			var lastDebug;
+//
+//			return function logger(title, ast) {
+//				var line = title;
+//
+//				if (ast) {
+//					line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
+//				}
+//
+//				if (level > 1 && ast) {
+//					var css = traslateInternal(ast, true);
+//
+//					// when level 2, limit css to 256 symbols
+//					if (level === 2 && css.length > 256) {
+//						css = css.substr(0, 256) + '...';
+//					}
+//
+//					line += '\n  ' + css + '\n';
+//				}
+//
+//				console.error(line);
+//				lastDebug = Date.now();
+//			};
+//		}
+
+		function buildCompressOptions(options) {
 			var result = {};
 
 			for (var key in options) {
@@ -6657,6 +6872,10 @@ var CSSO = (function(){
 			}
 
 			result.outputAst = 'internal';
+
+//			if (typeof result.logger !== 'function' && options.debug) {
+//				result.logger = createDefaultLogger(options.debug);
+//			}
 
 			return result;
 		}
@@ -6678,7 +6897,7 @@ var CSSO = (function(){
 
 			// compress
 			var compressedAst = debugOutput('compress', options, new Date(),
-				compress(ast, compressOptions(options))
+				compress(ast, buildCompressOptions(options))
 			);
 
 			// translate
@@ -6699,7 +6918,7 @@ var CSSO = (function(){
 		};
 
 		var exports = {
-			version: '1.6.4',
+			version: '1.7.0',
 
 			// main method
 			minify: minify,
@@ -6717,8 +6936,8 @@ var CSSO = (function(){
 			internal: {
 				fromGonzales: require('/compressor/ast/gonzalesToInternal'),
 				toGonzales: require('/compressor/ast/internalToGonzales'),
-				traslate: traslateInternal,
-//				traslateWithSourceMap: traslateInternalWithSourceMap,
+				translate: traslateInternal,
+//				translateWithSourceMap: traslateInternalWithSourceMap,
 				walk: internalWalkers.all,
 				walkRules: internalWalkers.rules,
 				walkRulesRight: internalWalkers.rulesRight
