@@ -9,6 +9,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			allowUnreachableCode: false,
 			allowUnusedLabels: false,
 			charset: '',
+			disableSizeLimit: false,
 			emitBOM: false,
 			emitDecoratorMetadata: false,
 			experimentalDecorators: false,

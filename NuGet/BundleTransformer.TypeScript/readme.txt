@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript v1.9.92
+           README file for Bundle Transformer: TypeScript v1.9.94
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains translator-adapter
    `TypeScriptTranslator` (supports TypeScript
-   (http://www.typescriptlang.org) version 1.8.7). This adapter makes
+   (http://www.typescriptlang.org) version 1.8.9). This adapter makes
    translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text
    output of translated TypeScript-asset.
@@ -30,14 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of TypeScript version 1.8.7;
-   2. No longer made preprocessing of `reference` comments;
-   3. In configuration settings of TypeScript-translator was added 5 new
-      properties: `AllowUnreachableCode` (default `false`),
-      `AllowUnusedLabels` (default `false`),
-      `ForceConsistentCasingInFileNames` (default `false`),
-      `NoFallthroughCasesInSwitch` (default `false`) and
-      `NoImplicitReturns` (default `false`).
+   Added support of TypeScript version 1.8.9.
 
    ====================
    POST-INSTALL ACTIONS

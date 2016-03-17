@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.7.0
+* CSSO (CSS Optimizer) v1.7.1
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -120,6 +120,7 @@ var CSSO = (function(){
 			var block = { offset: 2 };
 			var firstAtrulesAllowed = true;
 			var blockNum = 1;
+			var blockRules;
 
 			if (typeof ast[0] === 'string') {
 				injectInfo([ast]);
@@ -129,6 +130,7 @@ var CSSO = (function(){
 				block = readBlock(ast, block.offset);
 				block.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
 				block.stylesheet = compressBlock(block.stylesheet, restructuring, blockNum++/*, logger*/);
+				blockRules = block.stylesheet.rules;
 
 				if (block.comment) {
 					// add \n before comment if there is another content in result
@@ -145,7 +147,7 @@ var CSSO = (function(){
 					}));
 
 					// add \n after comment if block is not empty
-					if (!block.stylesheet.rules.isEmpty()) {
+					if (!blockRules.isEmpty()) {
 						result.insert(List.createItem({
 							type: 'Raw',
 							value: '\n'
@@ -153,16 +155,16 @@ var CSSO = (function(){
 					}
 				}
 
-				result.appendList(block.stylesheet.rules);
-
-				if (firstAtrulesAllowed && !result.isEmpty()) {
-					var lastRule = result.last();
+				if (firstAtrulesAllowed && !blockRules.isEmpty()) {
+					var lastRule = blockRules.last();
 
 					if (lastRule.type !== 'Atrule' ||
 					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
 						firstAtrulesAllowed = false;
 					}
 				}
+
+				result.appendList(blockRules);
 			} while (block.offset < ast.length);
 
 			if (!options.outputAst || options.outputAst === 'gonzales') {
@@ -4041,6 +4043,11 @@ var CSSO = (function(){
 			'vhash': getVhash
 		};
 
+		var blockMode = {
+			'declaration': true,
+			'property': true
+		};
+
 		function parseError(message) {
 			var error = new Error(message);
 			var line = 1;
@@ -5573,7 +5580,7 @@ var CSSO = (function(){
 			rule = rule || 'stylesheet';
 			pos = 0;
 
-			tokens = tokenize(source, options.line, options.column);
+			tokens = tokenize(source, blockMode.hasOwnProperty(rule), options.line, options.column);
 
 			if (tokens.length) {
 				ast = rules[rule]();
@@ -5798,7 +5805,7 @@ var CSSO = (function(){
 		// main part
 		//
 
-		function tokenize(source, initLine, initColumn) {
+		function tokenize(source, initBlockMode, initLine, initColumn) {
 			function pushToken(type, line, column, value) {
 				tokens.push({
 					type: type,
@@ -5819,7 +5826,8 @@ var CSSO = (function(){
 			var tokens = [];
 			var urlMode = false;
 			var lastPos = 0;
-			var blockMode = 0;
+			var minBlockMode = initBlockMode ? 1 : 0;
+			var blockMode = minBlockMode;
 			var code;
 			var next;
 			var ident;
@@ -5878,7 +5886,9 @@ var CSSO = (function(){
 						} else if (code === LEFT_CURLY_BRACE) {
 							blockMode++;
 						} else if (code === RIGHT_CURLY_BRACE) {
-							blockMode--;
+							if (blockMode > minBlockMode) {
+								blockMode--;
+							}
 						}
 
 						break;
