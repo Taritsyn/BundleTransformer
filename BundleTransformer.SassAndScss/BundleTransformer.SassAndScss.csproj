@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\LibSassHost.0.4.3\build\LibSassHost.props" Condition="Exists('..\packages\LibSassHost.0.4.3\build\LibSassHost.props')" />
+  <Import Project="..\packages\LibSassHost.0.4.4\build\LibSassHost.props" Condition="Exists('..\packages\LibSassHost.0.4.4\build\LibSassHost.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -41,8 +41,8 @@
     <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LibSassHost, Version=0.4.3.0, Culture=neutral, PublicKeyToken=3e24e88796a38e46, processorArchitecture=MSIL">
-      <HintPath>..\packages\LibSassHost.0.4.3\lib\net40-client\LibSassHost.dll</HintPath>
+    <Reference Include="LibSassHost, Version=0.4.4.0, Culture=neutral, PublicKeyToken=3e24e88796a38e46, processorArchitecture=MSIL">
+      <HintPath>..\packages\LibSassHost.0.4.4\lib\net40-client\LibSassHost.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -82,7 +82,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\LibSassHost.0.4.3\build\LibSassHost.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LibSassHost.0.4.3\build\LibSassHost.props'))" />
+    <Error Condition="!Exists('..\packages\LibSassHost.0.4.4\build\LibSassHost.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LibSassHost.0.4.4\build\LibSassHost.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
