@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS v1.9.95
+          README file for Bundle Transformer: Sass and SCSS v1.9.96
 
    ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
    BundleTransformer.SassAndScss contains translator-adapter
    `SassAndScssTranslator`. This adapter makes translation of Sass- and
    SCSS-code to CSS-code by using the LibSass Host for .NET
-   (http://github.com/Taritsyn/LibSassHost) version 0.4.4 (supports
+   (http://github.com/Taritsyn/LibSassHost) version 0.4.5 (supports
    libSass version 3.3.4). Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of
    translated Sass- or SCSS-asset.
@@ -26,7 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of libSass version 3.3.4.
+   Added support of the LibSass Host for .NET version 0.4.5.
 
    ====================
    POST-INSTALL ACTIONS
