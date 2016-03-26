@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v1.7.1
+* CSSO (CSS Optimizer) v1.8.0
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -33,12 +33,12 @@ var CSSO = (function(){
 	//#region URL: /compressor
 	modules['/compressor'] = function () {
 		var List = require('/utils/list');
+		var usageUtils = require('/compressor/usage');
 		var convertToInternal = require('/compressor/ast/gonzalesToInternal');
 		var convertToGonzales = require('/compressor/ast/internalToGonzales');
-		var internalWalkAll = require('/compressor/ast/walk').all;
 		var clean = require('/compressor/clean');
 		var compress = require('/compressor/compress');
-		var restructureAst = require('/compressor/restructure');
+		var restructureBlock = require('/compressor/restructure');
 
 		function injectInfo(token) {
 			for (var i = token.length - 1; i > -1; i--) {
@@ -83,7 +83,7 @@ var CSSO = (function(){
 			};
 		}
 
-		function compressBlock(ast, restructuring, num/*, logger*/) {
+		function compressBlock(ast, usageData, num/*, logger*/) {
 //			logger('Compress block #' + num, null, true);
 
 			var internalAst = convertToInternal(ast);
@@ -91,24 +91,18 @@ var CSSO = (function(){
 
 			internalAst.firstAtrulesAllowed = ast.firstAtrulesAllowed;
 
-			// remove useless
-			internalWalkAll(internalAst, clean);
+			// remove redundant
+			clean(internalAst, usageData);
 //			logger('clean', internalAst);
 
 			// compress nodes
-			internalWalkAll(internalAst, compress);
+			compress(internalAst, usageData);
 //			logger('compress', internalAst);
-
-			// structure optimisations
-			if (restructuring) {
-				restructureAst(internalAst/*, logger*/);
-			}
 
 			return internalAst;
 		}
 
 		var exports = function compress(ast, options) {
-			ast = ast || [{}, 'stylesheet'];
 			options = options || {};
 
 //			var logger = typeof options.logger === 'function' ? options.logger : Function();
@@ -121,15 +115,40 @@ var CSSO = (function(){
 			var firstAtrulesAllowed = true;
 			var blockNum = 1;
 			var blockRules;
+			var blockMode = false;
+			var usageData = false;
+
+			ast = ast || [{}, 'stylesheet'];
 
 			if (typeof ast[0] === 'string') {
 				injectInfo([ast]);
 			}
 
+			if (ast[1] !== 'stylesheet') {
+				blockMode = true;
+				ast = [null, 'stylesheet',
+					[null, 'ruleset',
+						[null, 'selector',
+							[null, 'simpleselector', [null, 'ident', 'x']]],
+						ast
+					]
+				];
+			}
+
+			if (options.usage) {
+				usageData = usageUtils.buildIndex(options.usage);
+			}
+
 			do {
 				block = readBlock(ast, block.offset);
 				block.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
-				block.stylesheet = compressBlock(block.stylesheet, restructuring, blockNum++/*, logger*/);
+				block.stylesheet = compressBlock(block.stylesheet, usageData, blockNum++/*, logger*/);
+
+				// structure optimisations
+				if (restructuring) {
+					restructureBlock(block.stylesheet, usageData/*, logger*/);
+				}
+
 				blockRules = block.stylesheet.rules;
 
 				if (block.comment) {
@@ -167,17 +186,20 @@ var CSSO = (function(){
 				result.appendList(blockRules);
 			} while (block.offset < ast.length);
 
-			if (!options.outputAst || options.outputAst === 'gonzales') {
-				return convertToGonzales({
+			if (blockMode) {
+				result = result.first().block;
+			} else {
+				result = {
 					type: 'StyleSheet',
 					rules: result
-				});
+				};
 			}
 
-			return {
-				type: 'StyleSheet',
-				rules: result
-			};
+			if (!options.outputAst || options.outputAst === 'gonzales') {
+				return convertToGonzales(result);
+			}
+
+			return result;
 		};
 
 		return exports;
@@ -1490,6 +1512,7 @@ var CSSO = (function(){
 
 	//#region URL: /compressor/clean
 	modules['/compressor/clean'] = function () {
+		var walk = require('/compressor/ast/walk').all;
 		var handlers = {
 			Space: require('/compressor/clean/Space'),
 			Atrule: require('/compressor/clean/Atrule'),
@@ -1498,10 +1521,12 @@ var CSSO = (function(){
 			Identifier: require('/compressor/clean/Identifier')
 		};
 
-		var exports = function(node, item, list) {
-			if (handlers.hasOwnProperty(node.type)) {
-				handlers[node.type].call(this, node, item, list);
-			}
+		var exports = function(ast, usageData) {
+			walk(ast, function(node, item, list) {
+				if (handlers.hasOwnProperty(node.type)) {
+					handlers[node.type].call(this, node, item, list, usageData);
+				}
+			});
 		};
 
 		return exports;
@@ -1583,7 +1608,7 @@ var CSSO = (function(){
 
 	//#region URL: /compressor/clean/Identifier
 	modules['/compressor/clean/Identifier'] = function () {
-		var exports = function(node, item, list) {
+		var exports = function cleanIdentifier(node, item, list) {
 			// remove useless universal selector
 			if (this.selector !== null && node.name === '*') {
 				// remove when universal selector isn't last
@@ -1599,7 +1624,40 @@ var CSSO = (function(){
 
 	//#region URL: /compressor/clean/Ruleset
 	modules['/compressor/clean/Ruleset'] = function () {
-		var exports = function cleanRuleset(node, item, list) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+		function cleanUnused(node, usageData) {
+			return node.selector.selectors.each(function(selector, item, list) {
+				var hasUnused = selector.sequence.some(function(node) {
+					switch (node.type) {
+						case 'Class':
+							return usageData.classes && !hasOwnProperty.call(usageData.classes, node.name);
+
+						case 'Id':
+							return usageData.ids && !hasOwnProperty.call(usageData.ids, node.name);
+
+						case 'Identifier':
+							// ignore universal selector
+							if (node.name !== '*') {
+								// TODO: remove toLowerCase when type selectors will be normalized
+								return usageData.tags && !hasOwnProperty.call(usageData.tags, node.name.toLowerCase());
+							}
+
+							break;
+					}
+				});
+
+				if (hasUnused) {
+					list.remove(item);
+				}
+			});
+		}
+
+		var exports = function cleanRuleset(node, item, list, usageData) {
+			if (usageData) {
+				cleanUnused(node, usageData);
+			}
+
 			if (node.selector.selectors.isEmpty() ||
 				node.block.declarations.isEmpty()) {
 				list.remove(item);
@@ -1666,6 +1724,7 @@ var CSSO = (function(){
 	
 	//#region URL: /compressor/compress
 	modules['/compressor/compress'] = function () {
+		var walk = require('/compressor/ast/walk').all;
 		var handlers = {
 			Atrule: require('/compressor/compress/Atrule'),
 			Attribute: require('/compressor/compress/Attribute'),
@@ -1680,10 +1739,12 @@ var CSSO = (function(){
 			Function: require('/compressor/compress/color').compressFunction
 		};
 
-		var exports = function(node, item, list) {
-			if (handlers.hasOwnProperty(node.type)) {
-				handlers[node.type].call(this, node, item, list);
-			}
+		var exports = function(ast) {
+			walk(ast, function(node, item, list) {
+				if (handlers.hasOwnProperty(node.type)) {
+					handlers[node.type].call(this, node, item, list);
+				}
+			});
 		};
 
 		return exports;
@@ -2587,7 +2648,6 @@ var CSSO = (function(){
 	modules['/compressor/restructure'] = function () {
 		var internalWalkRules = require('/compressor/ast/walk').rules;
 		var internalWalkRulesRight = require('/compressor/ast/walk').rulesRight;
-		var translate = require('/compressor/ast/translate');
 		var prepare = require('/compressor/restructure/prepare');
 		var initialMergeRuleset = require('/compressor/restructure/1-initialMergeRuleset');
 		var mergeAtrule = require('/compressor/restructure/2-mergeAtrule');
@@ -2597,23 +2657,7 @@ var CSSO = (function(){
 		var mergeRuleset = require('/compressor/restructure/7-mergeRuleset');
 		var restructRuleset = require('/compressor/restructure/8-restructRuleset');
 
-		function Index() {
-			this.seed = 0;
-			this.map = Object.create(null);
-		}
-
-		Index.prototype.resolve = function(str) {
-			var index = this.map[str];
-
-			if (!index) {
-				index = ++this.seed;
-				this.map[str] = index;
-			}
-
-			return index;
-		};
-
-		var exports = function(ast/*, debug*/) {
+		var exports = function(ast, usageData/*, debug*/) {
 			function walkRulesets(name, fn) {
 				internalWalkRules(ast, function(node, item, list) {
 					if (node.type === 'Ruleset') {
@@ -2644,35 +2688,19 @@ var CSSO = (function(){
 //				debug(name, ast);
 			}
 
-			var declarationMarker = (function() {
-				var names = new Index();
-				var values = new Index();
-
-				return function markDeclaration(node) {
-					// node.id = translate(node);
-
-					var property = node.property.name;
-					var value = translate(node.value);
-
-					node.id = names.resolve(property) + (values.resolve(value) << 12);
-					node.length = property.length + 1 + value.length;
-
-					return node;
-				};
-			})();
-
 			// prepare ast for restructing
-			internalWalkRules(ast, function(node) {
-				prepare(node, declarationMarker);
-			});
+			var indexer = prepare(ast, usageData);
 //			debug('prepare', ast);
 
-			// todo: remove initial merge
-			walkRulesetsRight('initialMergeRuleset', initialMergeRuleset);
+			// NOTE: direction should be left to right, since rulesets merge to left
+			// ruleset. When direction right to left unmerged rulesets may prevent lookup
+			// TODO: remove initial merge
+			walkRulesets('initialMergeRuleset', initialMergeRuleset);
+
 			walkAtrules('mergeAtrule', mergeAtrule);
 			walkRulesetsRight('disjoinRuleset', disjoinRuleset);
 
-			restructShorthand(ast, declarationMarker);
+			restructShorthand(ast, indexer);
 //			debug('restructShorthand', ast);
 
 			restructBlock(ast);
@@ -2691,43 +2719,37 @@ var CSSO = (function(){
 		var utils = require('/compressor/restructure/utils');
 
 		var exports = function initialMergeRuleset(node, item, list) {
-			var selector = node.selector.selectors;
-			var block = node.block;
+			var selectors = node.selector.selectors;
+			var declarations = node.block.declarations;
 
 			list.prevUntil(item.prev, function(prev) {
+				// skip non-ruleset node if safe
 				if (prev.type !== 'Ruleset') {
-					return true;
+					return utils.unsafeToSkipNode.call(selectors, prev);
 				}
 
-				if (node.pseudoSignature !== prev.pseudoSignature) {
-					return true;
+				var prevSelectors = prev.selector.selectors;
+				var prevDeclarations = prev.block.declarations;
+
+				// try to join rulesets with equal pseudo signature
+				if (node.pseudoSignature === prev.pseudoSignature) {
+					// try to join by selectors
+					if (utils.isEqualLists(prevSelectors, selectors)) {
+						prevDeclarations.appendList(declarations);
+						list.remove(item);
+						return true;
+					}
+
+					// try to join by declarations
+					if (utils.isEqualLists(declarations, prevDeclarations)) {
+						utils.addSelectors(prevSelectors, selectors);
+						list.remove(item);
+						return true;
+					}
 				}
 
-				var prevSelector = prev.selector.selectors;
-				var prevBlock = prev.block;
-
-				// try to join by selectors
-				if (utils.isEqualLists(prevSelector, selector)) {
-					prevBlock.declarations.appendList(block.declarations);
-					list.remove(item);
-					return true;
-				}
-
-				// try to join by properties
-				var diff = utils.compareDeclarations(block.declarations, prevBlock.declarations);
-
-				if (!diff.ne1.length && !diff.ne2.length) {
-					utils.addToSelector(prevSelector, selector);
-					list.remove(item);
-					return true;
-				}
-
-				// go to next ruleset if simpleselectors has no equal specificity and element selector
-				return selector.some(function(a) {
-					return prevSelector.some(function(b) {
-						return a.compareMarker === b.compareMarker;
-					});
-				});
+				// go to prev ruleset if has no selector similarities
+				return utils.hasSimilarSelectors(selectors, prevSelectors);
 			});
 		};
 
@@ -3191,7 +3213,7 @@ var CSSO = (function(){
 			});
 		};
 
-		var exports = function restructBlock(ast, declarationMarker) {
+		var exports = function restructBlock(ast, indexer) {
 			var stylesheetMap = {};
 			var shortDeclarations = [];
 
@@ -3224,9 +3246,9 @@ var CSSO = (function(){
 				rulesetMap.lastShortSelector = processRuleset.call(this, node, shorts, shortDeclarations, rulesetMap.lastShortSelector);
 			});
 
-			processShorthands(shortDeclarations, declarationMarker);
+			processShorthands(shortDeclarations, indexer.declaration);
 		};
-		
+
 		return exports;
 	};
 	//#endregion
@@ -3302,8 +3324,14 @@ var CSSO = (function(){
 				var hack9 = '';
 				var special = {};
 
-				declaration.value.sequence.each(function(node) {
+				declaration.value.sequence.each(function walk(node) {
 					switch (node.type) {
+						case 'Argument':
+						case 'Value':
+						case 'Braces':
+							node.sequence.each(walk);
+							break;
+
 						case 'Identifier':
 							var name = node.name;
 
@@ -3340,6 +3368,10 @@ var CSSO = (function(){
 							}
 
 							special[name + '()'] = true;
+
+							// check nested tokens too
+							node.arguments.each(walk);
+
 							break;
 
 						case 'Dimension':
@@ -3480,15 +3512,28 @@ var CSSO = (function(){
 	modules['/compressor/restructure/7-mergeRuleset'] = function () {
 		var utils = require('/compressor/restructure/utils');
 
+		/*
+			At this step all rules has single simple selector. We try to join by equal
+			declaration blocks to first rule, e.g.
+
+			.a { color: red }
+			b { ... }
+			.b { color: red }
+			->
+			.a, .b { color: red }
+			b { ... }
+		*/
+
 		var exports = function mergeRuleset(node, item, list) {
-			var selector = node.selector.selectors;
-			var block = node.block.declarations;
-			var nodeCompareMarker = selector.first().compareMarker;
+			var selectors = node.selector.selectors;
+			var declarations = node.block.declarations;
+			var nodeCompareMarker = selectors.first().compareMarker;
 			var skippedCompareMarkers = {};
 
 			list.nextUntil(item.next, function(next, nextItem) {
+				// skip non-ruleset node if safe
 				if (next.type !== 'Ruleset') {
-					return true;
+					return utils.unsafeToSkipNode.call(selectors, next);
 				}
 
 				if (node.pseudoSignature !== next.pseudoSignature) {
@@ -3496,7 +3541,7 @@ var CSSO = (function(){
 				}
 
 				var nextFirstSelector = next.selector.selectors.head;
-				var nextBlock = next.block.declarations;
+				var nextDeclarations = next.block.declarations;
 				var nextCompareMarker = nextFirstSelector.data.compareMarker;
 
 				// if next ruleset has same marked as one of skipped then stop joining
@@ -3505,32 +3550,28 @@ var CSSO = (function(){
 				}
 
 				// try to join by selectors
-				if (selector.head === selector.tail) {
-					if (selector.first().id === nextFirstSelector.data.id) {
-						block.appendList(nextBlock);
+				if (selectors.head === selectors.tail) {
+					if (selectors.first().id === nextFirstSelector.data.id) {
+						declarations.appendList(nextDeclarations);
 						list.remove(nextItem);
 						return;
 					}
 				}
 
 				// try to join by properties
-				if (utils.isEqualDeclarations(block, nextBlock)) {
+				if (utils.isEqualDeclarations(declarations, nextDeclarations)) {
 					var nextStr = nextFirstSelector.data.id;
 
-					selector.some(function(data, item) {
+					selectors.some(function(data, item) {
 						var curStr = data.id;
 
-						if (nextStr === curStr) {
-							return true;
-						}
-
 						if (nextStr < curStr) {
-							selector.insert(nextFirstSelector, item);
+							selectors.insert(nextFirstSelector, item);
 							return true;
 						}
 
 						if (!item.next) {
-							selector.insert(nextFirstSelector);
+							selectors.insert(nextFirstSelector);
 							return true;
 						}
 					});
@@ -3547,7 +3588,7 @@ var CSSO = (function(){
 				skippedCompareMarkers[nextCompareMarker] = true;
 			});
 		};
-		
+
 		return exports;
 	};
 	//#endregion
@@ -3580,18 +3621,23 @@ var CSSO = (function(){
 			);
 		}
 
+		function inList(selector) {
+			return selector.compareMarker in this;
+		}
+
 		var exports = function restructRuleset(node, item, list) {
 			var avoidRulesMerge = this.stylesheet.avoidRulesMerge;
-			var selector = node.selector.selectors;
+			var selectors = node.selector.selectors;
 			var block = node.block;
 			var skippedCompareMarkers = Object.create(null);
 
 			list.prevUntil(item.prev, function(prev, prevItem) {
+				// skip non-ruleset node if safe
 				if (prev.type !== 'Ruleset') {
-					return true;
+					return utils.unsafeToSkipNode.call(selectors, prev);
 				}
 
-				var prevSelector = prev.selector.selectors;
+				var prevSelectors = prev.selector.selectors;
 				var prevBlock = prev.block;
 
 				if (node.pseudoSignature !== prev.pseudoSignature) {
@@ -3599,17 +3645,12 @@ var CSSO = (function(){
 				}
 
 				// try prev ruleset if simpleselectors has no equal specifity and element selector
-				var prevSelectorCursor = prevSelector.head;
-				while (prevSelectorCursor) {
-					if (prevSelectorCursor.data.compareMarker in skippedCompareMarkers) {
-						return true;
-					}
-
-					prevSelectorCursor = prevSelectorCursor.next;
+				if (prevSelectors.some(inList, skippedCompareMarkers)) {
+					return true;
 				}
 
 				// try to join by selectors
-				if (utils.isEqualLists(prevSelector, selector)) {
+				if (utils.isEqualLists(prevSelectors, selectors)) {
 					prevBlock.declarations.appendList(block.declarations);
 					list.remove(item);
 					return true;
@@ -3623,7 +3664,7 @@ var CSSO = (function(){
 				if (diff.eq.length) {
 					if (!diff.ne1.length && !diff.ne2.length) {
 						// equal blocks
-						utils.addToSelector(selector, prevSelector);
+						utils.addSelectors(selectors, prevSelectors);
 						list.remove(prevItem);
 						return true;
 					} else if (!avoidRulesMerge) { /* probably we don't need to prevent those merges for @keyframes
@@ -3631,21 +3672,21 @@ var CSSO = (function(){
 
 						if (diff.ne1.length && !diff.ne2.length) {
 							// prevBlock is subset block
-							var selectorLength = calcSelectorLength(selector);
+							var selectorLength = calcSelectorLength(selectors);
 							var blockLength = calcDeclarationsLength(diff.eq); // declarations length
 
 							if (selectorLength < blockLength) {
-								utils.addToSelector(prevSelector, selector);
-								node.block.declarations = new List(diff.ne1);
+								utils.addSelectors(prevSelectors, selectors);
+								block.declarations = new List(diff.ne1);
 							}
 						} else if (!diff.ne1.length && diff.ne2.length) {
 							// node is subset of prevBlock
-							var selectorLength = calcSelectorLength(prevSelector);
+							var selectorLength = calcSelectorLength(prevSelectors);
 							var blockLength = calcDeclarationsLength(diff.eq); // declarations length
 
 							if (selectorLength < blockLength) {
-								utils.addToSelector(selector, prevSelector);
-								prev.block.declarations = new List(diff.ne2);
+								utils.addSelectors(selectors, prevSelectors);
+								prevBlock.declarations = new List(diff.ne2);
 							}
 						} else {
 							// diff.ne1.length && diff.ne2.length
@@ -3653,7 +3694,7 @@ var CSSO = (function(){
 							var newSelector = {
 								type: 'Selector',
 								info: {},
-								selectors: utils.addToSelector(prevSelector.copy(), selector)
+								selectors: utils.addSelectors(prevSelectors.copy(), selectors)
 							};
 							var newBlockLength = calcSelectorLength(newSelector.selectors) + 2; // selectors length + curly braces length
 							var blockLength = calcDeclarationsLength(diff.eq); // declarations length
@@ -3673,8 +3714,8 @@ var CSSO = (function(){
 									}
 								};
 
-								node.block.declarations = new List(diff.ne1);
-								prev.block.declarations = new List(diff.ne2.concat(diff.ne2overrided));
+								block.declarations = new List(diff.ne1);
+								prevBlock.declarations = new List(diff.ne2.concat(diff.ne2overrided));
 								list.insert(list.createItem(newRuleset), prevItem);
 								return true;
 							}
@@ -3682,27 +3723,29 @@ var CSSO = (function(){
 					}
 				}
 
-				prevSelector.each(function(data) {
+				prevSelectors.each(function(data) {
 					skippedCompareMarkers[data.compareMarker] = true;
 				});
 			});
 		};
-		
+
 		return exports;
 	};
 	//#endregion
 
 	//#region URL: /compressor/restructure/prepare
 	modules['/compressor/restructure/prepare'] = function () {
+		var internalWalkRules = require('/compressor/ast/walk').rules;
 		var resolveKeyword = require('/compressor/ast/names').keyword;
 		var translate = require('/compressor/ast/translate');
+		var createDeclarationIndexer = require('/compressor/restructure/prepare/createDeclarationIndexer');
 		var processSelector = require('/compressor/restructure/prepare/processSelector');
 
-		var exports = function walk(node, markDeclaration) {
+		function walk(node, markDeclaration, usageData) {
 			switch (node.type) {
 				case 'Ruleset':
 					node.block.declarations.each(markDeclaration);
-					processSelector(node);
+					processSelector(node, usageData);
 					break;
 
 				case 'Atrule':
@@ -3725,10 +3768,61 @@ var CSSO = (function(){
 			}
 		};
 
+		var exports = function prepare(ast, usageData) {
+			var markDeclaration = createDeclarationIndexer();
+
+			internalWalkRules(ast, function(node) {
+				walk(node, markDeclaration, usageData);
+			});
+
+			return {
+				declaration: markDeclaration
+			};
+		};
+
 		return exports;
 	};
 	//#endregion
-	
+
+	//#region URL: /compressor/restructure/prepare/createDeclarationIndexer
+	modules['/compressor/restructure/prepare/createDeclarationIndexer'] = function () {
+		var translate = require('/compressor/ast/translate');
+
+		function Index() {
+			this.seed = 0;
+			this.map = Object.create(null);
+		}
+
+		Index.prototype.resolve = function(str) {
+			var index = this.map[str];
+
+			if (!index) {
+				index = ++this.seed;
+				this.map[str] = index;
+			}
+
+			return index;
+		};
+
+		var exports = function createDeclarationIndexer() {
+			var names = new Index();
+			var values = new Index();
+
+			return function markDeclaration(node) {
+				var property = node.property.name;
+				var value = translate(node.value);
+
+				node.id = names.resolve(property) + (values.resolve(value) << 12);
+				node.length = property.length + 1 + value.length;
+
+				return node;
+			};
+		};
+
+		return exports;
+	};
+	//#endregion
+
 	//#region URL: /compressor/restructure/prepare/processSelector
 	modules['/compressor/restructure/prepare/processSelector'] = function () {
 		var translate = require('/compressor/ast/translate');
@@ -3751,28 +3845,28 @@ var CSSO = (function(){
 			'before': true
 		};
 
-		var exports = function freeze(node) {
+		var exports = function freeze(node, usageData) {
 			var pseudos = Object.create(null);
 			var hasPseudo = false;
 
 			node.selector.selectors.each(function(simpleSelector) {
-				var list = simpleSelector.sequence;
-				var last = list.tail;
 				var tagName = '*';
+				var scope = 0;
 
-				while (last && last.prev && last.prev.data.type !== 'Combinator') {
-					last = last.prev;
-				}
-
-				if (last && last.data.type === 'Identifier') {
-					tagName = last.data.name;
-				}
-
-				simpleSelector.compareMarker = specificity(simpleSelector) + ',' + tagName;
-				simpleSelector.id = translate(simpleSelector);
-
-				simpleSelector.sequence.each(function(node) {
+				simpleSelector.sequence.some(function(node) {
 					switch (node.type) {
+						case 'Class':
+							if (usageData && usageData.scopes) {
+								var classScope = usageData.scopes[node.name] || 0;
+
+								if (scope !== 0 && classScope !== scope) {
+									throw new Error('Selector can\'t has classes from different scopes: ' + translate(simpleSelector));
+								}
+
+								scope = classScope;
+							}
+							break;
+
 						case 'PseudoClass':
 							if (!nonFreezePseudoClasses.hasOwnProperty(node.name)) {
 								pseudos[node.name] = true;
@@ -3791,8 +3885,24 @@ var CSSO = (function(){
 							pseudos[node.name] = true;
 							hasPseudo = true;
 							break;
+
+						case 'Negation':
+							pseudos.not = true;
+							hasPseudo = true;
+							break;
+
+						case 'Identifier':
+							tagName = node.name;
+							break;
+
+						case 'Combinator':
+							tagName = '*';
+							break;
 					}
 				});
+
+				simpleSelector.id = translate(simpleSelector);
+				simpleSelector.compareMarker = specificity(simpleSelector) + ',' + tagName + (scope ? ',' + scope : '');
 			});
 
 			if (hasPseudo) {
@@ -3935,7 +4045,7 @@ var CSSO = (function(){
 			return result;
 		}
 
-		function addToSelector(dest, source) {
+		function addSelectors(dest, source) {
 			source.each(function(sourceData) {
 				var newStr = sourceData.id;
 				var cursor = dest.head;
@@ -3960,17 +4070,118 @@ var CSSO = (function(){
 			return dest;
 		}
 
+		// check if simpleselectors has no equal specificity and element selector
+		function hasSimilarSelectors(selectors1, selectors2) {
+			return selectors1.some(function(a) {
+				return selectors2.some(function(b) {
+					return a.compareMarker === b.compareMarker;
+				});
+			});
+		}
+
+		// test node can't to be skipped
+		function unsafeToSkipNode(node) {
+			switch (node.type) {
+				case 'Ruleset':
+					// unsafe skip ruleset with selector similarities
+					return hasSimilarSelectors(node.selector.selectors, this);
+
+				case 'Atrule':
+					// can skip at-rules with blocks
+					if (node.block) {
+						// non-stylesheet blocks are safe to skip since have no selectors
+						if (node.block.type !== 'StyleSheet') {
+							return false;
+						}
+
+						// unsafe skip at-rule if block contains something unsafe to skip
+						return node.block.rules.some(unsafeToSkipNode, this);
+					}
+					break;
+			}
+
+			// unsafe by default
+			return true;
+		}
+
 		var exports = {
 			isEqualLists: isEqualLists,
 			isEqualDeclarations: isEqualDeclarations,
 			compareDeclarations: compareDeclarations,
-			addToSelector: addToSelector
+			addSelectors: addSelectors,
+			hasSimilarSelectors: hasSimilarSelectors,
+			unsafeToSkipNode: unsafeToSkipNode
 		};
 
 		return exports;
 	};
 	//#endregion
-		
+
+	//#region URL: /compressor/usage
+	modules['/compressor/usage'] = function () {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+		function buildMap(list, caseInsensitive) {
+			var map = Object.create(null);
+
+			if (!Array.isArray(list)) {
+				return false;
+			}
+
+			for (var i = 0; i < list.length; i++) {
+				var name = list[i];
+
+				if (caseInsensitive) {
+					name = name.toLowerCase();
+				}
+
+				map[name] = true;
+			}
+
+			return map;
+		}
+
+		function buildIndex(data) {
+			var scopes = false;
+
+			if (data.scopes && Array.isArray(data.scopes)) {
+				scopes = Object.create(null);
+
+				for (var i = 0; i < data.scopes.length; i++) {
+					var list = data.scopes[i];
+
+					if (!list || !Array.isArray(list)) {
+						throw new Error('Wrong usage format');
+					}
+
+					for (var j = 0; j < list.length; j++) {
+						var name = list[j];
+
+						if (hasOwnProperty.call(scopes, name)) {
+							throw new Error('Class can\'t be used for several scopes: ' + name);
+						}
+
+						scopes[name] = i + 1;
+					}
+				}
+			}
+
+			return {
+				tags: buildMap(data.tags, true),
+				ids: buildMap(data.ids),
+				classes: buildMap(data.classes),
+				scopes: scopes
+			};
+		}
+
+		var exports = {
+			buildIndex: buildIndex
+		};
+
+		return exports;
+	};
+	//#endregion
+
 	//#region URL: /parser
 	modules['/parser'] = function () {
 		'use strict';
@@ -4004,21 +4215,17 @@ var CSSO = (function(){
 
 		var rules = {
 			'atkeyword': getAtkeyword,
-			'atruleb': getAtrule,
-			'atruler': getAtrule,
-			'atrules': getAtrule,
-			'attrib': getAttrib,
-			'attrselector': getAttrselector,
-			'block': getBlock,
+			'atrule': getAtrule,
+			'attribute': getAttribute,
+			'block': getBlockWithBrackets,
 			'braces': getBraces,
-			'clazz': getClass,
+			'class': getClass,
 			'combinator': getCombinator,
 			'comment': getComment,
 			'declaration': getDeclaration,
+			'declarations': getBlock,
 			'dimension': getDimension,
-			'filter': getDeclaration,
-			'functionExpression': getOldIEExpression,
-			'funktion': getFunction,
+			'function': getFunction,
 			'ident': getIdentifier,
 			'important': getImportant,
 			'nth': getNth,
@@ -4028,8 +4235,8 @@ var CSSO = (function(){
 			'percentage': getPercentage,
 			'progid': getProgid,
 			'property': getProperty,
-			'pseudoc': getPseudoc,
-			'pseudoe': getPseudoe,
+			'pseudoClass': getPseudoClass,
+			'pseudoElement': getPseudoElement,
 			'ruleset': getRuleset,
 			'selector': getSelector,
 			'shash': getShash,
@@ -4040,7 +4247,21 @@ var CSSO = (function(){
 			'unknown': getUnknown,
 			'uri': getUri,
 			'value': getValue,
-			'vhash': getVhash
+			'vhash': getVhash,
+
+			// TODO: remove in 2.0
+			// for backward capability
+			'atruleb': getAtrule,
+			'atruler': getAtrule,
+			'atrules': getAtrule,
+			'attrib': getAttribute,
+			'attrselector': getAttrselector,
+			'clazz': getClass,
+			'filter': getDeclaration,
+			'functionExpression': getOldIEExpression,
+			'funktion': getFunction,
+			'pseudoc': getPseudoClass,
+			'pseudoe': getPseudoElement
 		};
 
 		var blockMode = {
@@ -4204,7 +4425,7 @@ var CSSO = (function(){
 					case TokenType.LeftCurlyBracket:
 						if (isBlockAtrule(pos)) {
 							node[1] = NodeType.AtrulebType;
-							node.push(getBlock());
+							node.push(getBlockWithBrackets());
 						} else {
 							node[1] = NodeType.AtrulerType;
 							node.push([
@@ -4255,7 +4476,7 @@ var CSSO = (function(){
 				getInfo(pos),
 				NodeType.RulesetType,
 				getSelector(),
-				getBlock()
+				getBlockWithBrackets()
 			];
 		}
 
@@ -4326,7 +4547,7 @@ var CSSO = (function(){
 						break;
 
 					case TokenType.LeftSquareBracket:
-						node.push(getAttrib());
+						node.push(getAttribute());
 						break;
 
 					case TokenType.NumberSign:
@@ -4356,10 +4577,19 @@ var CSSO = (function(){
 			return node;
 		}
 
-		function getBlock() {
-			var node = [getInfo(pos), NodeType.BlockType];
+		function getBlockWithBrackets() {
+			var info = getInfo(pos);
+			var node;
 
 			eat(TokenType.LeftCurlyBracket);
+			node = getBlock(info);
+			eat(TokenType.RightCurlyBracket);
+
+			return node;
+		}
+
+		function getBlock(info) {
+			var node = [info || getInfo(pos), NodeType.BlockType];
 
 			scan:
 			while (pos < tokens.length) {
@@ -4386,8 +4616,6 @@ var CSSO = (function(){
 						node.push(getDeclaration());
 				}
 			}
-
-			eat(TokenType.RightCurlyBracket);
 
 			return node;
 		}
@@ -4524,6 +4752,10 @@ var CSSO = (function(){
 				case TokenType.String:
 					return getString();
 
+				case TokenType.LowLine:
+				case TokenType.Identifier:
+					break;
+
 				case TokenType.FullStop:
 				case TokenType.DecimalNumber:
 				case TokenType.HyphenMinus:
@@ -4554,12 +4786,6 @@ var CSSO = (function(){
 					}
 
 					parseError('Unexpected input');
-					break;
-
-				case TokenType.HyphenMinus:
-				case TokenType.LowLine:
-				case TokenType.Identifier:
-					break;
 
 				default:
 					parseError('Unexpected input');
@@ -4577,7 +4803,7 @@ var CSSO = (function(){
 
 		// '[' S* attrib_name ']'
 		// '[' S* attrib_name attrib_match [ IDENT | STRING ] S* attrib_flags? ']'
-		function getAttrib() {
+		function getAttribute() {
 			var node = [getInfo(pos), NodeType.AttribType];
 
 			eat(TokenType.LeftSquareBracket);
@@ -5453,7 +5679,7 @@ var CSSO = (function(){
 			var next = tokens[pos + 1];
 
 			if (next.type === TokenType.Colon) {
-				return getPseudoe();
+				return getPseudoElement();
 			}
 
 			if (next.type === TokenType.Identifier &&
@@ -5461,11 +5687,11 @@ var CSSO = (function(){
 				return getNthSelector();
 			}
 
-			return getPseudoc();
+			return getPseudoClass();
 		}
 
 		// :: ident
-		function getPseudoe() {
+		function getPseudoElement() {
 			eat(TokenType.Colon);
 			eat(TokenType.Colon);
 
@@ -5473,7 +5699,7 @@ var CSSO = (function(){
 		}
 
 		// : ( ident | function )
-		function getPseudoc() {
+		function getPseudoClass() {
 			var startPos = pos;
 			var node = eat(TokenType.Colon) && getIdentifier();
 
@@ -5557,7 +5783,7 @@ var CSSO = (function(){
 			return [getInfo(pos - 1), NodeType.VhashType, name];
 		}
 
-		function parse(source, rule, options) {
+		function parse(source, context, options) {
 			var ast;
 
 			options = options || {};
@@ -5577,19 +5803,19 @@ var CSSO = (function(){
 			}
 
 			filename = options.filename || '<unknown>';
-			rule = rule || 'stylesheet';
+			context = context || 'stylesheet';
 			pos = 0;
 
-			tokens = tokenize(source, blockMode.hasOwnProperty(rule), options.line, options.column);
+			tokens = tokenize(source, blockMode.hasOwnProperty(context), options.line, options.column);
 
 			if (tokens.length) {
-				ast = rules[rule]();
+				ast = rules[context]();
 			}
 
 			tokens = null; // drop tokens
 
-			if (!ast && rule === 'stylesheet') {
-				ast = [{}, rule];
+			if (!ast && context === 'stylesheet') {
+				ast = [{}, context];
 			}
 
 			if (ast && !options.needInfo) {
@@ -6874,23 +7100,28 @@ var CSSO = (function(){
 //			};
 //		}
 
-		function buildCompressOptions(options) {
+		function copy(obj) {
 			var result = {};
 
-			for (var key in options) {
-				result[key] = options[key];
+			for (var key in obj) {
+				result[key] = obj[key];
 			}
-
-			result.outputAst = 'internal';
-
-//			if (typeof result.logger !== 'function' && options.debug) {
-//				result.logger = createDefaultLogger(options.debug);
-//			}
 
 			return result;
 		}
 
-		var minify = function(source, options) {
+		function buildCompressOptions(options) {
+			options = copy(options);
+			options.outputAst = 'internal';
+
+//			if (typeof options.logger !== 'function' && options.debug) {
+//				options.logger = createDefaultLogger(options.debug);
+//			}
+
+			return options;
+		}
+
+		function minify(context, source, options) {
 			options = options || {};
 
 			var filename = options.filename || '<unknown>';
@@ -6898,7 +7129,7 @@ var CSSO = (function(){
 
 			// parse
 			var ast = debugOutput('parsing', options, new Date(),
-				parse(source, 'stylesheet', {
+				parse(source, context, {
 					filename: filename,
 //					positions: Boolean(options.sourceMap),
 					needInfo: true
@@ -6925,13 +7156,22 @@ var CSSO = (function(){
 //			}
 
 			return result;
+		}
+
+		function minifyStylesheet(source, options) {
+			return minify('stylesheet', source, options);
 		};
 
+		function minifyBlock(source, options) {
+			return minify('declarations', source, options);
+		}
+
 		var exports = {
-			version: '1.7.0',
+			version: '1.8.0',
 
 			// main method
-			minify: minify,
+			minify: minifyStylesheet,
+			minifyBlock: minifyBlock,
 
 			// utils
 			parse: parse,

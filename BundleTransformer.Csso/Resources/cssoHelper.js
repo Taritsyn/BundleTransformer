@@ -6,6 +6,7 @@ var cssoHelper = (function (csso, undefined) {
 		defaultOptions = {
 			filename: '',
 			sourceMap: null,
+			usage: false,
 			restructure: true,
 			debug: false
 		}

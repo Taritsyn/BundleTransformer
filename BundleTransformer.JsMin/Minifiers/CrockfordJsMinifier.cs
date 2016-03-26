@@ -4,11 +4,11 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
+	using DouglasCrockford.JsMin;
+
 	using Core.Assets;
 	using Core.Minifiers;
 	using CoreStrings = Core.Resources.Strings;
-
-	using Internal;
 
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
