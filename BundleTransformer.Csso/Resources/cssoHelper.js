@@ -52,6 +52,7 @@ var cssoHelper = (function (csso, undefined) {
 
 	exports.minify = function (code, options) {
 		var optimizationOptions,
+			data,
 			result = {},
 			errors = [],
 			minifiedCode = ''
@@ -60,7 +61,10 @@ var cssoHelper = (function (csso, undefined) {
 		optimizationOptions = mix(mix({}, defaultOptions), options);
 
 		try {
-			minifiedCode = csso.minify(code, optimizationOptions);
+			data = csso.minify(code, optimizationOptions);
+			if (data) {
+				minifiedCode = data.css;
+			}
 		}
 		catch (e) {
 			if (e.message) {
