@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.11
+ * Clean-css v3.4.12
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -5770,7 +5770,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false, // div+ nav Android stock browser hack
 			  ie7Hack: false, // *+html hack
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|::content|\/deep\/|::shadow)/ // special selectors which prevent merging
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|::content|\/deep\/|::shadow|^,)/ // special selectors which prevent merging
 			},
 			units: {
 			  ch: true,
@@ -5806,7 +5806,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false,
 			  ie7Hack: false,
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder|:host|::content|\/deep\/|::shadow)/
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder|:host|::content|\/deep\/|::shadow|^,)/
 			},
 			units: {
 			  ch: false,
@@ -5842,7 +5842,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false,
 			  ie7Hack: true,
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder|:host|::content|\/deep\/|::shadow)/
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:focus|:before|:after|:root|:nth|:first\-of|:last|:only|:empty|:target|:checked|::selection|:enabled|:disabled|:not|:placeholder|:host|::content|\/deep\/|::shadow|^,)/
 			},
 			units: {
 			  ch: false,

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-            README file for Bundle Transformer: Clean-css v1.9.99
+            README file for Bundle Transformer: Clean-css v1.9.101
 
    ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
    BundleTransformer.CleanCss contains one minifier-adapter for
    minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is
    based on the Clean-css (http://github.com/jakubpawlowicz/clean-css)
-   version 3.4.11.
+   version 3.4.12.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 3.4.11.
+   Added support of Clean-css version 3.4.12.
 
    ====================
    POST-INSTALL ACTIONS
