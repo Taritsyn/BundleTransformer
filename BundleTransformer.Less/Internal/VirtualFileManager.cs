@@ -27,6 +27,30 @@
 
 
 		/// <summary>
+		/// Converts a relative path to an application absolute path
+		/// </summary>
+		/// <param name="path">The relative path</param>
+		/// <returns>The absolute path representation of the specified relative path</returns>
+		public string ToAbsolutePath(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+			}
+
+			string processedPath = path.Trim();
+			if (processedPath.IndexOf('~') != 0)
+			{
+				return path;
+			}
+
+			string absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(processedPath);
+
+			return absolutePath;
+		}
+
+		/// <summary>
 		/// Determines whether the specified file exists
 		/// </summary>
 		/// <param name="path">The file to check</param>

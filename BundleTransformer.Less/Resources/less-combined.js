@@ -6,7 +6,7 @@
  * Licensed under the Apache v2 License.
  *
  */
-var Less = (function(){
+var Less = (function(virtualFileManager){
 	var modules = {},
 		loadedModules = {},
 		require = function(name) {
@@ -2877,6 +2877,10 @@ var Less = (function(){
 			var val = this.value.eval(context),
 				rootpath;
 
+			if (val.value.trim().indexOf('~') === 0){
+				val.value = virtualFileManager.ToAbsolutePath(val.value);
+			}
+
 			if (!this.isEvald) {
 				// Add the base path if the URL is relative
 				rootpath = this.currentFileInfo && this.currentFileInfo.rootpath;
@@ -2887,6 +2891,11 @@ var Less = (function(){
 					if (!val.quote) {
 						rootpath = rootpath.replace(/[\(\)'"\s]/g, function(match) { return "\\" + match; });
 					}
+
+					if (rootpath.trim().indexOf('~') === 0) {
+						rootpath = virtualFileManager.ToAbsolutePath(rootpath);
+					}
+
 					val.value = rootpath + val.value;
 				}
 
@@ -9210,4 +9219,4 @@ var Less = (function(){
 		createFromEnvironment: require('/'),
 		logger: null
 	};
-})();
+})(VirtualFileManager);

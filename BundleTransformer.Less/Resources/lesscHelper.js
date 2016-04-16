@@ -115,6 +115,8 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 
 		BtFileManager.prototype.loadFileSync = function (filename, currentDirectory, options, environment, encoding) {
 			var result,
+				processedFilename,
+				processedCurrentDirectory,
 				fullFilename,
 				isAbsoluteFilename,
 				isFileExists,
@@ -122,9 +124,19 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				err
 				;
 
-			isAbsoluteFilename = this.isPathAbsolute(filename);
+			processedFilename = filename;
+			if (filename.trim().indexOf('~') === 0) {
+				processedFilename = virtualFileManager.ToAbsolutePath(filename);
+			}
+
+			processedCurrentDirectory = currentDirectory;
+			if (currentDirectory.trim().indexOf('~') === 0) {
+				processedCurrentDirectory = virtualFileManager.ToAbsolutePath(currentDirectory);
+			}
+
+			isAbsoluteFilename = this.isPathAbsolute(processedFilename);
 			fullFilename = isAbsoluteFilename ?
-				filename : this.extractUrlParts(this.join(currentDirectory, filename)).fileUrl;
+				processedFilename : this.extractUrlParts(this.join(processedCurrentDirectory, processedFilename)).fileUrl;
 			isFileExists = virtualFileManager.FileExists(fullFilename);
 
 			if (isFileExists) {

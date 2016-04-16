@@ -63,6 +63,10 @@
 
 			string mixinsLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Mixins.less");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(mixinsLessAssetVirtualPath))
+				.Returns(mixinsLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(mixinsLessAssetVirtualPath))
 				.Returns(true)
 				;
@@ -84,6 +88,10 @@
 
 			string variablesLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Variables.less");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(variablesLessAssetVirtualPath))
+				.Returns(variablesLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(variablesLessAssetVirtualPath))
 				.Returns(true)
 				;
@@ -97,6 +105,10 @@
 
 			string testLessImportLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestLessImport.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(testLessImportLessAssetVirtualPath))
+				.Returns(testLessImportLessAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testLessImportLessAssetVirtualPath))
 				.Returns(true)
@@ -136,6 +148,10 @@
 
 			string headphoneGifAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "images/icons/headphone.gif");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(headphoneGifAssetVirtualPath))
+				.Returns(headphoneGifAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(headphoneGifAssetVirtualPath))
 				.Returns(true)
 				;
@@ -146,6 +162,10 @@
 
 
 			string googlePlusSvgAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "google-plus.svg");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(googlePlusSvgAssetVirtualPath))
+				.Returns(googlePlusSvgAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(googlePlusSvgAssetVirtualPath))
 				.Returns(true)
@@ -158,6 +178,10 @@
 
 			string testLessImportSub1LessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestLessImport.Sub1.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(testLessImportSub1LessAssetVirtualPath))
+				.Returns(testLessImportSub1LessAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testLessImportSub1LessAssetVirtualPath))
 				.Returns(true)
@@ -185,6 +209,10 @@
 
 			string networkPngAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "@network.png");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(networkPngAssetVirtualPath))
+				.Returns(networkPngAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(networkPngAssetVirtualPath))
 				.Returns(true)
 				;
@@ -195,6 +223,10 @@
 
 
 			string tagIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "TagIcon.css");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(tagIconCssAssetVirtualPath))
+				.Returns(tagIconCssAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(tagIconCssAssetVirtualPath))
 				.Returns(true)
@@ -212,6 +244,10 @@
 			string testLessImportSub2LessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"TestLessImport.Sub2.less");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(testLessImportSub2LessAssetVirtualPath))
+				.Returns(testLessImportSub2LessAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(testLessImportSub2LessAssetVirtualPath))
 				.Returns(true)
 				;
@@ -224,12 +260,17 @@
 @import (inline, css) 'NodeIcon.less';
 @import (css) ""OpenIdIcon.less"";
 @import (optional) ""PrinterIcon.less"";
-@import (optional) ""NonExistentIcon.less"";")
+@import (optional) ""NonExistentIcon.less"";
+@import ""~/Content/XfnIcon.less"";")
 				;
 
 
 			string usbFlashDriveIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"UsbFlashDriveIcon.css");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(usbFlashDriveIconCssAssetVirtualPath))
+				.Returns(usbFlashDriveIconCssAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(usbFlashDriveIconCssAssetVirtualPath))
 				.Returns(true)
@@ -246,6 +287,10 @@
 			string validationIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"ValidationIcon.css");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(validationIconCssAssetVirtualPath))
+				.Returns(validationIconCssAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(validationIconCssAssetVirtualPath))
 				.Returns(true)
 				;
@@ -260,6 +305,10 @@
 
 			string microformatsIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"MicroformatsIcon.css");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(microformatsIconCssAssetVirtualPath))
+				.Returns(microformatsIconCssAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(microformatsIconCssAssetVirtualPath))
 				.Returns(true)
@@ -276,6 +325,10 @@
 			string nodeIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"NodeIcon.less");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(nodeIconLessAssetVirtualPath))
+				.Returns(nodeIconLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(nodeIconLessAssetVirtualPath))
 				.Returns(true)
 				;
@@ -290,6 +343,10 @@
 
 			string openIdIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"OpenIdIcon.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(openIdIconLessAssetVirtualPath))
+				.Returns(openIdIconLessAssetVirtualPath)
+				;
 			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(openIdIconLessAssetVirtualPath))
 				.Returns(true)
@@ -306,6 +363,10 @@
 			string printerIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"PrinterIcon.less");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(printerIconLessAssetVirtualPath))
+				.Returns(printerIconLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(printerIconLessAssetVirtualPath))
 				.Returns(true)
 				;
@@ -321,8 +382,38 @@
 			string nonExistentIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"NonExistentIcon.less");
 			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath(nonExistentIconLessAssetVirtualPath))
+				.Returns(nonExistentIconLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
 				.Setup(fs => fs.FileExists(nonExistentIconLessAssetVirtualPath))
 				.Returns(false)
+				;
+
+			string xfnIconLessAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"XfnIcon.less");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath("~" + xfnIconLessAssetVirtualPath))
+				.Returns(xfnIconLessAssetVirtualPath)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(xfnIconLessAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(xfnIconLessAssetVirtualPath))
+				.Returns(@".icon-xfn
+{
+	display: inline;
+	background-image: url(""~/Content/xfn.png"");
+}")
+				;
+
+			string xfnPngAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"xfn.png");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath("~" + xfnPngAssetVirtualPath))
+				.Returns(xfnPngAssetVirtualPath)
 				;
 
 			Func<IJsEngine> createJsEngineInstance =
@@ -339,7 +430,7 @@
 			IList<string> dependencies = asset.VirtualPathDependencies;
 
 			// Assert
-			Assert.AreEqual(13, dependencies.Count);
+			Assert.AreEqual(14, dependencies.Count);
 			Assert.AreEqual(mixinsLessAssetVirtualPath, dependencies[0]);
 			Assert.AreEqual(variablesLessAssetVirtualPath, dependencies[1]);
 			Assert.AreEqual(testLessImportLessAssetVirtualPath, dependencies[2]);
@@ -350,9 +441,10 @@
 			Assert.AreEqual(nodeIconLessAssetVirtualPath, dependencies[7]);
 			Assert.AreEqual(printerIconLessAssetVirtualPath, dependencies[8]);
 			Assert.AreEqual(nonExistentIconLessAssetVirtualPath, dependencies[9]);
-			Assert.AreEqual(headphoneGifAssetVirtualPath, dependencies[10]);
-			Assert.AreEqual(googlePlusSvgAssetVirtualPath, dependencies[11]);
-			Assert.AreEqual(networkPngAssetVirtualPath, dependencies[12]);
+			Assert.AreEqual(xfnIconLessAssetVirtualPath, dependencies[10]);
+			Assert.AreEqual(headphoneGifAssetVirtualPath, dependencies[11]);
+			Assert.AreEqual(googlePlusSvgAssetVirtualPath, dependencies[12]);
+			Assert.AreEqual(networkPngAssetVirtualPath, dependencies[13]);
 		}
 	}
 }
