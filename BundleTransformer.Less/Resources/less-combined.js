@@ -2855,7 +2855,9 @@ var Less = (function(virtualFileManager){
 
 	//#region URL: /tree/url
 	modules['/tree/url'] = function () {
-		var Node = require('/tree/node');
+		var Node = require('/tree/node'),
+			utils = require('/utils')
+			;
 
 		var URL = function (val, index, currentFileInfo, isEvald) {
 			this.value = val;
@@ -2877,7 +2879,7 @@ var Less = (function(virtualFileManager){
 			var val = this.value.eval(context),
 				rootpath;
 
-			if (val.value.trim().indexOf('~') === 0){
+			if (utils.isAppRelativePath(val.value)){
 				val.value = virtualFileManager.ToAbsolutePath(val.value);
 			}
 
@@ -2892,7 +2894,7 @@ var Less = (function(virtualFileManager){
 						rootpath = rootpath.replace(/[\(\)'"\s]/g, function(match) { return "\\" + match; });
 					}
 
-					if (rootpath.trim().indexOf('~') === 0) {
+					if (utils.isAppRelativePath(rootpath)) {
 						rootpath = virtualFileManager.ToAbsolutePath(rootpath);
 					}
 
@@ -3111,7 +3113,9 @@ var Less = (function(virtualFileManager){
 			URL = require('/tree/url'),
 			Quoted = require('/tree/quoted'),
 			Ruleset = require('/tree/ruleset'),
-			Anonymous = require('/tree/anonymous');
+			Anonymous = require('/tree/anonymous'),
+			utils = require('/utils')
+			;
 
 		//
 		// CSS @import node
@@ -3203,7 +3207,15 @@ var Less = (function(virtualFileManager){
 			var rootpath = this.currentFileInfo && this.currentFileInfo.rootpath;
 
 			if (!(path instanceof URL)) {
+				if (utils.isAppRelativePath(path.value)) {
+					path.value = virtualFileManager.ToAbsolutePath(path.value);
+				}
+
 				if (rootpath) {
+					if (utils.isAppRelativePath(rootpath)) {
+						rootpath = virtualFileManager.ToAbsolutePath(rootpath);
+					}
+
 					var pathValue = path.value;
 					// Add the base path if the import is relative
 					if (pathValue && context.isPathRelative(pathValue)) {
@@ -5530,6 +5542,10 @@ var Less = (function(virtualFileManager){
 					line: line,
 					column: column
 				};
+			},
+
+			isAppRelativePath: function(path) {
+				return path.match(/^\s*~[\/\\]/);
 			}
 		};
 
@@ -9217,6 +9233,7 @@ var Less = (function(virtualFileManager){
 	return {
 		AbstractFileManager: require('/environment/abstract-file-manager'),
 		createFromEnvironment: require('/'),
-		logger: null
+		logger: null,
+		utils: require('/utils')
 	};
 })(VirtualFileManager);

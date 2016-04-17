@@ -261,7 +261,8 @@
 @import (css) ""OpenIdIcon.less"";
 @import (optional) ""PrinterIcon.less"";
 @import (optional) ""NonExistentIcon.less"";
-@import ""~/Content/XfnIcon.less"";")
+@import ""~/Content/XfnIcon.less"";
+@import ""~/Content/YahooIcon.css"";")
 				;
 
 
@@ -414,6 +415,25 @@
 			virtualFileSystemMock
 				.Setup(fs => fs.ToAbsolutePath("~" + xfnPngAssetVirtualPath))
 				.Returns(xfnPngAssetVirtualPath)
+				;
+
+			string yahooIconCssAssetVirtualPath = UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+				"YahooIcon.css");
+			virtualFileSystemMock
+				.Setup(fs => fs.ToAbsolutePath("~" + yahooIconCssAssetVirtualPath))
+				.Returns(yahooIconCssAssetVirtualPath)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.FileExists(yahooIconCssAssetVirtualPath))
+				.Returns(true)
+				;
+			virtualFileSystemMock
+				.Setup(fs => fs.GetFileTextContent(yahooIconCssAssetVirtualPath))
+				.Returns(@".icon-yahoo
+{
+	display: inline;
+	background-image: url(""/Content/yahoo.ico"") !important;
+}")
 				;
 
 			Func<IJsEngine> createJsEngineInstance =

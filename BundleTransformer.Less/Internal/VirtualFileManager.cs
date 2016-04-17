@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Less.Internal
 {
 	using System;
+	using System.Text.RegularExpressions;
 
 	using Core.FileSystem;
 	using CoreStrings = Core.Resources.Strings;
@@ -10,6 +11,11 @@
 	/// </summary>
 	public sealed class VirtualFileManager
 	{
+		/// <summary>
+		/// Regular expression for working with the application relative paths
+		/// </summary>
+		private static readonly Regex _appRelativePathRegex = new Regex(@"^\s*~[/\\]");
+
 		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
@@ -39,13 +45,12 @@
 					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
 			}
 
-			string processedPath = path.Trim();
-			if (processedPath.IndexOf('~') != 0)
+			if (!_appRelativePathRegex.IsMatch(path))
 			{
 				return path;
 			}
 
-			string absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(processedPath);
+			string absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(path);
 
 			return absolutePath;
 		}

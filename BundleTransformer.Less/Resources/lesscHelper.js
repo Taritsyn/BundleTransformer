@@ -121,16 +121,17 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				isAbsoluteFilename,
 				isFileExists,
 				data,
-				err
+				err,
+				utils = less.utils
 				;
 
 			processedFilename = filename;
-			if (filename.trim().indexOf('~') === 0) {
+			if (utils.isAppRelativePath(filename)) {
 				processedFilename = virtualFileManager.ToAbsolutePath(filename);
 			}
 
 			processedCurrentDirectory = currentDirectory;
-			if (currentDirectory.trim().indexOf('~') === 0) {
+			if (utils.isAppRelativePath(currentDirectory)) {
 				processedCurrentDirectory = virtualFileManager.ToAbsolutePath(currentDirectory);
 			}
 
