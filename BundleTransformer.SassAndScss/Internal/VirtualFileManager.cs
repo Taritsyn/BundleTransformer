@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.SassAndScss.Internal
 {
 	using System;
+	using System.Text.RegularExpressions;
 
 	using LibSassHost;
 
@@ -12,6 +13,11 @@
 	/// </summary>
 	internal sealed class VirtualFileManager : IFileManager
 	{
+		/// <summary>
+		/// Regular expression for working with the application relative paths
+		/// </summary>
+		private static readonly Regex _appRelativePathRegex = new Regex(@"^\s*~[/\\]");
+
 		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
@@ -61,6 +67,24 @@
 			bool result = path.StartsWith("/");
 
 			return result;
+		}
+
+		public string ToAbsolutePath(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+			}
+
+			if (!_appRelativePathRegex.IsMatch(path))
+			{
+				return path;
+			}
+
+			string absolutePath = _virtualFileSystemWrapper.ToAbsolutePath(path);
+
+			return absolutePath;
 		}
 
 		public string ReadFile(string path)

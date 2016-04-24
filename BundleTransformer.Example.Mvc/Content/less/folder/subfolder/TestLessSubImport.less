@@ -28,9 +28,24 @@
 @import (inline, css) "../NodeIcon.less" screen and (color), projection and (color);
 @import (optional) "../PrinterIcon.less";
 @import (optional) "../NonExistentIcon.less";
+@import "~/Content/less/folder/RobotIcon.css";
+@import (less) "~/Content/less/folder/ServerIcon.css";
+@import "~/Content/less/folder/TableIcon.less";
 
 .icon-xfn
 {
 	display: inline;
 	background-image: data-uri("../../xfn.png");
+}
+
+.icon-upload
+{
+	display: inline;
+	background-image: data-uri('~/Content/less/folder/upload.png') !important;
+}
+
+.icon-vise
+{
+	display: inline;
+	background-image: data-uri("@{alternative-icons-path}vise.png") !important;
 }

@@ -7,3 +7,23 @@
 @import "folder/GitIcon", 'folder/HourglassIcon', "folder/ImageIcon", url(folder/JsonIcon.css);
 @import url('folder/KeyIcon.css');
 @import 'folder/LayoutIcon.css' screen and (orientation:landscape) and (color), (color);
+@import '~/Content/scss/folder/DriveIcon.scss', "~/Content/scss/folder/HomeIcon.css", url(~/Content/scss/folder/InformationIcon.css);
+@import "~/Content/scss/folder/JarIcon.scss" screen, projection;
+
+.icon-equalizer
+{
+	display: inline;
+	background-image: url(#{$alternative-icons-path}equalizer.png) !important;
+}
+
+.icon-film
+{
+	display: inline;
+	background-image: url("~/Content/sass/folder/film.png") !important;
+}
+
+.icon-geolocation
+{
+	display: inline;
+	background-image: url("#{$alternative-icons-path}geolocation.png") !important;
+}
