@@ -127,6 +127,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="AlternativeContent\less\LessIcons.less" />
     <None Include="BundleTransformer.Configuration.xsc">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
@@ -137,6 +138,8 @@
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>
     <Content Include="AlternativeContent\images\icons\geolocation.png" />
+    <Content Include="Content\less\folder\subfolder\java.ico" />
+    <Content Include="Content\less\folder\keys.png" />
     <Content Include="Content\scss\folder\home.png" />
     <Content Include="AlternativeContent\images\icons\table.png" />
     <Content Include="AlternativeContent\images\icons\vise.png" />
@@ -148,6 +151,8 @@
     <Content Include="Content\fonts\blogger-sans\blogger-sans-webfont.ttf" />
     <Content Include="Content\fonts\blogger-sans\blogger-sans-webfont.woff" />
     <Content Include="Content\fonts\blogger-sans\blogger-sans-webfont.woff2" />
+    <Content Include="Content\less\folder\JavaIcon.less" />
+    <Content Include="Content\less\KeysIcon.less" />
     <None Include="Content\less\folder\OpenIdIcon.less" />
     <Content Include="Content\less\folder\PrinterIcon.less" />
     <Content Include="Content\less\folder\qr-code.gif" />

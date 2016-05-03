@@ -35,6 +35,7 @@
 				"~/Content/themes/base/jquery.ui.dialog.css",
 				"~/Content/TestTranslators.css",
 				"~/Content/less/TestLess.less",
+				"~/AlternativeContent/less/LessIcons.less",
 				"~/Content/sass/TestSass.sass",
 				"~/Content/scss/TestScss.scss");
 			commonStylesBundle.Orderer = nullOrderer;

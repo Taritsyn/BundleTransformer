@@ -99,6 +99,50 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 
 		BtFileManager.prototype = new AbstractFileManager();
 
+		BtFileManager.prototype.pathDiff = function (url, baseUrl) {
+			var urlParts = this.extractUrlParts(url),
+				baseUrlParts = this.extractUrlParts(baseUrl),
+				i,
+				max,
+				urlDirectories,
+				baseUrlDirectories,
+				diff = ''
+				;
+
+			if (urlParts.hostPart !== baseUrlParts.hostPart) {
+				if (urlParts.hostPart.charAt(0) === '/' && baseUrlParts.hostPart.charAt(0) === '/') {
+					for (i = 0; i < baseUrlParts.directories.length; i++) {
+						diff += '../';
+					}
+					diff += urlParts.path.substr(1);
+
+					return diff;
+				}
+
+				return '';
+			}
+
+			max = Math.max(baseUrlParts.directories.length, urlParts.directories.length);
+
+			for (i = 0; i < max; i++) {
+				if (baseUrlParts.directories[i] !== urlParts.directories[i]) {
+					break;
+				}
+			}
+
+			baseUrlDirectories = baseUrlParts.directories.slice(i);
+			urlDirectories = urlParts.directories.slice(i);
+
+			for (i = 0; i < baseUrlDirectories.length - 1; i++) {
+				diff += '../';
+			}
+
+			for (i = 0; i < urlDirectories.length - 1; i++) {
+				diff += urlDirectories[i] + '/';
+			}
+
+			return diff;
+		};
 
 		BtFileManager.prototype.supports = function () {
 			return true;

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS v1.9.103
+              README file for Bundle Transformer: LESS v1.9.105
 
    ----------------------------------------------------------------------
 
@@ -28,8 +28,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a bug that occurred during processing of the paths beginning
-   with a tilde in CSS import directives.
+   Fixed a bug “Wrong path resolution in imported files”.
 
    ====================
    POST-INSTALL ACTIONS
