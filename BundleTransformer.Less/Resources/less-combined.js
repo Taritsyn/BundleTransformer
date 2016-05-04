@@ -4096,7 +4096,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			// urlParts[4] = filename
 			// urlParts[5] = parameters
 
-			var urlPartsRegex = /^((?:[a-z-]+:)?\/+?(?:[^\/\?#]*\/)|([\/\\]))?((?:[^\/\\\?#]*[\/\\])*)([^\/\\\?#]*)([#\?].*)?$/i,
+			var urlPartsRegex = /^((?:[a-z-]+:)?\/{2}(?:[^\/\?#]*\/)|([\/\\]))?((?:[^\/\\\?#]*[\/\\])*)([^\/\\\?#]*)([#\?].*)?$/i,
 				urlParts = url.match(urlPartsRegex),
 				returner = {}, directories = [], i, baseUrlParts;
 

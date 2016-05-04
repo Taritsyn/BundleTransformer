@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS v1.9.105
+              README file for Bundle Transformer: LESS v1.9.106
 
    ----------------------------------------------------------------------
 
@@ -28,7 +28,8 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a bug “Wrong path resolution in imported files”.
+   Fixed a another bug that occurred during resolution of paths in imported
+   files.
 
    ====================
    POST-INSTALL ACTIONS
