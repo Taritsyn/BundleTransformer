@@ -106,12 +106,18 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				max,
 				urlDirectories,
 				baseUrlDirectories,
+				baseUrlDirectoryCount,
 				diff = ''
 				;
 
 			if (urlParts.hostPart !== baseUrlParts.hostPart) {
 				if (urlParts.hostPart.charAt(0) === '/' && baseUrlParts.hostPart.charAt(0) === '/') {
-					for (i = 0; i < baseUrlParts.directories.length; i++) {
+					baseUrlDirectoryCount = baseUrlParts.directories.length;
+					if (baseUrlDirectoryCount === 0 && baseUrlParts.hostPart !== '/') {
+						baseUrlDirectoryCount++;
+					}
+
+					for (i = 0; i < baseUrlDirectoryCount; i++) {
 						diff += '../';
 					}
 					diff += urlParts.path.substr(1);
