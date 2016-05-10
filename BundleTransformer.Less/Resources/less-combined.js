@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v2.6.1
+ * Less - Leaner CSS v2.7.1
  * http://lesscss.org
  *
  * Copyright (c) 2009-2015, Alexis Sellier <self@cloudhead.net>
@@ -861,6 +861,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.inline = inline || false;
 			this.variable = (variable !== undefined) ? variable
 				: (name.charAt && (name.charAt(0) === '@'));
+			this.allowRoot = true;
 		};
 
 		function evalName(context, name) {
@@ -1272,6 +1273,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this._lookups = {};
 			this.strictImports = strictImports;
 			this.copyVisibilityInfo(visibilityInfo);
+			this.allowRoot = true;
 		};
 		Ruleset.prototype = new Node();
 		Ruleset.prototype.type = "Ruleset";
@@ -1996,6 +1998,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.debugInfo = debugInfo;
 			this.isRooted = isRooted || false;
 			this.copyVisibilityInfo(visibilityInfo);
+			this.allowRoot = true;
 		};
 
 		Directive.prototype = new Node();
@@ -2705,6 +2708,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.value = value;
 			this.isLineComment = isLineComment;
 			this.currentFileInfo = currentFileInfo;
+			this.allowRoot = true;
 		};
 		Comment.prototype = new Node();
 		Comment.prototype.type = "Comment";
@@ -2820,17 +2824,20 @@ var Less = (function(virtualFileManager /*BT+*/){
 			var args = this.args.map(function (a) { return a.eval(context); }),
 				result, funcCaller = new FunctionCaller(this.name, context, this.index, this.currentFileInfo);
 
-			if (funcCaller.isValid()) { // 1.
+			if (funcCaller.isValid()) {
 				try {
 					result = funcCaller.call(args);
-					if (result != null) {
-						return result;
-					}
 				} catch (e) {
 					throw { type: e.type || "Runtime",
 							message: "error evaluating function `" + this.name + "`" +
 									 (e.message ? ': ' + e.message : ''),
 							index: this.index, filename: this.currentFileInfo.filename };
+				}
+
+				if (result != null) {
+					result.index = this.index;
+					result.currentFileInfo = this.currentFileInfo;
+					return result;
 				}
 			}
 
@@ -2934,7 +2941,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.mapLines = mapLines;
 			this.currentFileInfo = currentFileInfo;
 			this.rulesetLike = (typeof rulesetLike === 'undefined') ? false : rulesetLike;
-
+			this.allowRoot = true;
 			this.copyVisibilityInfo(visibilityInfo);
 		};
 		Anonymous.prototype = new Node();
@@ -2975,6 +2982,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.rules = [new Ruleset(selectors, value)];
 			this.rules[0].allowImports = true;
 			this.copyVisibilityInfo(visibilityInfo);
+			this.allowRoot = true;
 		};
 		Media.prototype = new Directive();
 		Media.prototype.type = "Media";
@@ -3135,6 +3143,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.path = path;
 			this.features = features;
 			this.currentFileInfo = currentFileInfo;
+			this.allowRoot = true;
 
 			if (this.options.less !== undefined || this.options.inline) {
 				this.css = !this.options.less || this.options.inline;
@@ -3320,6 +3329,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.optionalParameters = optionalParameters;
 			this.frames = frames;
 			this.copyVisibilityInfo(visibilityInfo);
+			this.allowRoot = true;
 		};
 		Definition.prototype = new Ruleset();
 		Definition.prototype.type = "MixinDefinition";
@@ -3508,6 +3518,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.index = index;
 			this.currentFileInfo = currentFileInfo;
 			this.important = important;
+			this.allowRoot = true;
 		};
 		MixinCall.prototype = new Node();
 		MixinCall.prototype.type = "MixinCall";
@@ -3845,6 +3856,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.parent_ids = [this.object_id];
 			this.currentFileInfo = currentFileInfo || {};
 			this.copyVisibilityInfo(visibilityInfo);
+			this.allowRoot = true;
 
 			switch(option) {
 				case "all":
@@ -3901,6 +3913,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 
 		var RulesetCall = function (variable) {
 			this.variable = variable;
+			this.allowRoot = true;
 		};
 		RulesetCall.prototype = new Node();
 		RulesetCall.prototype.type = "RulesetCall";
@@ -4090,7 +4103,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 		};
 		// helper function, not part of API
 		abstractFileManager.prototype.extractUrlParts = function extractUrlParts(url, baseUrl) {
-			// urlParts[1] = protocol&hostname || /
+			// urlParts[1] = protocol://hostname/ OR /
 			// urlParts[2] = / if path relative to host base
 			// urlParts[3] = directories
 			// urlParts[4] = filename
@@ -4661,7 +4674,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 		ProcessExtendsVisitor.prototype = {
 			run: function(root) {
 				var extendFinder = new ExtendFinderVisitor();
-				this.extendIndicies = {};
+				this.extendIndices = {};
 				extendFinder.run(root);
 				if (!extendFinder.foundExtends) { return root; }
 				root.allExtends = root.allExtends.concat(this.doExtendChaining(root.allExtends, root.allExtends));
@@ -4672,7 +4685,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			},
 			checkExtendsForNonMatched: function(extendList) {
 				var logger = Less.logger; //BT+
-				var indicies = this.extendIndicies;
+				var indices = this.extendIndices;
 				extendList.filter(function(extend) {
 					return !extend.hasFoundMatches && extend.parent_ids.length == 1;
 				}).forEach(function(extend) {
@@ -4682,8 +4695,8 @@ var Less = (function(virtualFileManager /*BT+*/){
 						}
 						catch(_) {}
 
-						if (!indicies[extend.index + ' ' + selector]) {
-							indicies[extend.index + ' ' + selector] = true;
+						if (!indices[extend.index + ' ' + selector]) {
+							indices[extend.index + ' ' + selector] = true;
 							logger.warn("extend '" + selector + "' has no matches");
 						}
 					});
@@ -4707,7 +4720,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 				// a target extend is the one on the ruleset we are looking at copy/edit/pasting in place
 				// e.g.  .a:extend(.b) {}  and .b:extend(.c) {} then the first extend extends the second one
 				// and the second is the target.
-				// the seperation into two lists allows us to process a subset of chains with a bigger set, as is the
+				// the separation into two lists allows us to process a subset of chains with a bigger set, as is the
 				// case when processing media queries
 				for (extendIndex = 0; extendIndex < extendsList.length; extendIndex++) {
 					for (targetExtendIndex = 0; targetExtendIndex < extendsListTarget.length; targetExtendIndex++) {
@@ -5276,7 +5289,6 @@ var Less = (function(virtualFileManager /*BT+*/){
 				} else {
 					return this.visitDirectiveWithoutBody(directiveNode, visitArgs);
 				}
-				return directiveNode;
 			},
 
 			visitDirectiveWithBody: function(directiveNode, visitArgs) {
@@ -5331,13 +5343,24 @@ var Less = (function(virtualFileManager /*BT+*/){
 				return directiveNode;
 			},
 
-			checkPropertiesInRoot: function(rules) {
-				var ruleNode;
+			checkValidNodes: function(rules, isRoot) {
+				if (!rules) {
+					return;
+				}
+
 				for (var i = 0; i < rules.length; i++) {
-					ruleNode = rules[i];
-					if (ruleNode instanceof tree.Rule && !ruleNode.variable) {
-						throw { message: "properties must be inside selector blocks, they cannot be in the root.",
-							index: ruleNode.index, filename: ruleNode.currentFileInfo ? ruleNode.currentFileInfo.filename : null};
+					var ruleNode = rules[i];
+					if (isRoot && ruleNode instanceof tree.Rule && !ruleNode.variable) {
+						throw { message: "Properties must be inside selector blocks. They cannot be in the root",
+							index: ruleNode.index, filename: ruleNode.currentFileInfo && ruleNode.currentFileInfo.filename};
+					}
+					if (ruleNode instanceof tree.Call) {
+						throw { message: "Function '" + ruleNode.name + "' is undefined",
+							index: ruleNode.index, filename: ruleNode.currentFileInfo && ruleNode.currentFileInfo.filename};
+					}
+					if (ruleNode.type && !ruleNode.allowRoot) {
+						throw { message: ruleNode.type + " node returned by a function is not valid here",
+							index: ruleNode.index, filename: ruleNode.currentFileInfo && ruleNode.currentFileInfo.filename};
 					}
 				}
 			},
@@ -5345,9 +5368,9 @@ var Less = (function(virtualFileManager /*BT+*/){
 			visitRuleset: function (rulesetNode, visitArgs) {
 				//at this point rulesets are nested into each other
 				var rule, rulesets = [];
-				if (rulesetNode.firstRoot) {
-					this.checkPropertiesInRoot(rulesetNode.rules);
-				}
+
+				this.checkValidNodes(rulesetNode.rules, rulesetNode.firstRoot);
+
 				if (! rulesetNode.root) {
 					//remove invisible paths
 					this._compileRulesetPaths(rulesetNode);
@@ -5774,7 +5797,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 								nextNewLine = endIndex;
 							}
 							parserInput.i = nextNewLine;
-							comment.text = inp.substr(comment.i, parserInput.i - comment.i);
+							comment.text = inp.substr(comment.index, parserInput.i - comment.index);
 							parserInput.commentStore.push(comment);
 							continue;
 						} else if (nextChar === '*') {
@@ -5951,7 +5974,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 				input = str;
 				parserInput.i = j = currentPos = furthest = 0;
 
-				// chunking apparantly makes things quicker (but my tests indicate
+				// chunking apparently makes things quicker (but my tests indicate
 				// it might actually make things slower in node at least)
 				// and it is a non-perfect parse - it can't recognise
 				// unquoted urls, meaning it can't distinguish comments
@@ -6263,7 +6286,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 							}
 
 							node = mixin.definition() || this.rule() || this.ruleset() ||
-								mixin.call() || this.rulesetCall() || this.directive();
+								mixin.call() || this.rulesetCall() || this.entities.call() || this.directive();
 							if (node) {
 								root.push(node);
 							} else {
@@ -6372,19 +6395,51 @@ var Less = (function(virtualFileManager /*BT+*/){
 							return new(tree.Call)(name, args, index, fileInfo);
 						},
 						arguments: function () {
-							var args = [], arg;
+							var argsSemiColon = [], argsComma = [],
+								expressions = [],
+								isSemiColonSeparated, value, arg;
+
+							parserInput.save();
 
 							while (true) {
-								arg = this.assignment() || parsers.expression();
+
+								arg = parsers.detachedRuleset() || this.assignment() || parsers.expression();
+
 								if (!arg) {
 									break;
 								}
-								args.push(arg);
-								if (! parserInput.$char(',')) {
-									break;
+
+								value = arg;
+
+								if (arg.value && arg.value.length == 1) {
+									value = arg.value[0];
+								}
+
+								if (value) {
+									expressions.push(value);
+								}
+
+								argsComma.push(value);
+
+								if (parserInput.$char(',')) {
+									continue;
+								}
+
+								if (parserInput.$char(';') || isSemiColonSeparated) {
+
+									isSemiColonSeparated = true;
+
+									if (expressions.length > 1) {
+										value = new(tree.Value)(expressions);
+									}
+									argsSemiColon.push(value);
+
+									expressions = [];
 								}
 							}
-							return args;
+
+							parserInput.forget();
+							return isSemiColonSeparated ? argsSemiColon : argsComma;
 						},
 						literal: function () {
 							return this.dimension() ||
@@ -6464,7 +6519,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 							}
 						},
 
-						// A variable entity useing the protective {} e.g. @{var}
+						// A variable entity using the protective {} e.g. @{var}
 						variableCurly: function () {
 							var curly, index = parserInput.i;
 
@@ -6499,7 +6554,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 							parserInput.save();
 							var autoCommentAbsorb = parserInput.autoCommentAbsorb;
 							parserInput.autoCommentAbsorb = false;
-							var k = parserInput.$re(/^[A-Za-z]+/);
+							var k = parserInput.$re(/^[_A-Za-z-][_A-Za-z0-9-]+/);
 							parserInput.autoCommentAbsorb = autoCommentAbsorb;
 							if (!k) {
 								parserInput.forget();
@@ -6901,7 +6956,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 					//
 					// A Rule terminator. Note that we use `peek()` to check for '}',
 					// because the `block` rule will be expecting it, but we still need to make sure
-					// it's there, if ';' was ommitted.
+					// it's there, if ';' was omitted.
 					//
 					end: function () {
 						return parserInput.$char(';') || parserInput.peek('}');
@@ -7323,10 +7378,10 @@ var Less = (function(virtualFileManager /*BT+*/){
 					},
 
 					media: function () {
-						var features, rules, media, debugInfo;
+						var features, rules, media, debugInfo, index = parserInput.i;
 
 						if (context.dumpLineNumbers) {
-							debugInfo = getDebugInfo(parserInput.i);
+							debugInfo = getDebugInfo(index);
 						}
 
 						parserInput.save();
@@ -7342,7 +7397,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 
 							parserInput.forget();
 
-							media = new(tree.Media)(rules, features, parserInput.i, fileInfo);
+							media = new(tree.Media)(rules, features, index, fileInfo);
 							if (context.dumpLineNumbers) {
 								media.debugInfo = debugInfo;
 							}
@@ -8101,7 +8156,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 				return hsla(hsl);
 			},
 			//
-			// Copyright (c) 2006-2009 Hampton Catlin, Nathan Weizenbaum, and Chris Eppstein
+			// Copyright (c) 2006-2009 Hampton Catlin, Natalie Weizenbaum, and Chris Eppstein
 			// http://sass-lang.com
 			//
 			mix: function (color1, color2, weight) {
@@ -8130,33 +8185,41 @@ var Less = (function(virtualFileManager /*BT+*/){
 			greyscale: function (color) {
 				return colorFunctions.desaturate(color, new Dimension(100));
 			},
-			contrast: function (color, dark, light, threshold) {
+			contrast: function (color, color1, color2, threshold) {
+				// Return which of `color1` and `color2` has the greatest contrast with `color`
+				// according to the standard WCAG contrast ratio calculation.
+				// http://www.w3.org/TR/WCAG20/#contrast-ratiodef
+				// The threshold param is no longer used, in line with SASS.
 				// filter: contrast(3.2);
 				// should be kept as is, so check for color
 				if (!color.rgb) {
 					return null;
 				}
-				if (typeof light === 'undefined') {
-					light = colorFunctions.rgba(255, 255, 255, 1.0);
+				if (typeof color1 === 'undefined') {
+					color1 = colorFunctions.rgba(0, 0, 0, 1.0);
 				}
-				if (typeof dark === 'undefined') {
-					dark = colorFunctions.rgba(0, 0, 0, 1.0);
+				if (typeof color2 === 'undefined') {
+					color2 = colorFunctions.rgba(255, 255, 255, 1.0);
 				}
-				//Figure out which is actually light and dark!
-				if (dark.luma() > light.luma()) {
-					var t = light;
-					light = dark;
-					dark = t;
-				}
-				if (typeof threshold === 'undefined') {
-					threshold = 0.43;
+				var contrast1, contrast2;
+				var luma = color.luma();
+				var luma1 = color1.luma();
+				var luma2 = color2.luma();
+				// Calculate contrast ratios for each color
+				if (luma > luma1) {
+					contrast1 = (luma + 0.05) / (luma1 + 0.05);
 				} else {
-					threshold = number(threshold);
+					contrast1 = (luma1 + 0.05) / (luma + 0.05);
 				}
-				if (color.luma() < threshold) {
-					return light;
+				if (luma > luma2) {
+					contrast2 = (luma + 0.05) / (luma2 + 0.05);
 				} else {
-					return dark;
+					contrast2 = (luma2 + 0.05) / (luma + 0.05);
+				}
+				if (contrast1 > contrast2) {
+					return color1;
+				} else {
+					return color2;
 				}
 			},
 			argb: function (color) {
@@ -9200,7 +9263,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 	modules['/image-size'] = function () {
 		var exports = function() {
 
-			var functionRegistry = require("/functions/function-registry");
+			var functionRegistry = require('/functions/function-registry');
 
 			function imageSize() {
 				throw {
@@ -9237,7 +9300,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			var /*BT- SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var less = {
-				version: [2, 6, 1],
+				version: [2, 7, 1],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),
