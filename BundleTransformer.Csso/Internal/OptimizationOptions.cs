@@ -14,6 +14,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a comments mode
+		/// </summary>
+		public CommentsMode Comments
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the CSS optimization options
@@ -21,6 +30,7 @@
 		public OptimizationOptions()
 		{
 			Restructure = true;
+			Comments = CommentsMode.Exclamation;
 		}
 	}
 }

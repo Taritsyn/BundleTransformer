@@ -45,6 +45,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a comments mode
+		/// </summary>
+		public CommentsMode Comments
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of Sergey Kryzhanovsky's CSS-minifier
@@ -60,7 +69,9 @@
 		/// <param name="cssoConfig">Configuration settings of Sergey Kryzhanovsky's Minifier</param>
 		public KryzhanovskyCssMinifier(Func<IJsEngine> createJsEngineInstance, CssoSettings cssoConfig)
 		{
-			DisableRestructuring = cssoConfig.CssMinifier.DisableRestructuring;
+			CssMinifierSettings cssMinifierConfig = cssoConfig.CssMinifier;
+			DisableRestructuring = cssMinifierConfig.DisableRestructuring;
+			Comments = cssMinifierConfig.Comments;
 
 			if (createJsEngineInstance == null)
 			{
@@ -181,7 +192,8 @@
 		{
 			var options = new OptimizationOptions
 			{
-				Restructure = !DisableRestructuring
+				Restructure = !DisableRestructuring,
+				Comments = Comments
 			};
 
 			return options;

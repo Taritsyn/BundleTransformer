@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v2.0.0
+* CSSO (CSS Optimizer) v2.1.1
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -39,13 +39,18 @@ var CSSO = (function(){
 		var restructureBlock = require('/compressor/restructure');
 		var walkRules = require('/utils/walk').rules;
 
-		function readBlock(stylesheet) {
+		function readBlock(stylesheet, specialComments) {
 			var buffer = new List();
 			var nonSpaceTokenInBuffer = false;
 			var protectedComment;
 
 			stylesheet.rules.nextUntil(stylesheet.rules.head, function(node, item, list) {
-				if (node.type === 'Comment' && node.value.charAt(0) === '!') {
+				if (node.type === 'Comment') {
+					if (!specialComments || node.value.charAt(0) !== '!') {
+						list.remove(item);
+						return;
+					}
+
 					if (nonSpaceTokenInBuffer || protectedComment) {
 						return true;
 					}
@@ -94,15 +99,31 @@ var CSSO = (function(){
 			return ast;
 		}
 
+		function getCommentsOption(options) {
+			var comments = 'comments' in options ? options.comments : 'exclamation';
+
+			if (typeof comments === 'boolean') {
+				comments = comments ? 'exclamation' : false;
+			} else if (comments !== 'exclamation' && comments !== 'first-exclamation') {
+				comments = false;
+			}
+
+			return comments;
+		}
+
+		function getRestructureOption(options) {
+			return 'restructure' in options ? options.restructure :
+				   'restructuring' in options ? options.restructuring :
+				   true;
+		}
+
 		var exports = function compress(ast, options) {
 			options = options || {};
 			ast = ast || { type: 'StyleSheet', rules: new List() };
 
 //			var logger = typeof options.logger === 'function' ? options.logger : Function();
-			var restructuring =
-				'restructure' in options ? options.restructure :
-				'restructuring' in options ? options.restructuring :
-				true;
+			var specialComments = getCommentsOption(options);
+			var restructuring = getRestructureOption(options);
 			var result = new List();
 			var block;
 			var firstAtrulesAllowed = true;
@@ -138,8 +159,7 @@ var CSSO = (function(){
 			}
 
 			do {
-				block = readBlock(ast);
-				// console.log(JSON.stringify(block.stylesheet, null, 2));
+				block = readBlock(ast, Boolean(specialComments));
 				block.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
 				block.stylesheet = compressBlock(block.stylesheet, usageData, blockNum++/*, logger*/);
 
@@ -177,6 +197,10 @@ var CSSO = (function(){
 					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
 						firstAtrulesAllowed = false;
 					}
+				}
+
+				if (specialComments !== 'exclamation') {
+					specialComments = false;
 				}
 
 				result.appendList(blockRules);
@@ -2032,7 +2056,7 @@ var CSSO = (function(){
 								vendorId = resolveKeyword(name).vendor;
 							}
 
-							if (name === '\\9') {
+							if (/\\9/.test(name)) {
 								hack9 = name;
 							}
 
@@ -2949,15 +2973,19 @@ var CSSO = (function(){
 
 		function parseError(message) {
 			var error = new Error(message);
+			var offset = 0;
 			var line = 1;
 			var column = 1;
 			var lines;
 
 			if (scanner.token !== null) {
+				offset = scanner.token.offset;
 				line = scanner.token.line;
 				column = scanner.token.column;
 			} else if (scanner.prevToken !== null) {
-				lines = scanner.prevToken.value.trimRight().split(/\n|\r\n?|\f/);
+				lines = scanner.prevToken.value.trimRight();
+				offset = scanner.prevToken.offset + lines.length;
+				lines = lines.split(/\n|\r\n?|\f/);
 				line = scanner.prevToken.line + lines.length - 1;
 				column = lines.length > 1
 					? lines[lines.length - 1].length + 1
@@ -2966,6 +2994,7 @@ var CSSO = (function(){
 
 			error.name = 'CssSyntaxError';
 			error.parseError = {
+				offset: offset,
 				line: line,
 				column: column
 			};
@@ -4756,7 +4785,6 @@ var CSSO = (function(){
 			scanner = null;
 
 			// console.log(JSON.stringify(ast, null, 4));
-			// console.log(require('../utils/stringify.js')(ast, true));
 			return ast;
 		};
 
@@ -4917,7 +4945,6 @@ var CSSO = (function(){
 
 			this.pos = source.charCodeAt(0) === 0xFEFF ? 1 : 0;
 			this.eof = this.pos === this.source.length;
-			this.lastPos = this.pos;
 			this.line = typeof initLine === 'undefined' ? 1 : initLine;
 			this.lineStartPos = typeof initColumn === 'undefined' ? -1 : -initColumn;
 
@@ -4975,7 +5002,7 @@ var CSSO = (function(){
 				var code = this.source.charCodeAt(this.pos);
 				var line = this.line;
 				var column = this.pos - this.lineStartPos;
-				var lastPos;
+				var offset = this.pos;
 				var next;
 				var type;
 				var value;
@@ -5048,15 +5075,13 @@ var CSSO = (function(){
 						this.urlMode = this.urlMode || value === 'url';
 				}
 
-				lastPos = this.lastPos === 0 ? this.lastPos : this.lastPos - 1;
-				this.lastPos = this.pos;
 				this.eof = this.pos === this.source.length;
 
 				return {
 					type: type,
 					value: value,
 
-					offset: lastPos,
+					offset: offset,
 					line: line,
 					column: column
 				};
@@ -5710,17 +5735,19 @@ var CSSO = (function(){
 					return each(node.rules);
 
 				case 'Atrule':
-					var result = '@' + node.name;
+					var nodes = ['@', node.name];
 
 					if (node.expression && !node.expression.sequence.isEmpty()) {
-						result += ' ' + translate(node.expression);
+						nodes.push(' ', translate(node.expression));
 					}
 
 					if (node.block) {
-						return result + '{' + translate(node.block) + '}';
+						nodes.push('{', translate(node.block), '}');
 					} else {
-						return result + ';';
+						nodes.push(';');
 					}
+
+					return nodes.join('');
 
 				case 'Ruleset':
 					return translate(node.selector) + '{' + translate(node.block) + '}';
@@ -5729,14 +5756,19 @@ var CSSO = (function(){
 					return eachDelim(node.selectors, ',');
 
 				case 'SimpleSelector':
-					return node.sequence.map(function(node) {
+					var nodes = node.sequence.map(function(node) {
 						// add extra spaces around /deep/ combinator since comment beginning/ending may to be produced
 						if (node.type === 'Combinator' && node.name === '/deep/') {
 							return ' ' + translate(node) + ' ';
 						}
 
 						return translate(node);
-					}).join('');
+					});
+
+					return nodes.join('');
+
+				case 'Block':
+					return eachDelim(node.declarations, ';');
 
 				case 'Declaration':
 					return translate(node.property) + ':' + translate(node.value);
@@ -5771,9 +5803,6 @@ var CSSO = (function(){
 
 				case 'Function':
 					return node.name + '(' + eachDelim(node.arguments, ',') + ')';
-
-				case 'Block':
-					return eachDelim(node.declarations, ';');
 
 				case 'Negation':
 					return ':not(' + eachDelim(node.sequence, ',') + ')';
@@ -6054,6 +6083,7 @@ var CSSO = (function(){
 		var translate = require('/utils/translate');
 //		var translateWithSourceMap = require('/utils/translateWithSourceMap');
 		var walkers = require('/utils/walk');
+		var List = require('/utils/list');
 
 		function debugOutput(name, options, startTime, data) {
 //			if (options.debug) {
@@ -6156,7 +6186,10 @@ var CSSO = (function(){
 		}
 
 		var exports = {
-			version: '2.0.0',
+			version: '2.1.0',
+
+			// classes
+			List: List,
 
 			// main methods
 			minify: minifyStylesheet,

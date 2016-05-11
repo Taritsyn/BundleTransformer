@@ -12,6 +12,7 @@
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
+	using Csso;
 	using CssoStrings = Resources.Strings;
 
 	/// <summary>
@@ -133,10 +134,39 @@
 		private static JObject ConvertOptimizationOptionsToJson(OptimizationOptions options)
 		{
 			var optionsJson = new JObject(
-				new JProperty("restructure", options.Restructure)
+				new JProperty("restructure", options.Restructure),
+				new JProperty("comments", ConvertCommentsModeEnumValueToCode(options.Comments))
 			);
 
 			return optionsJson;
+		}
+
+		/// <summary>
+		/// Converts a comments mode enum value to the code
+		/// </summary>
+		/// <param name="сommentsMode">Сomments mode enum value</param>
+		/// <returns>Сomments mode code</returns>
+		private static string ConvertCommentsModeEnumValueToCode(CommentsMode сommentsMode)
+		{
+			string code;
+
+			switch (сommentsMode)
+			{
+				case CommentsMode.Exclamation:
+					code = "exclamation";
+					break;
+				case CommentsMode.FirstExclamation:
+					code = "first-exclamation";
+					break;
+				case CommentsMode.None:
+					code = "none";
+					break;
+				default:
+					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
+						сommentsMode.ToString(), typeof(CommentsMode)));
+			}
+
+			return code;
 		}
 
 		/// <summary>

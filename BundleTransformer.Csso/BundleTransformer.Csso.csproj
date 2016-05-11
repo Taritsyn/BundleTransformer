@@ -68,6 +68,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommentsMode.cs" />
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\CssMinifierSettings.cs" />
     <Compile Include="Configuration\CssoSettings.cs" />

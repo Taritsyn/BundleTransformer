@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: IntelliSense v1.9.92
+          README file for Bundle Transformer: IntelliSense v1.9.108
 
    ----------------------------------------------------------------------
 
@@ -18,9 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of LESS-translator,
-   TypeScript-translator, Autoprefixer-postprocessor and Uglify
-   JS-minifier.
+   Updated definitions for configuration settings of CSSO CSS-minifier.
 
    =============
    DOCUMENTATION

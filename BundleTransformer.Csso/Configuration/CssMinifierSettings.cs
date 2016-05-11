@@ -16,5 +16,15 @@
 			get { return (bool)this["disableRestructuring"]; }
 			set { this["disableRestructuring"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a comments mode
+		/// </summary>
+		[ConfigurationProperty("comments", DefaultValue = CommentsMode.Exclamation)]
+		public CommentsMode Comments
+		{
+			get { return (CommentsMode)this["comments"]; }
+			set { this["comments"] = value; }
+		}
 	}
 }
