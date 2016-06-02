@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.12
+ * Clean-css v3.4.16
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -351,6 +351,7 @@ var CleanCss = (function(){
 	//#region URL: /properties/break-up
 	modules['/properties/break-up'] = function () {
 		var wrapSingle = require('/properties/wrap-for-optimizing').single;
+		var InvalidPropertyError = require('/properties/invalid-property-error');
 
 		var split = require('/utils/split');
 		var MULTIPLEX_SEPARATOR = ',';
@@ -483,20 +484,25 @@ var CleanCss = (function(){
 			}
 		  }
 
-		  if (splitAt == -1)
-			return fourValues(property, compactable);
+		  if (splitAt === 0 || splitAt === values.length - 1) {
+			throw new InvalidPropertyError('Invalid border-radius value.');
+		  }
 
 		  var target = _wrapDefault(property.name, property, compactable);
-		  target.value = values.slice(0, splitAt);
+		  target.value = splitAt > -1 ?
+			values.slice(0, splitAt) :
+			values.slice(0);
 		  target.components = fourValues(target, compactable);
 
 		  var remainder = _wrapDefault(property.name, property, compactable);
-		  remainder.value = values.slice(splitAt + 1);
+		  remainder.value = splitAt > -1 ?
+			values.slice(splitAt + 1) :
+			values.slice(0);
 		  remainder.components = fourValues(remainder, compactable);
 
 		  for (var j = 0; j < 4; j++) {
 			target.components[j].multiplex = true;
-			target.components[j].value = target.components[j].value.concat([['/']]).concat(remainder.components[j].value);
+			target.components[j].value = target.components[j].value.concat(remainder.components[j].value);
 		  }
 
 		  return target.components;
@@ -698,6 +704,22 @@ var CleanCss = (function(){
 		  return true;
 		}
 
+		function alwaysButIntoFunction(property1, property2, validator) {
+		  var value1 = property1.value[0][0];
+		  var value2 = property2.value[0][0];
+
+		  var validFunction1 = validator.isValidFunction(value1);
+		  var validFunction2 = validator.isValidFunction(value2);
+
+		  if (validFunction1 && validFunction2) {
+			return validator.areSameFunction(value1, value2);
+		  } else if (!validFunction1 && validFunction2) {
+			return false;
+		  } else {
+			return true;
+		  }
+		}
+
 		function backgroundImage(property1, property2, validator) {
 		  // The idea here is that 'more understandable' values override 'less understandable' values, but not vice versa
 		  // Understandability: (none | url | inherit) > (same function) > (same value)
@@ -803,6 +825,7 @@ var CleanCss = (function(){
 
 		var exports = {
 		  always: always,
+		  alwaysButIntoFunction: alwaysButIntoFunction,
 		  backgroundImage: backgroundImage,
 		  border: border,
 		  color: color,
@@ -935,13 +958,13 @@ var CleanCss = (function(){
 			doubleValues: true
 		  },
 		  'background-position': {
-			canOverride: canOverride.always,
+			canOverride: canOverride.alwaysButIntoFunction,
 			defaultValue: ['0', '0'],
 			doubleValues: true,
 			shortestValue: '0'
 		  },
 		  'background-size': {
-			canOverride: canOverride.always,
+			canOverride: canOverride.alwaysButIntoFunction,
 			defaultValue: ['auto'],
 			doubleValues: true,
 			shortestValue: '0 0'
@@ -1146,12 +1169,16 @@ var CleanCss = (function(){
 		var MULTIPLEX_SEPARATOR = ',';
 
 		function everyCombination(fn, left, right, validator) {
+		  var samePositon = !left.shorthand && !right.shorthand && !left.multiplex && !right.multiplex;
 		  var _left = shallowClone(left);
 		  var _right = shallowClone(right);
 
 		  for (var i = 0, l = left.value.length; i < l; i++) {
 			for (var j = 0, m = right.value.length; j < m; j++) {
 			  if (left.value[i][0] == MULTIPLEX_SEPARATOR || right.value[j][0] == MULTIPLEX_SEPARATOR)
+				continue;
+
+			  if (samePositon && i != j)
 				continue;
 
 			  _left.value = [left.value[i]];
@@ -1180,6 +1207,21 @@ var CleanCss = (function(){
 		}
 
 		return hasInherit;
+	};
+	//#endregion
+
+	//#region URL: /properties/invalid-property-error
+	modules['/properties/invalid-property-error'] = function () {
+		function InvalidPropertyError(message) {
+		  this.name = 'InvalidPropertyError';
+		  this.message = message;
+		  this.stack = (new Error()).stack;
+		}
+
+		InvalidPropertyError.prototype = Object.create(Error.prototype);
+		InvalidPropertyError.prototype.constructor = InvalidPropertyError;
+
+		return InvalidPropertyError;
 	};
 	//#endregion
 
@@ -1376,15 +1418,18 @@ var CleanCss = (function(){
 		  }
 		}
 
-		function optimize(selector, properties, mergeAdjacent, withCompacting, options, validator) {
+		function optimize(selector, properties, mergeAdjacent, withCompacting, options, context) {
+		  var validator = context.validator;
+		  var warnings = context.warnings;
+
 		  var _properties = wrapForOptimizing(properties);
-		  populateComponents(_properties, validator);
+		  populateComponents(_properties, validator, warnings);
 		  _optimize(_properties, mergeAdjacent, options.aggressiveMerging, validator);
 
 		  for (var i = 0, l = _properties.length; i < l; i++) {
 			var _property = _properties[i];
 			if (_property.variable && _property.block)
-			  optimize(selector, _property.value[0], mergeAdjacent, withCompacting, options, validator);
+			  optimize(selector, _property.value[0], mergeAdjacent, withCompacting, options, context);
 		  }
 
 		  if (withCompacting && options.shorthandCompacting) {
@@ -1787,8 +1832,9 @@ var CleanCss = (function(){
 	//#region URL: /properties/populate-components
 	modules['/properties/populate-components'] = function () {
 		var compactable = require('/properties/compactable');
+		var InvalidPropertyError = require('/properties/invalid-property-error');
 
-		function populateComponents(properties, validator) {
+		function populateComponents(properties, validator, warnings) {
 		  for (var i = properties.length - 1; i >= 0; i--) {
 			var property = properties[i];
 			var descriptor = compactable[property.name];
@@ -1796,7 +1842,17 @@ var CleanCss = (function(){
 			if (descriptor && descriptor.shorthand) {
 			  property.shorthand = true;
 			  property.dirty = true;
-			  property.components = descriptor.breakUp(property, compactable, validator);
+
+			  try {
+				property.components = descriptor.breakUp(property, compactable, validator);
+			  } catch (e) {
+				if (e instanceof InvalidPropertyError) {
+				  property.components = []; // this will set property.unused to true below
+				  warnings.push(e.message);
+				} else {
+				  throw e;
+				}
+			  }
 
 			  if (property.components.length > 0)
 				property.multiplex = property.components[0].multiplex;
@@ -1939,7 +1995,10 @@ var CleanCss = (function(){
 			  horizontal.components.push(horizontalComponent);
 
 			  var verticalComponent = shallowClone(property);
-			  verticalComponent.value = [component.value[2]];
+			  // FIXME: only shorthand compactor (see breakup#borderRadius) knows that border radius
+			  // longhands have two values, whereas tokenizer does not care about populating 2nd value
+			  // if it's missing, hence this fallback
+			  verticalComponent.value = [component.value[1] || component.value[0]];
 			  vertical.components.push(verticalComponent);
 			}
 
@@ -2172,7 +2231,7 @@ var CleanCss = (function(){
 		  newProperty.shorthand = true;
 		  newProperty.dirty = true;
 
-		  populateComponents([newProperty], validator);
+		  populateComponents([newProperty], validator, []);
 
 		  for (var i = 0, l = descriptor.components.length; i < l; i++) {
 			var component = candidateComponents[descriptor.components[i]];
@@ -2660,52 +2719,52 @@ var CleanCss = (function(){
 		  }
 		}
 
-		function recursivelyOptimizeBlocks(tokens, options, validator) {
+		function recursivelyOptimizeBlocks(tokens, options, context) {
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
 
 			if (token[0] == 'block') {
 			  var isKeyframes = /@(-moz-|-o-|-webkit-)?keyframes/.test(token[1][0]);
-			  optimize(token[2], options, validator, !isKeyframes);
+			  optimize(token[2], options, context, !isKeyframes);
 			}
 		  }
 		}
 
-		function recursivelyOptimizeProperties(tokens, options, validator) {
+		function recursivelyOptimizeProperties(tokens, options, context) {
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
 
 			switch (token[0]) {
 			  case 'selector':
-				optimizeProperties(token[1], token[2], false, true, options, validator);
+				optimizeProperties(token[1], token[2], false, true, options, context);
 				break;
 			  case 'block':
-				recursivelyOptimizeProperties(token[2], options, validator);
+				recursivelyOptimizeProperties(token[2], options, context);
 			}
 		  }
 		}
 
-		function optimize(tokens, options, validator, withRestructuring) {
-		  recursivelyOptimizeBlocks(tokens, options, validator);
-		  recursivelyOptimizeProperties(tokens, options, validator);
+		function optimize(tokens, options, context, withRestructuring) {
+		  recursivelyOptimizeBlocks(tokens, options, context);
+		  recursivelyOptimizeProperties(tokens, options, context);
 
 		  removeDuplicates(tokens);
-		  mergeAdjacent(tokens, options, validator);
-		  reduceNonAdjacent(tokens, options, validator);
+		  mergeAdjacent(tokens, options, context);
+		  reduceNonAdjacent(tokens, options, context);
 
-		  mergeNonAdjacentBySelector(tokens, options, validator);
+		  mergeNonAdjacentBySelector(tokens, options, context);
 		  mergeNonAdjacentByBody(tokens, options);
 
 		  if (options.restructuring && withRestructuring) {
 			restructure(tokens, options);
-			mergeAdjacent(tokens, options, validator);
+			mergeAdjacent(tokens, options, context);
 		  }
 
 		  if (options.mediaMerging) {
 			removeDuplicateMediaQueries(tokens);
 			var reduced = mergeMediaQueries(tokens);
 			for (var i = reduced.length - 1; i >= 0; i--) {
-			  optimize(reduced[i][2], options, validator, false);
+			  optimize(reduced[i][2], options, context, false);
 			}
 		  }
 
@@ -2903,7 +2962,7 @@ var CleanCss = (function(){
 		var cleanUpSelectors = require('/selectors/clean-up').selectors;
 		var isSpecial = require('/selectors/is-special');
 
-		function mergeAdjacent(tokens, options, validator) {
+		function mergeAdjacent(tokens, options, context) {
 		  var lastToken = [null, [], []];
 		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
 
@@ -2918,7 +2977,7 @@ var CleanCss = (function(){
 			if (lastToken[0] == 'selector' && stringifySelectors(token[1]) == stringifySelectors(lastToken[1])) {
 			  var joinAt = [lastToken[2].length];
 			  Array.prototype.push.apply(lastToken[2], token[2]);
-			  optimizeProperties(token[1], lastToken[2], joinAt, true, options, validator);
+			  optimizeProperties(token[1], lastToken[2], joinAt, true, options, context);
 			  token[2] = [];
 			} else if (lastToken[0] == 'selector' && stringifyBody(token[2]) == stringifyBody(lastToken[2]) &&
 				!isSpecial(options, stringifySelectors(token[1])) && !isSpecial(options, stringifySelectors(lastToken[1]))) {
@@ -3076,7 +3135,7 @@ var CleanCss = (function(){
 		var extractProperties = require('/selectors/extractor');
 		var canReorder = require('/selectors/reorderable').canReorder;
 
-		function mergeNonAdjacentBySelector(tokens, options, validator) {
+		function mergeNonAdjacentBySelector(tokens, options, context) {
 		  var allSelectors = {};
 		  var repeatedSelectors = [];
 		  var i;
@@ -3139,7 +3198,7 @@ var CleanCss = (function(){
 				  Array.prototype.push.apply(target[2], moved[2]);
 				}
 
-				optimizeProperties(target[1], target[2], joinAt, true, options, validator);
+				optimizeProperties(target[1], target[2], joinAt, true, options, context);
 				moved[2] = [];
 			  }
 			}
@@ -3158,7 +3217,7 @@ var CleanCss = (function(){
 		var isSpecial = require('/selectors/is-special');
 		var cloneArray = require('/utils/clone-array');
 
-		function reduceNonAdjacent(tokens, options, validator) {
+		function reduceNonAdjacent(tokens, options, context) {
 		  var candidates = {};
 		  var repeated = [];
 
@@ -3194,8 +3253,8 @@ var CleanCss = (function(){
 			}
 		  }
 
-		  reduceSimpleNonAdjacentCases(tokens, repeated, candidates, options, validator);
-		  reduceComplexNonAdjacentCases(tokens, candidates, options, validator);
+		  reduceSimpleNonAdjacentCases(tokens, repeated, candidates, options, context);
+		  reduceComplexNonAdjacentCases(tokens, candidates, options, context);
 		}
 
 		function wrappedSelectorsFrom(list) {
@@ -3208,7 +3267,7 @@ var CleanCss = (function(){
 		  return wrapped;
 		}
 
-		function reduceSimpleNonAdjacentCases(tokens, repeated, candidates, options, validator) {
+		function reduceSimpleNonAdjacentCases(tokens, repeated, candidates, options, context) {
 		  function filterOut(idx, bodies) {
 			return data[idx].isPartial && bodies.length === 0;
 		  }
@@ -3225,11 +3284,11 @@ var CleanCss = (function(){
 			reduceSelector(tokens, selector, data, {
 			  filterOut: filterOut,
 			  callback: reduceBody
-			}, options, validator);
+			}, options, context);
 		  }
 		}
 
-		function reduceComplexNonAdjacentCases(tokens, candidates, options, validator) {
+		function reduceComplexNonAdjacentCases(tokens, candidates, options, context) {
 		  var localContext = {};
 
 		  function filterOut(idx) {
@@ -3270,7 +3329,7 @@ var CleanCss = (function(){
 			  reduceSelector(tokens, selector, data, {
 				filterOut: filterOut,
 				callback: collectReducedBodies
-			  }, options, validator);
+			  }, options, context);
 
 			  if (stringifyBody(reducedBodies[reducedBodies.length - 1]) != stringifyBody(reducedBodies[0]))
 				continue allSelectors;
@@ -3280,7 +3339,7 @@ var CleanCss = (function(){
 		  }
 		}
 
-		function reduceSelector(tokens, selector, data, context, options, validator) {
+		function reduceSelector(tokens, selector, data, context, options, outerContext) {
 		  var bodies = [];
 		  var bodiesAsList = [];
 		  var joinsAt = [];
@@ -3304,7 +3363,7 @@ var CleanCss = (function(){
 			  joinsAt.push((joinsAt[j - 1] || 0) + bodiesAsList[j].length);
 		  }
 
-		  optimizeProperties(selector, bodies, joinsAt, false, options, validator);
+		  optimizeProperties(selector, bodies, joinsAt, false, options, outerContext);
 
 		  var processedCount = processedTokens.length;
 		  var propertyIdx = bodies.length - 1;
@@ -4344,10 +4403,6 @@ var CleanCss = (function(){
 		  return token[0][0] == 'background' || token[0][0] == 'transform' || token[0][0] == 'src';
 		}
 
-		function isVariable(token, valueIndex) {
-		  return token[valueIndex][0].indexOf('var(') === 0;
-		}
-
 		function afterClosingBrace(token, valueIndex) {
 		  return token[valueIndex][0][token[valueIndex][0].length - 1] == ')' || token[valueIndex][0].indexOf('__ESCAPED_URL_CLEAN_CSS') === 0;
 		}
@@ -4373,7 +4428,7 @@ var CleanCss = (function(){
 		}
 
 		function inSpecialContext(token, valueIndex, context) {
-		  return (!context.spaceAfterClosingBrace && supportsAfterClosingBrace(token) || isVariable(token, valueIndex)) && afterClosingBrace(token, valueIndex) ||
+		  return !context.spaceAfterClosingBrace && supportsAfterClosingBrace(token) && afterClosingBrace(token, valueIndex) ||
 			beforeSlash(token, valueIndex) ||
 			afterSlash(token, valueIndex) ||
 			beforeComma(token, valueIndex) ||
@@ -4424,8 +4479,9 @@ var CleanCss = (function(){
 		  var store = context.store;
 		  var token = tokens[position];
 		  var isVariableDeclaration = token[0][0].indexOf('--') === 0;
+		  var isBlockVariable = isVariableDeclaration && Array.isArray(token[1][0]);
 
-		  if (isVariableDeclaration && atRulesOrProperties(token[1])) {
+		  if (isVariableDeclaration && isBlockVariable && atRulesOrProperties(token[1])) {
 			store('{', context);
 			body(token[1], context);
 			store('};', context);
@@ -5050,6 +5106,9 @@ var CleanCss = (function(){
 			.replace(/^url\((['"])? /, 'url($1')
 			.replace(/ (['"])?\)$/, '$1)');
 
+		  if (/url\(".*'.*"\)/.test(url) || /url\('.*".*'\)/.test(url))
+			return url;
+
 		  if (!keepUrlQuotes && !/^['"].+['"]$/.test(url) && !/url\(.*[\s\(\)].*\)/.test(url) && !/url\(['"]data:[^;]+;charset/.test(url))
 			url = url.replace(/["']/g, '');
 
@@ -5572,10 +5631,14 @@ var CleanCss = (function(){
 	
 	//#region URL: /urls/reduce
 	modules['/urls/reduce'] = function () {
+		var split = require('/utils/split');
+
 		var URL_PREFIX = 'url(';
 		var UPPERCASE_URL_PREFIX = 'URL(';
 		var URL_SUFFIX = ')';
-		var DATA_URI_PREFIX = 'data:';
+
+		var DATA_URI_PREFIX_PATTERN = /^\s*['"]?\s*data:/;
+		var DATA_URI_TRAILER_PATTERN = /[\s\};,\/]/;
 
 		var IMPORT_URL_PREFIX = '@import';
 		var UPPERCASE_IMPORT_URL_PREFIX = '@IMPORT';
@@ -5586,7 +5649,7 @@ var CleanCss = (function(){
 		  var nextStart = 0;
 		  var nextStartUpperCase = 0;
 		  var nextEnd = 0;
-		  var nextEndAhead = 0;
+		  var firstMatch;
 		  var isDataURI = false;
 		  var cursor = 0;
 		  var tempData = [];
@@ -5601,27 +5664,23 @@ var CleanCss = (function(){
 			if (nextStart == -1 && nextStartUpperCase > -1)
 			  nextStart = nextStartUpperCase;
 
+			isDataURI = DATA_URI_PREFIX_PATTERN.test(data.substring(nextStart + URL_PREFIX.length));
 
-			if (data[nextStart + URL_PREFIX.length] == '"') {
-			  nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
-			} else if (data[nextStart + URL_PREFIX.length] == '\'') {
-			  nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
+			if (isDataURI) {
+			  firstMatch = split(data.substring(nextStart), DATA_URI_TRAILER_PATTERN, false, '(', ')', true).pop();
+
+			  if (firstMatch && firstMatch[firstMatch.length - 1] == URL_SUFFIX) {
+				nextEnd = nextStart + firstMatch.length - URL_SUFFIX.length;
+			  } else {
+				nextEnd = -1;
+			  }
 			} else {
-			  isDataURI = data.substring(nextStart + URL_PREFIX.length).trim().indexOf(DATA_URI_PREFIX) === 0;
-			  nextEnd = data.indexOf(URL_SUFFIX, nextStart);
-
-			  if (isDataURI) {
-				// this is a fuzzy matching logic for unqoted data URIs
-				while (true) {
-				  nextEndAhead = data.indexOf(URL_SUFFIX, nextEnd + 1);
-				  // if it has whitespace, curly braces, or semicolon then we should be out of URL,
-				  // otherwise keep iterating if it has not but content is not escaped,
-				  // it has to be quoted so it will be captured by either of two clauses above
-				  if (nextEndAhead == -1 || /[\s\{\};]/.test(data.substring(nextEnd, nextEndAhead)))
-					break;
-
-				  nextEnd = nextEndAhead;
-				}
+			  if (data[nextStart + URL_PREFIX.length] == '"') {
+				nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
+			  } else if (data[nextStart + URL_PREFIX.length] == '\'') {
+				nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
+			  } else {
+				nextEnd = data.indexOf(URL_SUFFIX, nextStart);
 			  }
 			}
 
@@ -6192,7 +6251,7 @@ var CleanCss = (function(){
 	
 	//#region URL: /utils/split
 	modules['/utils/split'] = function () {
-		function split(value, separator, includeSeparator, openLevel, closeLevel) {
+		function split(value, separator, includeSeparator, openLevel, closeLevel, firstOnly) {
 		  var withRegex = typeof separator != 'string';
 		  var hasSeparator = withRegex ?
 			separator.test(value) :
@@ -6204,7 +6263,7 @@ var CleanCss = (function(){
 		  openLevel = openLevel || '(';
 		  closeLevel = closeLevel || ')';
 
-		  if (value.indexOf(openLevel) == -1 && !includeSeparator)
+		  if (value.indexOf(openLevel) == -1 && !includeSeparator && !firstOnly)
 			return value.split(separator);
 
 		  var level = 0;
@@ -6223,6 +6282,10 @@ var CleanCss = (function(){
 			if (level === 0 && cursor > 0 && cursor + 1 < len && (withRegex ? separator.test(value[cursor]) : value[cursor] == separator)) {
 			  tokens.push(value.substring(lastStart, cursor + (includeSeparator ? 1 : 0)));
 			  lastStart = cursor + 1;
+
+			  if (firstOnly && tokens.length == 1) {
+				break;
+			  }
 			}
 
 			cursor++;
@@ -6466,11 +6529,11 @@ var CleanCss = (function(){
 		  simpleOptimize(tokens, options);
 
 		  if (options.advanced)
-			advancedOptimize(tokens, options, context.validator, true);
+			advancedOptimize(tokens, options, context, true);
 
 		  return stringify(tokens, options, restoreEscapes/*, context.inputSourceMapTracker*/);
 		}
-		
+
 		return CleanCSS;
 	};
 	//#endregion
