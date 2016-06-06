@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.16
+ * Clean-css v3.4.17
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -5638,7 +5638,7 @@ var CleanCss = (function(){
 		var URL_SUFFIX = ')';
 
 		var DATA_URI_PREFIX_PATTERN = /^\s*['"]?\s*data:/;
-		var DATA_URI_TRAILER_PATTERN = /[\s\};,\/]/;
+		var DATA_URI_TRAILER_PATTERN = /[\s\};,\/!]/;
 
 		var IMPORT_URL_PREFIX = '@import';
 		var UPPERCASE_IMPORT_URL_PREFIX = '@IMPORT';
