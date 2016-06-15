@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.17
+ * Clean-css v3.4.18
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -5636,6 +5636,8 @@ var CleanCss = (function(){
 		var URL_PREFIX = 'url(';
 		var UPPERCASE_URL_PREFIX = 'URL(';
 		var URL_SUFFIX = ')';
+		var SINGLE_QUOTE_URL_SUFFIX = '\')';
+		var DOUBLE_QUOTE_URL_SUFFIX = '")';
 
 		var DATA_URI_PREFIX_PATTERN = /^\s*['"]?\s*data:/;
 		var DATA_URI_TRAILER_PATTERN = /[\s\};,\/!]/;
@@ -5664,21 +5666,21 @@ var CleanCss = (function(){
 			if (nextStart == -1 && nextStartUpperCase > -1)
 			  nextStart = nextStartUpperCase;
 
-			isDataURI = DATA_URI_PREFIX_PATTERN.test(data.substring(nextStart + URL_PREFIX.length));
-
-			if (isDataURI) {
-			  firstMatch = split(data.substring(nextStart), DATA_URI_TRAILER_PATTERN, false, '(', ')', true).pop();
-
-			  if (firstMatch && firstMatch[firstMatch.length - 1] == URL_SUFFIX) {
-				nextEnd = nextStart + firstMatch.length - URL_SUFFIX.length;
-			  } else {
-				nextEnd = -1;
-			  }
+			if (data[nextStart + URL_PREFIX.length] == '"') {
+			  nextEnd = data.indexOf(DOUBLE_QUOTE_URL_SUFFIX, nextStart);
+			} else if (data[nextStart + URL_PREFIX.length] == '\'') {
+			  nextEnd = data.indexOf(SINGLE_QUOTE_URL_SUFFIX, nextStart);
 			} else {
-			  if (data[nextStart + URL_PREFIX.length] == '"') {
-				nextEnd = data.indexOf('"', nextStart + URL_PREFIX.length + 1);
-			  } else if (data[nextStart + URL_PREFIX.length] == '\'') {
-				nextEnd = data.indexOf('\'', nextStart + URL_PREFIX.length + 1);
+			  isDataURI = DATA_URI_PREFIX_PATTERN.test(data.substring(nextStart + URL_PREFIX.length));
+
+			  if (isDataURI) {
+				firstMatch = split(data.substring(nextStart), DATA_URI_TRAILER_PATTERN, false, '(', ')', true).pop();
+
+				if (firstMatch && firstMatch[firstMatch.length - 1] == URL_SUFFIX) {
+				  nextEnd = nextStart + firstMatch.length - URL_SUFFIX.length;
+				} else {
+				  nextEnd = -1;
+				}
 			  } else {
 				nextEnd = data.indexOf(URL_SUFFIX, nextStart);
 			  }
