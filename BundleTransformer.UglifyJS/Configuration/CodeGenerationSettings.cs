@@ -163,5 +163,16 @@
 			get { return (QuoteStyle)this["quoteStyle"]; }
 			set { this["quoteStyle"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to prevent stripping quotes
+		/// from property names in object literals
+		/// </summary>
+		[ConfigurationProperty("keepQuotedProperties", DefaultValue = false)]
+		public bool KeepQuotedProperties
+		{
+			get { return (bool)this["keepQuotedProperties"]; }
+			set { this["keepQuotedProperties"] = value; }
+		}
 	}
 }

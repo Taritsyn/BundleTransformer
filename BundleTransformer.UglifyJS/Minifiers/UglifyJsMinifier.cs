@@ -155,7 +155,8 @@
 				PureGetters = compressionConfig.PureGetters,
 				PureFunctions = compressionConfig.PureFunctions,
 				DropConsole = compressionConfig.DropConsole,
-				Angular = compressionConfig.Angular
+				Angular = compressionConfig.Angular,
+				Passes = compressionConfig.Passes
 			};
 
 			ManglingOptions = new ManglingOptions
@@ -163,7 +164,6 @@
 				Mangle = manglingConfig.Mangle,
 				Except = manglingConfig.Except,
 				Eval = manglingConfig.Eval,
-				Sort = manglingConfig.Sort,
 				TopLevel = manglingConfig.TopLevel,
 			};
 
@@ -183,7 +183,8 @@
 				Comments = codeGenerationConfig.Comments,
 				PreserveLine = codeGenerationConfig.PreserveLine,
 				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps,
-				QuoteStyle = codeGenerationConfig.QuoteStyle
+				QuoteStyle = codeGenerationConfig.QuoteStyle,
+				KeepQuotedProperties = codeGenerationConfig.KeepQuotedProperties
 			};
 
 			ScrewIe8 = jsMinifierConfig.ScrewIe8;

@@ -41,17 +41,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to assign shorter names to most
-		/// frequently used variables
-		/// </summary>
-		[ConfigurationProperty("sort", DefaultValue = false)]
-		public bool Sort
-		{
-			get { return (bool)this["sort"]; }
-			set { this["sort"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to mangle names declared in the toplevel scope
 		/// </summary>
 		[ConfigurationProperty("topLevel", DefaultValue = false)]

@@ -1783,6 +1783,17 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to enable support of `@ngInject` annotations</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="passes" use="optional" default="1">
+			<xs:annotation>
+				<xs:documentation>Number of times to run compress</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="1" />
+					<xs:maxInclusive value="2147483647" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="UglifyManglingSettings_SchemaType">
@@ -1802,11 +1813,6 @@ to preserve references to external symbols.</xs:documentation>
 		<xs:attribute name="eval" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to mangle names visible in scopes where eval or when are used</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="sort" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to assign shorter names to most frequently used variables</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="topLevel" type="Boolean_SchemaType" use="optional" default="false">
@@ -1922,6 +1928,11 @@ to preserve references to external symbols.</xs:documentation>
 					</xs:enumeration>
 				</xs:restriction>
 			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="keepQuotedProperties" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to prevent stripping quotes from property names in object literals</xs:documentation>
+			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /UglifyJs settings -->

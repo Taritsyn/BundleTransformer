@@ -147,6 +147,16 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to prevent stripping quotes
+		/// from property names in object literals
+		/// </summary>
+		public bool KeepQuotedProperties
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the options of code generation
@@ -168,6 +178,7 @@
 			PreserveLine = false;
 			UnescapeRegexps = false;
 			QuoteStyle = QuoteStyle.Auto;
+			KeepQuotedProperties = false;
 		}
 	}
 }

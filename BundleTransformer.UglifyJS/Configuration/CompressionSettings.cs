@@ -265,5 +265,16 @@
 			get { return (bool)this["angular"]; }
 			set { this["angular"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a number of times to run compress
+		/// </summary>
+		[ConfigurationProperty("passes", DefaultValue = 1)]
+		[IntegerValidator(MinValue = 1, MaxValue = int.MaxValue, ExcludeRange = false)]
+		public int Passes
+		{
+			get { return (int)this["passes"]; }
+			set { this["passes"] = value; }
+		}
 	}
 }

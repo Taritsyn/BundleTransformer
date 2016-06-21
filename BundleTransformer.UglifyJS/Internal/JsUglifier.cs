@@ -224,7 +224,8 @@
 					new JProperty("pure_getters", compressionOptions.PureGetters),
 					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions)),
 					new JProperty("drop_console", compressionOptions.DropConsole),
-					new JProperty("angular", compressionOptions.Angular)
+					new JProperty("angular", compressionOptions.Angular),
+					new JProperty("passes", compressionOptions.Passes)
 				));
 			}
 			else
@@ -238,7 +239,6 @@
 				optionsJson.Add("mangle", new JObject(
 					new JProperty("except", ParseExcept(manglingOptions.Except)),
 					new JProperty("eval", manglingOptions.Eval),
-					new JProperty("sort", manglingOptions.Sort),
 					new JProperty("toplevel", manglingOptions.TopLevel),
 					new JProperty("screw_ie8", options.ScrewIe8),
 					new JProperty("keep_fnames", options.KeepFunctionNames)
@@ -265,7 +265,8 @@
 				new JProperty("preserve_line", codeGenerationOptions.PreserveLine),
 				new JProperty("screw_ie8", options.ScrewIe8),
 				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps),
-				new JProperty("quote_style", codeGenerationOptions.QuoteStyle)
+				new JProperty("quote_style", codeGenerationOptions.QuoteStyle),
+				new JProperty("keep_quoted_props", codeGenerationOptions.KeepQuotedProperties)
 			));
 
 			return optionsJson;

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: IntelliSense v1.9.108
+          README file for Bundle Transformer: IntelliSense v1.9.113
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of CSSO CSS-minifier.
+   Updated definitions for configuration settings of Uglify JS-minifier.
 
    =============
    DOCUMENTATION

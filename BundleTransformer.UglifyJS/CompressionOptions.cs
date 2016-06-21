@@ -240,6 +240,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a number of times to run compress
+		/// </summary>
+		public int Passes
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the compression options
@@ -270,6 +279,7 @@
 			PureFunctions = string.Empty;
 			DropConsole = false;
 			Angular = false;
+			Passes = 1;
 		}
 	}
 }

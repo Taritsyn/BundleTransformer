@@ -36,16 +36,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to assign shorter names to most
-		/// frequently used variables
-		/// </summary>
-		public bool Sort
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to mangle names declared in the toplevel scope
 		/// </summary>
 		public bool TopLevel
@@ -63,7 +53,6 @@
 			Mangle = true;
 			Except = string.Empty;
 			Eval = false;
-			Sort = false;
 			TopLevel = false;
 		}
 	}
