@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v2.1.1
+* CSSO (CSS Optimizer) v2.2.0
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -29,22 +29,23 @@ var CSSO = (function(){
 			return result;
 		}
 		;
-		
+
 	//#region URL: /compressor
 	modules['/compressor'] = function () {
 		var List = require('/utils/list');
+		var clone = require('/utils/clone');
 		var usageUtils = require('/compressor/usage');
 		var clean = require('/compressor/clean');
 		var compress = require('/compressor/compress');
 		var restructureBlock = require('/compressor/restructure');
 		var walkRules = require('/utils/walk').rules;
 
-		function readBlock(stylesheet, specialComments) {
+		function readRulesChunk(rules, specialComments) {
 			var buffer = new List();
 			var nonSpaceTokenInBuffer = false;
 			var protectedComment;
 
-			stylesheet.rules.nextUntil(stylesheet.rules.head, function(node, item, list) {
+			rules.nextUntil(rules.head, function(node, item, list) {
 				if (node.type === 'Comment') {
 					if (!specialComments || node.value.charAt(0) !== '!') {
 						list.remove(item);
@@ -71,18 +72,19 @@ var CSSO = (function(){
 				comment: protectedComment,
 				stylesheet: {
 					type: 'StyleSheet',
+					info: null,
 					rules: buffer
 				}
 			};
 		}
 
-		function compressBlock(ast, usageData, num/*, logger*/) {
+		function compressChunk(ast, firstAtrulesAllowed, usageData, num/*, logger*/) {
 //			logger('Compress block #' + num, null, true);
 
 			var seed = 1;
-			ast.firstAtrulesAllowed = ast.firstAtrulesAllowed;
-			walkRules(ast, function() {
-				if (!this.stylesheet.id) {
+			walkRules(ast, function markStylesheets() {
+				if ('id' in this.stylesheet === false) {
+					this.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
 					this.stylesheet.id = seed++;
 				}
 			});
@@ -117,41 +119,47 @@ var CSSO = (function(){
 				   true;
 		}
 
+		function wrapBlock(block) {
+			return new List([{
+				type: 'Ruleset',
+				selector: {
+					type: 'Selector',
+					selectors: new List([{
+						type: 'SimpleSelector',
+						sequence: new List([{
+							type: 'Identifier',
+							name: 'x'
+						}])
+					}])
+				},
+				block: block
+			}]);
+		}
+
 		var exports = function compress(ast, options) {
+			ast = ast || { type: 'StyleSheet', info: null, rules: new List() };
 			options = options || {};
-			ast = ast || { type: 'StyleSheet', rules: new List() };
 
 //			var logger = typeof options.logger === 'function' ? options.logger : Function();
 			var specialComments = getCommentsOption(options);
 			var restructuring = getRestructureOption(options);
-			var result = new List();
-			var block;
 			var firstAtrulesAllowed = true;
-			var blockNum = 1;
-			var blockRules;
-			var blockMode = false;
 			var usageData = false;
-			var info = ast.info || null;
+			var inputRules;
+			var outputRules = new List();
+			var chunk;
+			var chunkNum = 1;
+			var chunkRules;
 
-			if (ast.type !== 'StyleSheet') {
-				blockMode = true;
-				ast = {
-					type: 'StyleSheet',
-					rules: new List([{
-						type: 'Ruleset',
-						selector: {
-							type: 'Selector',
-							selectors: new List([{
-								type: 'SimpleSelector',
-								sequence: new List([{
-									type: 'Identifier',
-									name: 'x'
-								}])
-							}])
-						},
-						block: ast
-					}])
-				};
+			if (options.clone) {
+				ast = clone(ast);
+			}
+
+			if (ast.type === 'StyleSheet') {
+				inputRules = ast.rules;
+				ast.rules = outputRules;
+			} else {
+				inputRules = wrapBlock(ast);
 			}
 
 			if (options.usage) {
@@ -159,39 +167,39 @@ var CSSO = (function(){
 			}
 
 			do {
-				block = readBlock(ast, Boolean(specialComments));
-				block.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
-				block.stylesheet = compressBlock(block.stylesheet, usageData, blockNum++/*, logger*/);
+				chunk = readRulesChunk(inputRules, Boolean(specialComments));
+
+				compressChunk(chunk.stylesheet, firstAtrulesAllowed, usageData, chunkNum++/*, logger*/);
 
 				// structure optimisations
 				if (restructuring) {
-					restructureBlock(block.stylesheet, usageData/*, logger*/);
+					restructureBlock(chunk.stylesheet, usageData/*, logger*/);
 				}
 
-				blockRules = block.stylesheet.rules;
+				chunkRules = chunk.stylesheet.rules;
 
-				if (block.comment) {
-					// add \n before comment if there is another content in result
-					if (!result.isEmpty()) {
-						result.insert(List.createItem({
+				if (chunk.comment) {
+					// add \n before comment if there is another content in outputRules
+					if (!outputRules.isEmpty()) {
+						outputRules.insert(List.createItem({
 							type: 'Raw',
 							value: '\n'
 						}));
 					}
 
-					result.insert(List.createItem(block.comment));
+					outputRules.insert(List.createItem(chunk.comment));
 
-					// add \n after comment if block is not empty
-					if (!blockRules.isEmpty()) {
-						result.insert(List.createItem({
+					// add \n after comment if chunk is not empty
+					if (!chunkRules.isEmpty()) {
+						outputRules.insert(List.createItem({
 							type: 'Raw',
 							value: '\n'
 						}));
 					}
 				}
 
-				if (firstAtrulesAllowed && !blockRules.isEmpty()) {
-					var lastRule = blockRules.last();
+				if (firstAtrulesAllowed && !chunkRules.isEmpty()) {
+					var lastRule = chunkRules.last();
 
 					if (lastRule.type !== 'Atrule' ||
 					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
@@ -203,25 +211,11 @@ var CSSO = (function(){
 					specialComments = false;
 				}
 
-				result.appendList(blockRules);
-			} while (!ast.rules.isEmpty());
-
-			if (blockMode) {
-				result = !result.isEmpty() ? result.first().block : {
-					type: 'Block',
-					info: info,
-					declarations: new List()
-				};
-			} else {
-				result = {
-					type: 'StyleSheet',
-					info: info,
-					rules: result
-				};
-			}
+				outputRules.appendList(chunkRules);
+			} while (!inputRules.isEmpty());
 
 			return {
-				ast: result
+				ast: ast
 			};
 		};
 
@@ -1668,6 +1662,10 @@ var CSSO = (function(){
 					case 'Percentage':
 						break;
 
+					case 'Function':
+						special = child.name;
+						break;
+
 					case 'Space':
 						return false; // ignore space
 
@@ -2348,15 +2346,13 @@ var CSSO = (function(){
 			);
 		}
 
-		function inList(selector) {
-			return selector.compareMarker in this;
-		}
-
 		function processRuleset(node, item, list) {
 			var avoidRulesMerge = this.stylesheet.avoidRulesMerge;
 			var selectors = node.selector.selectors;
 			var block = node.block;
-			var skippedCompareMarkers = Object.create(null);
+			var disallowDownMarkers = Object.create(null);
+			var allowMergeUp = true;
+			var allowMergeDown = true;
 
 			list.prevUntil(item.prev, function(prev, prevItem) {
 				// skip non-ruleset node if safe
@@ -2371,13 +2367,17 @@ var CSSO = (function(){
 					return true;
 				}
 
+				allowMergeDown = !prevSelectors.some(function(selector) {
+					return selector.compareMarker in disallowDownMarkers;
+				});
+
 				// try prev ruleset if simpleselectors has no equal specifity and element selector
-				if (prevSelectors.some(inList, skippedCompareMarkers)) {
+				if (!allowMergeDown && !allowMergeUp) {
 					return true;
 				}
 
 				// try to join by selectors
-				if (utils.isEqualLists(prevSelectors, selectors)) {
+				if (allowMergeUp && utils.isEqualLists(prevSelectors, selectors)) {
 					prevBlock.declarations.appendList(block.declarations);
 					list.remove(item);
 					return true;
@@ -2391,8 +2391,11 @@ var CSSO = (function(){
 				if (diff.eq.length) {
 					if (!diff.ne1.length && !diff.ne2.length) {
 						// equal blocks
-						utils.addSelectors(selectors, prevSelectors);
-						list.remove(prevItem);
+						if (allowMergeDown) {
+							utils.addSelectors(selectors, prevSelectors);
+							list.remove(prevItem);
+						}
+
 						return true;
 					} else if (!avoidRulesMerge) { /* probably we don't need to prevent those merges for @keyframes
 													  TODO: need to be checked */
@@ -2402,7 +2405,7 @@ var CSSO = (function(){
 							var selectorLength = calcSelectorLength(selectors);
 							var blockLength = calcDeclarationsLength(diff.eq); // declarations length
 
-							if (selectorLength < blockLength) {
+							if (allowMergeUp && selectorLength < blockLength) {
 								utils.addSelectors(prevSelectors, selectors);
 								block.declarations = new List(diff.ne1);
 							}
@@ -2411,7 +2414,7 @@ var CSSO = (function(){
 							var selectorLength = calcSelectorLength(prevSelectors);
 							var blockLength = calcDeclarationsLength(diff.eq); // declarations length
 
-							if (selectorLength < blockLength) {
+							if (allowMergeDown && selectorLength < blockLength) {
 								utils.addSelectors(selectors, prevSelectors);
 								prevBlock.declarations = new List(diff.ne2);
 							}
@@ -2428,7 +2431,7 @@ var CSSO = (function(){
 
 							// create new ruleset if declarations length greater than
 							// ruleset description overhead
-							if (blockLength >= newBlockLength) {
+							if (allowMergeDown && blockLength >= newBlockLength) {
 								var newRuleset = {
 									type: 'Ruleset',
 									info: {},
@@ -2450,8 +2453,18 @@ var CSSO = (function(){
 					}
 				}
 
+				if (allowMergeUp) {
+					// TODO: disallow up merge only if any property interception only (i.e. diff.ne2overrided.length > 0);
+					// await property families to find property interception correctly
+					allowMergeUp = !prevSelectors.some(function(prevSelector) {
+						return selectors.some(function(selector) {
+							return selector.compareMarker === prevSelector.compareMarker;
+						});
+					});
+				}
+
 				prevSelectors.each(function(data) {
-					skippedCompareMarkers[data.compareMarker] = true;
+					disallowDownMarkers[data.compareMarker] = true;
 				});
 			});
 		};
@@ -2628,6 +2641,13 @@ var CSSO = (function(){
 
 						case 'Identifier':
 							tagName = node.name;
+							break;
+
+						case 'Attribute':
+							if (node.flags) {
+								pseudos['[' + node.flags + ']'] = true;
+								hasPseudo = true;
+							}
 							break;
 
 						case 'Combinator':
@@ -3692,17 +3712,20 @@ var CSSO = (function(){
 			readSC();
 
 			if (scanner.token !== null && scanner.token.type !== TokenType.RightSquareBracket) {
-				node.operator = readAttrselector();
+				// avoid case `[name i]`
+				if (scanner.token.type !== TokenType.Identifier) {
+					node.operator = readAttrselector();
 
-				readSC();
+					readSC();
 
-				if (scanner.token !== null && scanner.token.type === TokenType.String) {
-					node.value = getString();
-				} else {
-					node.value = getIdentifier(false);
+					if (scanner.token !== null && scanner.token.type === TokenType.String) {
+						node.value = getString();
+					} else {
+						node.value = getIdentifier(false);
+					}
+
+					readSC();
 				}
-
-				readSC();
 
 				// attribute flags
 				if (scanner.token !== null && scanner.token.type === TokenType.Identifier) {
@@ -4871,8 +4894,7 @@ var CSSO = (function(){
 		var WHITESPACE = 1;
 		var PUNCTUATOR = 2;
 		var DIGIT = 3;
-		var STRING_SQ = 4;
-		var STRING_DQ = 5;
+		var STRING = 4;
 
 		var PUNCTUATION = {
 			9:  TokenType.Tab,                // '\t'
@@ -4933,8 +4955,8 @@ var CSSO = (function(){
 		SYMBOL_CATEGORY[R] = WHITESPACE;
 		SYMBOL_CATEGORY[F] = WHITESPACE;
 
-		SYMBOL_CATEGORY[QUOTE] = STRING_SQ;
-		SYMBOL_CATEGORY[DOUBLE_QUOTE] = STRING_DQ;
+		SYMBOL_CATEGORY[QUOTE] = STRING;
+		SYMBOL_CATEGORY[DOUBLE_QUOTE] = STRING;
 
 		//
 		// scanner
@@ -4975,17 +4997,18 @@ var CSSO = (function(){
 				return token !== null && token.type === type;
 			},
 			next: function() {
-				this.prevToken = this.token;
+				var newToken = null;
 
 				if (this.buffer.length !== 0) {
-					this.token = this.buffer.shift();
+					newToken = this.buffer.shift();
 				} else if (!this.eof) {
-					this.token = this.getToken();
-				} else {
-					this.token = null;
+					newToken = this.getToken();
 				}
 
-				return this.token;
+				this.prevToken = this.token;
+				this.token = newToken;
+
+				return newToken;
 			},
 
 			tokenize: function() {
@@ -5013,8 +5036,7 @@ var CSSO = (function(){
 						value = this.readDecimalNumber();
 						break;
 
-					case STRING_SQ:
-					case STRING_DQ:
+					case STRING:
 						type = TokenType.String;
 						value = this.readString(code);
 						break;
@@ -5026,7 +5048,7 @@ var CSSO = (function(){
 
 					case PUNCTUATOR:
 						if (code === SLASH) {
-							next = this.source.charCodeAt(this.pos + 1);
+							next = this.pos + 1 < this.source.length ? this.source.charCodeAt(this.pos + 1) : 0;
 
 							if (next === STAR) { // /*
 								type = TokenType.Comment;
@@ -5225,7 +5247,41 @@ var CSSO = (function(){
 			}
 		};
 
+		// warm up tokenizer to elimitate code branches that never execute
+		// fix soft deoptimizations (insufficient type feedback)
+		new Scanner('\n\r\r\n\f//""\'\'/**/1a;.{url(a)}').lookup(1e3);
+
 		return Scanner;
+	};
+	//#endregion
+
+	//#region URL: /utils/clone
+	modules['/utils/clone'] = function () {
+		var List = require('/utils/list');
+
+		var exports = function clone(node) {
+			var result = {};
+
+			for (var key in node) {
+				var value = node[key];
+
+				if (value) {
+					if (Array.isArray(value)) {
+						value = value.slice(0);
+					} else if (value instanceof List) {
+						value = new List(value.map(clone));
+					} else if (value.constructor === Object) {
+						value = clone(value);
+					}
+				}
+
+				result[key] = value;
+			}
+
+			return result;
+		};
+
+		return exports;
 	};
 	//#endregion
 
@@ -5783,6 +5839,7 @@ var CSSO = (function(){
 
 				case 'Attribute':
 					var result = translate(node.name);
+					var flagsPrefix = ' ';
 
 					if (node.operator !== null) {
 						result += node.operator;
@@ -5790,10 +5847,15 @@ var CSSO = (function(){
 						if (node.value !== null) {
 							result += translate(node.value);
 
-							if (node.flags !== null) {
-								result += (node.value.type !== 'String' ? ' ' : '') + node.flags;
+							// space between string and flags is not required
+							if (node.value.type === 'String') {
+								flagsPrefix = '';
 							}
 						}
+					}
+
+					if (node.flags !== null) {
+						result += flagsPrefix + node.flags;
 					}
 
 					return '[' + result + ']';
@@ -6083,6 +6145,7 @@ var CSSO = (function(){
 		var translate = require('/utils/translate');
 //		var translateWithSourceMap = require('/utils/translateWithSourceMap');
 		var walkers = require('/utils/walk');
+		var clone = require('/utils/clone');
 		var List = require('/utils/list');
 
 		function debugOutput(name, options, startTime, data) {
@@ -6186,7 +6249,7 @@ var CSSO = (function(){
 		}
 
 		var exports = {
-			version: '2.1.0',
+			version: '2.2.0',
 
 			// classes
 			List: List,
@@ -6204,7 +6267,10 @@ var CSSO = (function(){
 			// walkers
 			walk: walkers.all,
 			walkRules: walkers.rules,
-			walkRulesRight: walkers.rulesRight
+			walkRulesRight: walkers.rulesRight,
+
+			// utils
+			clone: clone
 		};
 
 		return exports;

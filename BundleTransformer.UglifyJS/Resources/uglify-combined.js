@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.6.3
+ * UglifyJS v2.6.4
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -3939,7 +3939,7 @@
 
 		AST_Node.DEFMETHOD("print", function(stream, force_parens){
 			var self = this, generator = self._codegen, prev_use_asm = use_asm;
-			if (self instanceof AST_Directive && self.value == "use asm") {
+			if (self instanceof AST_Directive && self.value == "use asm" && stream.parent() instanceof AST_Scope) {
 				use_asm = true;
 			}
 			function doit() {
@@ -3954,7 +3954,7 @@
 				doit();
 			}
 			stream.pop_node();
-			if (self instanceof AST_Lambda) {
+			if (self instanceof AST_Scope) {
 				use_asm = prev_use_asm;
 			}
 		});
@@ -4756,7 +4756,7 @@
 			output.print_string(self.getValue(), self.quote, in_directive);
 		});
 		DEFPRINT(AST_Number, function(self, output){
-			if (use_asm && self.start.raw != null) {
+			if (use_asm && self.start && self.start.raw != null) {
 				output.print(self.start.raw);
 			} else {
 				output.print(make_num(self.getValue()));
@@ -5968,31 +5968,37 @@
 				throw def;
 			});
 			def(AST_Binary, function(c){
-				var left = this.left, right = this.right;
+				var left = this.left, right = this.right, result;
 				switch (this.operator) {
-				  case "&&"         : return ev(left, c) &&         ev(right, c);
-				  case "||"         : return ev(left, c) ||         ev(right, c);
-				  case "|"          : return ev(left, c) |          ev(right, c);
-				  case "&"          : return ev(left, c) &          ev(right, c);
-				  case "^"          : return ev(left, c) ^          ev(right, c);
-				  case "+"          : return ev(left, c) +          ev(right, c);
-				  case "*"          : return ev(left, c) *          ev(right, c);
-				  case "/"          : return ev(left, c) /          ev(right, c);
-				  case "%"          : return ev(left, c) %          ev(right, c);
-				  case "-"          : return ev(left, c) -          ev(right, c);
-				  case "<<"         : return ev(left, c) <<         ev(right, c);
-				  case ">>"         : return ev(left, c) >>         ev(right, c);
-				  case ">>>"        : return ev(left, c) >>>        ev(right, c);
-				  case "=="         : return ev(left, c) ==         ev(right, c);
-				  case "==="        : return ev(left, c) ===        ev(right, c);
-				  case "!="         : return ev(left, c) !=         ev(right, c);
-				  case "!=="        : return ev(left, c) !==        ev(right, c);
-				  case "<"          : return ev(left, c) <          ev(right, c);
-				  case "<="         : return ev(left, c) <=         ev(right, c);
-				  case ">"          : return ev(left, c) >          ev(right, c);
-				  case ">="         : return ev(left, c) >=         ev(right, c);
+				  case "&&"  : result = ev(left, c) &&  ev(right, c); break;
+				  case "||"  : result = ev(left, c) ||  ev(right, c); break;
+				  case "|"   : result = ev(left, c) |   ev(right, c); break;
+				  case "&"   : result = ev(left, c) &   ev(right, c); break;
+				  case "^"   : result = ev(left, c) ^   ev(right, c); break;
+				  case "+"   : result = ev(left, c) +   ev(right, c); break;
+				  case "*"   : result = ev(left, c) *   ev(right, c); break;
+				  case "/"   : result = ev(left, c) /   ev(right, c); break;
+				  case "%"   : result = ev(left, c) %   ev(right, c); break;
+				  case "-"   : result = ev(left, c) -   ev(right, c); break;
+				  case "<<"  : result = ev(left, c) <<  ev(right, c); break;
+				  case ">>"  : result = ev(left, c) >>  ev(right, c); break;
+				  case ">>>" : result = ev(left, c) >>> ev(right, c); break;
+				  case "=="  : result = ev(left, c) ==  ev(right, c); break;
+				  case "===" : result = ev(left, c) === ev(right, c); break;
+				  case "!="  : result = ev(left, c) !=  ev(right, c); break;
+				  case "!==" : result = ev(left, c) !== ev(right, c); break;
+				  case "<"   : result = ev(left, c) <   ev(right, c); break;
+				  case "<="  : result = ev(left, c) <=  ev(right, c); break;
+				  case ">"   : result = ev(left, c) >   ev(right, c); break;
+				  case ">="  : result = ev(left, c) >=  ev(right, c); break;
+				  default:
+					  throw def;
 				}
-				throw def;
+				if (isNaN(result) && c.find_parent(AST_With)) {
+					// leave original expression as is
+					throw def;
+				}
+				return result;
 			});
 			def(AST_Conditional, function(compressor){
 				return ev(this.condition, compressor)
@@ -7511,13 +7517,16 @@
 				if (defines && HOP(defines, self.name)) {
 					return make_node_from_constant(compressor, defines[self.name], self);
 				}
-				switch (self.name) {
-				  case "undefined":
-					return make_node(AST_Undefined, self);
-				  case "NaN":
-					return make_node(AST_NaN, self).transform(compressor);
-				  case "Infinity":
-					return make_node(AST_Infinity, self).transform(compressor);
+				// testing against !self.scope.uses_with first is an optimization
+				if (!self.scope.uses_with || !compressor.find_parent(AST_With)) {
+					switch (self.name) {
+					  case "undefined":
+						return make_node(AST_Undefined, self);
+					  case "NaN":
+						return make_node(AST_NaN, self).transform(compressor);
+					  case "Infinity":
+						return make_node(AST_Infinity, self).transform(compressor);
+					}
 				}
 			}
 			return self;
@@ -7649,7 +7658,7 @@
 			if (consequent.is_constant(compressor)
 				&& alternative.is_constant(compressor)
 				&& consequent.equivalent_to(alternative)) {
-				var consequent_value = consequent.constant_value();
+				var consequent_value = consequent.constant_value(compressor);
 				if (self.condition.has_side_effects(compressor)) {
 					return AST_Seq.from_array([self.condition, make_node_from_constant(compressor, consequent_value, self)]);
 				} else {
@@ -8324,7 +8333,7 @@
 	exports["is_identifier"] = is_identifier;
 	exports["SymbolDef"] = SymbolDef;
 
-//	if (DEBUG) {
+//	if (typeof DEBUG !== "undefined" && DEBUG) {
 //		exports["EXPECT_DIRECTIVE"] = EXPECT_DIRECTIVE;
 //	}
 	//#endregion
