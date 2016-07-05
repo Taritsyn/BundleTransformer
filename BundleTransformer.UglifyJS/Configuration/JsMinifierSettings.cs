@@ -47,7 +47,7 @@
 		/// Gets or sets a flag for whether to disable full compliance with
 		/// Internet Explorer 6-8 quirks
 		/// </summary>
-		[ConfigurationProperty("screwIe8", DefaultValue = false)]
+		[ConfigurationProperty("screwIe8", DefaultValue = true)]
 		public bool ScrewIe8
 		{
 			get { return (bool)this["screwIe8"]; }

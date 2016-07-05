@@ -82,7 +82,7 @@
 			CompressionOptions = new CompressionOptions();
 			ManglingOptions = new ManglingOptions();
 			CodeGenerationOptions = new CodeGenerationOptions();
-			ScrewIe8 = false;
+			ScrewIe8 = true;
 			KeepFunctionNames = false;
 			Severity = 0;
 		}

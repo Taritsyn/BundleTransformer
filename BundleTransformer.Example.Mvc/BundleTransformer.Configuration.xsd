@@ -1618,7 +1618,7 @@ to preserve references to external symbols.</xs:documentation>
 			<xs:element name="mangling" type="UglifyManglingSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 			<xs:element name="codeGeneration" type="UglifyCodeGenerationSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
-		<xs:attribute name="screwIe8" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="screwIe8" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to disable full compliance with Internet Explorer 6-8 quirks</xs:documentation>
 			</xs:annotation>
