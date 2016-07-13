@@ -112,6 +112,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to raise error on <code>this</code> expressions with
+		/// an implied <code>any</code> type
+		/// </summary>
+		[ConfigurationProperty("noImplicitThis", DefaultValue = false)]
+		public bool NoImplicitThis
+		{
+			get { return (bool)this["noImplicitThis"]; }
+			set { this["noImplicitThis"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not include a default library (<code>lib.d.ts</code>
 		/// or <code>lib.es6.d.ts</code>)
 		/// </summary>
@@ -120,6 +131,26 @@
 		{
 			get { return (bool)this["noLib"]; }
 			set { this["noLib"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to report errors on unused locals
+		/// </summary>
+		[ConfigurationProperty("noUnusedLocals", DefaultValue = false)]
+		public bool NoUnusedLocals
+		{
+			get { return (bool)this["noUnusedLocals"]; }
+			set { this["noUnusedLocals"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to report errors on unused parameters
+		/// </summary>
+		[ConfigurationProperty("noUnusedParameters", DefaultValue = false)]
+		public bool NoUnusedParameters
+		{
+			get { return (bool)this["noUnusedParameters"]; }
+			set { this["noUnusedParameters"] = value; }
 		}
 
 		/// <summary>
@@ -150,6 +181,26 @@
 		{
 			get { return (bool)this["skipDefaultLibCheck"]; }
 			set { this["skipDefaultLibCheck"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to skip type checking of declaration files
+		/// </summary>
+		[ConfigurationProperty("skipLibCheck", DefaultValue = false)]
+		public bool SkipLibCheck
+		{
+			get { return (bool)this["skipLibCheck"]; }
+			set { this["skipLibCheck"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable strict null checks
+		/// </summary>
+		[ConfigurationProperty("strictNullChecks", DefaultValue = false)]
+		public bool StrictNullChecks
+		{
+			get { return (bool)this["strictNullChecks"]; }
+			set { this["strictNullChecks"] = value; }
 		}
 
 		/// <summary>

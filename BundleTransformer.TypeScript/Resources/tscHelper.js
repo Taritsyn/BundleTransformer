@@ -8,7 +8,9 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			allowSyntheticDefaultImports: false,
 			allowUnreachableCode: false,
 			allowUnusedLabels: false,
+			baseUrl: '',
 			charset: '',
+			declarationDir: '',
 			disableSizeLimit: false,
 			emitBOM: false,
 			emitDecoratorMetadata: false,
@@ -17,7 +19,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			inlineSourceMap: false,
 			inlineSources: false,
 			mapRoot: '',
-			module: 0 /* None */,
+			module: ts.ModuleKind.None,
 			newLine: 0 /* CrLf */,
 			noEmit: false,
 			noEmitHelpers: false,
@@ -25,8 +27,11 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			noFallthroughCasesInSwitch: false,
 			noImplicitAny: false,
 			noImplicitReturns: false,
+			noImplicitThis: false,
 			noLib: false,
 			noResolve: false,
+			noUnusedLocals: false,
+			noUnusedParameters: false,
 			out: '',
 			outDir: '',
 			preserveConstEnums: false,
@@ -37,6 +42,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			sourceMap: false,
 			sourceRoot: '',
 			skipDefaultLibCheck: false,
+			skipLibCheck: false,
+			strictNullChecks: false,
 			stripInternal: false,
 			suppressExcessPropertyErrors: false,
 			suppressImplicitAnyIndexErrors: false,
@@ -120,6 +127,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			return path.toLowerCase();
 		};
 
+		BtSystem.prototype.getDirectories = null;
+
 		BtSystem.prototype.readDirectory = function() {
 			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'readDirectory'));
 		};
@@ -196,6 +205,10 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 				ts.createSourceFile(fileName, text, languageVersion, false) : undefined;
 		}
 
+		function getDefaultLibLocation() {
+			return "";
+		}
+
 		function getDefaultLibFileName(options) {
 			return ts.getDefaultLibFileName(options);
 		}
@@ -235,12 +248,15 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			return ts.sys.readFile(fileName);
 		}
 
+		function trace() { }
+
 		function directoryExists(directoryName) {
 			return ts.sys.directoryExists(directoryName);
 		}
 
 		return {
 			getSourceFile: getSourceFile,
+			getDefaultLibLocation: getDefaultLibLocation,
 			getDefaultLibFileName: getDefaultLibFileName,
 			writeFile: writeFile,
 			getCurrentDirectory: getCurrentDirectory,
@@ -249,7 +265,10 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			getNewLine: getNewLine,
 			fileExists: fileExists,
 			readFile: readFile,
-			directoryExists: directoryExists
+			trace: trace,
+			directoryExists: directoryExists,
+			getDirectories: null,
+			realpath: null
 		};
 	}
 	//#endregion
@@ -275,7 +294,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		}
 
 		emitErrors = program.emit().diagnostics;
-		errors = ts.concatenate(errors, emitErrors);
+		errors = ts.sortAndDeduplicateDiagnostics(errors.concat(emitErrors));
 
 		return {
 			program: program,

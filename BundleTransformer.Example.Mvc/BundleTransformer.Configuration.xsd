@@ -577,9 +577,24 @@
 				<xs:documentation>Flag for whether to report error when not all code paths in function return a value</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noImplicitThis" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to raise error on `this` expressions with an implied `any` type</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="noUnusedParameters" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to report errors on unused parameters</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noLib" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not include a default library (`lib.d.ts` or `lib.es6.d.ts`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="noUnusedLocals" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to report errors on unused locals</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="preserveConstEnums" type="Boolean_SchemaType" use="optional" default="false">
@@ -595,6 +610,16 @@
 		<xs:attribute name="skipDefaultLibCheck" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to skip a default library checking</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="skipLibCheck" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to skip type checking of declaration files</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="strictNullChecks" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable strict null checks</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="stripInternal" type="Boolean_SchemaType" use="optional" default="false">

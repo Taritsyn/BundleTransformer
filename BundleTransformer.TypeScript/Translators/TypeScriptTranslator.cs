@@ -143,10 +143,38 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to raise error on <code>this</code> expressions with
+		/// an implied <code>any</code> type
+		/// </summary>
+		public bool NoImplicitThis
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not include a default library (<code>lib.d.ts</code>
 		/// or <code>lib.es6.d.ts</code>)
 		/// </summary>
 		public bool NoLib
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to report errors on unused locals
+		/// </summary>
+		public bool NoUnusedLocals
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to report errors on unused parameters
+		/// </summary>
+		public bool NoUnusedParameters
 		{
 			get;
 			set;
@@ -174,6 +202,24 @@
 		/// Gets or sets a flag for whether to skip a default library checking
 		/// </summary>
 		public bool SkipDefaultLibCheck
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to skip type checking of declaration files
+		/// </summary>
+		public bool SkipLibCheck
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable strict null checks
+		/// </summary>
+		public bool StrictNullChecks
 		{
 			get;
 			set;
@@ -250,10 +296,15 @@
 			NoFallthroughCasesInSwitch = tsConfig.NoFallthroughCasesInSwitch;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			NoImplicitReturns = tsConfig.NoImplicitReturns;
+			NoImplicitThis = tsConfig.NoImplicitThis;
 			NoLib = tsConfig.NoLib;
+			NoUnusedLocals = tsConfig.NoUnusedLocals;
+			NoUnusedParameters = tsConfig.NoUnusedParameters;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
 			RemoveComments = tsConfig.RemoveComments;
 			SkipDefaultLibCheck = tsConfig.SkipDefaultLibCheck;
+			SkipLibCheck = tsConfig.SkipLibCheck;
+			StrictNullChecks = tsConfig.StrictNullChecks;
 			StripInternal = tsConfig.StripInternal;
 			SuppressExcessPropertyErrors = tsConfig.SuppressExcessPropertyErrors;
 			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
@@ -388,10 +439,15 @@
 				NoFallthroughCasesInSwitch = NoFallthroughCasesInSwitch,
 				NoImplicitAny = NoImplicitAny,
 				NoImplicitReturns = NoImplicitReturns,
+				NoImplicitThis = NoImplicitThis,
 				NoLib = NoLib,
+				NoUnusedLocals = NoUnusedLocals,
+				NoUnusedParameters = NoUnusedParameters,
 				PreserveConstEnums = PreserveConstEnums,
 				RemoveComments = RemoveComments,
 				SkipDefaultLibCheck = SkipDefaultLibCheck,
+				SkipLibCheck = SkipLibCheck,
+				StrictNullChecks = StrictNullChecks,
 				StripInternal = StripInternal,
 				SuppressExcessPropertyErrors = SuppressExcessPropertyErrors,
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
