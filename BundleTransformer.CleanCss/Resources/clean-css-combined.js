@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.18
+ * Clean-css v3.4.19
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -1721,6 +1721,11 @@ var CleanCss = (function(){
 				// maybe `right` can be pulled into `left` which is a shorthand?
 				if (right.important && !left.important)
 				  continue;
+
+				if (!right.important && left.important) {
+				  right.unused = true;
+				  continue;
+				}
 
 				// Pending more clever algorithm in #527
 				if (moreSameShorthands(properties, i - 1, left.name))

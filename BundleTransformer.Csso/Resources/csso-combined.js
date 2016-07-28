@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v2.2.0
+* CSSO (CSS Optimizer) v2.2.1
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -1658,6 +1658,7 @@ var CSSO = (function(){
 						}
 						break;
 
+					case 'Hash': // color
 					case 'Number':
 					case 'Percentage':
 						break;
@@ -1705,27 +1706,29 @@ var CSSO = (function(){
 				var side = SIDE[name];
 
 				if (side) {
-					if (side in sides) {
-						var values = this.getValueSequence(value, 1);
+					if (side in sides === false) {
+						return false;
+					}
 
-						if (!values || !values.length) {
+					var values = this.getValueSequence(value, 1);
+
+					if (!values || !values.length) {
+						return false;
+					}
+
+					// can mix only if specials are equal
+					for (var key in sides) {
+						if (sides[key] !== null && sides[key].special !== values[0].special) {
 							return false;
 						}
+					}
 
-						// can mix only if specials are equal
-						for (var key in sides) {
-							if (sides[key] !== null && sides[key].special !== values[0].special) {
-								return false;
-							}
-						}
-
-						if (!this.canOverride(side, values[0])) {
-							return true;
-						}
-
-						sides[side] = values[0];
+					if (!this.canOverride(side, values[0])) {
 						return true;
 					}
+
+					sides[side] = values[0];
+					return true;
 				} else if (name === this.name) {
 					var values = this.getValueSequence(value, 4);
 
@@ -1887,7 +1890,12 @@ var CSSO = (function(){
 				if (!shorthand || !shorthand.add(property, declaration.value, declaration.info)) {
 					operation = REPLACE;
 					shorthand = new TRBL(key);
-					shorthand.add(property, declaration.value, declaration.info);
+
+					// if can't parse value ignore it and break shorthand sequence
+					if (!shorthand.add(property, declaration.value, declaration.info)) {
+						lastShortSelector = null;
+						return;
+					}
 				}
 
 				shorts[key] = shorthand;
@@ -1985,6 +1993,14 @@ var CSSO = (function(){
 			'text-align': /^(start|end|match-parent|justify-all)$/i
 		};
 
+		var CURSOR_SAFE_VALUE = [
+			'auto', 'crosshair', 'default', 'move', 'text', 'wait', 'help',
+			'n-resize', 'e-resize', 's-resize', 'w-resize',
+			'ne-resize', 'nw-resize', 'se-resize', 'sw-resize',
+			'pointer', 'progress', 'not-allowed', 'no-drop', 'vertical-text', 'all-scroll',
+			'col-resize', 'row-resize'
+		];
+
 		var NEEDLESS_TABLE = {
 			'border-width': ['border'],
 			'border-style': ['border'],
@@ -2058,9 +2074,14 @@ var CSSO = (function(){
 								hack9 = name;
 							}
 
-							if (DONT_MIX_VALUE.hasOwnProperty(realName) &&
-								DONT_MIX_VALUE[realName].test(name)) {
-								special[name] = true;
+							if (realName === 'cursor') {
+								if (CURSOR_SAFE_VALUE.indexOf(name) === -1) {
+									special[name] = true;
+								}
+							} else if (DONT_MIX_VALUE.hasOwnProperty(realName)) {
+								if (DONT_MIX_VALUE[realName].test(name)) {
+									special[name] = true;
+								}
 							}
 
 							break;
@@ -6249,7 +6270,7 @@ var CSSO = (function(){
 		}
 
 		var exports = {
-			version: '2.2.0',
+			version: '2.2.1',
 
 			// classes
 			List: List,
