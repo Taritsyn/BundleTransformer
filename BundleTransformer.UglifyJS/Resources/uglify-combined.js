@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.7.0
+ * UglifyJS v2.7.1
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -1580,6 +1580,9 @@
 				return is_alphanumeric_char(code);
 			});
 			if (prefix) num = prefix + num;
+			if (RE_OCT_NUMBER.test(num) && next_token.has_directive("use strict")) {
+				parse_error("SyntaxError: Legacy octal literals are not allowed in strict mode");
+			}
 			var valid = parse_js_number(num);
 			if (!isNaN(valid)) {
 				return token("num", valid);
@@ -1623,7 +1626,7 @@
 			// Parse
 			if (ch === "0") return "\0";
 			if (ch.length > 0 && next_token.has_directive("use strict"))
-				parse_error("SyntaxError: Octal literals are not allowed in strict mode");
+				parse_error("SyntaxError: Legacy octal escape sequences are not allowed in strict mode");
 			return String.fromCharCode(parseInt(ch, 8));
 		}
 
@@ -1726,7 +1729,7 @@
 			try {
 			  return token("regexp", new RegExp(regexp, mods));
 			} catch(e) {
-			  parse_error(e.message);
+			  parse_error("SyntaxError: " + e.message);
 			}
 		});
 
@@ -3253,9 +3256,13 @@
 		// a function expression's argument cannot shadow the function expression's name
 
 		var tricky_def = def.orig[0] instanceof AST_SymbolFunarg && this.name && this.name.definition();
+
+		// the function's mangled_name is null when keep_fnames is true
+		var tricky_name = tricky_def ? tricky_def.mangled_name || tricky_def.name : null;
+
 		while (true) {
 			var name = AST_Lambda.prototype.next_mangled.call(this, options, def);
-			if (!(tricky_def && tricky_def.mangled_name == name))
+			if (!tricky_name || tricky_name != name)
 				return name;
 		}
 	});
@@ -4068,7 +4075,7 @@
 		PARENS([ AST_Unary, AST_Undefined ], function(output){
 			var p = output.parent();
 			return p instanceof AST_PropAccess && p.expression === this
-				|| p instanceof AST_New;
+				|| p instanceof AST_Call && p.expression === this;
 		});
 
 		PARENS(AST_Seq, function(output){
@@ -5722,7 +5729,7 @@
 						CHANGED = true;
 					}
 					else if (stat instanceof AST_For
-							 && prev instanceof AST_Definitions
+							 && prev instanceof AST_Var
 							 && (!stat.init || stat.init.TYPE == prev.TYPE)) {
 						CHANGED = true;
 						a.pop();
@@ -8419,6 +8426,7 @@
 			outSourceMap     : null,
 			sourceRoot       : null,
 			inSourceMap      : null,
+			sourceMapUrl     : null,
 			fromString       : true,
 			warnings         : false,
 			mangle           : {},
