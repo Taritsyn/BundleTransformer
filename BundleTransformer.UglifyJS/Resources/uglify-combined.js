@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.7.1
+ * UglifyJS v2.7.2
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -4073,6 +4073,8 @@
 		});
 
 		PARENS([ AST_Unary, AST_Undefined ], function(output){
+			if (this.expression instanceof AST_Call)
+				return false;
 			var p = output.parent();
 			return p instanceof AST_PropAccess && p.expression === this
 				|| p instanceof AST_Call && p.expression === this;
