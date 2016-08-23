@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.7.2
+ * UglifyJS v2.7.3
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -4073,8 +4073,6 @@
 		});
 
 		PARENS([ AST_Unary, AST_Undefined ], function(output){
-			if (this.expression instanceof AST_Call)
-				return false;
 			var p = output.parent();
 			return p instanceof AST_PropAccess && p.expression === this
 				|| p instanceof AST_Call && p.expression === this;
@@ -5752,6 +5750,13 @@
 			};
 
 			function negate_iifes(statements, compressor) {
+				function is_iife_call(node) {
+					if (node instanceof AST_Call) {
+						return node.expression instanceof AST_Function || is_iife_call(node.expression);
+					}
+					return false;
+				}
+
 				statements.forEach(function(stat){
 					if (stat instanceof AST_SimpleStatement) {
 						stat.body = (function transform(thing) {
@@ -5759,7 +5764,7 @@
 								if (node instanceof AST_New) {
 									return node;
 								}
-								if (node instanceof AST_Call && node.expression instanceof AST_Function) {
+								if (is_iife_call(node)) {
 									return make_node(AST_UnaryPrefix, node, {
 										operator: "!",
 										expression: node
