@@ -19,6 +19,8 @@
 		[SetUp]
 		public void Initialize()
 		{
+			JsEngineSwitcherInitializer.Initialize();
+
 			var styleContextMock = new Mock<IAssetContext>();
 			styleContextMock
 				.Setup(s => s.FileExtensionMappings)

@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: Handlebars v1.9.92
+       README file for Bundle Transformer: Handlebars v1.9.122 Alpha 1
 
    ----------------------------------------------------------------------
 
@@ -23,6 +23,11 @@
    working of this module is recommended to install one of the following
    NuGet packages: JavaScriptEngineSwitcher.Msie,
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+
+   =============
+   RELEASE NOTES
+   =============
+   JavaScript Engine Switcher was updated to version 2.0.0 Alpha 1.
 
    ====================
    POST-INSTALL ACTIONS

@@ -437,7 +437,7 @@
 				;
 
 			Func<IJsEngine> createJsEngineInstance =
-				() => JsEngineSwitcher.Current.CreateDefaultJsEngineInstance();
+				() => JsEngineSwitcher.Instance.CreateDefaultEngine();
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			var lessConfig = new LessSettings();
 

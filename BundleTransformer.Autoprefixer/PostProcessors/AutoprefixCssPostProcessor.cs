@@ -167,7 +167,7 @@
 					);
 				}
 
-				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateJsEngineInstance(jsEngineName);
+				createJsEngineInstance = () => JsEngineSwitcher.Instance.CreateEngine(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}

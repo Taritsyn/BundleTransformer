@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-           README file for Bundle Transformer: TypeScript v1.9.116
+       README file for Bundle Transformer: TypeScript v1.9.122 Alpha 1
 
    ----------------------------------------------------------------------
 
@@ -30,12 +30,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of TypeScript version 2.0 Beta;
-   2. In configuration settings of TypeScript-translator was added 5 new
-      properties: `NoImplicitThis` (default `false`), `NoUnusedLocals`
-      (default `false`), `NoUnusedParameters` (default `false`),
-      `SkipLibCheck` (default `false`) and `StrictNullChecks` (default
-      `false`).
+   JavaScript Engine Switcher was updated to version 2.0.0 Alpha 1.
 
    ====================
    POST-INSTALL ACTIONS

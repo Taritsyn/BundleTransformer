@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-              README file for Bundle Transformer: LESS v1.9.107
+          README file for Bundle Transformer: LESS v1.9.122 Alpha 1
 
    ----------------------------------------------------------------------
 
@@ -28,7 +28,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 2.7.1.
+   JavaScript Engine Switcher was updated to version 2.0.0 Alpha 1.
 
    ====================
    POST-INSTALL ACTIONS
