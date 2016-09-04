@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: TypeScript v1.9.122 Alpha 1
+       README file for Bundle Transformer: TypeScript v1.9.122 Alpha 2
 
    ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains translator-adapter
    `TypeScriptTranslator` (supports TypeScript
-   (http://www.typescriptlang.org) version 2.0 Beta). This adapter makes
+   (http://www.typescriptlang.org) version 2.0 RC). This adapter makes
    translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text
    output of translated TypeScript-asset.
@@ -30,7 +30,9 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 2.0.0 Alpha 1.
+   1. Added support of TypeScript version 2.0 RC;
+   2. In configuration settings of TypeScript-translator was added one
+      new property: `NoErrorTruncation` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

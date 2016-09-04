@@ -24,6 +24,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			noEmit: false,
 			noEmitHelpers: false,
 			noEmitOnError: false,
+			noErrorTruncation: false,
 			noFallthroughCasesInSwitch: false,
 			noImplicitAny: false,
 			noImplicitReturns: false,

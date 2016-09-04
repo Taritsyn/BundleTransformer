@@ -81,6 +81,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not truncate type name in error messages
+		/// </summary>
+		[ConfigurationProperty("noErrorTruncation", DefaultValue = false)]
+		public bool NoErrorTruncation
+		{
+			get { return (bool)this["noErrorTruncation"]; }
+			set { this["noErrorTruncation"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors for fallthrough cases in switch statement
 		/// </summary>
 		[ConfigurationProperty("noFallthroughCasesInSwitch", DefaultValue = false)]

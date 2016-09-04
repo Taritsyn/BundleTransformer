@@ -157,6 +157,7 @@
 				new JProperty("noEmit", options.NoEmit),
 				new JProperty("noEmitHelpers", options.NoEmitHelpers),
 				new JProperty("noEmitOnError", options.NoEmitOnError),
+				new JProperty("noErrorTruncation", options.NoErrorTruncation),
 				new JProperty("noFallthroughCasesInSwitch", options.NoFallthroughCasesInSwitch),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
 				new JProperty("noImplicitReturns", options.NoImplicitReturns),

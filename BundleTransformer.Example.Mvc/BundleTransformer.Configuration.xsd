@@ -562,6 +562,11 @@
 				<xs:documentation>Flag for whether to do not emit outputs if any errors were reported</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noErrorTruncation" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not truncate type name in error messages</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noFallthroughCasesInSwitch" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to report errors for fallthrough cases in switch statement</xs:documentation>

@@ -115,6 +115,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not truncate type name in error messages
+		/// </summary>
+		public bool NoErrorTruncation
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors for fallthrough cases in switch statement
 		/// </summary>
 		public bool NoFallthroughCasesInSwitch
@@ -293,6 +302,7 @@
 			NoEmit = tsConfig.NoEmit;
 			NoEmitHelpers = tsConfig.NoEmitHelpers;
 			NoEmitOnError = tsConfig.NoEmitOnError;
+			NoErrorTruncation = tsConfig.NoErrorTruncation;
 			NoFallthroughCasesInSwitch = tsConfig.NoFallthroughCasesInSwitch;
 			NoImplicitAny = tsConfig.NoImplicitAny;
 			NoImplicitReturns = tsConfig.NoImplicitReturns;
@@ -436,6 +446,7 @@
 				NoEmit = NoEmit,
 				NoEmitHelpers = NoEmitHelpers,
 				NoEmitOnError = NoEmitOnError,
+				NoErrorTruncation = NoErrorTruncation,
 				NoFallthroughCasesInSwitch = NoFallthroughCasesInSwitch,
 				NoImplicitAny = NoImplicitAny,
 				NoImplicitReturns = NoImplicitReturns,

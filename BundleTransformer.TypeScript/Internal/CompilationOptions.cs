@@ -70,6 +70,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not truncate type name in error messages
+		/// </summary>
+		public bool NoErrorTruncation
+		{
+			get;
+			set;
+		}
+
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors for fallthrough cases in switch statement
 		/// </summary>
 		public bool NoFallthroughCasesInSwitch
@@ -232,6 +242,7 @@
 			NoEmit = false;
 			NoEmitHelpers = false;
 			NoEmitOnError = false;
+			NoErrorTruncation = false;
 			NoFallthroughCasesInSwitch = false;
 			NoImplicitAny = false;
 			NoImplicitReturns = false;
