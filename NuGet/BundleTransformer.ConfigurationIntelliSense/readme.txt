@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-      README file for Bundle Transformer: IntelliSense v1.9.122 Alpha 2
+      README file for Bundle Transformer: IntelliSense v1.9.122 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -14,11 +14,6 @@
    BundleTransformer.ConfigurationIntelliSense adds IntelliSense support
    when editing the `bundleTransformer` configuration section in the
    Web.config file.
-
-   =============
-   RELEASE NOTES
-   =============
-   Updated definitions for configuration settings of TypeScript-translator.
 
    =============
    DOCUMENTATION

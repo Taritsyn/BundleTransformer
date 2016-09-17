@@ -122,8 +122,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new CoffeeScriptCompilationException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new CoffeeScriptCompilationException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;

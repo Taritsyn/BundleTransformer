@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: Clean-css v1.9.122 Alpha 1
+        README file for Bundle Transformer: Clean-css v1.9.122 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 2.0.0 Alpha 1.
+   JavaScript Engine Switcher was updated to version 2.0.0 Beta 1.
 
    ====================
    POST-INSTALL ACTIONS

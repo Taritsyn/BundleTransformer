@@ -130,7 +130,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new CssCleaningException(JsRuntimeErrorHelpers.Format(e));
+				throw new CssCleaningException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;

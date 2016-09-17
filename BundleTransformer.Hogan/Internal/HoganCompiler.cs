@@ -125,8 +125,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new HoganCompilationException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new HoganCompilationException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;

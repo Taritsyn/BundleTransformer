@@ -138,7 +138,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new CssAutoprefixingException(JsRuntimeErrorHelpers.Format(e));
+				throw new CssAutoprefixingException(JsErrorHelpers.Format(e));
 			}
 
 			return autoprefixingResult;

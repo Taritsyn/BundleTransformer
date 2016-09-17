@@ -95,8 +95,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new JsPackingException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new JsPackingException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;

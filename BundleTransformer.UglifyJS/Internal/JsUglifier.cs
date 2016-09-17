@@ -170,7 +170,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new JsUglificationException(JsRuntimeErrorHelpers.Format(e));
+				throw new JsUglificationException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;

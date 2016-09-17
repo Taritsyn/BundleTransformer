@@ -135,8 +135,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new TypeScriptCompilationException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new TypeScriptCompilationException(JsErrorHelpers.Format(e));
 			}
 
 			return compilationResult;

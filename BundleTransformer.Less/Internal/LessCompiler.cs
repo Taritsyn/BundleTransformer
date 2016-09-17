@@ -183,8 +183,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new LessCompilationException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new LessCompilationException(JsErrorHelpers.Format(e));
 			}
 
 			return compilationResult;

@@ -127,8 +127,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new HandlebarsCompilationException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new HandlebarsCompilationException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;

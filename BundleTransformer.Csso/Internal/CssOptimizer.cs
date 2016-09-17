@@ -119,8 +119,7 @@
 			}
 			catch (JsRuntimeException e)
 			{
-				throw new CssOptimizationException(
-					JsRuntimeErrorHelpers.Format(e));
+				throw new CssOptimizationException(JsErrorHelpers.Format(e));
 			}
 
 			return newContent;
