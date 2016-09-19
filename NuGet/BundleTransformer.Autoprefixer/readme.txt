@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-      README file for Bundle Transformer: Autoprefixer v1.9.122 Beta 1
+          README file for Bundle Transformer: Autoprefixer v1.9.122
 
    ----------------------------------------------------------------------
 
@@ -25,7 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 2.0.0 Beta 1.
+   1. JavaScript Engine Switcher was updated to version 2.0.0;
+   2. Added support of Autoprefixer version 6.4.1.1.
 
    ====================
    POST-INSTALL ACTIONS

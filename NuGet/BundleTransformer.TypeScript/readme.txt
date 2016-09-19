@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-       README file for Bundle Transformer: TypeScript v1.9.122 Beta 1
+           README file for Bundle Transformer: TypeScript v1.9.122
 
    ----------------------------------------------------------------------
 
@@ -30,7 +30,10 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 2.0.0 Beta 1.
+   1. JavaScript Engine Switcher was updated to version 2.0.0;
+   2. Added support of TypeScript version 2.0 RC;
+   3. In configuration settings of TypeScript-translator was added one
+      new property: `NoErrorTruncation` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

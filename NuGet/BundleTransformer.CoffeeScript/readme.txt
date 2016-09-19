@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-      README file for Bundle Transformer: CoffeeScript v1.9.122 Beta 1
+          README file for Bundle Transformer: CoffeeScript v1.9.122
 
    ----------------------------------------------------------------------
 
@@ -27,7 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 2.0.0 Beta 1.
+   JavaScript Engine Switcher was updated to version 2.0.0.
 
    ====================
    POST-INSTALL ACTIONS
