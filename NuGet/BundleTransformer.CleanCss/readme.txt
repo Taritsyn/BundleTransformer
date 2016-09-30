@@ -1,47 +1,47 @@
 
 
-   ----------------------------------------------------------------------
-           README file for Bundle Transformer: Clean-css v1.9.122
+   --------------------------------------------------------------------------------
+                README file for Bundle Transformer: Clean-css v1.9.125
 
-   ----------------------------------------------------------------------
+   --------------------------------------------------------------------------------
 
-      Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.CleanCss contains one minifier-adapter for
-   minification of CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is
-   based on the Clean-css (http://github.com/jakubpawlowicz/clean-css)
-   version 3.4.19.
+   BundleTransformer.CleanCss contains one minifier-adapter for minification of
+   CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css
+   (http://github.com/jakubpawlowicz/clean-css) version 3.4.20.
 
    As a JS-engine is used the JavaScript Engine Switcher library
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct
-   working of this module is recommended to install the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie,
-   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
+   this module is recommended to install one of the following NuGet packages:
+   JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or
+   JavaScriptEngineSwitcher.ChakraCore.
 
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 2.0.0.
+   Added support of Clean-css version 3.4.20.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
-   For correct working of this module is recommended to install the
+   For correct working of this module is recommended to install one of the
    following NuGet packages: JavaScriptEngineSwitcher.Msie,
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
-   After package is installed, need set a name of JavaScript engine (for
-   example, `MsieJsEngine`) to the `name` attribute of
-   `/configuration/bundleTransformer/clean/jsEngine` configuration
+   After package is installed and JS-engine is registered
+   (http://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
+   need set a name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
+   attribute of `/configuration/bundleTransformer/clean/jsEngine` configuration
    element.
 
-   To make `CleanCssMinifier` is the default CSS-minifier, you need
-   to make changes to the Web.config file. In the `defaultMinifier`
-   attribute of `\configuration\bundleTransformer\core\css` element must
-   be set value equal to `CleanCssMinifier`.
+   To make `CleanCssMinifier` is the default CSS-minifier, you need to make changes
+   to the Web.config file. In the `defaultMinifier` attribute of
+   `\configuration\bundleTransformer\core\css` element must be set value equal to
+   `CleanCssMinifier`.
 
    =============
    DOCUMENTATION

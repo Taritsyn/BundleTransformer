@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.19
+ * Clean-css v3.4.20
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -5836,7 +5836,7 @@ var CleanCss = (function(){
 			selectors: {
 			  adjacentSpace: false, // div+ nav Android stock browser hack
 			  ie7Hack: false, // *+html hack
-			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|::content|\/deep\/|::shadow|^,)/ // special selectors which prevent merging
+			  special: /(\-moz\-|\-ms\-|\-o\-|\-webkit\-|:dir\([a-z-]*\)|:first(?![a-z-])|:fullscreen|:left|:read-only|:read-write|:right|:placeholder|:host|:content|\/deep\/|:shadow|:selection|^,)/ // special selectors which prevent merging
 			},
 			units: {
 			  ch: true,
@@ -5972,7 +5972,7 @@ var CleanCss = (function(){
 		Compatibility.prototype.toOptions = function () {
 		  return merge(DEFAULTS['*'], calculateSource(this.source));
 		};
-		
+
 		return Compatibility;
 	};
 	//#endregion
