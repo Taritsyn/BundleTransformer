@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.11.0
+ * CoffeeScript Compiler v1.11.1
  * http://coffeescript.org
  *
  * Copyright 2009-2015, Jeremy Ashkenas
@@ -968,37 +968,48 @@ var CoffeeScript = (function(){
 		};
 
 		Lexer.prototype.numberToken = function() {
-		  var binaryLiteral, lexedLength, match, number, numberValue, octalLiteral, tag;
+		  var base, lexedLength, match, number, numberValue, ref2, tag;
 		  if (!(match = NUMBER.exec(this.chunk))) {
 			return 0;
 		  }
 		  number = match[0];
 		  lexedLength = number.length;
-		  if (/^0[BOX]/.test(number)) {
-			this.error("radix prefix in '" + number + "' must be lowercase", {
-			  offset: 1
-			});
-		  } else if (/E/.test(number) && !/^0x/.test(number)) {
-			this.error("exponential notation in '" + number + "' must be indicated with a lowercase 'e'", {
-			  offset: number.indexOf('E')
-			});
-		  } else if (/^0\d*[89]/.test(number)) {
-			this.error("decimal literal '" + number + "' must not be prefixed with '0'", {
-			  length: lexedLength
-			});
-		  } else if (/^0\d+/.test(number)) {
-			this.error("octal literal '" + number + "' must be prefixed with '0o'", {
-			  length: lexedLength
-			});
+		  switch (false) {
+			case !/^0[BOX]/.test(number):
+			  this.error("radix prefix in '" + number + "' must be lowercase", {
+				offset: 1
+			  });
+			  break;
+			case !/^(?!0x).*E/.test(number):
+			  this.error("exponential notation in '" + number + "' must be indicated with a lowercase 'e'", {
+				offset: number.indexOf('E')
+			  });
+			  break;
+			case !/^0\d*[89]/.test(number):
+			  this.error("decimal literal '" + number + "' must not be prefixed with '0'", {
+				length: lexedLength
+			  });
+			  break;
+			case !/^0\d+/.test(number):
+			  this.error("octal literal '" + number + "' must be prefixed with '0o'", {
+				length: lexedLength
+			  });
 		  }
-		  if (octalLiteral = /^0o([0-7]+)/.exec(number)) {
-			numberValue = parseInt(octalLiteral[1], 8);
+		  base = (function() {
+			switch (number.charAt(1)) {
+			  case 'b':
+				return 2;
+			  case 'o':
+				return 8;
+			  case 'x':
+				return 16;
+			  default:
+				return null;
+			}
+		  })();
+		  numberValue = base != null ? parseInt(number.slice(2), base) : parseFloat(number);
+		  if ((ref2 = number.charAt(1)) === 'b' || ref2 === 'o') {
 			number = "0x" + (numberValue.toString(16));
-		  } else if (binaryLiteral = /^0b([01]+)/.exec(number)) {
-			numberValue = parseInt(binaryLiteral[1], 2);
-			number = "0x" + (numberValue.toString(16));
-		  } else {
-			numberValue = parseFloat(number);
 		  }
 		  tag = numberValue === 2e308 ? 'INFINITY' : 'NUMBER';
 		  this.token(tag, number, 0, lexedLength);
@@ -1050,21 +1061,21 @@ var CoffeeScript = (function(){
 			  }
 			}
 			if (indent) {
-			  indentRegex = RegExp("^" + indent, "gm");
+			  indentRegex = RegExp("\\n" + indent, "g");
 			}
 			this.mergeInterpolationTokens(tokens, {
 			  delimiter: delimiter
 			}, (function(_this) {
 			  return function(value, i) {
 				value = _this.formatString(value);
+				if (indentRegex) {
+				  value = value.replace(indentRegex, '\n');
+				}
 				if (i === 0) {
 				  value = value.replace(LEADING_BLANK_LINE, '');
 				}
 				if (i === $) {
 				  value = value.replace(TRAILING_BLANK_LINE, '');
-				}
-				if (indentRegex) {
-				  value = value.replace(indentRegex, '');
 				}
 				return value;
 			  };
@@ -4123,7 +4134,6 @@ var CoffeeScript = (function(){
 
 		function Access(name1, tag) {
 		  this.name = name1;
-		  this.name.asKey = true;
 		  this.soak = tag === 'soak';
 		}
 
@@ -4365,13 +4375,15 @@ var CoffeeScript = (function(){
 				if (!(prop instanceof Assign)) {
 				  prop = new Assign(prop, prop, 'object');
 				}
-				(prop.variable.base || prop.variable).asKey = true;
 			  } else {
 				if (prop instanceof Assign) {
 				  key = prop.variable;
 				  value = prop.value;
 				} else {
 				  ref3 = prop.base.cache(o), key = ref3[0], value = ref3[1];
+				  if (key instanceof IdentifierLiteral) {
+					key = new PropertyName(key.value);
+				  }
 				}
 				prop = new Assign(new Value(new IdentifierLiteral(oref), [new Access(key)]), value);
 			  }
@@ -6661,11 +6673,11 @@ var CoffeeScript = (function(){
 	  };
 
 	  isLiteralArguments = function(node) {
-		return node instanceof Literal && node.value === 'arguments' && !node.asKey;
+		return node instanceof IdentifierLiteral && node.value === 'arguments';
 	  };
 
 	  isLiteralThis = function(node) {
-		return (node instanceof ThisLiteral && !node.asKey) || (node instanceof Code && node.bound) || node instanceof SuperCall;
+		return node instanceof ThisLiteral || (node instanceof Code && node.bound) || node instanceof SuperCall;
 	  };
 
 	  isComplexOrAssignable = function(node) {
@@ -6706,7 +6718,7 @@ var CoffeeScript = (function(){
 
 //	  SourceMap = require('/sourcemap');
 
-	  exports.VERSION = '1.11.0';
+	  exports.VERSION = '1.11.1';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
