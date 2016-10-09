@@ -172,6 +172,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not resolve a script references
+		/// </summary>
+		public bool NoResolve
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		public bool NoUnusedLocals
@@ -264,10 +273,29 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to suppress type checking errors
+		/// </summary>
+		public bool SuppressTypeCheckingErrors
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript2015` (experimental)
 		/// </summary>
 		public TargetMode Target
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to run TypeScript to JavaScript transpilation
+		/// only (skip other passes)
+		/// </summary>
+		public bool TranspileOnly
 		{
 			get;
 			set;
@@ -308,6 +336,7 @@
 			NoImplicitReturns = tsConfig.NoImplicitReturns;
 			NoImplicitThis = tsConfig.NoImplicitThis;
 			NoLib = tsConfig.NoLib;
+			NoResolve = tsConfig.NoResolve;
 			NoUnusedLocals = tsConfig.NoUnusedLocals;
 			NoUnusedParameters = tsConfig.NoUnusedParameters;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
@@ -318,7 +347,9 @@
 			StripInternal = tsConfig.StripInternal;
 			SuppressExcessPropertyErrors = tsConfig.SuppressExcessPropertyErrors;
 			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
+			SuppressTypeCheckingErrors = tsConfig.SuppressTypeCheckingErrors;
 			Target = tsConfig.Target;
+			TranspileOnly = tsConfig.TranspileOnly;
 
 			if (createJsEngineInstance == null)
 			{
@@ -452,6 +483,7 @@
 				NoImplicitReturns = NoImplicitReturns,
 				NoImplicitThis = NoImplicitThis,
 				NoLib = NoLib,
+				NoResolve = NoResolve,
 				NoUnusedLocals = NoUnusedLocals,
 				NoUnusedParameters = NoUnusedParameters,
 				PreserveConstEnums = PreserveConstEnums,
@@ -462,7 +494,9 @@
 				StripInternal = StripInternal,
 				SuppressExcessPropertyErrors = SuppressExcessPropertyErrors,
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
-				Target = Target
+				SuppressTypeCheckingErrors = SuppressTypeCheckingErrors,
+				Target = Target,
+				TranspileOnly = TranspileOnly
 			};
 
 			return options;

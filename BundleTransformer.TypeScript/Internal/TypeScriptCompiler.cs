@@ -162,6 +162,7 @@
 				new JProperty("noImplicitReturns", options.NoImplicitReturns),
 				new JProperty("noImplicitThis", options.NoImplicitThis),
 				new JProperty("noLib", options.NoLib),
+				new JProperty("noResolve", options.NoResolve),
 				new JProperty("noUnusedLocals", options.NoUnusedLocals),
 				new JProperty("noUnusedParameters", options.NoUnusedParameters),
 				new JProperty("preserveConstEnums", options.PreserveConstEnums),
@@ -172,7 +173,9 @@
 				new JProperty("stripInternal", options.StripInternal),
 				new JProperty("suppressExcessPropertyErrors", options.SuppressExcessPropertyErrors),
 				new JProperty("suppressImplicitAnyIndexErrors", options.SuppressImplicitAnyIndexErrors),
-				new JProperty("target", options.Target)
+				new JProperty("suppressTypeCheckingErrors", options.SuppressTypeCheckingErrors),
+				new JProperty("target", options.Target),
+				new JProperty("transpileOnly", options.TranspileOnly)
 			);
 
 			return optionsJson;

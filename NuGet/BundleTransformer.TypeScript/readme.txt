@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.9.123
+                README file for Bundle Transformer: TypeScript v1.9.127
 
    --------------------------------------------------------------------------------
 
@@ -29,8 +29,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 2.0 RTM (please note: The 2.0 RTM release is
-   also called '2.0.3').
+   In configuration settings of TypeScript-translator was added 3 new properties:
+   `NoResolve` (default `false`), `SuppressTypeCheckingErrors` (default `false`)
+   and `TranspileOnly` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

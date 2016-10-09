@@ -48,7 +48,9 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			stripInternal: false,
 			suppressExcessPropertyErrors: false,
 			suppressImplicitAnyIndexErrors: false,
-			target: 0 /* ES3 */
+			suppressTypeCheckingErrors: false,
+			target: 0 /* ES3 */,
+			transpileOnly: false
 		},
 		BtSystem
 		;
@@ -276,30 +278,32 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 	function innerCompile(fileNames, options, compilerHost) {
 		var program,
-			errors,
-			emitErrors
+			diagnostics,
+			allowTypeCheckingErrors = !options.suppressTypeCheckingErrors
 			;
 
 		program = ts.createProgram(fileNames, options, compilerHost);
-		errors = program.getSyntacticDiagnostics();
 
-		if (errors.length === 0) {
-			errors = program.getOptionsDiagnostics().concat(program.getGlobalDiagnostics());
-			if (errors.length === 0) {
-				errors = program.getSemanticDiagnostics();
+		diagnostics = program.getSyntacticDiagnostics();
+		if (diagnostics.length === 0) {
+			diagnostics = program.getOptionsDiagnostics();
+			if (allowTypeCheckingErrors) {
+				diagnostics = diagnostics.concat(program.getGlobalDiagnostics());
+				if (diagnostics.length === 0) {
+					diagnostics = program.getSemanticDiagnostics();
+				}
 			}
 		}
 
-		if (options.noEmit) {
-			return errors;
+		var emitOutput = program.emit();
+		if (allowTypeCheckingErrors) {
+			diagnostics = diagnostics.concat(emitOutput.diagnostics);
+			diagnostics = ts.sortAndDeduplicateDiagnostics(diagnostics);
 		}
-
-		emitErrors = program.emit().diagnostics;
-		errors = ts.sortAndDeduplicateDiagnostics(errors.concat(emitErrors));
 
 		return {
 			program: program,
-			errors: errors
+			errors: diagnostics
 		};
 	}
 
@@ -358,6 +362,11 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 		options = options || {};
 		compilationOptions = mix(mix({}, defaultOptions), options);
+		if (compilationOptions.transpileOnly) {
+			compilationOptions.noLib = true;
+			compilationOptions.noResolve = true;
+			compilationOptions.suppressTypeCheckingErrors = true;
+		}
 		defaultLibFileName = ts.getDefaultLibFileName(compilationOptions);
 
 		// Compile code

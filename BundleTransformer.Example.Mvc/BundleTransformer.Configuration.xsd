@@ -587,19 +587,24 @@
 				<xs:documentation>Flag for whether to raise error on `this` expressions with an implied `any` type</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="noUnusedParameters" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to report errors on unused parameters</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="noLib" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not include a default library (`lib.d.ts` or `lib.es6.d.ts`)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noResolve" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not resolve a script references</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noUnusedLocals" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to report errors on unused locals</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="noUnusedParameters" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to report errors on unused parameters</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="preserveConstEnums" type="Boolean_SchemaType" use="optional" default="false">
@@ -642,6 +647,11 @@
 				<xs:documentation>Flag for whether to suppress noImplicitAny errors for indexing objects lacking index signatures</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="suppressTypeCheckingErrors" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to suppress type checking errors</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="target" use="optional" default="EcmaScript3">
 			<xs:annotation>
 				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, or `EcmaScript2015` (experimental)</xs:documentation>
@@ -654,6 +664,11 @@
 					<xs:enumeration value="EcmaScript2015" />
 				</xs:restriction>
 			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="transpileOnly" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to run TypeScript to JavaScript transpilation only (skip other passes)</xs:documentation>
+			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /TypeScript settings -->

@@ -144,6 +144,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not resolve a script references
+		/// </summary>
+		[ConfigurationProperty("noResolve", DefaultValue = false)]
+		public bool NoResolve
+		{
+			get { return (bool)this["noResolve"]; }
+			set { this["noResolve"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		[ConfigurationProperty("noUnusedLocals", DefaultValue = false)]
@@ -246,6 +256,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to suppress type checking errors
+		/// </summary>
+		[ConfigurationProperty("suppressTypeCheckingErrors", DefaultValue = false)]
+		public bool SuppressTypeCheckingErrors
+		{
+			get { return (bool)this["suppressTypeCheckingErrors"]; }
+			set { this["suppressTypeCheckingErrors"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript2015` (experimental)
 		/// </summary>
@@ -254,6 +274,17 @@
 		{
 			get { return (TargetMode)this["target"]; }
 			set { this["target"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to run TypeScript to JavaScript transpilation
+		/// only (skip other passes)
+		/// </summary>
+		[ConfigurationProperty("transpileOnly", DefaultValue = false)]
+		public bool TranspileOnly
+		{
+			get { return (bool)this["transpileOnly"]; }
+			set { this["transpileOnly"] = value; }
 		}
 
 		/// <summary>

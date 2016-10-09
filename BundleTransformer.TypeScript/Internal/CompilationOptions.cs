@@ -128,6 +128,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to do not resolve a script references
+		/// </summary>
+		public bool NoResolve
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		public bool NoUnusedLocals
@@ -220,10 +229,29 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to suppress type checking errors
+		/// </summary>
+		public bool SuppressTypeCheckingErrors
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// or `EcmaScript2015` (experimental)
 		/// </summary>
 		public TargetMode Target
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to run TypeScript to JavaScript transpilation
+		/// only (skip other passes)
+		/// </summary>
+		public bool TranspileOnly
 		{
 			get;
 			set;
@@ -248,6 +276,7 @@
 			NoImplicitReturns = false;
 			NoImplicitThis = false;
 			NoLib = false;
+			NoResolve = false;
 			NoUnusedLocals = false;
 			NoUnusedParameters = false;
 			PreserveConstEnums = false;
@@ -258,7 +287,9 @@
 			StripInternal = false;
 			SuppressExcessPropertyErrors = false;
 			SuppressImplicitAnyIndexErrors = false;
+			SuppressTypeCheckingErrors = false;
 			Target = TargetMode.EcmaScript3;
+			TranspileOnly = false;
 		}
 	}
 }
