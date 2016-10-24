@@ -123,11 +123,11 @@
 		/// <summary>
 		/// Gets or sets a value that determines what kind of comments need to preserve:
 		///		"all" - keep all comments;
-		///		"copyright" - keep JSDoc-style comments that contain <code>@license</code> or <code>@preserve</code>;
-		///		valid JS regexp (needs to start with a slash) - keep only comments that match;
+		///		"some" - keep JSDoc-style (e.g. <code>@license</code> or <code>@preserve</code>) and conditional compilation comments;
+		///		valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
 		///		empty string - remove all comments.
 		/// </summary>
-		[ConfigurationProperty("comments", DefaultValue = "")]
+		[ConfigurationProperty("comments", DefaultValue = "some")]
 		public string Comments
 		{
 			get { return (string)this["comments"]; }
@@ -173,6 +173,16 @@
 		{
 			get { return (bool)this["keepQuotedProperties"]; }
 			set { this["keepQuotedProperties"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to wrap IIFEs in parenthesis
+		/// </summary>
+		[ConfigurationProperty("wrapIife", DefaultValue = false)]
+		public bool WrapIife
+		{
+			get { return (bool)this["wrapIife"]; }
+			set { this["wrapIife"] = value; }
 		}
 	}
 }

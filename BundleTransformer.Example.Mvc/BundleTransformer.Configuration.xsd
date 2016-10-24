@@ -1818,6 +1818,11 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>String representation of the functions list, that can be safely removed if their return value is not used</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="negateIife" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to negate IIFEs</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="dropConsole" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to discard calls to `console.*` functions</xs:documentation>
@@ -1930,8 +1935,8 @@ to preserve references to external symbols.</xs:documentation>
 			<xs:annotation>
 				<xs:documentation>Value that determines what kind of comments need to preserve:
  "all" - keep all comments;
- "copyright" - keep JSDoc-style comments that contain `@license` or `@preserve`;
- valid JS regexp (needs to start with a slash) - keep only comments that match;
+ "some" - keep JSDoc-style (e.g. `@license` or `@preserve`) and conditional compilation comments;
+ valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
  empty string - remove all comments.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
@@ -1977,6 +1982,11 @@ to preserve references to external symbols.</xs:documentation>
 		<xs:attribute name="keepQuotedProperties" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to prevent stripping quotes from property names in object literals</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="wrapIife" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to wrap IIFEs in parenthesis</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>

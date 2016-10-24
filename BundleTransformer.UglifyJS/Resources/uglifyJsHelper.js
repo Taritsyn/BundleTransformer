@@ -4,18 +4,6 @@ var uglifyJsHelper = (function (uglifyJs, undefined) {
 
 	var exports = {};
 
-	function extractRegex(str) {
-		if (/^\/.*\/[a-zA-Z]*$/.test(str)) {
-			var regexPosition = str.lastIndexOf("/");
-
-			return new RegExp(str.substr(1, regexPosition - 1), str.substr(regexPosition + 1));
-		}
-		else
-		{
-			throw new Error("Invalid regular expression: " + str);
-		}
-	}
-
 	function preprocessOptions(options) {
 		var uglificationOptions = options || {},
 			codeGenerationOptions = uglificationOptions.output,
@@ -25,35 +13,22 @@ var uglifyJsHelper = (function (uglifyJs, undefined) {
 
 		if (codeGenerationOptions) {
 			comments = codeGenerationOptions.comments;
-			processedComments = false;
+			processedComments = comments;
 
-			if (comments) {
-				if (comments === 'all') {
-					processedComments = true;
-				}
-				else if (comments === 'copyright') {
-					processedComments = function (node, comment) {
-						var text = comment.value,
-							type = comment.type
-							;
-
-						if (type === 'comment2') {
-							// multiline comment
-							return /@preserve|@license|@cc_on/i.test(text);
-						}
-					};
-				}
-				else if (/^\/.*\/[a-zA-Z]*$/.test(comments)) {
-					try {
-						processedComments = extractRegex(comments);
-					}
-					catch (e) {
-						throw new Error('Invalid value in the `output.comments` option.');
-					}
-				}
+			if (comments === 'all') {
+				processedComments = true;
+			}
+			else if (comments === '') {
+				processedComments = false;
 			}
 
 			codeGenerationOptions.comments = processedComments;
+
+			if (codeGenerationOptions.wrap_iife) {
+				if (options.compress) {
+					options.compress.negate_iife = false;
+				}
+			}
 		}
 
 		return uglificationOptions;

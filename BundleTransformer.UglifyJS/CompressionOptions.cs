@@ -223,6 +223,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to negate IIFEs
+		/// </summary>
+		public bool NegateIife
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to discard calls to <code>console.*</code> functions
 		/// </summary>
 		public bool DropConsole
@@ -277,6 +286,7 @@
 			GlobalDefinitions = string.Empty;
 			PureGetters = false;
 			PureFunctions = string.Empty;
+			NegateIife = true;
 			DropConsole = false;
 			Angular = false;
 			Passes = 1;

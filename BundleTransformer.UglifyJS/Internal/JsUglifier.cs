@@ -223,6 +223,7 @@
 					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
 					new JProperty("pure_getters", compressionOptions.PureGetters),
 					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions)),
+					new JProperty("negate_iife", compressionOptions.NegateIife),
 					new JProperty("drop_console", compressionOptions.DropConsole),
 					new JProperty("angular", compressionOptions.Angular),
 					new JProperty("passes", compressionOptions.Passes)
@@ -266,7 +267,8 @@
 				new JProperty("screw_ie8", options.ScrewIe8),
 				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps),
 				new JProperty("quote_style", codeGenerationOptions.QuoteStyle),
-				new JProperty("keep_quoted_props", codeGenerationOptions.KeepQuotedProperties)
+				new JProperty("keep_quoted_props", codeGenerationOptions.KeepQuotedProperties),
+				new JProperty("wrap_iife", codeGenerationOptions.WrapIife)
 			));
 
 			return optionsJson;

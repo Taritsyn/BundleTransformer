@@ -110,8 +110,8 @@
 		/// <summary>
 		/// Gets or sets a value that determines what kind of comments need to preserve:
 		///		"all" - keep all comments;
-		///		"copyright" - keep JSDoc-style comments that contain <code>@license</code> or <code>@preserve</code>;
-		///		valid JS regexp (needs to start with a slash) - keep only comments that match;
+		///		"some" - keep JSDoc-style (e.g. <code>@license</code> or <code>@preserve</code>) and conditional compilation comments;
+		///		valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
 		///		empty string - remove all comments.
 		/// </summary>
 		public string Comments
@@ -157,6 +157,15 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to wrap IIFEs in parenthesis
+		/// </summary>
+		public bool WrapIife
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the options of code generation
@@ -174,11 +183,12 @@
 			MaxLineLength = 32000;
 			Bracketize = false;
 			Semicolons = true;
-			Comments = string.Empty;
+			Comments = "some";
 			PreserveLine = false;
 			UnescapeRegexps = false;
 			QuoteStyle = QuoteStyle.Auto;
 			KeepQuotedProperties = false;
+			WrapIife = false;
 		}
 	}
 }

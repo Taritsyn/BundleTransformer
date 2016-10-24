@@ -247,6 +247,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to negate IIFEs
+		/// </summary>
+		[ConfigurationProperty("negateIife", DefaultValue = true)]
+		public bool NegateIife
+		{
+			get { return (bool)this["negateIife"]; }
+			set { this["negateIife"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to discard calls to <code>console.*</code> functions
 		/// </summary>
 		[ConfigurationProperty("dropConsole", DefaultValue = false)]

@@ -154,6 +154,7 @@
 				GlobalDefinitions = compressionConfig.GlobalDefinitions,
 				PureGetters = compressionConfig.PureGetters,
 				PureFunctions = compressionConfig.PureFunctions,
+				NegateIife = compressionConfig.NegateIife,
 				DropConsole = compressionConfig.DropConsole,
 				Angular = compressionConfig.Angular,
 				Passes = compressionConfig.Passes
@@ -184,7 +185,8 @@
 				PreserveLine = codeGenerationConfig.PreserveLine,
 				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps,
 				QuoteStyle = codeGenerationConfig.QuoteStyle,
-				KeepQuotedProperties = codeGenerationConfig.KeepQuotedProperties
+				KeepQuotedProperties = codeGenerationConfig.KeepQuotedProperties,
+				WrapIife = codeGenerationConfig.WrapIife
 			};
 
 			ScrewIe8 = jsMinifierConfig.ScrewIe8;
