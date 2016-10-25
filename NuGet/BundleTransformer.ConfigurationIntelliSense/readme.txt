@@ -1,7 +1,7 @@
 
 
    ----------------------------------------------------------------------
-          README file for Bundle Transformer: IntelliSense v1.9.129
+      README file for Bundle Transformer: IntelliSense v1.9.131 Beta 1
 
    ----------------------------------------------------------------------
 
@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of Uglify JS-minifier.
+   Updated definitions for configuration settings of Sass- and
+   SCSS-translator.
 
    =============
    DOCUMENTATION

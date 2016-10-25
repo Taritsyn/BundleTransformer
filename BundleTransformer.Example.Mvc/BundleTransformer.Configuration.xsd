@@ -438,6 +438,9 @@
 		<xs:annotation>
 			<xs:documentation>Configuration settings of Sass- and SCSS-translator</xs:documentation>
 		</xs:annotation>
+		<xs:all>
+			<xs:element name="includePaths" type="IncludedPathRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
 		<xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to allow the use of native minification</xs:documentation>
@@ -495,6 +498,35 @@
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
+
+	<xs:complexType name="IncludedPathRegistrationCollection_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Collection of registered included paths</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddIncludedPathRegistration_SchemaType" />
+			<xs:element name="remove" type="RemoveIncludedPathRegistration_SchemaType" />
+			<xs:element name="clear" type="ClearIncludedPathRegistration_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddIncludedPathRegistration_SchemaType">
+		<xs:attribute name="path" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Path</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RemoveIncludedPathRegistration_SchemaType">
+		<xs:attribute name="path" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Path</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="ClearIncludedPathRegistration_SchemaType" />
 	<!-- /Sass and SCSS settings -->
 
 	<!-- CoffeeScript settings -->

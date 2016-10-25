@@ -18,6 +18,15 @@
 		}
 
 		/// <summary>
+		/// Gets a list of include paths
+		/// </summary>
+		[ConfigurationProperty("includePaths", IsRequired = false)]
+		public IncludedPathRegistrationCollection IncludePaths
+		{
+			get { return (IncludedPathRegistrationCollection)this["includePaths"]; }
+		}
+
+		/// <summary>
 		/// Gets or sets a indent type
 		/// </summary>
 		[ConfigurationProperty("indentType", DefaultValue = IndentType.Space)]

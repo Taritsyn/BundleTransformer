@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.SassAndScss</id>
-		<version>1.9.104</version>
+		<version>1.9.131-beta1</version>
 		<title>Bundle Transformer: Sass and SCSS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -14,8 +14,7 @@
 
 For correct working of the LibSass Host require assemblies `msvcp120.dll` and `msvcr120.dll` from the Visual C++ Redistributable Packages for Visual Studio 2013.</description>
 		<summary>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET version 0.5.0 (supports libSass version 3.3.6). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.</summary>
-		<releaseNotes>1. Now supported paths beginning with a tilde in `@import` directives and `url()` functions;
-2. Added support of libSass version 3.3.6.</releaseNotes>
+		<releaseNotes>In configuration settings of Sass- and SCSS-translator was added one new property - `IncludePaths` (default empty list).</releaseNotes>
 		<copyright>Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>

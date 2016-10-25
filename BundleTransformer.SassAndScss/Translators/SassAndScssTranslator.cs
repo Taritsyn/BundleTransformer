@@ -39,6 +39,15 @@
 		private readonly VirtualFileManager _virtualFileManager;
 
 		/// <summary>
+		/// Gets or sets a list of include paths
+		/// </summary>
+		public IList<string> IncludePaths
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a indent type
 		/// </summary>
 		public BtIndentType IndentType
@@ -104,6 +113,11 @@
 			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
 
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
+			IncludePaths = sassAndScssConfig.IncludePaths
+				.Cast<IncludedPathRegistration>()
+				.Select(p => p.Path)
+				.ToList()
+				;
 			IndentType = sassAndScssConfig.IndentType;
 			IndentWidth = sassAndScssConfig.IndentWidth;
 			LineFeedType = sassAndScssConfig.LineFeedType;
@@ -216,6 +230,7 @@
 		{
 			var options = new CompilationOptions
 			{
+				IncludePaths = IncludePaths,
 				IndentedSyntax = assetTypeCode == Constants.AssetTypeCode.Sass,
 				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, LshIndentType>(IndentType),
 				IndentWidth = IndentWidth,

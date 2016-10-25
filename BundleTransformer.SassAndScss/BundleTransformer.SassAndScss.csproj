@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
+    <Compile Include="Configuration\IncludedPathRegistration.cs" />
+    <Compile Include="Configuration\IncludedPathRegistrationCollection.cs" />
     <Compile Include="Configuration\SassAndScssSettings.cs" />
     <Compile Include="Constants\AssetTypeCode.cs" />
     <Compile Include="Constants\TranslatorName.cs" />
