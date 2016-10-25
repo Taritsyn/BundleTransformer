@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v2.2.1
+* CSSO (CSS Optimizer) v2.3.0
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -4049,7 +4049,14 @@ var CSSO = (function(){
 						break;
 
 					case TokenType.Comma:
-						removeTrailingSpaces(argument.sequence);
+						if (argument) {
+							removeTrailingSpaces(argument.sequence);
+						} else {
+							args.insert(List.createItem({
+								type: 'Argument',
+								sequence: new List()
+							}));
+						}
 						scanner.next();
 						readSC();
 						argument = null;
@@ -6223,6 +6230,16 @@ var CSSO = (function(){
 			return options;
 		}
 
+//		function runHandler(ast, options, handlers) {
+//			if (!Array.isArray(handlers)) {
+//				handlers = [handlers];
+//			}
+//
+//			handlers.forEach(function(fn) {
+//				fn(ast, options);
+//			});
+//		}
+
 		function minify(context, source, options) {
 			options = options || {};
 
@@ -6238,10 +6255,24 @@ var CSSO = (function(){
 				})
 			);
 
+//			// before compress handlers
+//			if (options.beforeCompress) {
+//				debugOutput('beforeCompress', options, Date.now(),
+//					runHandler(ast, options, options.beforeCompress)
+//				);
+//			}
+
 			// compress
 			var compressResult = debugOutput('compress', options, Date.now(),
 				compress(ast, buildCompressOptions(options))
 			);
+
+//			// after compress handlers
+//			if (options.afterCompress) {
+//				debugOutput('afterCompress', options, Date.now(),
+//					runHandler(compressResult, options, options.afterCompress)
+//				);
+//			}
 
 			// translate
 //			if (options.sourceMap) {
@@ -6270,7 +6301,7 @@ var CSSO = (function(){
 		}
 
 		var exports = {
-			version: '2.2.1',
+			version: '2.3.0',
 
 			// classes
 			List: List,
