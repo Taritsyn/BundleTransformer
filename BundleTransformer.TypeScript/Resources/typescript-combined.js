@@ -36682,7 +36682,7 @@ var ts;
 })(ts || (ts = {}));
 var ts;
 (function (ts) {
-    ts.version = "2.0.6";
+    ts.version = "2.0.8";
     var emptyArray = [];
     function findConfigFile(searchPath, fileExists, configName) {
         if (configName === void 0) { configName = "tsconfig.json"; }
@@ -37031,6 +37031,7 @@ var ts;
             getTypeCount: function () { return getDiagnosticsProducingTypeChecker().getTypeCount(); },
             getFileProcessingDiagnostics: function () { return fileProcessingDiagnostics; },
             getResolvedTypeReferenceDirectives: function () { return resolvedTypeReferenceDirectives; },
+            isSourceFileFromExternalLibrary: isSourceFileFromExternalLibrary,
             dropDiagnosticsProducingTypeChecker: dropDiagnosticsProducingTypeChecker
         };
         verifyCompilerOptions();
@@ -37170,10 +37171,13 @@ var ts;
                 getSourceFile: program.getSourceFile,
                 getSourceFileByPath: program.getSourceFileByPath,
                 getSourceFiles: program.getSourceFiles,
-                isSourceFileFromExternalLibrary: function (file) { return !!sourceFilesFoundSearchingNodeModules[file.path]; },
+                isSourceFileFromExternalLibrary: isSourceFileFromExternalLibrary,
                 writeFile: writeFileCallback || (function (fileName, data, writeByteOrderMark, onError, sourceFiles) { return host.writeFile(fileName, data, writeByteOrderMark, onError, sourceFiles); }),
                 isEmitBlocked: isEmitBlocked
             };
+        }
+        function isSourceFileFromExternalLibrary(file) {
+            return sourceFilesFoundSearchingNodeModules[file.path];
         }
         function getDiagnosticsProducingTypeChecker() {
             return diagnosticsProducingTypeChecker || (diagnosticsProducingTypeChecker = ts.createTypeChecker(program, true));
