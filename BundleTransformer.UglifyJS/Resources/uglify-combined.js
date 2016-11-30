@@ -1,5 +1,5 @@
 /*!
- * UglifyJS v2.7.4
+ * UglifyJS v2.7.5
  * http://github.com/mishoo/UglifyJS2
  *
  * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
@@ -83,6 +83,8 @@
 	};
 
 	function noop() {};
+	function return_false() { return false; }
+	function return_true() { return true; }
 
 	var MAP = (function(){
 		function MAP(a, f, backwards) {
@@ -3591,6 +3593,20 @@
 
 	var EXPECT_DIRECTIVE = /^$|[;{][\s\n]*$/;
 
+	function is_some_comments(comment) {
+		var text = comment.value;
+		var type = comment.type;
+		if (type == "comment2") {
+			// multiline comment
+			return /@preserve|@license|@cc_on/i.test(text);
+		}
+		return type == "comment5";
+	}
+
+	function is_comment5(comment) {
+		return comment.type == "comment5";
+	}
+
 	function OutputStream(options) {
 
 		options = defaults(options, {
@@ -3618,46 +3634,30 @@
 		}, true);
 
 		// Convert comment option to RegExp if neccessary and set up comments filter
-		if (typeof options.comments === "string" && /^\/.*\/[a-zA-Z]*$/.test(options.comments)) {
-			var regex_pos = options.comments.lastIndexOf("/");
-			options.comments = new RegExp(
-				options.comments.substr(1, regex_pos - 1),
-				options.comments.substr(regex_pos + 1)
-			);
-		}
-		if (options.comments instanceof RegExp) {
-			options.comments = (function(f) {
-				return function(comment) {
-					return comment.type == "comment5" || f.test(comment.value);
-				}
-			})(options.comments);
-		}
-		else if (typeof options.comments === "function") {
-			options.comments = (function(f) {
-				return function(comment) {
-					return comment.type == "comment5" || f(this, comment);
-				}
-			})(options.comments);
-		}
-		else if (options.comments === "some") {
-			options.comments = function(comment) {
-				var text = comment.value;
-				var type = comment.type;
-				if (type == "comment2") {
-					// multiline comment
-					return /@preserve|@license|@cc_on/i.test(text);
-				}
-				return type == "comment5";
+		var comment_filter = options.shebang ? is_comment5 : return_false; // Default case, throw all comments away except shebangs
+		if (options.comments) {
+			var comments = options.comments;
+			if (typeof options.comments === "string" && /^\/.*\/[a-zA-Z]*$/.test(options.comments)) {
+				var regex_pos = options.comments.lastIndexOf("/");
+				comments = new RegExp(
+					options.comments.substr(1, regex_pos - 1),
+					options.comments.substr(regex_pos + 1)
+				);
 			}
-		}
-		else if (options.comments){ // NOTE includes "all" option
-			options.comments = function() {
-				return true;
+			if (comments instanceof RegExp) {
+				comment_filter = function(comment) {
+					return comment.type == "comment5" || comments.test(comment.value);
+				};
 			}
-		} else {
-			// Falsy case, so reject all comments, except shebangs
-			options.comments = function(comment) {
-				return comment.type == "comment5";
+			else if (typeof comments === "function") {
+				comment_filter = function(comment) {
+					return comment.type == "comment5" || comments(this, comment);
+				};
+			}
+			else if (comments === "some") {
+				comment_filter = is_some_comments;
+			} else { // NOTE includes "all" option
+				comment_filter = return_true;
 			}
 		}
 
@@ -3967,6 +3967,7 @@
 			with_square     : with_square,
 			add_mapping     : add_mapping,
 			option          : function(opt) { return options[opt] },
+			comment_filter  : comment_filter,
 			line            : function() { return current_line },
 			col             : function() { return current_col },
 			pos             : function() { return current_pos },
@@ -4049,7 +4050,7 @@
 					}));
 				}
 
-				comments = comments.filter(output.option("comments"), self);
+				comments = comments.filter(output.comment_filter, self);
 
 				// Keep single line comments after nlb, after nlb
 				if (!output.option("beautify") && comments.length > 0 &&
@@ -5881,7 +5882,7 @@
 		(function (def){
 			var unary_bool = [ "!", "delete" ];
 			var binary_bool = [ "in", "instanceof", "==", "!=", "===", "!==", "<", "<=", ">=", ">" ];
-			def(AST_Node, function(){ return false });
+			def(AST_Node, return_false);
 			def(AST_UnaryPrefix, function(){
 				return member(this.operator, unary_bool);
 			});
@@ -5899,16 +5900,16 @@
 			def(AST_Seq, function(){
 				return this.cdr.is_boolean();
 			});
-			def(AST_True, function(){ return true });
-			def(AST_False, function(){ return true });
+			def(AST_True, return_true);
+			def(AST_False, return_true);
 		})(function(node, func){
 			node.DEFMETHOD("is_boolean", func);
 		});
 
 		// methods to determine if an expression has a string result type
 		(function (def){
-			def(AST_Node, function(){ return false });
-			def(AST_String, function(){ return true });
+			def(AST_Node, return_false);
+			def(AST_String, return_true);
 			def(AST_UnaryPrefix, function(){
 				return this.operator == "typeof";
 			});
@@ -6162,11 +6163,11 @@
 
 		// determine if expression has side effects
 		(function(def){
-			def(AST_Node, function(compressor){ return true });
+			def(AST_Node, return_true);
 
-			def(AST_EmptyStatement, function(compressor){ return false });
-			def(AST_Constant, function(compressor){ return false });
-			def(AST_This, function(compressor){ return false });
+			def(AST_EmptyStatement, return_false);
+			def(AST_Constant, return_false);
+			def(AST_This, return_false);
 
 			def(AST_Call, function(compressor){
 				var pure = compressor.option("pure_funcs");
@@ -6186,13 +6187,13 @@
 			def(AST_SimpleStatement, function(compressor){
 				return this.body.has_side_effects(compressor);
 			});
-			def(AST_Defun, function(compressor){ return true });
-			def(AST_Function, function(compressor){ return false });
+			def(AST_Defun, return_true);
+			def(AST_Function, return_false);
 			def(AST_Binary, function(compressor){
 				return this.left.has_side_effects(compressor)
 					|| this.right.has_side_effects(compressor);
 			});
-			def(AST_Assign, function(compressor){ return true });
+			def(AST_Assign, return_true);
 			def(AST_Conditional, function(compressor){
 				return this.condition.has_side_effects(compressor)
 					|| this.consequent.has_side_effects(compressor)
@@ -8494,6 +8495,7 @@
 		options = defaults(options, {
 			spidermonkey     : false,
 			outSourceMap     : null,
+			outFileName      : null,
 			sourceRoot       : null,
 			inSourceMap      : null,
 			sourceMapUrl     : null,

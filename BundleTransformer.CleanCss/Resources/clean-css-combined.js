@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.20
+ * Clean-css v3.4.21
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -3365,7 +3365,7 @@ var CleanCss = (function(){
 
 		  for (j = 0, m = bodiesAsList.length; j < m; j++) {
 			if (bodiesAsList[j].length > 0)
-			  joinsAt.push((joinsAt[j - 1] || 0) + bodiesAsList[j].length);
+			  joinsAt.push((joinsAt.length > 0 ? joinsAt[joinsAt.length - 1] : 0) + bodiesAsList[j].length);
 		  }
 
 		  optimizeProperties(selector, bodies, joinsAt, false, options, outerContext);
@@ -3499,9 +3499,9 @@ var CleanCss = (function(){
 			return false;
 		  if (leftNameRoot == rightNameRoot && unprefixed(leftName) == unprefixed(rightName) && (vendorPrefixed(leftName) ^ vendorPrefixed(rightName)))
 			return false;
-		  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot))
+		  if (leftNameRoot == 'border' && BORDER_PROPERTIES.test(rightNameRoot) && (leftName == 'border' || leftName == rightNameRoot || (leftValue != rightValue && sameBorderComponent(leftName, rightName))))
 			return false;
-		  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot))
+		  if (rightNameRoot == 'border' && BORDER_PROPERTIES.test(leftNameRoot) && (rightName == 'border' || rightName == leftNameRoot || (leftValue != rightValue && sameBorderComponent(leftName, rightName))))
 			return false;
 		  if (leftNameRoot == 'border' && rightNameRoot == 'border' && leftName != rightName && (isSideBorder(leftName) && isStyleBorder(rightName) || isStyleBorder(leftName) && isSideBorder(rightName)))
 			return false;
@@ -3525,6 +3525,10 @@ var CleanCss = (function(){
 
 		function unprefixed(name) {
 		  return name.replace(/^\-(?:moz|webkit|ms|o)\-/, '');
+		}
+
+		function sameBorderComponent(name1, name2) {
+		  return name1.split('-').pop() == name2.split('-').pop();
 		}
 
 		function isSideBorder(name) {
@@ -5449,6 +5453,10 @@ var CleanCss = (function(){
 		  var nextEscape = chunk.indexOf('__ESCAPED_', context.cursor);
 		  var nextBodyStart = chunk.indexOf('{', context.cursor);
 		  var nextBodyEnd = chunk.indexOf('}', context.cursor);
+
+		  if (nextSpecial > -1 && context.cursor > 0 && !/\s|\{|\}|\/|_|,|;/.test(chunk.substring(nextSpecial - 1, nextSpecial))) {
+			nextSpecial = -1;
+		  }
 
 		  if (nextEscape > -1 && /\S/.test(chunk.substring(context.cursor, nextEscape)))
 			nextEscape = -1;
