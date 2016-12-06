@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
+	using System.Reflection;
 	using System.Text;
 
 	using JavaScriptEngineSwitcher.Core;
@@ -97,10 +98,10 @@
 			{
 				_jsEngine.EmbedHostObject(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME, CountryStatisticsService.Instance);
 
-				Type type = GetType();
+				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(AUTOPREFIXER_LIBRARY_FILE_NAME), type);
-				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(AUTOPREFIXER_HELPER_FILE_NAME), type);
+				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(AUTOPREFIXER_LIBRARY_FILE_NAME), assembly);
+				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(AUTOPREFIXER_HELPER_FILE_NAME), assembly);
 			}
 		}
 
