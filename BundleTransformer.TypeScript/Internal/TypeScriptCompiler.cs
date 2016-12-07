@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
+	using System.Reflection;
 	using System.Text;
 
 	using JavaScriptEngineSwitcher.Core;
@@ -92,10 +93,10 @@
 			{
 				_jsEngine.EmbedHostObject(VIRTUAL_FILE_MANAGER_VARIABLE_NAME, _virtualFileManager);
 
-				Type type = GetType();
+				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TYPESCRIPT_LIBRARY_FILE_NAME), type);
-				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TSC_HELPER_FILE_NAME), type);
+				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TYPESCRIPT_LIBRARY_FILE_NAME), assembly);
+				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TSC_HELPER_FILE_NAME), assembly);
 			}
 		}
 

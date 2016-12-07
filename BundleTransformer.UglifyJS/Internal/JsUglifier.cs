@@ -3,6 +3,7 @@
 	using System;
 	using System.Globalization;
 	using System.Linq;
+	using System.Reflection;
 	using System.Text;
 	using System.Text.RegularExpressions;
 
@@ -124,10 +125,10 @@
 		{
 			if (_initializedFlag.Set())
 			{
-				Type type = GetType();
+				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_LIBRARY_FILE_NAME, type);
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_HELPER_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_LIBRARY_FILE_NAME, assembly);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_HELPER_FILE_NAME, assembly);
 			}
 		}
 

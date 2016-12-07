@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
+	using System.Reflection;
 	using System.Text;
 
 	using JavaScriptEngineSwitcher.Core;
@@ -109,10 +110,10 @@
 				_jsEngine.EmbedHostObject(LESS_ENVIRONMENT_VARIABLE_NAME, LessEnvironment.Instance);
 				_jsEngine.EmbedHostObject(VIRTUAL_FILE_MANAGER_VARIABLE_NAME, _virtualFileManager);
 
-				Type type = GetType();
+				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESS_LIBRARY_FILE_NAME, type);
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESSC_HELPER_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESS_LIBRARY_FILE_NAME, assembly);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESSC_HELPER_FILE_NAME, assembly);
 			}
 		}
 

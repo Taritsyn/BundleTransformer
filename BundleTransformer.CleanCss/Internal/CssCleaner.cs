@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.CleanCss.Internal
 {
 	using System;
+	using System.Reflection;
 	using System.Text;
 
 	using JavaScriptEngineSwitcher.Core;
@@ -82,10 +83,10 @@
 		{
 			if (_initializedFlag.Set())
 			{
-				Type type = GetType();
+				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_LIBRARY_FILE_NAME, type);
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_HELPER_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_LIBRARY_FILE_NAME, assembly);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_HELPER_FILE_NAME, assembly);
 			}
 		}
 

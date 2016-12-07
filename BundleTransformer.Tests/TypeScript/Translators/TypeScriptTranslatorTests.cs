@@ -70,7 +70,7 @@ TranslatorBadges.createTsTranslatorBadge();")
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(jqueryTsAssetVirtualPath))
-				.Returns(Utils.GetResourceAsString("BundleTransformer.Tests.Resources.jquery.d.ts", GetType()))
+				.Returns(Utils.GetResourceAsString("BundleTransformer.Tests.Resources.jquery.d.ts", GetType().Assembly))
 				;
 
 

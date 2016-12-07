@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Globalization;
+	using System.Reflection;
 	using System.Text;
 	using System.Text.RegularExpressions;
 
@@ -84,10 +85,10 @@
 		{
 			if (_initializedFlag.Set())
 			{
-				Type type = GetType();
+				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + COFFEESCRIPT_LIBRARY_FILE_NAME, type);
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CSC_HELPER_FILE_NAME, type);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + COFFEESCRIPT_LIBRARY_FILE_NAME, assembly);
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CSC_HELPER_FILE_NAME, assembly);
 			}
 		}
 

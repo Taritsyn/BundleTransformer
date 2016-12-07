@@ -86,7 +86,7 @@
 
 			try
 			{
-				statistics = Utils.GetResourceAsString(resourceName, Assembly.GetExecutingAssembly());
+				statistics = Utils.GetResourceAsString(resourceName, GetType().Assembly);
 			}
 			catch (NullReferenceException)
 			{

@@ -70,7 +70,7 @@
 		{
 			string content = Utils.GetResourceAsString(
 				TypeScriptResourceHelpers.GetResourceName(fileName),
-				typeof(VirtualFileManager)
+				typeof(VirtualFileManager).Assembly
 			);
 
 			return content;

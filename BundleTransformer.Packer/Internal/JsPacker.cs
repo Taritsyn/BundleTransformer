@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.Packer.Internal
 {
 	using System;
+	using System.Reflection;
 
 	using JavaScriptEngineSwitcher.Core;
 	using JavaScriptEngineSwitcher.Core.Helpers;
@@ -67,7 +68,7 @@
 		{
 			if (_initializedFlag.Set())
 			{
-				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + PACKER_LIBRARY_FILE_NAME, GetType());
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + PACKER_LIBRARY_FILE_NAME, GetType().Assembly);
 				_jsEngine.Execute(
 					string.Format(@"var {0} = function(code, base62Encode, shrinkVariables) {{
 	var packer = new Packer();
