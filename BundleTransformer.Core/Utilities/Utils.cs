@@ -141,23 +141,67 @@
 		/// <summary>
 		/// Gets a content of the embedded resource as string
 		/// </summary>
-		/// <param name="resourceName">Resource name</param>
-		/// <param name="type">Type from assembly that containing an embedded resource</param>
+		/// <param name="resourceName">The case-sensitive resource name without the namespace of the specified type</param>
+		/// <param name="type">The type, that determines the assembly and whose namespace is used to scope
+		/// the resource name</param>
 		/// <returns>Сontent of the embedded resource as string</returns>
 		public static string GetResourceAsString(string resourceName, Type type)
 		{
-			Assembly assembly = type.Assembly;
+			if (resourceName == null)
+			{
+				throw new ArgumentNullException(
+					"resourceName", string.Format(Strings.Common_ArgumentIsNull, "resourceName"));
+			}
 
-			return GetResourceAsString(resourceName, assembly);
+			if (type == null)
+			{
+				throw new ArgumentNullException(
+					"type", string.Format(Strings.Common_ArgumentIsNull, "type"));
+			}
+
+			if (string.IsNullOrWhiteSpace(resourceName))
+			{
+				throw new ArgumentException(
+					string.Format(Strings.Common_ArgumentIsEmpty, "resourceName"), "resourceName");
+			}
+
+			Assembly assembly = type.Assembly;
+			string nameSpace = type.Namespace;
+			string resourceFullName = nameSpace != null ? nameSpace + "." + resourceName : resourceName;
+
+			return InnerGetResourceAsString(resourceFullName, assembly);
 		}
 
 		/// <summary>
 		/// Gets a content of the embedded resource as string
 		/// </summary>
-		/// <param name="resourceName">Resource name</param>
-		/// <param name="assembly">Assembly that containing an embedded resource</param>
+		/// <param name="resourceName">The case-sensitive resource name</param>
+		/// <param name="assembly">The assembly, which contains the embedded resource</param>
 		/// <returns>Сontent of the embedded resource as string</returns>
 		public static string GetResourceAsString(string resourceName, Assembly assembly)
+		{
+			if (resourceName == null)
+			{
+				throw new ArgumentNullException(
+					"resourceName", string.Format(Strings.Common_ArgumentIsNull, "resourceName"));
+			}
+
+			if (assembly == null)
+			{
+				throw new ArgumentNullException(
+					"assembly", string.Format(Strings.Common_ArgumentIsNull, "assembly"));
+			}
+
+			if (string.IsNullOrWhiteSpace(resourceName))
+			{
+				throw new ArgumentException(
+					string.Format(Strings.Common_ArgumentIsEmpty, "resourceName"), "resourceName");
+			}
+
+			return InnerGetResourceAsString(resourceName, assembly);
+		}
+
+		private static string InnerGetResourceAsString(string resourceName, Assembly assembly)
 		{
 			using (Stream stream = assembly.GetManifestResourceStream(resourceName))
 			{
