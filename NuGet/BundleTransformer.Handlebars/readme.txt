@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: Handlebars v1.9.134
+                README file for Bundle Transformer: Handlebars v1.9.138
 
    --------------------------------------------------------------------------------
 
@@ -26,7 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Handlebars version 4.0.6.
+   Now all calls of the `ExecuteResource` method takes the assembly as second
+   parameter.
 
    ====================
    POST-INSTALL ACTIONS

@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                   README file for Bundle Transformer: CSSO v1.9.130
+                   README file for Bundle Transformer: CSSO v1.9.138
 
    --------------------------------------------------------------------------------
 
@@ -24,7 +24,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CSSO version 2.3.0.
+   Now all calls of the `ExecuteResource` method takes the assembly as second
+   parameter.
 
    ====================
    POST-INSTALL ACTIONS

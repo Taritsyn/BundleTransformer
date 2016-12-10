@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: Autoprefixer v1.9.137
+               README file for Bundle Transformer: Autoprefixer v1.9.138
 
    --------------------------------------------------------------------------------
 
@@ -25,7 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 6.5.3.1.
+   Now all calls of the `ExecuteResource` method takes the assembly as second
+   parameter.
 
    ====================
    POST-INSTALL ACTIONS

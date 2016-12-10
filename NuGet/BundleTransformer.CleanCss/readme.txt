@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: Clean-css v1.9.135
+                README file for Bundle Transformer: Clean-css v1.9.138
 
    --------------------------------------------------------------------------------
 
@@ -24,7 +24,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 3.4.21.
+   Now all calls of the `ExecuteResource` method takes the assembly as second
+   parameter.
 
    ====================
    POST-INSTALL ACTIONS

@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.9.132
+                README file for Bundle Transformer: TypeScript v1.9.138
 
    --------------------------------------------------------------------------------
 
@@ -29,7 +29,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 2.0.8.
+   Now all calls of the `ExecuteResource` method takes the assembly as second
+   parameter.
 
    ====================
    POST-INSTALL ACTIONS

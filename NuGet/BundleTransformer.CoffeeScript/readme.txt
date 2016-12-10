@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: CoffeeScript v1.9.136
+               README file for Bundle Transformer: CoffeeScript v1.9.138
 
    --------------------------------------------------------------------------------
 
@@ -26,7 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CoffeeScript version 1.12.1.
+   Now all calls of the `ExecuteResource` method takes the assembly as second
+   parameter.
 
    ====================
    POST-INSTALL ACTIONS
