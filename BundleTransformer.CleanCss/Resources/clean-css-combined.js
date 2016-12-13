@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.21
+ * Clean-css v3.4.22
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -3961,6 +3961,7 @@ var CleanCss = (function(){
 		var DEFAULT_ROUNDING_PRECISION = 2;
 		var CHARSET_TOKEN = '@charset';
 		var CHARSET_REGEXP = new RegExp('^' + CHARSET_TOKEN, 'i');
+		var IMPORT_REGEXP = /^@import["'\s]/i;
 
 		var FONT_NUMERAL_WEIGHTS = ['100', '200', '300', '400', '500', '600', '700', '800', '900'];
 		var FONT_NAME_WEIGHTS = ['normal', 'bold', 'bolder', 'lighter'];
@@ -4347,11 +4348,12 @@ var CleanCss = (function(){
 		  return precision;
 		}
 
-		function optimize(tokens, options) {
+		function optimize(tokens, options, context) {
 		  var ie7Hack = options.compatibility.selectors.ie7Hack;
 		  var adjacentSpace = options.compatibility.selectors.adjacentSpace;
 		  var spaceAfterClosingBrace = options.compatibility.properties.spaceAfterClosingBrace;
 		  var mayHaveCharset = false;
+		  var afterContent = false;
 
 		  options.unitsRegexp = buildUnitRegexp(options);
 		  options.precision = buildPrecision(options);
@@ -4363,18 +4365,26 @@ var CleanCss = (function(){
 			  case 'selector':
 				token[1] = cleanUpSelectors(token[1], !ie7Hack, adjacentSpace);
 				optimizeBody(token[2], options);
+				afterContent = true;
 				break;
 			  case 'block':
 				cleanUpBlock(token[1], spaceAfterClosingBrace);
-				optimize(token[2], options);
+				optimize(token[2], options, context);
+				afterContent = true;
 				break;
 			  case 'flat-block':
 				cleanUpBlock(token[1], spaceAfterClosingBrace);
 				optimizeBody(token[2], options);
+				afterContent = true;
 				break;
 			  case 'at-rule':
 				cleanUpAtRule(token[1]);
 				mayHaveCharset = true;
+			}
+
+			if (token[0] == 'at-rule' && IMPORT_REGEXP.test(token[1]) && afterContent) {
+			  context.warnings.push('Ignoring @import rule "' + token[1] + '" as it appears after rules thus browsers will ignore them.');
+			  token[1] = '';
 			}
 
 			if (token[1].length === 0 || (token[2] && token[2].length === 0)) {
@@ -6541,7 +6551,7 @@ var CleanCss = (function(){
 
 		  var tokens = tokenize(data, context);
 
-		  simpleOptimize(tokens, options);
+		  simpleOptimize(tokens, options, context);
 
 		  if (options.advanced)
 			advancedOptimize(tokens, options, context, true);
