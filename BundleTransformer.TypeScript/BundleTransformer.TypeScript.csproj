@@ -54,9 +54,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="Helpers\TypeScriptResourceHelpers.cs" />
+    <Compile Include="Configuration\LibraryFileRegistration.cs" />
+    <Compile Include="Configuration\LibraryFileRegistrationCollection.cs" />
     <Compile Include="Internal\CompilationOptions.cs" />
     <Compile Include="Internal\CompilationResult.cs" />
+    <Compile Include="Internal\ResourceHelpers.cs" />
     <Compile Include="Internal\TypeScriptCompilationException.cs" />
     <Compile Include="Internal\TypeScriptCompiler.cs" />
     <Compile Include="Internal\VirtualFileManager.cs" />
@@ -69,7 +71,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translators\TypeScriptTranslator.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="..\BundleTransformer.snk">
       <Link>BundleTransformer.snk</Link>
@@ -79,9 +80,30 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\typescript-combined.min.js" />
-    <EmbeddedResource Include="Resources\lib.es6.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.collection.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.core.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.generator.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.iterable.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.promise.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.proxy.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.reflect.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.symbol.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2015.symbol.wellknown.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2016.array.include.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2016.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.object.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.sharedmemory.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.string.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es5.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es6.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.dom.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.dom.iterable.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.scripthost.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.webworker.d.ts" />
     <Content Include="Resources\typescript-combined.js" />
-    <EmbeddedResource Include="Resources\lib.d.ts" />
     <Content Include="Resources\LICENSE.txt" />
     <Content Include="Resources\tscHelper.js" />
     <EmbeddedResource Include="Resources\tscHelper.min.js" />

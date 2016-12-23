@@ -69,9 +69,28 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to parse in strict mode and emit
+		/// <code>use strict</code> for each source file
+		/// </summary>
+		public bool AlwaysStrict
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		public bool ForceConsistentCasingInFileNames
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets a list of library file names to be included in the compilation
+		/// </summary>
+		public IList<string> Libs
 		{
 			get;
 			set;
@@ -283,7 +302,7 @@
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// or `EcmaScript2015` (experimental)
+		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, or `EcmaScriptNext`
 		/// </summary>
 		public TargetMode Target
 		{
@@ -325,7 +344,13 @@
 
 			AllowUnreachableCode = tsConfig.AllowUnreachableCode;
 			AllowUnusedLabels = tsConfig.AllowUnusedLabels;
+			AlwaysStrict = tsConfig.AlwaysStrict;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
+			Libs = tsConfig.Libs
+				.Cast<LibraryFileRegistration>()
+				.Select(l => l.LibraryFileName)
+				.ToList()
+				;
 			NewLine = tsConfig.NewLine;
 			NoEmit = tsConfig.NoEmit;
 			NoEmitHelpers = tsConfig.NoEmitHelpers;
@@ -472,7 +497,9 @@
 			{
 				AllowUnreachableCode = AllowUnreachableCode,
 				AllowUnusedLabels = AllowUnusedLabels,
+				AlwaysStrict = AlwaysStrict,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
+				Libs = Libs,
 				NewLine = NewLine,
 				NoEmit = NoEmit,
 				NoEmitHelpers = NoEmitHelpers,

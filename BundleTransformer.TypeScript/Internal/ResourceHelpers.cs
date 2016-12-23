@@ -1,14 +1,22 @@
-﻿namespace BundleTransformer.TypeScript.Helpers
+﻿namespace BundleTransformer.TypeScript.Internal
 {
 	/// <summary>
 	/// TypeScript resource helpers
 	/// </summary>
-	internal static class TypeScriptResourceHelpers
+	internal static class ResourceHelpers
 	{
 		/// <summary>
 		/// Namespace for resources
 		/// </summary>
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.TypeScript.Resources";
+
+		/// <summary>
+		/// Gets a namespace for resources
+		/// </summary>
+		public static string ResourcesNamespace
+		{
+			get { return RESOURCES_NAMESPACE; }
+		}
 
 
 		/// <summary>

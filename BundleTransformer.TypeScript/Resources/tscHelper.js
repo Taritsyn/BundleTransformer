@@ -8,6 +8,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			allowSyntheticDefaultImports: false,
 			allowUnreachableCode: false,
 			allowUnusedLabels: false,
+			alwaysStrict: false,
 			baseUrl: '',
 			charset: '',
 			declarationDir: '',
@@ -16,8 +17,11 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			emitDecoratorMetadata: false,
 			experimentalDecorators: false,
 			forceConsistentCasingInFileNames: false,
+			importHelpers: false,
 			inlineSourceMap: false,
 			inlineSources: false,
+			jsxFactory: false,
+			lib: null,
 			mapRoot: '',
 			module: ts.ModuleKind.None,
 			newLine: 0 /* CrLf */,
@@ -29,6 +33,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			noImplicitAny: false,
 			noImplicitReturns: false,
 			noImplicitThis: false,
+			noImplicitUseStrict: false,
 			noLib: false,
 			noResolve: false,
 			noUnusedLocals: false,
@@ -114,7 +119,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 			var content = virtualFileManager.ReadFile(fileName);
 
-			if (fileName !== this._defaultLibFileName) {
+			if (fileName.length > 0 && fileName.charAt(0) === '/'
+				&& fileName !== this._defaultLibFileName) {
 				this._includedFilePaths.push(fileName);
 			}
 
@@ -131,6 +137,10 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		};
 
 		BtSystem.prototype.getDirectories = null;
+
+		BtSystem.prototype.getEnvironmentVariable = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getEnvironmentVariable'));
+		};
 
 		BtSystem.prototype.readDirectory = function() {
 			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'readDirectory'));
@@ -257,6 +267,10 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			return ts.sys.directoryExists(directoryName);
 		}
 
+		function getEnvironmentVariable(name) {
+			return ts.sys.getEnvironmentVariable ? ts.sys.getEnvironmentVariable(name) : "";
+		}
+
 		return {
 			getSourceFile: getSourceFile,
 			getDefaultLibLocation: getDefaultLibLocation,
@@ -270,6 +284,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			readFile: readFile,
 			trace: trace,
 			directoryExists: directoryExists,
+			getEnvironmentVariable: getEnvironmentVariable,
 			getDirectories: null,
 			realpath: null
 		};

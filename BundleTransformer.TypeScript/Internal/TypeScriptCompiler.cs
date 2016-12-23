@@ -15,8 +15,6 @@
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
-	using Helpers;
-
 	/// <summary>
 	/// TypeScript-compiler
 	/// </summary>
@@ -95,8 +93,8 @@
 
 				Assembly assembly = GetType().Assembly;
 
-				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TYPESCRIPT_LIBRARY_FILE_NAME), assembly);
-				_jsEngine.ExecuteResource(TypeScriptResourceHelpers.GetResourceName(TSC_HELPER_FILE_NAME), assembly);
+				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(TYPESCRIPT_LIBRARY_FILE_NAME), assembly);
+				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(TSC_HELPER_FILE_NAME), assembly);
 			}
 		}
 
@@ -152,7 +150,9 @@
 			var optionsJson = new JObject(
 				new JProperty("allowUnreachableCode", options.AllowUnreachableCode),
 				new JProperty("allowUnusedLabels", options.AllowUnusedLabels),
+				new JProperty("alwaysStrict", options.AlwaysStrict),
 				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
+				new JProperty("lib", options.Libs.Count > 0 ? new JArray(options.Libs) : null),
 				new JProperty("newLine", options.NewLine),
 				new JProperty("noEmit", options.NoEmit),
 				new JProperty("noEmitHelpers", options.NoEmitHelpers),

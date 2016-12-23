@@ -552,6 +552,7 @@
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="libs" type="LibraryFileRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 		<xs:attribute name="allowUnreachableCode" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
@@ -561,6 +562,11 @@
 		<xs:attribute name="allowUnusedLabels" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not report errors on unused labels</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="alwaysStrict" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to parse in strict mode and emit `use strict` for each source file</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="false">
@@ -686,7 +692,7 @@
 		</xs:attribute>
 		<xs:attribute name="target" use="optional" default="EcmaScript3">
 			<xs:annotation>
-				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, or `EcmaScript2015` (experimental)</xs:documentation>
+				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, or `EcmaScriptNext`</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
@@ -694,6 +700,9 @@
 					<xs:enumeration value="EcmaScript5" />
 					<xs:enumeration value="EcmaScript6" />
 					<xs:enumeration value="EcmaScript2015" />
+					<xs:enumeration value="EcmaScript2016" />
+					<xs:enumeration value="EcmaScript2017" />
+					<xs:enumeration value="EcmaScriptNext" />
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>
@@ -703,6 +712,35 @@
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
+
+	<xs:complexType name="LibraryFileRegistrationCollection_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Collection of registered library files</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="add" type="AddLibraryFileRegistration_SchemaType" />
+			<xs:element name="remove" type="RemoveLibraryFileRegistration_SchemaType" />
+			<xs:element name="clear" type="ClearLibraryFileRegistration_SchemaType" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="AddLibraryFileRegistration_SchemaType">
+		<xs:attribute name="libraryFileName" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Library file name</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="RemoveLibraryFileRegistration_SchemaType">
+		<xs:attribute name="libraryFileName" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Library file name</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="ClearLibraryFileRegistration_SchemaType" />
 	<!-- /TypeScript settings -->
 
 	<!-- Hogan settings -->

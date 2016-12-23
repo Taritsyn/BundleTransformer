@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.9.138
+                README file for Bundle Transformer: TypeScript v1.9.140
 
    --------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator`
-   (supports TypeScript (http://www.typescriptlang.org) version 2.0.8). This
+   (supports TypeScript (http://www.typescriptlang.org) version 2.1 RTM). This
    adapter makes translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of
    translated TypeScript-asset.
@@ -29,8 +29,10 @@
    =============
    RELEASE NOTES
    =============
-   Now all calls of the `ExecuteResource` method takes the assembly as second
-   parameter.
+   1. Added support of TypeScript version 2.1 RTM (please note: The 2.1 RTM release
+      is also called '2.1.4');
+   2. In configuration settings of TypeScript-translator was added 2 new properties:
+      `AlwaysStrict` (default `false`) and `Libs` (default empty list).
 
    ====================
    POST-INSTALL ACTIONS

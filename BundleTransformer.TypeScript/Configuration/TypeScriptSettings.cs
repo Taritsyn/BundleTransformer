@@ -30,6 +30,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to parse in strict mode and emit
+		/// <code>use strict</code> for each source file
+		/// </summary>
+		[ConfigurationProperty("alwaysStrict", DefaultValue = false)]
+		public bool AlwaysStrict
+		{
+			get { return (bool)this["alwaysStrict"]; }
+			set { this["alwaysStrict"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = false)]
@@ -37,6 +48,15 @@
 		{
 			get { return (bool)this["forceConsistentCasingInFileNames"]; }
 			set { this["forceConsistentCasingInFileNames"] = value; }
+		}
+
+		/// <summary>
+		/// Gets a list of library files to be included in the compilation
+		/// </summary>
+		[ConfigurationProperty("libs", IsRequired = false)]
+		public LibraryFileRegistrationCollection Libs
+		{
+			get { return (LibraryFileRegistrationCollection)this["libs"]; }
 		}
 
 		/// <summary>
@@ -267,7 +287,7 @@
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// or `EcmaScript2015` (experimental)
+		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, or `EcmaScriptNext`
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
 		public TargetMode Target

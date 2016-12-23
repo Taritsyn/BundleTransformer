@@ -2,12 +2,11 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Reflection;
 
 	using Core.FileSystem;
 	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
-
-	using Helpers;
 
 	/// <summary>
 	/// Virtual file manager
@@ -15,41 +14,48 @@
 	public sealed class VirtualFileManager
 	{
 		/// <summary>
-		/// Name of file, which contains a default <code>lib.d.ts</code> with global declarations
+		/// Name of directory, which contains a TypeScript default libraries
 		/// </summary>
-		private const string DEFAULT_LIBRARY_FILE_NAME = "lib.d.ts";
+		private const string TYPESCRIPT_DEFAULT_LIBRARIES_DIRECTORY_NAME = "DefaultLibraries";
 
 		/// <summary>
-		/// Name of file, which contains a default <code>lib.es6.d.ts</code> with global declarations
+		/// Cache of default libraries
 		/// </summary>
-		private const string DEFAULT_LIBRARY_ES6_FILE_NAME = "lib.es6.d.ts";
+		private static readonly Dictionary<string, string> _defaultLibraryCache;
 
 		/// <summary>
-		/// List of default library file names
+		/// Synchronizer of default library cache
 		/// </summary>
-		private static readonly HashSet<string> _defaultLibraryFileNames = new HashSet<string>
-		{
-			DEFAULT_LIBRARY_FILE_NAME,
-			DEFAULT_LIBRARY_ES6_FILE_NAME
-		};
-
-		/// <summary>
-		/// Content of <code>lib.d.ts</code> file
-		/// </summary>
-		private static readonly Lazy<string> _defaultLibraryContent =
-			new Lazy<string>(() => GetDefaultLibraryContent(DEFAULT_LIBRARY_FILE_NAME));
-
-		/// <summary>
-		/// Content of <code>lib.es6.d.ts</code> file
-		/// </summary>
-		private static readonly Lazy<string> _defaultLibraryEs6Content =
-			new Lazy<string>(() => GetDefaultLibraryContent(DEFAULT_LIBRARY_ES6_FILE_NAME));
+		private static readonly object _defaultLibraryCacheSynchronizer = new object();
 
 		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
+
+		/// <summary>
+		/// Static constructor
+		/// </summary>
+		static VirtualFileManager()
+		{
+			string[] allResourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+			string defaultLibraryResourcePrefix = ResourceHelpers.ResourcesNamespace + "." +
+				TYPESCRIPT_DEFAULT_LIBRARIES_DIRECTORY_NAME + ".";
+			int defaultLibraryResourcePrefixLength = defaultLibraryResourcePrefix.Length;
+			var defaultLibraryCache = new Dictionary<string, string>();
+
+			foreach (string resourceName in allResourceNames)
+			{
+				if (resourceName.StartsWith(defaultLibraryResourcePrefix, StringComparison.Ordinal))
+				{
+					string defaultLibraryFileName = resourceName.Substring(defaultLibraryResourcePrefixLength);
+					defaultLibraryCache.Add(defaultLibraryFileName, null);
+				}
+			}
+
+			_defaultLibraryCache = defaultLibraryCache;
+		}
 
 		/// <summary>
 		/// Constructs a instance of virtual file manager
@@ -68,10 +74,9 @@
 		/// <returns>Content of default library</returns>
 		private static string GetDefaultLibraryContent(string fileName)
 		{
-			string content = Utils.GetResourceAsString(
-				TypeScriptResourceHelpers.GetResourceName(fileName),
-				typeof(VirtualFileManager).Assembly
-			);
+			string resourceName = ResourceHelpers.GetResourceName(
+				TYPESCRIPT_DEFAULT_LIBRARIES_DIRECTORY_NAME + "." + fileName);
+			string content = Utils.GetResourceAsString(resourceName, typeof(VirtualFileManager).Assembly);
 
 			return content;
 		}
@@ -83,7 +88,7 @@
 		/// <returns>true - library exists; false - library does not exist</returns>
 		private static bool DefaultLibraryExists(string path)
 		{
-			bool result = _defaultLibraryFileNames.Contains(path);
+			bool result = _defaultLibraryCache.ContainsKey(path);
 
 			return result;
 		}
@@ -95,20 +100,18 @@
 		/// <returns>Content of default library</returns>
 		private static string ReadDefaultLibrary(string path)
 		{
-			string content;
-
-			switch (path)
+			if (_defaultLibraryCache[path] == null)
 			{
-				case DEFAULT_LIBRARY_FILE_NAME:
-					content = _defaultLibraryContent.Value;
-					break;
-				case DEFAULT_LIBRARY_ES6_FILE_NAME:
-					content = _defaultLibraryEs6Content.Value;
-					break;
-				default:
-					content = string.Empty;
-					break;
+				lock (_defaultLibraryCacheSynchronizer)
+				{
+					if (_defaultLibraryCache[path] == null)
+					{
+						_defaultLibraryCache[path] = GetDefaultLibraryContent(path);
+					}
+				}
 			}
+
+			string content = _defaultLibraryCache[path];
 
 			return content;
 		}

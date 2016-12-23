@@ -1,5 +1,7 @@
 ﻿namespace BundleTransformer.TypeScript.Internal
 {
+	using System.Collections.Generic;
+
 	/// <summary>
 	/// TypeScript compilation options
 	/// </summary>
@@ -24,9 +26,28 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to parse in strict mode and emit
+		/// <code>use strict</code> for each source file
+		/// </summary>
+		public bool AlwaysStrict
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		public bool ForceConsistentCasingInFileNames
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets a list of library file names to be included in the compilation
+		/// </summary>
+		public IList<string> Libs
 		{
 			get;
 			set;
@@ -239,7 +260,7 @@
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// or `EcmaScript2015` (experimental)
+		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, or `EcmaScriptNext`
 		/// </summary>
 		public TargetMode Target
 		{
@@ -265,7 +286,9 @@
 		{
 			AllowUnreachableCode = false;
 			AllowUnusedLabels = false;
+			AlwaysStrict = false;
 			ForceConsistentCasingInFileNames = false;
+			Libs = new List<string>();
 			NewLine = NewLineMode.CrLf;
 			NoEmit = false;
 			NoEmitHelpers = false;
