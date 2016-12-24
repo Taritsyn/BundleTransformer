@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.22
+ * Clean-css v3.4.23
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -5214,7 +5214,7 @@ var CleanCss = (function(){
 		function extractProperties(string, selectors, context) {
 		  var list = [];
 		  var innerComments = [];
-		  var valueSeparator = /[ ,\/]/;
+		  var valueSeparator = /[\s,\/]/;
 
 		  if (typeof string != 'string')
 			return [];
