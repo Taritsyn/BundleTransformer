@@ -5,14 +5,14 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.Less contains translator-adapter `LessTranslator` (supports
-   LESS (http://lesscss.org) version 2.7.1). This adapter makes translation of
+   LESS (http://lesscss.org) version 2.7.2). This adapter makes translation of
    LESS-code to CSS-code. Also contains debugging HTTP-handler `LessAssetHandler`,
    which is responsible for text output of translated LESS-asset.
 
@@ -27,8 +27,7 @@
    =============
    RELEASE NOTES
    =============
-   Now all calls of the `ExecuteResource` method takes the assembly as second
-   parameter.
+   Added support of LESS version 2.7.2.
 
    ====================
    POST-INSTALL ACTIONS
