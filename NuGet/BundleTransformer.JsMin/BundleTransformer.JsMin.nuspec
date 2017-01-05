@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.JsMin</id>
-		<version>1.9.117</version>
+		<version>1.9.143</version>
 		<title>Bundle Transformer: JSMin</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -17,7 +17,7 @@
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Douglas Crockford JSMin</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.92" />
+			<dependency id="BundleTransformer.Core" version="1.9.138" />
 			<dependency id="DouglasCrockford.JsMin" version="1.1.2" />
 		</dependencies>
 		<references>
