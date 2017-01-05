@@ -12,12 +12,13 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>BundleTransformer.JsMin contains one minifier-adapter for minification of JS-code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port of Douglas Crockford's JSMin (http://github.com/douglascrockford/JSMin) version of March 29, 2013.</description>
 		<summary>BundleTransformer.JsMin contains one minifier-adapter for minification of JS-code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port of Douglas Crockford's JSMin version of March 29, 2013.</summary>
-		<copyright>Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<releaseNotes>Added support of JSMin for .NET version 1.1.2.</releaseNotes>
+		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Douglas Crockford JSMin</tags>
 		<dependencies>
 			<dependency id="BundleTransformer.Core" version="1.9.92" />
-			<dependency id="DouglasCrockford.JsMin" version="1.1.1" />
+			<dependency id="DouglasCrockford.JsMin" version="1.1.2" />
 		</dependencies>
 		<references>
 			<reference file="BundleTransformer.JsMin.dll" />
