@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v2.3.0
+* CSSO (CSS Optimizer) v2.3.1
 * http://github.com/css/csso
 *
 * Copyright 2011-2015, Sergey Kryzhanovsky
@@ -1621,15 +1621,16 @@ var CSSO = (function(){
 
 		TRBL.prototype.getValueSequence = function(value, count) {
 			var values = [];
-			var iehack = false;
+			var iehack = '';
 			var hasBadValues = value.sequence.some(function(child) {
 				var special = false;
 
 				switch (child.type) {
 					case 'Identifier':
 						switch (child.name) {
+							case '\\0':
 							case '\\9':
-								iehack = true;
+								iehack = child.name;
 								return;
 
 							case 'inherit':
@@ -1685,7 +1686,7 @@ var CSSO = (function(){
 				return false;
 			}
 
-			if (typeof this.iehack === 'boolean' && this.iehack !== iehack) {
+			if (typeof this.iehack === 'string' && this.iehack !== iehack) {
 				return false;
 			}
 
@@ -1845,7 +1846,7 @@ var CSSO = (function(){
 				result.push({ type: 'Space' }, {
 					type: 'Identifier',
 					info: {},
-					name: '\\9'
+					name: this.iehack
 				});
 			}
 
@@ -2052,7 +2053,7 @@ var CSSO = (function(){
 
 			if (!fingerprint) {
 				var vendorId = '';
-				var hack9 = '';
+				var iehack = '';
 				var special = {};
 
 				declaration.value.sequence.each(function walk(node) {
@@ -2070,8 +2071,8 @@ var CSSO = (function(){
 								vendorId = resolveKeyword(name).vendor;
 							}
 
-							if (/\\9/.test(name)) {
-								hack9 = name;
+							if (/\\[09]/.test(name)) {
+								iehack = RegExp.lastMatch;
 							}
 
 							if (realName === 'cursor') {
@@ -2131,7 +2132,7 @@ var CSSO = (function(){
 					}
 				});
 
-				fingerprint = '|' + Object.keys(special).sort() + '|' + hack9 + vendorId;
+				fingerprint = '|' + Object.keys(special).sort() + '|' + iehack + vendorId;
 
 				fingerprints[declarationId] = fingerprint;
 			}
@@ -6301,7 +6302,7 @@ var CSSO = (function(){
 		}
 
 		var exports = {
-			version: '2.3.0',
+			version: '2.3.1',
 
 			// classes
 			List: List,
