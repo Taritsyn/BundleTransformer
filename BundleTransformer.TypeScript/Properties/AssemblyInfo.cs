@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundle Transformer: TypeScript")]
-[assembly: AssemblyCopyright("Copyright © 2012-2016 Andrey Taritsyn")]
+[assembly: AssemblyCopyright("Copyright © 2012-2017 Andrey Taritsyn")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
 [assembly: Guid("787cf904-0ac2-48c3-a972-8911e496780e")]
 
-[assembly: AssemblyVersion("1.9.140.0")]
-[assembly: AssemblyFileVersion("1.9.140.0")]
+[assembly: AssemblyVersion("1.9.145.0")]
+[assembly: AssemblyFileVersion("1.9.145.0")]

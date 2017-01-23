@@ -1,5 +1,5 @@
 /*!
- * Clean-css v3.4.23
+ * Clean-css v3.4.24
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2016 JakubPawlowicz.com
@@ -1090,7 +1090,7 @@ var CleanCss = (function(){
 		  }
 		};
 
-		['', '-moz-', '-o-', '-webkit-'].forEach(function (prefix) {
+		['', '-moz-', '-o-'].forEach(function (prefix) {
 		  addFourValueShorthand(prefix + 'border-radius', [
 			prefix + 'border-top-left-radius',
 			prefix + 'border-top-right-radius',
