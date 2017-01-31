@@ -1,8 +1,8 @@
 /*!
- * CoffeeScript Compiler v1.12.2
+ * CoffeeScript Compiler v1.12.3
  * http://coffeescript.org
  *
- * Copyright 2009-2015, Jeremy Ashkenas
+ * Copyright 2009-2017 Jeremy Ashkenas
  * Released under the MIT License
  */
 var CoffeeScript = (function(){
@@ -2795,7 +2795,10 @@ var CoffeeScript = (function(){
 //				console.log('Usage: '+args[0]+' FILE');
 //				process.exit(1);
 //			}
-//			var source = require('fs').readFileSync(require('path').normalize(args[1]), "utf8");
+//			var source = '';
+//			var fs = require('fs');
+//			if (typeof fs !== 'undefined' && fs !== null)
+//				source = fs.readFileSync(require('path').normalize(args[1]), "utf8");
 //			return exports.parser.parse(source);
 //		};
 //		if (typeof module !== 'undefined' && require.main === module) {
@@ -6091,9 +6094,10 @@ var CoffeeScript = (function(){
 		};
 
 		Op.prototype.compileFloorDivision = function(o) {
-		  var div, floor;
+		  var div, floor, second;
 		  floor = new Value(new IdentifierLiteral('Math'), [new Access(new PropertyName('floor'))]);
-		  div = new Op('/', this.first, this.second);
+		  second = this.second.isComplex() ? new Parens(this.second) : this.second;
+		  div = new Op('/', this.first, second);
 		  return new Call(floor, [div]).compileToFragments(o);
 		};
 
@@ -6390,7 +6394,7 @@ var CoffeeScript = (function(){
 		  if (this.object) {
 			ref3 = [this.index, this.name], this.name = ref3[0], this.index = ref3[1];
 		  }
-		  if (this.index instanceof Value) {
+		  if (this.index instanceof Value && !this.index.isAssignable()) {
 			this.index.error('index cannot be a pattern matching expression');
 		  }
 		  this.range = this.source instanceof Value && this.source.base instanceof Range && !this.source.properties.length && !this.from;
@@ -6422,7 +6426,7 @@ var CoffeeScript = (function(){
 		  if (name && !this.pattern) {
 			scope.find(name);
 		  }
-		  if (index) {
+		  if (index && !(this.index instanceof Value)) {
 			scope.find(index);
 		  }
 		  if (this.returns) {
@@ -6861,7 +6865,7 @@ var CoffeeScript = (function(){
 	//#region URL: /coffee-script
 	modules['/coffee-script'] = function () {
 	  var exports = {};
-	  var Lexer, SourceMap, base64encode, compile, ext, fn1, fs, helpers, i, len, lexer, packageJson, parser, path, ref, vm, withPrettyErrors,
+	  var Lexer, SourceMap, base64encode, compile, ext, fn1, formatSourcePosition, fs, getSourceMap, helpers, i, len, lexer, packageJson, parser, path, ref, sourceMaps, sources, vm, withPrettyErrors,
 		hasProp = {}.hasOwnProperty;
 
 //	  fs = require('fs');
@@ -6880,7 +6884,7 @@ var CoffeeScript = (function(){
 
 //	  packageJson = require('../../package.json');
 
-	  exports.VERSION = '1.12.2';
+	  exports.VERSION = '1.12.3';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
@@ -6917,11 +6921,17 @@ var CoffeeScript = (function(){
 		};
 	  };
 
+//	  sources = {};
+
+//	  sourceMaps = {};
+
 	  exports.compile = compile = withPrettyErrors(function(code, options) {
-		var currentColumn, currentLine, encoded, extend, fragment, fragments, generateSourceMap, header, i, j, js, len, len1, map, merge, newLines, ref, ref1, sourceMapDataURI, sourceURL, token, tokens, v3SourceMap;
+		var currentColumn, currentLine, encoded, extend, filename, fragment, fragments, generateSourceMap, header, i, j, js, len, len1, map, merge, newLines, ref, ref1, sourceMapDataURI, sourceURL, token, tokens, v3SourceMap;
 		merge = helpers.merge, extend = helpers.extend;
 		options = extend({}, options);
-//		generateSourceMap = options.sourceMap || options.inlineMap;
+//		generateSourceMap = options.sourceMap || options.inlineMap || (options.filename == null);
+//		filename = options.filename || '<anonymous>';
+//		sources[filename] = code;
 //		if (generateSourceMap) {
 //		  map = new SourceMap;
 //		}
@@ -6980,6 +6990,7 @@ var CoffeeScript = (function(){
 //		}
 //		if (generateSourceMap) {
 //		  v3SourceMap = map.generate(options, code);
+//		  sourceMaps[filename] = map;
 //		}
 //		if (options.inlineMap) {
 //		  encoded = base64encode(JSON.stringify(v3SourceMap));
@@ -7016,9 +7027,9 @@ var CoffeeScript = (function(){
 //		  options = {};
 //		}
 //		mainModule = require.main;
-//		mainModule.filename = process.argv[1] = options.filename ? fs.realpathSync(options.filename) : '.';
+//		mainModule.filename = process.argv[1] = options.filename ? fs.realpathSync(options.filename) : '<anonymous>';
 //		mainModule.moduleCache && (mainModule.moduleCache = {});
-//		dir = options.filename ? path.dirname(fs.realpathSync(options.filename)) : fs.realpathSync('.');
+//		dir = options.filename != null ? path.dirname(fs.realpathSync(options.filename)) : fs.realpathSync('.');
 //		mainModule.paths = require('module')._nodeModulePaths(dir);
 //		if (!helpers.isCoffee(mainModule.filename) || require.extensions) {
 //		  answer = compile(code, options);
@@ -7181,6 +7192,100 @@ var CoffeeScript = (function(){
 		})();
 		return helpers.throwSyntaxError("unexpected " + errorText, errorLoc);
 	  };
+
+//	  formatSourcePosition = function(frame, getSourceMapping) {
+//		var as, column, fileLocation, filename, functionName, isConstructor, isMethodCall, line, methodName, source, tp, typeName;
+//		filename = void 0;
+//		fileLocation = '';
+//		if (frame.isNative()) {
+//		  fileLocation = "native";
+//		} else {
+//		  if (frame.isEval()) {
+//			filename = frame.getScriptNameOrSourceURL();
+//			if (!filename) {
+//			  fileLocation = (frame.getEvalOrigin()) + ", ";
+//			}
+//		  } else {
+//			filename = frame.getFileName();
+//		  }
+//		  filename || (filename = "<anonymous>");
+//		  line = frame.getLineNumber();
+//		  column = frame.getColumnNumber();
+//		  source = getSourceMapping(filename, line, column);
+//		  fileLocation = source ? filename + ":" + source[0] + ":" + source[1] : filename + ":" + line + ":" + column;
+//		}
+//		functionName = frame.getFunctionName();
+//		isConstructor = frame.isConstructor();
+//		isMethodCall = !(frame.isToplevel() || isConstructor);
+//		if (isMethodCall) {
+//		  methodName = frame.getMethodName();
+//		  typeName = frame.getTypeName();
+//		  if (functionName) {
+//			tp = as = '';
+//			if (typeName && functionName.indexOf(typeName)) {
+//			  tp = typeName + ".";
+//			}
+//			if (methodName && functionName.indexOf("." + methodName) !== functionName.length - methodName.length - 1) {
+//			  as = " [as " + methodName + "]";
+//			}
+//			return "" + tp + functionName + as + " (" + fileLocation + ")";
+//		  } else {
+//			return typeName + "." + (methodName || '<anonymous>') + " (" + fileLocation + ")";
+//		  }
+//		} else if (isConstructor) {
+//		  return "new " + (functionName || '<anonymous>') + " (" + fileLocation + ")";
+//		} else if (functionName) {
+//		  return functionName + " (" + fileLocation + ")";
+//		} else {
+//		  return fileLocation;
+//		}
+//	  };
+
+//	  getSourceMap = function(filename) {
+//		var answer;
+//		if (sourceMaps[filename] != null) {
+//		  return sourceMaps[filename];
+//		} else if (sourceMaps['<anonymous>'] != null) {
+//		  return sourceMaps['<anonymous>'];
+//		} else if (sources[filename] != null) {
+//		  answer = compile(sources[filename], {
+//			filename: filename,
+//			sourceMap: true
+//		  });
+//		  return answer.sourceMap;
+//		} else {
+//		  return null;
+//		}
+//	  };
+
+//	  Error.prepareStackTrace = function(err, stack) {
+//		var frame, frames, getSourceMapping;
+//		getSourceMapping = function(filename, line, column) {
+//		  var answer, sourceMap;
+//		  sourceMap = getSourceMap(filename);
+//		  if (sourceMap != null) {
+//			answer = sourceMap.sourceLocation([line - 1, column - 1]);
+//		  }
+//		  if (answer != null) {
+//			return [answer[0] + 1, answer[1] + 1];
+//		  } else {
+//			return null;
+//		  }
+//		};
+//		frames = (function() {
+//		  var j, len1, results;
+//		  results = [];
+//		  for (j = 0, len1 = stack.length; j < len1; j++) {
+//			frame = stack[j];
+//			if (frame.getFunction() === exports.run) {
+//			  break;
+//			}
+//			results.push("    at " + (formatSourcePosition(frame, getSourceMapping)));
+//		  }
+//		  return results;
+//		})();
+//		return (err.toString()) + "\n" + (frames.join('\n')) + "\n";
+//	  };
 
 	  return exports;
 	};
