@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.9.145
+                README file for Bundle Transformer: TypeScript v1.9.147
 
    --------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.TypeScript contains translator-adapter `TypeScriptTranslator`
-   (supports TypeScript (http://www.typescriptlang.org) version 2.1.5). This
+   (supports TypeScript (http://www.typescriptlang.org) version 2.2 RC). This
    adapter makes translation of TypeScript-code to JS-code. Also contains debugging
    HTTP-handler `TypeScriptAssetHandler`, which is responsible for text output of
    translated TypeScript-asset.
@@ -29,7 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 2.1.5.
+   Added support of TypeScript version 2.2 RC.
 
    ====================
    POST-INSTALL ACTIONS
