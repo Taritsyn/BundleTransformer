@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.12.3
+ * CoffeeScript Compiler v1.12.4
  * http://coffeescript.org
  *
  * Copyright 2009-2017 Jeremy Ashkenas
@@ -1221,11 +1221,11 @@ var CoffeeScript = (function(){
 				double: true
 			  }, this.formatHeregex);
 			  if (flags) {
-				this.token(',', ',', index, 0);
-				this.token('STRING', '"' + flags + '"', index, flags.length);
+				this.token(',', ',', index - 1, 0);
+				this.token('STRING', '"' + flags + '"', index - 1, flags.length);
 			  }
-			  this.token(')', ')', end, 0);
-			  this.token('REGEX_END', ')', end, 0);
+			  this.token(')', ')', end - 1, 0);
+			  this.token('REGEX_END', ')', end - 1, 0);
 		  }
 		  return end;
 		};
@@ -2858,11 +2858,14 @@ var CoffeeScript = (function(){
 		  return this.parent.namedMethod();
 		};
 
-		Scope.prototype.find = function(name) {
+		Scope.prototype.find = function(name, type) {
+		  if (type == null) {
+			type = 'var';
+		  }
 		  if (this.check(name)) {
 			return true;
 		  }
-		  this.add(name, 'var');
+		  this.add(name, type);
 		  return false;
 		};
 
@@ -4003,6 +4006,22 @@ var CoffeeScript = (function(){
 
 		Call.prototype.children = ['variable', 'args'];
 
+		Call.prototype.updateLocationDataIfMissing = function(locationData) {
+		  var base, ref3;
+		  if (this.locationData && this.needsUpdatedStartLocation) {
+			this.locationData.first_line = locationData.first_line;
+			this.locationData.first_column = locationData.first_column;
+			base = ((ref3 = this.variable) != null ? ref3.base : void 0) || this.variable;
+			if (base.needsUpdatedStartLocation) {
+			  this.variable.locationData.first_line = locationData.first_line;
+			  this.variable.locationData.first_column = locationData.first_column;
+			  base.updateLocationDataIfMissing(locationData);
+			}
+			delete this.needsUpdatedStartLocation;
+		  }
+		  return Call.__super__.updateLocationDataIfMissing.apply(this, arguments);
+		};
+
 		Call.prototype.newInstance = function() {
 		  var base, ref3;
 		  base = ((ref3 = this.variable) != null ? ref3.base : void 0) || this.variable;
@@ -4011,6 +4030,7 @@ var CoffeeScript = (function(){
 		  } else {
 			this.isNew = true;
 		  }
+		  this.needsUpdatedStartLocation = true;
 		  return this;
 		};
 
@@ -5038,7 +5058,7 @@ var CoffeeScript = (function(){
 
 		ModuleSpecifier.prototype.compileNode = function(o) {
 		  var code;
-		  o.scope.add(this.identifier, this.moduleDeclarationType);
+		  o.scope.find(this.identifier, this.moduleDeclarationType);
 		  code = [];
 		  code.push(this.makeCode(this.original.value));
 		  if (this.alias != null) {
@@ -6884,7 +6904,7 @@ var CoffeeScript = (function(){
 
 //	  packageJson = require('../../package.json');
 
-	  exports.VERSION = '1.12.3';
+	  exports.VERSION = '1.12.4';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
@@ -7250,7 +7270,8 @@ var CoffeeScript = (function(){
 //		} else if (sources[filename] != null) {
 //		  answer = compile(sources[filename], {
 //			filename: filename,
-//			sourceMap: true
+//			sourceMap: true,
+//			literate: helpers.isLiterate(filename)
 //		  });
 //		  return answer.sourceMap;
 //		} else {
