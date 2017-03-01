@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Linq;
 
 	using LibSassHost;
@@ -34,9 +33,9 @@
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Virtual file manager
+		/// Value that indicates if the virtual file system wrapper is set
 		/// </summary>
-		private readonly VirtualFileManager _virtualFileManager;
+		private static InterlockedStatedFlag _virtualFileSystemWrapperSetFlag = new InterlockedStatedFlag();
 
 		/// <summary>
 		/// Gets or sets a list of include paths
@@ -98,20 +97,15 @@
 		/// Constructs a instance of Sass- and SCSS-translator
 		/// </summary>
 		public SassAndScssTranslator()
-			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
-				BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
+			: this(BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>
 		/// Constructs a instance of Sass- and SCSS-translator
 		/// </summary>
-		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="sassAndScssConfig">Configuration settings of Sass- and SCSS-translator</param>
-		public SassAndScssTranslator(IVirtualFileSystemWrapper virtualFileSystemWrapper,
-			SassAndScssSettings sassAndScssConfig)
+		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfig)
 		{
-			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
-
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 			IncludePaths = sassAndScssConfig.IncludePaths
 				.Cast<IncludedPathRegistration>()
@@ -127,6 +121,22 @@
 
 
 		/// <summary>
+		/// Sets a virtual file system wrapper
+		/// </summary>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
+		public static void SetVirtualFileSystemWrapper(IVirtualFileSystemWrapper virtualFileSystemWrapper)
+		{
+			if (virtualFileSystemWrapper == null)
+			{
+				throw new ArgumentNullException("virtualFileSystemWrapper",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "virtualFileSystemWrapper"));
+			}
+
+			_virtualFileSystemWrapperSetFlag.Set();
+			SassCompiler.FileManager = new VirtualFileManager(virtualFileSystemWrapper);
+		}
+
+		/// <summary>
 		/// Translates a code of asset written on Sass or SCSS to CSS-code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Sass or SCSS</param>
@@ -138,10 +148,7 @@
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
 			}
 
-			using (var sassCompiler = new SassCompiler(_virtualFileManager))
-			{
-				InnerTranslate(asset, sassCompiler, NativeMinificationEnabled);
-			}
+			InnerTranslate(asset, NativeMinificationEnabled);
 
 			return asset;
 		}
@@ -172,34 +179,34 @@
 
 			bool enableNativeMinification = NativeMinificationEnabled;
 
-			using (var sassCompiler = new SassCompiler(_virtualFileManager))
+			foreach (var asset in assetsToProcessing)
 			{
-				foreach (var asset in assetsToProcessing)
-				{
-					InnerTranslate(asset, sassCompiler, enableNativeMinification);
-				}
+				InnerTranslate(asset, enableNativeMinification);
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, SassCompiler sassCompiler, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, bool enableNativeMinification)
 		{
+			if (_virtualFileSystemWrapperSetFlag.Set())
+			{
+				IVirtualFileSystemWrapper virtualFileSystemWrapper =
+					BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper();
+				SassCompiler.FileManager = new VirtualFileManager(virtualFileSystemWrapper);
+			}
+
 			string assetTypeName = asset.AssetTypeCode == Constants.AssetTypeCode.Sass ? "Sass" : "SCSS";
 			string newContent;
 			string assetUrl = asset.Url;
 			IList<string> dependencies;
-			CompilationOptions options = CreateCompilationOptions(asset.AssetTypeCode, enableNativeMinification);
+			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
 			try
 			{
-				CompilationResult result = sassCompiler.Compile(asset.Content, assetUrl, options: options);
+				CompilationResult result = SassCompiler.Compile(asset.Content, assetUrl, options: options);
 				newContent = result.CompiledContent;
 				dependencies = result.IncludedFilePaths;
-			}
-			catch (FileNotFoundException)
-			{
-				throw;
 			}
 			catch (SassСompilationException e)
 			{
@@ -226,12 +233,11 @@
 		/// <param name="assetTypeCode">Asset type code</param>
 		/// <param name="enableNativeMinification">Flag that indicating to use of native minification</param>
 		/// <returns>Compilation options</returns>
-		private CompilationOptions CreateCompilationOptions(string assetTypeCode, bool enableNativeMinification)
+		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)
 		{
 			var options = new CompilationOptions
 			{
 				IncludePaths = IncludePaths,
-				IndentedSyntax = assetTypeCode == Constants.AssetTypeCode.Sass,
 				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, LshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
 				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, LshLineFeedType>(LineFeedType),

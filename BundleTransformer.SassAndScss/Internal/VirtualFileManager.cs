@@ -1,7 +1,6 @@
 ﻿namespace BundleTransformer.SassAndScss.Internal
 {
 	using System;
-	using System.Text.RegularExpressions;
 
 	using LibSassHost;
 
@@ -13,11 +12,6 @@
 	/// </summary>
 	internal sealed class VirtualFileManager : IFileManager
 	{
-		/// <summary>
-		/// Regular expression for working with the application relative paths
-		/// </summary>
-		private static readonly Regex _appRelativePathRegex = new Regex(@"^\s*~[/\\]");
-
 		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
@@ -34,7 +28,31 @@
 		}
 
 
+		/// <summary>
+		/// Determines whether the beginning of specified path matches the '~/'
+		/// </summary>
+		/// <param name="path">The path</param>
+		/// <returns>true if path starts with the '~/'; otherwise, false</returns>
+		private static bool IsAppRelativePath(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+			}
+
+			bool result = path.Length >= 2 && path[0] == '~' && (path[1] == '/' || path[1] == '\\');
+
+			return result;
+		}
+
 		#region IFileManager implementation
+
+		public bool SupportsConversionToAbsolutePath
+		{
+			get { return true; }
+		}
+
 
 		public string GetCurrentDirectory()
 		{
@@ -64,7 +82,7 @@
 					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
 			}
 
-			bool result = path.StartsWith("/");
+			bool result = path.Length > 0 && path[0] == '/';
 
 			return result;
 		}
@@ -77,7 +95,7 @@
 					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
 			}
 
-			if (!_appRelativePathRegex.IsMatch(path))
+			if (!IsAppRelativePath(path))
 			{
 				return path;
 			}
