@@ -132,6 +132,7 @@
     <Compile Include="Helpers\UrlHelpers.cs" />
     <Compile Include="InterlockedStatedFlag.cs" />
     <Compile Include="StatedFlag.cs" />
+    <Compile Include="Utilities\CharExtensions.cs" />
     <Compile Include="Utilities\SourceCodeNavigator.cs" />
     <Compile Include="Utilities\SourceCodeNodeCoordinates.cs" />
     <Compile Include="HttpHandlers\JsAssetHandler.cs" />

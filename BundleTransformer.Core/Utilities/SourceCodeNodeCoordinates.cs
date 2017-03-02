@@ -43,12 +43,12 @@
 		/// </summary>
 		public bool IsEmpty
 		{
-			get { return (LineNumber == 0 && ColumnNumber == 0); }
+			get { return LineNumber == 0 && ColumnNumber == 0; }
 		}
 
 
 		/// <summary>
-		/// Constructs a instance of source code node coordinates
+		/// Constructs an instance of source code node coordinates
 		/// </summary>
 		/// <param name="lineNumber">Line number</param>
 		/// <param name="columnNumber">Column number</param>

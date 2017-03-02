@@ -33,9 +33,14 @@
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Value that indicates if the virtual file system wrapper is set
+		/// Synchronizer of Sass compiler's initialization
 		/// </summary>
-		private static InterlockedStatedFlag _virtualFileSystemWrapperSetFlag = new InterlockedStatedFlag();
+		private static readonly object _initializationSynchronizer = new object();
+
+		/// <summary>
+		/// Flag that indicates if the Sass compiler is initialized
+		/// </summary>
+		private static bool _initialized;
 
 		/// <summary>
 		/// Gets or sets a list of include paths
@@ -94,14 +99,14 @@
 
 
 		/// <summary>
-		/// Constructs a instance of Sass- and SCSS-translator
+		/// Constructs an instance of Sass- and SCSS-translator
 		/// </summary>
 		public SassAndScssTranslator()
 			: this(BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Sass- and SCSS-translator
+		/// Constructs an instance of Sass- and SCSS-translator
 		/// </summary>
 		/// <param name="sassAndScssConfig">Configuration settings of Sass- and SCSS-translator</param>
 		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfig)
@@ -132,8 +137,35 @@
 					string.Format(CoreStrings.Common_ArgumentIsNull, "virtualFileSystemWrapper"));
 			}
 
-			_virtualFileSystemWrapperSetFlag.Set();
-			SassCompiler.FileManager = new VirtualFileManager(virtualFileSystemWrapper);
+			IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
+
+			lock (_initializationSynchronizer)
+			{
+				SassCompiler.FileManager = virtualFileManager;
+				_initialized = true;
+			}
+		}
+
+		/// <summary>
+		/// Initializes a Sass compiler
+		/// </summary>
+		private static void Initialize()
+		{
+			if (!_initialized)
+			{
+				lock (_initializationSynchronizer)
+				{
+					if (!_initialized)
+					{
+						IVirtualFileSystemWrapper virtualFileSystemWrapper =
+							BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper();
+						IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
+
+						SassCompiler.FileManager = virtualFileManager;
+						_initialized = true;
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -148,7 +180,12 @@
 				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
 			}
 
-			InnerTranslate(asset, NativeMinificationEnabled);
+			Initialize();
+
+			bool enableNativeMinification = NativeMinificationEnabled;
+			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
+
+			InnerTranslate(asset, options, enableNativeMinification);
 
 			return asset;
 		}
@@ -177,34 +214,29 @@
 				return assets;
 			}
 
+			Initialize();
+
 			bool enableNativeMinification = NativeMinificationEnabled;
+			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
 			foreach (var asset in assetsToProcessing)
 			{
-				InnerTranslate(asset, enableNativeMinification);
+				InnerTranslate(asset, options, enableNativeMinification);
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, CompilationOptions sassOptions, bool enableNativeMinification)
 		{
-			if (_virtualFileSystemWrapperSetFlag.Set())
-			{
-				IVirtualFileSystemWrapper virtualFileSystemWrapper =
-					BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper();
-				SassCompiler.FileManager = new VirtualFileManager(virtualFileSystemWrapper);
-			}
-
 			string assetTypeName = asset.AssetTypeCode == Constants.AssetTypeCode.Sass ? "Sass" : "SCSS";
 			string newContent;
 			string assetUrl = asset.Url;
 			IList<string> dependencies;
-			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
 			try
 			{
-				CompilationResult result = SassCompiler.Compile(asset.Content, assetUrl, options: options);
+				CompilationResult result = SassCompiler.Compile(asset.Content, assetUrl, options: sassOptions);
 				newContent = result.CompiledContent;
 				dependencies = result.IncludedFilePaths;
 			}
@@ -230,7 +262,6 @@
 		/// <summary>
 		/// Creates a compilation options
 		/// </summary>
-		/// <param name="assetTypeCode">Asset type code</param>
 		/// <param name="enableNativeMinification">Flag that indicating to use of native minification</param>
 		/// <returns>Compilation options</returns>
 		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)

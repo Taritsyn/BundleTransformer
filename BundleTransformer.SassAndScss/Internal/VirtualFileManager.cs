@@ -5,6 +5,7 @@
 	using LibSassHost;
 
 	using Core.FileSystem;
+	using Core.Utilities;
 	using CoreStrings = Core.Resources.Strings;
 
 	/// <summary>
@@ -19,7 +20,7 @@
 
 
 		/// <summary>
-		/// Constructs a instance of virtual file manager
+		/// Constructs an instance of virtual file manager
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		public VirtualFileManager(IVirtualFileSystemWrapper virtualFileSystemWrapper)
@@ -82,7 +83,33 @@
 					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
 			}
 
-			bool result = path.Length > 0 && path[0] == '/';
+			bool result = false;
+
+			if (path.Length > 0)
+			{
+				int charPosition = 0;
+				char charValue;
+
+				if (path.Length >= 2)
+				{
+					// check if we have a protocol
+					if (path.TryGetChar(charPosition, out charValue) && charValue.IsAlpha())
+					{
+						charPosition++;
+
+						// skip over all alphanumeric characters
+						while (path.TryGetChar(charPosition, out charValue) && charValue.IsAlphaNumeric())
+						{
+							charPosition++;
+						}
+
+						charPosition = charValue == ':' ? charPosition + 1 : 0;
+					}
+				}
+
+				path.TryGetChar(charPosition, out charValue);
+				result = charValue == '/';
+			}
 
 			return result;
 		}
