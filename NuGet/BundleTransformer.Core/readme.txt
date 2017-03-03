@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-                   README file for Bundle Transformer: Core v1.9.138
+                   README file for Bundle Transformer: Core v1.9.152
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -37,12 +37,6 @@
 
    This extension will help your web applications successfully pass a most part of
    the tests in YSlow.
-
-   =============
-   RELEASE NOTES
-   =============
-   Now when you call the overloaded version of the `GetResourceAsString` method,
-   that takes the type, need to pass the resource name without the namespace.
 
    ====================
    POST-INSTALL ACTIONS

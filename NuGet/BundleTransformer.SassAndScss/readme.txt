@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-           README file for Bundle Transformer: Sass and SCSS v1.9.152 Beta 1
+              README file for Bundle Transformer: Sass and SCSS v1.9.152
 
    --------------------------------------------------------------------------------
 
@@ -14,9 +14,16 @@
    BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`.
    This adapter makes translation of Sass- and SCSS-code to CSS-code by using the
    LibSass Host for .NET (http://github.com/Taritsyn/LibSassHost) version 1.0.0
-   Beta 1 (supports libSass version 3.4.3). Also contains debugging HTTP-handler
+   (supports libSass version 3.4.3). Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of translated
    Sass- or SCSS-asset.
+
+   This package does not contain the native implementations of libSass for Windows.
+   Therefore, you need to choose and install the most appropriate package(s) for
+   your platform. The following packages are available:
+
+    * LibSassHost.Native.win-x86
+    * LibSassHost.Native.win-x64
 
    For correct working of the LibSass Host requires `msvcp140.dll` assembly from
    the Visual C++ Redistributable for Visual Studio 2015.
@@ -24,7 +31,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the LibSass Host for .NET version 1.0.0 Beta 1;
+   1. Added support of the LibSass Host for .NET version 1.0.0;
    2. Native assemblies for Windows have been moved to separate packages:
       LibSassHost.Native.win-x86 and LibSassHost.Native.win-x64;
    3. Now the libSass for Windows requires `msvcp140.dll` assembly from the Visual
@@ -33,13 +40,6 @@
    ====================
    POST-INSTALL ACTIONS
    ====================
-   This package does not contain the native implementations of libSass for Windows.
-   Therefore, you need to choose and install the most appropriate package(s) for
-   your platform. The following packages are available:
-
-    * LibSassHost.Native.win-x86
-    * LibSassHost.Native.win-x64
-
    If in your system does not `msvcp140.dll` assembly, then download and install
    the Visual C++ Redistributable for Visual Studio 2015
    (http://www.microsoft.com/en-us/download/details.aspx?id=48145).

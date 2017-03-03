@@ -42,7 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LibSassHost, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3e24e88796a38e46, processorArchitecture=MSIL">
-      <HintPath>..\packages\LibSassHost.1.0.0-beta1\lib\net40-client\LibSassHost.dll</HintPath>
+      <HintPath>..\packages\LibSassHost.1.0.0\lib\net40-client\LibSassHost.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
