@@ -40,8 +40,8 @@
     <AssemblyOriginatorKeyFile>..\BundleTransformer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DouglasCrockford.JsMin, Version=1.1.2.0, Culture=neutral, PublicKeyToken=99147aa1108448b7, processorArchitecture=MSIL">
-      <HintPath>..\packages\DouglasCrockford.JsMin.1.1.2\lib\net40-client\DouglasCrockford.JsMin.dll</HintPath>
+    <Reference Include="DouglasCrockford.JsMin, Version=1.1.3.0, Culture=neutral, PublicKeyToken=99147aa1108448b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\DouglasCrockford.JsMin.1.1.3\lib\net40-client\DouglasCrockford.JsMin.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

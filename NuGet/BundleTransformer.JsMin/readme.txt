@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                  README file for Bundle Transformer: JSMin v1.9.143
+                  README file for Bundle Transformer: JSMin v1.9.153
 
    --------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of JSMin for .NET version 1.1.2.
+   Added support of JSMin for .NET version 1.1.3.
 
    ====================
    POST-INSTALL ACTIONS
