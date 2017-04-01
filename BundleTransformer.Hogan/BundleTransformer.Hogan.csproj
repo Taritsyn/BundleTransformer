@@ -117,7 +117,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
-del "$(ProjectDir)Resources\hoganHelper.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources\hogan.js" –out "$(ProjectDir)Resources\hogan.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\hoganHelper.js" –out "$(ProjectDir)Resources\hoganHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

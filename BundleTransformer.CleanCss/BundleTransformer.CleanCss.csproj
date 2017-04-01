@@ -87,10 +87,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
-del "$(ProjectDir)Resources\clean-css-combined.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\clean-css-combined.js" –out "$(ProjectDir)Resources\clean-css-combined.min.js"
-
-del "$(ProjectDir)Resources\cleanCssHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\cleanCssHelper.js" –out "$(ProjectDir)Resources\cleanCssHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

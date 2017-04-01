@@ -111,10 +111,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
-del "$(ProjectDir)Resources\less-combined.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\less-combined.js" –out "$(ProjectDir)Resources\less-combined.min.js"
-
-del "$(ProjectDir)Resources\lesscHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\lesscHelper.js" –out "$(ProjectDir)Resources\lesscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

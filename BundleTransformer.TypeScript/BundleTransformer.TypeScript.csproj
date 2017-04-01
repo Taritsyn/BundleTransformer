@@ -118,10 +118,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
-del "$(ProjectDir)Resources\typescript-combined.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\typescript-combined.js" –out "$(ProjectDir)Resources\typescript-combined.min.js"
-
-del "$(ProjectDir)Resources\tscHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\tscHelper.js" –out "$(ProjectDir)Resources\tscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

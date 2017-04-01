@@ -112,10 +112,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
-del "$(ProjectDir)Resources\csso-combined.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\csso-combined.js" –out "$(ProjectDir)Resources\csso-combined.min.js"
-
-del "$(ProjectDir)Resources\cssoHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\cssoHelper.js" –out "$(ProjectDir)Resources\cssoHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

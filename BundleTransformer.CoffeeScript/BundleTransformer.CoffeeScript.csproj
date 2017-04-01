@@ -89,10 +89,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\Binaries\Microsoft Ajax Minifier\"
 
-del "$(ProjectDir)Resources\coffeescript-combined.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\coffeescript-combined.js" –out "$(ProjectDir)Resources\coffeescript-combined.min.js"
-
-del "$(ProjectDir)Resources\cscHelper.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources\cscHelper.js" –out "$(ProjectDir)Resources\cscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
