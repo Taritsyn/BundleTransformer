@@ -1,5 +1,5 @@
 /*!
- * Clean-css v4.0.10
+ * Clean-css v4.0.11
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -379,7 +379,7 @@ var CleanCss = (function(){
 		}
 
 		function optimizeUnits(name, value, unitsRegexp) {
-		  if (/^(?:\-moz\-calc|\-webkit\-calc|calc)\(/.test(value)) {
+		  if (/^(?:\-moz\-calc|\-webkit\-calc|calc|rgb|hsl|rgba|hsla)\(/.test(value)) {
 			return value;
 		  }
 
