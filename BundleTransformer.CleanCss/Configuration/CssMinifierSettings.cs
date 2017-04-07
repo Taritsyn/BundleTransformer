@@ -8,31 +8,11 @@
 	public sealed class CssMinifierSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to enable advanced optimizations
-		/// (selector and property merging, reduction, etc)
-		/// </summary>
-		[ConfigurationProperty("advanced", DefaultValue = true)]
-		public bool Advanced
-		{
-			get { return (bool)this["advanced"]; }
-			set { this["advanced"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable properties merging based on their order
-		/// </summary>
-		[ConfigurationProperty("aggressiveMerging", DefaultValue = true)]
-		public bool AggressiveMerging
-		{
-			get { return (bool)this["aggressiveMerging"]; }
-			set { this["aggressiveMerging"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a compatibility mode:
-		///		"ie7" - Internet Explorer 7 compatibility mode;
-		///		"ie8" - Internet Explorer 8 compatibility mode;
-		///		"*" - Internet Explorer 9+ compatibility mode.
+		///		"*" (default) - Internet Explorer 10+ compatibility mode;
+		///		"ie9" - Internet Explorer 9+ compatibility mode;
+		///		"ie8" - Internet Explorer 8+ compatibility mode;
+		///		"ie7" - Internet Explorer 7+ compatibility mode.
 		/// </summary>
 		[ConfigurationProperty("compatibility", DefaultValue = "*")]
 		public string Compatibility
@@ -42,75 +22,40 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to keep line breaks
+		/// Gets a configuration settings of output CSS formatting
 		/// </summary>
-		[ConfigurationProperty("keepBreaks", DefaultValue = false)]
-		public bool KeepBreaks
+		[ConfigurationProperty("formatting")]
+		public FormattingSettings Formatting
 		{
-			get { return (bool)this["keepBreaks"]; }
-			set { this["keepBreaks"] = value; }
+			get { return (FormattingSettings)this["formatting"]; }
 		}
 
 		/// <summary>
-		/// Gets or sets a special comments mode
+		/// Gets or sets a optimization level
 		/// </summary>
-		[ConfigurationProperty("keepSpecialComments", DefaultValue = SpecialCommentsMode.KeepAll)]
-		public SpecialCommentsMode KeepSpecialComments
+		[ConfigurationProperty("level", DefaultValue = OptimizationLevel.One)]
+		public OptimizationLevel Level
 		{
-			get { return (SpecialCommentsMode)this["keepSpecialComments"]; }
-			set { this["keepSpecialComments"] = value; }
+			get { return (OptimizationLevel)this["level"]; }
+			set { this["level"] = value; }
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable <code>@media</code> merging
+		/// Gets a configuration settings of level 1 optimizations
 		/// </summary>
-		[ConfigurationProperty("mediaMerging", DefaultValue = true)]
-		public bool MediaMerging
+		[ConfigurationProperty("level1Optimizations")]
+		public Level1OptimizationSettings Level1Optimizations
 		{
-			get { return (bool)this["mediaMerging"]; }
-			set { this["mediaMerging"] = value; }
+			get { return (Level1OptimizationSettings)this["level1Optimizations"]; }
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable restructuring optimizations
+		/// Gets a configuration settings of level 2 optimizations
 		/// </summary>
-		[ConfigurationProperty("restructuring", DefaultValue = true)]
-		public bool Restructuring
+		[ConfigurationProperty("level2Optimizations")]
+		public Level2OptimizationSettings Level2Optimizations
 		{
-			get { return (bool)this["restructuring"]; }
-			set { this["restructuring"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a rounding precision. -1 disables rounding.
-		/// </summary>
-		[ConfigurationProperty("roundingPrecision", DefaultValue = 2)]
-		[IntegerValidator(MinValue = -1, MaxValue = int.MaxValue, ExcludeRange = false)]
-		public int RoundingPrecision
-		{
-			get { return (int)this["roundingPrecision"]; }
-			set { this["roundingPrecision"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets
-		/// (warning, this may break your styling!)
-		/// </summary>
-		[ConfigurationProperty("semanticMerging", DefaultValue = false)]
-		public bool SemanticMerging
-		{
-			get { return (bool)this["semanticMerging"]; }
-			set { this["semanticMerging"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable shorthand compacting
-		/// </summary>
-		[ConfigurationProperty("shorthandCompacting", DefaultValue = true)]
-		public bool ShorthandCompacting
-		{
-			get { return (bool)this["shorthandCompacting"]; }
-			set { this["shorthandCompacting"] = value; }
+			get { return (Level2OptimizationSettings)this["level2Optimizations"]; }
 		}
 
 		/// <summary>

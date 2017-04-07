@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -17,7 +17,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of TypeScript-translator.
+   Updated definitions for configuration settings of Clean CSS-minifier.
 
    =============
    DOCUMENTATION

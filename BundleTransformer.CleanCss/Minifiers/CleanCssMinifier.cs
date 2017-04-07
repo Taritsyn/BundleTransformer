@@ -37,29 +37,11 @@
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable advanced optimizations
-		/// (selector and property merging, reduction, etc)
-		/// </summary>
-		public bool Advanced
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable properties merging based on their order
-		/// </summary>
-		public bool AggressiveMerging
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a compatibility mode:
-		///		"ie7" - Internet Explorer 7 compatibility mode;
-		///		"ie8" - Internet Explorer 8 compatibility mode;
-		///		"*" - Internet Explorer 9+ compatibility mode.
+		///		"*" (default) - Internet Explorer 10+ compatibility mode;
+		///		"ie9" - Internet Explorer 9+ compatibility mode;
+		///		"ie8" - Internet Explorer 8+ compatibility mode;
+		///		"ie7" - Internet Explorer 7+ compatibility mode.
 		/// </summary>
 		public string Compatibility
 		{
@@ -68,64 +50,36 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to keep line breaks
+		/// Gets or sets a output CSS formatting
 		/// </summary>
-		public bool KeepBreaks
+		public FormattingOptions FormattingOptions
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a special comments mode
+		/// Gets or sets a optimization level
 		/// </summary>
-		public SpecialCommentsMode KeepSpecialComments
+		public OptimizationLevel Level
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable <code>@media</code> merging
+		/// Gets or sets a level 1 optimization options
 		/// </summary>
-		public bool MediaMerging
+		public Level1OptimizationOptions Level1OptimizationOptions
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable restructuring optimizations
+		/// Gets or sets a level 2 optimization options
 		/// </summary>
-		public bool Restructuring
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a rounding precision. -1 disables rounding.
-		/// </summary>
-		public int RoundingPrecision
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets
-		/// (warning, this may break your styling!)
-		/// </summary>
-		public bool SemanticMerging
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to enable shorthand compacting
-		/// </summary>
-		public bool ShorthandCompacting
+		public Level2OptimizationOptions Level2OptimizationOptions
 		{
 			get;
 			set;
@@ -158,16 +112,75 @@
 		public CleanCssMinifier(Func<IJsEngine> createJsEngineInstance, CleanSettings cleanConfig)
 		{
 			CssMinifierSettings cssMinifierConfig = cleanConfig.Css;
-			Advanced = cssMinifierConfig.Advanced;
-			AggressiveMerging = cssMinifierConfig.AggressiveMerging;
+			FormattingSettings formattingConfig = cssMinifierConfig.Formatting;
+			BreaksInsertingSettings breaksInsertingConfig = formattingConfig.BreaksInserting;
+			SpacesInsertingSettings spacesInsertingConfig = formattingConfig.SpacesInserting;
+			Level1OptimizationSettings level1OptimizationConfig = cssMinifierConfig.Level1Optimizations;
+			Level2OptimizationSettings level2OptimizationConfig = cssMinifierConfig.Level2Optimizations;
+
 			Compatibility = cssMinifierConfig.Compatibility;
-			KeepBreaks = cssMinifierConfig.KeepBreaks;
-			KeepSpecialComments = cssMinifierConfig.KeepSpecialComments;
-			MediaMerging = cssMinifierConfig.MediaMerging;
-			Restructuring = cssMinifierConfig.Restructuring;
-			RoundingPrecision = cssMinifierConfig.RoundingPrecision;
-			SemanticMerging = cssMinifierConfig.SemanticMerging;
-			ShorthandCompacting = cssMinifierConfig.ShorthandCompacting;
+			FormattingOptions = new FormattingOptions
+			{
+				BreaksInsertingOptions = new BreaksInsertingOptions
+				{
+					AfterAtRule = breaksInsertingConfig.AfterAtRule,
+					AfterBlockBegins = breaksInsertingConfig.AfterBlockBegins,
+					AfterBlockEnds = breaksInsertingConfig.AfterBlockEnds,
+					AfterComment = breaksInsertingConfig.AfterComment,
+					AfterProperty = breaksInsertingConfig.AfterProperty,
+					AfterRuleBegins = breaksInsertingConfig.AfterRuleBegins,
+					AfterRuleEnds = breaksInsertingConfig.AfterRuleEnds,
+					BeforeBlockEnds = breaksInsertingConfig.BeforeBlockEnds,
+					BetweenSelectors = breaksInsertingConfig.BetweenSelectors
+				},
+				IndentBy = formattingConfig.IndentBy,
+				IndentWith = formattingConfig.IndentWith,
+				SpacesInsertingOptions = new SpacesInsertingOptions
+				{
+					AroundSelectorRelation = spacesInsertingConfig.AroundSelectorRelation,
+					BeforeBlockBegins = spacesInsertingConfig.BeforeBlockBegins,
+					BeforeValue = spacesInsertingConfig.BeforeValue
+				},
+				WrapAt = formattingConfig.WrapAt
+			};
+			Level = cssMinifierConfig.Level;
+			Level1OptimizationOptions = new Level1OptimizationOptions
+			{
+				CleanupCharsets = level1OptimizationConfig.CleanupCharsets,
+				NormalizeUrls = level1OptimizationConfig.NormalizeUrls,
+				OptimizeBackground = level1OptimizationConfig.OptimizeBackground,
+				OptimizeBorderRadius = level1OptimizationConfig.OptimizeBorderRadius,
+				OptimizeFilter = level1OptimizationConfig.OptimizeFilter,
+				OptimizeFont = level1OptimizationConfig.OptimizeFont,
+				OptimizeFontWeight = level1OptimizationConfig.OptimizeFontWeight,
+				OptimizeOutline = level1OptimizationConfig.OptimizeOutline,
+				RemoveNegativePaddings = level1OptimizationConfig.RemoveNegativePaddings,
+				RemoveQuotes = level1OptimizationConfig.RemoveQuotes,
+				RemoveWhitespace = level1OptimizationConfig.RemoveWhitespace,
+				ReplaceMultipleZeros = level1OptimizationConfig.ReplaceMultipleZeros,
+				ReplaceTimeUnits = level1OptimizationConfig.ReplaceTimeUnits,
+				ReplaceZeroUnits = level1OptimizationConfig.ReplaceZeroUnits,
+				RoundingPrecision = level1OptimizationConfig.RoundingPrecision,
+				SelectorsSortingMethod = level1OptimizationConfig.SelectorsSortingMethod,
+				SpecialComments = level1OptimizationConfig.SpecialComments,
+				TidyAtRules = level1OptimizationConfig.TidyAtRules,
+				TidyBlockScopes = level1OptimizationConfig.TidyBlockScopes,
+				TidySelectors = level1OptimizationConfig.TidySelectors
+			};
+			Level2OptimizationOptions = new Level2OptimizationOptions
+			{
+				MergeAdjacentRules = level2OptimizationConfig.MergeAdjacentRules,
+				MergeIntoShorthands = level2OptimizationConfig.MergeIntoShorthands,
+				MergeMedia = level2OptimizationConfig.MergeMedia,
+				MergeNonAdjacentRules = level2OptimizationConfig.MergeNonAdjacentRules,
+				MergeSemantically = level2OptimizationConfig.MergeSemantically,
+				OverrideProperties = level2OptimizationConfig.OverrideProperties,
+				ReduceNonAdjacentRules = level2OptimizationConfig.ReduceNonAdjacentRules,
+				RemoveDuplicateFontRules = level2OptimizationConfig.RemoveDuplicateFontRules,
+				RemoveDuplicateMediaBlocks = level2OptimizationConfig.RemoveDuplicateMediaBlocks,
+				RemoveDuplicateRules = level2OptimizationConfig.RemoveDuplicateRules,
+				RestructureRules = level2OptimizationConfig.RestructureRules
+			};
 			Severity = cssMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
@@ -288,16 +301,11 @@
 		{
 			var options = new CleaningOptions
 			{
-				Advanced = Advanced,
-				AggressiveMerging = AggressiveMerging,
 				Compatibility = Compatibility,
-				KeepBreaks = KeepBreaks,
-				KeepSpecialComments = KeepSpecialComments,
-				MediaMerging = MediaMerging,
-				Restructuring = Restructuring,
-				RoundingPrecision = RoundingPrecision,
-				SemanticMerging = SemanticMerging,
-				ShorthandCompacting = ShorthandCompacting,
+				FormattingOptions = FormattingOptions,
+				Level = Level,
+				Level1OptimizationOptions = Level1OptimizationOptions,
+				Level2OptimizationOptions = Level2OptimizationOptions,
 				Severity = Severity
 			};
 

@@ -2,48 +2,10 @@
 var cleanCssHelper = (function (CleanCss, undefined) {
 	'use strict';
 
-	var exports = {},
-		defaultOptions = {
-			advanced: true,
-			aggressiveMerging: true,
-			benchmark: false,
-			compatibility: '*',
-			debug: false,
-			inliner: undefined,
-			keepBreaks: false,
-			keepSpecialComments: '*',
-			mediaMerging: true,
-			processImport: false,
-			processImportFrom: false,
-			rebase: false,
-			restructuring: true,
-			root: '',
-			relativeTo: '',
-			roundingPrecision: 2,
-			semanticMerging: false,
-			shorthandCompacting: true,
-			sourceMap: false,
-			target: null
-		}
-		;
-
-	function mix(destination, source) {
-		var propertyName;
-
-		destination = destination || {};
-
-		for (propertyName in source) {
-			if (source.hasOwnProperty(propertyName)) {
-				destination[propertyName] = source[propertyName];
-			}
-		}
-
-		return destination;
-	}
+	var exports = {};
 
 	exports.minify = function (code, options) {
-		var cleanOptions,
-			cleaner,
+		var cleaner,
 			data,
 			result = {},
 			minifiedCode,
@@ -51,8 +13,8 @@ var cleanCssHelper = (function (CleanCss, undefined) {
 			warnings
 			;
 
-		cleanOptions = mix(mix({}, defaultOptions), options);
-		cleaner = new CleanCss(cleanOptions);
+		options = options || {};
+		cleaner = new CleanCss(options);
 
 		data = cleaner.minify(code);
 

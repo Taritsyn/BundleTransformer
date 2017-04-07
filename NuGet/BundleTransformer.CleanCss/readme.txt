@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.CleanCss contains one minifier-adapter for minification of
    CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css
-   (http://github.com/jakubpawlowicz/clean-css) version 3.4.24.
+   (http://github.com/jakubpawlowicz/clean-css) version 4.0.10.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
@@ -24,7 +24,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 3.4.24.
+   1. Added support of Clean-css version 4.0.10;
+   2. Completely changed the configuration settings of CSS-minifier, therefore it
+      is recommended to remove old settings from `Web.config` file.
 
    ====================
    POST-INSTALL ACTIONS

@@ -52,15 +52,27 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BreaksInsertingOptions.cs" />
+    <Compile Include="Configuration\BreaksInsertingSettings.cs" />
     <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
     <Compile Include="Configuration\CleanSettings.cs" />
     <Compile Include="Configuration\CssMinifierSettings.cs" />
+    <Compile Include="Configuration\Level1OptimizationSettings.cs" />
+    <Compile Include="Configuration\FormattingSettings.cs" />
+    <Compile Include="Configuration\SpacesInsertingSettings.cs" />
+    <Compile Include="Level1OptimizationOptions.cs" />
+    <Compile Include="FormattingOptions.cs" />
+    <Compile Include="IndentType.cs" />
     <Compile Include="Internal\CleaningOptions.cs" />
     <Compile Include="Internal\CssCleaner.cs" />
     <Compile Include="Internal\CssCleaningException.cs" />
+    <Compile Include="Configuration\Level2OptimizationSettings.cs" />
+    <Compile Include="Level2OptimizationOptions.cs" />
     <Compile Include="Minifiers\CleanCssMinifier.cs" />
+    <Compile Include="OptimizationLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpecialCommentsMode.cs" />
+    <Compile Include="SelectorsSortingMethod.cs" />
+    <Compile Include="SpacesInsertingOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">

@@ -2179,83 +2179,31 @@ to preserve references to external symbols.</xs:documentation>
 		<xs:annotation>
 			<xs:documentation>Configuration settings of Clean CSS-minifier</xs:documentation>
 		</xs:annotation>
-		<xs:attribute name="advanced" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable advanced optimizations (selector and property merging, reduction, etc)</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="aggressiveMerging" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable properties merging based on their order</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
+		<xs:all>
+			<xs:element name="formatting" type="CleanFormattingSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="level1Optimizations" type="CleanLevel1OptimizationSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="level2Optimizations" type="CleanLevel2OptimizationSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
 		<xs:attribute name="compatibility" type="xs:string" use="optional" default="*">
 			<xs:annotation>
 				<xs:documentation>Compatibility mode:
- "ie7" - Internet Explorer 7 compatibility mode;
- "ie8" - Internet Explorer 8 compatibility mode;
- "*" - Internet Explorer 9+ compatibility mode.</xs:documentation>
+ "*" (default) - Internet Explorer 10+ compatibility mode;
+ "ie9" - Internet Explorer 9+ compatibility mode;
+ "ie8" - Internet Explorer 8+ compatibility mode;
+ "ie7" - Internet Explorer 7+ compatibility mode.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="keepBreaks" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="level" use="optional" default="One">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to keep line breaks</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="keepSpecialComments" use="optional" default="KeepAll">
-			<xs:annotation>
-				<xs:documentation>Special comments mode</xs:documentation>
+				<xs:documentation>Optimization level</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
-					<xs:enumeration value="KeepAll">
-						<xs:annotation>
-							<xs:documentation>Keep all special comments</xs:documentation>
-						</xs:annotation>
-					</xs:enumeration>
-					<xs:enumeration value="KeepFirstOne">
-						<xs:annotation>
-							<xs:documentation>Keep first one special comment</xs:documentation>
-						</xs:annotation>
-					</xs:enumeration>
-					<xs:enumeration value="RemoveAll">
-						<xs:annotation>
-							<xs:documentation>Remove all special comments</xs:documentation>
-						</xs:annotation>
-					</xs:enumeration>
+					<xs:enumeration value="Zero" />
+					<xs:enumeration value="One" />
+					<xs:enumeration value="Two" />
 				</xs:restriction>
 			</xs:simpleType>
-		</xs:attribute>
-		<xs:attribute name="mediaMerging" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable `@media` merging</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="restructuring" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable restructuring optimizations</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="roundingPrecision" use="optional" default="2">
-			<xs:annotation>
-				<xs:documentation>Rounding precision. -1 disables rounding.</xs:documentation>
-			</xs:annotation>
-			<xs:simpleType>
-				<xs:restriction base="xs:int">
-					<xs:minInclusive value="-1" />
-					<xs:maxInclusive value="2147483647" />
-				</xs:restriction>
-			</xs:simpleType>
-		</xs:attribute>
-		<xs:attribute name="semanticMerging" type="Boolean_SchemaType" use="optional" default="false">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable unsafe mode by assuming BEM-like semantic stylesheets (warning, this may break your styling!)</xs:documentation>
-			</xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="shorthandCompacting" type="Boolean_SchemaType" use="optional" default="true">
-			<xs:annotation>
-				<xs:documentation>Flag for whether to enable shorthand compacting</xs:documentation>
-			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="severity" use="optional" default="0">
 			<xs:annotation>
@@ -2269,6 +2217,297 @@ to preserve references to external symbols.</xs:documentation>
 					<xs:maxInclusive value="1" />
 				</xs:restriction>
 			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="CleanFormattingSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of output CSS formatting</xs:documentation>
+		</xs:annotation>
+		<xs:all>
+			<xs:element name="breaksInserting" type="CleanBreaksInsertingSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="spacesInserting" type="CleanSpacesInsertingSettings_SchemaType" minOccurs="0" maxOccurs="1" />
+		</xs:all>
+		<xs:attribute name="indentBy" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>Number of characters to indent with</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="0" />
+					<xs:maxInclusive value="2147483647" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="indentWith" use="optional" default="Space">
+			<xs:annotation>
+				<xs:documentation>Character to indent with</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="Space" />
+					<xs:enumeration value="Tab" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="wrapAt" use="optional" default="0">
+			<xs:annotation>
+				<xs:documentation>Maximum line length</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="0" />
+					<xs:maxInclusive value="2147483647" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="CleanBreaksInsertingSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of breaks inserting</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="afterAtRule" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after at-rule (e.g. `@charset`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="afterBlockBegins" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after a beginning of block (e.g. `@media`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="afterBlockEnds" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after a ending of block</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="afterComment" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after a comment</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="afterProperty" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after a property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="afterRuleBegins" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after a rule begins</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="afterRuleEnds" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break after a rule ends</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="beforeBlockEnds" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break before a block ends</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="betweenSelectors" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a line break between selectors</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="CleanSpacesInsertingSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of spaces inserting</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="aroundSelectorRelation" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a spaces around selector relations (e.g. `div &gt; a`>)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="beforeBlockBegins" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a space before a block begins (e.g. `.block {`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="beforeValue" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to insert a space before a value (e.g. `width: 1rem`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="CleanLevel1OptimizationSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of level 1 optimizations</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="cleanupCharsets" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to move `@charset` to the front of a stylesheet</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="normalizeUrls" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to normalize URL</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="optimizeBackground" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize `background` property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="optimizeBorderRadius" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize `border-radius` property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="optimizeFilter" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize `filter` property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="optimizeFont" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize `font` property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="optimizeFontWeight" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize `font-weight` property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="optimizeOutline" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize `outline` property</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeNegativePaddings" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove negative paddings</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeQuotes" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove unnecessary quotes</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeWhitespace" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove unused whitespace</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="replaceMultipleZeros" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove redundant zeros</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="replaceTimeUnits" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to replace time units with shorter values</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="replaceZeroUnits" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to replace zero values with units</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="roundingPrecision" type="xs:string" use="optional" default="off">
+			<xs:annotation>
+				<xs:documentation>Rounding precision:
+ "off" (default) - all precision changes are disabled;
+ N - number of decimal places.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="selectorsSortingMethod" use="optional" default="Standard">
+			<xs:annotation>
+				<xs:documentation>Selector sorting method</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="Standard" />
+					<xs:enumeration value="Natural" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="specialComments" type="xs:string" use="optional" default="all">
+			<xs:annotation>
+				<xs:documentation>Number of `/*! ... */` comments preserved</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tidyAtRules" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize at-rules (e.g. `@charset`, `@import`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tidyBlockScopes" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize block scopes (e.g. `@media`)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tidySelectors" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize selectors</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="CleanLevel2OptimizationSettings_SchemaType">
+		<xs:annotation>
+			<xs:documentation>Configuration settings of level 2 optimizations</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="mergeAdjacentRules" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to merge adjacent rules</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="mergeIntoShorthands" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to merge properties into shorthands</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="mergeMedia" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to merge `@media`</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="mergeNonAdjacentRules" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to merge non-adjacent rules</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="mergeSemantically" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to merge semantically</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="overrideProperties" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to override properties based on understandability</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="reduceNonAdjacentRules" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to reduce non-adjacent rules</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeDuplicateFontRules" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove duplicate `@font-face`</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeDuplicateMediaBlocks" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove duplicate `@media`</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="removeDuplicateRules" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove duplicate rules</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="restructureRules" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to restructure rules</xs:documentation>
+			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
 	<!-- /Clean-css settings -->
