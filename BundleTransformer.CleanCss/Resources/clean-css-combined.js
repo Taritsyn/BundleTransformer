@@ -1,5 +1,5 @@
 /*!
- * Clean-css v4.0.11
+ * Clean-css v4.0.12
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -1278,9 +1278,9 @@ var CleanCss = (function(){
 			wasWhitespace = isWhitespace;
 		  }
 
-		  return stripped
-			.join('')
-			.replace(withCaseAttribute ? CASE_RESTORE_PATTERN : null, '$1 $2]');
+		  return withCaseAttribute ?
+			stripped.join('').replace(CASE_RESTORE_PATTERN, '$1 $2]') :
+			stripped.join('');
 		}
 
 		function removeQuotes(value) {
