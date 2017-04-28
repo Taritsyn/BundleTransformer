@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: IntelliSense v1.9.154
+               README file for Bundle Transformer: IntelliSense v1.9.156
 
    --------------------------------------------------------------------------------
 
@@ -17,7 +17,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of Clean CSS-minifier.
+   Updated definitions for configuration settings of TypeScript-translator.
 
    =============
    DOCUMENTATION

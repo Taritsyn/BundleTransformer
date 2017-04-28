@@ -151,6 +151,7 @@
 				new JProperty("allowUnreachableCode", options.AllowUnreachableCode),
 				new JProperty("allowUnusedLabels", options.AllowUnusedLabels),
 				new JProperty("alwaysStrict", options.AlwaysStrict),
+				new JProperty("downlevelIteration", options.DownlevelIteration),
 				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
 				new JProperty("lib", options.Libs.Count > 0 ? new JArray(options.Libs) : null),
 				new JProperty("newLine", options.NewLine),

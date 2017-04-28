@@ -41,6 +41,17 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to provide full support for iterables in <code>for-of</code>,
+		/// spread, and destructuring when targeting 'ES5' or 'ES3'
+		/// </summary>
+		[ConfigurationProperty("downlevelIteration", DefaultValue = false)]
+		public bool DownlevelIteration
+		{
+			get { return (bool)this["downlevelIteration"]; }
+			set { this["downlevelIteration"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = false)]

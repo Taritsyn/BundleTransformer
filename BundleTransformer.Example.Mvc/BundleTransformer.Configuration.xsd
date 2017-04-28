@@ -569,6 +569,11 @@
 				<xs:documentation>Flag for whether to parse in strict mode and emit `use strict` for each source file</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="downlevelIteration" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to provide full support for iterables in `for-of`, spread, and destructuring when targeting 'ES5' or 'ES3'</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to disallow inconsistently-cased references to the same file</xs:documentation>

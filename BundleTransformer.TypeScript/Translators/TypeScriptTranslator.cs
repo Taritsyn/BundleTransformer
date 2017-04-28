@@ -79,6 +79,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to provide full support for iterables in <code>for-of</code>,
+		/// spread, and destructuring when targeting 'ES5' or 'ES3'
+		/// </summary>
+		public bool DownlevelIteration
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		public bool ForceConsistentCasingInFileNames
@@ -345,6 +355,7 @@
 			AllowUnreachableCode = tsConfig.AllowUnreachableCode;
 			AllowUnusedLabels = tsConfig.AllowUnusedLabels;
 			AlwaysStrict = tsConfig.AlwaysStrict;
+			DownlevelIteration = tsConfig.DownlevelIteration;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
 			Libs = tsConfig.Libs
 				.Cast<LibraryFileRegistration>()
@@ -498,6 +509,7 @@
 				AllowUnreachableCode = AllowUnreachableCode,
 				AllowUnusedLabels = AllowUnusedLabels,
 				AlwaysStrict = AlwaysStrict,
+				DownlevelIteration = DownlevelIteration,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
 				Libs = Libs,
 				NewLine = NewLine,

@@ -36,6 +36,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to provide full support for iterables in <code>for-of</code>,
+		/// spread, and destructuring when targeting 'ES5' or 'ES3'
+		/// </summary>
+		public bool DownlevelIteration
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		public bool ForceConsistentCasingInFileNames
@@ -287,6 +297,7 @@
 			AllowUnreachableCode = false;
 			AllowUnusedLabels = false;
 			AlwaysStrict = false;
+			DownlevelIteration = false;
 			ForceConsistentCasingInFileNames = false;
 			Libs = new List<string>();
 			NewLine = NewLineMode.CrLf;

@@ -13,6 +13,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			charset: '',
 			declarationDir: '',
 			disableSizeLimit: false,
+			downlevelIteration: false,
 			emitBOM: false,
 			emitDecoratorMetadata: false,
 			experimentalDecorators: false,
