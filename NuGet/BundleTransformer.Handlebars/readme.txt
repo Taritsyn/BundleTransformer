@@ -5,14 +5,14 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.Handlebars contains translator-adapter `HandlebarsTranslator`
-   (supports Handlebars (http://handlebarsjs.com) version 4.0.6). This adapter
+   (supports Handlebars (http://handlebarsjs.com) version 4.0.8). This adapter
    makes translation of Handlebars-templates to JS-code. Also contains debugging
    HTTP-handler `HandlebarsAssetHandler`, which is responsible for text output of
    translated Handlebars-asset.
@@ -26,8 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   Now all calls of the `ExecuteResource` method takes the assembly as second
-   parameter.
+   Added support of Handlebars version 4.0.8.
 
    ====================
    POST-INSTALL ACTIONS
