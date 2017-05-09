@@ -154,6 +154,7 @@
 				OptimizeFont = level1OptimizationConfig.OptimizeFont,
 				OptimizeFontWeight = level1OptimizationConfig.OptimizeFontWeight,
 				OptimizeOutline = level1OptimizationConfig.OptimizeOutline,
+				RemoveEmpty = level1OptimizationConfig.RemoveEmpty,
 				RemoveNegativePaddings = level1OptimizationConfig.RemoveNegativePaddings,
 				RemoveQuotes = level1OptimizationConfig.RemoveQuotes,
 				RemoveWhitespace = level1OptimizationConfig.RemoveWhitespace,
@@ -175,11 +176,14 @@
 				MergeNonAdjacentRules = level2OptimizationConfig.MergeNonAdjacentRules,
 				MergeSemantically = level2OptimizationConfig.MergeSemantically,
 				OverrideProperties = level2OptimizationConfig.OverrideProperties,
+				RemoveEmpty = level2OptimizationConfig.RemoveEmpty,
 				ReduceNonAdjacentRules = level2OptimizationConfig.ReduceNonAdjacentRules,
 				RemoveDuplicateFontRules = level2OptimizationConfig.RemoveDuplicateFontRules,
 				RemoveDuplicateMediaBlocks = level2OptimizationConfig.RemoveDuplicateMediaBlocks,
 				RemoveDuplicateRules = level2OptimizationConfig.RemoveDuplicateRules,
-				RestructureRules = level2OptimizationConfig.RestructureRules
+				RemoveUnusedAtRules = level2OptimizationConfig.RemoveUnusedAtRules,
+				RestructureRules = level2OptimizationConfig.RestructureRules,
+				SkipProperties = level2OptimizationConfig.SkipProperties
 			};
 			Severity = cssMinifierConfig.Severity;
 

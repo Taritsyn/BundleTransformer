@@ -78,6 +78,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove empty rules and nested blocks
+		/// </summary>
+		public bool RemoveEmpty
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to remove negative paddings
 		/// </summary>
 		public bool RemoveNegativePaddings
@@ -201,6 +210,7 @@
 			OptimizeFont = true;
 			OptimizeFontWeight = true;
 			OptimizeOutline = true;
+			RemoveEmpty = true;
 			RemoveNegativePaddings = true;
 			RemoveQuotes = true;
 			RemoveWhitespace = true;

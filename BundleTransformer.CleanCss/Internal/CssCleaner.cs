@@ -1,6 +1,7 @@
 ﻿namespace BundleTransformer.CleanCss.Internal
 {
 	using System;
+	using System.Linq;
 	using System.Reflection;
 	using System.Text;
 
@@ -233,6 +234,7 @@
 					new JProperty("optimizeFont", level1OptimizationOptions.OptimizeFont),
 					new JProperty("optimizeFontWeight", level1OptimizationOptions.OptimizeFontWeight),
 					new JProperty("optimizeOutline", level1OptimizationOptions.OptimizeOutline),
+					new JProperty("removeEmpty", level1OptimizationOptions.RemoveEmpty),
 					new JProperty("removeNegativePaddings", level1OptimizationOptions.RemoveNegativePaddings),
 					new JProperty("removeQuotes", level1OptimizationOptions.RemoveQuotes),
 					new JProperty("removeWhitespace", level1OptimizationOptions.RemoveWhitespace),
@@ -258,11 +260,14 @@
 						new JProperty("mergeNonAdjacentRules", level2OptimizationOptions.MergeNonAdjacentRules),
 						new JProperty("mergeSemantically", level2OptimizationOptions.MergeSemantically),
 						new JProperty("overrideProperties", level2OptimizationOptions.OverrideProperties),
+						new JProperty("removeEmpty", level2OptimizationOptions.RemoveEmpty),
 						new JProperty("reduceNonAdjacentRules", level2OptimizationOptions.ReduceNonAdjacentRules),
 						new JProperty("removeDuplicateFontRules", level2OptimizationOptions.RemoveDuplicateFontRules),
 						new JProperty("removeDuplicateMediaBlocks", level2OptimizationOptions.RemoveDuplicateMediaBlocks),
 						new JProperty("removeDuplicateRules", level2OptimizationOptions.RemoveDuplicateRules),
-						new JProperty("restructureRules", level2OptimizationOptions.RestructureRules)
+						new JProperty("removeUnusedAtRules", level2OptimizationOptions.RemoveUnusedAtRules),
+						new JProperty("restructureRules", level2OptimizationOptions.RestructureRules),
+						new JProperty("skipProperties", ParseSkippingProperties(level2OptimizationOptions.SkipProperties))
 					));
 				}
 
@@ -310,6 +315,9 @@
 
 			switch (method)
 			{
+				case SelectorsSortingMethod.None:
+					code = "none";
+					break;
 				case SelectorsSortingMethod.Standard:
 					code = "standard";
 					break;
@@ -322,6 +330,19 @@
 			}
 
 			return code;
+		}
+
+		/// <summary>
+		/// Parses a string representation of the skipping properties to list
+		/// </summary>
+		/// <param name="skippingPropertiesString">String representation of the skipping properties</param>
+		/// <returns>Skipping properties list in JSON format</returns>
+		private static JArray ParseSkippingProperties(string skippingPropertiesString)
+		{
+			var skippingProperties = Utils.ConvertToStringCollection(skippingPropertiesString, ',',
+				trimItemValues: true, removeEmptyItems: true);
+
+			return new JArray(skippingProperties.Select(p => new JValue(p)));
 		}
 
 		/// <summary>

@@ -68,6 +68,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove empty rules and nested blocks
+		/// </summary>
+		[ConfigurationProperty("removeEmpty", DefaultValue = true)]
+		public bool RemoveEmpty
+		{
+			get { return (bool)this["removeEmpty"]; }
+			set { this["removeEmpty"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to reduce non-adjacent rules
 		/// </summary>
 		[ConfigurationProperty("reduceNonAdjacentRules", DefaultValue = true)]
@@ -108,6 +118,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove unused at rules
+		/// </summary>
+		[ConfigurationProperty("removeUnusedAtRules", DefaultValue = false)]
+		public bool RemoveUnusedAtRules
+		{
+			get { return (bool)this["removeUnusedAtRules"]; }
+			set { this["removeUnusedAtRules"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to restructure rules
 		/// </summary>
 		[ConfigurationProperty("restructureRules", DefaultValue = false)]
@@ -115,6 +135,16 @@
 		{
 			get { return (bool)this["restructureRules"]; }
 			set { this["restructureRules"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of properties to skip during optimization
+		/// </summary>
+		[ConfigurationProperty("skipProperties", DefaultValue = "")]
+		public string SkipProperties
+		{
+			get { return (string)this["skipProperties"]; }
+			set { this["skipProperties"] = value; }
 		}
 	}
 }

@@ -2384,6 +2384,11 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to optimize `outline` property</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="removeEmpty" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove empty rules and nested blocks</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="removeNegativePaddings" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to remove negative paddings</xs:documentation>
@@ -2428,6 +2433,7 @@ to preserve references to external symbols.</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="None" />
 					<xs:enumeration value="Standard" />
 					<xs:enumeration value="Natural" />
 				</xs:restriction>
@@ -2489,6 +2495,11 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to override properties based on understandability</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="removeEmpty" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove empty rules and nested blocks</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="reduceNonAdjacentRules" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to reduce non-adjacent rules</xs:documentation>
@@ -2509,9 +2520,19 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to remove duplicate rules</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="removeUnusedAtRules" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to remove unused at rules</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="restructureRules" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to restructure rules</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="skipProperties" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>Comma-separated list of properties to skip during optimization</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>

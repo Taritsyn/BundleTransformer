@@ -60,6 +60,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove empty rules and nested blocks
+		/// </summary>
+		public bool RemoveEmpty
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to reduce non-adjacent rules
 		/// </summary>
 		public bool ReduceNonAdjacentRules
@@ -96,9 +105,27 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove unused at rules
+		/// </summary>
+		public bool RemoveUnusedAtRules
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to restructure rules
 		/// </summary>
 		public bool RestructureRules
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of properties to exclude from optimization
+		/// </summary>
+		public string SkipProperties
 		{
 			get;
 			set;
@@ -116,11 +143,14 @@
 			MergeNonAdjacentRules = true;
 			MergeSemantically = false;
 			OverrideProperties = true;
+			RemoveEmpty = true;
 			ReduceNonAdjacentRules = true;
 			RemoveDuplicateFontRules = true;
 			RemoveDuplicateMediaBlocks = true;
 			RemoveDuplicateRules = true;
+			RemoveUnusedAtRules = false;
 			RestructureRules = false;
+			SkipProperties = string.Empty;
 		}
 	}
 }

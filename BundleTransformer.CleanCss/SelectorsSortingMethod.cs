@@ -5,6 +5,7 @@
 	/// </summary>
 	public enum SelectorsSortingMethod
 	{
+		None,
 		Standard,
 		Natural
 	}

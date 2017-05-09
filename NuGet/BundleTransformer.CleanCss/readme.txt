@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.CleanCss contains one minifier-adapter for minification of
    CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css
-   (http://github.com/jakubpawlowicz/clean-css) version 4.0.12.
+   (http://github.com/jakubpawlowicz/clean-css) version 4.1.1.
 
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
@@ -24,7 +24,12 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 4.0.12.
+   1. Added support of Clean-css version 4.1.1;
+   2. In level 1 optimization settings was added one new property - `RemoveEmpty`
+      (default `true`);
+   3. In level 2 optimization settings was added three new properties:
+      `RemoveEmpty` (default `true`), `RemoveUnusedAtRules` (default `false`) and
+      `SkipProperties` (default empty string).
 
    ====================
    POST-INSTALL ACTIONS

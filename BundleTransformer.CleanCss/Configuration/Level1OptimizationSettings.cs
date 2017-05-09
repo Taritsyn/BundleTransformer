@@ -88,6 +88,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to remove empty rules and nested blocks
+		/// </summary>
+		[ConfigurationProperty("removeEmpty", DefaultValue = true)]
+		public bool RemoveEmpty
+		{
+			get { return (bool)this["removeEmpty"]; }
+			set { this["removeEmpty"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to remove negative paddings
 		/// </summary>
 		[ConfigurationProperty("removeNegativePaddings", DefaultValue = true)]

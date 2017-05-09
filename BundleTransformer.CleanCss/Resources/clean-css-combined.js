@@ -1,5 +1,5 @@
 /*!
- * Clean-css v4.0.12
+ * Clean-css v4.1.1
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -82,10 +82,6 @@ var CleanCss = (function(){
 		var CHARSET_REGEXP = new RegExp('^' + CHARSET_TOKEN, 'i');
 
 		var DEFAULT_ROUNDING_PRECISION = require('/options/rounding-precision').DEFAULT;
-
-		var FONT_NUMERAL_WEIGHTS = ['100', '200', '300', '400', '500', '600', '700', '800', '900'];
-		var FONT_NAME_WEIGHTS = ['normal', 'bold', 'bolder', 'lighter'];
-		var FONT_NAME_WEIGHTS_WITHOUT_NORMAL = ['bold', 'bolder', 'lighter'];
 
 		var WHOLE_PIXEL_VALUE = /(?:^|\s|\()(-?\d+)px/;
 		var TIME_VALUE = /^(\-?[\d\.]+)(m?s)$/;
@@ -214,63 +210,6 @@ var CleanCss = (function(){
 		  property.value[0][1] = property.value[0][1]
 			.replace(/,(\S)/g, ', $1')
 			.replace(/ ?= ?/g, '=');
-		}
-
-		function optimizeFont(property, options) {
-		  var values = property.value;
-		  var hasNumeral = FONT_NUMERAL_WEIGHTS.indexOf(values[0][1]) > -1 ||
-			values[1] && FONT_NUMERAL_WEIGHTS.indexOf(values[1][1]) > -1 ||
-			values[2] && FONT_NUMERAL_WEIGHTS.indexOf(values[2][1]) > -1;
-		  var canOptimizeFontWeight = options.level[OptimizationLevel.One].optimizeFontWeight;
-		  var normalCount = 0;
-		  var toOptimize;
-
-		  if (!canOptimizeFontWeight) {
-			return;
-		  }
-
-		  if (hasNumeral) {
-			return;
-		  }
-
-		  if (values[1] && values[1][1] == '/') {
-			return;
-		  }
-
-		  if (values[0][1] == 'normal') {
-			normalCount++;
-		  }
-
-		  if (values[1] && values[1][1] == 'normal') {
-			normalCount++;
-		  }
-
-		  if (values[2] && values[2][1] == 'normal') {
-			normalCount++;
-		  }
-
-		  if (normalCount > 1) {
-			return;
-		  }
-
-		  if (FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(values[0][1]) > -1) {
-			toOptimize = 0;
-		  } else if (values[1] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(values[1][1]) > -1) {
-			toOptimize = 1;
-		  } else if (values[2] && FONT_NAME_WEIGHTS_WITHOUT_NORMAL.indexOf(values[2][1]) > -1) {
-			toOptimize = 2;
-		  } else if (FONT_NAME_WEIGHTS.indexOf(values[0][1]) > -1) {
-			toOptimize = 0;
-		  } else if (values[1] && FONT_NAME_WEIGHTS.indexOf(values[1][1]) > -1) {
-			toOptimize = 1;
-		  } else if (values[2] && FONT_NAME_WEIGHTS.indexOf(values[2][1]) > -1) {
-			toOptimize = 2;
-		  }
-
-		  if (toOptimize !== undefined && canOptimizeFontWeight) {
-			optimizeFontWeight(property, toOptimize);
-			property.dirty = true;
-		  }
 		}
 
 		function optimizeFontWeight(property, atIndex) {
@@ -540,7 +479,7 @@ var CleanCss = (function(){
 				break;
 			  }
 
-			  if (valueIsUrl && !context.validator.isValidUrl(value)) {
+			  if (valueIsUrl && !context.validator.isUrl(value)) {
 				property.unused = true;
 				context.warnings.push('Broken URL \'' + value + '\' at ' + formatPosition(property.value[j][2][0]) + '. Ignoring.');
 				break;
@@ -600,8 +539,6 @@ var CleanCss = (function(){
 			  optimizeBorderRadius(property);
 			} else if (name == 'filter'&& levelOptions.optimizeFilter && options.compatibility.properties.ieFilters) {
 			  optimizeFilter(property);
-			} else if (name == 'font' && levelOptions.optimizeFont) {
-			  optimizeFont(property, options);
 			} else if (name == 'font-weight' && levelOptions.optimizeFontWeight) {
 			  optimizeFontWeight(property, 0);
 			} else if (name == 'outline' && levelOptions.optimizeOutline) {
@@ -774,7 +711,7 @@ var CleanCss = (function(){
 				break;
 			}
 
-			if (token[1].length === 0 || (token[2] && token[2].length === 0)) {
+			if (levelOptions.removeEmpty && (token[1].length === 0 || (token[2] && token[2].length === 0))) {
 			  tokens.splice(i, 1);
 			  i--;
 			  l--;
@@ -1080,17 +1017,15 @@ var CleanCss = (function(){
 		}
 
 		function sortSelectors(selectors, method) {
-		  var sorter;
-
 		  switch (method) {
 			case 'natural':
-			  sorter = naturalSorter;
-			  break;
+			  return selectors.sort(naturalSorter);
 			case 'standard':
-			  sorter = standardSorter;
+			  return selectors.sort(standardSorter);
+			case 'none':
+			case false:
+			  return selectors;
 		  }
-
-		  return selectors.sort(sorter);
 		}
 
 		return sortSelectors;
@@ -1477,6 +1412,22 @@ var CleanCss = (function(){
 	};
 	//#endregion
 
+	//#region URL: /optimizer/level-2/properties/is-mergeable-shorthand
+	modules['/optimizer/level-2/properties/is-mergeable-shorthand'] = function () {
+		var Marker = require('/tokenizer/marker');
+
+		function isMergeableShorthand(shorthand) {
+		  if (shorthand.name != 'font') {
+			return true;
+		  }
+
+		  return shorthand.value[0][1].indexOf(Marker.INTERNAL) == -1;
+		}
+
+		return isMergeableShorthand;
+	};
+	//#endregion
+
 	//#region URL: /optimizer/level-2/properties/merge-into-shorthands
 	modules['/optimizer/level-2/properties/merge-into-shorthands'] = function () {
 		var everyValuesPair = require('/optimizer/level-2/properties/every-values-pair');
@@ -1485,22 +1436,312 @@ var CleanCss = (function(){
 
 		var compactable = require('/optimizer/level-2/compactable');
 		var deepClone = require('/optimizer/level-2/clone').deep;
+		var restoreWithComponents = require('/optimizer/level-2/restore-with-components');
 
+		var restoreFromOptimizing = require('/optimizer/restore-from-optimizing');
 		var wrapSingle = require('/optimizer/wrap-for-optimizing').single;
 
+		var serializeBody = require('/writer/one-time').body;
 		var Token = require('/tokenizer/token');
 
-		function mixedImportance(components) {
-		  var important;
+		function mergeIntoShorthands(properties, validator) {
+		  var candidates = {};
+		  var descriptor;
+		  var componentOf;
+		  var property;
+		  var i, l;
+		  var j, m;
 
-		  for (var name in components) {
-			if (undefined !== important && components[name].important != important)
-			  return true;
+		  // there is no shorthand property made up of less than 3 longhands
+		  if (properties.length < 3) {
+			return;
+		  }
 
-			important = components[name].important;
+		  for (i = 0, l = properties.length; i < l; i++) {
+			property = properties[i];
+			descriptor = compactable[property.name];
+
+			if (property.unused) {
+			  continue;
+			}
+
+			if (property.hack) {
+			  continue;
+			}
+
+			if (property.block) {
+			  continue;
+			}
+
+			invalidateOrCompact(properties, i, candidates, validator);
+
+			if (descriptor && descriptor.componentOf) {
+			  for (j = 0, m = descriptor.componentOf.length; j < m; j++) {
+				componentOf = descriptor.componentOf[j];
+
+				candidates[componentOf] = candidates[componentOf] || {};
+				candidates[componentOf][property.name] = property;
+			  }
+			}
+		  }
+
+		  invalidateOrCompact(properties, i, candidates, validator);
+		}
+
+		function invalidateOrCompact(properties, position, candidates, validator) {
+		  var invalidatedBy = properties[position];
+		  var shorthandName;
+		  var shorthandDescriptor;
+		  var candidateComponents;
+
+		  for (shorthandName in candidates) {
+			if (undefined !== invalidatedBy && shorthandName == invalidatedBy.name) {
+			  continue;
+			}
+
+			shorthandDescriptor = compactable[shorthandName];
+			candidateComponents = candidates[shorthandName];
+			if (invalidatedBy && invalidates(candidates, shorthandName, invalidatedBy)) {
+			  delete candidates[shorthandName];
+			  continue;
+			}
+
+			if (shorthandDescriptor.components.length > Object.keys(candidateComponents).length) {
+			  continue;
+			}
+
+			if (mixedImportance(candidateComponents)) {
+			  continue;
+			}
+
+			if (!overridable(candidateComponents, shorthandName, validator)) {
+			  continue;
+			}
+
+			if (!mergeable(candidateComponents)) {
+			  continue;
+			}
+
+			if (mixedInherit(candidateComponents)) {
+			  replaceWithInheritBestFit(properties, candidateComponents, shorthandName, validator);
+			} else {
+			  replaceWithShorthand(properties, candidateComponents, shorthandName, validator);
+			}
+		  }
+		}
+
+		function invalidates(candidates, shorthandName, invalidatedBy) {
+		  var shorthandDescriptor = compactable[shorthandName];
+		  var invalidatedByDescriptor = compactable[invalidatedBy.name];
+		  var componentName;
+
+		  if ('overridesShorthands' in shorthandDescriptor && shorthandDescriptor.overridesShorthands.indexOf(invalidatedBy.name) > -1) {
+			return true;
+		  }
+
+		  if (invalidatedByDescriptor && 'componentOf' in invalidatedByDescriptor) {
+			for (componentName in candidates[shorthandName]) {
+			  if (invalidatedByDescriptor.componentOf.indexOf(componentName) > -1) {
+				return true;
+			  }
+			}
 		  }
 
 		  return false;
+		}
+
+		function mixedImportance(components) {
+		  var important;
+		  var componentName;
+
+		  for (componentName in components) {
+			if (undefined !== important && components[componentName].important != important) {
+			  return true;
+			}
+
+			important = components[componentName].important;
+		  }
+
+		  return false;
+		}
+
+		function overridable(components, shorthandName, validator) {
+		  var descriptor = compactable[shorthandName];
+		  var newValuePlaceholder = [
+			Token.PROPERTY,
+			[Token.PROPERTY_NAME, shorthandName],
+			[Token.PROPERTY_VALUE, descriptor.defaultValue]
+		  ];
+		  var newProperty = wrapSingle(newValuePlaceholder);
+		  var component;
+		  var mayOverride;
+		  var i, l;
+
+		  populateComponents([newProperty], validator, []);
+
+		  for (i = 0, l = descriptor.components.length; i < l; i++) {
+			component = components[descriptor.components[i]];
+			mayOverride = compactable[component.name].canOverride;
+
+			if (!everyValuesPair(mayOverride.bind(null, validator), newProperty.components[i], component)) {
+			  return false;
+			}
+		  }
+
+		  return true;
+		}
+
+		function mergeable(components) {
+		  var lastCount = null;
+		  var currentCount;
+		  var componentName;
+		  var component;
+		  var descriptor;
+		  var values;
+
+		  for (componentName in components) {
+			component = components[componentName];
+			descriptor = compactable[componentName];
+
+			if (!('restore' in descriptor)) {
+			  continue;
+			}
+
+			restoreFromOptimizing([component.all[component.position]], restoreWithComponents);
+			values = descriptor.restore(component, compactable);
+
+			currentCount = values.length;
+
+			if (lastCount !== null && currentCount !== lastCount) {
+			  return false;
+			}
+
+			lastCount = currentCount;
+		  }
+
+		  return true;
+		}
+
+		function mixedInherit(components) {
+		  var componentName;
+		  var lastValue = null;
+		  var currentValue;
+
+		  for (componentName in components) {
+			currentValue = hasInherit(components[componentName]);
+
+			if (lastValue !== null && lastValue !== currentValue) {
+			  return true;
+			}
+
+			lastValue = currentValue;
+		  }
+
+		  return false;
+		}
+
+		function replaceWithInheritBestFit(properties, candidateComponents, shorthandName, validator) {
+		  var viaLonghands = buildSequenceWithInheritLonghands(candidateComponents, shorthandName, validator);
+		  var viaShorthand = buildSequenceWithInheritShorthand(candidateComponents, shorthandName, validator);
+		  var longhandTokensSequence = viaLonghands[0];
+		  var shorthandTokensSequence = viaShorthand[0];
+		  var isLonghandsShorter = serializeBody(longhandTokensSequence).length < serializeBody(shorthandTokensSequence).length;
+		  var newTokensSequence = isLonghandsShorter ? longhandTokensSequence : shorthandTokensSequence;
+		  var newProperty = isLonghandsShorter ? viaLonghands[1] : viaShorthand[1];
+		  var newComponents = isLonghandsShorter ? viaLonghands[2] : viaShorthand[2];
+		  var all = candidateComponents[Object.keys(candidateComponents)[0]].all;
+		  var componentName;
+		  var oldComponent;
+		  var newComponent;
+		  var newToken;
+
+		  newProperty.position = all.length;
+		  newProperty.shorthand = true;
+		  newProperty.dirty = true;
+		  newProperty.all = all;
+		  newProperty.all.push(newTokensSequence[0]);
+
+		  properties.push(newProperty);
+
+		  for (componentName in candidateComponents) {
+			oldComponent = candidateComponents[componentName];
+			oldComponent.unused = true;
+
+			if (oldComponent.name in newComponents) {
+			  newComponent = newComponents[oldComponent.name];
+			  newToken = findTokenIn(newTokensSequence, componentName);
+
+			  newComponent.position = all.length;
+			  newComponent.all = all;
+			  newComponent.all.push(newToken);
+
+			  properties.push(newComponent);
+			}
+		  }
+		}
+
+		function buildSequenceWithInheritLonghands(components, shorthandName, validator) {
+		  var tokensSequence = [];
+		  var inheritComponents = {};
+		  var nonInheritComponents = {};
+		  var descriptor = compactable[shorthandName];
+		  var shorthandToken = [
+			Token.PROPERTY,
+			[Token.PROPERTY_NAME, shorthandName],
+			[Token.PROPERTY_VALUE, descriptor.defaultValue]
+		  ];
+		  var newProperty = wrapSingle(shorthandToken);
+		  var component;
+		  var longhandToken;
+		  var newComponent;
+		  var nameMetadata;
+		  var i, l;
+
+		  populateComponents([newProperty], validator, []);
+
+		  for (i = 0, l = descriptor.components.length; i < l; i++) {
+			component = components[descriptor.components[i]];
+
+			if (hasInherit(component)) {
+			  longhandToken = component.all[component.position].slice(0, 2);
+			  Array.prototype.push.apply(longhandToken, component.value);
+			  tokensSequence.push(longhandToken);
+
+			  newComponent = deepClone(component);
+			  newComponent.value = inferComponentValue(components, newComponent.name);
+
+			  newProperty.components[i] = newComponent;
+			  inheritComponents[component.name] = deepClone(component);
+			} else {
+			  newComponent = deepClone(component);
+			  newComponent.all = component.all;
+			  newProperty.components[i] = newComponent;
+
+			  nonInheritComponents[component.name] = component;
+			}
+		  }
+
+		  nameMetadata = joinMetadata(nonInheritComponents, 1);
+		  shorthandToken[1].push(nameMetadata);
+
+		  restoreFromOptimizing([newProperty], restoreWithComponents);
+
+		  shorthandToken = shorthandToken.slice(0, 2);
+		  Array.prototype.push.apply(shorthandToken, newProperty.value);
+
+		  tokensSequence.unshift(shorthandToken);
+
+		  return [tokensSequence, newProperty, inheritComponents];
+		}
+
+		function inferComponentValue(components, propertyName) {
+		  var descriptor = compactable[propertyName];
+
+		  if ('oppositeTo' in descriptor) {
+			return components[descriptor.oppositeTo].value;
+		  } else {
+			return [[Token.PROPERTY_VALUE, descriptor.defaultValue]];
+		  }
 		}
 
 		function joinMetadata(components, at) {
@@ -1508,29 +1749,97 @@ var CleanCss = (function(){
 		  var component;
 		  var originalValue;
 		  var componentMetadata;
-		  var name;
+		  var componentName;
 
-		  for (name in components) {
-			component = components[name];
+		  for (componentName in components) {
+			component = components[componentName];
 			originalValue = component.all[component.position];
 			componentMetadata = originalValue[at][originalValue[at].length - 1];
 
 			Array.prototype.push.apply(metadata, componentMetadata);
 		  }
 
-		  return metadata;
+		  return metadata.sort(metadataSorter);
 		}
 
-		function replaceWithShorthand(properties, candidateComponents, name, validator) {
-		  var descriptor = compactable[name];
+		function metadataSorter(metadata1, metadata2) {
+		  var line1 = metadata1[0];
+		  var line2 = metadata2[0];
+		  var column1 = metadata1[1];
+		  var column2 = metadata2[1];
+
+		  if (line1 < line2) {
+			return -1;
+		  } else if (line1 === line2) {
+			return column1 < column2 ? -1 : 1;
+		  } else {
+			return 1;
+		  }
+		}
+
+		function buildSequenceWithInheritShorthand(components, shorthandName, validator) {
+		  var tokensSequence = [];
+		  var inheritComponents = {};
+		  var nonInheritComponents = {};
+		  var descriptor = compactable[shorthandName];
+		  var shorthandToken = [
+			Token.PROPERTY,
+			[Token.PROPERTY_NAME, shorthandName],
+			[Token.PROPERTY_VALUE, 'inherit']
+		  ];
+		  var newProperty = wrapSingle(shorthandToken);
+		  var component;
+		  var longhandToken;
+		  var nameMetadata;
+		  var valueMetadata;
+		  var i, l;
+
+		  populateComponents([newProperty], validator, []);
+
+		  for (i = 0, l = descriptor.components.length; i < l; i++) {
+			component = components[descriptor.components[i]];
+
+			if (hasInherit(component)) {
+			  inheritComponents[component.name] = component;
+			} else {
+			  longhandToken = component.all[component.position].slice(0, 2);
+			  Array.prototype.push.apply(longhandToken, component.value);
+			  tokensSequence.push(longhandToken);
+
+			  nonInheritComponents[component.name] = deepClone(component);
+			}
+		  }
+
+		  nameMetadata = joinMetadata(inheritComponents, 1);
+		  shorthandToken[1].push(nameMetadata);
+
+		  valueMetadata = joinMetadata(inheritComponents, 2);
+		  shorthandToken[2].push(valueMetadata);
+
+		  tokensSequence.unshift(shorthandToken);
+
+		  return [tokensSequence, newProperty, nonInheritComponents];
+		}
+
+		function findTokenIn(tokens, componentName) {
+		  var i, l;
+
+		  for (i = 0, l = tokens.length; i < l; i++) {
+			if (tokens[i][1][1] == componentName) {
+			  return tokens[i];
+			}
+		  }
+		}
+
+		function replaceWithShorthand(properties, candidateComponents, shorthandName, validator) {
+		  var descriptor = compactable[shorthandName];
 		  var nameMetadata;
 		  var valueMetadata;
 		  var newValuePlaceholder = [
 			Token.PROPERTY,
-			[Token.PROPERTY_NAME, name],
+			[Token.PROPERTY_NAME, shorthandName],
 			[Token.PROPERTY_VALUE, descriptor.defaultValue]
 		  ];
-		  var mayOverride;
 		  var all;
 
 		  var newProperty = wrapSingle(newValuePlaceholder);
@@ -1541,13 +1850,6 @@ var CleanCss = (function(){
 
 		  for (var i = 0, l = descriptor.components.length; i < l; i++) {
 			var component = candidateComponents[descriptor.components[i]];
-
-			if (hasInherit(component))
-			  return;
-
-			mayOverride = compactable[component.name].canOverride;
-			if (!everyValuesPair(mayOverride.bind(null, validator), newProperty.components[i], component))
-			  return;
 
 			newProperty.components[i] = deepClone(component);
 			newProperty.important = component.important;
@@ -1572,69 +1874,6 @@ var CleanCss = (function(){
 		  properties.push(newProperty);
 		}
 
-		function invalidateOrCompact(properties, position, candidates, validator) {
-		  var property = properties[position];
-
-		  for (var name in candidates) {
-			if (undefined !== property && name == property.name)
-			  continue;
-
-			var descriptor = compactable[name];
-			var candidateComponents = candidates[name];
-			if (descriptor.components.length > Object.keys(candidateComponents).length) {
-			  delete candidates[name];
-			  continue;
-			}
-
-			if (mixedImportance(candidateComponents))
-			  continue;
-
-			replaceWithShorthand(properties, candidateComponents, name, validator);
-		  }
-		}
-
-		function mergeIntoShorthands(properties, validator) {
-		  var candidates = {};
-		  var descriptor;
-		  var componentOf;
-		  var property;
-		  var i, l;
-		  var j, m;
-
-		  if (properties.length < 3)
-			return;
-
-		  for (i = 0, l = properties.length; i < l; i++) {
-			property = properties[i];
-
-			if (property.unused)
-			  continue;
-
-			if (property.hack)
-			  continue;
-
-			if (property.block)
-			  continue;
-
-			descriptor = compactable[property.name];
-			if (!descriptor || !descriptor.componentOf)
-			  continue;
-
-			if (property.shorthand) {
-			  invalidateOrCompact(properties, i, candidates, validator);
-			} else {
-			  for (j = 0, m = descriptor.componentOf.length; j < m; j++) {
-				componentOf = descriptor.componentOf[j];
-
-				candidates[componentOf] = candidates[componentOf] || {};
-				candidates[componentOf][property.name] = property;
-			  }
-			}
-		  }
-
-		  invalidateOrCompact(properties, i, candidates, validator);
-		}
-
 		return mergeIntoShorthands;
 	};
 	//#endregion
@@ -1654,7 +1893,8 @@ var CleanCss = (function(){
 		var OptimizationLevel = require('/options/optimization-level').OptimizationLevel;
 
 		function optimizeProperties(properties, withOverriding, withMerging, context) {
-		  var _properties = wrapForOptimizing(properties, false);
+		  var levelOptions = context.options.level[OptimizationLevel.Two];
+		  var _properties = wrapForOptimizing(properties, false, levelOptions.skipProperties);
 		  var _property;
 		  var i, l;
 
@@ -1667,12 +1907,12 @@ var CleanCss = (function(){
 			}
 		  }
 
-		  if (withOverriding && context.options.level[OptimizationLevel.Two].overrideProperties) {
-			overrideProperties(_properties, withMerging, context.options.compatibility, context.validator);
+		  if (withMerging && levelOptions.mergeIntoShorthands) {
+			mergeIntoShorthands(_properties, context.validator);
 		  }
 
-		  if (withMerging && context.options.level[OptimizationLevel.Two].mergeIntoShorthands) {
-			mergeIntoShorthands(_properties, context.validator);
+		  if (withOverriding && levelOptions.overrideProperties) {
+			overrideProperties(_properties, withMerging, context.options.compatibility, context.validator);
 		  }
 
 		  restoreFromOptimizing(_properties, restoreWithComponents);
@@ -1689,6 +1929,7 @@ var CleanCss = (function(){
 		var everyValuesPair = require('/optimizer/level-2/properties/every-values-pair');
 		var findComponentIn = require('/optimizer/level-2/properties/find-component-in');
 		var isComponentOf = require('/optimizer/level-2/properties/is-component-of');
+		var isMergeableShorthand = require('/optimizer/level-2/properties/is-mergeable-shorthand');
 		var overridesNonComponentShorthand = require('/optimizer/level-2/properties/overrides-non-component-shorthand');
 		var sameVendorPrefixesIn = require('/optimizer/level-2/properties/vendor-prefixes').same;
 
@@ -1760,16 +2001,44 @@ var CleanCss = (function(){
 		function turnIntoMultiplex(property, size) {
 		  property.multiplex = true;
 
-		  for (var i = 0, l = property.components.length; i < l; i++) {
-			var component = property.components[i];
-			if (component.multiplex)
-			  continue;
+		  if (compactable[property.name].shorthand) {
+			turnShorthandValueIntoMultiplex(property, size);
+		  } else {
+			turnLonghandValueIntoMultiplex(property, size);
+		  }
+		}
 
-			var value = component.value.slice(0);
+		function turnShorthandValueIntoMultiplex(property, size) {
+		  var component;
+		  var i, l;
 
-			for (var j = 1; j < size; j++) {
-			  component.value.push([Token.PROPERTY_VALUE, Marker.COMMA]);
-			  Array.prototype.push.apply(component.value, value);
+		  for (i = 0, l = property.components.length; i < l; i++) {
+			component = property.components[i];
+
+			if (!component.multiplex) {
+			  turnLonghandValueIntoMultiplex(component, size);
+			}
+		  }
+		}
+
+		function turnLonghandValueIntoMultiplex(property, size) {
+		  var withRealValue = compactable[property.name].intoMultiplexMode == 'real';
+		  var withValue = withRealValue ?
+			property.value.slice(0) :
+			compactable[property.name].defaultValue;
+		  var i = multiplexSize(property);
+		  var j;
+		  var m = withValue.length;
+
+		  for (; i < size; i++) {
+			property.value.push([Token.PROPERTY_VALUE, Marker.COMMA]);
+
+			if (Array.isArray(withValue)) {
+			  for (j = 0; j < m; j++) {
+				property.value.push(withRealValue ? withValue[j] : [Token.PROPERTY_VALUE, withValue[j]]);
+			  }
+			} else {
+			  property.value.push(withRealValue ? withValue : [Token.PROPERTY_VALUE, withValue]);
 			}
 		  }
 		}
@@ -1811,8 +2080,9 @@ var CleanCss = (function(){
 
 		function overridingFunction(shorthand, validator) {
 		  for (var i = 0, l = shorthand.components.length; i < l; i++) {
-			if (anyValue(validator.isValidFunction, shorthand.components[i]))
+			if (!anyValue(validator.isUrl, shorthand.components[i]) && anyValue(validator.isFunction, shorthand.components[i])) {
 			  return true;
+			}
 		  }
 
 		  return false;
@@ -1958,8 +2228,13 @@ var CleanCss = (function(){
 				if (!sameVendorPrefixesIn([left], right.components))
 				  continue;
 
-				if (!anyValue(validator.isValidFunction, left) && overridingFunction(right, validator))
+				if (!anyValue(validator.isFunction, left) && overridingFunction(right, validator))
 				  continue;
+
+				if (!isMergeableShorthand(right)) {
+				  left.unused = true;
+				  continue;
+				}
 
 				component = findComponentIn(right, left);
 				mayOverride = compactable[left.name].canOverride;
@@ -1976,7 +2251,7 @@ var CleanCss = (function(){
 				  continue;
 				}
 
-				if (!anyValue(validator.isValidFunction, left) && overridingFunction(right, validator)) {
+				if (!anyValue(validator.isFunction, left) && overridingFunction(right, validator)) {
 				  continue;
 				}
 
@@ -2010,6 +2285,9 @@ var CleanCss = (function(){
 				  continue;
 
 				if (overridingFunction(left, validator))
+				  continue;
+
+				if (!isMergeableShorthand(left))
 				  continue;
 
 				component = findComponentIn(left, right);
@@ -2050,6 +2328,11 @@ var CleanCss = (function(){
 				}
 
 				if (right.important && !left.important) {
+				  left.unused = true;
+				  continue;
+				}
+
+				if (!isMergeableShorthand(right)) {
 				  left.unused = true;
 				  continue;
 				}
@@ -2199,7 +2482,7 @@ var CleanCss = (function(){
 			return false;
 		  }
 
-		  if (isPaired && validator.isValidVariable(value1) !== validator.isValidVariable(value2)) {
+		  if (isPaired && validator.isVariable(value1) !== validator.isVariable(value2)) {
 			return false;
 		  }
 
@@ -2247,20 +2530,31 @@ var CleanCss = (function(){
 		var wrapSingle = require('/optimizer/wrap-for-optimizing').single;
 
 		var Token = require('/tokenizer/token');
+		var Marker = require('/tokenizer/marker');
 
 		var formatPosition = require('/utils/format-position');
 
-		var MULTIPLEX_SEPARATOR = ',';
+		function _anyIsInherit(values) {
+		  var i, l;
+
+		  for (i = 0, l = values.length; i < l; i++) {
+			if (values[i][1] == 'inherit') {
+			  return true;
+			}
+		  }
+
+		  return false;
+		}
 
 		function _colorFilter(validator) {
 		  return function (value) {
-			return value[1] == 'invert' || validator.isValidColor(value[1]) || validator.isValidVendorPrefixedValue(value[1]);
+			return value[1] == 'invert' || validator.isColor(value[1]) || validator.isPrefixed(value[1]);
 		  };
 		}
 
 		function _styleFilter(validator) {
 		  return function (value) {
-			return value[1] != 'inherit' && validator.isValidStyle(value[1]) && !validator.isValidColorValue(value[1]);
+			return value[1] != 'inherit' && validator.isStyleKeyword(value[1]) && !validator.isColorFunction(value[1]);
 		  };
 		}
 
@@ -2290,8 +2584,78 @@ var CleanCss = (function(){
 
 		function _widthFilter(validator) {
 		  return function (value) {
-			return value[1] != 'inherit' && validator.isValidWidth(value[1]) && !validator.isValidStyle(value[1]) && !validator.isValidColorValue(value[1]);
+			return value[1] != 'inherit' &&
+			  (validator.isWidth(value[1]) || validator.isUnit(value[1]) && !validator.isDynamicUnit(value[1])) &&
+			  !validator.isStyleKeyword(value[1]) &&
+			  !validator.isColorFunction(value[1]);
 		  };
+		}
+
+		function animation(property, compactable, validator) {
+		  var duration = _wrapDefault('animation-duration', property, compactable);
+		  var timing = _wrapDefault('animation-timing-function', property, compactable);
+		  var delay = _wrapDefault('animation-delay', property, compactable);
+		  var iteration = _wrapDefault('animation-iteration-count', property, compactable);
+		  var direction = _wrapDefault('animation-direction', property, compactable);
+		  var fill = _wrapDefault('animation-fill-mode', property, compactable);
+		  var play = _wrapDefault('animation-play-state', property, compactable);
+		  var name = _wrapDefault('animation-name', property, compactable);
+		  var components = [duration, timing, delay, iteration, direction, fill, play, name];
+		  var values = property.value;
+		  var value;
+		  var durationSet = false;
+		  var timingSet = false;
+		  var delaySet = false;
+		  var iterationSet = false;
+		  var directionSet = false;
+		  var fillSet = false;
+		  var playSet = false;
+		  var nameSet = false;
+		  var i;
+		  var l;
+
+		  if (property.value.length == 1 && property.value[0][1] == 'inherit') {
+			duration.value = timing.value = delay.value = iteration.value = direction.value = fill.value = play.value = name.value = property.value;
+			return components;
+		  }
+
+		  if (values.length > 1 && _anyIsInherit(values)) {
+			throw new InvalidPropertyError('Invalid animation values at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
+		  }
+
+		  for (i = 0, l = values.length; i < l; i++) {
+			value = values[i];
+
+			if (validator.isTime(value[1]) && !durationSet) {
+			  duration.value = [value];
+			  durationSet = true;
+			} else if (validator.isTime(value[1]) && !delaySet) {
+			  delay.value = [value];
+			  delaySet = true;
+			} else if ((validator.isGlobal(value[1]) || validator.isAnimationTimingFunction(value[1])) && !timingSet) {
+			  timing.value = [value];
+			  timingSet = true;
+			} else if ((validator.isAnimationIterationCountKeyword(value[1]) || validator.isPositiveNumber(value[1])) && !iterationSet) {
+			  iteration.value = [value];
+			  iterationSet = true;
+			} else if (validator.isAnimationDirectionKeyword(value[1]) && !directionSet) {
+			  direction.value = [value];
+			  directionSet = true;
+			} else if (validator.isAnimationFillModeKeyword(value[1]) && !fillSet) {
+			  fill.value = [value];
+			  fillSet = true;
+			} else if (validator.isAnimationPlayStateKeyword(value[1]) && !playSet) {
+			  play.value = [value];
+			  playSet = true;
+			} else if ((validator.isAnimationNameKeyword(value[1]) || validator.isIdentifier(value[1])) && !nameSet) {
+			  name.value = [value];
+			  nameSet = true;
+			} else {
+			  throw new InvalidPropertyError('Invalid animation value at ' + formatPosition(value[2][0]) + '. Ignoring.');
+			}
+		  }
+
+		  return components;
 		}
 
 		function background(property, compactable, validator) {
@@ -2326,10 +2690,10 @@ var CleanCss = (function(){
 		  for (var i = values.length - 1; i >= 0; i--) {
 			var value = values[i];
 
-			if (validator.isValidBackgroundAttachment(value[1])) {
+			if (validator.isBackgroundAttachmentKeyword(value[1])) {
 			  attachment.value = [value];
 			  anyValueSet = true;
-			} else if (validator.isValidBackgroundClip(value[1]) || validator.isValidBackgroundOrigin(value[1])) {
+			} else if (validator.isBackgroundClipKeyword(value[1]) || validator.isBackgroundOriginKeyword(value[1])) {
 			  if (clipSet) {
 				origin.value = [value];
 				originSet = true;
@@ -2338,7 +2702,7 @@ var CleanCss = (function(){
 				clipSet = true;
 			  }
 			  anyValueSet = true;
-			} else if (validator.isValidBackgroundRepeat(value[1])) {
+			} else if (validator.isBackgroundRepeatKeyword(value[1])) {
 			  if (repeatSet) {
 				repeat.value.unshift(value);
 			  } else {
@@ -2346,13 +2710,13 @@ var CleanCss = (function(){
 				repeatSet = true;
 			  }
 			  anyValueSet = true;
-			} else if (validator.isValidBackgroundPositionPart(value[1]) || validator.isValidBackgroundSizePart(value[1])) {
+			} else if (validator.isBackgroundPositionKeyword(value[1]) || validator.isBackgroundSizeKeyword(value[1]) || validator.isUnit(value[1]) || validator.isDynamicUnit(value[1])) {
 			  if (i > 0) {
 				var previousValue = values[i - 1];
 
-				if (previousValue[1] == '/') {
+				if (previousValue[1] == Marker.FORWARD_SLASH) {
 				  size.value = [value];
-				} else if (i > 1 && values[i - 2][1] == '/') {
+				} else if (i > 1 && values[i - 2][1] == Marker.FORWARD_SLASH) {
 				  size.value = [previousValue, value];
 				  i -= 2;
 				} else {
@@ -2370,10 +2734,10 @@ var CleanCss = (function(){
 				positionSet = true;
 			  }
 			  anyValueSet = true;
-			} else if ((color.value[0][1] == compactable[color.name].defaultValue || color.value[0][1] == 'none') && (validator.isValidColor(value[1]) || validator.isValidVendorPrefixedValue(value[1]))) {
+			} else if ((color.value[0][1] == compactable[color.name].defaultValue || color.value[0][1] == 'none') && (validator.isColor(value[1]) || validator.isPrefixed(value[1]))) {
 			  color.value = [value];
 			  anyValueSet = true;
-			} else if (validator.isValidUrl(value[1]) || validator.isValidFunction(value[1])) {
+			} else if (validator.isUrl(value[1]) || validator.isFunction(value[1])) {
 			  image.value = [value];
 			  anyValueSet = true;
 			}
@@ -2394,7 +2758,7 @@ var CleanCss = (function(){
 		  var splitAt = -1;
 
 		  for (var i = 0, l = values.length; i < l; i++) {
-			if (values[i][1] == '/') {
+			if (values[i][1] == Marker.FORWARD_SLASH) {
 			  splitAt = i;
 			  break;
 			}
@@ -2422,6 +2786,122 @@ var CleanCss = (function(){
 		  }
 
 		  return target.components;
+		}
+
+		function font(property, compactable, validator) {
+		  var style = _wrapDefault('font-style', property, compactable);
+		  var variant = _wrapDefault('font-variant', property, compactable);
+		  var weight = _wrapDefault('font-weight', property, compactable);
+		  var stretch = _wrapDefault('font-stretch', property, compactable);
+		  var size = _wrapDefault('font-size', property, compactable);
+		  var height = _wrapDefault('line-height', property, compactable);
+		  var family = _wrapDefault('font-family', property, compactable);
+		  var components = [style, variant, weight, stretch, size, height, family];
+		  var values = property.value;
+		  var fuzzyMatched = 4; // style, variant, weight, and stretch
+		  var index = 0;
+		  var isStretchSet = false;
+		  var isStretchValid;
+		  var isStyleSet = false;
+		  var isStyleValid;
+		  var isVariantSet = false;
+		  var isVariantValid;
+		  var isWeightSet = false;
+		  var isWeightValid;
+		  var isSizeSet = false;
+		  var appendableFamilyName = false;
+
+		  if (!values[index]) {
+			throw new InvalidPropertyError('Missing font values at ' + formatPosition(property.all[property.position][1][2][0]) + '. Ignoring.');
+		  }
+
+		  if (values.length == 1 && (validator.isFontKeyword(values[0][1]) || validator.isPrefixed(values[0][1]))) {
+			values[0][1] = Marker.INTERNAL + values[0][1];
+			style.value = variant.value = weight.value = stretch.value = size.value = height.value = family.value = values;
+			return components;
+		  }
+
+		  if (values.length == 1 && values[0][1] == 'inherit') {
+			style.value = variant.value = weight.value = stretch.value = size.value = height.value = family.value = values;
+			return components;
+		  }
+
+		  if (values.length > 1 && _anyIsInherit(values)) {
+			throw new InvalidPropertyError('Invalid font values at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
+		  }
+
+		  // fuzzy match style, variant, weight, and stretch on first elements
+		  while (index < fuzzyMatched) {
+			isStretchValid = validator.isFontStretchKeyword(values[index][1]) || validator.isGlobal(values[index][1]);
+			isStyleValid = validator.isFontStyleKeyword(values[index][1]) || validator.isGlobal(values[index][1]);
+			isVariantValid = validator.isFontVariantKeyword(values[index][1]) || validator.isGlobal(values[index][1]);
+			isWeightValid = validator.isFontWeightKeyword(values[index][1]) || validator.isGlobal(values[index][1]);
+
+			if (isStyleValid && !isStyleSet) {
+			  style.value = [values[index]];
+			  isStyleSet = true;
+			} else if (isVariantValid && !isVariantSet) {
+			  variant.value = [values[index]];
+			  isVariantSet = true;
+			} else if (isWeightValid && !isWeightSet) {
+			  weight.value = [values[index]];
+			  isWeightSet = true;
+			} else if (isStretchValid && !isStretchSet) {
+			  stretch.value = [values[index]];
+			  isStretchSet = true;
+			} else if (isStyleValid && isStyleSet || isVariantValid && isVariantSet || isWeightValid && isWeightSet || isStretchValid && isStretchSet) {
+			  throw new InvalidPropertyError('Invalid font style / variant / weight / stretch value at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
+			} else {
+			  break;
+			}
+
+			index++;
+		  }
+
+		  // now comes font-size ...
+		  if (validator.isFontSizeKeyword(values[index][1]) || validator.isUnit(values[index][1]) && !validator.isDynamicUnit(values[index][1])) {
+			size.value = [values[index]];
+			isSizeSet = true;
+			index++;
+		  } else {
+			throw new InvalidPropertyError('Missing font size at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
+		  }
+
+		  if (!values[index]) {
+			throw new InvalidPropertyError('Missing font family at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
+		  }
+
+		  // ... and perhaps line-height
+		  if (isSizeSet && values[index] && values[index][1] == Marker.FORWARD_SLASH && values[index + 1] && (validator.isLineHeightKeyword(values[index + 1][1]) || validator.isUnit(values[index + 1][1]) || validator.isNumber(values[index + 1][1]))) {
+			height.value = [values[index + 1]];
+			index++;
+			index++;
+		  }
+
+		  // ... and whatever comes next is font-family
+		  family.value = [];
+
+		  while (values[index]) {
+			if (values[index][1] == Marker.COMMA) {
+			  appendableFamilyName = false;
+			} else {
+			  if (appendableFamilyName) {
+				family.value[family.value.length - 1][1] += Marker.SPACE + values[index][1];
+			  } else {
+				family.value.push(values[index]);
+			  }
+
+			  appendableFamilyName = true;
+			}
+
+			index++;
+		  }
+
+		  if (family.value.length === 0) {
+			throw new InvalidPropertyError('Missing font family at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
+		  }
+
+		  return components;
 		}
 
 		function fourValues(property, compactable) {
@@ -2486,7 +2966,7 @@ var CleanCss = (function(){
 			  components[i].multiplex = true;
 
 			  for (j = 1, m = splitComponents.length; j < m; j++) {
-				components[i].value.push([Token.PROPERTY_VALUE, MULTIPLEX_SEPARATOR]);
+				components[i].value.push([Token.PROPERTY_VALUE, Marker.COMMA]);
 				Array.prototype.push.apply(components[i].value, splitComponents[j][i].value);
 			  }
 			}
@@ -2512,25 +2992,26 @@ var CleanCss = (function(){
 
 		  // `image` first...
 		  for (index = 0, total = values.length; index < total; index++) {
-			if (validator.isValidUrl(values[index][1]) || values[index][1] == '0') {
+			if (validator.isUrl(values[index][1]) || values[index][1] == '0') {
 			  image.value = [values[index]];
 			  values.splice(index, 1);
 			  break;
 			}
 		  }
 
-		  // ... then `type`...
+		  // ... then `position`
 		  for (index = 0, total = values.length; index < total; index++) {
-			if (validator.isValidListStyleType(values[index][1])) {
-			  type.value = [values[index]];
+			if (validator.isListStylePositionKeyword(values[index][1])) {
+			  position.value = [values[index]];
 			  values.splice(index, 1);
 			  break;
 			}
 		  }
 
-		  // ... and what's left is a `position`
-		  if (values.length > 0 && validator.isValidListStylePosition(values[0][1]))
-			position.value = [values[0]];
+		  // ... and what's left is a `type`
+		  if (values.length > 0 && (validator.isListStyleTypeKeyword(values[0][1]) || validator.isIdentifier(values[0][1]))) {
+			type.value = [values[0]];
+		  }
 
 		  return components;
 		}
@@ -2596,9 +3077,11 @@ var CleanCss = (function(){
 		}
 
 		var exports = {
+		  animation: animation,
 		  background: background,
 		  border: widthStyleColor,
 		  borderRadius: borderRadius,
+		  font: font,
 		  fourValues: fourValues,
 		  listStyle: listStyle,
 		  multiplex: multiplex,
@@ -2613,12 +3096,53 @@ var CleanCss = (function(){
 	modules['/optimizer/level-2/can-override'] = function () {
 		var understandable = require('/optimizer/level-2/properties/understandable');
 
-		function backgroundPosition(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidKeywordValue('background-position', value2, true)) {
+		function animationIterationCount(validator, value1, value2) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isAnimationIterationCountKeyword(value2) || validator.isPositiveNumber(value2))) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
-		  } else if (validator.isValidKeywordValue('background-position', value2, true)) {
+		  }
+
+		  return validator.isAnimationIterationCountKeyword(value2) || validator.isPositiveNumber(value2);
+		}
+
+		function animationName(validator, value1, value2) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isAnimationNameKeyword(value2) || validator.isIdentifier(value2))) {
+			return false;
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
+			return true;
+		  }
+
+		  return validator.isAnimationNameKeyword(value2) || validator.isIdentifier(value2);
+		}
+
+		function animationTimingFunction(validator, value1, value2) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isAnimationTimingFunction(value2) || validator.isGlobal(value2))) {
+			return false;
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
+			return true;
+		  }
+
+		  return validator.isAnimationTimingFunction(value2) || validator.isGlobal(value2);
+		}
+
+		function areSameFunction(validator, value1, value2) {
+		  if (!validator.isFunction(value1) || !validator.isFunction(value2)) {
+			return false;
+		  }
+
+		  var function1Name = value1.substring(0, value1.indexOf('('));
+		  var function2Name = value2.substring(0, value2.indexOf('('));
+
+		  return function1Name === function2Name;
+		}
+
+		function backgroundPosition(validator, value1, value2) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isBackgroundPositionKeyword(value2) || validator.isGlobal(value2))) {
+			return false;
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
+			return true;
+		  } else if (validator.isBackgroundPositionKeyword(value2) || validator.isGlobal(value2)) {
 			return true;
 		  }
 
@@ -2626,11 +3150,11 @@ var CleanCss = (function(){
 		}
 
 		function backgroundSize(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidKeywordValue('background-size', value2, true)) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isBackgroundSizeKeyword(value2) || validator.isGlobal(value2))) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
-		  } else if (validator.isValidKeywordValue('background-size', value2, true)) {
+		  } else if (validator.isBackgroundSizeKeyword(value2) || validator.isGlobal(value2)) {
 			return true;
 		  }
 
@@ -2638,15 +3162,15 @@ var CleanCss = (function(){
 		}
 
 		function color(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidColor(value2)) {
+		  if (!understandable(validator, value1, value2, 0, true) && !validator.isColor(value2)) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
-		  } else if (!validator.colorOpacity && (validator.isValidRgbaColor(value1) || validator.isValidHslaColor(value1))) {
+		  } else if (!validator.colorOpacity && (validator.isRgbColor(value1) || validator.isHslColor(value1))) {
 			return false;
-		  } else if (!validator.colorOpacity && (validator.isValidRgbaColor(value2) || validator.isValidHslaColor(value2))) {
+		  } else if (!validator.colorOpacity && (validator.isRgbColor(value2) || validator.isHslColor(value2))) {
 			return false;
-		  } else if (validator.isValidColor(value1) && validator.isValidColor(value2)) {
+		  } else if (validator.isColor(value1) && validator.isColor(value2)) {
 			return true;
 		  }
 
@@ -2659,14 +3183,18 @@ var CleanCss = (function(){
 		  };
 		}
 
+		function fontFamily(validator, value1, value2) {
+		  return understandable(validator, value1, value2, 0, true);
+		}
+
 		function image(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidImage(value2)) {
+		  if (!understandable(validator, value1, value2, 0, true) && !validator.isImage(value2)) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
-		  } else if (validator.isValidImage(value2)) {
+		  } else if (validator.isImage(value2)) {
 			return true;
-		  } else if (validator.isValidImage(value1)) {
+		  } else if (validator.isImage(value1)) {
 			return false;
 		  }
 
@@ -2675,56 +3203,76 @@ var CleanCss = (function(){
 
 		function keyword(propertyName) {
 		  return function(validator, value1, value2) {
-			if (!understandable(validator, value1, value2, 0, true) && !validator.isValidKeywordValue(propertyName, value2)) {
+			if (!understandable(validator, value1, value2, 0, true) && !validator.isKeyword(propertyName)(value2)) {
 			  return false;
-			} else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+			} else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			  return true;
 			}
 
-			return validator.isValidKeywordValue(propertyName, value2, false);
+			return validator.isKeyword(propertyName)(value2);
 		  };
 		}
 
 		function keywordWithGlobal(propertyName) {
 		  return function(validator, value1, value2) {
-			if (!understandable(validator, value1, value2, 0, true) && !validator.isValidKeywordValue(propertyName, value2, true)) {
+			if (!understandable(validator, value1, value2, 0, true) && !(validator.isKeyword(propertyName)(value2) || validator.isGlobal(value2))) {
 			  return false;
-			} else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+			} else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			  return true;
 			}
 
-			return validator.isValidKeywordValue(propertyName, value2, true);
+			return validator.isKeyword(propertyName)(value2) || validator.isGlobal(value2);
 		  };
 		}
 
 		function sameFunctionOrValue(validator, value1, value2) {
-		  return validator.areSameFunction(value1, value2) ?
+		  return areSameFunction(validator, value1, value2) ?
 			true :
 			value1 === value2;
 		}
 
+
+
 		function textShadow(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidTextShadow(value2)) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isUnit(value2) || validator.isColor(value2) || validator.isGlobal(value2))) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
 		  }
 
-		  return validator.isValidTextShadow(value2);
+		  return validator.isUnit(value2) || validator.isColor(value2) || validator.isGlobal(value2);
+		}
+
+		function time(validator, value1, value2) {
+		  if (!understandable(validator, value1, value2, 0, true) && !validator.isTime(value2)) {
+			return false;
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
+			return true;
+		  } else if (validator.isTime(value1) && !validator.isTime(value2)) {
+			return false;
+		  } else if (validator.isTime(value2)) {
+			return true;
+		  } else if (validator.isTime(value1)) {
+			return false;
+		  } else if (validator.isFunction(value1) && !validator.isPrefixed(value1) && validator.isFunction(value2) && !validator.isPrefixed(value2)) {
+			return true;
+		  }
+
+		  return sameFunctionOrValue(validator, value1, value2);
 		}
 
 		function unit(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidUnitWithoutFunction(value2)) {
+		  if (!understandable(validator, value1, value2, 0, true) && !validator.isUnit(value2)) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
-		  } else if (validator.isValidUnitWithoutFunction(value1) && !validator.isValidUnitWithoutFunction(value2)) {
+		  } else if (validator.isUnit(value1) && !validator.isUnit(value2)) {
 			return false;
-		  } else if (validator.isValidUnitWithoutFunction(value2)) {
+		  } else if (validator.isUnit(value2)) {
 			return true;
-		  } else if (validator.isValidUnitWithoutFunction(value1)) {
+		  } else if (validator.isUnit(value1)) {
 			return false;
-		  } else if (validator.isValidFunctionWithoutVendorPrefix(value1) && validator.isValidFunctionWithoutVendorPrefix(value2)) {
+		  } else if (validator.isFunction(value1) && !validator.isPrefixed(value1) && validator.isFunction(value2) && !validator.isPrefixed(value2)) {
 			return true;
 		  }
 
@@ -2740,13 +3288,13 @@ var CleanCss = (function(){
 		}
 
 		function zIndex(validator, value1, value2) {
-		  if (!understandable(validator, value1, value2, 0, true) && !validator.isValidZIndex(value2)) {
+		  if (!understandable(validator, value1, value2, 0, true) && !validator.isZIndex(value2)) {
 			return false;
-		  } else if (validator.isValidVariable(value1) && validator.isValidVariable(value2)) {
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
 			return true;
 		  }
 
-		  return validator.isValidZIndex(value2);
+		  return validator.isZIndex(value2);
 		}
 
 		var exports = {
@@ -2754,9 +3302,16 @@ var CleanCss = (function(){
 			color: color,
 			components: components,
 			image: image,
+			time: time,
 			unit: unit
 		  },
 		  property: {
+			animationDirection: keywordWithGlobal('animation-direction'),
+			animationFillMode: keyword('animation-fill-mode'),
+			animationIterationCount: animationIterationCount,
+			animationName: animationName,
+			animationPlayState: keywordWithGlobal('animation-play-state'),
+			animationTimingFunction: animationTimingFunction,
 			backgroundAttachment: keyword('background-attachment'),
 			backgroundClip: keywordWithGlobal('background-clip'),
 			backgroundOrigin: keyword('background-origin'),
@@ -2770,8 +3325,11 @@ var CleanCss = (function(){
 			cursor: keywordWithGlobal('cursor'),
 			display: keywordWithGlobal('display'),
 			float: keywordWithGlobal('float'),
-			fontStyle: keywordWithGlobal('font-style'),
 			left: unitOrKeywordWithGlobal('left'),
+			fontFamily: fontFamily,
+			fontStretch: keywordWithGlobal('font-stretch'),
+			fontStyle: keywordWithGlobal('font-style'),
+			fontVariant: keywordWithGlobal('font-variant'),
 			fontWeight: keywordWithGlobal('font-weight'),
 			listStyleType: keywordWithGlobal('list-style-type'),
 			listStylePosition: keywordWithGlobal('list-style-position'),
@@ -2875,6 +3433,141 @@ var CleanCss = (function(){
 		//   Puts the shorthand together from its components.
 		//
 		var compactable = {
+		  'animation': {
+			canOverride: canOverride.generic.components([
+			  canOverride.generic.time,
+			  canOverride.property.animationTimingFunction,
+			  canOverride.generic.time,
+			  canOverride.property.animationIterationCount,
+			  canOverride.property.animationDirection,
+			  canOverride.property.animationFillMode,
+			  canOverride.property.animationPlayState,
+			  canOverride.property.animationName
+			]),
+			components: [
+			  'animation-duration',
+			  'animation-timing-function',
+			  'animation-delay',
+			  'animation-iteration-count',
+			  'animation-direction',
+			  'animation-fill-mode',
+			  'animation-play-state',
+			  'animation-name'
+			],
+			breakUp: breakUp.multiplex(breakUp.animation),
+			defaultValue: 'none',
+			restore: restore.multiplex(restore.withoutDefaults),
+			shorthand: true,
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-delay': {
+			canOverride: canOverride.generic.time,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: '0s',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-direction': {
+			canOverride: canOverride.property.animationDirection,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: 'normal',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-duration': {
+			canOverride: canOverride.generic.time,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: '0s',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-fill-mode': {
+			canOverride: canOverride.property.animationFillMode,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: 'none',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-iteration-count': {
+			canOverride: canOverride.property.animationIterationCount,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: '1',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-name': {
+			canOverride: canOverride.property.animationName,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: 'none',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-play-state': {
+			canOverride: canOverride.property.animationPlayState,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: 'running',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
+		  'animation-timing-function': {
+			canOverride: canOverride.property.animationTimingFunction,
+			componentOf: [
+			  'animation'
+			],
+			defaultValue: 'ease',
+			intoMultiplexMode: 'real',
+			vendorPrefixes: [
+			  '-moz-',
+			  '-o-',
+			  '-webkit-'
+			]
+		  },
 		  'background': {
 			canOverride: canOverride.generic.components([
 			  canOverride.generic.image,
@@ -2907,7 +3600,8 @@ var CleanCss = (function(){
 			componentOf: [
 			  'background'
 			],
-			defaultValue: 'scroll'
+			defaultValue: 'scroll',
+			intoMultiplexMode: 'real'
 		  },
 		  'background-clip': {
 			canOverride: canOverride.property.backgroundClip,
@@ -2915,6 +3609,7 @@ var CleanCss = (function(){
 			  'background'
 			],
 			defaultValue: 'border-box',
+			intoMultiplexMode: 'real',
 			shortestValue: 'border-box'
 		  },
 		  'background-color': {
@@ -2923,6 +3618,7 @@ var CleanCss = (function(){
 			  'background'
 			],
 			defaultValue: 'transparent',
+			intoMultiplexMode: 'real', // otherwise real color will turn into default since color appears in last multiplex only
 			multiplexLastOnly: true,
 			nonMergeableValue: 'none',
 			shortestValue: 'red'
@@ -2932,7 +3628,8 @@ var CleanCss = (function(){
 			componentOf: [
 			  'background'
 			],
-			defaultValue: 'none'
+			defaultValue: 'none',
+			intoMultiplexMode: 'default'
 		  },
 		  'background-origin': {
 			canOverride: canOverride.property.backgroundOrigin,
@@ -2940,6 +3637,7 @@ var CleanCss = (function(){
 			  'background'
 			],
 			defaultValue: 'padding-box',
+			intoMultiplexMode: 'real',
 			shortestValue: 'border-box'
 		  },
 		  'background-position': {
@@ -2949,6 +3647,7 @@ var CleanCss = (function(){
 			],
 			defaultValue: ['0', '0'],
 			doubleValues: true,
+			intoMultiplexMode: 'real',
 			shortestValue: '0'
 		  },
 		  'background-repeat': {
@@ -2957,7 +3656,8 @@ var CleanCss = (function(){
 			  'background'
 			],
 			defaultValue: ['repeat'],
-			doubleValues: true
+			doubleValues: true,
+			intoMultiplexMode: 'real'
 		  },
 		  'background-size': {
 			canOverride: canOverride.property.backgroundSize,
@@ -2966,6 +3666,7 @@ var CleanCss = (function(){
 			],
 			defaultValue: ['auto'],
 			doubleValues: true,
+			intoMultiplexMode: 'real',
 			shortestValue: '0 0'
 		  },
 		  'bottom': {
@@ -3056,6 +3757,7 @@ var CleanCss = (function(){
 			  'border-width'
 			],
 			defaultValue: 'medium',
+			oppositeTo: 'border-top-width',
 			shortestValue: '0'
 		  },
 		  'border-collapse': {
@@ -3070,7 +3772,9 @@ var CleanCss = (function(){
 			  canOverride.generic.color,
 			  canOverride.generic.color
 			]),
-			componentOf: ['border'],
+			componentOf: [
+			  'border'
+			],
 			components: [
 			  'border-top-color',
 			  'border-right-color',
@@ -3121,6 +3825,7 @@ var CleanCss = (function(){
 			  'border-width'
 			],
 			defaultValue: 'medium',
+			oppositeTo: 'border-right-width',
 			shortestValue: '0'
 		  },
 		  'border-radius': {
@@ -3184,6 +3889,7 @@ var CleanCss = (function(){
 			  'border-width'
 			],
 			defaultValue: 'medium',
+			oppositeTo: 'border-left-width',
 			shortestValue: '0'
 		  },
 		  'border-style': {
@@ -3268,6 +3974,7 @@ var CleanCss = (function(){
 			  'border-width'
 			],
 			defaultValue: 'medium',
+			oppositeTo: 'border-bottom-width',
 			shortestValue: '0'
 		  },
 		  'border-width': {
@@ -3278,6 +3985,9 @@ var CleanCss = (function(){
 			  canOverride.generic.unit,
 			  canOverride.generic.unit
 			]),
+			componentOf: [
+			  'border'
+			],
 			components: [
 			  'border-top-width',
 			  'border-right-width',
@@ -3309,18 +4019,53 @@ var CleanCss = (function(){
 			canOverride: canOverride.property.float,
 			defaultValue: 'none'
 		  },
+		  'font': {
+			breakUp: breakUp.font,
+			canOverride: canOverride.generic.components([
+			  canOverride.property.fontStyle,
+			  canOverride.property.fontVariant,
+			  canOverride.property.fontWeight,
+			  canOverride.property.fontStretch,
+			  canOverride.generic.unit,
+			  canOverride.generic.unit,
+			  canOverride.property.fontFamily
+			]),
+			components: [
+			  'font-style',
+			  'font-variant',
+			  'font-weight',
+			  'font-stretch',
+			  'font-size',
+			  'line-height',
+			  'font-family'
+			],
+			restore: restore.font,
+			shorthand: true
+		  },
+		  'font-family': {
+			canOverride: canOverride.property.fontFamily,
+			defaultValue: 'user|agent|specific'
+		  },
 		  'font-size': {
 			canOverride: canOverride.generic.unit,
 			defaultValue: 'medium',
 			shortestValue: '0'
 		  },
+		  'font-stretch': {
+			canOverride: canOverride.property.fontStretch,
+			defaultValue: 'normal'
+		  },
 		  'font-style': {
 			canOverride: canOverride.property.fontStyle,
 			defaultValue: 'normal'
 		  },
+		  'font-variant': {
+			canOverride: canOverride.property.fontVariant,
+			defaultValue: 'normal'
+		  },
 		  'font-weight': {
 			canOverride: canOverride.property.fontWeight,
-			defaultValue: '400',
+			defaultValue: 'normal',
 			shortestValue: '400'
 		  },
 		  'height': {
@@ -3403,28 +4148,32 @@ var CleanCss = (function(){
 			componentOf: [
 			  'margin'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'margin-top'
 		  },
 		  'margin-left': {
 			canOverride: canOverride.generic.unit,
 			componentOf: [
 			  'margin'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'margin-right'
 		  },
 		  'margin-right': {
 			canOverride: canOverride.generic.unit,
 			componentOf: [
 			  'margin'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'margin-left'
 		  },
 		  'margin-top': {
 			canOverride: canOverride.generic.unit,
 			componentOf: [
 			  'margin'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'margin-bottom'
 		  },
 		  'outline': {
 			canOverride: canOverride.generic.components([
@@ -3500,28 +4249,32 @@ var CleanCss = (function(){
 			componentOf: [
 			  'padding'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'padding-top'
 		  },
 		  'padding-left': {
 			canOverride: canOverride.generic.unit,
 			componentOf: [
 			  'padding'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'padding-right'
 		  },
 		  'padding-right': {
 			canOverride: canOverride.generic.unit,
 			componentOf: [
 			  'padding'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'padding-left'
 		  },
 		  'padding-top': {
 			canOverride: canOverride.generic.unit,
 			componentOf: [
 			  'padding'
 			],
-			defaultValue: '0'
+			defaultValue: '0',
+			oppositeTo: 'padding-bottom'
 		  },
 		  'position': {
 			canOverride: canOverride.property.position,
@@ -3739,6 +4492,19 @@ var CleanCss = (function(){
 		  ':nth-of-type'
 		];
 		var RELATION_PATTERN = /[>\+~]/;
+		var UNMIXABLE_PSEUDO_CLASSES = [
+		  ':after',
+		  ':before',
+		  ':first-letter',
+		  ':first-line',
+		  ':lang'
+		];
+		var UNMIXABLE_PSEUDO_ELEMENTS = [
+		  '::after',
+		  '::before',
+		  '::first-letter',
+		  '::first-line'
+		];
 
 		var Level = {
 		  DOUBLE_QUOTE: 'double-quote',
@@ -3746,7 +4512,7 @@ var CleanCss = (function(){
 		  ROOT: 'root'
 		};
 
-		function isMergeable(selector, mergeablePseudoClasses, mergeablePseudoElements) {
+		function isMergeable(selector, mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging) {
 		  var singleSelectors = split(selector, Marker.COMMA);
 		  var singleSelector;
 		  var i, l;
@@ -3756,7 +4522,7 @@ var CleanCss = (function(){
 
 			if (singleSelector.length === 0 ||
 				isDeepSelector(singleSelector) ||
-				(singleSelector.indexOf(Marker.COLON) > -1 && !areMergeable(singleSelector, extractPseudoFrom(singleSelector), mergeablePseudoClasses, mergeablePseudoElements))) {
+				(singleSelector.indexOf(Marker.COLON) > -1 && !areMergeable(singleSelector, extractPseudoFrom(singleSelector), mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging))) {
 			  return false;
 			}
 		  }
@@ -3847,11 +4613,11 @@ var CleanCss = (function(){
 		  return list;
 		}
 
-		function areMergeable(selector, matches, mergeablePseudoClasses, mergeablePseudoElements) {
+		function areMergeable(selector, matches, mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging) {
 		  return areAllowed(matches, mergeablePseudoClasses, mergeablePseudoElements) &&
 			needArguments(matches) &&
 			(matches.length < 2 || !someIncorrectlyChained(selector, matches)) &&
-			(matches.length < 2 || !someMixed(matches));
+			(matches.length < 2 || multiplePseudoMerging && allMixable(matches));
 		}
 
 		function areAllowed(matches, mergeablePseudoClasses, mergeablePseudoElements) {
@@ -3942,20 +4708,30 @@ var CleanCss = (function(){
 		  return false;
 		}
 
-		function someMixed(matches) {
-		  var firstIsPseudoElement = DOUBLE_COLON_PATTERN.test(matches[0]);
+		function allMixable(matches) {
+		  var unmixableMatches = 0;
 		  var match;
 		  var i, l;
 
 		  for (i = 0, l = matches.length; i < l; i++) {
 			match = matches[i];
 
-			if (DOUBLE_COLON_PATTERN.test(match) != firstIsPseudoElement) {
-			  return true;
+			if (isPseudoElement(match)) {
+			  unmixableMatches += UNMIXABLE_PSEUDO_ELEMENTS.indexOf(match) > -1 ? 1 : 0;
+			} else {
+			  unmixableMatches += UNMIXABLE_PSEUDO_CLASSES.indexOf(match) > -1 ? 1 : 0;
+			}
+
+			if (unmixableMatches > 1) {
+			  return false;
 			}
 		  }
 
-		  return false;
+		  return true;
+		}
+
+		function isPseudoElement(pseudo) {
+		  return DOUBLE_COLON_PATTERN.test(pseudo);
 		}
 
 		return isMergeable;
@@ -3985,7 +4761,8 @@ var CleanCss = (function(){
 		  var selectorsSortingMethod = options.level[OptimizationLevel.One].selectorsSortingMethod;
 		  var mergeablePseudoClasses = options.compatibility.selectors.mergeablePseudoClasses;
 		  var mergeablePseudoElements = options.compatibility.selectors.mergeablePseudoElements;
-		  var mergeLimit = 8191;
+		  var mergeLimit = options.compatibility.selectors.mergeLimit;
+		  var multiplePseudoMerging = options.compatibility.selectors.multiplePseudoMerging;
 
 		  for (var i = 0, l = tokens.length; i < l; i++) {
 			var token = tokens[i];
@@ -4000,8 +4777,8 @@ var CleanCss = (function(){
 			  optimizeProperties(lastToken[2], true, true, context);
 			  token[2] = [];
 			} else if (lastToken[0] == Token.RULE && serializeBody(token[2]) == serializeBody(lastToken[2]) &&
-				isMergeable(serializeRules(token[1]), mergeablePseudoClasses, mergeablePseudoElements) &&
-				isMergeable(serializeRules(lastToken[1]), mergeablePseudoClasses, mergeablePseudoElements) &&
+				isMergeable(serializeRules(token[1]), mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging) &&
+				isMergeable(serializeRules(lastToken[1]), mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging) &&
 				lastToken[1].length < mergeLimit) {
 			  lastToken[1] = tidyRules(lastToken[1].concat(token[1]), false, adjacentSpace, false, context.warnings);
 			  lastToken[1] = lastToken.length > 1 ? sortSelectors(lastToken[1], selectorsSortingMethod) : lastToken[1];
@@ -4170,6 +4947,7 @@ var CleanCss = (function(){
 		  var selectorsSortingMethod = options.level[OptimizationLevel.One].selectorsSortingMethod;
 		  var mergeablePseudoClasses = options.compatibility.selectors.mergeablePseudoClasses;
 		  var mergeablePseudoElements = options.compatibility.selectors.mergeablePseudoElements;
+		  var multiplePseudoMerging = options.compatibility.selectors.multiplePseudoMerging;
 		  var candidates = {};
 
 		  for (var i = tokens.length - 1; i >= 0; i--) {
@@ -4186,8 +4964,8 @@ var CleanCss = (function(){
 			var candidateBody = serializeBody(token[2]);
 			var oldToken = candidates[candidateBody];
 			if (oldToken &&
-				isMergeable(serializeRules(token[1]), mergeablePseudoClasses, mergeablePseudoElements) &&
-				isMergeable(serializeRules(oldToken[1]), mergeablePseudoClasses, mergeablePseudoElements)) {
+				isMergeable(serializeRules(token[1]), mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging) &&
+				isMergeable(serializeRules(oldToken[1]), mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging)) {
 
 			  if (token[2].length > 0) {
 				token[1] = tidyRules(oldToken[1].concat(token[1]), false, adjacentSpace, false, context.warnings);
@@ -4301,6 +5079,7 @@ var CleanCss = (function(){
 		var removeDuplicateFontAtRules = require('/optimizer/level-2/remove-duplicate-font-at-rules');
 		var removeDuplicateMediaQueries = require('/optimizer/level-2/remove-duplicate-media-queries');
 		var removeDuplicates = require('/optimizer/level-2/remove-duplicates');
+		var removeUnusedAtRules = require('/optimizer/level-2/remove-unused-at-rules');
 		var restructure = require('/optimizer/level-2/restructure');
 
 		var optimizeProperties = require('/optimizer/level-2/properties/optimize');
@@ -4321,6 +5100,9 @@ var CleanCss = (function(){
 			  case Token.NESTED_BLOCK:
 				removeEmpty(token[2]);
 				isEmpty = token[2].length === 0;
+				break;
+			  case Token.AT_RULE:
+				isEmpty = token[1].length === 0;
 				break;
 			  case Token.AT_RULE_BLOCK:
 				isEmpty = token[2].length === 0;
@@ -4404,6 +5186,10 @@ var CleanCss = (function(){
 			removeDuplicateMediaQueries(tokens, context);
 		  }
 
+		  if (levelOptions.removeUnusedAtRules) {
+			removeUnusedAtRules(tokens, context);
+		  }
+
 		  if (levelOptions.mergeMedia) {
 			reduced = mergeMediaQueries(tokens, context);
 			for (i = reduced.length - 1; i >= 0; i--) {
@@ -4411,7 +5197,9 @@ var CleanCss = (function(){
 			}
 		  }
 
-		  removeEmpty(tokens);
+		  if (levelOptions.removeEmpty) {
+			removeEmpty(tokens);
+		  }
 
 		  return tokens;
 		}
@@ -4437,6 +5225,7 @@ var CleanCss = (function(){
 		  var options = context.options;
 		  var mergeablePseudoClasses = options.compatibility.selectors.mergeablePseudoClasses;
 		  var mergeablePseudoElements = options.compatibility.selectors.mergeablePseudoElements;
+		  var multiplePseudoMerging = options.compatibility.selectors.multiplePseudoMerging;
 		  var candidates = {};
 		  var repeated = [];
 
@@ -4451,7 +5240,7 @@ var CleanCss = (function(){
 
 			var selectorAsString = serializeRules(token[1]);
 			var isComplexAndNotSpecial = token[1].length > 1 &&
-			  isMergeable(selectorAsString, mergeablePseudoClasses, mergeablePseudoElements);
+			  isMergeable(selectorAsString, mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging);
 			var wrappedSelectors = wrappedSelectorsFrom(token[1]);
 			var selectors = isComplexAndNotSpecial ?
 			  [selectorAsString].concat(wrappedSelectors) :
@@ -4512,6 +5301,7 @@ var CleanCss = (function(){
 		function reduceComplexNonAdjacentCases(tokens, candidates, options, context) {
 		  var mergeablePseudoClasses = options.compatibility.selectors.mergeablePseudoClasses;
 		  var mergeablePseudoElements = options.compatibility.selectors.mergeablePseudoElements;
+		  var multiplePseudoMerging = options.compatibility.selectors.multiplePseudoMerging;
 		  var localContext = {};
 
 		  function filterOut(idx) {
@@ -4533,7 +5323,7 @@ var CleanCss = (function(){
 			var intoToken = tokens[intoPosition];
 			var reducedBodies = [];
 
-			var selectors = isMergeable(complexSelector, mergeablePseudoClasses, mergeablePseudoElements) ?
+			var selectors = isMergeable(complexSelector, mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging) ?
 			  into[0].list :
 			  [complexSelector];
 
@@ -4718,6 +5508,243 @@ var CleanCss = (function(){
 		}
 
 		return removeDuplicates;
+	};
+	//#endregion
+
+	//#region URL: /optimizer/level-2/remove-unused-at-rules
+	modules['/optimizer/level-2/remove-unused-at-rules'] = function () {
+		var populateComponents = require('/optimizer/level-2/properties/populate-components');
+
+		var wrapForOptimizing = require('/optimizer/wrap-for-optimizing').single;
+		var restoreFromOptimizing = require('/optimizer/restore-from-optimizing');
+
+		var Token = require('/tokenizer/token');
+
+		var animationNameRegex = /^(\-moz\-|\-o\-|\-webkit\-)?animation-name$/;
+		var animationRegex = /^(\-moz\-|\-o\-|\-webkit\-)?animation$/;
+		var keyframeRegex = /^@(\-moz\-|\-o\-|\-webkit\-)?keyframes /;
+
+		function removeUnusedAtRules(tokens, context) {
+		  removeUnusedAtRule(tokens, matchCounterStyle, markCounterStylesAsUsed, context);
+		  removeUnusedAtRule(tokens, matchFontFace, markFontFacesAsUsed, context);
+		  removeUnusedAtRule(tokens, matchKeyframe, markKeyframesAsUsed, context);
+		  removeUnusedAtRule(tokens, matchNamespace, markNamespacesAsUsed, context);
+		}
+
+		function removeUnusedAtRule(tokens, matchCallback, markCallback, context) {
+		  var atRules = {};
+		  var atRule;
+		  var token;
+		  var zeroAt;
+		  var i, l;
+
+		  for (i = 0, l = tokens.length; i < l; i++) {
+			matchCallback(tokens[i], atRules);
+		  }
+
+		  if (Object.keys(atRules).length === 0) {
+			return;
+		  }
+
+		  markUsedAtRules(tokens, markCallback, atRules, context);
+
+		  for (atRule in atRules) {
+			token = atRules[atRule];
+			zeroAt = token[0] == Token.AT_RULE ? 1 : 2;
+			token[zeroAt] = [];
+		  }
+		}
+
+		function markUsedAtRules(tokens, markCallback, atRules, context) {
+		  var boundMarkCallback = markCallback(atRules);
+		  var i, l;
+
+		  for (i = 0, l = tokens.length; i < l; i++) {
+			switch (tokens[i][0]) {
+			  case Token.RULE:
+				boundMarkCallback(tokens[i], context);
+				break;
+			  case Token.NESTED_BLOCK:
+				markUsedAtRules(tokens[i][2], markCallback, atRules, context);
+			}
+		  }
+		}
+
+		function matchCounterStyle(token, atRules) {
+		  var match;
+
+		  if (token[0] == Token.AT_RULE_BLOCK && token[1][0][1].indexOf('@counter-style') === 0) {
+			match = token[1][0][1].split(' ')[1];
+			atRules[match] = token;
+		  }
+		}
+
+		function markCounterStylesAsUsed(atRules) {
+		  return function (token, context) {
+			var property;
+			var wrappedProperty;
+			var i, l;
+
+			for (i = 0, l = token[2].length; i < l; i++) {
+			  property = token[2][i];
+
+			  if (property[1][1] == 'list-style') {
+				wrappedProperty = wrapForOptimizing(property);
+				populateComponents([wrappedProperty], context.validator, context.warnings);
+
+				if (wrappedProperty.components[0].value[0][1] in atRules) {
+				  delete atRules[property[2][1]];
+				}
+
+				restoreFromOptimizing([wrappedProperty]);
+			  }
+
+			  if (property[1][1] == 'list-style-type' && property[2][1] in atRules) {
+				delete atRules[property[2][1]];
+			  }
+			}
+		  };
+		}
+
+		function matchFontFace(token, atRules) {
+		  var property;
+		  var match;
+		  var i, l;
+
+		  if (token[0] == Token.AT_RULE_BLOCK && token[1][0][1] == '@font-face') {
+			for (i = 0, l = token[2].length; i < l; i++) {
+			  property = token[2][i];
+
+			  if (property[1][1] == 'font-family') {
+				match = property[2][1].toLowerCase();
+				atRules[match] = token;
+				break;
+			  }
+			}
+		  }
+		}
+
+		function markFontFacesAsUsed(atRules) {
+		  return function (token, context) {
+			var property;
+			var wrappedProperty;
+			var component;
+			var normalizedMatch;
+			var i, l;
+			var j, m;
+
+			for (i = 0, l = token[2].length; i < l; i++) {
+			  property = token[2][i];
+
+			  if (property[1][1] == 'font') {
+				wrappedProperty = wrapForOptimizing(property);
+				populateComponents([wrappedProperty], context.validator, context.warnings);
+				component = wrappedProperty.components[6];
+
+				for (j = 0, m = component.value.length; j < m; j++) {
+				  normalizedMatch = component.value[j][1].toLowerCase();
+
+				  if (normalizedMatch in atRules) {
+					delete atRules[normalizedMatch];
+				  }
+				}
+
+				restoreFromOptimizing([wrappedProperty]);
+			  }
+
+			  if (property[1][1] == 'font-family') {
+				for (j = 2, m = property.length; j < m; j++) {
+				  normalizedMatch = property[j][1].toLowerCase();
+
+				  if (normalizedMatch in atRules) {
+					delete atRules[normalizedMatch];
+				  }
+				}
+			  }
+			}
+		  };
+		}
+
+		function matchKeyframe(token, atRules) {
+		  var match;
+
+		  if (token[0] == Token.NESTED_BLOCK && keyframeRegex.test(token[1][0][1])) {
+			match = token[1][0][1].split(' ')[1];
+			atRules[match] = token;
+		  }
+		}
+
+		function markKeyframesAsUsed(atRules) {
+		  return function (token, context) {
+			var property;
+			var wrappedProperty;
+			var component;
+			var i, l;
+			var j, m;
+
+			for (i = 0, l = token[2].length; i < l; i++) {
+			  property = token[2][i];
+
+			  if (animationRegex.test(property[1][1])) {
+				wrappedProperty = wrapForOptimizing(property);
+				populateComponents([wrappedProperty], context.validator, context.warnings);
+				component = wrappedProperty.components[7];
+
+				for (j = 0, m = component.value.length; j < m; j++) {
+				  if (component.value[j][1] in atRules) {
+					delete atRules[component.value[j][1]];
+				  }
+				}
+
+				restoreFromOptimizing([wrappedProperty]);
+			  }
+
+			  if (animationNameRegex.test(property[1][1])) {
+				for (j = 2, m = property.length; j < m; j++) {
+				  if (property[j][1] in atRules) {
+					delete atRules[property[j][1]];
+				  }
+				}
+			  }
+			}
+		  };
+		}
+
+		function matchNamespace(token, atRules) {
+		  var match;
+
+		  if (token[0] == Token.AT_RULE && token[1].indexOf('@namespace') === 0) {
+			match = token[1].split(' ')[1];
+			atRules[match] = token;
+		  }
+		}
+
+		function markNamespacesAsUsed(atRules) {
+		  var namespaceRegex = new RegExp(Object.keys(atRules).join('\\\||') + '\\\|', 'g');
+
+		  return function (token) {
+			var match;
+			var scope;
+			var normalizedMatch;
+			var i, l;
+			var j, m;
+
+			for (i = 0, l = token[1].length; i < l; i++) {
+			  scope = token[1][i];
+			  match = scope[1].match(namespaceRegex);
+
+			  for (j = 0, m = match.length; j < m; j++) {
+				normalizedMatch = match[j].substring(0, match[j].length - 1);
+
+				if (normalizedMatch in atRules) {
+				  delete atRules[normalizedMatch];
+				}
+			  }
+			}
+		  };
+		}
+
+		return removeUnusedAtRules;
 	};
 	//#endregion
 
@@ -4960,6 +5987,59 @@ var CleanCss = (function(){
 		  }
 		}
 
+		function font(property, compactable) {
+		  var components = property.components;
+		  var restored = [];
+		  var component;
+		  var componentIndex = 0;
+		  var fontFamilyIndex = 0;
+
+		  if (property.value[0][1].indexOf(Marker.INTERNAL) === 0) {
+			property.value[0][1] = property.value[0][1].substring(Marker.INTERNAL.length);
+			return property.value;
+		  }
+
+		  // first four components are optional
+		  while (componentIndex < 4) {
+			component = components[componentIndex];
+
+			if (component.value[0][1] != compactable[component.name].defaultValue) {
+			  Array.prototype.push.apply(restored, component.value);
+			}
+
+			componentIndex++;
+		  }
+
+		  // then comes font-size
+		  Array.prototype.push.apply(restored, components[componentIndex].value);
+		  componentIndex++;
+
+		  // then may come line-height
+		  if (components[componentIndex].value[0][1] != compactable[components[componentIndex].name].defaultValue) {
+			Array.prototype.push.apply(restored, [[Token.PROPERTY_VALUE, Marker.FORWARD_SLASH]]);
+			Array.prototype.push.apply(restored, components[componentIndex].value);
+		  }
+
+		  componentIndex++;
+
+		  // then comes font-family
+		  while (components[componentIndex].value[fontFamilyIndex]) {
+			restored.push(components[componentIndex].value[fontFamilyIndex]);
+
+			if (components[componentIndex].value[fontFamilyIndex + 1]) {
+			  restored.push([Token.PROPERTY_VALUE, Marker.COMMA]);
+			}
+
+			fontFamilyIndex++;
+		  }
+
+		  if (isInheritOnly(restored)) {
+			return [restored[0]];
+		  }
+
+		  return restored;
+		}
+
 		function fourValues(property) {
 		  var components = property.components;
 		  var value1 = components[0].value[0];
@@ -5052,6 +6132,7 @@ var CleanCss = (function(){
 		var exports = {
 		  background: background,
 		  borderRadius: borderRadius,
+		  font: font,
 		  fourValues: fourValues,
 		  multiplex: multiplex,
 		  withoutDefaults: withoutDefaults
@@ -5108,7 +6189,8 @@ var CleanCss = (function(){
 		  var options = context.options;
 		  var mergeablePseudoClasses = options.compatibility.selectors.mergeablePseudoClasses;
 		  var mergeablePseudoElements = options.compatibility.selectors.mergeablePseudoElements;
-		  var mergeLimit = 8191;
+		  var mergeLimit = options.compatibility.selectors.mergeLimit;
+		  var multiplePseudoMerging = options.compatibility.selectors.multiplePseudoMerging;
 		  var specificityCache = context.cache.specificity;
 		  var movableTokens = {};
 		  var movedProperties = [];
@@ -5169,7 +6251,7 @@ var CleanCss = (function(){
 			var mergeableTokens = [];
 
 			for (var i = sourceTokens.length - 1; i >= 0; i--) {
-			  if (!isMergeable(serializeRules(sourceTokens[i][1]), mergeablePseudoClasses, mergeablePseudoElements)) {
+			  if (!isMergeable(serializeRules(sourceTokens[i][1]), mergeablePseudoClasses, mergeablePseudoElements, multiplePseudoMerging)) {
 				continue;
 			  }
 
@@ -5761,47 +6843,31 @@ var CleanCss = (function(){
 
 	//#region URL: /optimizer/validator
 	modules['/optimizer/validator'] = function () {
-		var Units = [
-		  '%',
-		  'ch',
-		  'cm',
-		  'em',
-		  'ex',
-		  'in',
-		  'mm',
-		  'pc',
-		  'pt',
-		  'px',
-		  'rem',
-		  'vh',
-		  'vm',
-		  'vmax',
-		  'vmin',
-		  'vw'
-		];
-		var cssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + Units.join('|') + '|)|auto|inherit)';
-		var cssCalcRegexStr = '(\\-moz\\-|\\-webkit\\-)?calc\\([^\\)]+\\)';
-		var cssFunctionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(.*?\\)';
-		var cssFunctionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(.*?\\)';
-		var cssVariableRegexStr = 'var\\(\\-\\-[^\\)]+\\)';
-		var cssFunctionAnyRegexStr = '(' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')';
-		var cssUnitOrCalcRegexStr = '(' + cssUnitRegexStr + '|' + cssCalcRegexStr + ')';
+		var functionNoVendorRegexStr = '[A-Z]+(\\-|[A-Z]|[0-9])+\\(.*?\\)';
+		var functionVendorRegexStr = '\\-(\\-|[A-Z]|[0-9])+\\(.*?\\)';
+		var variableRegexStr = 'var\\(\\-\\-[^\\)]+\\)';
+		var functionAnyRegexStr = '(' + variableRegexStr + '|' + functionNoVendorRegexStr + '|' + functionVendorRegexStr + ')';
 
-		var cssFunctionNoVendorRegex = new RegExp('^' + cssFunctionNoVendorRegexStr + '$', 'i');
-		var cssVariableRegex = new RegExp('^' + cssVariableRegexStr + '$', 'i');
-		var cssFunctionAnyRegex = new RegExp('^' + cssFunctionAnyRegexStr + '$', 'i');
-		var cssUnitRegex = new RegExp('^' + cssUnitRegexStr + '$', 'i');
-		var cssUnitOrCalcRegex = new RegExp('^' + cssUnitOrCalcRegexStr + '$', 'i');
-
+		var animationTimingFunctionRegex = /^(cubic\-bezier|steps)\([^\)]+\)$/;
+		var calcRegex = new RegExp('^(\\-moz\\-|\\-webkit\\-)?calc\\([^\\)]+\\)$', 'i');
+		var functionAnyRegex = new RegExp('^' + functionAnyRegexStr + '$', 'i');
+		var hslColorRegex = /^hsl\(\s*[\-\.\d]+\s*,\s*[\.\d]+%\s*,\s*[\.\d]+%\s*\)|hsla\(\s*[\-\.\d]+\s*,\s*[\.\d]+%\s*,\s*[\.\d]+%\s*,\s*[\.\d]+\s*\)$/;
+		var identifierRegex = /^(\-[a-z0-9_][a-z0-9\-_]*|[a-z][a-z0-9\-_]*)$/i;
+		var longHexColorRegex = /^#[0-9a-f]{6}$/i;
+		var namedEntityRegex = /^[a-z]+$/i;
+		var prefixRegex = /^-([a-z0-9]|-)*$/i;
+		var rgbColorRegex = /^rgb\(\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*\)|rgba\(\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*,\s*[\.\d]+\s*\)$/;
+		var shortHexColorRegex = /^#[0-9a-f]{3}$/i;
+		var timeRegex = new RegExp('^(\\-?\\+?\\.?\\d+\\.?\\d*(s|ms))$');
 		var urlRegex = /^url\([\s\S]+\)$/i;
-
-		var globalKeywords = [
-		  'inherit',
-		  'initial',
-		  'unset'
-		];
+		var variableRegex = new RegExp('^' + variableRegexStr + '$', 'i');
 
 		var Keywords = {
+		  '^': [
+			'inherit',
+			'initial',
+			'unset'
+		  ],
 		  '*-style': [
 			'auto',
 			'dashed',
@@ -5814,6 +6880,37 @@ var CleanCss = (function(){
 			'outset',
 			'ridge',
 			'solid'
+		  ],
+		  'animation-direction': [
+			'alternate',
+			'alternate-reverse',
+			'normal',
+			'reverse'
+		  ],
+		  'animation-fill-mode': [
+			'backwards',
+			'both',
+			'forwards',
+			'none'
+		  ],
+		  'animation-iteration-count': [
+			'infinite'
+		  ],
+		  'animation-name': [
+			'none'
+		  ],
+		  'animation-play-state': [
+			'paused',
+			'running'
+		  ],
+		  'animation-timing-function': [
+			'ease',
+			'ease-in',
+			'ease-in-out',
+			'ease-out',
+			'linear',
+			'step-end',
+			'step-start'
 		  ],
 		  'background-attachment': [
 			'fixed',
@@ -5869,6 +6966,9 @@ var CleanCss = (function(){
 			'none',
 			'right'
 		  ],
+		  'color': [
+			'transparent'
+		  ],
 		  'cursor': [
 			'all-scroll',
 			'auto',
@@ -5919,10 +7019,44 @@ var CleanCss = (function(){
 		  'left': [
 			'auto'
 		  ],
+		  'font': [
+			'caption',
+			'icon',
+			'menu',
+			'message-box',
+			'small-caption',
+			'status-bar'
+		  ],
+		  'font-size': [
+			'large',
+			'larger',
+			'medium',
+			'small',
+			'smaller',
+			'x-large',
+			'x-small',
+			'xx-large',
+			'xx-small'
+		  ],
+		  'font-stretch': [
+			'condensed',
+			'expanded',
+			'extra-condensed',
+			'extra-expanded',
+			'normal',
+			'semi-condensed',
+			'semi-expanded',
+			'ultra-condensed',
+			'ultra-expanded'
+		  ],
 		  'font-style': [
 			'italic',
 			'normal',
 			'oblique'
+		  ],
+		  'font-variant': [
+			'normal',
+			'small-caps'
 		  ],
 		  'font-weight': [
 			'100',
@@ -5937,6 +7071,9 @@ var CleanCss = (function(){
 			'bold',
 			'bolder',
 			'lighter',
+			'normal'
+		  ],
+		  'line-height': [
 			'normal'
 		  ],
 		  'list-style-position': [
@@ -6025,163 +7162,118 @@ var CleanCss = (function(){
 		  ]
 		};
 
-		var VENDOR_PREFIX_PATTERN = /(^|\W)-\w+\-/;
+		var Units = [
+		  '%',
+		  'ch',
+		  'cm',
+		  'em',
+		  'ex',
+		  'in',
+		  'mm',
+		  'pc',
+		  'pt',
+		  'px',
+		  'rem',
+		  'vh',
+		  'vm',
+		  'vmax',
+		  'vmin',
+		  'vw'
+		];
 
-		function areSameFunction(value1, value2) {
-		  if (!isValidFunction(value1) || !isValidFunction(value2)) {
-			return false;
-		  }
+		function isAnimationTimingFunction() {
+		  var isTimingFunctionKeyword = isKeyword('animation-timing-function');
 
-		  var function1Name = value1.substring(0, value1.indexOf('('));
-		  var function2Name = value2.substring(0, value2.indexOf('('));
-
-		  return function1Name === function2Name;
+		  return function (value) {
+			return isTimingFunctionKeyword(value) || animationTimingFunctionRegex.test(value);
+		  };
 		}
 
-		function hasNoVendorPrefix(value) {
-		  return VENDOR_PREFIX_PATTERN.test(value);
+		function isColor(value) {
+		  return value != 'auto' &&
+			(
+			  isKeyword('color')(value) ||
+			  isHexColor(value) ||
+			  isColorFunction(value) ||
+			  isNamedEntity(value)
+			);
 		}
 
-		function isValidBackgroundAttachment(value) {
-		  return Keywords['background-attachment'].indexOf(value) > -1;
+		function isColorFunction(value) {
+		  return isRgbColor(value) || isHslColor(value);
 		}
 
-		function isValidBackgroundClip(value) {
-		  return Keywords['background-clip'].indexOf(value) > -1;
+		function isDynamicUnit(value) {
+		  return calcRegex.test(value);
 		}
 
-		function isValidBackgroundRepeat(value) {
-		  return Keywords['background-repeat'].indexOf(value) > -1;
+		function isFunction(value) {
+		  return functionAnyRegex.test(value);
 		}
 
-		function isValidBackgroundOrigin(value) {
-		  return Keywords['background-origin'].indexOf(value) > -1;
+		function isHexColor(value) {
+		  return shortHexColorRegex.test(value) || longHexColorRegex.test(value);
 		}
 
-		function isValidBackgroundPosition(value) {
-		  var parts;
-		  var i, l;
-
-		  if (value === 'inherit') {
-			return true;
-		  }
-
-		  parts = value.split(' ');
-		  for (i = 0, l = parts.length; i < l; i++) {
-			if (parts[i] === '') {
-			  continue;
-			} else if (isValidBackgroundPositionPart(parts[i])) {
-			  continue;
-			}
-
-			return false;
-		  }
-
-		  return true;
+		function isHslColor(value) {
+		  return hslColorRegex.test(value);
 		}
 
-		function isValidBackgroundPositionPart(value) {
-		  return Keywords['background-position'].indexOf(value) > -1 || cssUnitOrCalcRegex.test(value);
+		function isIdentifier(value) {
+		  return identifierRegex.test(value);
 		}
 
-		function isValidBackgroundSizePart(value) {
-		  return Keywords['background-size'].indexOf(value) > -1 || cssUnitRegex.test(value);
+		function isImage(value) {
+		  return value == 'none' || value == 'inherit' || isUrl(value);
 		}
 
-		function isValidColor(value) {
-		  return isValidNamedColor(value) ||
-			isValidColorValue(value);
+		function isKeyword(propertyName) {
+		  return function(value) {
+			return Keywords[propertyName].indexOf(value) > -1;
+		  };
 		}
 
-		function isValidColorValue(value) {
-		  return isValidHexColor(value) ||
-			isValidRgbaColor(value) ||
-			isValidHslaColor(value);
+		function isNamedEntity(value) {
+		  return namedEntityRegex.test(value);
 		}
 
-		function isValidFunction(value) {
-		  return !urlRegex.test(value) && cssFunctionAnyRegex.test(value);
+		function isNumber(value) {
+		  return value.length > 0 && ('' + parseFloat(value)) === value;
 		}
 
-		function isValidFunctionWithoutVendorPrefix(value) {
-		  return !urlRegex.test(value) && cssFunctionNoVendorRegex.test(value);
+		function isRgbColor(value) {
+		  return rgbColorRegex.test(value);
 		}
 
-		function isValidGlobalValue(value) {
-		  return globalKeywords.indexOf(value) > -1;
+		function isPrefixed(value) {
+		  return prefixRegex.test(value);
 		}
 
-		function isValidHexColor(value) {
-		  return (value.length === 4 || value.length === 7) && value[0] === '#';
+		function isPositiveNumber(value) {
+		  return isNumber(value) &&
+			parseFloat(value) >= 0;
 		}
 
-		function isValidHslaColor(value) {
-		  return value.length > 0 && value.indexOf('hsla(') === 0 && value.indexOf(')') === value.length - 1;
+		function isVariable(value) {
+		  return variableRegex.test(value);
 		}
 
-		function isValidImage(value) {
-		  return value == 'none' || value == 'inherit' || isValidUrl(value);
+		function isTime(value) {
+		  return timeRegex.test(value);
 		}
 
-		function isValidKeywordValue(propertyName, value, includeGlobal) {
-		  return Keywords[propertyName].indexOf(value) > -1 || includeGlobal && isValidGlobalValue(value);
-		}
-
-		function isValidListStyleType(value) {
-		  return Keywords['list-style-type'].indexOf(value) > -1;
-		}
-
-		function isValidListStylePosition(value) {
-		  return Keywords['list-style-position'].indexOf(value) > -1;
-		}
-
-		function isValidNamedColor(value) {
-		  // We don't really check if it's a valid color value, but allow any letters in it
-		  return value !== 'auto' && (value === 'transparent' || value === 'inherit' || /^[a-zA-Z]+$/.test(value));
-		}
-
-		function isValidRgbaColor(value) {
-		  return value.length > 0 && value.indexOf('rgba(') === 0 && value.indexOf(')') === value.length - 1;
-		}
-
-		function isValidStyle(value) {
-		  return Keywords['*-style'].indexOf(value) > -1;
-		}
-
-		function isValidTextShadow(compatibleCssUnitRegex, value) {
-		  return isValidUnitWithoutFunction(compatibleCssUnitRegex, value) ||
-			isValidColor(value) ||
-			isValidGlobalValue(value);
-		}
-
-		function isValidUnit(compatibleCssUnitAnyRegex, value) {
-		  return compatibleCssUnitAnyRegex.test(value);
-		}
-
-		function isValidUnitWithoutFunction(compatibleCssUnitRegex, value) {
+		function isUnit(compatibleCssUnitRegex, value) {
 		  return compatibleCssUnitRegex.test(value);
 		}
 
-		function isValidUrl(value) {
+		function isUrl(value) {
 		  return urlRegex.test(value);
 		}
 
-		function isValidVariable(value) {
-		  return cssVariableRegex.test(value);
-		}
-
-		function isValidVendorPrefixedValue(value) {
-		  return /^-([A-Za-z0-9]|-)*$/gi.test(value);
-		}
-
-		function isValidWidth(compatibleCssUnitRegex, value) {
-		  return isValidUnit(compatibleCssUnitRegex, value) || Keywords.width.indexOf(value) > -1;
-		}
-
-		function isValidZIndex(value) {
+		function isZIndex(value) {
 		  return value == 'auto' ||
-			isValidGlobalValue(value) ||
-			value.length > 0 && value == ('' + parseInt(value));
+			isNumber(value) ||
+			isKeyword('^')(value);
 		}
 
 		function validator(compatibility) {
@@ -6189,44 +7281,50 @@ var CleanCss = (function(){
 			return !(value in compatibility.units) || compatibility.units[value] === true;
 		  });
 
-		  var compatibleCssUnitRegexStr = '(\\-?\\.?\\d+\\.?\\d*(' + validUnits.join('|') + '|)|auto|inherit)';
-		  var compatibleCssUnitRegex = new RegExp('^' + compatibleCssUnitRegexStr + '$', 'i');
-		  var compatibleCssUnitAnyRegex = new RegExp('^(none|' + Keywords.width.join('|') + '|' + compatibleCssUnitRegexStr + '|' + cssVariableRegexStr + '|' + cssFunctionNoVendorRegexStr + '|' + cssFunctionVendorRegexStr + ')$', 'i');
-		  var colorOpacity = compatibility.colors.opacity;
+		  var compatibleCssUnitRegex = new RegExp('^(\\-?\\.?\\d+\\.?\\d*(' + validUnits.join('|') + '|)|auto|inherit)$', 'i');
 
 		  return {
-			areSameFunction: areSameFunction,
-			colorOpacity: colorOpacity,
-			hasNoVendorPrefix: hasNoVendorPrefix,
-			isValidBackgroundAttachment: isValidBackgroundAttachment,
-			isValidBackgroundClip: isValidBackgroundClip,
-			isValidBackgroundOrigin: isValidBackgroundOrigin,
-			isValidBackgroundPosition: isValidBackgroundPosition,
-			isValidBackgroundPositionPart: isValidBackgroundPositionPart,
-			isValidBackgroundRepeat: isValidBackgroundRepeat,
-			isValidBackgroundSizePart: isValidBackgroundSizePart,
-			isValidColor: isValidColor,
-			isValidColorValue: isValidColorValue,
-			isValidFunction: isValidFunction,
-			isValidFunctionWithoutVendorPrefix: isValidFunctionWithoutVendorPrefix,
-			isValidGlobalValue: isValidGlobalValue,
-			isValidHexColor: isValidHexColor,
-			isValidHslaColor: isValidHslaColor,
-			isValidImage: isValidImage,
-			isValidKeywordValue: isValidKeywordValue,
-			isValidListStylePosition: isValidListStylePosition,
-			isValidListStyleType: isValidListStyleType,
-			isValidNamedColor: isValidNamedColor,
-			isValidRgbaColor: isValidRgbaColor,
-			isValidStyle: isValidStyle,
-			isValidTextShadow: isValidTextShadow.bind(null, compatibleCssUnitRegex),
-			isValidUnit: isValidUnit.bind(null, compatibleCssUnitAnyRegex),
-			isValidUnitWithoutFunction: isValidUnitWithoutFunction.bind(null, compatibleCssUnitRegex),
-			isValidUrl: isValidUrl,
-			isValidVariable: isValidVariable,
-			isValidVendorPrefixedValue: isValidVendorPrefixedValue,
-			isValidWidth: isValidWidth.bind(null, compatibleCssUnitRegex),
-			isValidZIndex: isValidZIndex
+			colorOpacity: compatibility.colors.opacity,
+			isAnimationDirectionKeyword: isKeyword('animation-direction'),
+			isAnimationFillModeKeyword: isKeyword('animation-fill-mode'),
+			isAnimationIterationCountKeyword: isKeyword('animation-iteration-count'),
+			isAnimationNameKeyword: isKeyword('animation-name'),
+			isAnimationPlayStateKeyword: isKeyword('animation-play-state'),
+			isAnimationTimingFunction: isAnimationTimingFunction(),
+			isBackgroundAttachmentKeyword: isKeyword('background-attachment'),
+			isBackgroundClipKeyword: isKeyword('background-clip'),
+			isBackgroundOriginKeyword: isKeyword('background-origin'),
+			isBackgroundPositionKeyword: isKeyword('background-position'),
+			isBackgroundRepeatKeyword: isKeyword('background-repeat'),
+			isBackgroundSizeKeyword: isKeyword('background-size'),
+			isColor: isColor,
+			isColorFunction: isColorFunction,
+			isDynamicUnit: isDynamicUnit,
+			isFontKeyword: isKeyword('font'),
+			isFontSizeKeyword: isKeyword('font-size'),
+			isFontStretchKeyword: isKeyword('font-stretch'),
+			isFontStyleKeyword: isKeyword('font-style'),
+			isFontVariantKeyword: isKeyword('font-variant'),
+			isFontWeightKeyword: isKeyword('font-weight'),
+			isFunction: isFunction,
+			isGlobal: isKeyword('^'),
+			isHslColor: isHslColor,
+			isIdentifier: isIdentifier,
+			isImage: isImage,
+			isKeyword: isKeyword,
+			isLineHeightKeyword: isKeyword('line-height'),
+			isListStylePositionKeyword: isKeyword('list-style-position'),
+			isListStyleTypeKeyword: isKeyword('list-style-type'),
+			isPrefixed: isPrefixed,
+			isPositiveNumber: isPositiveNumber,
+			isRgbColor: isRgbColor,
+			isStyleKeyword: isKeyword('*-style'),
+			isTime: isTime,
+			isUnit: isUnit.bind(null, compatibleCssUnitRegex),
+			isUrl: isUrl,
+			isVariable: isVariable,
+			isWidth: isKeyword('width'),
+			isZIndex: isZIndex
 		  };
 		}
 
@@ -6255,7 +7353,7 @@ var CleanCss = (function(){
 		  VARIABLE_REFERENCE_PATTERN: /var\(--.+\)$/
 		};
 
-		function wrapAll(properties, includeVariable) {
+		function wrapAll(properties, includeVariable, skipProperties) {
 		  var wrapped = [];
 		  var single;
 		  var property;
@@ -6269,6 +7367,10 @@ var CleanCss = (function(){
 			}
 
 			if (!includeVariable && someVariableReferences(property)) {
+			  continue;
+			}
+
+			if (skipProperties && skipProperties.indexOf(property[1][1]) > -1) {
 			  continue;
 			}
 
@@ -6488,7 +7590,9 @@ var CleanCss = (function(){
 				'::before',
 				'::first-letter',
 				'::first-line'
-			  ] // selectors with these pseudo-elements can be merged as these are universally supported
+			  ], // selectors with these pseudo-elements can be merged as these are universally supported
+			  mergeLimit: 8191, // number of rules that can be safely merged together
+			  multiplePseudoMerging: true
 			},
 			units: {
 			  ch: true,
@@ -6827,9 +7931,9 @@ var CleanCss = (function(){
 		  optimizeBackground: true,
 		  optimizeBorderRadius: true,
 		  optimizeFilter: true,
-		  optimizeFont: true,
 		  optimizeFontWeight: true,
 		  optimizeOutline: true,
+		  removeEmpty: true,
 		  removeNegativePaddings: true,
 		  removeQuotes: true,
 		  removeWhitespace: true,
@@ -6851,11 +7955,14 @@ var CleanCss = (function(){
 		  mergeNonAdjacentRules: true,
 		  mergeSemantically: false,
 		  overrideProperties: true,
+		  removeEmpty: true,
 		  reduceNonAdjacentRules: true,
 		  removeDuplicateFontRules: true,
 		  removeDuplicateMediaBlocks: true,
 		  removeDuplicateRules: true,
-		  restructureRules: false
+		  removeUnusedAtRules: false,
+		  restructureRules: false,
+		  skipProperties: []
 		};
 
 		var ALL_KEYWORD_1 = '*';
@@ -6865,6 +7972,7 @@ var CleanCss = (function(){
 		var TRUE_KEYWORD_1 = 'true';
 		var TRUE_KEYWORD_2 = 'on';
 
+		var LIST_VALUE_SEPARATOR = ',';
 		var OPTION_SEPARATOR = ';';
 		var OPTION_VALUE_SEPARATOR = ':';
 
@@ -6907,6 +8015,10 @@ var CleanCss = (function(){
 
 		  if (One in source && 'roundingPrecision' in source[One]) {
 			source[One].roundingPrecision = roundingPrecisionFrom(source[One].roundingPrecision);
+		  }
+
+		  if (Two in source && 'skipProperties' in source[Two] && typeof(source[Two].skipProperties) == 'string') {
+			source[Two].skipProperties = source[Two].skipProperties.split(LIST_VALUE_SEPARATOR);
 		  }
 
 		  if (Zero in source || One in source || Two in source) {
@@ -7131,7 +8243,6 @@ var CleanCss = (function(){
 		var extractImportUrlAndMedia = require('/reader/extract-import-url-and-media');
 		var isAllowedResource = require('/reader/is-allowed-resource');
 		var loadOriginalSources = require('/reader/load-original-sources');
-		var loadRemoteResource = require('/reader/load-remote-resource');
 		var normalizePath = require('/reader/normalize-path');
 		var rebase = require('/reader/rebase');
 		var rebaseLocalMap = require('/reader/rebase-local-map');
@@ -7188,27 +8299,38 @@ var CleanCss = (function(){
 
 		/*BT-
 		function fromArray(input, context, callback) {
-		  var inputAsImports = input.reduce(function (accumulator, uri) {
-			var normalizedUri = normalizeUri(uri);
+		  var inputAsImports = input.reduce(function (accumulator, uriOrHash) {
+			if (typeof uriOrHash === 'string') {
+			  return addStringSource(uriOrHash, accumulator);
+			} else {
+			  return addHashSource(uriOrHash, context, accumulator);
+			}
 
-			accumulator.push(restoreAsImport(normalizedUri));
-			return accumulator;
 		  }, []);
 
 		  return fromStyles(inputAsImports.join(''), context, { inline: ['all'] }, callback);
 		}
 
 		function fromHash(input, context, callback) {
+		  var inputAsImports = addHashSource(input, context, []);
+		  return fromStyles(inputAsImports.join(''), context, { inline: ['all'] }, callback);
+		}
+
+		function addStringSource(input, imports) {
+		  imports.push(restoreAsImport(normalizeUri(input)));
+		  return imports;
+		}
+
+		function addHashSource(input, context, imports) {
 		  var uri;
 		  var normalizedUri;
 		  var source;
-		  var inputAsImports = [];
 
 		  for (uri in input) {
 			source = input[uri];
 			normalizedUri = normalizeUri(uri);
 
-			inputAsImports.push(restoreAsImport(normalizedUri));
+			imports.push(restoreAsImport(normalizedUri));
 
 			context.sourcesContent[normalizedUri] = source.styles;
 
@@ -7217,7 +8339,7 @@ var CleanCss = (function(){
 			}
 		  }
 
-		  return fromStyles(inputAsImports.join(''), context, { inline: ['all'] }, callback);
+		  return imports;
 		}
 
 		function normalizeUri(uri) {
@@ -7296,6 +8418,7 @@ var CleanCss = (function(){
 			callback: callback,
 			errors: externalContext.errors,
 			externalContext: externalContext,
+			fetch: externalContext.options.fetch,
 			inlinedStylesheets: parentInlinerContext.inlinedStylesheets || externalContext.inlinedStylesheets,
 			inline: parentInlinerContext.inline,
 			inlineRequest: externalContext.options.inlineRequest,
@@ -7411,7 +8534,7 @@ var CleanCss = (function(){
 
 		  return isLoaded ?
 			whenLoaded(null, inlinerContext.externalContext.sourcesContent[uri]) :
-			loadRemoteResource(uri, inlinerContext.inlineRequest, inlinerContext.inlineTimeout, whenLoaded);
+			inlinerContext.fetch(uri, inlinerContext.inlineRequest, inlinerContext.inlineTimeout, whenLoaded);
 		}
 
 		function inlineLocalStylesheet(uri, mediaQuery, metadata, inlinerContext) {
@@ -7487,6 +8610,7 @@ var CleanCss = (function(){
 		  DOUBLE_QUOTE: '"',
 		  EXCLAMATION: '!',
 		  FORWARD_SLASH: '/',
+		  INTERNAL: '-clean-css-',
 		  NEW_LINE_NIX: '\n',
 		  NEW_LINE_WIN: '\r',
 		  OPEN_CURLY_BRACKET: '{',
@@ -8505,6 +9629,9 @@ var CleanCss = (function(){
 		var validator = require('/optimizer/validator');
 
 		var compatibilityFrom = require('/options/compatibility');
+		/*BT-
+		var fetchFrom = require('/options/fetch');
+		*/
 		var formatFrom = require('/options/format').formatFrom;
 		/*BT-
 		var inlineFrom = require('/options/inline');
@@ -8531,6 +9658,9 @@ var CleanCss = (function(){
 
 		  this.options = {
 			compatibility: compatibilityFrom(options.compatibility),
+			/*BT-
+			fetch: fetchFrom(options.fetch),
+			*/
 			format: formatFrom(options.format),
 			/*BT-
 			inline: inlineFrom(options.inline),
