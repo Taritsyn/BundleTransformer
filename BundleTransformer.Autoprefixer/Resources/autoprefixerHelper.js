@@ -58,7 +58,7 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 		autoprefixOptions.browsers = browsers;
 
 		try {
-			processedCode = autoprefixer.process(code, autoprefixOptions).css;
+			processedCode = autoprefixer.process(code, undefined, autoprefixOptions).css;
 		}
 		catch (e) {
 			if (typeof e.line !== 'undefined' || typeof e.autoprefixer !== 'undefined') {

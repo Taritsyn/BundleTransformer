@@ -82,7 +82,7 @@
 		{
 			string statistics;
 			string resourceName = ResourceHelpers.GetResourceName(
-				AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + "." + countryCode + ".json");
+				AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + "." + countryCode + ".js");
 
 			try
 			{
