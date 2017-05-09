@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: Autoprefixer v1.9.155
+               README file for Bundle Transformer: Autoprefixer v1.9.157
 
    --------------------------------------------------------------------------------
 
@@ -19,8 +19,8 @@
    As a JS-engine is used the JavaScript Engine Switcher library
    (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
    this module is recommended to install one of the following NuGet packages:
-   JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or
-   JavaScriptEngineSwitcher.ChakraCore.
+   JavaScriptEngineSwitcher.Msie (only in the `ChakraEdgeJsRt` mode),
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
 
    =============
    RELEASE NOTES
