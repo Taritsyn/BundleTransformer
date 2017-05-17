@@ -1,5 +1,5 @@
 /*!
- * Clean-css v4.1.1
+ * Clean-css v4.1.2
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -2592,14 +2592,14 @@ var CleanCss = (function(){
 		}
 
 		function animation(property, compactable, validator) {
-		  var duration = _wrapDefault('animation-duration', property, compactable);
-		  var timing = _wrapDefault('animation-timing-function', property, compactable);
-		  var delay = _wrapDefault('animation-delay', property, compactable);
-		  var iteration = _wrapDefault('animation-iteration-count', property, compactable);
-		  var direction = _wrapDefault('animation-direction', property, compactable);
-		  var fill = _wrapDefault('animation-fill-mode', property, compactable);
-		  var play = _wrapDefault('animation-play-state', property, compactable);
-		  var name = _wrapDefault('animation-name', property, compactable);
+		  var duration = _wrapDefault(property.name + '-duration', property, compactable);
+		  var timing = _wrapDefault(property.name + '-timing-function', property, compactable);
+		  var delay = _wrapDefault(property.name + '-delay', property, compactable);
+		  var iteration = _wrapDefault(property.name + '-iteration-count', property, compactable);
+		  var direction = _wrapDefault(property.name + '-direction', property, compactable);
+		  var fill = _wrapDefault(property.name + '-fill-mode', property, compactable);
+		  var play = _wrapDefault(property.name + '-play-state', property, compactable);
+		  var name = _wrapDefault(property.name + '-name', property, compactable);
 		  var components = [duration, timing, delay, iteration, direction, fill, play, name];
 		  var values = property.value;
 		  var value;
@@ -2815,13 +2815,13 @@ var CleanCss = (function(){
 			throw new InvalidPropertyError('Missing font values at ' + formatPosition(property.all[property.position][1][2][0]) + '. Ignoring.');
 		  }
 
-		  if (values.length == 1 && (validator.isFontKeyword(values[0][1]) || validator.isPrefixed(values[0][1]))) {
-			values[0][1] = Marker.INTERNAL + values[0][1];
+		  if (values.length == 1 && values[0][1] == 'inherit') {
 			style.value = variant.value = weight.value = stretch.value = size.value = height.value = family.value = values;
 			return components;
 		  }
 
-		  if (values.length == 1 && values[0][1] == 'inherit') {
+		  if (values.length == 1 && (validator.isFontKeyword(values[0][1]) || validator.isGlobal(values[0][1]) || validator.isPrefixed(values[0][1]))) {
+			values[0][1] = Marker.INTERNAL + values[0][1];
 			style.value = variant.value = weight.value = stretch.value = size.value = height.value = family.value = values;
 			return components;
 		  }
@@ -7025,7 +7025,8 @@ var CleanCss = (function(){
 			'menu',
 			'message-box',
 			'small-caption',
-			'status-bar'
+			'status-bar',
+			'unset'
 		  ],
 		  'font-size': [
 			'large',
@@ -9368,7 +9369,7 @@ var CleanCss = (function(){
 		  switch (token[0]) {
 			case Token.AT_RULE:
 			  store(context, token);
-			  store(context, position < lastPropertyAt ? semicolon(context, Breaks.AfterProperty, false) : emptyCharacter);
+			  store(context, semicolon(context, Breaks.AfterProperty, false));
 			  break;
 			case Token.COMMENT:
 			  store(context, token);
