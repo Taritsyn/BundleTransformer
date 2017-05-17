@@ -1,5 +1,5 @@
 /*!
- * CoffeeScript Compiler v1.12.5
+ * CoffeeScript Compiler v1.12.6
  * http://coffeescript.org
  *
  * Copyright 2009-2017 Jeremy Ashkenas
@@ -286,7 +286,7 @@ var CoffeeScript = (function(){
 	//#region URL: /rewriter
 	modules['/rewriter'] = function() {
 	  var exports = {};
-	  var BALANCED_PAIRS, CALL_CLOSERS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, SINGLE_CLOSERS, SINGLE_LINERS, generate, k, left, len, ref, rite,
+	  var BALANCED_PAIRS, CALL_CLOSERS, EXPRESSION_CLOSE, EXPRESSION_END, EXPRESSION_START, IMPLICIT_CALL, IMPLICIT_END, IMPLICIT_FUNC, IMPLICIT_UNSPACED_CALL, INVERSES, LINEBREAKS, Rewriter, SINGLE_CLOSERS, SINGLE_LINERS, generate, k, left, len, ref, rite,
 		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
 		slice = [].slice;
 
@@ -300,7 +300,7 @@ var CoffeeScript = (function(){
 		return tok;
 	  };
 
-	  exports.Rewriter = (function() {
+	  exports.Rewriter = Rewriter = (function() {
 		function Rewriter() {}
 
 		Rewriter.prototype.rewrite = function(tokens1) {
@@ -457,7 +457,7 @@ var CoffeeScript = (function(){
 		  stack = [];
 		  start = null;
 		  return this.scanTokens(function(token, i, tokens) {
-			var endImplicitCall, endImplicitObject, forward, inImplicit, inImplicitCall, inImplicitControl, inImplicitObject, newLine, nextTag, offset, prevTag, prevToken, ref, ref1, ref2, ref3, ref4, ref5, s, sameLine, stackIdx, stackTag, stackTop, startIdx, startImplicitCall, startImplicitObject, startsLine, tag;
+			var endImplicitCall, endImplicitObject, forward, inImplicit, inImplicitCall, inImplicitControl, inImplicitObject, isImplicit, isImplicitCall, isImplicitObject, k, newLine, nextTag, offset, prevTag, prevToken, ref, ref1, ref2, ref3, ref4, ref5, s, sameLine, stackIdx, stackItem, stackTag, stackTop, startIdx, startImplicitCall, startImplicitObject, startsLine, tag;
 			tag = token[0];
 			prevTag = (prevToken = i > 0 ? tokens[i - 1] : [])[0];
 			nextTag = (i < tokens.length - 1 ? tokens[i + 1] : [])[0];
@@ -468,17 +468,24 @@ var CoffeeScript = (function(){
 			forward = function(n) {
 			  return i - startIdx + n;
 			};
+			isImplicit = function(stackItem) {
+			  var ref;
+			  return stackItem != null ? (ref = stackItem[2]) != null ? ref.ours : void 0 : void 0;
+			};
+			isImplicitObject = function(stackItem) {
+			  return isImplicit(stackItem) && (stackItem != null ? stackItem[0] : void 0) === '{';
+			};
+			isImplicitCall = function(stackItem) {
+			  return isImplicit(stackItem) && (stackItem != null ? stackItem[0] : void 0) === '(';
+			};
 			inImplicit = function() {
-			  var ref, ref1;
-			  return (ref = stackTop()) != null ? (ref1 = ref[2]) != null ? ref1.ours : void 0 : void 0;
+			  return isImplicit(stackTop());
 			};
 			inImplicitCall = function() {
-			  var ref;
-			  return inImplicit() && ((ref = stackTop()) != null ? ref[0] : void 0) === '(';
+			  return isImplicitCall(stackTop());
 			};
 			inImplicitObject = function() {
-			  var ref;
-			  return inImplicit() && ((ref = stackTop()) != null ? ref[0] : void 0) === '{';
+			  return isImplicitObject(stackTop());
 			};
 			inImplicitControl = function() {
 			  var ref;
@@ -602,8 +609,13 @@ var CoffeeScript = (function(){
 			  startImplicitObject(s, !!startsLine);
 			  return forward(2);
 			}
-			if (inImplicitObject() && indexOf.call(LINEBREAKS, tag) >= 0) {
-			  stackTop()[2].sameLine = false;
+			if (indexOf.call(LINEBREAKS, tag) >= 0) {
+			  for (k = stack.length - 1; k >= 0; k += -1) {
+				stackItem = stack[k];
+				if (isImplicitObject(stackItem)) {
+				  stackItem[2].sameLine = false;
+				}
+			  }
 			}
 			newLine = prevTag === 'OUTDENT' || prevToken.newLine;
 			if (indexOf.call(IMPLICIT_END, tag) >= 0 || indexOf.call(CALL_CLOSERS, tag) >= 0 && newLine) {
@@ -681,7 +693,7 @@ var CoffeeScript = (function(){
 		  starter = indent = outdent = null;
 		  condition = function(token, i) {
 			var ref, ref1, ref2, ref3;
-			return token[1] !== ';' && (ref = token[0], indexOf.call(SINGLE_CLOSERS, ref) >= 0) && !(token[0] === 'TERMINATOR' && (ref1 = this.tag(i + 1), indexOf.call(EXPRESSION_CLOSE, ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((ref2 = token[0]) === 'CATCH' || ref2 === 'FINALLY') && (starter === '->' || starter === '=>')) || (ref3 = token[0], indexOf.call(CALL_CLOSERS, ref3) >= 0) && this.tokens[i - 1].newLine;
+			return token[1] !== ';' && (ref = token[0], indexOf.call(SINGLE_CLOSERS, ref) >= 0) && !(token[0] === 'TERMINATOR' && (ref1 = this.tag(i + 1), indexOf.call(EXPRESSION_CLOSE, ref1) >= 0)) && !(token[0] === 'ELSE' && starter !== 'THEN') && !(((ref2 = token[0]) === 'CATCH' || ref2 === 'FINALLY') && (starter === '->' || starter === '=>')) || (ref3 = token[0], indexOf.call(CALL_CLOSERS, ref3) >= 0) && (this.tokens[i - 1].newLine || this.tokens[i - 1][0] === 'OUTDENT');
 		  };
 		  action = function(token, i) {
 			return this.tokens.splice((this.tag(i - 1) === ',' ? i - 1 : i), 0, outdent);
@@ -812,7 +824,7 @@ var CoffeeScript = (function(){
 	//#region URL: /lexer
 	modules['/lexer'] = function () {
 	  var exports = {};
-	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HERECOMMENT_ILLEGAL, HEREDOC_DOUBLE, HEREDOC_INDENT, HEREDOC_SINGLE, HEREGEX, HEREGEX_OMIT, HERE_JSTOKEN, IDENTIFIER, INDENTABLE_CLOSERS, INDEXABLE, INVERSES, JSTOKEN, JS_KEYWORDS, LEADING_BLANK_LINE, LINE_BREAK, LINE_CONTINUER, Lexer, MATH, MULTI_DENT, NOT_REGEX, NUMBER, OPERATOR, POSSIBLY_DIVISION, REGEX, REGEX_FLAGS, REGEX_ILLEGAL, REGEX_INVALID_ESCAPE, RELATION, RESERVED, Rewriter, SHIFT, SIMPLE_STRING_OMIT, STRICT_PROSCRIBED, STRING_DOUBLE, STRING_INVALID_ESCAPE, STRING_OMIT, STRING_SINGLE, STRING_START, TRAILING_BLANK_LINE, TRAILING_SPACES, UNARY, UNARY_MATH, VALID_FLAGS, WHITESPACE, compact, count, invertLiterate, isForFrom, isUnassignable, key, locationDataToString, ref, ref1, repeat, starts, throwSyntaxError,
+	  var BOM, BOOL, CALLABLE, CODE, COFFEE_ALIASES, COFFEE_ALIAS_MAP, COFFEE_KEYWORDS, COMMENT, COMPARE, COMPOUND_ASSIGN, HERECOMMENT_ILLEGAL, HEREDOC_DOUBLE, HEREDOC_INDENT, HEREDOC_SINGLE, HEREGEX, HEREGEX_OMIT, HERE_JSTOKEN, IDENTIFIER, INDENTABLE_CLOSERS, INDEXABLE, INVERSES, JSTOKEN, JS_KEYWORDS, LEADING_BLANK_LINE, LINE_BREAK, LINE_CONTINUER, Lexer, MATH, MULTI_DENT, NOT_REGEX, NUMBER, OPERATOR, POSSIBLY_DIVISION, REGEX, REGEX_FLAGS, REGEX_ILLEGAL, REGEX_INVALID_ESCAPE, RELATION, RESERVED, Rewriter, SHIFT, SIMPLE_STRING_OMIT, STRICT_PROSCRIBED, STRING_DOUBLE, STRING_INVALID_ESCAPE, STRING_OMIT, STRING_SINGLE, STRING_START, TRAILING_BLANK_LINE, TRAILING_SPACES, UNARY, UNARY_MATH, UNICODE_CODE_POINT_ESCAPE, VALID_FLAGS, WHITESPACE, compact, count, invertLiterate, isForFrom, isUnassignable, key, locationDataToString, ref, ref1, repeat, starts, throwSyntaxError,
 		indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
 		slice = [].slice;
 
@@ -1094,7 +1106,9 @@ var CoffeeScript = (function(){
 			  delimiter: delimiter
 			}, (function(_this) {
 			  return function(value, i) {
-				value = _this.formatString(value);
+				value = _this.formatString(value, {
+				  delimiter: quote
+				});
 				if (indentRegex) {
 				  value = value.replace(indentRegex, '\n');
 				}
@@ -1112,7 +1126,9 @@ var CoffeeScript = (function(){
 			  delimiter: delimiter
 			}, (function(_this) {
 			  return function(value, i) {
-				value = _this.formatString(value);
+				value = _this.formatString(value, {
+				  delimiter: quote
+				});
 				value = value.replace(SIMPLE_STRING_OMIT, function(match, offset) {
 				  if ((i === 0 && offset === 0) || (i === $ && offset + match.length === value.length)) {
 					return '';
@@ -1176,6 +1192,9 @@ var CoffeeScript = (function(){
 			  this.validateEscapes(body, {
 				isRegex: true,
 				offsetInChunk: 1
+			  });
+			  body = this.formatRegex(body, {
+				delimiter: '/'
 			  });
 			  index = regex.length;
 			  ref2 = this.tokens, prev = ref2[ref2.length - 1];
@@ -1255,7 +1274,7 @@ var CoffeeScript = (function(){
 			return indent.length;
 		  }
 		  if (size > this.indent) {
-			if (noNewlines) {
+			if (noNewlines || this.tag() === 'RETURN') {
 			  this.indebt = size - this.indent;
 			  this.suppressNewlines();
 			  return indent.length;
@@ -1557,7 +1576,7 @@ var CoffeeScript = (function(){
 				tokensToPush = value;
 				break;
 			  case 'NEOSTRING':
-				converted = fn(token[1], i);
+				converted = fn.call(this, token[1], i);
 				if (converted.length === 0) {
 				  if (i === 0) {
 					firstEmptyStringIndex = this.tokens.length;
@@ -1679,19 +1698,59 @@ var CoffeeScript = (function(){
 
 		Lexer.prototype.unfinished = function() {
 		  var ref2;
-		  return LINE_CONTINUER.test(this.chunk) || ((ref2 = this.tag()) === '\\' || ref2 === '.' || ref2 === '?.' || ref2 === '?::' || ref2 === 'UNARY' || ref2 === 'MATH' || ref2 === 'UNARY_MATH' || ref2 === '+' || ref2 === '-' || ref2 === '**' || ref2 === 'SHIFT' || ref2 === 'RELATION' || ref2 === 'COMPARE' || ref2 === '&' || ref2 === '^' || ref2 === '|' || ref2 === '&&' || ref2 === '||' || ref2 === 'BIN?' || ref2 === 'THROW' || ref2 === 'EXTENDS');
+		  return LINE_CONTINUER.test(this.chunk) || ((ref2 = this.tag()) === '\\' || ref2 === '.' || ref2 === '?.' || ref2 === '?::' || ref2 === 'UNARY' || ref2 === 'MATH' || ref2 === 'UNARY_MATH' || ref2 === '+' || ref2 === '-' || ref2 === '**' || ref2 === 'SHIFT' || ref2 === 'RELATION' || ref2 === 'COMPARE' || ref2 === '&' || ref2 === '^' || ref2 === '|' || ref2 === '&&' || ref2 === '||' || ref2 === 'BIN?' || ref2 === 'THROW' || ref2 === 'EXTENDS' || ref2 === 'DEFAULT');
 		};
 
-		Lexer.prototype.formatString = function(str) {
-		  return str.replace(STRING_OMIT, '$1');
+		Lexer.prototype.formatString = function(str, options) {
+		  return this.replaceUnicodeCodePointEscapes(str.replace(STRING_OMIT, '$1'), options);
 		};
 
 		Lexer.prototype.formatHeregex = function(str) {
-		  return str.replace(HEREGEX_OMIT, '$1$2');
+		  return this.formatRegex(str.replace(HEREGEX_OMIT, '$1$2'), {
+			delimiter: '///'
+		  });
+		};
+
+		Lexer.prototype.formatRegex = function(str, options) {
+		  return this.replaceUnicodeCodePointEscapes(str, options);
+		};
+
+		Lexer.prototype.unicodeCodePointToUnicodeEscapes = function(codePoint) {
+		  var high, low, toUnicodeEscape;
+		  toUnicodeEscape = function(val) {
+			var str;
+			str = val.toString(16);
+			return "\\u" + (repeat('0', 4 - str.length)) + str;
+		  };
+		  if (codePoint < 0x10000) {
+			return toUnicodeEscape(codePoint);
+		  }
+		  high = Math.floor((codePoint - 0x10000) / 0x400) + 0xD800;
+		  low = (codePoint - 0x10000) % 0x400 + 0xDC00;
+		  return "" + (toUnicodeEscape(high)) + (toUnicodeEscape(low));
+		};
+
+		Lexer.prototype.replaceUnicodeCodePointEscapes = function(str, options) {
+		  return str.replace(UNICODE_CODE_POINT_ESCAPE, (function(_this) {
+			return function(match, escapedBackslash, codePointHex, offset) {
+			  var codePointDecimal;
+			  if (escapedBackslash) {
+				return escapedBackslash;
+			  }
+			  codePointDecimal = parseInt(codePointHex, 16);
+			  if (codePointDecimal > 0x10ffff) {
+				_this.error("unicode code point escapes greater than \\u{10ffff} are not allowed", {
+				  offset: offset + options.delimiter.length,
+				  length: codePointHex.length + 4
+				});
+			  }
+			  return _this.unicodeCodePointToUnicodeEscapes(codePointDecimal);
+			};
+		  })(this));
 		};
 
 		Lexer.prototype.validateEscapes = function(str, options) {
-		  var before, hex, invalidEscape, invalidEscapeRegex, match, message, octal, ref2, unicode;
+		  var before, hex, invalidEscape, invalidEscapeRegex, match, message, octal, ref2, unicode, unicodeCodePoint;
 		  if (options == null) {
 			options = {};
 		  }
@@ -1700,9 +1759,9 @@ var CoffeeScript = (function(){
 		  if (!match) {
 			return;
 		  }
-		  match[0], before = match[1], octal = match[2], hex = match[3], unicode = match[4];
+		  match[0], before = match[1], octal = match[2], hex = match[3], unicodeCodePoint = match[4], unicode = match[5];
 		  message = octal ? "octal escape sequences are not allowed" : "invalid escape sequence";
-		  invalidEscape = "\\" + (octal || hex || unicode);
+		  invalidEscape = "\\" + (octal || hex || unicodeCodePoint || unicode);
 		  return this.error(message + " " + invalidEscape, {
 			offset: ((ref2 = options.offsetInChunk) != null ? ref2 : 0) + match.index + before.length,
 			length: invalidEscape.length
@@ -1874,7 +1933,7 @@ var CoffeeScript = (function(){
 
 	  REGEX_FLAGS = /^\w*/;
 
-	  VALID_FLAGS = /^(?!.*(.).*\1)[imgy]*$/;
+	  VALID_FLAGS = /^(?!.*(.).*\1)[imguy]*$/;
 
 	  HEREGEX = /^(?:[^\\\/#]|\\[\s\S]|\/(?!\/\/)|\#(?!\{))*/;
 
@@ -1888,9 +1947,11 @@ var CoffeeScript = (function(){
 
 	  LINE_CONTINUER = /^\s*(?:,|\??\.(?![.\d])|::)/;
 
-	  STRING_INVALID_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\(?:(0[0-7]|[1-7])|(x(?![\da-fA-F]{2}).{0,2})|(u(?![\da-fA-F]{4}).{0,4}))/;
+	  STRING_INVALID_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\(?:(0[0-7]|[1-7])|(x(?![\da-fA-F]{2}).{0,2})|(u\{(?![\da-fA-F]{1,}\})[^}]*\}?)|(u(?!\{|[\da-fA-F]{4}).{0,4}))/;
 
-	  REGEX_INVALID_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\(?:(0[0-7])|(x(?![\da-fA-F]{2}).{0,2})|(u(?![\da-fA-F]{4}).{0,4}))/;
+	  REGEX_INVALID_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\(?:(0[0-7])|(x(?![\da-fA-F]{2}).{0,2})|(u\{(?![\da-fA-F]{1,}\})[^}]*\}?)|(u(?!\{|[\da-fA-F]{4}).{0,4}))/;
+
+	  UNICODE_CODE_POINT_ESCAPE = /(\\\\)|\\u\{([\da-fA-F]+)\}/g;
 
 	  LEADING_BLANK_LINE = /^[^\n\S]*\n/;
 
@@ -6345,7 +6406,7 @@ var CoffeeScript = (function(){
 			return expr.compileToFragments(o);
 		  }
 		  fragments = expr.compileToFragments(o, LEVEL_PAREN);
-		  bare = o.level < LEVEL_OP && (expr instanceof Op || expr instanceof Call || (expr instanceof For && expr.returns));
+		  bare = o.level < LEVEL_OP && (expr instanceof Op || expr instanceof Call || (expr instanceof For && expr.returns)) && (o.level < LEVEL_COND || fragments.length <= 3);
 		  if (bare) {
 			return fragments;
 		  } else {
@@ -6918,7 +6979,7 @@ var CoffeeScript = (function(){
 
 //	  packageJson = require('../../package.json');
 
-	  exports.VERSION = '1.12.5';
+	  exports.VERSION = '1.12.6';
 
 //	  exports.FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
 
