@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: Handlebars v1.9.157
+                README file for Bundle Transformer: Handlebars v1.9.159
 
    --------------------------------------------------------------------------------
 
