@@ -1,5 +1,5 @@
 /*!
- * Clean-css v4.1.2
+ * Clean-css v4.1.3
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -8681,6 +8681,7 @@ var CleanCss = (function(){
 		  '@supports'
 		];
 
+		var REPEAT_PATTERN = /^\[\s*\d+\s*\]$/;
 		var RULE_WORD_SEPARATOR_PATTERN = /[\s\(]/;
 		var TAIL_BROKEN_VALUE_PATTERN = /[\s|\}]*$/;
 
@@ -9030,6 +9031,12 @@ var CleanCss = (function(){
 			  propertyToken.push([Token.PROPERTY_VALUE, character, [[position.line, position.column, position.source]]]);
 
 			  buffer = [];
+			} else if (character == Marker.CLOSE_SQUARE_BRACKET && propertyToken && propertyToken.length > 1 && buffer.length > 0 && isRepeatToken(buffer)) {
+			  buffer.push(character);
+			  serializedBuffer = buffer.join('').trim();
+			  propertyToken[propertyToken.length - 1][1] += serializedBuffer;
+
+			  buffer = [];
 			} else if ((isSpace || (isNewLineNix && !isNewLineWin)) && level == Level.RULE && seekingValue && propertyToken && buffer.length > 0) {
 			  // space or *nix newline within property, e.g. a{margin:0 <--
 			  serializedBuffer = buffer.join('').trim();
@@ -9111,6 +9118,10 @@ var CleanCss = (function(){
 		  } else if (tokenType == Token.AT_RULE_BLOCK) {
 			return Token.AT_RULE_BLOCK_SCOPE;
 		  }
+		}
+
+		function isRepeatToken(buffer) {
+		  return REPEAT_PATTERN.test(buffer.join('') + Marker.CLOSE_SQUARE_BRACKET);
 		}
 
 		return tokenize;
