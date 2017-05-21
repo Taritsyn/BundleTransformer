@@ -1,7 +1,7 @@
 /**!
 
  @license
- handlebars v4.0.8
+ handlebars v4.0.10
 
 Copyright (C) 2011-2016 by Yehuda Katz
 
@@ -278,7 +278,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _logger2 = _interopRequireDefault(_logger);
 
-	var VERSION = '4.0.8';
+	var VERSION = '4.0.10';
 	exports.VERSION = VERSION;
 	var COMPILER_REVISION = 7;
 
@@ -3051,7 +3051,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      for (var _name in knownHelpers) {
 	        /* istanbul ignore else */
 	        if (_name in knownHelpers) {
-	          options.knownHelpers[_name] = knownHelpers[_name];
+	          this.options.knownHelpers[_name] = knownHelpers[_name];
 	        }
 	      }
 	    }
@@ -3466,6 +3466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new _exception2['default']('You must pass a string or Handlebars AST to Handlebars.compile. You passed ' + input);
 	  }
 
+	  options = _utils.extend({}, options);
 	  if (!('data' in options)) {
 	    options.data = true;
 	  }
