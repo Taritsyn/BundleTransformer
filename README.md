@@ -19,7 +19,7 @@ This extension will help your web applications successfully pass a most part of 
  * [Bundle Transformer: LESS](http://nuget.org/packages/BundleTransformer.Less)
  * [Bundle Transformer: Sass and SCSS](http://nuget.org/packages/BundleTransformer.SassAndScss)
  * [Bundle Transformer: CoffeeScript](http://nuget.org/packages/BundleTransformer.CoffeeScript)
- * [Bundle Transformer: TypeScript](http://nuget.org/packages/BundleTransformer.CoffeeScript)
+ * [Bundle Transformer: TypeScript](http://nuget.org/packages/BundleTransformer.TypeScript)
  * [Bundle Transformer: Hogan](http://nuget.org/packages/BundleTransformer.Hogan)
  * [Bundle Transformer: Handlebars](http://nuget.org/packages/BundleTransformer.Handlebars)
 
