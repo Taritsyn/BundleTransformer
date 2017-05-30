@@ -42,7 +42,7 @@ This extension will help your web applications successfully pass a most part of 
  * [BundleTransformer.TypeScript.Unofficial](http://nuget.org/packages/BundleTransformer.TypeScript.Unofficial) by Alexey Kushnikov
 
 ## Documentation
-Documentation is located on the [CodePlex](http://bundletransformer.codeplex.com/documentation).
+Documentation is located on the [wiki](https://github.com/Taritsyn/BundleTransformer/wiki) of this Repo.
 
 ## Who's Using Bundle Transformer
 If you use Bundle Transformer in some project, please send me a message so I can include it in this list:
@@ -59,7 +59,7 @@ If you use Bundle Transformer in some project, please send me a message so I can
  * [Open Government Data Initiative v6](http://github.com/openlab/OGDI-DataLab)
  * [Optimus](http://our.umbraco.org/projects/developer-tools/optimus) by Tim Geyssens
  * [Sassy](http://our.umbraco.org/projects/backoffice-extensions/sassy) by Warren Buckley
- * [SmartStore.NET](http://www.smartstore.com/net)
+ * [SmartStore.NET](http://www.smartstore.com)
  * [Vault MVC Library](http://nuget.org/packages/Vault.MVC.V) by Admir Tuzovic, Josip Dusper, Mirza Dervisevic and Fedja Omeragic
  * [VMware AirWatch MDM Server 8.0](http://www.air-watch.com/)
  * [Web Performance Helpers for ASP.NET MVC](http://github.com/benembery/dotnet-mvc-web-optimisation-helpers) by Ben Embery
