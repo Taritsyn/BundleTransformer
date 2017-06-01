@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundle Transformer: Packer")]
-[assembly: AssemblyCopyright("Copyright © 2012-2016 Andrey Taritsyn")]
+[assembly: AssemblyCopyright("Copyright © 2012-2017 Andrey Taritsyn")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
