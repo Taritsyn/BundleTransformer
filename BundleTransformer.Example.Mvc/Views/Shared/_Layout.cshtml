@@ -1,53 +1,53 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <title>@ViewBag.Title - Bundle Transformer Example MVC Application</title>
-        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-        <meta name="viewport" content="width=device-width" />
+	<head>
+		<meta charset="utf-8" />
+		<title>@ViewBag.Title - Bundle Transformer Example MVC Application</title>
+		<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+		<meta name="viewport" content="width=device-width" />
 		@Styles.Render("~/Bundles/CommonStyles")
 		@Scripts.Render("~/Bundles/Modernizr")
-    </head>
-    <body>
-        <header>
-            <div class="content-wrapper">
-                <div class="float-left">
-                    <p class="site-title">
+	</head>
+	<body>
+		<header>
+			<div class="content-wrapper">
+				<div class="float-left">
+					<p class="site-title">
 						<a href="@Url.Action("Index", "Home")"><img src="../../Content/images/bundle_transformer_logo.png" alt="Bundle Transformer Logo" /></a>
 					</p>
-                </div>
-                <div class="float-right">
-                    <nav class="primary-nav">
-                        <ul id="menu">
-                            <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                            <li>@Html.ActionLink("About", "About", "Home")</li>
-                            <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </header>
-        <div id="body">
-            @RenderSection("featured", required: false)
-            <section class="content-wrapper main-content clear-fix">
-                @RenderBody()
-            </section>
-        </div>
-        <footer>
-            <div class="content-wrapper">
-                <div class="float-left">
-                    <p>&copy; @DateTime.Now.Year Andrey Taritsyn</p>
-                </div>
-                <div class="float-right">
-                    <ul id="social">
-                        <li><a href="http://www.linkedin.com/in/taritsyn" target="_blank" class="linkedin">LinkedIn</a></li>
-                        <li><a href="http://twitter.com/andrey_taritsyn" target="_blank" class="twitter">Twitter</a></li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
+				</div>
+				<div class="float-right">
+					<nav class="primary-nav">
+						<ul id="menu">
+							<li>@Html.ActionLink("Home", "Index", "Home")</li>
+							<li>@Html.ActionLink("About", "About", "Home")</li>
+							<li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</header>
+		<div id="body">
+			@RenderSection("featured", required: false)
+			<section class="content-wrapper main-content clear-fix">
+				@RenderBody()
+			</section>
+		</div>
+		<footer>
+			<div class="content-wrapper">
+				<div class="float-left">
+					<p>&copy; @DateTime.Now.Year Andrey Taritsyn</p>
+				</div>
+				<div class="float-right">
+					<ul id="social">
+						<li><a href="http://www.linkedin.com/in/taritsyn" target="_blank" class="linkedin">LinkedIn</a></li>
+						<li><a href="http://twitter.com/andrey_taritsyn" target="_blank" class="twitter">Twitter</a></li>
+					</ul>
+				</div>
+			</div>
+		</footer>
 
 		@Scripts.Render("~/Bundles/Jquery", "~/Bundles/CommonScripts", "~/Bundles/CommonTemplates")
-        @RenderSection("scripts", required: false)
-    </body>
+		@RenderSection("scripts", required: false)
+	</body>
 </html>

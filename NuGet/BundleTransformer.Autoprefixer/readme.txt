@@ -14,10 +14,10 @@
    BundleTransformer.Autoprefixer contains one postprocessor-adapter for
    postprocessing of CSS-code - `AutoprefixCssPostProcessor`.
    `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer
-   (http://github.com/postcss/autoprefixer) version 7.1.1.
+   (https://github.com/postcss/autoprefixer) version 7.1.1.
 
    As a JS-engine is used the JavaScript Engine Switcher library
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
    this module is recommended to install one of the following NuGet packages:
    JavaScriptEngineSwitcher.Msie (only in the `ChakraEdgeJsRt` mode),
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
@@ -34,7 +34,7 @@
    following NuGet packages: JavaScriptEngineSwitcher.Msie,
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
    After package is installed and JS-engine is registered
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
    attribute of `/configuration/bundleTransformer/autoprefixer/jsEngine`
    configuration element.
@@ -49,5 +49,4 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex -
-   http://bundletransformer.codeplex.com/documentation
+   See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki

@@ -13,10 +13,10 @@
    ===========
    BundleTransformer.Csso contains one minifier-adapter for minification of
    CSS-code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the
-   Sergey Kryzhanovsky's CSSO (http://github.com/css/csso) version 2.3.1.
+   Sergey Kryzhanovsky's CSSO (https://github.com/css/csso) version 2.3.1.
 
    As a JS-engine is used the JavaScript Engine Switcher library
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
    this module is recommended to install one of the following NuGet packages:
    JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes),
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
@@ -33,7 +33,7 @@
    following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT
    modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
    After package is installed and JS-engine is registered
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
    attribute of `/configuration/bundleTransformer/csso/jsEngine` configuration
    element.
@@ -46,5 +46,4 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex -
-   http://bundletransformer.codeplex.com/documentation
+   See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki

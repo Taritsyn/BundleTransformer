@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.JsMin contains one minifier-adapter for minification of
    JS-code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port
-   of Douglas Crockford's JSMin (http://github.com/douglascrockford/JSMin) version
+   of Douglas Crockford's JSMin (https://github.com/douglascrockford/JSMin) version
    of March 29, 2013.
 
    =============
@@ -32,5 +32,4 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex -
-   http://bundletransformer.codeplex.com/documentation
+   See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki

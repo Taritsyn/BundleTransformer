@@ -27,5 +27,4 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex -
-   http://bundletransformer.codeplex.com/documentation
+   See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki

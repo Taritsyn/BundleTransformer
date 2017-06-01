@@ -6,13 +6,13 @@
 		<title>Bundle Transformer: UglifyJS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
-		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476857</iconUrl>
+		<licenseUrl>https://github.com/Taritsyn/BundleTransformer/blob/master/LICENSE.txt</licenseUrl>
+		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_UglifyJs_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (http://github.com/mishoo/UglifyJS2) version 2.7.5.
+		<description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (https://github.com/mishoo/UglifyJS2) version 2.7.5.
 
-As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
+As a JS-engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
 		<summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.7.5.</summary>
 		<releaseNotes>Now all calls of the `ExecuteResource` method takes the assembly as second parameter.</releaseNotes>
 		<copyright>Copyright (c) 2012-2016 Andrey Taritsyn - http://www.taritsyn.ru</copyright>

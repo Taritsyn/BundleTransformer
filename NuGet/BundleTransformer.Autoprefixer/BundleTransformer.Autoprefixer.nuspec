@@ -6,13 +6,13 @@
 		<title>Bundle Transformer: Autoprefixer</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
-		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=860421</iconUrl>
+		<licenseUrl>https://github.com/Taritsyn/BundleTransformer/blob/master/LICENSE.txt</licenseUrl>
+		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (http://github.com/postcss/autoprefixer) version 7.1.1.
+		<description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 7.1.1.
 
-As a JS-engine is used the JavaScript Engine Switcher library (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the `ChakraEdgeJsRt` mode), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
+As a JS-engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the `ChakraEdgeJsRt` mode), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
 		<summary>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS-code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer version 7.1.1.</summary>
 		<releaseNotes>Added support of Autoprefixer version 7.1.1.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>

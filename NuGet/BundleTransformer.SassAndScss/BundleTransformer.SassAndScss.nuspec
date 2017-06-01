@@ -6,11 +6,11 @@
 		<title>Bundle Transformer: Sass and SCSS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
-		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=476849</iconUrl>
+		<licenseUrl>https://github.com/Taritsyn/BundleTransformer/blob/master/LICENSE.txt</licenseUrl>
+		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET (http://github.com/Taritsyn/LibSassHost) version 1.0.3 (supports LibSass version 3.4.4). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.
+		<description>BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`. This adapter makes translation of Sass- and SCSS-code to CSS-code by using the LibSass Host for .NET (https://github.com/Taritsyn/LibSassHost) version 1.0.3 (supports LibSass version 3.4.4). Also contains debugging HTTP-handler `SassAndScssAssetHandler`, which is responsible for text output of translated Sass- or SCSS-asset.
 
 This package does not contain the native implementations of LibSass for Windows. Therefore, you need to choose and install the most appropriate package(s) for your platform. The following packages are available:
 

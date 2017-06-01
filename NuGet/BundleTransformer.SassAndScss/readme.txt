@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.SassAndScss contains translator-adapter `SassAndScssTranslator`.
    This adapter makes translation of Sass- and SCSS-code to CSS-code by using the
-   LibSass Host for .NET (http://github.com/Taritsyn/LibSassHost) version 1.0.3
+   LibSass Host for .NET (https://github.com/Taritsyn/LibSassHost) version 1.0.3
    (supports LibSass version 3.4.4). Also contains debugging HTTP-handler
    `SassAndScssAssetHandler`, which is responsible for text output of translated
    Sass- or SCSS-asset.
@@ -38,7 +38,7 @@
    ====================
    If in your system does not `msvcp140.dll` assembly, then download and install
    the Visual C++ Redistributable for Visual Studio 2015
-   (http://www.microsoft.com/en-us/download/details.aspx?id=48145).
+   (https://www.microsoft.com/en-us/download/details.aspx?id=48145).
 
    To use a debugging HTTP-handlers in the IIS Classic mode, you need add to the
    `/configuration/system.web/httpHandlers` element of the Web.config file a
@@ -54,5 +54,4 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex -
-   http://bundletransformer.codeplex.com/documentation
+   See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki

@@ -6,9 +6,9 @@
 		<title>Bundle Transformer: IntelliSense</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
-		<licenseUrl>http://bundletransformer.codeplex.com/license</licenseUrl>
-		<projectUrl>http://bundletransformer.codeplex.com/</projectUrl>
-		<iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=bundletransformer&amp;DownloadId=1424702</iconUrl>
+		<licenseUrl>https://github.com/Taritsyn/BundleTransformer/blob/master/LICENSE.txt</licenseUrl>
+		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when editing the `bundleTransformer` configuration section in the Web.config file.</description>
 		<summary>BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when editing the `bundleTransformer` configuration section in the Web.config file.</summary>

@@ -13,10 +13,10 @@
    ===========
    BundleTransformer.CleanCss contains one minifier-adapter for minification of
    CSS-code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css
-   (http://github.com/jakubpawlowicz/clean-css) version 4.1.3.
+   (https://github.com/jakubpawlowicz/clean-css) version 4.1.3.
 
    As a JS-engine is used the JavaScript Engine Switcher library
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
    this module is recommended to install one of the following NuGet packages:
    JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or
    JavaScriptEngineSwitcher.ChakraCore.
@@ -33,7 +33,7 @@
    following NuGet packages: JavaScriptEngineSwitcher.Msie,
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
    After package is installed and JS-engine is registered
-   (http://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JavaScript engine (for example, `MsieJsEngine`) to the `name`
    attribute of `/configuration/bundleTransformer/clean/jsEngine` configuration
    element.
@@ -46,5 +46,4 @@
    =============
    DOCUMENTATION
    =============
-   See documentation on CodePlex -
-   http://bundletransformer.codeplex.com/documentation
+   See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki
