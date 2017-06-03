@@ -18,7 +18,7 @@
 		<tags>Web.config IntelliSense</tags>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.Example.Mvc\BundleTransformer.Configuration.xsd" target="content" />
+		<file src="..\..\samples\BundleTransformer.Example.Mvc\BundleTransformer.Configuration.xsd" target="content" />
 		<file src="readme.txt" />
 	</files>
 </package>

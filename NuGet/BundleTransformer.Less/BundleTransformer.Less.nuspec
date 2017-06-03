@@ -30,8 +30,8 @@ As a JS-engine is used the JavaScript Engine Switcher library (https://github.co
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.Less\bin\Release\BundleTransformer.Less.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.Less\bin\Release\**\BundleTransformer.Less.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Less\bin\Release\BundleTransformer.Less.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Less\bin\Release\**\BundleTransformer.Less.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 	</files>

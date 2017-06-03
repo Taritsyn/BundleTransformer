@@ -32,8 +32,8 @@ For correct working of the LibSass Host requires `msvcp140.dll` assembly from th
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.SassAndScss\bin\Release\BundleTransformer.SassAndScss.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.SassAndScss\bin\Release\**\BundleTransformer.SassAndScss.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.SassAndScss\bin\Release\BundleTransformer.SassAndScss.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.SassAndScss\bin\Release\**\BundleTransformer.SassAndScss.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 		<file src="..\..\Licenses\libsass-license.txt" />

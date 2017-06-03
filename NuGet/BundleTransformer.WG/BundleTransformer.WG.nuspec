@@ -24,8 +24,8 @@
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.WG\bin\Release\BundleTransformer.WG.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.WG\bin\Release\**\BundleTransformer.WG.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.WG\bin\Release\BundleTransformer.WG.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.WG\bin\Release\**\BundleTransformer.WG.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 	</files>

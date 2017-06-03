@@ -27,8 +27,8 @@ This extension will help your web applications successfully pass a most part of 
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.Core\bin\Release\BundleTransformer.Core.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.Core\bin\Release\**\BundleTransformer.Core.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Core\bin\Release\BundleTransformer.Core.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Core\bin\Release\**\BundleTransformer.Core.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 	</files>

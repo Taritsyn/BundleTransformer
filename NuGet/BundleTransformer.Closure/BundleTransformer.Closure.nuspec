@@ -25,8 +25,8 @@
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.Closure\bin\Release\BundleTransformer.Closure.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.Closure\bin\Release\**\BundleTransformer.Closure.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Closure\bin\Release\BundleTransformer.Closure.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Closure\bin\Release\**\BundleTransformer.Closure.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 	</files>

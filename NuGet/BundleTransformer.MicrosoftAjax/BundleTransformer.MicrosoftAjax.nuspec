@@ -24,8 +24,8 @@
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.MicrosoftAjax\bin\Release\BundleTransformer.MicrosoftAjax.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.MicrosoftAjax\bin\Release\**\BundleTransformer.MicrosoftAjax.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.MicrosoftAjax\bin\Release\BundleTransformer.MicrosoftAjax.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.MicrosoftAjax\bin\Release\**\BundleTransformer.MicrosoftAjax.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 	</files>

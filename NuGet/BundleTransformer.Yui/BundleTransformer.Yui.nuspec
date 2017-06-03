@@ -24,8 +24,8 @@
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\BundleTransformer.Yui\bin\Release\BundleTransformer.Yui.dll" target="lib\net40" />
-		<file src="..\..\BundleTransformer.Yui\bin\Release\**\BundleTransformer.Yui.resources.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Yui\bin\Release\BundleTransformer.Yui.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.Yui\bin\Release\**\BundleTransformer.Yui.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 	</files>

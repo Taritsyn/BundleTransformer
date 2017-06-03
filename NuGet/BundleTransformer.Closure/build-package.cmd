@@ -1,2 +1,2 @@
-\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.Closure\BundleTransformer.Closure.csproj /p:Configuration=Release
+\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\src\BundleTransformer.Closure\BundleTransformer.Closure.csproj /p:Configuration=Release
 ..\..\.nuget\nuget.exe pack ..\BundleTransformer.Closure\BundleTransformer.Closure.nuspec

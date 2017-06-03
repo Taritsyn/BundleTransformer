@@ -1,2 +1,2 @@
-\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\BundleTransformer.Hogan\BundleTransformer.Hogan.csproj /p:Configuration=Release
+\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\src\BundleTransformer.Hogan\BundleTransformer.Hogan.csproj /p:Configuration=Release
 ..\..\.nuget\nuget.exe pack ..\BundleTransformer.Hogan\BundleTransformer.Hogan.nuspec
