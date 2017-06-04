@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.Core.Utilities
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Utilities
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Reflection;
-	using System.Text;
-
-	using Resources;
-
 	public static class Utils
 	{
 		/// <summary>

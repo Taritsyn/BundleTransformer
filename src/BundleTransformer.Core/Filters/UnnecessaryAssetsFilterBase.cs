@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Filters
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Filters
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Base class of filter is responsible for removal of unnecessary assets
 	/// </summary>

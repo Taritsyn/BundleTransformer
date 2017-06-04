@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Handlebars.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Handlebars.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a compiling of asset code by Handlebars-compiler is failed
 	/// </summary>

@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core
-{
-	using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
+namespace BundleTransformer.Core
+{
 	/// <summary>
 	/// CSS node match
 	/// </summary>

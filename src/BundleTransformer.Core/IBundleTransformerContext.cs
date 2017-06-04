@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core
-{
-	using Assets;
-	using FileSystem;
-	using Configuration;
+﻿using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Configuration;
 
+namespace BundleTransformer.Core
+{
 	/// <summary>
 	/// Defines interface of bundle transformer context
 	/// </summary>

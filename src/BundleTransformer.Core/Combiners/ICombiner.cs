@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Combiners
+﻿using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+
+namespace BundleTransformer.Core.Combiners
 {
-	using System.Collections.Generic;
-
-	using Assets;
-
 	/// <summary>
 	/// Defines interface of asset combiner
 	/// </summary>

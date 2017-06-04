@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Utilities
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.Utilities
+{
 	/// <summary>
 	/// Extensions for String
 	/// </summary>

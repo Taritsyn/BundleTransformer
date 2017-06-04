@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Csso.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Csso.Configuration
+{
 	/// <summary>
 	/// Configuration settings of Sergey Kryzhanovsky's CSS-minifier
 	/// </summary>

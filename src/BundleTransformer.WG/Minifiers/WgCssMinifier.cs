@@ -1,24 +1,24 @@
-﻿namespace BundleTransformer.WG.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+
+using WebGrease;
+using WebGrease.Configuration;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.WG.Configuration;
+
+namespace BundleTransformer.WG.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Linq;
-	using System.Reflection;
-	using System.Text;
-	using System.Text.RegularExpressions;
-
-	using WebGrease;
-	using WebGrease.Configuration;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code
 	/// by using WebGrease Semantic CSS-minifier

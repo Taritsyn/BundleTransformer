@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.Core.Filters
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Filters
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Assets;
-	using FileSystem;
-	using Resources;
-
 	/// <summary>
 	/// Filter that responsible for choosing appropriate version
 	/// of CSS-file, depending on current mode of

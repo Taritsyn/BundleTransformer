@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Closure.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Closure.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a compiling of asset code by Google Closure Compiler is failed
 	/// </summary>

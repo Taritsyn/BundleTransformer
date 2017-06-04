@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.SassAndScss.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.SassAndScss.Configuration
+{
 	/// <summary>
 	/// Included path registration
 	/// </summary>

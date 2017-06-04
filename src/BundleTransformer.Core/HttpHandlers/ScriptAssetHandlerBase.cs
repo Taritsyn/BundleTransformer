@@ -1,14 +1,14 @@
-﻿namespace BundleTransformer.Core.HttpHandlers
+﻿using System.Linq;
+using System.Web.Caching;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Transformers;
+using BundleTransformer.Core.Translators;
+
+namespace BundleTransformer.Core.HttpHandlers
 {
-	using System.Linq;
-	using System.Web.Caching;
-	using System.Web.Optimization;
-
-	using Configuration;
-	using FileSystem;
-	using Transformers;
-	using Translators;
-
 	/// <summary>
 	/// Base class of the debugging HTTP-handler that responsible for text output
 	/// of processed script asset

@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Assets
-{
-	using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace BundleTransformer.Core.Assets
+{
 	/// <summary>
 	/// Defines the interface of asset
 	/// </summary>

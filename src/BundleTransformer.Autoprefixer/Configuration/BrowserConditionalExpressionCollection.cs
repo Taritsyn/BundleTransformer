@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Autoprefixer.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Autoprefixer.Configuration
+{
 	/// <summary>
 	/// Collection of browser conditional expressions
 	/// </summary>

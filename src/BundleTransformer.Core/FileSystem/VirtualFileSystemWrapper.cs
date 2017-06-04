@@ -1,15 +1,15 @@
-﻿namespace BundleTransformer.Core.FileSystem
+﻿using System;
+using System.IO;
+using System.Text;
+using System.Web.Caching;
+using System.Web.Hosting;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Utilities;
+
+namespace BundleTransformer.Core.FileSystem
 {
-	using System;
-	using System.IO;
-	using System.Text;
-	using System.Web.Caching;
-	using System.Web.Hosting;
-	using System.Web.Optimization;
-
-	using Resources;
-	using Utilities;
-
 	/// <summary>
 	/// Virtual file system wrapper
 	/// </summary>

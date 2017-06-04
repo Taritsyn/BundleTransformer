@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Packer.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Packer.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a packing of asset code by Dean Edwards' Packer is failed
 	/// </summary>

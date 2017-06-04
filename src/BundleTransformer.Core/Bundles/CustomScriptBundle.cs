@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Bundles
+﻿using System.Web.Optimization;
+
+using BundleTransformer.Core.Builders;
+
+namespace BundleTransformer.Core.Bundles
 {
-	using System.Web.Optimization;
-
-	using Builders;
-
 	/// <summary>
 	/// Bundle that uses ScriptTransformer as transformation by default
 	/// and NullBuilder as builder by default

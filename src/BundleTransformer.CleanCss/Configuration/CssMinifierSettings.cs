@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.CleanCss.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.CleanCss.Configuration
+{
 	/// <summary>
 	/// Configuration settings of Clean CSS-minifier
 	/// </summary>

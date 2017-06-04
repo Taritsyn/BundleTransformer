@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Closure.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Closure.Configuration
+{
 	/// <summary>
 	/// Configuration settings of Closure Remote JS-minifier
 	/// </summary>

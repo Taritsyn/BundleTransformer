@@ -1,11 +1,10 @@
-﻿namespace BundleTransformer.Core.FileSystem
+﻿using System;
+
+using BundleTransformer.Core.Helpers;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.FileSystem
 {
-	using System;
-
-	using Core;
-	using Helpers;
-	using Resources;
-
 	/// <summary>
 	/// Common relative path resolver
 	/// </summary>

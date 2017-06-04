@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Less.Internal
-{
-	using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace BundleTransformer.Less.Internal
+{
 	internal sealed class CompilationResult
 	{
 		/// <summary>

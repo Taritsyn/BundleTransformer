@@ -1,21 +1,21 @@
-﻿namespace BundleTransformer.Hogan.Translators
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Translators;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Hogan.Configuration;
+using BundleTransformer.Hogan.Internal;
+using BundleTransformer.Hogan.Resources;
+
+namespace BundleTransformer.Hogan.Translators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.Translators;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-	using Resources;
-
 	/// <summary>
 	/// Translator that responsible for translation of Mustache-templates to JS-code
 	/// </summary>

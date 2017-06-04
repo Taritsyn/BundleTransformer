@@ -1,22 +1,22 @@
-﻿namespace BundleTransformer.Less.Translators
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Translators;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Less.Configuration;
+using BundleTransformer.Less.Internal;
+
+namespace BundleTransformer.Less.Translators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.IO;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.FileSystem;
-	using Core.Translators;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-
 	/// <summary>
 	/// Translator that responsible for translation of LESS-code to CSS-code
 	/// </summary>

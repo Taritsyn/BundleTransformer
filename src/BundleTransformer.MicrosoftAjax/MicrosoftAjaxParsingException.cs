@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.MicrosoftAjax
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.MicrosoftAjax
+{
 	/// <summary>
 	/// The exception that is thrown when a parsing of asset code by Microsoft Ajax Minifier is failed
 	/// </summary>

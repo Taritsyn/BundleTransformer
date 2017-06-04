@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.WG.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.WG.Configuration
+{
 	/// <summary>
 	/// Configuration settings of WebGrease Minifier
 	/// </summary>

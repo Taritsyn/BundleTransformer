@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Assets
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.FileSystem;
+
+namespace BundleTransformer.Core.Assets
 {
-	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
-	using System.Web.Optimization;
-
-	using FileSystem;
-
 	/// <summary>
 	/// Asset
 	/// </summary>

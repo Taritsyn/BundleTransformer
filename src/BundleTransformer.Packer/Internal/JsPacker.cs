@@ -1,13 +1,12 @@
-﻿namespace BundleTransformer.Packer.Internal
+﻿using System;
+
+using JavaScriptEngineSwitcher.Core;
+using JavaScriptEngineSwitcher.Core.Helpers;
+
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.Packer.Internal
 {
-	using System;
-	using System.Reflection;
-
-	using JavaScriptEngineSwitcher.Core;
-	using JavaScriptEngineSwitcher.Core.Helpers;
-
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// JS-packer
 	/// </summary>

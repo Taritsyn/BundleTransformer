@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Resolvers
+﻿using System;
+using System.Collections.Generic;
+using System.Web;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Resolvers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Web;
-	using System.Web.Optimization;
-
-	using Resources;
-
 	/// <summary>
 	/// Custom bundle resolver, that required in order to the debugging HTTP-handler can use
 	/// transformations of the corresponding bundle

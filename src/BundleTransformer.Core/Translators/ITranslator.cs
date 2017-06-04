@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Translators
+﻿using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+
+namespace BundleTransformer.Core.Translators
 {
-	using System.Collections.Generic;
-
-	using Assets;
-
 	/// <summary>
 	/// This interface used in implementation of containers for
 	/// translators of code written on intermediate languages

@@ -1,16 +1,16 @@
-﻿namespace BundleTransformer.Autoprefixer.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Autoprefixer.Resources;
+
+namespace BundleTransformer.Autoprefixer.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-	using System.Reflection;
-
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Resources;
-
 	/// <summary>
 	/// Country statistics service
 	/// </summary>

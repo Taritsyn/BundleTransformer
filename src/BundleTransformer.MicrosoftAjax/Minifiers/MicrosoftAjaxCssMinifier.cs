@@ -1,27 +1,27 @@
-﻿namespace BundleTransformer.MicrosoftAjax.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Microsoft.Ajax.Utilities;
+using MsCssColor = Microsoft.Ajax.Utilities.CssColor;
+using MsCssComment = Microsoft.Ajax.Utilities.CssComment;
+using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
+using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.MicrosoftAjax.Configuration;
+using BtCssColor = BundleTransformer.MicrosoftAjax.CssColor;
+using BtCssComment = BundleTransformer.MicrosoftAjax.CssComment;
+using BtOutputMode = BundleTransformer.MicrosoftAjax.OutputMode;
+using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
+
+namespace BundleTransformer.MicrosoftAjax.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Microsoft.Ajax.Utilities;
-	using MsCssColor = Microsoft.Ajax.Utilities.CssColor;
-	using MsCssComment = Microsoft.Ajax.Utilities.CssComment;
-	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
-	using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using BtCssColor = CssColor;
-	using BtCssComment = CssComment;
-	using BtOutputMode = OutputMode;
-	using BtBlockStart = BlockStart;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code
 	/// by using Microsoft Ajax Minifier

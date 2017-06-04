@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Packer.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Packer.Configuration
+{
 	/// <summary>
 	/// Configuration settings of Dean Edwards' JS-minifier
 	/// </summary>

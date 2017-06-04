@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.TypeScript.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.TypeScript.Configuration
+{
 	/// <summary>
 	/// Collection of registered library files
 	/// </summary>

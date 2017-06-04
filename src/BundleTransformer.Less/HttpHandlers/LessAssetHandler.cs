@@ -1,17 +1,17 @@
-﻿namespace BundleTransformer.Less.HttpHandlers
+﻿using System.Web;
+using System.Web.Caching;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.HttpHandlers;
+using BundleTransformer.Core.Transformers;
+
+using BundleTransformer.Less.Translators;
+
+namespace BundleTransformer.Less.HttpHandlers
 {
-	using System.Web;
-	using System.Web.Caching;
-
-	using Core;
-	using Core.Assets;
-	using Core.Configuration;
-	using Core.FileSystem;
-	using Core.HttpHandlers;
-	using Core.Transformers;
-
-	using Translators;
-
 	/// <summary>
 	/// Debugging HTTP-handler that responsible for text output
 	/// of translated LESS-asset

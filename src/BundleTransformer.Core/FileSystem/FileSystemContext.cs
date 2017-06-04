@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.FileSystem
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.FileSystem
+{
 	/// <summary>
 	/// Defines interface of file system context
 	/// </summary>

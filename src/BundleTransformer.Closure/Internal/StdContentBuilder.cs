@@ -1,8 +1,8 @@
-﻿namespace BundleTransformer.Closure.Internal
-{
-	using System.Diagnostics;
-	using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
+namespace BundleTransformer.Closure.Internal
+{
 	/// <summary>
 	/// Builds a text content from standard streams
 	/// </summary>

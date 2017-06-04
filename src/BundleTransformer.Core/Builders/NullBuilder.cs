@@ -1,8 +1,8 @@
-﻿namespace BundleTransformer.Core.Builders
-{
-	using System.Collections.Generic;
-	using System.Web.Optimization;
+﻿using System.Collections.Generic;
+using System.Web.Optimization;
 
+namespace BundleTransformer.Core.Builders
+{
 	/// <summary>
 	/// Builder that responsible for prevention of early applying of
 	/// the item transformations and combining of code

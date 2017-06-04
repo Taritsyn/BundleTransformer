@@ -1,10 +1,10 @@
-﻿namespace BundleTransformer.Core.FileSystem
-{
-	using System;
-	using System.IO;
-	using System.Text;
-	using System.Web.Caching;
+﻿using System;
+using System.IO;
+using System.Text;
+using System.Web.Caching;
 
+namespace BundleTransformer.Core.FileSystem
+{
 	/// <summary>
 	/// Defines interface of virtual file system wrapper
 	/// </summary>

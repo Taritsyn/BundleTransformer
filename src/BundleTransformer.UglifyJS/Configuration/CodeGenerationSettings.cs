@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.UglifyJs.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.UglifyJs.Configuration
+{
 	/// <summary>
 	/// Configuration settings of code generation
 	/// </summary>

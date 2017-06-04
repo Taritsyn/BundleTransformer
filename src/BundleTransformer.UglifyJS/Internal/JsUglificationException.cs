@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.UglifyJs.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.UglifyJs.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a uglifying of asset code by JS-uglifier is failed
 	/// </summary>

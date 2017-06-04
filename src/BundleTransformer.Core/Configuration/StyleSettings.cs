@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Constants;
+
+namespace BundleTransformer.Core.Configuration
 {
-	using System.Configuration;
-
-	using Constants;
-
 	/// <summary>
 	/// Configuration settings of processing style assets
 	/// </summary>

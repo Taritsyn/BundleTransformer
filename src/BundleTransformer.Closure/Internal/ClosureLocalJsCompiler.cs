@@ -1,17 +1,17 @@
-﻿namespace BundleTransformer.Closure.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.Closure.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.IO;
-	using System.Text;
-	using System.Text.RegularExpressions;
-
-	using Core;
-	using Core.Assets;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// Local Closure Compiler
 	/// </summary>

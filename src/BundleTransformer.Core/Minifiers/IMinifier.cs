@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Minifiers
+﻿using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+
+namespace BundleTransformer.Core.Minifiers
 {
-	using System.Collections.Generic;
-
-	using Assets;
-
 	/// <summary>
 	/// Defines a interface of asset minifier
 	/// </summary>

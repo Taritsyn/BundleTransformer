@@ -1,22 +1,22 @@
-﻿namespace BundleTransformer.Closure.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
+using FormItem = System.Collections.Generic.KeyValuePair<string, string>;
+
+using Newtonsoft.Json.Linq;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Closure.Resources;
+
+namespace BundleTransformer.Closure.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Net.Http;
-	using System.Text;
-	using System.Text.RegularExpressions;
-
-	using Newtonsoft.Json.Linq;
-
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Resources;
-	using FormItem = System.Collections.Generic.KeyValuePair<string, string>;
-
 	/// <summary>
 	/// Remote Closure Compiler
 	/// </summary>

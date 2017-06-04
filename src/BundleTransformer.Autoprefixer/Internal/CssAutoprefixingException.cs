@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Autoprefixer.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Autoprefixer.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a autoprefixing of asset code by CSS-autoprefixer is failed
 	/// </summary>

@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.PostProcessors
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.PostProcessors
+{
 	/// <summary>
 	/// The exception that is thrown when a postprocessing of asset code is failed
 	/// </summary>

@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Assets
+﻿using System.Collections.Generic;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Translators;
+
+namespace BundleTransformer.Core.Assets
 {
-	using System.Collections.Generic;
-	using System.Web.Optimization;
-
-	using Minifiers;
-	using PostProcessors;
-	using Translators;
-
 	/// <summary>
 	/// Defines interface of asset context
 	/// </summary>

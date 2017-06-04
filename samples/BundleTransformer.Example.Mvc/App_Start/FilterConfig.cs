@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Example.Mvc
-{
-	using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
+namespace BundleTransformer.Example.Mvc
+{
 	public class FilterConfig
 	{
 		public static void RegisterGlobalFilters(GlobalFilterCollection filters)

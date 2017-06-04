@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.Core.Assets
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Assets
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-
-	using Resources;
-
 	/// <summary>
 	/// Collection of file extension mappings
 	/// </summary>

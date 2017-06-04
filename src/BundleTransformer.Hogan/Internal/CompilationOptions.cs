@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Hogan.Internal
-{
-	using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace BundleTransformer.Hogan.Internal
+{
 	/// <summary>
 	/// Hogan compilation options
 	/// </summary>

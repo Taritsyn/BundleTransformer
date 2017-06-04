@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Transformers
+﻿using System.Collections.Generic;
+using System.Text;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Utilities;
+
+namespace BundleTransformer.Core.Transformers
 {
-	using System.Collections.Generic;
-	using System.Text;
-	using System.Web.Optimization;
-
-	using Utilities;
-
 	/// <summary>
 	/// Transformer that responsible to output trace information
 	/// </summary>

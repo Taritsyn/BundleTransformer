@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Csso.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Csso.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a optimizing of asset code by Sergey Kryzhanovsky's CSSO is failed
 	/// </summary>

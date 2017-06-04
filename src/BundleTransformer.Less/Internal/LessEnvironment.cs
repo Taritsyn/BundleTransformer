@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Less.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.Less.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Text;
-
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// LESS environment
 	/// </summary>

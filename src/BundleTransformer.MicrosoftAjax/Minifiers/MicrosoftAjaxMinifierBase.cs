@@ -1,19 +1,19 @@
-﻿namespace BundleTransformer.MicrosoftAjax.Minifiers
+﻿using System.Collections.Generic;
+using System.Text;
+
+using Microsoft.Ajax.Utilities;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.MicrosoftAjax.Configuration;
+using BtOutputMode = BundleTransformer.MicrosoftAjax.OutputMode;
+using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
+
+namespace BundleTransformer.MicrosoftAjax.Minifiers
 {
-	using System.Collections.Generic;
-	using System.Text;
-
-	using Microsoft.Ajax.Utilities;
-
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using BtOutputMode = OutputMode;
-	using BtBlockStart = BlockStart;
-
 	/// <summary>
 	/// Base class of minifier, which produces minifiction of code
 	/// by using Microsoft Ajax Minifier

@@ -1,8 +1,8 @@
-﻿namespace BundleTransformer.Core.Assets
-{
-	using System.Collections.Generic;
-	using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
+namespace BundleTransformer.Core.Assets
+{
 	/// <summary>
 	/// List of dependencies
 	/// </summary>

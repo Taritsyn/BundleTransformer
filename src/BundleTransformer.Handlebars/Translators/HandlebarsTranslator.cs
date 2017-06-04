@@ -1,21 +1,21 @@
-﻿namespace BundleTransformer.Handlebars.Translators
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Translators;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Handlebars.Configuration;
+using BundleTransformer.Handlebars.Internal;
+using BundleTransformer.Handlebars.Resources;
+
+namespace BundleTransformer.Handlebars.Translators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.Translators;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-	using Resources;
-
 	/// <summary>
 	/// Translator that responsible for translation of Handlebars-templates to JS-code
 	/// </summary>

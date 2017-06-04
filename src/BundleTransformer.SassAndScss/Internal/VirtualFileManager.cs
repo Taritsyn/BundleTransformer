@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.SassAndScss.Internal
+﻿using System;
+
+using LibSassHost;
+
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.SassAndScss.Internal
 {
-	using System;
-
-	using LibSassHost;
-
-	using Core.FileSystem;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// Virtual file manager
 	/// </summary>

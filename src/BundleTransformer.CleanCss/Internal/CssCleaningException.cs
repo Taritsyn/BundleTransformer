@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.CleanCss.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.CleanCss.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a cleaning of asset code by CSS-cleaner is failed
 	/// </summary>

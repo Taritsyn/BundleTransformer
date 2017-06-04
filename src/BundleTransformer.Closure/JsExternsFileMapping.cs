@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Closure
-{
-	using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace BundleTransformer.Closure
+{
 	/// <summary>
 	/// JS-externs file mapping
 	/// </summary>

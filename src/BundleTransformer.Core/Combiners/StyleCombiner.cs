@@ -1,14 +1,14 @@
-﻿namespace BundleTransformer.Core.Combiners
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Utilities;
+
+namespace BundleTransformer.Core.Combiners
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Text.RegularExpressions;
-
-	using Assets;
-	using Utilities;
-
 	/// <summary>
 	/// Style asset combiner
 	/// </summary>

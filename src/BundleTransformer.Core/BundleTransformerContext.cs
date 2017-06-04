@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core
+﻿using System;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.Core
 {
-	using System;
-	using System.Web.Optimization;
-
-	using Assets;
-	using FileSystem;
-	using Configuration;
-
 	/// <summary>
 	/// Bundle transformer context
 	/// </summary>

@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.MicrosoftAjax.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.MicrosoftAjax.Configuration
+{
 	/// <summary>
 	/// Configuration settings of Microsoft Ajax JS-minifier
 	/// </summary>

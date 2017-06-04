@@ -1,10 +1,10 @@
-﻿namespace BundleTransformer.Core.Utilities
-{
-	using System;
-	using System.Globalization;
-	using System.Text;
-	using System.Text.RegularExpressions;
+﻿using System;
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 
+namespace BundleTransformer.Core.Utilities
+{
 	public static class SourceCodeNavigator
 	{
 		private const byte DEFAULT_TAB_SIZE = 4;

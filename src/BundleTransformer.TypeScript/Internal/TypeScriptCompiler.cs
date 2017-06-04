@@ -1,20 +1,20 @@
-﻿namespace BundleTransformer.TypeScript.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+
+using JavaScriptEngineSwitcher.Core;
+using JavaScriptEngineSwitcher.Core.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.TypeScript.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Linq;
-	using System.Reflection;
-	using System.Text;
-
-	using JavaScriptEngineSwitcher.Core;
-	using JavaScriptEngineSwitcher.Core.Helpers;
-	using Newtonsoft.Json;
-	using Newtonsoft.Json.Linq;
-
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// TypeScript-compiler
 	/// </summary>

@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Transformers
+﻿using System.Collections.ObjectModel;
+
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Translators;
+
+namespace BundleTransformer.Core.Transformers
 {
-	using System.Collections.ObjectModel;
-
-	using Minifiers;
-	using PostProcessors;
-	using Translators;
-
 	/// <summary>
 	/// Defines interface of transformer that responsible for processing assets
 	/// </summary>

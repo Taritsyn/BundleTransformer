@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core
+{
 	/// <summary>
 	/// The exception that is thrown when a specified value is null or empty
 	/// </summary>

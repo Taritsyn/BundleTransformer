@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Utilities
-{
-	using System;
-	using System.Text;
-	using System.Text.RegularExpressions;
+﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
+namespace BundleTransformer.Core.Utilities
+{
 	/// <summary>
 	/// Extensions for StringBuilder
 	/// </summary>

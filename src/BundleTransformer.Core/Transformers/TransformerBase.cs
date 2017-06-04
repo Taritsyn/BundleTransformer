@@ -1,19 +1,19 @@
-﻿namespace BundleTransformer.Core.Transformers
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Web.Hosting;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Translators;
+
+namespace BundleTransformer.Core.Transformers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
-	using System.Linq;
-	using System.Web.Hosting;
-	using System.Web.Optimization;
-
-	using Assets;
-	using Configuration;
-	using Minifiers;
-	using PostProcessors;
-	using Resources;
-	using Translators;
-
 	/// <summary>
 	/// Base class of transformer that responsible for processing assets
 	/// </summary>

@@ -1,27 +1,27 @@
-﻿namespace BundleTransformer.SassAndScss.Translators
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using LibSassHost;
+using LibSassHost.Helpers;
+using LshIndentType = LibSassHost.IndentType;
+using LshLineFeedType = LibSassHost.LineFeedType;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Translators;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.SassAndScss.Configuration;
+using BundleTransformer.SassAndScss.Internal;
+using BtIndentType = BundleTransformer.SassAndScss.IndentType;
+using BtLineFeedType = BundleTransformer.SassAndScss.LineFeedType;
+
+namespace BundleTransformer.SassAndScss.Translators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using LibSassHost;
-	using LibSassHost.Helpers;
-	using LshIndentType = LibSassHost.IndentType;
-	using LshLineFeedType = LibSassHost.LineFeedType;
-
-	using Core;
-	using Core.Assets;
-	using Core.FileSystem;
-	using Core.Resources;
-	using Core.Translators;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-	using BtIndentType = IndentType;
-	using BtLineFeedType = LineFeedType;
-
 	/// <summary>
 	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
 	/// </summary>

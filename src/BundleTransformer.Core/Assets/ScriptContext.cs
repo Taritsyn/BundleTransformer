@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Assets
+﻿using System;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.Transformers;
+
+namespace BundleTransformer.Core.Assets
 {
-	using System;
-	using System.Web.Optimization;
-
-	using Configuration;
-	using Transformers;
-
 	/// <summary>
 	/// Script context
 	/// </summary>

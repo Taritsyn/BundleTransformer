@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Translators
+﻿using System;
+using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Translators
 {
-	using System;
-	using System.Collections.Generic;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Null translator (used as a placeholder)
 	/// </summary>

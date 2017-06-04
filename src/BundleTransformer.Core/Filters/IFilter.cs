@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.Filters
+﻿using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+
+namespace BundleTransformer.Core.Filters
 {
-	using System.Collections.Generic;
-
-	using Assets;
-
 	/// <summary>
 	/// Defines interface of asset filter
 	/// </summary>

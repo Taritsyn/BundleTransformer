@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core
-{
-	using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
+namespace BundleTransformer.Core
+{
 	/// <summary>
 	/// Common regular expressions
 	/// </summary>

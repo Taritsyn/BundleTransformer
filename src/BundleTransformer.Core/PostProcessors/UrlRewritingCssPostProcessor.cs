@@ -1,16 +1,16 @@
-﻿namespace BundleTransformer.Core.PostProcessors
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Helpers;
+
+namespace BundleTransformer.Core.PostProcessors
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
-	using System.Text.RegularExpressions;
-
-	using Assets;
-	using FileSystem;
-	using Resources;
-	using Helpers;
-
 	/// <summary>
 	/// Postprocessor that responsible for transformation of relative
 	/// paths in CSS-files to absolute

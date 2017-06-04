@@ -1,15 +1,15 @@
-﻿namespace BundleTransformer.Tests.Core.Validators
+﻿using System;
+using System.Collections.Generic;
+
+using NUnit.Framework;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Helpers;
+using BundleTransformer.Core.Validators;
+
+namespace BundleTransformer.Tests.Core.Validators
 {
-	using System;
-	using System.Collections.Generic;
-
-	using NUnit.Framework;
-
-	using BundleTransformer.Core.Assets;
-	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Helpers;
-	using BundleTransformer.Core.Validators;
-
 	[TestFixture]
 	public class ScriptAssetTypesValidatorTests
 	{

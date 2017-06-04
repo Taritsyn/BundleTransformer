@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Csso.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.Csso.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of Sergey Kryzhanovsky's Minifier
 	/// </summary>

@@ -1,21 +1,21 @@
-﻿namespace BundleTransformer.Closure.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Minifiers;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Closure.Configuration;
+using BundleTransformer.Closure.Internal;
+using BundleTransformer.Closure.Resources;
+
+namespace BundleTransformer.Closure.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-	using System.Web;
-
-	using Core;
-	using Core.Assets;
-	using Core.FileSystem;
-	using Core.Minifiers;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-	using Resources;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
 	/// by using Google Closure Compiler Application

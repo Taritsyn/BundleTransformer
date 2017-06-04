@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Core.Configuration
+{
 	/// <summary>
 	/// Configuration settings of the debugging HTTP-handler, that responsible
 	/// for text output of processed asset

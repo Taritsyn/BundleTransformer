@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.TypeScript.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.TypeScript.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of TypeScript-translator
 	/// </summary>

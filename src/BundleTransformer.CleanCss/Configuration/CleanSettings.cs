@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.CleanCss.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.CleanCss.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of Clean-css Minifier
 	/// </summary>

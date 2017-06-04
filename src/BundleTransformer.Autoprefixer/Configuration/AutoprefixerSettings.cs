@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Autoprefixer.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.Autoprefixer.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor
 	/// </summary>

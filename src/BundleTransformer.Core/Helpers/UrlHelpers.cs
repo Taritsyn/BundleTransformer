@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Helpers
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Helpers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-	using System.Text.RegularExpressions;
-
-	using Resources;
-
 	/// <summary>
 	/// URL helpers
 	/// </summary>

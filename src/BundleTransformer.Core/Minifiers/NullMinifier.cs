@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Minifiers
+﻿using System;
+using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Null minifier (used as a placeholder)
 	/// </summary>

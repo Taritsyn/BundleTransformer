@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Validators
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.Validators
+{
 	/// <summary>
 	/// The exception that is thrown when a assets are invalid types
 	/// </summary>

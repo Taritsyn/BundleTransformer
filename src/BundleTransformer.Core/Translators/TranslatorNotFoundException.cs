@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Translators
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.Translators
+{
 	/// <summary>
 	/// The exception that is thrown when a translator is not found
 	/// </summary>

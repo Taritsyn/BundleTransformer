@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Translators
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.Translators
+{
 	/// <summary>
 	/// The exception that is thrown when a translation of asset code, written
 	/// on intermediate language, is failed

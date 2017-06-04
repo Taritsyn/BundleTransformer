@@ -1,18 +1,18 @@
-﻿namespace BundleTransformer.Tests
+﻿using Moq;
+using NUnit.Framework;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+
+using CoffeeScriptAssetTypeCodes = BundleTransformer.CoffeeScript.Constants.AssetTypeCode;
+using CoreAssetTypeCodes = BundleTransformer.Core.Constants.AssetTypeCode;
+using HandlebarsAssetTypeCodes = BundleTransformer.Handlebars.Constants.AssetTypeCode;
+using LessAssetTypeCodes = BundleTransformer.Less.Constants.AssetTypeCode;
+using SassAndScssAssetTypeCodes = BundleTransformer.SassAndScss.Constants.AssetTypeCode;
+using TypeScriptAssetTypeCodes = BundleTransformer.TypeScript.Constants.AssetTypeCode;
+
+namespace BundleTransformer.Tests
 {
-	using Moq;
-	using NUnit.Framework;
-
-	using BundleTransformer.Core;
-	using BundleTransformer.Core.Assets;
-
-	using CoffeeScriptAssetTypeCodes = BundleTransformer.CoffeeScript.Constants.AssetTypeCode;
-	using CoreAssetTypeCodes = BundleTransformer.Core.Constants.AssetTypeCode;
-	using HandlebarsAssetTypeCodes = BundleTransformer.Handlebars.Constants.AssetTypeCode;
-	using LessAssetTypeCodes = BundleTransformer.Less.Constants.AssetTypeCode;
-	using SassAndScssAssetTypeCodes = BundleTransformer.SassAndScss.Constants.AssetTypeCode;
-	using TypeScriptAssetTypeCodes = BundleTransformer.TypeScript.Constants.AssetTypeCode;
-
 	[SetUpFixture]
 	public class ApplicationSetup
 	{

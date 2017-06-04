@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.Filters
+﻿using System;
+using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Filters
 {
-	using System;
-	using System.Collections.Generic;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Filter that responsible for removal of unnecessary script assets
 	/// </summary>

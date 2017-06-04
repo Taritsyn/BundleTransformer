@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Yui.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Yui.Configuration
+{
 	/// <summary>
 	/// Configuration settings of minifier
 	/// </summary>

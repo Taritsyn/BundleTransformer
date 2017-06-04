@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.WG
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.WG
+{
 	/// <summary>
 	/// The exception that is thrown when a minification of asset code by WebGrease Minifier is failed
 	/// </summary>

@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Autoprefixer.Internal
-{
-	using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace BundleTransformer.Autoprefixer.Internal
+{
 	/// <summary>
 	/// Autoprefixing result
 	/// </summary>

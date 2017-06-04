@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.TypeScript.Internal
-{
-	using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace BundleTransformer.TypeScript.Internal
+{
 	internal sealed class CompilationResult
 	{
 		/// <summary>

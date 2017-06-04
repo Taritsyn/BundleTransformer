@@ -1,25 +1,25 @@
-﻿namespace BundleTransformer.Yui.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+
+using EcmaScript.NET;
+using Yahoo.Yui.Compressor;
+using YuiCompressionType = Yahoo.Yui.Compressor.CompressionType;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Yui.Configuration;
+using BtCompressionType = BundleTransformer.Yui.CompressionType;
+using YuiStrings = BundleTransformer.Yui.Resources.Strings;
+
+namespace BundleTransformer.Yui.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.Linq;
-	using System.Text;
-
-	using EcmaScript.NET;
-	using Yahoo.Yui.Compressor;
-	using YuiCompressionType = Yahoo.Yui.Compressor.CompressionType;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using BtCompressionType = CompressionType;
-	using YuiStrings = Resources.Strings;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
 	/// by using YUI Compressor for .NET

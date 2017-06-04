@@ -1,21 +1,21 @@
-﻿namespace BundleTransformer.TypeScript.Translators
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Translators;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.TypeScript.Configuration;
+using BundleTransformer.TypeScript.Internal;
+
+namespace BundleTransformer.TypeScript.Translators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.FileSystem;
-	using Core.Translators;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-
 	/// <summary>
 	/// Translator that responsible for translation of TypeScript-code to JS-code
 	/// </summary>

@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.Closure.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+
+using BundleTransformer.Core.Helpers;
+
+namespace BundleTransformer.Closure.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Net.Http;
-	using System.Net.Http.Headers;
-	using System.Text;
-
-	using Core.Helpers;
-
 	/// <summary>
 	/// A container for name/value tuples encoded using application/x-www-form-urlencoded MIME type
 	/// </summary>

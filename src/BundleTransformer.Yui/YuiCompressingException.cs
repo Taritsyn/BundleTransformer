@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Yui
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Yui
+{
 	/// <summary>
 	/// The exception that is thrown when a compressing of asset code by YUI Compressor for .Net is failed
 	/// </summary>

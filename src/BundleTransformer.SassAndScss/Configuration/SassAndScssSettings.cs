@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.SassAndScss.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.SassAndScss.Configuration
+{
 	/// <summary>
 	/// Configuration settings of Sass- and SCSS-translator
 	/// </summary>

@@ -1,31 +1,31 @@
-﻿namespace BundleTransformer.MicrosoftAjax.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+using Microsoft.Ajax.Utilities;
+using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
+using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
+using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
+using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.MicrosoftAjax.Configuration;
+using BundleTransformer.MicrosoftAjax.Resources;
+using BtOutputMode = BundleTransformer.MicrosoftAjax.OutputMode;
+using BtEvalTreatment = BundleTransformer.MicrosoftAjax.EvalTreatment;
+using BtLocalRenaming = BundleTransformer.MicrosoftAjax.LocalRenaming;
+using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
+
+namespace BundleTransformer.MicrosoftAjax.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.IO;
-	using System.Linq;
-	using System.Text;
-
-	using Microsoft.Ajax.Utilities;
-	using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
-	using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
-	using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
-	using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using BtOutputMode = OutputMode;
-	using BtEvalTreatment = EvalTreatment;
-	using BtLocalRenaming = LocalRenaming;
-	using BtBlockStart = BlockStart;
-	using Resources;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
 	/// by using Microsoft Ajax Minifier
@@ -506,7 +506,7 @@
 			{
 				return _jsParserConfiguration.RemoveUnneededCode;
 			}
-			set 
+			set
 			{
 				_jsParserConfiguration.RemoveUnneededCode = value;
 			}

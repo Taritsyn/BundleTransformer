@@ -1,19 +1,19 @@
-﻿namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
+﻿using System;
+using System.Collections.Generic;
+
+using JavaScriptEngineSwitcher.Core;
+using Moq;
+using NUnit.Framework;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Helpers;
+
+using BundleTransformer.Autoprefixer.Configuration;
+using BundleTransformer.Autoprefixer.PostProcessors;
+
+namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
 {
-	using System;
-	using System.Collections.Generic;
-
-	using JavaScriptEngineSwitcher.Core;
-	using Moq;
-	using NUnit.Framework;
-
-	using BundleTransformer.Core.Assets;
-	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Helpers;
-
-	using BundleTransformer.Autoprefixer.Configuration;
-	using BundleTransformer.Autoprefixer.PostProcessors;
-
 	[TestFixture]
 	public class AutoprefixCssPostProcessorTests
 	{

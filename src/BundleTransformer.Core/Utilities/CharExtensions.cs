@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Utilities
-{
-	using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
+namespace BundleTransformer.Core.Utilities
+{
 	/// <summary>
 	/// Extensions for Char
 	/// </summary>

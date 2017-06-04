@@ -1,16 +1,16 @@
-﻿namespace BundleTransformer.Core.Assets
+﻿using System.Configuration;
+using System.Collections.Generic;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Translators;
+using BundleTransformer.Core.Utilities;
+
+namespace BundleTransformer.Core.Assets
 {
-	using System.Configuration;
-	using System.Collections.Generic;
-	using System.Web.Optimization;
-
-	using Configuration;
-	using Minifiers;
-	using PostProcessors;
-	using Resources;
-	using Translators;
-	using Utilities;
-
 	public abstract class AssetContextBase : IAssetContext
 	{
 		/// <summary>

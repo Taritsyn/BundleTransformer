@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Closure.Internal
-{
-	using Core.Assets;
+﻿using BundleTransformer.Core.Assets;
 
+namespace BundleTransformer.Closure.Internal
+{
 	/// <summary>
 	/// Base class of Closure Compiler
 	/// </summary>

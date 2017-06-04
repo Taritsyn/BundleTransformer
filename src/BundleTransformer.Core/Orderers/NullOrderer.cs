@@ -1,8 +1,8 @@
-﻿namespace BundleTransformer.Core.Orderers
-{
-	using System.Collections.Generic;
-	using System.Web.Optimization;
+﻿using System.Collections.Generic;
+using System.Web.Optimization;
 
+namespace BundleTransformer.Core.Orderers
+{
 	/// <summary>
 	/// Orderer that responsible for sorting of the files in declarative order
 	/// </summary>

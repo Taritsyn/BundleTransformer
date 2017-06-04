@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.UglifyJs.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.UglifyJs.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of Uglify Minifier
 	/// </summary>

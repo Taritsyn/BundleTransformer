@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Example.Mvc.Controllers
-{
-	using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
+namespace BundleTransformer.Example.Mvc.Controllers
+{
 	public class HomeController : Controller
 	{
 		public ActionResult Index()

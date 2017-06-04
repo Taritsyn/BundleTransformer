@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Packer.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.Packer.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of Dean Edwards' Minifier
 	/// </summary>

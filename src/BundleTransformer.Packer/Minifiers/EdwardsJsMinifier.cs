@@ -1,20 +1,20 @@
-﻿namespace BundleTransformer.Packer.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Packer.Configuration;
+using BundleTransformer.Packer.Internal;
+
+namespace BundleTransformer.Packer.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
 	/// by using Dean Edwards' Packer version 3.0

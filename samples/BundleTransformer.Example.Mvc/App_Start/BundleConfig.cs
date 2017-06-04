@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.Example.Mvc
+﻿using System.Web.Optimization;
+
+using BundleTransformer.Core.Builders;
+using BundleTransformer.Core.Bundles;
+using BundleTransformer.Core.Orderers;
+using BundleTransformer.Core.Resolvers;
+using BundleTransformer.Core.Transformers;
+
+namespace BundleTransformer.Example.Mvc
 {
-	using System.Web.Optimization;
-
-	using Core.Builders;
-	using Core.Bundles;
-	using Core.Orderers;
-	using Core.Resolvers;
-	using Core.Transformers;
-
 	public class BundleConfig
 	{
 		// For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725

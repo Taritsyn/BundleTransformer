@@ -1,21 +1,20 @@
-﻿namespace BundleTransformer.Csso.Internal
+﻿using System;
+using System.Globalization;
+using System.Reflection;
+using System.Text;
+
+using JavaScriptEngineSwitcher.Core;
+using JavaScriptEngineSwitcher.Core.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using CssoStrings = BundleTransformer.Csso.Resources.Strings;
+
+namespace BundleTransformer.Csso.Internal
 {
-	using System;
-	using System.Globalization;
-	using System.Reflection;
-	using System.Text;
-
-	using JavaScriptEngineSwitcher.Core;
-	using JavaScriptEngineSwitcher.Core.Helpers;
-	using Newtonsoft.Json;
-	using Newtonsoft.Json.Linq;
-
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Csso;
-	using CssoStrings = Resources.Strings;
-
 	/// <summary>
 	/// CSS-optimizer
 	/// </summary>

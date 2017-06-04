@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Filters
+﻿using System.Collections.Generic;
+using System.IO;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Filters
 {
-	using System.Collections.Generic;
-	using System.IO;
-
-	using Assets;
-	using FileSystem;
-	using Resources;
-
 	/// <summary>
 	/// Base class of filter is responsible for choosing appropriate
 	/// version of asset file, depending on current mode of

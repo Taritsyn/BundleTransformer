@@ -1,25 +1,25 @@
-﻿namespace BundleTransformer.Core.HttpHandlers
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web;
+using System.Web.Caching;
+using System.Web.Optimization;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Helpers;
+using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Transformers;
+using BundleTransformer.Core.Translators;
+
+namespace BundleTransformer.Core.HttpHandlers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-	using System.Reflection;
-	using System.Security.Cryptography;
-	using System.Text;
-	using System.Web;
-	using System.Web.Caching;
-	using System.Web.Optimization;
-
-	using Assets;
-	using Configuration;
-	using FileSystem;
-	using Helpers;
-	using PostProcessors;
-	using Resources;
-	using Transformers;
-	using Translators;
-
 	/// <summary>
 	/// Base class of the debugging HTTP-handler that responsible for text output
 	/// of processed asset

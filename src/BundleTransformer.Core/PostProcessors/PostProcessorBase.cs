@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Core.PostProcessors
+﻿using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+
+namespace BundleTransformer.Core.PostProcessors
 {
-	using System.Collections.Generic;
-
-	using Assets;
-
 	/// <summary>
 	/// Base class of asset postprocessor (runs after translators and before minifiers)
 	/// </summary>

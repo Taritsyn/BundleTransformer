@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core
-{
-	using System.Threading;
+﻿using System.Threading;
 
+namespace BundleTransformer.Core
+{
 	public struct InterlockedStatedFlag
 	{
 		private int _counter;

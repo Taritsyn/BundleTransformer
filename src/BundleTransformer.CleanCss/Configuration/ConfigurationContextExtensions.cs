@@ -1,10 +1,10 @@
-﻿namespace BundleTransformer.CleanCss.Configuration
+﻿using System;
+using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.CleanCss.Configuration
 {
-	using System;
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration context extensions
 	/// </summary>

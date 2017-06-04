@@ -1,17 +1,17 @@
-﻿namespace BundleTransformer.Tests.Core.Filters
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Moq;
+using NUnit.Framework;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Filters;
+using BundleTransformer.Core.Helpers;
+
+namespace BundleTransformer.Tests.Core.Filters
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Moq;
-	using NUnit.Framework;
-
-	using BundleTransformer.Core.Assets;
-	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Filters;
-	using BundleTransformer.Core.Helpers;
-
 	[TestFixture]
 	public class StyleUnnecessaryAssetsFilterTests
 	{

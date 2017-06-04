@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Combiners
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Combiners
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Base class of asset combiner
 	/// </summary>

@@ -1,9 +1,9 @@
-﻿namespace BundleTransformer.Less.Configuration
+﻿using System.Configuration;
+
+using BundleTransformer.Core.Configuration;
+
+namespace BundleTransformer.Less.Configuration
 {
-	using System.Configuration;
-
-	using Core.Configuration;
-
 	/// <summary>
 	/// Configuration settings of LESS-translator
 	/// </summary>

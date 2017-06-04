@@ -1,17 +1,15 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
+
+using Moq;
+using NUnit.Framework;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Filters;
+using BundleTransformer.Core.Helpers;
 
 namespace BundleTransformer.Tests.Core.Filters
 {
-	using System.Collections.Generic;
-
-	using Moq;
-	using NUnit.Framework;
-
-	using BundleTransformer.Core.Assets;
-	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Filters;
-	using BundleTransformer.Core.Helpers;
-
 	[TestFixture]
 	public class StyleDuplicateAssetsFilterTests
 	{

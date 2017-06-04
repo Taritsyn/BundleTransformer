@@ -1,13 +1,13 @@
-﻿namespace BundleTransformer.TypeScript.Internal
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.TypeScript.Internal
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Reflection;
-
-	using Core.FileSystem;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// Virtual file manager
 	/// </summary>

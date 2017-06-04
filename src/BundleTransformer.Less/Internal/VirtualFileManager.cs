@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Less.Internal
+﻿using System;
+using System.Text.RegularExpressions;
+
+using BundleTransformer.Core.FileSystem;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.Less.Internal
 {
-	using System;
-	using System.Text.RegularExpressions;
-
-	using Core.FileSystem;
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// Virtual file manager
 	/// </summary>

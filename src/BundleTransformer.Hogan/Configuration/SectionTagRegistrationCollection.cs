@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Hogan.Configuration
-{
-	using System.Configuration;
+﻿using System.Configuration;
 
+namespace BundleTransformer.Hogan.Configuration
+{
 	/// <summary>
 	/// Collection of registered custom section tags
 	/// </summary>

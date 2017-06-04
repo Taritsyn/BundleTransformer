@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Tests.Core
+﻿using System;
+using System.IO;
+using System.Web.Caching;
+
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Helpers;
+
+namespace BundleTransformer.Tests.Core
 {
-	using System;
-	using System.IO;
-	using System.Web.Caching;
-
-	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Helpers;
-
 	public class MockVirtualFileSystemWrapper : IVirtualFileSystemWrapper
 	{
 		private readonly string _applicationRootUrl;

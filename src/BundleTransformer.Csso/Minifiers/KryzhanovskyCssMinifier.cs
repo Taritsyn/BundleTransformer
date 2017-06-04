@@ -1,20 +1,20 @@
-﻿namespace BundleTransformer.Csso.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Csso.Configuration;
+using BundleTransformer.Csso.Internal;
+
+namespace BundleTransformer.Csso.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code
 	/// by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)

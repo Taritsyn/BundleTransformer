@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Less.Internal
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Less.Internal
+{
 	/// <summary>
 	/// The exception that is thrown when a compiling of asset code by LESS-compiler is failed
 	/// </summary>

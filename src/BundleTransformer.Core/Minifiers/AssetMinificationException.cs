@@ -1,7 +1,7 @@
-﻿namespace BundleTransformer.Core.Minifiers
-{
-	using System;
+﻿using System;
 
+namespace BundleTransformer.Core.Minifiers
+{
 	/// <summary>
 	/// The exception that is thrown when a minification of asset code is failed
 	/// </summary>

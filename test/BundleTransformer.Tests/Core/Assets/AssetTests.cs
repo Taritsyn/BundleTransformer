@@ -1,18 +1,18 @@
-﻿namespace BundleTransformer.Tests.Core.Assets
+﻿using NUnit.Framework;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.Helpers;
+
+using CoffeeScriptAssetTypeCodes = BundleTransformer.CoffeeScript.Constants.AssetTypeCode;
+using CoreAssetTypeCodes = BundleTransformer.Core.Constants.AssetTypeCode;
+using HandlebarsAssetTypeCodes = BundleTransformer.Handlebars.Constants.AssetTypeCode;
+using LessAssetTypeCodes = BundleTransformer.Less.Constants.AssetTypeCode;
+using SassAndScssAssetTypeCodes = BundleTransformer.SassAndScss.Constants.AssetTypeCode;
+using TypeScriptAssetTypeCodes = BundleTransformer.TypeScript.Constants.AssetTypeCode;
+
+namespace BundleTransformer.Tests.Core.Assets
 {
-	using NUnit.Framework;
-
-	using BundleTransformer.Core.Assets;
-	using BundleTransformer.Core.FileSystem;
-	using BundleTransformer.Core.Helpers;
-
-	using CoffeeScriptAssetTypeCodes = BundleTransformer.CoffeeScript.Constants.AssetTypeCode;
-	using CoreAssetTypeCodes = BundleTransformer.Core.Constants.AssetTypeCode;
-	using HandlebarsAssetTypeCodes = BundleTransformer.Handlebars.Constants.AssetTypeCode;
-	using LessAssetTypeCodes = BundleTransformer.Less.Constants.AssetTypeCode;
-	using SassAndScssAssetTypeCodes = BundleTransformer.SassAndScss.Constants.AssetTypeCode;
-	using TypeScriptAssetTypeCodes = BundleTransformer.TypeScript.Constants.AssetTypeCode;
-
 	[TestFixture]
 	public class AssetTests
 	{

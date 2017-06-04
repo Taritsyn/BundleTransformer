@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Combiners
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Utilities;
+
+namespace BundleTransformer.Core.Combiners
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Text;
-
-	using Assets;
-	using Utilities;
-
 	/// <summary>
 	/// Script asset combiner
 	/// </summary>

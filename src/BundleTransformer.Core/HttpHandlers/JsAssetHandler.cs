@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.HttpHandlers
+﻿using System.Web;
+using System.Web.Caching;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.FileSystem;
+
+namespace BundleTransformer.Core.HttpHandlers
 {
-	using System.Web;
-	using System.Web.Caching;
-
-	using Assets;
-	using Configuration;
-	using FileSystem;
-
 	/// <summary>
 	/// Debugging HTTP-handler that responsible for text output
 	/// of translated JS-asset

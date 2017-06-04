@@ -1,21 +1,21 @@
-﻿namespace BundleTransformer.Autoprefixer.PostProcessors
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+
+using JavaScriptEngineSwitcher.Core;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.FileSystem;
+using BundleTransformer.Core.PostProcessors;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Autoprefixer.Configuration;
+using BundleTransformer.Autoprefixer.Internal;
+
+namespace BundleTransformer.Autoprefixer.PostProcessors
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Configuration;
-	using System.Linq;
-
-	using JavaScriptEngineSwitcher.Core;
-
-	using Core;
-	using Core.Assets;
-	using Core.FileSystem;
-	using Core.PostProcessors;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using Internal;
-
 	/// <summary>
 	/// Postprocessor that actualizes a vendor prefixes in CSS-code
 	/// by using Andrey Sitnik's Autoprefixer

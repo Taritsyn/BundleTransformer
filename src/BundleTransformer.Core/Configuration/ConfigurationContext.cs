@@ -1,8 +1,8 @@
-﻿namespace BundleTransformer.Core.Configuration
-{
-	using System;
-	using System.Configuration;
+﻿using System;
+using System.Configuration;
 
+namespace BundleTransformer.Core.Configuration
+{
 	/// <summary>
 	/// Defines interface of configuration context
 	/// </summary>

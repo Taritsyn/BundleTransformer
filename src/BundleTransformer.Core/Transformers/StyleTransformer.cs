@@ -1,17 +1,17 @@
-﻿namespace BundleTransformer.Core.Transformers
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Combiners;
+using BundleTransformer.Core.Configuration;
+using BundleTransformer.Core.Filters;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Translators;
+using BundleTransformer.Core.Validators;
+
+namespace BundleTransformer.Core.Transformers
 {
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Assets;
-	using Combiners;
-	using Configuration;
-	using Filters;
-	using Minifiers;
-	using PostProcessors;
-	using Translators;
-	using Validators;
-
 	/// <summary>
 	/// Transformer that responsible for processing of style assets
 	/// </summary>

@@ -1,12 +1,12 @@
-﻿namespace BundleTransformer.Core.Validators
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.Validators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Validator that checks whether the specified assets are style assets
 	/// </summary>

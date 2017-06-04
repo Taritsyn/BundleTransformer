@@ -1,15 +1,15 @@
-﻿namespace BundleTransformer.JsMin.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using DouglasCrockford.JsMin;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+namespace BundleTransformer.JsMin.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using DouglasCrockford.JsMin;
-
-	using Core.Assets;
-	using Core.Minifiers;
-	using CoreStrings = Core.Resources.Strings;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of JS-code
 	/// by using C# port of Douglas Crockford's JSMin

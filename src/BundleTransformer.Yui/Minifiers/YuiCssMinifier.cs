@@ -1,21 +1,21 @@
-﻿namespace BundleTransformer.Yui.Minifiers
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Yahoo.Yui.Compressor;
+using YuiCompressionType = Yahoo.Yui.Compressor.CompressionType;
+
+using BundleTransformer.Core;
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Minifiers;
+using BundleTransformer.Core.Utilities;
+using CoreStrings = BundleTransformer.Core.Resources.Strings;
+
+using BundleTransformer.Yui.Configuration;
+using BtCompressionType = BundleTransformer.Yui.CompressionType;
+
+namespace BundleTransformer.Yui.Minifiers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-
-	using Yahoo.Yui.Compressor;
-	using YuiCompressionType = Yahoo.Yui.Compressor.CompressionType;
-
-	using Core;
-	using Core.Assets;
-	using Core.Minifiers;
-	using Core.Utilities;
-	using CoreStrings = Core.Resources.Strings;
-
-	using Configuration;
-	using BtCompressionType = CompressionType;
-
 	/// <summary>
 	/// Minifier, which produces minifiction of CSS-code
 	/// by using YUI Compressor for .NET

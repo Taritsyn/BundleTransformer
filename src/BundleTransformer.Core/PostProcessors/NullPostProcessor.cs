@@ -1,11 +1,11 @@
-﻿namespace BundleTransformer.Core.PostProcessors
+﻿using System;
+using System.Collections.Generic;
+
+using BundleTransformer.Core.Assets;
+using BundleTransformer.Core.Resources;
+
+namespace BundleTransformer.Core.PostProcessors
 {
-	using System;
-	using System.Collections.Generic;
-
-	using Assets;
-	using Resources;
-
 	/// <summary>
 	/// Null postprocessor (used as a placeholder)
 	/// </summary>
