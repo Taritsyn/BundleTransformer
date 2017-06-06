@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>@ViewBag.Title - Bundle Transformer Example MVC Application</title>
+		<title>@if (!string.IsNullOrEmpty(ViewBag.Title)) {<text>@ViewBag.Title | </text>}Bundle Transformer Sample ASP.NET 4.0 MVC 4 Site</title>
 		<link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 		<meta name="viewport" content="width=device-width" />
 		@Styles.Render("~/Bundles/CommonStyles")

@@ -1,7 +1,7 @@
 ﻿using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Msie;
 
-namespace BundleTransformer.Example.Mvc
+namespace BundleTransformer.Sample.AspNet4.Mvc4
 {
 	public class JsEngineSwitcherConfig
 	{

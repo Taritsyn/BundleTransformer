@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace BundleTransformer.Example.Mvc.Controllers
+namespace BundleTransformer.Sample.AspNet4.Mvc4.Controllers
 {
 	public class HomeController : Controller
 	{

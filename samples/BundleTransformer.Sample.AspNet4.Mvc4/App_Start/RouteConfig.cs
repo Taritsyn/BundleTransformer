@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace BundleTransformer.Example.Mvc
+namespace BundleTransformer.Sample.AspNet4.Mvc4
 {
 	public class RouteConfig
 	{

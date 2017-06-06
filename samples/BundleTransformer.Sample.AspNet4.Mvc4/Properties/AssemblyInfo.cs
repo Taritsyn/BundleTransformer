@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("BundleTransformer.Example.Mvc")]
+[assembly: AssemblyTitle("BundleTransformer.Sample.AspNet4.Mvc4")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Bundle Transformer: Example MVC Application")]
+[assembly: AssemblyProduct("Bundle Transformer: Sample ASP.NET MVC 4 Site")]
 [assembly: AssemblyCopyright("Copyright © 2012-2017 Andrey Taritsyn")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
