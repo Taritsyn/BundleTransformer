@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -12,12 +12,12 @@ using BundleTransformer.Core.Helpers;
 
 namespace BundleTransformer.Tests.Core.Filters
 {
-	[TestFixture]
-	public class ScriptUnnecessaryAssetsFilterTests
+	public class ScriptUnnecessaryAssetsFilterTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
-		[Test]
+
+		[Fact]
 		public void UnneededScriptAssetsRemovedIsCorrect()
 		{
 			// Arrange
@@ -62,20 +62,20 @@ namespace BundleTransformer.Tests.Core.Filters
 			IList<IAsset> processedAssets = scriptUnnecessaryAssetsFilter.Transform(assets).ToList();
 
 			// Assert
-			Assert.AreEqual(5, processedAssets.Count);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "AjaxLogin.js"),
+			Assert.Equal(5, processedAssets.Count);
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "AjaxLogin.js"),
 				processedAssets[0].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"),
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "jquery-1.6.2.min.js"),
 				processedAssets[1].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"),
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "MicrosoftAjax.debug.js"),
 				processedAssets[2].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.0.0.js"),
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH, "knockout-2.0.0.js"),
 				processedAssets[3].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), processedAssets[4].VirtualPath);
 		}
 
-		[Test]
+		[Fact]
 		public void FirstInvalidIgnorePatternProcessedIsCorrect()
 		{
 			// Arrange
@@ -92,12 +92,12 @@ namespace BundleTransformer.Tests.Core.Filters
 			}
 
 			// Assert
-			Assert.IsNotNull(currentException);
-			Assert.IsInstanceOf<ArgumentException>(currentException);
-			Assert.AreEqual(((ArgumentException)currentException).ParamName, "ignorePatterns");
+			Assert.NotNull(currentException);
+			Assert.IsType<ArgumentException>(currentException);
+			Assert.Equal(((ArgumentException)currentException).ParamName, "ignorePatterns");
 		}
 
-		[Test]
+		[Fact]
 		public void SecondInvalidIgnorePatternProcessedIsCorrect()
 		{
 			// Arrange
@@ -114,9 +114,9 @@ namespace BundleTransformer.Tests.Core.Filters
 			}
 
 			// Assert
-			Assert.IsNotNull(currentException);
-			Assert.IsInstanceOf<ArgumentException>(currentException);
-			Assert.AreEqual(((ArgumentException)currentException).ParamName, "ignorePatterns");
+			Assert.NotNull(currentException);
+			Assert.IsType<ArgumentException>(currentException);
+			Assert.Equal(((ArgumentException)currentException).ParamName, "ignorePatterns");
 		}
 	}
 }

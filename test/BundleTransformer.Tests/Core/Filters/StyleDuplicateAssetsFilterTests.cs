@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -10,21 +10,21 @@ using BundleTransformer.Core.Helpers;
 
 namespace BundleTransformer.Tests.Core.Filters
 {
-	[TestFixture]
-	public class StyleDuplicateAssetsFilterTests
+	public class StyleDuplicateAssetsFilterTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
 		private const string ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH = @"~/AlternativeContent/";
 
-		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
-		[TestFixtureSetUp]
-		public void SetUp()
+
+		public StyleDuplicateAssetsFilterTests()
 		{
-			_virtualFileSystemWrapper = (new Mock<IVirtualFileSystemWrapper>()).Object;
+			_virtualFileSystemWrapper = new Mock<IVirtualFileSystemWrapper>().Object;
 		}
 
-		[Test]
+
+		[Fact]
 		public void DuplicateStyleAssetsRemovedIsCorrect()
 		{
 			// Arrange
@@ -50,11 +50,11 @@ namespace BundleTransformer.Tests.Core.Filters
 
 			IList<IAsset> assets = new List<IAsset>
 			{
-			    siteAsset,
-			    jqueryUiAccordionMinAsset,
-			    testCssComponentsPathsAsset,
-			    testCssComponentsPathsMinAsset,
-			    siteDuplicateAsset,
+				siteAsset,
+				jqueryUiAccordionMinAsset,
+				testCssComponentsPathsAsset,
+				testCssComponentsPathsMinAsset,
+				siteDuplicateAsset,
 				testLessAsset,
 				testSassAsset,
 				testScssAsset,
@@ -67,25 +67,19 @@ namespace BundleTransformer.Tests.Core.Filters
 			IList<IAsset> processedAssets = styleDuplicateFilter.Transform(assets);
 
 			// Assert
-			Assert.AreEqual(6, processedAssets.Count);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(6, processedAssets.Count);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"Site.css"), processedAssets[0].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"themes/base/jquery.ui.accordion.min.css"), processedAssets[1].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				"css/TestCssComponentsPaths.css"), processedAssets[2].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"less/TestLess.less"), processedAssets[3].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"sass/TestSass.sass"), processedAssets[4].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				"scss/TestScss.scss"), processedAssets[5].VirtualPath);
-		}
-
-		[TestFixtureTearDown]
-		public void TearDown()
-		{
-			_virtualFileSystemWrapper = null;
 		}
 	}
 }

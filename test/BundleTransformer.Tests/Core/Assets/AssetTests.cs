@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -13,8 +13,7 @@ using TypeScriptAssetTypeCodes = BundleTransformer.TypeScript.Constants.AssetTyp
 
 namespace BundleTransformer.Tests.Core.Assets
 {
-	[TestFixture]
-	public class AssetTests
+	public class AssetTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string APPLICATION_ROOT_VIRTUAL_PATH = @"~/";
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
@@ -24,15 +23,16 @@ namespace BundleTransformer.Tests.Core.Assets
 		private const string STYLES_DIRECTORY_URL = "/Content/";
 		private const string SCRIPTS_DIRECTORY_URL = "/Scripts/";
 
-		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
-		[TestFixtureSetUp]
-		public void SetUp()
+
+		public AssetTests()
 		{
 			_virtualFileSystemWrapper = new MockVirtualFileSystemWrapper(APPLICATION_ROOT_URL);
 		}
 
-		[Test]
+
+		[Fact]
 		public void UrlCalculationIsCorrect()
 		{
 			// Arrange
@@ -46,11 +46,11 @@ namespace BundleTransformer.Tests.Core.Assets
 			string jqueryAssetUrl = jqueryAsset.Url;
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_URL, "Site.css"), siteCssAssetUrl);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_URL, "jquery-1.6.2.js"), jqueryAssetUrl);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_URL, "Site.css"), siteCssAssetUrl);
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_URL, "jquery-1.6.2.js"), jqueryAssetUrl);
 		}
 
-		[Test]
+		[Fact]
 		public void DeterminationOfAssetTypeIsCorrect()
 		{
 			// Arrange
@@ -96,49 +96,43 @@ namespace BundleTransformer.Tests.Core.Assets
 				_virtualFileSystemWrapper);
 
 			// Assert
-			Assert.AreEqual(CoreAssetTypeCodes.Css, siteCssAsset.AssetTypeCode);
-			Assert.AreEqual(CoreAssetTypeCodes.JavaScript, jqueryJsAsset.AssetTypeCode);
-			Assert.AreEqual(LessAssetTypeCodes.Less, testLessAsset.AssetTypeCode);
-			Assert.AreEqual(SassAndScssAssetTypeCodes.Sass, testSassAsset.AssetTypeCode);
-			Assert.AreEqual(SassAndScssAssetTypeCodes.Scss, testScssAsset.AssetTypeCode);
-			Assert.AreEqual(CoffeeScriptAssetTypeCodes.CoffeeScript, testCoffeeAsset.AssetTypeCode);
-			Assert.AreEqual(CoffeeScriptAssetTypeCodes.LiterateCoffeeScript, testLitCoffeeAsset.AssetTypeCode);
-			Assert.AreEqual(CoffeeScriptAssetTypeCodes.LiterateCoffeeScript, testCoffeeMdAsset.AssetTypeCode);
-			Assert.AreEqual(TypeScriptAssetTypeCodes.TypeScript, testTsAsset.AssetTypeCode);
-			Assert.AreEqual(HandlebarsAssetTypeCodes.Handlebars, testHandlebarsAsset.AssetTypeCode);
-			Assert.AreEqual(HandlebarsAssetTypeCodes.Handlebars, testShortHandlebarsAsset.AssetTypeCode);
-			Assert.AreEqual(CoreAssetTypeCodes.Unknown, testPlainTextAsset.AssetTypeCode);
+			Assert.Equal(CoreAssetTypeCodes.Css, siteCssAsset.AssetTypeCode);
+			Assert.Equal(CoreAssetTypeCodes.JavaScript, jqueryJsAsset.AssetTypeCode);
+			Assert.Equal(LessAssetTypeCodes.Less, testLessAsset.AssetTypeCode);
+			Assert.Equal(SassAndScssAssetTypeCodes.Sass, testSassAsset.AssetTypeCode);
+			Assert.Equal(SassAndScssAssetTypeCodes.Scss, testScssAsset.AssetTypeCode);
+			Assert.Equal(CoffeeScriptAssetTypeCodes.CoffeeScript, testCoffeeAsset.AssetTypeCode);
+			Assert.Equal(CoffeeScriptAssetTypeCodes.LiterateCoffeeScript, testLitCoffeeAsset.AssetTypeCode);
+			Assert.Equal(CoffeeScriptAssetTypeCodes.LiterateCoffeeScript, testCoffeeMdAsset.AssetTypeCode);
+			Assert.Equal(TypeScriptAssetTypeCodes.TypeScript, testTsAsset.AssetTypeCode);
+			Assert.Equal(HandlebarsAssetTypeCodes.Handlebars, testHandlebarsAsset.AssetTypeCode);
+			Assert.Equal(HandlebarsAssetTypeCodes.Handlebars, testShortHandlebarsAsset.AssetTypeCode);
+			Assert.Equal(CoreAssetTypeCodes.Unknown, testPlainTextAsset.AssetTypeCode);
 
-			Assert.AreEqual(siteCssAsset.IsStylesheet, true);
-			Assert.AreEqual(siteCssAsset.IsScript, false);
-			Assert.AreEqual(jqueryJsAsset.IsStylesheet, false);
-			Assert.AreEqual(jqueryJsAsset.IsScript, true);
-			Assert.AreEqual(testLessAsset.IsStylesheet, true);
-			Assert.AreEqual(testLessAsset.IsScript, false);
-			Assert.AreEqual(testSassAsset.IsStylesheet, true);
-			Assert.AreEqual(testSassAsset.IsScript, false);
-			Assert.AreEqual(testScssAsset.IsStylesheet, true);
-			Assert.AreEqual(testScssAsset.IsScript, false);
-			Assert.AreEqual(testCoffeeAsset.IsStylesheet, false);
-			Assert.AreEqual(testCoffeeAsset.IsScript, true);
-			Assert.AreEqual(testLitCoffeeAsset.IsStylesheet, false);
-			Assert.AreEqual(testLitCoffeeAsset.IsScript, true);
-			Assert.AreEqual(testCoffeeMdAsset.IsStylesheet, false);
-			Assert.AreEqual(testCoffeeMdAsset.IsScript, true);
-			Assert.AreEqual(testTsAsset.IsStylesheet, false);
-			Assert.AreEqual(testTsAsset.IsScript, true);
-			Assert.AreEqual(testHandlebarsAsset.IsStylesheet, false);
-			Assert.AreEqual(testHandlebarsAsset.IsScript, true);
-			Assert.AreEqual(testShortHandlebarsAsset.IsStylesheet, false);
-			Assert.AreEqual(testShortHandlebarsAsset.IsScript, true);
-			Assert.AreEqual(testPlainTextAsset.IsStylesheet, false);
-			Assert.AreEqual(testPlainTextAsset.IsScript, false);
-		}
-
-		[TestFixtureTearDown]
-		public void TearDown()
-		{
-			_virtualFileSystemWrapper = null;
+			Assert.True(siteCssAsset.IsStylesheet);
+			Assert.False(siteCssAsset.IsScript);
+			Assert.False(jqueryJsAsset.IsStylesheet);
+			Assert.True(jqueryJsAsset.IsScript);
+			Assert.True(testLessAsset.IsStylesheet);
+			Assert.False(testLessAsset.IsScript);
+			Assert.True(testSassAsset.IsStylesheet);
+			Assert.False(testSassAsset.IsScript);
+			Assert.True(testScssAsset.IsStylesheet);
+			Assert.False(testScssAsset.IsScript);
+			Assert.False(testCoffeeAsset.IsStylesheet);
+			Assert.True(testCoffeeAsset.IsScript);
+			Assert.False(testLitCoffeeAsset.IsStylesheet);
+			Assert.True(testLitCoffeeAsset.IsScript);
+			Assert.False(testCoffeeMdAsset.IsStylesheet);
+			Assert.True(testCoffeeMdAsset.IsScript);
+			Assert.False(testTsAsset.IsStylesheet);
+			Assert.True(testTsAsset.IsScript);
+			Assert.False(testHandlebarsAsset.IsStylesheet);
+			Assert.True(testHandlebarsAsset.IsScript);
+			Assert.False(testShortHandlebarsAsset.IsStylesheet);
+			Assert.True(testShortHandlebarsAsset.IsScript);
+			Assert.False(testPlainTextAsset.IsStylesheet);
+			Assert.False(testPlainTextAsset.IsScript);
 		}
 	}
 }

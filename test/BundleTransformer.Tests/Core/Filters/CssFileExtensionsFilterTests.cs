@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -10,16 +10,15 @@ using BundleTransformer.Core.Helpers;
 
 namespace BundleTransformer.Tests.Core.Filters
 {
-	[TestFixture]
-	public class CssFileExtensionsFilterTests
+	public class CssFileExtensionsFilterTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
 		private const string ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH = "~/AlternativeContent/";
 
-		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
-		[TestFixtureSetUp]
-		public void SetUp()
+
+		public CssFileExtensionsFilterTests()
 		{
 			var virtualFileSystemMock = new Mock<IVirtualFileSystemWrapper>();
 
@@ -57,6 +56,7 @@ namespace BundleTransformer.Tests.Core.Filters
 			_virtualFileSystemWrapper = virtualFileSystemMock.Object;
 		}
 
+
 		private IList<IAsset> GetTestAssets()
 		{
 			var siteAsset = new Asset(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"),
@@ -76,14 +76,14 @@ namespace BundleTransformer.Tests.Core.Filters
 			return testAssets;
 		}
 
-		[Test]
+		[Fact]
 		public void ReplacementOfFileExtensionsInDebugModeAndUsageOfPreMinifiedFilesAllowedIsCorrect()
 		{
 			// Arrange
 			IList<IAsset> assets = GetTestAssets();
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_virtualFileSystemWrapper)
 			{
-			    IsDebugMode = true,
+				IsDebugMode = true,
 				UsePreMinifiedFiles = true
 			};
 
@@ -94,20 +94,20 @@ namespace BundleTransformer.Tests.Core.Filters
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.NotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
-			Assert.AreEqual(false, siteAsset.Minified);
-			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
-			Assert.AreEqual(false, testCssComponentsPathsAsset.Minified);
+			Assert.False(siteAsset.Minified);
+			Assert.True(jqueryUiAccordionAsset.Minified);
+			Assert.False(testCssComponentsPathsAsset.Minified);
 		}
 
-		[Test]
+		[Fact]
 		public void ReplacementOfFileExtensionsInDebugModeAndUsageOfPreMinifiedFilesDisallowedIsCorrect()
 		{
 			// Arrange
@@ -125,27 +125,27 @@ namespace BundleTransformer.Tests.Core.Filters
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.NotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
-			Assert.AreEqual(false, siteAsset.Minified);
-			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
-			Assert.AreEqual(false, testCssComponentsPathsAsset.Minified);
+			Assert.False(siteAsset.Minified);
+			Assert.True(jqueryUiAccordionAsset.Minified);
+			Assert.False(testCssComponentsPathsAsset.Minified);
 		}
 
-		[Test]
+		[Fact]
 		public void ReplacementOfFileExtensionsInReleaseModeAndUsageOfPreMinifiedFilesAllowedIsCorrect()
 		{
 			// Arrange
 			IList<IAsset> assets = GetTestAssets();
 			var cssFileExtensionsFilter = new CssFileExtensionsFilter(_virtualFileSystemWrapper)
 			{
-			    IsDebugMode = false,
+				IsDebugMode = false,
 				UsePreMinifiedFiles = true
 			};
 
@@ -156,19 +156,19 @@ namespace BundleTransformer.Tests.Core.Filters
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreNotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.NotEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.min.css"), siteAsset.VirtualPath);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"css\TestCssComponentsPaths.min.css"), testCssComponentsPathsAsset.VirtualPath);
 
-			Assert.AreEqual(false, siteAsset.Minified);
-			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
-			Assert.AreEqual(true, testCssComponentsPathsAsset.Minified);
+			Assert.False(siteAsset.Minified);
+			Assert.True(jqueryUiAccordionAsset.Minified);
+			Assert.True(testCssComponentsPathsAsset.Minified);
 		}
 
-		[Test]
+		[Fact]
 		public void ReplacementOfFileExtensionsInReleaseModeAndUsageOfPreMinifiedFilesDisallowedIsCorrect()
 		{
 			// Arrange
@@ -186,21 +186,15 @@ namespace BundleTransformer.Tests.Core.Filters
 			IAsset testCssComponentsPathsAsset = processedAssets[2];
 
 			// Assert
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, "Site.css"), siteAsset.VirtualPath);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.min.css"), jqueryUiAccordionAsset.VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"css\TestCssComponentsPaths.css"), testCssComponentsPathsAsset.VirtualPath);
 
-			Assert.AreEqual(false, siteAsset.Minified);
-			Assert.AreEqual(true, jqueryUiAccordionAsset.Minified);
-			Assert.AreEqual(false, testCssComponentsPathsAsset.Minified);
-		}
-
-		[TestFixtureTearDown]
-		public void TearDown()
-		{
-			_virtualFileSystemWrapper = null;
+			Assert.False(siteAsset.Minified);
+			Assert.True(jqueryUiAccordionAsset.Minified);
+			Assert.False(testCssComponentsPathsAsset.Minified);
 		}
 	}
 }

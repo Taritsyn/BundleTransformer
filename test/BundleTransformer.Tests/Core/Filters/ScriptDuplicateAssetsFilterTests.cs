@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -10,12 +10,12 @@ using BundleTransformer.Core.Helpers;
 
 namespace BundleTransformer.Tests.Core.Filters
 {
-	[TestFixture]
-	public class ScriptDuplicateAssetsFilterTests
+	public class ScriptDuplicateAssetsFilterTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
-		[Test]
+
+		[Fact]
 		public void DuplicateScriptAssetsRemovedIsCorrect()
 		{
 			// Arrange
@@ -62,18 +62,18 @@ namespace BundleTransformer.Tests.Core.Filters
 			IList<IAsset> processedAssets = scriptDuplicateFilter.Transform(assets);
 
 			// Assert
-			Assert.AreEqual(6, processedAssets.Count);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(6, processedAssets.Count);
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"jquery-1.6.2.min.js"), processedAssets[0].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"AjaxLogin.js"), processedAssets[1].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"MicrosoftAjax.debug.js"), processedAssets[2].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"modernizr-2.0.6-development-only.js"), processedAssets[3].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"coffee/TestCoffeeScript.coffee"), processedAssets[4].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(SCRIPTS_DIRECTORY_VIRTUAL_PATH,
 				"ts/TestTypeScript.ts"), processedAssets[5].VirtualPath);
 		}
 	}

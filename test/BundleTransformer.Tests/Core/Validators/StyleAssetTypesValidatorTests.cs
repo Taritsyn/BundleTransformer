@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -10,22 +10,22 @@ using BundleTransformer.Core.Validators;
 
 namespace BundleTransformer.Tests.Core.Validators
 {
-	[TestFixture]
-	public class StyleAssetTypesValidatorTests
+	public class StyleAssetTypesValidatorTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string APPLICATION_ROOT_VIRTUAL_PATH = "~/";
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts?";
 
-		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
-		[TestFixtureSetUp]
-		public void SetUp()
+
+		public StyleAssetTypesValidatorTests()
 		{
 			_virtualFileSystemWrapper = new MockVirtualFileSystemWrapper("/");
 		}
 
-		[Test]
+
+		[Fact]
 		public void StyleAssetsListContainAssetsWithInvalidTypes()
 		{
 			// Arrange
@@ -84,8 +84,8 @@ namespace BundleTransformer.Tests.Core.Validators
 			}
 
 			// Assert
-			Assert.IsInstanceOf<InvalidAssetTypesException>(currentException);
-			Assert.AreEqual(5, invalidAssetsVirtualPaths.Length);
+			Assert.IsType<InvalidAssetTypesException>(currentException);
+			Assert.Equal(5, invalidAssetsVirtualPaths.Length);
 			Assert.Contains(jqueryJsAsset.VirtualPath, invalidAssetsVirtualPaths);
 			Assert.Contains(testCoffeeAsset.VirtualPath, invalidAssetsVirtualPaths);
 			Assert.Contains(testLitCoffeeAsset.VirtualPath, invalidAssetsVirtualPaths);
@@ -93,7 +93,7 @@ namespace BundleTransformer.Tests.Core.Validators
 			Assert.Contains(testPlainTextAsset.VirtualPath, invalidAssetsVirtualPaths);
 		}
 
-		[Test]
+		[Fact]
 		public void StyleAssetsListNotContainAssetsWithInvalidTypes()
 		{
 			// Arrange
@@ -124,13 +124,7 @@ namespace BundleTransformer.Tests.Core.Validators
 			}
 
 			// Assert
-			Assert.IsNotInstanceOf<InvalidAssetTypesException>(currentException);
-		}
-
-		[TestFixtureTearDown]
-		public void TearDown()
-		{
-			_virtualFileSystemWrapper = null;
+			Assert.IsNotType<InvalidAssetTypesException>(currentException);
 		}
 	}
 }

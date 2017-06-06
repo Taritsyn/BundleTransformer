@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using JavaScriptEngineSwitcher.Core;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -14,12 +14,12 @@ using BundleTransformer.Autoprefixer.PostProcessors;
 
 namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
 {
-	[TestFixture]
-	public class AutoprefixCssPostProcessorTests
+	public class AutoprefixCssPostProcessorTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "/Content/";
 
-		[Test]
+
+		[Fact]
 		public void FillingOfDependenciesIsCorrect()
 		{
 			// Arrange
@@ -38,7 +38,7 @@ namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
 				.Setup(fs => fs.GetFileTextContent(testCssAssetVirtualPath))
 				.Returns(@":fullscreen a
 {
-    display: flex
+	display: flex
 }")
 				;
 
@@ -54,16 +54,16 @@ namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(customStatisticsFileVirtualPath))
 				.Returns(@"{
-    ""name"": ""All data of website"",
-    ""id"": ""90598522|undefined"",
-    ""type"": ""custom"",
-    ""source"": ""google_analytics"",
-    ""dataByBrowser"": {},
-    ""meta"": {
-        ""start_date"": ""2015-12-20"",
-        ""end_date"": ""2016-01-19""
-    },
-    ""uid"": ""custom.90598522|undefined""
+	""name"": ""All data of website"",
+	""id"": ""90598522|undefined"",
+	""type"": ""custom"",
+	""source"": ""google_analytics"",
+	""dataByBrowser"": {},
+	""meta"": {
+		""start_date"": ""2015-12-20"",
+		""end_date"": ""2016-01-19""
+	},
+	""uid"": ""custom.90598522|undefined""
 }")
 				;
 
@@ -84,8 +84,8 @@ namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
 			IList<string> dependencies = asset.VirtualPathDependencies;
 
 			// Assert
-			Assert.AreEqual(1, dependencies.Count);
-			Assert.AreEqual("/App_Data/BundleTransformer/stats.json", dependencies[0]);
+			Assert.Equal(1, dependencies.Count);
+			Assert.Equal("/App_Data/BundleTransformer/stats.json", dependencies[0]);
 		}
 	}
 }

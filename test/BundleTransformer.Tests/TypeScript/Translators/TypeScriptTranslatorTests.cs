@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using JavaScriptEngineSwitcher.Core;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -15,12 +15,12 @@ using BundleTransformer.TypeScript.Translators;
 
 namespace BundleTransformer.Tests.TypeScript.Translators
 {
-	[TestFixture]
-	public class TypeScriptTranslatorTests
+	public class TypeScriptTranslatorTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "/Scripts/";
 
-		[Test]
+
+		[Fact]
 		public void FillingOfDependenciesIsCorrect()
 		{
 			// Arrange
@@ -107,35 +107,35 @@ TranslatorBadges.createTsTranslatorBadge();")
 /// <reference path=""ITranslatorBadge.d.ts"" />
 
 module TranslatorBadges {
-    export class TranslatorBadge implements ITranslatorBadge {
+	export class TranslatorBadge implements ITranslatorBadge {
 		$badgeElem: JQuery;
 		$linkElem: JQuery;
 
-        constructor (public elementId: string) {
-            this.$badgeElem = jQuery(""#"" + elementId);
+		constructor (public elementId: string) {
+			this.$badgeElem = jQuery(""#"" + elementId);
 			this.$linkElem = this.$badgeElem.find(""A:first"");
-        }
+		}
 
-        public getText(): string {
-            return this.$linkElem.text();
-        }
+		public getText(): string {
+			return this.$linkElem.text();
+		}
 
-        public setText(text: string): void {
-            this.$linkElem.text(text);
-        }
+		public setText(text: string): void {
+			this.$linkElem.text(text);
+		}
 
-        public show(): void {
-            this.$badgeElem.show(0);
-        }
+		public show(): void {
+			this.$badgeElem.show(0);
+		}
 
-        public hide(): void {
-            this.$badgeElem.hide(0);
-        }
+		public hide(): void {
+			this.$badgeElem.hide(0);
+		}
 
 		public isVisible() : boolean {
 			return this.$badgeElem.is("":visible"");
 		}
-    }
+	}
 }")
 				;
 
@@ -172,25 +172,25 @@ interface IColoredTranslatorBadge extends ITranslatorBadge {
 /// <reference path=""TranslatorBadge.ts"" />
 
 module TranslatorBadges {
-    export class ColoredTranslatorBadge
-        extends TranslatorBadge
-    {
-        public getTextColor(): string {
-            return this.$linkElem.css(""color"");
-        }
+	export class ColoredTranslatorBadge
+		extends TranslatorBadge
+	{
+		public getTextColor(): string {
+			return this.$linkElem.css(""color"");
+		}
 
-        public setTextColor(color: string): void {
-            this.$linkElem.css(""color"", color);
-        }
+		public setTextColor(color: string): void {
+			this.$linkElem.css(""color"", color);
+		}
 
-        public getBorderColor(): string {
-            return this.$badgeElem.css(""border-color"");
-        }
+		public getBorderColor(): string {
+			return this.$badgeElem.css(""border-color"");
+		}
 
-        public setBorderColor(color: string): void {
-            this.$badgeElem.css(""border-color"", color);
-        }
-    }
+		public setBorderColor(color: string): void {
+			this.$badgeElem.css(""border-color"", color);
+		}
+	}
 }")
 				;
 
@@ -208,13 +208,13 @@ module TranslatorBadges {
 			IList<string> dependencies = asset.VirtualPathDependencies;
 
 			// Assert
-			Assert.AreEqual(5, dependencies.Count);
+			Assert.Equal(5, dependencies.Count);
 
-			Assert.AreEqual(coloredTranslatorBadgeTsAssetVirtualPath, dependencies[0]);
-			Assert.AreEqual(jqueryTsAssetVirtualPath, dependencies[1]);
-			Assert.AreEqual(iColoredTranslatorBadgeTsAssetVirtualPath, dependencies[2]);
-			Assert.AreEqual(iTranslatorBadgeTsAssetVirtualPath, dependencies[3]);
-			Assert.AreEqual(translatorBadgeTsAssetVirtualPath, dependencies[4]);
+			Assert.Equal(coloredTranslatorBadgeTsAssetVirtualPath, dependencies[0]);
+			Assert.Equal(jqueryTsAssetVirtualPath, dependencies[1]);
+			Assert.Equal(iColoredTranslatorBadgeTsAssetVirtualPath, dependencies[2]);
+			Assert.Equal(iTranslatorBadgeTsAssetVirtualPath, dependencies[3]);
+			Assert.Equal(translatorBadgeTsAssetVirtualPath, dependencies[4]);
 		}
 	}
 }

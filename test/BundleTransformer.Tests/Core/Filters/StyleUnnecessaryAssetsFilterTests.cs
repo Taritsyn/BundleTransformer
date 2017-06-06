@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -12,13 +12,13 @@ using BundleTransformer.Core.Helpers;
 
 namespace BundleTransformer.Tests.Core.Filters
 {
-	[TestFixture]
-	public class StyleUnnecessaryAssetsFilterTests
+	public class StyleUnnecessaryAssetsFilterTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
 		private const string ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH = "~/AlternativeContent/";
 
-		[Test]
+
+		[Fact]
 		public void UnneededStyleAssetsRemovedIsCorrect()
 		{
 			// Arrange
@@ -51,16 +51,16 @@ namespace BundleTransformer.Tests.Core.Filters
 			IList<IAsset> processedAssets = styleUnnecessaryAssetsFilter.Transform(assets).ToList();
 
 			// Assert
-			Assert.AreEqual(3, processedAssets.Count);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, @"Site.css"),
+			Assert.Equal(3, processedAssets.Count);
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH, @"Site.css"),
 				processedAssets[0].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"themes\base\jquery.ui.accordion.css"), processedAssets[1].VirtualPath);
-			Assert.AreEqual(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
+			Assert.Equal(UrlHelpers.Combine(ALTERNATIVE_STYLES_DIRECTORY_VIRTUAL_PATH,
 				@"css\TestCssComponentsPaths.css"), processedAssets[2].VirtualPath);
 		}
 
-		[Test]
+		[Fact]
 		public void FirstInvalidIgnorePatternProcessedIsCorrect()
 		{
 			// Arrange
@@ -77,12 +77,12 @@ namespace BundleTransformer.Tests.Core.Filters
 			}
 
 			// Assert
-			Assert.IsNotNull(currentException);
-			Assert.IsInstanceOf<ArgumentException>(currentException);
-			Assert.AreEqual(((ArgumentException)currentException).ParamName, "ignorePatterns");
+			Assert.NotNull(currentException);
+			Assert.IsType<ArgumentException>(currentException);
+			Assert.Equal(((ArgumentException)currentException).ParamName, "ignorePatterns");
 		}
 
-		[Test]
+		[Fact]
 		public void SecondInvalidIgnorePatternProcessedIsCorrect()
 		{
 			// Arrange
@@ -99,9 +99,9 @@ namespace BundleTransformer.Tests.Core.Filters
 			}
 
 			// Assert
-			Assert.IsNotNull(currentException);
-			Assert.IsInstanceOf<ArgumentException>(currentException);
-			Assert.AreEqual(((ArgumentException)currentException).ParamName, "ignorePatterns");
+			Assert.NotNull(currentException);
+			Assert.IsType<ArgumentException>(currentException);
+			Assert.Equal(((ArgumentException)currentException).ParamName, "ignorePatterns");
 		}
 	}
 }

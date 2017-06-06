@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using JavaScriptEngineSwitcher.Core;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -14,12 +14,12 @@ using BundleTransformer.Less.Translators;
 
 namespace BundleTransformer.Tests.Less.Translators
 {
-	[TestFixture]
-	public class LessTranslatorTests
+	public class LessTranslatorTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "/Content/";
 
-		[Test]
+
+		[Fact]
 		public void FillingOfDependenciesIsCorrect()
 		{
 			// Arrange
@@ -450,21 +450,21 @@ namespace BundleTransformer.Tests.Less.Translators
 			IList<string> dependencies = asset.VirtualPathDependencies;
 
 			// Assert
-			Assert.AreEqual(14, dependencies.Count);
-			Assert.AreEqual(mixinsLessAssetVirtualPath, dependencies[0]);
-			Assert.AreEqual(variablesLessAssetVirtualPath, dependencies[1]);
-			Assert.AreEqual(testLessImportLessAssetVirtualPath, dependencies[2]);
-			Assert.AreEqual(testLessImportSub1LessAssetVirtualPath, dependencies[3]);
-			Assert.AreEqual(testLessImportSub2LessAssetVirtualPath, dependencies[4]);
-			Assert.AreEqual(validationIconCssAssetVirtualPath, dependencies[5]);
-			Assert.AreEqual(microformatsIconCssAssetVirtualPath, dependencies[6]);
-			Assert.AreEqual(nodeIconLessAssetVirtualPath, dependencies[7]);
-			Assert.AreEqual(printerIconLessAssetVirtualPath, dependencies[8]);
-			Assert.AreEqual(nonExistentIconLessAssetVirtualPath, dependencies[9]);
-			Assert.AreEqual(xfnIconLessAssetVirtualPath, dependencies[10]);
-			Assert.AreEqual(headphoneGifAssetVirtualPath, dependencies[11]);
-			Assert.AreEqual(googlePlusSvgAssetVirtualPath, dependencies[12]);
-			Assert.AreEqual(networkPngAssetVirtualPath, dependencies[13]);
+			Assert.Equal(14, dependencies.Count);
+			Assert.Equal(mixinsLessAssetVirtualPath, dependencies[0]);
+			Assert.Equal(variablesLessAssetVirtualPath, dependencies[1]);
+			Assert.Equal(testLessImportLessAssetVirtualPath, dependencies[2]);
+			Assert.Equal(testLessImportSub1LessAssetVirtualPath, dependencies[3]);
+			Assert.Equal(testLessImportSub2LessAssetVirtualPath, dependencies[4]);
+			Assert.Equal(validationIconCssAssetVirtualPath, dependencies[5]);
+			Assert.Equal(microformatsIconCssAssetVirtualPath, dependencies[6]);
+			Assert.Equal(nodeIconLessAssetVirtualPath, dependencies[7]);
+			Assert.Equal(printerIconLessAssetVirtualPath, dependencies[8]);
+			Assert.Equal(nonExistentIconLessAssetVirtualPath, dependencies[9]);
+			Assert.Equal(xfnIconLessAssetVirtualPath, dependencies[10]);
+			Assert.Equal(headphoneGifAssetVirtualPath, dependencies[11]);
+			Assert.Equal(googlePlusSvgAssetVirtualPath, dependencies[12]);
+			Assert.Equal(networkPngAssetVirtualPath, dependencies[13]);
 		}
 	}
 }

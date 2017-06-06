@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NUnit.Framework;
+using Xunit;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
@@ -10,22 +10,22 @@ using BundleTransformer.Core.Validators;
 
 namespace BundleTransformer.Tests.Core.Validators
 {
-	[TestFixture]
-	public class ScriptAssetTypesValidatorTests
+	public class ScriptAssetTypesValidatorTests : IClassFixture<ApplicationSetupFixture>
 	{
 		private const string APPLICATION_ROOT_VIRTUAL_PATH = "~/";
 		private const string STYLES_DIRECTORY_VIRTUAL_PATH = "~/Content/";
 		private const string SCRIPTS_DIRECTORY_VIRTUAL_PATH = "~/Scripts/";
 
-		private IVirtualFileSystemWrapper _virtualFileSystemWrapper;
+		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
-		[TestFixtureSetUp]
-		public void SetUp()
+
+		public ScriptAssetTypesValidatorTests()
 		{
 			_virtualFileSystemWrapper = new MockVirtualFileSystemWrapper("/");
 		}
 
-		[Test]
+
+		[Fact]
 		public void ScriptAssetsListContainAssetsWithInvalidTypes()
 		{
 			// Arrange
@@ -54,13 +54,13 @@ namespace BundleTransformer.Tests.Core.Validators
 
 			var assets = new List<IAsset>
 			{
-			    siteCssAsset,
-			    jqueryJsAsset,
-			    testLessAsset,
-			    testCoffeeAsset,
+				siteCssAsset,
+				jqueryJsAsset,
+				testLessAsset,
+				testCoffeeAsset,
 				testLitCoffeeAsset,
 				testCoffeeMdAsset,
-			    testPlainTextAsset
+				testPlainTextAsset
 			};
 
 			Exception currentException = null;
@@ -84,14 +84,14 @@ namespace BundleTransformer.Tests.Core.Validators
 			}
 
 			// Assert
-			Assert.IsInstanceOf<InvalidAssetTypesException>(currentException);
-			Assert.AreEqual(3, invalidAssetsVirtualPaths.Length);
+			Assert.IsType<InvalidAssetTypesException>(currentException);
+			Assert.Equal(3, invalidAssetsVirtualPaths.Length);
 			Assert.Contains(siteCssAsset.VirtualPath, invalidAssetsVirtualPaths);
 			Assert.Contains(testLessAsset.VirtualPath, invalidAssetsVirtualPaths);
 			Assert.Contains(testPlainTextAsset.VirtualPath, invalidAssetsVirtualPaths);
 		}
 
-		[Test]
+		[Fact]
 		public void ScriptAssetsListNotContainAssetsWithInvalidTypes()
 		{
 			// Arrange
@@ -104,8 +104,8 @@ namespace BundleTransformer.Tests.Core.Validators
 
 			var assets = new List<IAsset>
 			{
-			    jqueryJsAsset,
-			    testCoffeeAsset
+				jqueryJsAsset,
+				testCoffeeAsset
 			};
 
 			Exception currentException = null;
@@ -122,13 +122,7 @@ namespace BundleTransformer.Tests.Core.Validators
 			}
 
 			// Assert
-			Assert.IsNotInstanceOf<InvalidAssetTypesException>(currentException);
-		}
-
-		[TestFixtureTearDown]
-		public void TearDown()
-		{
-			_virtualFileSystemWrapper = null;
+			Assert.IsNotType<InvalidAssetTypesException>(currentException);
 		}
 	}
 }
