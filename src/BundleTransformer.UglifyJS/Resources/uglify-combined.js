@@ -2,7 +2,7 @@
  * UglifyJS v2.7.5
  * http://github.com/mishoo/UglifyJS2
  *
- * Copyright 2012-2014, Mihai Bazon <mihai.bazon@gmail.com>
+ * Copyright 2012-2013, Mihai Bazon <mihai.bazon@gmail.com>
  * Released under the BSD license
  */
 

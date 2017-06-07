@@ -2,7 +2,7 @@
 * CSSO (CSS Optimizer) v2.3.1
 * http://github.com/css/csso
 *
-* Copyright 2011-2015, Sergey Kryzhanovsky
+* Copyright 2011-2017, Sergey Kryzhanovsky
 * Released under the MIT License
 */
 var CSSO = (function(){

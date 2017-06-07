@@ -29,5 +29,8 @@
 		<file src="..\..\src\BundleTransformer.Closure\bin\Release\**\BundleTransformer.Closure.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
+		<file src="..\..\Licenses\closure-compiler-license.txt" />
+		<file src="..\..\Licenses\microsoft-net-http-license.txt" />
+		<file src="..\..\Licenses\newtonsoft-json-license.txt" />
 	</files>
 </package>

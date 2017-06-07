@@ -32,5 +32,8 @@ As a JS-engine is used the JavaScript Engine Switcher library (https://github.co
 		<file src="..\..\src\BundleTransformer.Csso\bin\Release\**\BundleTransformer.Csso.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
+		<file src="..\..\Licenses\csso-license.txt" />
+		<file src="..\..\Licenses\js-engine-switcher-license.txt" />
+		<file src="..\..\Licenses\newtonsoft-json-license.txt" />
 	</files>
 </package>

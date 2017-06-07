@@ -29,5 +29,7 @@
 		<file src="..\..\src\BundleTransformer.JsMin\bin\Release\**\BundleTransformer.JsMin.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
+		<file src="..\..\Licenses\jsmin-license.txt" />
+		<file src="..\..\Licenses\jsmin-net-license.txt" />
 	</files>
 </package>

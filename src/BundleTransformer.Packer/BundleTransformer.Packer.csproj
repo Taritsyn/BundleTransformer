@@ -63,6 +63,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\LICENSE.txt" />
     <Content Include="Resources\packer-combined.js" />
   </ItemGroup>
   <ItemGroup>

@@ -31,5 +31,6 @@ This extension will help your web applications successfully pass a most part of 
 		<file src="..\..\src\BundleTransformer.Core\bin\Release\**\BundleTransformer.Core.resources.dll" target="lib\net40" />
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
+		<file src="..\..\Licenses\microsoft-aspnet-web-optimization-license.txt" />
 	</files>
 </package>

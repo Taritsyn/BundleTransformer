@@ -37,5 +37,6 @@ For correct working of the LibSass Host requires `msvcp140.dll` assembly from th
 		<file src="content\web.config.transform" target="content" />
 		<file src="readme.txt" />
 		<file src="..\..\Licenses\libsass-license.txt" />
+		<file src="..\..\Licenses\libsass-host-license.txt" />
 	</files>
 </package>
