@@ -38,7 +38,7 @@
    ====================
    If in your system does not `msvcp140.dll` assembly, then download and install
    the Visual C++ Redistributable for Visual Studio 2015
-   (https://www.microsoft.com/en-us/download/details.aspx?id=48145).
+   (https://www.microsoft.com/en-us/download/details.aspx?id=52685).
 
    To use a debugging HTTP-handlers in the IIS Classic mode, you need add to the
    `/configuration/system.web/httpHandlers` element of the Web.config file a
