@@ -1,4 +1,52 @@
 /*!
+ * String.prototype.repeat polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat
+ */
+if (!String.prototype.hasOwnProperty('repeat')) {
+	String.prototype.repeat = function (count) {
+		var result,
+			value,
+			processedCount,
+			methodName = 'String.prototype.repeat'
+			;
+
+		processedCount = +count;
+		if (processedCount !== count) {
+			processedCount = 0;
+		}
+
+		if (processedCount < 0 || processedCount == Infinity) {
+			throw new RangeError(methodName + ': argument out of range.');
+		}
+
+		value = '' + this;
+		processedCount = Math.floor(processedCount);
+
+		if (value.length === 0 || processedCount === 0) {
+			return '';
+		}
+
+		if (value.length * processedCount >= 1 << 28) {
+			throw new RangeError(methodName + ': Repeat count must not overflow maximum string size.');
+		}
+
+		result = '';
+		for (; ;) {
+			if ((processedCount & 1) === 1) {
+				result += value;
+			}
+			processedCount >>>= 1;
+			if (processedCount === 0) {
+				break;
+			}
+			value += value;
+		}
+
+		return result;
+	};
+}
+
+/*!
  * Clean-css v4.1.3
  * https://github.com/jakubpawlowicz/clean-css
  *

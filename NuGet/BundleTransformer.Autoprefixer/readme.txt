@@ -19,7 +19,7 @@
    As a JS-engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of
    this module is recommended to install one of the following NuGet packages:
-   JavaScriptEngineSwitcher.Msie (only in the `ChakraEdgeJsRt` mode),
+   JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes),
    JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
 
    =============

@@ -1,4 +1,77 @@
 /*!
+ * Math.log2 polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log2
+ */
+if (!Math.hasOwnProperty('log2')) {
+	Math.log2 = function(x) {
+		var result = Math.log(x) * Math.LOG2E;
+
+		return result;
+	};
+}
+
+/*!
+ * Math.sign polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign
+ */
+if (!Math.hasOwnProperty('sign')) {
+	Math.sign = function(x) {
+		var result,
+			processedValue
+			;
+
+		processedValue = +x; // converts to a number
+
+		if (processedValue === 0 || isNaN(processedValue)) {
+			result = Number(processedValue);
+
+			return result;
+		}
+
+		result = processedValue > 0 ? 1 : -1;
+
+		return result;
+	};
+}
+
+/*!
+ * Object.assign polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+ */
+if (!Object.hasOwnProperty('assign')) {
+	Object.assign = function (target) {
+		var result,
+			argIndex,
+			argCount,
+			nextSource,
+			propName,
+			methodName = 'Object.assign'
+			;
+
+		if (typeof target === 'undefined' || target === null) {
+			throw new TypeError(methodName + ': argument is not an Object.');
+		}
+
+		result = Object(target);
+		argCount = arguments.length;
+
+		for (argIndex = 1; argIndex < argCount; argIndex++) {
+			nextSource = arguments[argIndex];
+
+			if (typeof nextSource !== 'undefined' && nextSource !== null) {
+				for (propName in nextSource) {
+					if (Object.prototype.hasOwnProperty.call(nextSource, propName)) {
+						result[propName] = nextSource[propName];
+					}
+				}
+			}
+		}
+
+		return result;
+	};
+}
+
+/*!
  * Autoprefixer v7.1.1
  * https://github.com/postcss/autoprefixer
  * https://github.com/ai/autoprefixer-rails
