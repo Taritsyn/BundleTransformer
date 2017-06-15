@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                  README file for Bundle Transformer: Hogan v1.9.138
+                  README file for Bundle Transformer: Hogan v1.9.160
 
    --------------------------------------------------------------------------------
 
@@ -19,12 +19,6 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
-
-   =============
-   RELEASE NOTES
-   =============
-   Now all calls of the `ExecuteResource` method takes the assembly as second
-   parameter.
 
    ====================
    POST-INSTALL ACTIONS

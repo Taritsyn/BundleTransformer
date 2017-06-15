@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                   README file for Bundle Transformer: CSSO v1.9.144
+                   README file for Bundle Transformer: CSSO v1.9.160
 
    --------------------------------------------------------------------------------
 
@@ -17,11 +17,6 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of CSSO version 2.3.1.
 
    ====================
    POST-INSTALL ACTIONS

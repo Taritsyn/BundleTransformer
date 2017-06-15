@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                   README file for Bundle Transformer: LESS v1.9.143
+                   README file for Bundle Transformer: LESS v1.9.160
 
    --------------------------------------------------------------------------------
 
@@ -21,11 +21,6 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of LESS version 2.7.2.
 
    ====================
    POST-INSTALL ACTIONS

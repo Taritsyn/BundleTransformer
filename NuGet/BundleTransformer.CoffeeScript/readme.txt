@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: CoffeeScript v1.9.158
+               README file for Bundle Transformer: CoffeeScript v1.9.160
 
    --------------------------------------------------------------------------------
 
@@ -19,11 +19,6 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of CoffeeScript version 1.12.6.
 
    ====================
    POST-INSTALL ACTIONS

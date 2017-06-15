@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: Clean-css v1.9.159
+                README file for Bundle Transformer: Clean-css v1.9.160
 
    --------------------------------------------------------------------------------
 
@@ -17,11 +17,6 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Clean-css version 4.1.3.
 
    ====================
    POST-INSTALL ACTIONS

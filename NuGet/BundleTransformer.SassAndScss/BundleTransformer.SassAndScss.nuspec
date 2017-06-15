@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.SassAndScss</id>
-		<version>1.9.154</version>
+		<version>1.9.160</version>
 		<title>Bundle Transformer: Sass and SCSS</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -24,7 +24,7 @@ For correct working of the LibSass Host requires `msvcp140.dll` assembly from th
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.152" />
+			<dependency id="BundleTransformer.Core" version="1.9.160" />
 			<dependency id="LibSassHost" version="1.0.4" />
 		</dependencies>
 		<references>

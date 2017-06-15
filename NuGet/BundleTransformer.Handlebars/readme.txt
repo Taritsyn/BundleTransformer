@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: Handlebars v1.9.159
+                README file for Bundle Transformer: Handlebars v1.9.160
 
    --------------------------------------------------------------------------------
 
@@ -19,11 +19,6 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
-
-   =============
-   RELEASE NOTES
-   =============
-   Added support of Handlebars version 4.0.10.
 
    ====================
    POST-INSTALL ACTIONS

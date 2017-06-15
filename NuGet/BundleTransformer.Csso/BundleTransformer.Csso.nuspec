@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.Csso</id>
-		<version>1.9.144</version>
+		<version>1.9.160</version>
 		<title>Bundle Transformer: CSSO</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -14,12 +14,11 @@
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
 		<summary>BundleTransformer.Csso contains one minifier-adapter for minification of CSS code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO version 2.3.1.</summary>
-		<releaseNotes>Added support of CSSO version 2.3.1.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.138" />
+			<dependency id="BundleTransformer.Core" version="1.9.160" />
 			<dependency id="JavaScriptEngineSwitcher.Core" version="2.0.0" />
 			<dependency id="Newtonsoft.Json" version="8.0.2" />
 		</dependencies>
