@@ -13,8 +13,8 @@ using BundleTransformer.SassAndScss.Translators;
 namespace BundleTransformer.SassAndScss.HttpHandlers
 {
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output
-	/// of translated Sass- or SCSS-asset
+	/// Debugging HTTP handler that responsible for text output
+	/// of translated Sass or SCSS asset
 	/// </summary>
 	public sealed class SassAndScssAssetHandler : StyleAssetHandlerBase
 	{
@@ -28,7 +28,7 @@ namespace BundleTransformer.SassAndScss.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging Sass and SCSS HTTP-handler
+		/// Constructs a instance of the debugging Sass and SCSS HTTP handler
 		/// </summary>
 		public SassAndScssAssetHandler()
 			: this(HttpContext.Current.Cache,
@@ -37,11 +37,11 @@ namespace BundleTransformer.SassAndScss.HttpHandlers
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of the debugging Sass and SCSS HTTP-handler
+		/// Constructs a instance of the debugging Sass and SCSS HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		public SassAndScssAssetHandler(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -50,7 +50,7 @@ namespace BundleTransformer.SassAndScss.HttpHandlers
 
 
 		/// <summary>
-		/// Translates a code of asset written on Sass or SCSS to CSS-code
+		/// Translates a code of asset written on Sass or SCSS to CSS code
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <param name="transformer">Transformer</param>

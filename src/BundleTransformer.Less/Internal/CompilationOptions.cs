@@ -51,7 +51,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable JavaScript in less files
+		/// Gets or sets a flag for whether to enable JS in less files
 		/// </summary>
 		public bool JavascriptEnabled
 		{

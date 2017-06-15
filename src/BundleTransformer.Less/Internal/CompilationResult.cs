@@ -5,7 +5,7 @@ namespace BundleTransformer.Less.Internal
 	internal sealed class CompilationResult
 	{
 		/// <summary>
-		/// Gets or sets a compilated LESS-code
+		/// Gets or sets a compilated LESS code
 		/// </summary>
 		public string CompiledContent
 		{

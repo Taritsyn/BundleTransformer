@@ -10,7 +10,7 @@ namespace BundleTransformer.Csso.Configuration
 	public sealed class CssoSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of Sergey Kryzhanovsky's CSS-minifier
+		/// Gets a configuration settings of Sergey Kryzhanovsky's CSS minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings CssMinifier
@@ -19,7 +19,7 @@ namespace BundleTransformer.Csso.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

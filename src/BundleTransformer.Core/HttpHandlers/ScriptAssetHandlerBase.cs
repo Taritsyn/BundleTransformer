@@ -10,7 +10,7 @@ using BundleTransformer.Core.Translators;
 namespace BundleTransformer.Core.HttpHandlers
 {
 	/// <summary>
-	/// Base class of the debugging HTTP-handler that responsible for text output
+	/// Base class of the debugging HTTP handler that responsible for text output
 	/// of processed script asset
 	/// </summary>
 	public abstract class ScriptAssetHandlerBase : AssetHandlerBase
@@ -25,11 +25,11 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging script HTTP-handler
+		/// Constructs a instance of the debugging script HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		protected ScriptAssetHandlerBase(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -38,10 +38,10 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Gets a JS-transformer from bundle
+		/// Gets a JS transformer from bundle
 		/// </summary>
 		/// <param name="bundle">Bundle</param>
-		/// <returns>JS-transformer</returns>
+		/// <returns>JS transformer</returns>
 		protected override ITransformer GetTransformer(Bundle bundle)
 		{
 			IBundleTransform transformer = null;

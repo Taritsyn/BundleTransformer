@@ -10,7 +10,7 @@ namespace BundleTransformer.CleanCss.Configuration
 	public sealed class CleanSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of Clean CSS-minifier
+		/// Gets a configuration settings of Clean CSS minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings Css
@@ -19,7 +19,7 @@ namespace BundleTransformer.CleanCss.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

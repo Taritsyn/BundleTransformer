@@ -15,7 +15,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.CoffeeScript.Internal
 {
 	/// <summary>
-	/// CoffeeScript-compiler
+	/// CoffeeScript compiler
 	/// </summary>
 	internal sealed class CoffeeScriptCompiler : IDisposable
 	{
@@ -25,12 +25,12 @@ namespace BundleTransformer.CoffeeScript.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.CoffeeScript.Resources";
 
 		/// <summary>
-		/// Name of file, which contains a CoffeeScript-library
+		/// Name of file, which contains a CoffeeScript library
 		/// </summary>
 		private const string COFFEESCRIPT_LIBRARY_FILE_NAME = "coffeescript-combined.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a CoffeeScript-compiler helper
+		/// Name of file, which contains a CoffeeScript compiler helper
 		/// </summary>
 		private const string CSC_HELPER_FILE_NAME = "cscHelper.min.js";
 
@@ -67,9 +67,9 @@ namespace BundleTransformer.CoffeeScript.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of CoffeeScript-compiler
+		/// Constructs a instance of CoffeeScript compiler
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Compilation options</param>
 		public CoffeeScriptCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions options)
 		{
@@ -93,11 +93,11 @@ namespace BundleTransformer.CoffeeScript.Internal
 		}
 
 		/// <summary>
-		/// "Compiles" CoffeeScript-code to JS-code
+		/// "Compiles" CoffeeScript code to JS code
 		/// </summary>
 		/// <param name="content">Text content written on CoffeeScript</param>
-		/// <param name="path">Path to CoffeeScript-file</param>
-		/// <returns>Translated CoffeeScript-code</returns>
+		/// <param name="path">Path to CoffeeScript file</param>
+		/// <returns>Translated CoffeeScript code</returns>
 		public string Compile(string content, string path)
 		{
 			Initialize();
@@ -132,7 +132,7 @@ namespace BundleTransformer.CoffeeScript.Internal
 		/// <summary>
 		/// Determines whether the file is "literate"
 		/// </summary>
-		/// <param name="path">Path to CoffeeScript-file</param>
+		/// <param name="path">Path to CoffeeScript file</param>
 		/// <returns>true if the file is "literate"; otherwise, false</returns>
 		private static bool IsLiterate(string path)
 		{
@@ -144,7 +144,7 @@ namespace BundleTransformer.CoffeeScript.Internal
 		/// <summary>
 		/// Converts a compilation options to JSON
 		/// </summary>
-		/// <param name="path">Path to CoffeeScript-file</param>
+		/// <param name="path">Path to CoffeeScript file</param>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Compilation options in JSON format</returns>
 		private static JObject ConvertCompilationOptionsToJson(string path, CompilationOptions options)
@@ -162,7 +162,7 @@ namespace BundleTransformer.CoffeeScript.Internal
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current CoffeeScript-file</param>
+		/// <param name="currentFilePath">Path to current CoffeeScript file</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(JToken errorDetails, string sourceCode,
 			string currentFilePath)

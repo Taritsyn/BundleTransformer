@@ -11,23 +11,23 @@
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.Closure contains 2 minifier-adapters for minification of
-   JS-code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`.
+   BundleTransformer.Closure contains two minifier-adapters for minification of JS
+   code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`.
 
    `ClosureRemoteJsMinifier` is based on the Google Closure Compiler Service API
-   (https://developers.google.com/closure/compiler/docs/gettingstarted_api)
-   and requires a permanent connection to the Internet.
+   (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and
+   requires a permanent connection to the Internet.
 
    `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application
    (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for
-   their work requires the latest version of compiler.jar file.
+   their work requires the latest version of `compiler.jar` file.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    To make `ClosureRemoteJsMinifier` or `ClosureLocalJsMinifier` is the default
-   JS-minifier, you need to make changes to the Web.config file. In the
-   `defaultMinifier` attribute of `\configuration\bundleTransformer\core\js` element
+   JS minifier, you need to make changes to the `Web.config` file. In the
+   `defaultMinifier` attribute of `/configuration/bundleTransformer/core/js` element
    must be set value equal to `ClosureRemoteJsMinifier` or `ClosureLocalJsMinifier`.
 
    To start using `ClosureLocalJsMinifier` need to make the following preliminary
@@ -40,11 +40,11 @@
       http://dl.google.com/closure-compiler/compiler-latest.zip.
    3. Unzip the downloaded archive and copy the compiler.jar file in some directory
       on disk of your computer.
-   4. In Web.config file find the `configuration/bundleTransformer/closure/local`
+   4. In `Web.config` file find the `/configuration/bundleTransformer/closure/local`
       element, then set the `javaVirtualMachinePath` attribute to a value equal to
-      the path to executable file of the Java Virtual Machine (java.exe), and set
+      the path to executable file of the Java Virtual Machine (`java.exe`), and set
       the `closureCompilerApplicationPath` attribute to a value equal to the path
-      to JAR-file of the Google Closure Compiler Application (compiler.jar).
+      to JAR file of the Google Closure Compiler Application (`compiler.jar`).
 
    =============
    DOCUMENTATION

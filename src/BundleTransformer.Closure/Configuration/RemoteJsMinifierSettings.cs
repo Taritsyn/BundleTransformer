@@ -3,7 +3,7 @@
 namespace BundleTransformer.Closure.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Closure Remote JS-minifier
+	/// Configuration settings of Closure Remote JS minifier
 	/// </summary>
 	public sealed class RemoteJsMinifierSettings : JsMinifierSettingsBase
 	{

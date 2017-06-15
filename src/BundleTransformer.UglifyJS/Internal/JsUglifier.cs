@@ -18,7 +18,7 @@ using UglifyStrings = BundleTransformer.UglifyJs.Resources.Strings;
 namespace BundleTransformer.UglifyJs.Internal
 {
 	/// <summary>
-	/// JS-uglifier
+	/// JS uglifier
 	/// </summary>
 	internal sealed class JsUglifier : IDisposable
 	{
@@ -33,7 +33,7 @@ namespace BundleTransformer.UglifyJs.Internal
 		private const string UGLIFY_JS_LIBRARY_FILE_NAME = "uglify-combined.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a UglifyJS-minifier helper
+		/// Name of file, which contains a UglifyJS minifier helper
 		/// </summary>
 		private const string UGLIFY_JS_HELPER_FILE_NAME = "uglifyJsHelper.min.js";
 
@@ -84,7 +84,7 @@ namespace BundleTransformer.UglifyJs.Internal
 		private static readonly Regex _floatValueRegex = new Regex(@"^(\+|\-)?[0-9]*\.[0-9]+(e(\+|\-)?[0-9]+)?$");
 
 		/// <summary>
-		/// List of inbuilt constants of JavaScript language
+		/// List of inbuilt constants of JS language
 		/// </summary>
 		private static readonly string[] _jsInbuiltConstants = { "false", "null", "true", "undefined" };
 
@@ -96,7 +96,7 @@ namespace BundleTransformer.UglifyJs.Internal
 				@"\[[\w \-+.:,;/?&=%~#$@()\[\]{}]*:(?<lineNumber>\d+),\s*(?<columnNumber>\d+)\]$");
 
 		/// <summary>
-		/// Flag that JS-uglifier is initialized
+		/// Flag that JS uglifier is initialized
 		/// </summary>
 		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
 
@@ -107,9 +107,9 @@ namespace BundleTransformer.UglifyJs.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of JS-uglifier
+		/// Constructs a instance of JS uglifier
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Uglification options</param>
 		public JsUglifier(Func<IJsEngine> createJsEngineInstance, UglificationOptions options)
 		{
@@ -120,7 +120,7 @@ namespace BundleTransformer.UglifyJs.Internal
 
 
 		/// <summary>
-		/// Initializes JS-uglifier
+		/// Initializes JS uglifier
 		/// </summary>
 		private void Initialize()
 		{
@@ -134,11 +134,11 @@ namespace BundleTransformer.UglifyJs.Internal
 		}
 
 		/// <summary>
-		/// "Uglifies" a JS-code by using UglifyJS
+		/// "Uglifies" a JS code by using UglifyJS
 		/// </summary>
-		/// <param name="content">Text content of JS-asset</param>
-		/// <param name="path">Path to JS-file</param>
-		/// <returns>Minified text content of JS-asset</returns>
+		/// <param name="content">Text content of JS asset</param>
+		/// <param name="path">Path to JS file</param>
+		/// <returns>Minified text content of JS asset</returns>
 		public string Uglify(string content, string path)
 		{
 			Initialize();
@@ -417,7 +417,7 @@ namespace BundleTransformer.UglifyJs.Internal
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="isError">Flag indicating that this issue is a error</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current JS-file</param>
+		/// <param name="currentFilePath">Path to current JS file</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(JToken errorDetails, bool isError, string sourceCode,
 			string currentFilePath)

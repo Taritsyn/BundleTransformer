@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Minifiers_ClosureCompilerApplicationNotFound" xml:space="preserve">
-    <value>The JAR-file of Google Closure Compiler Application not found at the specified path - {0}!</value>
+    <value>The JAR file of Google Closure Compiler Application not found at the specified path - {0}!</value>
   </data>
   <data name="Minifiers_ClosureCompilerApplicationPathNotSpecified" xml:space="preserve">
-    <value>You have not specified path to the JAR-file of Google Closure Compiler Application (compiler.jar).</value>
+    <value>You have not specified path to the JAR file of Google Closure Compiler Application (compiler.jar).</value>
   </data>
   <data name="Minifiers_ClosureCompilerServiceApiUrlNotSpecified" xml:space="preserve">
     <value>You have not specified URL of the Google Closure Compiler Service API.</value>
@@ -130,10 +130,10 @@
     <value>Cannot connect to '{0}'! Check the specified URL and Internet connectivity.</value>
   </data>
   <data name="Minifiers_ClosureRemoteMinificationInvalidHttpStatus" xml:space="preserve">
-    <value>When accessing to the Google Closure Compiler Service API occurred error with HTTP-status code '{0}'.</value>
+    <value>When accessing to the Google Closure Compiler Service API occurred error with HTTP status code '{0}'.</value>
   </data>
   <data name="Minifiers_JavaVirtualMachineNotFound" xml:space="preserve">
-    <value>The executable file of Java Virtual Machine not found at the specified path - {0}!</value>
+    <value>The executable file of Java Virtual Machine not found at the specified path - {0}.</value>
   </data>
   <data name="Minifiers_JavaVirtualMachinePathNotSpecified" xml:space="preserve">
     <value>You have not specified path to the executable file of Java Virtual Machine (java.exe).</value>

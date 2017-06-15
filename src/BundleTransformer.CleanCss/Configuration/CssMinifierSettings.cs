@@ -3,7 +3,7 @@
 namespace BundleTransformer.CleanCss.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Clean CSS-minifier
+	/// Configuration settings of Clean CSS minifier
 	/// </summary>
 	public sealed class CssMinifierSettings : ConfigurationElement
 	{

@@ -8,8 +8,8 @@ using BundleTransformer.Core.FileSystem;
 namespace BundleTransformer.Core.HttpHandlers
 {
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output
-	/// of translated JS-asset
+	/// Debugging HTTP handler that responsible for text output
+	/// of translated JS asset
 	/// </summary>
 	public sealed class JsAssetHandler : ScriptAssetHandlerBase
 	{
@@ -23,7 +23,7 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging JS HTTP-handler
+		/// Constructs a instance of the debugging JS HTTP handler
 		/// </summary>
 		public JsAssetHandler()
 			: this(HttpContext.Current.Cache,
@@ -32,11 +32,11 @@ namespace BundleTransformer.Core.HttpHandlers
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of the debugging JS HTTP-handler
+		/// Constructs a instance of the debugging JS HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		public JsAssetHandler(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -45,10 +45,10 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Removes a additional file extension from path of specified JS-asset
+		/// Removes a additional file extension from path of specified JS asset
 		/// </summary>
-		/// <param name="assetPath">Path of JS-asset</param>
-		/// <returns>Path of JS-asset without additional file extension</returns>
+		/// <param name="assetPath">Path of JS asset</param>
+		/// <returns>Path of JS asset without additional file extension</returns>
 		protected override string RemoveAdditionalFileExtension(string assetPath)
 		{
 			string processedAssetPath = Asset.RemoveAdditionalJsFileExtension(assetPath);

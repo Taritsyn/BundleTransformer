@@ -5,7 +5,7 @@ namespace BundleTransformer.TypeScript.Internal
 	internal sealed class CompilationResult
 	{
 		/// <summary>
-		/// Gets or sets a compilated TypeScript-code
+		/// Gets or sets a compilated TypeScript code
 		/// </summary>
 		public string CompiledContent
 		{

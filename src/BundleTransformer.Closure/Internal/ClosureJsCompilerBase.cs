@@ -8,7 +8,7 @@ namespace BundleTransformer.Closure.Internal
 	internal abstract class ClosureJsCompilerBase
 	{
 		/// <summary>
-		/// List of common JS-externs dependencies
+		/// List of common JS externs dependencies
 		/// </summary>
 		protected readonly DependencyCollection _commonExternsDependencies;
 
@@ -16,7 +16,7 @@ namespace BundleTransformer.Closure.Internal
 		/// <summary>
 		/// Constructs a instance of Closure Compiler
 		/// </summary>
-		/// <param name="commonExternsDependencies">List of common JS-externs dependencies</param>
+		/// <param name="commonExternsDependencies">List of common JS externs dependencies</param>
 		protected ClosureJsCompilerBase(DependencyCollection commonExternsDependencies)
 		{
 			_commonExternsDependencies = commonExternsDependencies;

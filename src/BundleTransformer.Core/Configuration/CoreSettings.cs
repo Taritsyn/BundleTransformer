@@ -18,7 +18,7 @@ namespace BundleTransformer.Core.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a list of JS-files with Microsoft-style extensions
+		/// Gets or sets a list of JS files with Microsoft-style extensions
 		/// </summary>
 		[ConfigurationProperty("jsFilesWithMicrosoftStyleExtensions", DefaultValue = "MicrosoftAjax.js,MicrosoftMvcAjax.js,MicrosoftMvcValidation.js,knockout-$version$.js")]
 		public string JsFilesWithMicrosoftStyleExtensions
@@ -46,7 +46,7 @@ namespace BundleTransformer.Core.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of the debugging HTTP-handler, that responsible
+		/// Gets a configuration settings of the debugging HTTP handler, that responsible
 		/// for text output of processed asset
 		/// </summary>
 		[ConfigurationProperty("assetHandler")]

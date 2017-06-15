@@ -5,7 +5,7 @@ using BundleTransformer.Core.Configuration;
 namespace BundleTransformer.Autoprefixer.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor
+	/// Configuration settings of Andrey Sitnik's Autoprefix CSS postprocessor
 	/// </summary>
 	public sealed class AutoprefixerSettings : ConfigurationSection
 	{
@@ -91,7 +91,7 @@ namespace BundleTransformer.Autoprefixer.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

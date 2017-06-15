@@ -11,16 +11,16 @@ namespace BundleTransformer.TypeScript.Configuration
 	public static class ConfigurationContextExtensions
 	{
 		/// <summary>
-		/// Configuration settings of TypeScript-translator
+		/// Configuration settings of TypeScript translator
 		/// </summary>
 		private static readonly Lazy<TypeScriptSettings> _tsConfig =
 			new Lazy<TypeScriptSettings>(() => (TypeScriptSettings)ConfigurationManager.GetSection("bundleTransformer/typeScript"));
 
 		/// <summary>
-		/// Gets a TypeScript-translator configuration settings
+		/// Gets a TypeScript translator configuration settings
 		/// </summary>
 		/// <param name="context">Configuration context</param>
-		/// <returns>Configuration settings of TypeScript-translator</returns>
+		/// <returns>Configuration settings of TypeScript translator</returns>
 		public static TypeScriptSettings GetTypeScriptSettings(this IConfigurationContext context)
 		{
 			return _tsConfig.Value;

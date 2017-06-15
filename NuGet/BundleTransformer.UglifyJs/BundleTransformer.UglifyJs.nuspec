@@ -10,14 +10,14 @@
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_UglifyJs_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (https://github.com/mishoo/UglifyJS2) version 2.7.5.
+		<description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (https://github.com/mishoo/UglifyJS2) version 2.7.5.
 
-As a JS-engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
-		<summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS-code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.7.5.</summary>
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
+		<summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.7.5.</summary>
 		<releaseNotes>Now all calls of the `ExecuteResource` method takes the assembly as second parameter.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
-		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify UglifyJS</tags>
+		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify UglifyJS</tags>
 		<dependencies>
 			<dependency id="BundleTransformer.Core" version="1.9.138" />
 			<dependency id="JavaScriptEngineSwitcher.Core" version="2.0.0" />

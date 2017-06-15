@@ -33,17 +33,17 @@ namespace BundleTransformer.Closure.Internal
 		private readonly string _tempDirectoryPath;
 
 		/// <summary>
-		/// Absolute path to directory that contains temporary common JS-externs files
+		/// Absolute path to directory that contains temporary common JS externs files
 		/// </summary>
 		private string _commonExternsTempDirectoryPath;
 
 		/// <summary>
-		/// Flag indicating what the common JS-externs temporary directory was created
+		/// Flag indicating what the common JS externs temporary directory was created
 		/// </summary>
 		private bool _commonExternsTempDirectoryCreated;
 
 		/// <summary>
-		/// List of absolute paths to temporary common JS-externs files
+		/// List of absolute paths to temporary common JS externs files
 		/// </summary>
 		private IList<string> _commonExternsTempFilePaths;
 
@@ -89,7 +89,7 @@ namespace BundleTransformer.Closure.Internal
 		/// <param name="javaVmPath">Path to Java Virtual Machine</param>
 		/// <param name="closureCompilerAppPath">Path to Google Closure Compiler Application</param>
 		/// <param name="tempDirectoryPath">Absolute path to directory that contains temporary files</param>
-		/// <param name="commonExternsDependencies">List of common JS-externs dependencies</param>
+		/// <param name="commonExternsDependencies">List of common JS externs dependencies</param>
 		/// <param name="options">Compilation options</param>
 		public ClosureLocalJsCompiler(string javaVmPath, string closureCompilerAppPath,
 			string tempDirectoryPath, DependencyCollection commonExternsDependencies,
@@ -108,12 +108,12 @@ namespace BundleTransformer.Closure.Internal
 
 
 		/// <summary>
-		/// "Compiles" a JS-code
+		/// "Compiles" a JS code
 		/// </summary>
-		/// <param name="content">Text content written on JavaScript</param>
-		/// <param name="path">Path to JS-file</param>
-		/// <param name="externsDependencies">List of JS-externs dependencies</param>
-		/// <returns>Compiled JS-code</returns>
+		/// <param name="content">Text content written on JS</param>
+		/// <param name="path">Path to JS file</param>
+		/// <param name="externsDependencies">List of JS externs dependencies</param>
+		/// <returns>Compiled JS code</returns>
 		public string Compile(string content, string path, DependencyCollection externsDependencies)
 		{
 			string newContent;
@@ -251,11 +251,11 @@ namespace BundleTransformer.Closure.Internal
 		}
 
 		/// <summary>
-		/// Writes a JS-externs to temporary directory
+		/// Writes a JS externs to temporary directory
 		/// </summary>
-		/// <param name="externsDependencies">List of JS-externs dependencies</param>
-		/// <param name="tempExternsDirectoryPath">Absolute path to directory that contains temporary JS-externs files</param>
-		/// <param name="tempExternsFilePaths">List of absolute paths to temporary JS-externs files</param>
+		/// <param name="externsDependencies">List of JS externs dependencies</param>
+		/// <param name="tempExternsDirectoryPath">Absolute path to directory that contains temporary JS externs files</param>
+		/// <param name="tempExternsFilePaths">List of absolute paths to temporary JS externs files</param>
 		private void WriteExternsToTempDirectory(DependencyCollection externsDependencies,
 			out string tempExternsDirectoryPath,
 			out IList<string> tempExternsFilePaths)
@@ -567,7 +567,7 @@ namespace BundleTransformer.Closure.Internal
 		/// Parses a error message
 		/// </summary>
 		/// <param name="errorDetails">String representation of error</param>
-		/// <param name="currentFilePath">Path to current JS-file</param>
+		/// <param name="currentFilePath">Path to current JS file</param>
 		/// <param name="errorList">List of errors</param>
 		/// <param name="warningList">List of warnings</param>
 		private void ParseErrorDetails(string errorDetails, string currentFilePath,
@@ -641,10 +641,10 @@ namespace BundleTransformer.Closure.Internal
 		}
 
 		/// <summary>
-		/// Converts a JS-externs temporary file path to URL
+		/// Converts a JS externs temporary file path to URL
 		/// </summary>
-		/// <param name="path">Path to JS-externs temporary file</param>
-		/// <returns>URL to JS-externs file</returns>
+		/// <param name="path">Path to JS externs temporary file</param>
+		/// <returns>URL to JS externs file</returns>
 		private string ConvertExternsTempFilePathToUrl(string path)
 		{
 			string url = path;

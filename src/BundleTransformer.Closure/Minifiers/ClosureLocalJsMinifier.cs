@@ -17,7 +17,7 @@ using BundleTransformer.Closure.Resources;
 namespace BundleTransformer.Closure.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code
+	/// Minifier, which produces minifiction of JS code
 	/// by using Google Closure Compiler Application
 	/// </summary>
 	public sealed class ClosureLocalJsMinifier : ClosureJsMinifierBase
@@ -25,7 +25,7 @@ namespace BundleTransformer.Closure.Minifiers
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "Closure Local JS-minifier";
+		const string MINIFIER_NAME = "Closure Local JS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -234,7 +234,7 @@ namespace BundleTransformer.Closure.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Closure Local JS-minifier
+		/// Constructs a instance of Closure Local JS minifier
 		/// </summary>
 		public ClosureLocalJsMinifier()
 			: this(BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
@@ -244,7 +244,7 @@ namespace BundleTransformer.Closure.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Closure Local JS-minifier
+		/// Constructs a instance of Closure Local JS minifier
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
@@ -304,10 +304,10 @@ namespace BundleTransformer.Closure.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of JS-asset by using Google Closure Compiler Application
+		/// Produces a code minifiction of JS asset by using Google Closure Compiler Application
 		/// </summary>
-		/// <param name="asset">JS-asset</param>
-		/// <returns>JS-asset with minified text content</returns>
+		/// <param name="asset">JS asset</param>
+		/// <returns>JS asset with minified text content</returns>
 		public override IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -333,10 +333,10 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of JS-assets by using Google Closure Compiler Application
+		/// Produces a code minifiction of JS assets by using Google Closure Compiler Application
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of JS-assets with minified text content</returns>
+		/// <param name="assets">Set of JS assets</param>
+		/// <returns>Set of JS assets with minified text content</returns>
 		public override IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

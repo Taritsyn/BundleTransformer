@@ -5,7 +5,7 @@ using BundleTransformer.Core.Configuration;
 namespace BundleTransformer.Hogan.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Hogan-translator
+	/// Configuration settings of Hogan translator
 	/// </summary>
 	public sealed class HoganSettings : ConfigurationSection
 	{
@@ -60,7 +60,7 @@ namespace BundleTransformer.Hogan.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

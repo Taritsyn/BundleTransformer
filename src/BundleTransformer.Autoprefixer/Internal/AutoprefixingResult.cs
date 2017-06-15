@@ -8,7 +8,7 @@ namespace BundleTransformer.Autoprefixer.Internal
 	internal sealed class AutoprefixingResult
 	{
 		/// <summary>
-		/// Gets or sets a processed CSS-code
+		/// Gets or sets a processed CSS code
 		/// </summary>
 		public string ProcessedContent
 		{

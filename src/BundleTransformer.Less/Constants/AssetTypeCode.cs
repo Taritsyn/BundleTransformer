@@ -6,7 +6,7 @@
 	public static class AssetTypeCode
 	{
 		/// <summary>
-		/// LESS-asset
+		/// LESS asset
 		/// </summary>
 		public static readonly string Less = "Less";
 	}

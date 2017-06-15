@@ -127,6 +127,6 @@
     <value>Значение "{0}" свойства UglifyJS `GlobalDefinitions` не соответствует формату `СИМВОЛ[=значение]`!</value>
   </data>
   <data name="GlobalDefsParsing_SymbolNameIsForbidden" xml:space="preserve">
-    <value>Запрещено задавать имя символа, которое совпадает с именем встроенной константы JavaScript: "{0}"!</value>
+    <value>Запрещено задавать имя символа, которое совпадает с именем встроенной константы JS: "{0}"!</value>
   </data>
 </root>

@@ -5,7 +5,7 @@ using BundleTransformer.Core.Configuration;
 namespace BundleTransformer.Less.Configuration
 {
 	/// <summary>
-	/// Configuration settings of LESS-translator
+	/// Configuration settings of LESS translator
 	/// </summary>
 	public sealed class LessSettings : ConfigurationSection
 	{
@@ -60,7 +60,7 @@ namespace BundleTransformer.Less.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable JavaScript in less files
+		/// Gets or sets a flag for whether to enable JS in less files
 		/// </summary>
 		[ConfigurationProperty("javascriptEnabled", DefaultValue = true)]
 		public bool JavascriptEnabled
@@ -105,7 +105,7 @@ namespace BundleTransformer.Less.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

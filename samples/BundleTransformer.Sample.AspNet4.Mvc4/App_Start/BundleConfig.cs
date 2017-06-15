@@ -18,7 +18,7 @@ namespace BundleTransformer.Sample.AspNet4.Mvc4
 			var nullBuilder = new NullBuilder();
 			var nullOrderer = new NullOrderer();
 
-			// Replace a default bundle resolver in order to the debugging HTTP-handler
+			// Replace a default bundle resolver in order to the debugging HTTP handler
 			// can use transformations of the corresponding bundle
 			BundleResolver.Current = new CustomBundleResolver();
 

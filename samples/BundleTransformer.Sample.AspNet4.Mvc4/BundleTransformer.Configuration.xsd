@@ -59,7 +59,7 @@
 			</xs:element>
 			<xs:element name="assetHandler" type="AssetHandlerSettings_SchemaType" minOccurs="0" maxOccurs="1">
 				<xs:annotation>
-					<xs:documentation>Configuration settings of the debugging HTTP-handler, that responsible for text output of processed asset</xs:documentation>
+					<xs:documentation>Configuration settings of the debugging HTTP handler, that responsible for text output of processed asset</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:all>
@@ -71,7 +71,7 @@
 		<xs:attribute name="jsFilesWithMicrosoftStyleExtensions" type="xs:string"
 			use="optional" default="MicrosoftAjax.js,MicrosoftMvcAjax.js,MicrosoftMvcValidation.js,knockout-$version$.js">
 			<xs:annotation>
-				<xs:documentation>List of JS-files with Microsoft-style extensions</xs:documentation>
+				<xs:documentation>List of JS files with Microsoft-style extensions</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -187,7 +187,7 @@
 			<xs:extension base="AddAssetProcessorRegistrationBase_SchemaType">
 				<xs:attribute name="useInDebugMode" type="Boolean_SchemaType" use="optional" default="false">
 					<xs:annotation>
-						<xs:documentation>Flag for whether to use postprocessor in the debugging HTTP-handlers</xs:documentation>
+						<xs:documentation>Flag for whether to use postprocessor in the debugging HTTP handlers</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 			</xs:extension>
@@ -258,7 +258,7 @@
 		</xs:attribute>
 		<xs:attribute name="type" type="xs:string" use="required">
 			<xs:annotation>
-				<xs:documentation>Processor .NET-type name</xs:documentation>
+				<xs:documentation>Processor .NET type name</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -309,11 +309,11 @@
 
 	<xs:complexType name="JsEngineSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of JavaScript engine</xs:documentation>
+			<xs:documentation>Configuration settings of JS engine</xs:documentation>
 		</xs:annotation>
 		<xs:attribute name="name" type="xs:string" use="optional" default="">
 			<xs:annotation>
-				<xs:documentation>JavaScript engine name</xs:documentation>
+				<xs:documentation>JS engine name</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -346,7 +346,7 @@
 	<!-- LESS settings -->
 	<xs:complexType name="LessSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of LESS-translator</xs:documentation>
+			<xs:documentation>Configuration settings of LESS translator</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -402,7 +402,7 @@
 		</xs:attribute>
 		<xs:attribute name="javascriptEnabled" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to enable JavaScript in less files</xs:documentation>
+				<xs:documentation>Flag for whether to enable JS in less files</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="globalVariables" type="xs:string" use="optional" default="">
@@ -436,7 +436,7 @@
 	<!-- Sass and SCSS settings -->
 	<xs:complexType name="SassAndScssSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Sass- and SCSS-translator</xs:documentation>
+			<xs:documentation>Configuration settings of Sass and SCSS translator</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="includePaths" type="IncludedPathRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -532,14 +532,14 @@
 	<!-- CoffeeScript settings -->
 	<xs:complexType name="CoffeeScriptSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of CoffeeScript-translator</xs:documentation>
+			<xs:documentation>Configuration settings of CoffeeScript translator</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
 		</xs:all>
 		<xs:attribute name="bare" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to allow compilation to JavaScript without the top-level function safety wrapper</xs:documentation>
+				<xs:documentation>Flag for whether to allow compilation to JS without the top-level function safety wrapper</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -548,7 +548,7 @@
 	<!-- TypeScript settings -->
 	<xs:complexType name="TypeScriptSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of TypeScript-translator</xs:documentation>
+			<xs:documentation>Configuration settings of TypeScript translator</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -713,7 +713,7 @@
 		</xs:attribute>
 		<xs:attribute name="transpileOnly" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to run TypeScript to JavaScript transpilation only (skip other passes)</xs:documentation>
+				<xs:documentation>Flag for whether to run TypeScript to JS transpilation only (skip other passes)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -751,7 +751,7 @@
 	<!-- Hogan settings -->
 	<xs:complexType name="HoganSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Hogan-translator</xs:documentation>
+			<xs:documentation>Configuration settings of Hogan translator</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="sectionTags" type="SectionTagRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -822,7 +822,7 @@
 	<!-- Handlebars settings -->
 	<xs:complexType name="HandlebarsSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Handlebars-translator</xs:documentation>
+			<xs:documentation>Configuration settings of Handlebars translator</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -858,7 +858,7 @@
 	<!-- Autoprefixer settings -->
 	<xs:complexType name="AutoprefixerSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor</xs:documentation>
+			<xs:documentation>Configuration settings of Andrey Sitnik's Autoprefix CSS postprocessor</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="browsers" type="BrowserConditionalExpressionCollection_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -944,7 +944,7 @@
 
 	<xs:complexType name="MicrosoftAjaxCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Microsoft Ajax CSS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Microsoft Ajax CSS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="MicrosoftAjaxMinifierSettingsBase_SchemaType">
@@ -1009,7 +1009,7 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 				</xs:attribute>
 				<xs:attribute name="minifyExpressions" type="Boolean_SchemaType" use="optional" default="true">
 					<xs:annotation>
-						<xs:documentation>Value indicating whether to minify the JavaScript within expression functions</xs:documentation>
+						<xs:documentation>Value indicating whether to minify the JS within expression functions</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 				<xs:attribute name="removeEmptyBlocks" type="Boolean_SchemaType" use="optional" default="true">
@@ -1023,7 +1023,7 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 
 	<xs:complexType name="MicrosoftAjaxJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Microsoft Ajax JS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Microsoft Ajax JS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="MicrosoftAjaxMinifierSettingsBase_SchemaType">
@@ -1324,7 +1324,7 @@ Not easily human-readable.</xs:documentation>
 
 	<xs:complexType name="YuiCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of YUI CSS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of YUI CSS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="YuiMinifierSettingsBase_SchemaType">
@@ -1339,7 +1339,7 @@ Not easily human-readable.</xs:documentation>
 
 	<xs:complexType name="YuiJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of YUI JS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of YUI JS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="YuiMinifierSettingsBase_SchemaType">
@@ -1416,7 +1416,7 @@ This affects the treatment of numbers etc - e.g. 9.00 could be output as 9,00 (t
 		<xs:attribute name="lineBreakPosition" type="xs:int" use="optional" default="-1">
 			<xs:annotation>
 				<xs:documentation>Column number, after which must be inserted a line break.
-Specify 0 to get a line break after each semi-colon in JavaScript, and after each rule in CSS.</xs:documentation>
+Specify 0 to get a line break after each semi-colon in JS, and after each rule in CSS.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 	</xs:complexType>
@@ -1434,7 +1434,7 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 
 	<xs:complexType name="ClosureJsSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of minification JS-assets</xs:documentation>
+			<xs:documentation>Configuration settings of minification JS assets</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="remote" type="ClosureRemoteJsMinifierSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -1467,7 +1467,7 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 
 	<xs:complexType name="ClosureRemoteJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Closure remote JS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Closure remote JS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="ClosureJsMinifierSettingsBase_SchemaType">
@@ -1492,7 +1492,7 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 
 	<xs:complexType name="ClosureLocalJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Closure local JS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Closure local JS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="ClosureJsMinifierSettingsBase_SchemaType">
@@ -1608,14 +1608,14 @@ Specify 0 to get a line break after each semi-colon in JavaScript, and after eac
 		</xs:attribute>
 		<xs:attribute name="compilationLevel" use="optional" default="Simple">
 			<xs:annotation>
-				<xs:documentation>Degree of compression and optimization to apply to your JavaScript.
+				<xs:documentation>Degree of compression and optimization to apply to your JS.
 There are 3 possible compilation levels:
-WhitespaceOnly - just removes whitespace and comments from your JavaScript;
+WhitespaceOnly - just removes whitespace and comments from your JS;
 Simple - performs compression and optimization that does not interfere with
-the interaction between the compiled JavaScript and other JavaScript.
+the interaction between the compiled JS and other JS.
 This level renames only local variables;
 Advanced - achieves the highest level of compression by renaming symbols in your
-JavaScript. When using this type of compilation you must perform extra steps
+JS. When using this type of compilation you must perform extra steps
 to preserve references to external symbols.</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
@@ -1655,7 +1655,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="CommonJsExternsFileRegistrationCollection_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Collection of registered common JS-externs files</xs:documentation>
+			<xs:documentation>Collection of registered common JS externs files</xs:documentation>
 		</xs:annotation>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="add" type="AddCommonJsExternsFileRegistration_SchemaType" />
@@ -1684,7 +1684,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="JsExternsFileMappingRegistrationCollection_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Collection of registered JS-externs file mappings</xs:documentation>
+			<xs:documentation>Collection of registered JS externs file mappings</xs:documentation>
 		</xs:annotation>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="add" type="AddJsExternsFileMappingRegistration_SchemaType" />
@@ -1730,7 +1730,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="UglifyJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Uglify JS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Uglify JS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="parsing" type="UglifyParsingSettings_SchemaType" minOccurs="0" maxOccurs="1" />
@@ -2080,7 +2080,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="PackerJsMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Dean Edwards' JS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Dean Edwards' JS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:attribute name="shrinkVariables" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
@@ -2108,7 +2108,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="CssoCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Sergey Kryzhanovsky's CSS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Sergey Kryzhanovsky's CSS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:attribute name="disableRestructuring" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
@@ -2154,7 +2154,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="WgCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of WebGrease Semantic CSS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of WebGrease Semantic CSS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:attribute name="shouldMinify" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
@@ -2182,7 +2182,7 @@ to preserve references to external symbols.</xs:documentation>
 
 	<xs:complexType name="CleanCssMinifierSettings_SchemaType">
 		<xs:annotation>
-			<xs:documentation>Configuration settings of Clean CSS-minifier</xs:documentation>
+			<xs:documentation>Configuration settings of Clean CSS minifier</xs:documentation>
 		</xs:annotation>
 		<xs:all>
 			<xs:element name="formatting" type="CleanFormattingSettings_SchemaType" minOccurs="0" maxOccurs="1" />

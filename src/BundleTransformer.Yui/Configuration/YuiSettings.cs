@@ -8,7 +8,7 @@ namespace BundleTransformer.Yui.Configuration
 	public sealed class YuiSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of YUI CSS-minifier
+		/// Gets a configuration settings of YUI CSS minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings CssMinifier
@@ -17,7 +17,7 @@ namespace BundleTransformer.Yui.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of YUI JS-minifier
+		/// Gets a configuration settings of YUI JS minifier
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public JsMinifierSettings JsMinifier

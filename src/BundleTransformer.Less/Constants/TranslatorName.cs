@@ -6,7 +6,7 @@
 	internal static class TranslatorName
 	{
 		/// <summary>
-		/// Name (key) of LESS-translator
+		/// Name (key) of LESS translator
 		/// </summary>
 		public const string LessTranslator = "LessTranslator";
 	}

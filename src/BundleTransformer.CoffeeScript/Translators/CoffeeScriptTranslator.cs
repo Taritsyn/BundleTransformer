@@ -16,7 +16,7 @@ using BundleTransformer.CoffeeScript.Internal;
 namespace BundleTransformer.CoffeeScript.Translators
 {
 	/// <summary>
-	/// Translator that responsible for translation of CoffeeScript-code to JS-code
+	/// Translator that responsible for translation of CoffeeScript code to JS code
 	/// </summary>
 	public sealed class CoffeeScriptTranslator : ITranslator
 	{
@@ -31,7 +31,7 @@ namespace BundleTransformer.CoffeeScript.Translators
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -45,7 +45,7 @@ namespace BundleTransformer.CoffeeScript.Translators
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to allow compilation to JavaScript
+		/// Gets or sets a flag for whether to allow compilation to JS
 		/// without the top-level function safety wrapper
 		/// </summary>
 		public bool Bare
@@ -56,17 +56,17 @@ namespace BundleTransformer.CoffeeScript.Translators
 
 
 		/// <summary>
-		/// Constructs a instance of CoffeeScript-translator
+		/// Constructs a instance of CoffeeScript translator
 		/// </summary>
 		public CoffeeScriptTranslator()
 			: this(null, BundleTransformerContext.Current.Configuration.GetCoffeeScriptSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of CoffeeScript-translator
+		/// Constructs a instance of CoffeeScript translator
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
-		/// <param name="coffeeConfig">Configuration settings of CoffeeScript-translator</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
+		/// <param name="coffeeConfig">Configuration settings of CoffeeScript translator</param>
 		public CoffeeScriptTranslator(Func<IJsEngine> createJsEngineInstance,
 			CoffeeScriptSettings coffeeConfig)
 		{
@@ -95,7 +95,7 @@ namespace BundleTransformer.CoffeeScript.Translators
 
 
 		/// <summary>
-		/// Translates a code of asset written on CoffeeScript to JS-code
+		/// Translates a code of asset written on CoffeeScript to JS code
 		/// </summary>
 		/// <param name="asset">Asset with code written on CoffeeScript</param>
 		/// <returns>Asset with translated code</returns>
@@ -117,7 +117,7 @@ namespace BundleTransformer.CoffeeScript.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of assets written on CoffeeScript to JS-code
+		/// Translates a code of assets written on CoffeeScript to JS code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on CoffeeScript</param>
 		/// <returns>Set of assets with translated code</returns>

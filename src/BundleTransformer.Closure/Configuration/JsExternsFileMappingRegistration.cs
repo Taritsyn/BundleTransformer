@@ -3,7 +3,7 @@
 namespace BundleTransformer.Closure.Configuration
 {
 	/// <summary>
-	/// JS-externs file mapping registration
+	/// JS externs file mapping registration
 	/// </summary>
 	public sealed class JsExternsFileMappingRegistration : ConfigurationElement
 	{

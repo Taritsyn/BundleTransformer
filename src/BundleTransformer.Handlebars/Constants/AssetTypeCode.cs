@@ -6,7 +6,7 @@
 	public static class AssetTypeCode
 	{
 		/// <summary>
-		/// Handlebars-asset
+		/// Handlebars asset
 		/// </summary>
 		public static readonly string Handlebars = "Handlebars";
 	}

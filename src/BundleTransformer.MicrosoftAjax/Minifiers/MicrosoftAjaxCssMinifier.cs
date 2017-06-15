@@ -23,7 +23,7 @@ using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
 namespace BundleTransformer.MicrosoftAjax.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code
+	/// Minifier, which produces minifiction of CSS code
 	/// by using Microsoft Ajax Minifier
 	/// </summary>
 	public sealed class MicrosoftAjaxCssMinifier : MicrosoftAjaxMinifierBase
@@ -31,7 +31,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "Microsoft Ajax CSS-minifier";
+		const string MINIFIER_NAME = "Microsoft Ajax CSS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -39,7 +39,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Configuration settings of CSS-parser
+		/// Configuration settings of CSS parser
 		/// </summary>
 		private readonly CssSettings _cssParserConfiguration;
 
@@ -222,7 +222,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to minify the
-		/// JavaScript within expression functions
+		/// JS within expression functions
 		/// </summary>
 		public bool MinifyExpressions
 		{
@@ -248,14 +248,14 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Microsoft Ajax CSS-minifier
+		/// Constructs a instance of Microsoft Ajax CSS minifier
 		/// </summary>
 		public MicrosoftAjaxCssMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetMicrosoftAjaxSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Microsoft Ajax CSS-minifier
+		/// Constructs a instance of Microsoft Ajax CSS minifier
 		/// </summary>
 		/// <param name="microsoftAjaxConfig">Configuration settings of Microsoft Ajax Minifier</param>
 		public MicrosoftAjaxCssMinifier(MicrosoftAjaxSettings microsoftAjaxConfig)
@@ -272,10 +272,10 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-asset by using Microsoft Ajax Minifier
+		/// Produces a code minifiction of CSS asset by using Microsoft Ajax Minifier
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>CSS-asset with minified text content</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>CSS asset with minified text content</returns>
 		public override IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -299,10 +299,10 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-assets by using Microsoft Ajax Minifier
+		/// Produces a code minifiction of CSS assets by using Microsoft Ajax Minifier
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of CSS-assets with minified text content</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of CSS assets with minified text content</returns>
 		public override IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)
@@ -369,7 +369,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 		}
 
 		/// <summary>
-		/// CSS-parser error handler
+		/// CSS parser error handler
 		/// </summary>
 		/// <param name="source">The source of the event</param>
 		/// <param name="args">A Microsoft.Ajax.Utilities.ContextErrorEventArgs

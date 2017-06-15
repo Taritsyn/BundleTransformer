@@ -1,7 +1,7 @@
 ﻿namespace BundleTransformer.Closure.Internal
 {
 	/// <summary>
-	/// Local JavaScript compilation options
+	/// Local JS compilation options
 	/// </summary>
 	internal sealed class LocalJsCompilationOptions : JsCompilationOptionsBase
 	{
@@ -184,7 +184,7 @@
 
 
 		/// <summary>
-		/// Constructs a instance of the local JavaScript compilation options
+		/// Constructs a instance of the local JS compilation options
 		/// </summary>
 		public LocalJsCompilationOptions()
 		{

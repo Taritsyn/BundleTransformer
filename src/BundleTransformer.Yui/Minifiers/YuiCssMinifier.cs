@@ -17,7 +17,7 @@ using BtCompressionType = BundleTransformer.Yui.CompressionType;
 namespace BundleTransformer.Yui.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code
+	/// Minifier, which produces minifiction of CSS code
 	/// by using YUI Compressor for .NET
 	/// </summary>
 	public sealed class YuiCssMinifier : YuiMinifierBase
@@ -25,7 +25,7 @@ namespace BundleTransformer.Yui.Minifiers
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "YUI CSS-minifier";
+		const string MINIFIER_NAME = "YUI CSS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -33,7 +33,7 @@ namespace BundleTransformer.Yui.Minifiers
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// CSS-compressor
+		/// CSS compressor
 		/// </summary>
 		private readonly CssCompressor _cssCompressor;
 
@@ -79,14 +79,14 @@ namespace BundleTransformer.Yui.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of YUI CSS-minifier
+		/// Constructs a instance of YUI CSS minifier
 		/// </summary>
 		public YuiCssMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetYuiSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of YUI CSS-minifier
+		/// Constructs a instance of YUI CSS minifier
 		/// </summary>
 		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
 		public YuiCssMinifier(YuiSettings yuiConfig)
@@ -101,10 +101,10 @@ namespace BundleTransformer.Yui.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-asset by using YUI Compressor for .NET
+		/// Produces a code minifiction of CSS asset by using YUI Compressor for .NET
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>CSS-asset with minified text content</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>CSS asset with minified text content</returns>
 		public override IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -126,10 +126,10 @@ namespace BundleTransformer.Yui.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-assets by using YUI Compressor for .NET
+		/// Produces a code minifiction of CSS assets by using YUI Compressor for .NET
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of CSS-assets with minified text content</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of CSS assets with minified text content</returns>
 		public override IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

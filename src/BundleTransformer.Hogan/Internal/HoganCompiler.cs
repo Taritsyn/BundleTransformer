@@ -15,7 +15,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.Hogan.Internal
 {
 	/// <summary>
-	/// Hogan-compiler
+	/// Hogan compiler
 	/// </summary>
 	internal sealed class HoganCompiler : IDisposable
 	{
@@ -25,12 +25,12 @@ namespace BundleTransformer.Hogan.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.Hogan.Resources";
 
 		/// <summary>
-		/// Name of file, which contains a Hogan-library
+		/// Name of file, which contains a Hogan library
 		/// </summary>
 		private const string HOGAN_LIBRARY_FILE_NAME = "hogan.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a Hogan-compiler helper
+		/// Name of file, which contains a Hogan compiler helper
 		/// </summary>
 		private const string HOGAN_HELPER_FILE_NAME = "hoganHelper.min.js";
 
@@ -66,9 +66,9 @@ namespace BundleTransformer.Hogan.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of Hogan-compiler
+		/// Constructs a instance of Hogan compiler
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Compilation options</param>
 		public HoganCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions options)
 		{
@@ -93,11 +93,11 @@ namespace BundleTransformer.Hogan.Internal
 		}
 
 		/// <summary>
-		/// "Compiles" Mustache-template to JS-code
+		/// "Compiles" Mustache template to JS code
 		/// </summary>
-		/// <param name="content">Text content of Mustache-template</param>
-		/// <param name="path">Path to Mustache-file</param>
-		/// <returns>Translated Mustache-template</returns>
+		/// <param name="content">Text content of Mustache template</param>
+		/// <param name="path">Path to Mustache file</param>
+		/// <returns>Translated Mustache template</returns>
 		public string Compile(string content, string path)
 		{
 			Initialize();
@@ -217,7 +217,7 @@ namespace BundleTransformer.Hogan.Internal
 		/// Generates a detailed error message
 		/// </summary>
 		/// <param name="message">Error message</param>
-		/// <param name="currentFilePath">Path to current Mustache-file</param>
+		/// <param name="currentFilePath">Path to current Mustache file</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(string message, string currentFilePath)
 		{

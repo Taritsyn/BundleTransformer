@@ -13,8 +13,8 @@ using BundleTransformer.Handlebars.Translators;
 namespace BundleTransformer.Handlebars.HttpHandlers
 {
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output
-	/// of translated Handlebars-asset
+	/// Debugging HTTP handler that responsible for text output
+	/// of translated Handlebars asset
 	/// </summary>
 	public sealed class HandlebarsAssetHandler : ScriptAssetHandlerBase
 	{
@@ -28,7 +28,7 @@ namespace BundleTransformer.Handlebars.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging Handlebars HTTP-handler
+		/// Constructs a instance of the debugging Handlebars HTTP handler
 		/// </summary>
 		public HandlebarsAssetHandler()
 			: this(HttpContext.Current.Cache,
@@ -37,11 +37,11 @@ namespace BundleTransformer.Handlebars.HttpHandlers
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of the debugging Handlebars HTTP-handler
+		/// Constructs a instance of the debugging Handlebars HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		public HandlebarsAssetHandler(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -50,7 +50,7 @@ namespace BundleTransformer.Handlebars.HttpHandlers
 
 
 		/// <summary>
-		/// Translates a code of asset written on Handlebars to JS-code
+		/// Translates a code of asset written on Handlebars to JS code
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <param name="transformer">Transformer</param>

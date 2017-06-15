@@ -3,12 +3,12 @@
 namespace BundleTransformer.Core.Configuration
 {
 	/// <summary>
-	/// Configuration settings of JavaScript engine
+	/// Configuration settings of JS engine
 	/// </summary>
 	public sealed class JsEngineSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets a JavaScript engine name
+		/// Gets or sets a JS engine name
 		/// </summary>
 		[ConfigurationProperty("name", DefaultValue = "")]
 		public string Name

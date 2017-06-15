@@ -14,7 +14,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.CleanCss.Internal
 {
 	/// <summary>
-	/// CSS-cleaner
+	/// CSS cleaner
 	/// </summary>
 	internal sealed class CssCleaner : IDisposable
 	{
@@ -29,7 +29,7 @@ namespace BundleTransformer.CleanCss.Internal
 		private const string CLEAN_CSS_LIBRARY_FILE_NAME = "clean-css-combined.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a Clean-css-minifier helper
+		/// Name of file, which contains a Clean-css minifier helper
 		/// </summary>
 		private const string CLEAN_CSS_HELPER_FILE_NAME = "cleanCssHelper.min.js";
 
@@ -54,7 +54,7 @@ namespace BundleTransformer.CleanCss.Internal
 		private readonly string _optionsString;
 
 		/// <summary>
-		/// Flag that CSS-cleaner is initialized
+		/// Flag that CSS cleaner is initialized
 		/// </summary>
 		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
 
@@ -65,9 +65,9 @@ namespace BundleTransformer.CleanCss.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of CSS-cleaner
+		/// Constructs a instance of CSS cleaner
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Cleaning options</param>
 		public CssCleaner(Func<IJsEngine> createJsEngineInstance, CleaningOptions options)
 		{
@@ -78,7 +78,7 @@ namespace BundleTransformer.CleanCss.Internal
 
 
 		/// <summary>
-		/// Initializes CSS-cleaner
+		/// Initializes CSS cleaner
 		/// </summary>
 		private void Initialize()
 		{
@@ -92,11 +92,11 @@ namespace BundleTransformer.CleanCss.Internal
 		}
 
 		/// <summary>
-		/// "Cleans" CSS-code by using Clean-css
+		/// "Cleans" CSS code by using Clean-css
 		/// </summary>
-		/// <param name="content">Text content of CSS-asset</param>
-		/// <param name="path">Path to CSS-file</param>
-		/// <returns>Minified text content of CSS-asset</returns>
+		/// <param name="content">Text content of CSS asset</param>
+		/// <param name="path">Path to CSS file</param>
+		/// <returns>Minified text content of CSS asset</returns>
 		public string Clean(string content, string path)
 		{
 			Initialize();
@@ -350,7 +350,7 @@ namespace BundleTransformer.CleanCss.Internal
 		/// </summary>
 		/// <param name="message">Message</param>
 		/// <param name="isError">Flag indicating that this issue is a error</param>
-		/// <param name="currentFilePath">Path to current CSS-file</param>
+		/// <param name="currentFilePath">Path to current CSS file</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(string message, bool isError, string currentFilePath)
 		{

@@ -6,7 +6,7 @@
 	internal static class TranslatorName
 	{
 		/// <summary>
-		/// Name (key) of Handlebars-translator
+		/// Name (key) of Handlebars translator
 		/// </summary>
 		public const string HandlebarsTranslator = "HandlebarsTranslator";
 	}

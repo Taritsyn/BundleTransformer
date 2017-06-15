@@ -13,8 +13,8 @@ using BundleTransformer.Less.Translators;
 namespace BundleTransformer.Less.HttpHandlers
 {
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output
-	/// of translated LESS-asset
+	/// Debugging HTTP handler that responsible for text output
+	/// of translated LESS asset
 	/// </summary>
 	public sealed class LessAssetHandler : StyleAssetHandlerBase
 	{
@@ -28,7 +28,7 @@ namespace BundleTransformer.Less.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging LESS HTTP-handler
+		/// Constructs a instance of the debugging LESS HTTP handler
 		/// </summary>
 		public LessAssetHandler()
 			: this(HttpContext.Current.Cache,
@@ -37,11 +37,11 @@ namespace BundleTransformer.Less.HttpHandlers
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of the debugging LESS HTTP-handler
+		/// Constructs a instance of the debugging LESS HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handle</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handle</param>
 		public LessAssetHandler(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -50,7 +50,7 @@ namespace BundleTransformer.Less.HttpHandlers
 
 
 		/// <summary>
-		/// Translates a code of asset written on LESS to CSS-code
+		/// Translates a code of asset written on LESS to CSS code
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <param name="transformer">Transformer</param>

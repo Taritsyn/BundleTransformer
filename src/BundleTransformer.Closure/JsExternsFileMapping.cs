@@ -3,7 +3,7 @@
 namespace BundleTransformer.Closure
 {
 	/// <summary>
-	/// JS-externs file mapping
+	/// JS externs file mapping
 	/// </summary>
 	public sealed class JsExternsFileMapping
 	{
@@ -27,7 +27,7 @@ namespace BundleTransformer.Closure
 
 
 		/// <summary>
-		/// Constructs a instance of JS-externs file mapping
+		/// Constructs a instance of JS externs file mapping
 		/// </summary>
 		/// <param name="scriptFilePath">Path to script file</param>
 		/// <param name="externsFilePaths">List of the externs file paths</param>

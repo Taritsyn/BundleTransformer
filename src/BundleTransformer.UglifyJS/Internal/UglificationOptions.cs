@@ -1,7 +1,7 @@
 ﻿namespace BundleTransformer.UglifyJs.Internal
 {
 	/// <summary>
-	/// JavaScript uglification options
+	/// JS uglification options
 	/// </summary>
 	internal sealed class UglificationOptions
 	{
@@ -74,7 +74,7 @@
 
 
 		/// <summary>
-		/// Constructs a instance of the JavaScript uglification options
+		/// Constructs a instance of the JS uglification options
 		/// </summary>
 		public UglificationOptions()
 		{

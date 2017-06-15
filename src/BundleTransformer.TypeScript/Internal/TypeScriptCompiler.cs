@@ -16,17 +16,17 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.TypeScript.Internal
 {
 	/// <summary>
-	/// TypeScript-compiler
+	/// TypeScript compiler
 	/// </summary>
 	internal sealed class TypeScriptCompiler : IDisposable
 	{
 		/// <summary>
-		/// Name of file, which contains a TypeScript-library
+		/// Name of file, which contains a TypeScript library
 		/// </summary>
 		private const string TYPESCRIPT_LIBRARY_FILE_NAME = "typescript-combined.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a TypeScript-compiler helper
+		/// Name of file, which contains a TypeScript compiler helper
 		/// </summary>
 		private const string TSC_HELPER_FILE_NAME = "tscHelper.min.js";
 
@@ -67,9 +67,9 @@ namespace BundleTransformer.TypeScript.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of TypeScript-compiler
+		/// Constructs a instance of TypeScript compiler
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="virtualFileManager">Virtual file manager</param>
 		/// <param name="options">Compilation options</param>
 		public TypeScriptCompiler(Func<IJsEngine> createJsEngineInstance,
@@ -99,9 +99,9 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
-		/// "Compiles" a TypeScript-code to JS-code
+		/// "Compiles" a TypeScript code to JS code
 		/// </summary>
-		/// <param name="path">Path to TypeScript-file</param>
+		/// <param name="path">Path to TypeScript file</param>
 		/// <returns>Compilation result</returns>
 		public CompilationResult Compile(string path)
 		{
@@ -187,7 +187,7 @@ namespace BundleTransformer.TypeScript.Internal
 		/// Generates a detailed error message
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
-		/// <param name="currentFilePath">Path to current TypeScript-file</param>
+		/// <param name="currentFilePath">Path to current TypeScript file</param>
 		/// <returns>Detailed error message</returns>
 		private string FormatErrorDetails(JToken errorDetails, string currentFilePath)
 		{

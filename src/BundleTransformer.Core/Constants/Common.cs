@@ -16,7 +16,7 @@
 		public static readonly string ProcessedAssetContentCacheItemKeyPattern = "BT:ProcessedAssetContent_{0}";
 
 		/// <summary>
-		/// Name of QueryString-parameter that contains the virtual path of the bundle
+		/// Name of QueryString parameter that contains the virtual path of the bundle
 		/// </summary>
 		public static readonly string BundleVirtualPathQueryStringParameterName = "bundleVirtualPath";
 	}

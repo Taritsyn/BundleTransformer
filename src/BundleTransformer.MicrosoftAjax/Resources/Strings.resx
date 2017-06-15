@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Minifiers_InvalidJsonOutput" xml:space="preserve">
-    <value>Invalid JSON JavaScript nodes encountered during output.</value>
+    <value>Invalid JSON JS nodes encountered during output.</value>
   </data>
 </root>

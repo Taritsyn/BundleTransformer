@@ -13,8 +13,8 @@ using BundleTransformer.Hogan.Translators;
 namespace BundleTransformer.Hogan.HttpHandlers
 {
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output
-	/// of translated Mustache-asset
+	/// Debugging HTTP handler that responsible for text output
+	/// of translated Mustache asset
 	/// </summary>
 	public sealed class HoganAssetHandler : ScriptAssetHandlerBase
 	{
@@ -28,7 +28,7 @@ namespace BundleTransformer.Hogan.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging Hogan HTTP-handler
+		/// Constructs a instance of the debugging Hogan HTTP handler
 		/// </summary>
 		public HoganAssetHandler()
 			: this(HttpContext.Current.Cache,
@@ -37,11 +37,11 @@ namespace BundleTransformer.Hogan.HttpHandlers
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of the debugging Hogan HTTP-handler
+		/// Constructs a instance of the debugging Hogan HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		public HoganAssetHandler(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -50,7 +50,7 @@ namespace BundleTransformer.Hogan.HttpHandlers
 
 
 		/// <summary>
-		/// Translates a code of asset written on Mustache to JS-code
+		/// Translates a code of asset written on Mustache to JS code
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <param name="transformer">Transformer</param>

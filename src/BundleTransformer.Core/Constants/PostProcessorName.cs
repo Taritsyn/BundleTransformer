@@ -11,7 +11,7 @@
 		public const string NullPostProcessor = "NullPostProcessor";
 
 		/// <summary>
-		/// Name (key) of URL rewriting CSS-postprocessor
+		/// Name (key) of URL rewriting CSS postprocessor
 		/// </summary>
 		public const string UrlRewritingCssPostProcessor = "UrlRewritingCssPostProcessor";
 	}

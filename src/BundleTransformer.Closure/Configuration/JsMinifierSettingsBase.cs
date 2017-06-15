@@ -3,7 +3,7 @@
 namespace BundleTransformer.Closure.Configuration
 {
 	/// <summary>
-	/// Configuration settings of JS-minifier
+	/// Configuration settings of JS minifier
 	/// </summary>
 	public abstract class JsMinifierSettingsBase : ConfigurationElement
 	{
@@ -19,14 +19,14 @@ namespace BundleTransformer.Closure.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a degree of compression and optimization to apply to your JavaScript.
+		/// Gets or sets a degree of compression and optimization to apply to your JS.
 		/// There are 3 possible compilation levels:
-		/// WhitespaceOnly - just removes whitespace and comments from your JavaScript;
+		/// WhitespaceOnly - just removes whitespace and comments from your JS;
 		/// Simple - performs compression and optimization that does not interfere with
-		/// the interaction between the compiled JavaScript and other JavaScript.
+		/// the interaction between the compiled JS and other JS.
 		/// This level renames only local variables;
 		/// Advanced - achieves the highest level of compression by renaming symbols in your
-		/// JavaScript. When using this type of compilation you must perform extra steps
+		/// JS. When using this type of compilation you must perform extra steps
 		/// to preserve references to external symbols.
 		/// </summary>
 		[ConfigurationProperty("compilationLevel", DefaultValue = CompilationLevel.Simple)]

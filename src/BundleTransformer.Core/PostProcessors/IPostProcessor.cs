@@ -10,7 +10,7 @@ namespace BundleTransformer.Core.PostProcessors
 	public interface IPostProcessor
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to use postprocessor in the debugging HTTP-handlers
+		/// Gets or sets a flag for whether to use postprocessor in the debugging HTTP handlers
 		/// </summary>
 		bool UseInDebugMode
 		{

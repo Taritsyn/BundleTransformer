@@ -3,7 +3,7 @@
 namespace BundleTransformer.Yui.Configuration
 {
 	/// <summary>
-	/// Configuration settings of YUI CSS-minifier
+	/// Configuration settings of YUI CSS minifier
 	/// </summary>
 	public sealed class CssMinifierSettings : MinifierSettingsBase
 	{

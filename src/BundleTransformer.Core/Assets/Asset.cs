@@ -13,21 +13,21 @@ namespace BundleTransformer.Core.Assets
 	{
 		/// <summary>
 		/// Regular expression to determine whether asset is
-		/// minified version of CSS-file with *.min.css extension
+		/// minified version of CSS file with *.min.css extension
 		/// </summary>
 		private static readonly Regex _cssFileWithMinExtensionRegex = new Regex(@"\.min\.css$",
 			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether asset is
-		/// debug version of JS-file with *.debug.js extension
+		/// debug version of JS file with *.debug.js extension
 		/// </summary>
 		private static readonly Regex _jsFileWithDebugExtensionRegex = new Regex(@"\.debug\.js$",
 			RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Regular expression to determine whether asset is
-		/// minified version of JS-file with *.min.js extension
+		/// minified version of JS file with *.min.js extension
 		/// </summary>
 		private static readonly Regex _jsFileWithMinExtensionRegex = new Regex(@"\.min\.js$",
 			RegexOptions.IgnoreCase);
@@ -318,10 +318,10 @@ namespace BundleTransformer.Core.Assets
 		}
 
 		/// <summary>
-		/// Checks a whether an asset is minified version of CSS-file
+		/// Checks a whether an asset is minified version of CSS file
 		/// with *.min.css extension
 		/// </summary>
-		/// <param name="assetVirtualPath">CSS-asset virtual file path</param>
+		/// <param name="assetVirtualPath">CSS asset virtual file path</param>
 		/// <returns>Checking result (true - with *.min.css extension;
 		/// false - without *.min.css extension)</returns>
 		public static bool IsCssFileWithMinExtension(string assetVirtualPath)
@@ -330,10 +330,10 @@ namespace BundleTransformer.Core.Assets
 		}
 
 		/// <summary>
-		/// Checks a whether an asset is debug version of JS-file
+		/// Checks a whether an asset is debug version of JS file
 		/// with *.debug.js extension
 		/// </summary>
-		/// <param name="assetVirtualPath">JS-asset virtual file path</param>
+		/// <param name="assetVirtualPath">JS asset virtual file path</param>
 		/// <returns>Checking result (true - with *.debug.js extension;
 		/// false - without *.debug.js extension)</returns>
 		public static bool IsJsFileWithDebugExtension(string assetVirtualPath)
@@ -342,9 +342,9 @@ namespace BundleTransformer.Core.Assets
 		}
 
 		/// <summary>
-		/// Checks a whether an asset is minified version of JS-file with *.min.js extension
+		/// Checks a whether an asset is minified version of JS file with *.min.js extension
 		/// </summary>
-		/// <param name="assetVirtualPath">JS-asset virtual file path</param>
+		/// <param name="assetVirtualPath">JS asset virtual file path</param>
 		/// <returns>Checking result (true - with *.min.js extension;
 		/// false - without *.min.js extension)</returns>
 		public static bool IsJsFileWithMinExtension(string assetVirtualPath)
@@ -353,10 +353,10 @@ namespace BundleTransformer.Core.Assets
 		}
 
 		/// <summary>
-		/// Removes a additional file extension from path of the specified CSS-file
+		/// Removes a additional file extension from path of the specified CSS file
 		/// </summary>
-		/// <param name="assetVirtualPath">CSS-asset virtual file path</param>
-		/// <returns>CSS-asset virtual file path without additional file extension</returns>
+		/// <param name="assetVirtualPath">CSS asset virtual file path</param>
+		/// <returns>CSS asset virtual file path without additional file extension</returns>
 		public static string RemoveAdditionalCssFileExtension(string assetVirtualPath)
 		{
 			string newAssetVirtualPath = _cssFileWithMinExtensionRegex.Replace(assetVirtualPath,
@@ -366,10 +366,10 @@ namespace BundleTransformer.Core.Assets
 		}
 
 		/// <summary>
-		/// Removes a additional file extension from path of the specified JS-file
+		/// Removes a additional file extension from path of the specified JS file
 		/// </summary>
-		/// <param name="assetVirtualPath">JS-asset virtual file path</param>
-		/// <returns>JS-asset virtual file path without additional file extension</returns>
+		/// <param name="assetVirtualPath">JS asset virtual file path</param>
+		/// <returns>JS asset virtual file path without additional file extension</returns>
 		public static string RemoveAdditionalJsFileExtension(string assetVirtualPath)
 		{
 			string newAssetVirtualPath = _jsFileWithDebugExtensionRegex.Replace(assetVirtualPath,

@@ -17,7 +17,7 @@ using BundleTransformer.Hogan.Resources;
 namespace BundleTransformer.Hogan.Translators
 {
 	/// <summary>
-	/// Translator that responsible for translation of Mustache-templates to JS-code
+	/// Translator that responsible for translation of Mustache templates to JS code
 	/// </summary>
 	public sealed class HoganTranslator : TranslatorWithNativeMinificationBase
 	{
@@ -32,7 +32,7 @@ namespace BundleTransformer.Hogan.Translators
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -75,17 +75,17 @@ namespace BundleTransformer.Hogan.Translators
 
 
 		/// <summary>
-		/// Constructs a instance of Hogan-translator
+		/// Constructs a instance of Hogan translator
 		/// </summary>
 		public HoganTranslator()
 			: this(null, BundleTransformerContext.Current.Configuration.GetHoganSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Hogan-translator
+		/// Constructs a instance of Hogan translator
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
-		/// <param name="hoganConfig">Configuration settings of Hogan-translator</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
+		/// <param name="hoganConfig">Configuration settings of Hogan translator</param>
 		public HoganTranslator(Func<IJsEngine> createJsEngineInstance, HoganSettings hoganConfig)
 		{
 			UseNativeMinification = hoganConfig.UseNativeMinification;
@@ -126,7 +126,7 @@ namespace BundleTransformer.Hogan.Translators
 
 
 		/// <summary>
-		/// Translates a code of asset written on Mustache to JS-code
+		/// Translates a code of asset written on Mustache to JS code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Mustache</param>
 		/// <returns>Asset with translated code</returns>
@@ -149,7 +149,7 @@ namespace BundleTransformer.Hogan.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of assets written on Mustache to JS-code
+		/// Translates a code of assets written on Mustache to JS code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on Mustache</param>
 		/// <returns>Set of assets with translated code</returns>

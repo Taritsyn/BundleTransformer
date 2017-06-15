@@ -48,7 +48,7 @@ namespace BundleTransformer.Closure.Internal
 		/// Constructs a instance of remote Closure Compiler
 		/// </summary>
 		/// <param name="closureCompilerServiceUrl">URL of Google Closure Compiler Service API</param>
-		/// <param name="commonExternsDependencies">List of common JS-externs dependencies</param>
+		/// <param name="commonExternsDependencies">List of common JS externs dependencies</param>
 		/// <param name="options">Compilation options</param>
 		public ClosureRemoteJsCompiler(string closureCompilerServiceUrl,
 			DependencyCollection commonExternsDependencies,
@@ -62,12 +62,12 @@ namespace BundleTransformer.Closure.Internal
 
 
 		/// <summary>
-		/// "Compiles" a JS-code
+		/// "Compiles" a JS code
 		/// </summary>
-		/// <param name="content">Text content written on JavaScript</param>
-		/// <param name="path">Path to JS-file</param>
-		/// <param name="externsDependencies">List of JS-externs dependencies</param>
-		/// <returns>Compiled JS-code</returns>
+		/// <param name="content">Text content written on JS</param>
+		/// <param name="path">Path to JS file</param>
+		/// <param name="externsDependencies">List of JS externs dependencies</param>
+		/// <returns>Compiled JS code</returns>
 		public string Compile(string content, string path, DependencyCollection externsDependencies)
 		{
 			string newContent;
@@ -282,7 +282,7 @@ namespace BundleTransformer.Closure.Internal
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="errorType">Error type</param>
 		/// <param name="currentFilePath">Current file path</param>
-		/// <param name="externsDependencies">List of JS-externs dependencies</param>
+		/// <param name="externsDependencies">List of JS externs dependencies</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string currentFilePath,
 			DependencyCollection externsDependencies)

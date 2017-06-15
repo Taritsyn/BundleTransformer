@@ -16,7 +16,7 @@ using BundleTransformer.CleanCss.Internal;
 namespace BundleTransformer.CleanCss.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code
+	/// Minifier, which produces minifiction of CSS code
 	/// by using Clean-css
 	/// </summary>
 	public sealed class CleanCssMinifier : IMinifier
@@ -24,7 +24,7 @@ namespace BundleTransformer.CleanCss.Minifiers
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "Clean CSS-minifier";
+		const string MINIFIER_NAME = "Clean CSS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -32,7 +32,7 @@ namespace BundleTransformer.CleanCss.Minifiers
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -98,16 +98,16 @@ namespace BundleTransformer.CleanCss.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Clean CSS-minifier
+		/// Constructs a instance of Clean CSS minifier
 		/// </summary>
 		public CleanCssMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetCleanSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Clean CSS-minifier
+		/// Constructs a instance of Clean CSS minifier
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="cleanConfig">Configuration settings of Clean-css Minifier</param>
 		public CleanCssMinifier(Func<IJsEngine> createJsEngineInstance, CleanSettings cleanConfig)
 		{
@@ -209,10 +209,10 @@ namespace BundleTransformer.CleanCss.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-asset by using Clean-css
+		/// Produces a code minifiction of CSS asset by using Clean-css
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>CSS-asset with minified text content</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>CSS asset with minified text content</returns>
 		public IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -236,10 +236,10 @@ namespace BundleTransformer.CleanCss.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-assets by using Clean-css
+		/// Produces a code minifiction of CSS assets by using Clean-css
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of CSS-assets with minified text content</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of CSS assets with minified text content</returns>
 		public IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

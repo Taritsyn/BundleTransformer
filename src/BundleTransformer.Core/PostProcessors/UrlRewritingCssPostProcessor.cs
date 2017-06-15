@@ -13,7 +13,7 @@ namespace BundleTransformer.Core.PostProcessors
 {
 	/// <summary>
 	/// Postprocessor that responsible for transformation of relative
-	/// paths in CSS-files to absolute
+	/// paths in CSS files to absolute
 	/// </summary>
 	public sealed class UrlRewritingCssPostProcessor : PostProcessorBase
 	{
@@ -31,14 +31,14 @@ namespace BundleTransformer.Core.PostProcessors
 
 
 		/// <summary>
-		/// Constructs a instance of URL rewriting CSS-postprocessor
+		/// Constructs a instance of URL rewriting CSS postprocessor
 		/// </summary>
 		public UrlRewritingCssPostProcessor()
 			: this(BundleTransformerContext.Current.FileSystem.GetCommonRelativePathResolver())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of URL rewriting CSS-postprocessor
+		/// Constructs a instance of URL rewriting CSS postprocessor
 		/// </summary>
 		/// <param name="relativePathResolver">Relative path resolver</param>
 		public UrlRewritingCssPostProcessor(IRelativePathResolver relativePathResolver)
@@ -48,10 +48,10 @@ namespace BundleTransformer.Core.PostProcessors
 
 
 		/// <summary>
-		/// Transforms relative paths to absolute in CSS-file
+		/// Transforms relative paths to absolute in CSS file
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>Processed CSS-asset</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>Processed CSS asset</returns>
 		public override IAsset PostProcess(IAsset asset)
 		{
 			if (asset == null)
@@ -65,10 +65,10 @@ namespace BundleTransformer.Core.PostProcessors
 		}
 
 		/// <summary>
-		/// Transforms relative paths to absolute in CSS-files
+		/// Transforms relative paths to absolute in CSS files
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of processed CSS-assets</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of processed CSS assets</returns>
 		public override IList<IAsset> PostProcess(IList<IAsset> assets)
 		{
 			if (assets == null)
@@ -105,11 +105,11 @@ namespace BundleTransformer.Core.PostProcessors
 		}
 
 		/// <summary>
-		/// Transforms all relative paths to absolute in CSS-code
+		/// Transforms all relative paths to absolute in CSS code
 		/// </summary>
-		/// <param name="content">Text content of CSS-asset</param>
-		/// <param name="path">CSS-file path</param>
-		/// <returns>Processed text content of CSS-asset</returns>
+		/// <param name="content">Text content of CSS asset</param>
+		/// <param name="path">CSS file path</param>
+		/// <returns>Processed text content of CSS asset</returns>
 		public string ResolveAllRelativePaths(string content, string path)
 		{
 			int contentLength = content.Length;
@@ -231,8 +231,8 @@ namespace BundleTransformer.Core.PostProcessors
 		/// <summary>
 		/// Process a CSS <code>@import</code> rule
 		/// </summary>
-		/// <param name="parentAssetUrl">URL of parent CSS-asset file</param>
-		/// <param name="assetUrl">URL of CSS-asset file</param>
+		/// <param name="parentAssetUrl">URL of parent CSS asset file</param>
+		/// <param name="assetUrl">URL of CSS asset file</param>
 		/// <returns>Processed CSS <code>@import</code> rule</returns>
 		private string ProcessImportRule(string parentAssetUrl, string assetUrl)
 		{
@@ -250,8 +250,8 @@ namespace BundleTransformer.Core.PostProcessors
 		/// <summary>
 		/// Process a CSS <code>url</code> rule
 		/// </summary>
-		/// <param name="parentAssetUrl">URL of parent CSS-asset file</param>
-		/// <param name="assetUrl">URL of CSS-asset file</param>
+		/// <param name="parentAssetUrl">URL of parent CSS asset file</param>
+		/// <param name="assetUrl">URL of CSS asset file</param>
 		/// <param name="quote">Quote</param>
 		/// <returns>Processed CSS <code>url</code> rule</returns>
 		private string ProcessUrlRule(string parentAssetUrl, string assetUrl, string quote)
@@ -271,7 +271,7 @@ namespace BundleTransformer.Core.PostProcessors
 		/// Process a other stylesheet content
 		/// </summary>
 		/// <param name="contentBuilder">Content builder</param>
-		/// <param name="assetContent">Text content of CSS-asset</param>
+		/// <param name="assetContent">Text content of CSS asset</param>
 		/// <param name="currentPosition">Current position</param>
 		/// <param name="nextPosition">Next position</param>
 		private static void ProcessOtherContent(StringBuilder contentBuilder, string assetContent,

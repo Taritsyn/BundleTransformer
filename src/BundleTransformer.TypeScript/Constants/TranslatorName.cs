@@ -6,7 +6,7 @@
 	internal static class TranslatorName
 	{
 		/// <summary>
-		/// Name (key) of TypeScript-translator
+		/// Name (key) of TypeScript translator
 		/// </summary>
 		public const string TypeScriptTranslator = "TypeScriptTranslator";
 	}

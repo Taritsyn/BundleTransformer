@@ -6,12 +6,12 @@
 	public static class FileExtension
 	{
 		/// <summary>
-		/// CSS-file extension
+		/// CSS file extension
 		/// </summary>
 		public static readonly string Css = ".css";
 
 		/// <summary>
-		/// JS-file extension
+		/// JS file extension
 		/// </summary>
 		public static readonly string JavaScript = ".js";
 	}

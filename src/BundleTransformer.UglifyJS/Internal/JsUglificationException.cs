@@ -3,7 +3,7 @@
 namespace BundleTransformer.UglifyJs.Internal
 {
 	/// <summary>
-	/// The exception that is thrown when a uglifying of asset code by JS-uglifier is failed
+	/// The exception that is thrown when a uglifying of asset code by JS uglifier is failed
 	/// </summary>
 	internal sealed class JsUglificationException : Exception
 	{

@@ -127,6 +127,6 @@
     <value>The value '{0}' of UglifyJS property `GlobalDefinitions` does not correspond to the format of `SYMBOL[=value]`.</value>
   </data>
   <data name="GlobalDefsParsing_SymbolNameIsForbidden" xml:space="preserve">
-    <value>Forbidden to specify the name of symbol, which coincides with the name of built-in constant of JavaScript language: '{0}'.</value>
+    <value>Forbidden to specify the name of symbol, which coincides with the name of built-in constant of JS language: '{0}'.</value>
   </data>
 </root>

@@ -3,7 +3,7 @@
 namespace BundleTransformer.Packer.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Dean Edwards' JS-minifier
+	/// Configuration settings of Dean Edwards' JS minifier
 	/// </summary>
 	public sealed class JsMinifierSettings : ConfigurationElement
 	{

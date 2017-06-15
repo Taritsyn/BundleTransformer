@@ -16,7 +16,7 @@ using BundleTransformer.Csso.Internal;
 namespace BundleTransformer.Csso.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code
+	/// Minifier, which produces minifiction of CSS code
 	/// by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 	/// </summary>
 	public sealed class KryzhanovskyCssMinifier : IMinifier
@@ -24,7 +24,7 @@ namespace BundleTransformer.Csso.Minifiers
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "CSSO CSS-minifier";
+		const string MINIFIER_NAME = "CSSO CSS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -32,7 +32,7 @@ namespace BundleTransformer.Csso.Minifiers
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -56,16 +56,16 @@ namespace BundleTransformer.Csso.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Sergey Kryzhanovsky's CSS-minifier
+		/// Constructs a instance of Sergey Kryzhanovsky's CSS minifier
 		/// </summary>
 		public KryzhanovskyCssMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetCssoSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Sergey Kryzhanovsky's CSS-minifier
+		/// Constructs a instance of Sergey Kryzhanovsky's CSS minifier
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="cssoConfig">Configuration settings of Sergey Kryzhanovsky's Minifier</param>
 		public KryzhanovskyCssMinifier(Func<IJsEngine> createJsEngineInstance, CssoSettings cssoConfig)
 		{
@@ -96,10 +96,10 @@ namespace BundleTransformer.Csso.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-asset by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
+		/// Produces a code minifiction of CSS asset by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>CSS-asset with minified text content</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>CSS asset with minified text content</returns>
 		public IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -123,10 +123,10 @@ namespace BundleTransformer.Csso.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-assets by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
+		/// Produces a code minifiction of CSS assets by using Sergey Kryzhanovsky's CSSO (CSS Optimizer)
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of CSS-assets with minified text content</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of CSS assets with minified text content</returns>
 		public IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

@@ -18,7 +18,7 @@ using BundleTransformer.Less.Internal;
 namespace BundleTransformer.Less.Translators
 {
 	/// <summary>
-	/// Translator that responsible for translation of LESS-code to CSS-code
+	/// Translator that responsible for translation of LESS code to CSS code
 	/// </summary>
 	public sealed class LessTranslator : TranslatorWithNativeMinificationBase
 	{
@@ -33,7 +33,7 @@ namespace BundleTransformer.Less.Translators
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -79,7 +79,7 @@ namespace BundleTransformer.Less.Translators
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable JavaScript in less files
+		/// Gets or sets a flag for whether to enable JS in less files
 		/// </summary>
 		public bool JavascriptEnabled
 		{
@@ -120,7 +120,7 @@ namespace BundleTransformer.Less.Translators
 
 
 		/// <summary>
-		/// Constructs a instance of LESS-translator
+		/// Constructs a instance of LESS translator
 		/// </summary>
 		public LessTranslator()
 			: this(null,
@@ -129,11 +129,11 @@ namespace BundleTransformer.Less.Translators
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of LESS-translator
+		/// Constructs a instance of LESS translator
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="lessConfig">Configuration settings of LESS-translator</param>
+		/// <param name="lessConfig">Configuration settings of LESS translator</param>
 		public LessTranslator(Func<IJsEngine> createJsEngineInstance,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			LessSettings lessConfig)
@@ -173,7 +173,7 @@ namespace BundleTransformer.Less.Translators
 
 
 		/// <summary>
-		/// Translates a code of asset written on LESS to CSS-code
+		/// Translates a code of asset written on LESS to CSS code
 		/// </summary>
 		/// <param name="asset">Asset with code written on LESS</param>
 		/// <returns>Asset with translated code</returns>
@@ -196,7 +196,7 @@ namespace BundleTransformer.Less.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of assets written on LESS to CSS-code
+		/// Translates a code of assets written on LESS to CSS code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on LESS</param>
 		/// <returns>Set of assets with translated code</returns>

@@ -17,7 +17,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.Autoprefixer.Internal
 {
 	/// <summary>
-	/// CSS-autoprefixer
+	/// CSS autoprefixer
 	/// </summary>
 	internal sealed class CssAutoprefixer : IDisposable
 	{
@@ -62,7 +62,7 @@ namespace BundleTransformer.Autoprefixer.Internal
 		private readonly string _optionsString;
 
 		/// <summary>
-		/// Flag that CSS-autoprefixer is initialized
+		/// Flag that CSS autoprefixer is initialized
 		/// </summary>
 		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
 
@@ -73,9 +73,9 @@ namespace BundleTransformer.Autoprefixer.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of CSS-autoprefixer
+		/// Constructs a instance of CSS autoprefixer
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="options">Autoprefixing options</param>
 		public CssAutoprefixer(Func<IJsEngine> createJsEngineInstance,
@@ -90,7 +90,7 @@ namespace BundleTransformer.Autoprefixer.Internal
 
 
 		/// <summary>
-		/// Initializes CSS-autoprefixer
+		/// Initializes CSS autoprefixer
 		/// </summary>
 		private void Initialize()
 		{
@@ -106,10 +106,10 @@ namespace BundleTransformer.Autoprefixer.Internal
 		}
 
 		/// <summary>
-		/// Actualizes a vendor prefixes in CSS-code by using Andrey Sitnik's Autoprefixer
+		/// Actualizes a vendor prefixes in CSS code by using Andrey Sitnik's Autoprefixer
 		/// </summary>
-		/// <param name="content">Text content of CSS-asset</param>
-		/// <param name="path">Path to CSS-asset</param>
+		/// <param name="content">Text content of CSS asset</param>
+		/// <param name="path">Path to CSS asset</param>
 		/// <returns>Autoprefixing result</returns>
 		public AutoprefixingResult Process(string content, string path)
 		{
@@ -209,7 +209,7 @@ namespace BundleTransformer.Autoprefixer.Internal
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current CSS-file</param>
+		/// <param name="currentFilePath">Path to current CSS file</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(JToken errorDetails, string sourceCode,
 			string currentFilePath)

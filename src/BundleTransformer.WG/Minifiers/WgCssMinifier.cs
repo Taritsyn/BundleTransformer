@@ -20,15 +20,15 @@ using BundleTransformer.WG.Configuration;
 namespace BundleTransformer.WG.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of CSS-code
-	/// by using WebGrease Semantic CSS-minifier
+	/// Minifier, which produces minifiction of CSS code
+	/// by using WebGrease Semantic CSS minifier
 	/// </summary>
 	public sealed class WgCssMinifier : IMinifier
 	{
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "WebGrease Semantic CSS-minifier";
+		const string MINIFIER_NAME = "WebGrease Semantic CSS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -84,14 +84,14 @@ namespace BundleTransformer.WG.Minifiers
 		}
 
 		/// <summary>
-		/// Constructs a instance of WebGrease Semantic CSS-minifier
+		/// Constructs a instance of WebGrease Semantic CSS minifier
 		/// </summary>
 		public WgCssMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetWgSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of WebGrease Semantic CSS-minifier
+		/// Constructs a instance of WebGrease Semantic CSS minifier
 		/// </summary>
 		/// <param name="wgConfig">Configuration settings of WebGrease Minifier</param>
 		public WgCssMinifier(WgSettings wgConfig)
@@ -105,10 +105,10 @@ namespace BundleTransformer.WG.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-asset by using WebGrease Semantic CSS-minifier
+		/// Produces a code minifiction of CSS asset by using WebGrease Semantic CSS minifier
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>CSS-asset with minified text content</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>CSS asset with minified text content</returns>
 		public IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -132,10 +132,10 @@ namespace BundleTransformer.WG.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of CSS-assets by using WebGrease Semantic CSS-minifier
+		/// Produces a code minifiction of CSS assets by using WebGrease Semantic CSS minifier
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of CSS-assets with minified text content</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of CSS assets with minified text content</returns>
 		public IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)
@@ -225,9 +225,9 @@ namespace BundleTransformer.WG.Minifiers
 		/// <summary>
 		/// Ejects a <code>@charset</code> rules
 		/// </summary>
-		/// <param name="content">Text content of CSS-asset</param>
+		/// <param name="content">Text content of CSS asset</param>
 		/// <param name="topCharset">Processed top <code>@charset</code> rule</param>
-		/// <returns>Text content of CSS-asset without <code>@charset</code> rules</returns>
+		/// <returns>Text content of CSS asset without <code>@charset</code> rules</returns>
 		private static string EjectCssCharset(string content, ref string topCharset)
 		{
 			int contentLength = content.Length;
@@ -322,7 +322,7 @@ namespace BundleTransformer.WG.Minifiers
 		/// Process a other stylesheet content
 		/// </summary>
 		/// <param name="contentBuilder">Content builder</param>
-		/// <param name="assetContent">Text content of CSS-asset</param>
+		/// <param name="assetContent">Text content of CSS asset</param>
 		/// <param name="currentPosition">Current position</param>
 		/// <param name="nextPosition">Next position</param>
 		private static void ProcessOtherContent(StringBuilder contentBuilder, string assetContent,
@@ -343,7 +343,7 @@ namespace BundleTransformer.WG.Minifiers
 		/// </summary>
 		/// <param name="errorDetails">String representation of error</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current CSS-file</param>
+		/// <param name="currentFilePath">Path to current CSS file</param>
 		/// <rereturns>Detailed error message</rereturns>
 		private static string FormatErrorDetails(string errorDetails, string sourceCode, string currentFilePath)
 		{

@@ -8,7 +8,7 @@ using BundleTransformer.Core.Resources;
 namespace BundleTransformer.Core.Resolvers
 {
 	/// <summary>
-	/// Custom bundle resolver, that required in order to the debugging HTTP-handler can use
+	/// Custom bundle resolver, that required in order to the debugging HTTP handler can use
 	/// transformations of the corresponding bundle
 	/// </summary>
 	public sealed class CustomBundleResolver : IBundleResolver

@@ -3,7 +3,7 @@
 namespace BundleTransformer.WG.Configuration
 {
 	/// <summary>
-	/// Configuration settings of WebGrease Semantic CSS-minifier
+	/// Configuration settings of WebGrease Semantic CSS minifier
 	/// </summary>
 	public sealed class CssMinifierSettings : ConfigurationElement
 	{

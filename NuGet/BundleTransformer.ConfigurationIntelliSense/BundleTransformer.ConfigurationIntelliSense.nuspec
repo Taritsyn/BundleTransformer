@@ -10,12 +10,12 @@
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when editing the `bundleTransformer` configuration section in the Web.config file.</description>
-		<summary>BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when editing the `bundleTransformer` configuration section in the Web.config file.</summary>
+		<description>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</description>
+		<summary>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</summary>
 		<releaseNotes>Updated definitions for configuration settings of Clean CSS-minifier.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
-		<tags>Web.config IntelliSense</tags>
+		<tags>BundleTransformer Web.config IntelliSense</tags>
 	</metadata>
 	<files>
 		<file src="..\..\samples\BundleTransformer.Example.Mvc\BundleTransformer.Configuration.xsd" target="content" />

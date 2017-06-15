@@ -16,7 +16,7 @@ using CssoStrings = BundleTransformer.Csso.Resources.Strings;
 namespace BundleTransformer.Csso.Internal
 {
 	/// <summary>
-	/// CSS-optimizer
+	/// CSS optimizer
 	/// </summary>
 	internal sealed class CssOptimizer : IDisposable
 	{
@@ -26,17 +26,17 @@ namespace BundleTransformer.Csso.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.Csso.Resources";
 
 		/// <summary>
-		/// Name of file, which contains a Sergey Kryzhanovsky's CSSO-library
+		/// Name of file, which contains a Sergey Kryzhanovsky's CSSO library
 		/// </summary>
 		private const string CSSO_LIBRARY_FILE_NAME = "csso-combined.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a CSSO-minifier helper
+		/// Name of file, which contains a CSSO minifier helper
 		/// </summary>
 		private const string CSSO_HELPER_FILE_NAME = "cssoHelper.min.js";
 
 		/// <summary>
-		/// Template of function call, which is responsible for CSS-optimization
+		/// Template of function call, which is responsible for CSS optimization
 		/// </summary>
 		private const string OPTIMIZATION_FUNCTION_CALL_TEMPLATE = @"cssoHelper.minify({0}, {1});";
 
@@ -62,9 +62,9 @@ namespace BundleTransformer.Csso.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of CSS-optimizer
+		/// Constructs a instance of CSS optimizer
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Optimization options</param>
 		public CssOptimizer(Func<IJsEngine> createJsEngineInstance, OptimizationOptions options)
 		{
@@ -88,11 +88,11 @@ namespace BundleTransformer.Csso.Internal
 		}
 
 		/// <summary>
-		/// "Optimizes" a CSS-code by using Sergey Kryzhanovsky's CSSO
+		/// "Optimizes" a CSS code by using Sergey Kryzhanovsky's CSSO
 		/// </summary>
-		/// <param name="content">Text content of CSS-asset</param>
-		/// <param name="path">Path to CSS-file</param>
-		/// <returns>Minified text content of CSS-asset</returns>
+		/// <param name="content">Text content of CSS asset</param>
+		/// <param name="path">Path to CSS file</param>
+		/// <returns>Minified text content of CSS asset</returns>
 		public string Optimize(string content, string path)
 		{
 			Initialize();
@@ -173,7 +173,7 @@ namespace BundleTransformer.Csso.Internal
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current CSS-file</param>
+		/// <param name="currentFilePath">Path to current CSS file</param>
 		/// <rereturns>Detailed error message</rereturns>
 		private static string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath)
 		{

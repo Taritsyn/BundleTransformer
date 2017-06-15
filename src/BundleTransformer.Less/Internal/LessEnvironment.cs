@@ -221,7 +221,7 @@ namespace BundleTransformer.Less.Internal
 		/// Encodes a text content to Base64
 		/// </summary>
 		/// <param name="value">Text content</param>
-		/// <returns>Base64-encoded content</returns>
+		/// <returns>Base64 encoded content</returns>
 		public string EncodeToBase64(string value)
 		{
 			if (value == null)
@@ -240,7 +240,7 @@ namespace BundleTransformer.Less.Internal
 		/// Encodes a binary content to Base64
 		/// </summary>
 		/// <param name="value">Binary content</param>
-		/// <returns>Base64-encoded content</returns>
+		/// <returns>Base64 encoded content</returns>
 		public string EncodeToBase64(byte[] value)
 		{
 			if (value == null)
@@ -255,10 +255,10 @@ namespace BundleTransformer.Less.Internal
 		}
 
 		/// <summary>
-		/// Determines a MIME-type by the file name
+		/// Determines a MIME type by the file name
 		/// </summary>
 		/// <param name="fileName">File name</param>
-		/// <returns>MIME-type</returns>
+		/// <returns>MIME type</returns>
 		public string GetMimeType(string fileName)
 		{
 			if (fileName == null)

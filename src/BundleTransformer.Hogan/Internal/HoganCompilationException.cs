@@ -3,7 +3,7 @@
 namespace BundleTransformer.Hogan.Internal
 {
 	/// <summary>
-	/// The exception that is thrown when a compiling of asset code by Hogan-compiler is failed
+	/// The exception that is thrown when a compiling of asset code by Hogan compiler is failed
 	/// </summary>
 	internal sealed class HoganCompilationException : Exception
 	{

@@ -17,7 +17,7 @@ using BundleTransformer.Handlebars.Resources;
 namespace BundleTransformer.Handlebars.Translators
 {
 	/// <summary>
-	/// Translator that responsible for translation of Handlebars-templates to JS-code
+	/// Translator that responsible for translation of Handlebars templates to JS code
 	/// </summary>
 	public sealed class HandlebarsTranslator : ITranslator
 	{
@@ -32,7 +32,7 @@ namespace BundleTransformer.Handlebars.Translators
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -94,17 +94,17 @@ namespace BundleTransformer.Handlebars.Translators
 
 
 		/// <summary>
-		/// Constructs a instance of Handlebars-translator
+		/// Constructs a instance of Handlebars translator
 		/// </summary>
 		public HandlebarsTranslator()
 			: this(null, BundleTransformerContext.Current.Configuration.GetHandlebarsSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Handlebars-translator
+		/// Constructs a instance of Handlebars translator
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
-		/// <param name="handlebarsConfig">Configuration settings of Handlebars-translator</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
+		/// <param name="handlebarsConfig">Configuration settings of Handlebars translator</param>
 		public HandlebarsTranslator(Func<IJsEngine> createJsEngineInstance,
 			HandlebarsSettings handlebarsConfig)
 		{
@@ -141,7 +141,7 @@ namespace BundleTransformer.Handlebars.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of asset written on Handlebars to JS-code
+		/// Translates a code of asset written on Handlebars to JS code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Handlebars</param>
 		/// <returns>Asset with translated code</returns>
@@ -163,7 +163,7 @@ namespace BundleTransformer.Handlebars.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of assets written on Handlebars to JS-code
+		/// Translates a code of assets written on Handlebars to JS code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on Handlebars</param>
 		/// <returns>Set of assets with translated code</returns>

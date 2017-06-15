@@ -10,7 +10,7 @@ namespace BundleTransformer.Packer.Configuration
 	public sealed class PackerSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of Dean Edwards' JS-minifier
+		/// Gets a configuration settings of Dean Edwards' JS minifier
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public JsMinifierSettings JsMinifier
@@ -19,7 +19,7 @@ namespace BundleTransformer.Packer.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

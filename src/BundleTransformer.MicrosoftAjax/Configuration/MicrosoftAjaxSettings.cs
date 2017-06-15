@@ -8,7 +8,7 @@ namespace BundleTransformer.MicrosoftAjax.Configuration
 	public sealed class MicrosoftAjaxSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of Microsoft Ajax CSS-minifier
+		/// Gets a configuration settings of Microsoft Ajax CSS minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings CssMinifier
@@ -17,7 +17,7 @@ namespace BundleTransformer.MicrosoftAjax.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of Microsoft Ajax JS-minifier
+		/// Gets a configuration settings of Microsoft Ajax JS minifier
 		/// </summary>
 		[ConfigurationProperty("js")]
 		public JsMinifierSettings JsMinifier

@@ -13,8 +13,8 @@ using BundleTransformer.CoffeeScript.Translators;
 namespace BundleTransformer.CoffeeScript.HttpHandlers
 {
 	/// <summary>
-	/// Debugging HTTP-handler that responsible for text output
-	/// of translated CoffeeScript-asset
+	/// Debugging HTTP handler that responsible for text output
+	/// of translated CoffeeScript asset
 	/// </summary>
 	public sealed class CoffeeScriptAssetHandler : ScriptAssetHandlerBase
 	{
@@ -28,7 +28,7 @@ namespace BundleTransformer.CoffeeScript.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging CoffeeScript HTTP-handler
+		/// Constructs a instance of the debugging CoffeeScript HTTP handler
 		/// </summary>
 		public CoffeeScriptAssetHandler()
 			: this(HttpContext.Current.Cache,
@@ -37,11 +37,11 @@ namespace BundleTransformer.CoffeeScript.HttpHandlers
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of the debugging CoffeeScript HTTP-handler
+		/// Constructs a instance of the debugging CoffeeScript HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		public CoffeeScriptAssetHandler(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -50,7 +50,7 @@ namespace BundleTransformer.CoffeeScript.HttpHandlers
 
 
 		/// <summary>
-		/// Translates a code of asset written on CoffeeScript to JS-code
+		/// Translates a code of asset written on CoffeeScript to JS code
 		/// </summary>
 		/// <param name="asset">Asset</param>
 		/// <param name="transformer">Transformer</param>

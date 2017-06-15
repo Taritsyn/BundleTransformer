@@ -11,12 +11,12 @@
 		public static readonly string Unknown = "Unknown";
 
 		/// <summary>
-		/// CSS-asset
+		/// CSS asset
 		/// </summary>
 		public static readonly string Css = "Css";
 
 		/// <summary>
-		/// JS-asset
+		/// JS asset
 		/// </summary>
 		public static readonly string JavaScript = "JavaScript";
 	}

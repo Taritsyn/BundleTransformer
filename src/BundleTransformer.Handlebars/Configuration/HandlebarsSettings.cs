@@ -5,7 +5,7 @@ using BundleTransformer.Core.Configuration;
 namespace BundleTransformer.Handlebars.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Handlebars-translator
+	/// Configuration settings of Handlebars translator
 	/// </summary>
 	public sealed class HandlebarsSettings : ConfigurationSection
 	{
@@ -62,7 +62,7 @@ namespace BundleTransformer.Handlebars.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

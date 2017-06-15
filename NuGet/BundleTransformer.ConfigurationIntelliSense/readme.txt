@@ -11,8 +11,9 @@
    ===========
    DESCRIPTION
    ===========
-   BundleTransformer.ConfigurationIntelliSense adds IntelliSense support when
-   editing the `bundleTransformer` configuration section in the Web.config file.
+   BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during
+   editing of the `bundleTransformer` configuration section in the `Web.config`
+   file.
 
    =============
    RELEASE NOTES

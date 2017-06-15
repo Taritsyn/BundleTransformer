@@ -21,7 +21,7 @@ namespace BundleTransformer.Core.Assets
 			}
 
 			string urlInUpperCase = url.ToUpperInvariant();
-			bool result = (this.Count(d => d.Url.ToUpperInvariant() == urlInUpperCase) > 0);
+			bool result = this.Count(d => d.Url.ToUpperInvariant() == urlInUpperCase) > 0;
 
 			return result;
 		}

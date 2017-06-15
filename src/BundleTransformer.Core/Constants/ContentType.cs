@@ -11,7 +11,7 @@
 		public static readonly string Css = "text/css";
 
 		/// <summary>
-		/// JavaScript content type
+		/// JS content type
 		/// </summary>
 		public static readonly string Js = "application/javascript";
 	}

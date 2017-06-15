@@ -16,15 +16,15 @@ using BundleTransformer.UglifyJs.Internal;
 namespace BundleTransformer.UglifyJs.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code
-	/// by using Uglify JS-minifier
+	/// Minifier, which produces minifiction of JS code
+	/// by using Uglify JS minifier
 	/// </summary>
 	public sealed class UglifyJsMinifier : IMinifier
 	{
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "Uglify JS-minifier";
+		const string MINIFIER_NAME = "Uglify JS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -32,7 +32,7 @@ namespace BundleTransformer.UglifyJs.Minifiers
 		const string CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -105,16 +105,16 @@ namespace BundleTransformer.UglifyJs.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Uglify JS-minifier
+		/// Constructs a instance of Uglify JS minifier
 		/// </summary>
 		public UglifyJsMinifier()
 			: this(null, BundleTransformerContext.Current.Configuration.GetUglifySettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Uglify JS-minifier
+		/// Constructs a instance of Uglify JS minifier
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="uglifyConfig">Configuration settings of Uglify Minifier</param>
 		public UglifyJsMinifier(Func<IJsEngine> createJsEngineInstance, UglifySettings uglifyConfig)
 		{
@@ -216,10 +216,10 @@ namespace BundleTransformer.UglifyJs.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of JS-asset by using Uglify JS-minifier
+		/// Produces a code minifiction of JS asset by using Uglify JS minifier
 		/// </summary>
-		/// <param name="asset">JS-asset</param>
-		/// <returns>JS-asset with minified text content</returns>
+		/// <param name="asset">JS asset</param>
+		/// <returns>JS asset with minified text content</returns>
 		public IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -243,10 +243,10 @@ namespace BundleTransformer.UglifyJs.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of JS-assets by using Uglify JS-minifier
+		/// Produces a code minifiction of JS assets by using Uglify JS minifier
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of JS-assets with minified text content</returns>
+		/// <param name="assets">Set of JS assets</param>
+		/// <returns>Set of JS assets with minified text content</returns>
 		public IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

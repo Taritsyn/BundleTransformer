@@ -6,7 +6,7 @@
 	internal sealed class CompilationOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to allow compilation to JavaScript
+		/// Gets or sets a flag for whether to allow compilation to JS
 		/// without the top-level function safety wrapper
 		/// </summary>
 		public bool Bare

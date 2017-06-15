@@ -21,7 +21,7 @@ using BundleTransformer.Core.Translators;
 namespace BundleTransformer.Core.HttpHandlers
 {
 	/// <summary>
-	/// Base class of the debugging HTTP-handler that responsible for text output
+	/// Base class of the debugging HTTP handler that responsible for text output
 	/// of processed asset
 	/// </summary>
 	public abstract class AssetHandlerBase : IHttpHandler
@@ -47,7 +47,7 @@ namespace BundleTransformer.Core.HttpHandlers
 		private readonly IVirtualFileSystemWrapper _virtualFileSystemWrapper;
 
 		/// <summary>
-		/// Configuration settings of the debugging HTTP-handler
+		/// Configuration settings of the debugging HTTP handler
 		/// </summary>
 		private readonly AssetHandlerSettings _assetHandlerConfig;
 
@@ -74,7 +74,7 @@ namespace BundleTransformer.Core.HttpHandlers
 		}
 
 		/// <summary>
-		/// Gets a value indicating whether another request can use the instance of HTTP-handler
+		/// Gets a value indicating whether another request can use the instance of HTTP handler
 		/// </summary>
 		public bool IsReusable
 		{
@@ -83,11 +83,11 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging HTTP-handler
+		/// Constructs a instance of the debugging HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		protected AssetHandlerBase(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -185,7 +185,7 @@ namespace BundleTransformer.Core.HttpHandlers
 				string eTag = GenerateAssetETag(content);
 				bool eTagChanged = IsETagHeaderChanged(request, eTag);
 
-				// Add a special HTTP-headers to ensure that
+				// Add a special HTTP headers to ensure that
 				// asset caching in browsers
 				if (eTagChanged)
 				{
@@ -338,7 +338,7 @@ namespace BundleTransformer.Core.HttpHandlers
 		}
 
 		/// <summary>
-		/// Generates a value for HTTP-header "ETag" based on
+		/// Generates a value for HTTP header "ETag" based on
 		/// information about processed asset
 		/// </summary>
 		/// <param name="assetContent">Text content of asset</param>
@@ -381,7 +381,7 @@ namespace BundleTransformer.Core.HttpHandlers
 
 		/// <summary>
 		/// Checks a actuality of data in browser cache using
-		/// HTTP-header "ETag"
+		/// HTTP header "ETag"
 		/// </summary>
 		/// <param name="request">HttpRequest object</param>
 		/// <param name="eTag">ETag value</param>

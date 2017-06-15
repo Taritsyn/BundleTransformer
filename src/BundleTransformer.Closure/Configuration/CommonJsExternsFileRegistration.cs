@@ -3,7 +3,7 @@
 namespace BundleTransformer.Closure.Configuration
 {
 	/// <summary>
-	/// Common JS-externs file registration
+	/// Common JS externs file registration
 	/// </summary>
 	public sealed class CommonJsExternsFileRegistration : ConfigurationElement
 	{

@@ -6,12 +6,12 @@
 	public static class AssetTypeCode
 	{
 		/// <summary>
-		/// Sass-asset
+		/// Sass asset
 		/// </summary>
 		public static readonly string Sass = "Sass";
 
 		/// <summary>
-		/// SCSS-asset
+		/// SCSS asset
 		/// </summary>
 		public static readonly string Scss = "Scss";
 	}

@@ -1,7 +1,7 @@
 ﻿namespace BundleTransformer.Closure.Internal
 {
 	/// <summary>
-	/// Remote JavaScript compilation options
+	/// Remote JS compilation options
 	/// </summary>
 	internal sealed class RemoteJsCompilationOptions : JsCompilationOptionsBase
 	{
@@ -26,7 +26,7 @@
 
 
 		/// <summary>
-		/// Constructs a instance of the remote JavaScript compilation options
+		/// Constructs a instance of the remote JS compilation options
 		/// </summary>
 		public RemoteJsCompilationOptions()
 		{

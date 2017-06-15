@@ -8,7 +8,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.Packer.Internal
 {
 	/// <summary>
-	/// JS-packer
+	/// JS packer
 	/// </summary>
 	internal sealed class JsPacker : IDisposable
 	{
@@ -18,7 +18,7 @@ namespace BundleTransformer.Packer.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.Packer.Resources";
 
 		/// <summary>
-		/// Name of file, which contains a Dean Edwards' Packer-library
+		/// Name of file, which contains a Dean Edwards' Packer library
 		/// </summary>
 		private const string PACKER_LIBRARY_FILE_NAME = "packer-combined.min.js";
 
@@ -38,7 +38,7 @@ namespace BundleTransformer.Packer.Internal
 		private readonly PackingOptions _options;
 
 		/// <summary>
-		/// Flag that JS-packer is initialized
+		/// Flag that JS packer is initialized
 		/// </summary>
 		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
 
@@ -49,9 +49,9 @@ namespace BundleTransformer.Packer.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of JS-packer
+		/// Constructs a instance of JS packer
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Packing options</param>
 		public JsPacker(Func<IJsEngine> createJsEngineInstance, PackingOptions options)
 		{
@@ -61,7 +61,7 @@ namespace BundleTransformer.Packer.Internal
 
 
 		/// <summary>
-		/// Initializes JS-packer
+		/// Initializes JS packer
 		/// </summary>
 		private void Initialize()
 		{
@@ -78,10 +78,10 @@ namespace BundleTransformer.Packer.Internal
 		}
 
 		/// <summary>
-		/// "Packs" a JS-code by using Dean Edwards' Packer
+		/// "Packs" a JS code by using Dean Edwards' Packer
 		/// </summary>
-		/// <param name="content">Text content of JS-asset</param>
-		/// <returns>Minified text content of JS-asset</returns>
+		/// <param name="content">Text content of JS asset</param>
+		/// <returns>Minified text content of JS asset</returns>
 		public string Pack(string content)
 		{
 			Initialize();

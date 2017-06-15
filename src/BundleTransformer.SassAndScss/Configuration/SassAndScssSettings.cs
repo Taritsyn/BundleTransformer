@@ -3,7 +3,7 @@
 namespace BundleTransformer.SassAndScss.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Sass- and SCSS-translator
+	/// Configuration settings of Sass and SCSS translator
 	/// </summary>
 	public sealed class SassAndScssSettings : ConfigurationSection
 	{

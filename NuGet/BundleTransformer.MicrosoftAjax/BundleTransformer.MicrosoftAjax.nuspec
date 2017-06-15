@@ -10,11 +10,11 @@
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_MicrosoftAjax_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.MicrosoftAjax contains 2 minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS-code) and `MicrosoftAjaxJsMinifier` (for minification of JS-code). These adapters perform minification using the Microsoft Ajax Minifier (http://ajaxmin.codeplex.com).</description>
-		<summary>BundleTransformer.MicrosoftAjax contains 2 minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS-code) and `MicrosoftAjaxJsMinifier` (for minification of JS-code). These adapters perform minification using the Microsoft Ajax Minifier.</summary>
+		<description>BundleTransformer.MicrosoftAjax contains two minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS code) and `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform minification by using the Microsoft Ajax Minifier (http://ajaxmin.codeplex.com).</description>
+		<summary>BundleTransformer.MicrosoftAjax contains two minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS code) and `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform minification by using the Microsoft Ajax Minifier.</summary>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
-		<tags>System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation Microsoft AjaxMin</tags>
+		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation Microsoft AjaxMin</tags>
 		<dependencies>
 			<dependency id="BundleTransformer.Core" version="1.9.92" />
 			<dependency id="AjaxMin" version="5.14.5506.26202" />

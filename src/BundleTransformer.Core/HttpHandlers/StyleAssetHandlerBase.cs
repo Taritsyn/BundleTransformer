@@ -10,7 +10,7 @@ using BundleTransformer.Core.Translators;
 namespace BundleTransformer.Core.HttpHandlers
 {
 	/// <summary>
-	/// Base class of the debugging HTTP-handler that responsible for text output
+	/// Base class of the debugging HTTP handler that responsible for text output
 	/// of processed style asset
 	/// </summary>
 	public abstract class StyleAssetHandlerBase : AssetHandlerBase
@@ -25,11 +25,11 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Constructs a instance of the debugging style HTTP-handler
+		/// Constructs a instance of the debugging style HTTP handler
 		/// </summary>
 		/// <param name="cache">Server cache</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP-handler</param>
+		/// <param name="assetHandlerConfig">Configuration settings of the debugging HTTP handler</param>
 		protected StyleAssetHandlerBase(Cache cache,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AssetHandlerSettings assetHandlerConfig)
@@ -38,10 +38,10 @@ namespace BundleTransformer.Core.HttpHandlers
 
 
 		/// <summary>
-		/// Gets a CSS-transformer from bundle
+		/// Gets a CSS transformer from bundle
 		/// </summary>
 		/// <param name="bundle">Bundle</param>
-		/// <returns>CSS-transformer</returns>
+		/// <returns>CSS transformer</returns>
 		protected override ITransformer GetTransformer(Bundle bundle)
 		{
 			IBundleTransform transformer = null;

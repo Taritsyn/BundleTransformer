@@ -179,7 +179,7 @@ See more details:
     <value>Unknown error.</value>
   </data>
   <data name="Common_UnknownMimeType" xml:space="preserve">
-    <value>Failed to determine MIME-type of the file '{0}'.</value>
+    <value>Failed to determine MIME type of the file '{0}'.</value>
   </data>
   <data name="Common_ValueIsEmpty" xml:space="preserve">
     <value>Value cannot be empty.</value>
@@ -188,20 +188,20 @@ See more details:
     <value>Value cannot be null.</value>
   </data>
   <data name="Configuration_DefaultMinifierNotSpecified" xml:space="preserve">
-    <value>Default {0}-minifier not specified.</value>
+    <value>Default {0} minifier not specified.</value>
   </data>
   <data name="Configuration_JsEngineNotSpecified" xml:space="preserve">
-    <value>In the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element not specified a name of JavaScript engine.
+    <value>In the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element not specified a name of JS engine.
 
-If you have not installed JavaScript engine, then for correct working of this module is recommended to install one of the following NuGet packages: {1}
+If you have not installed JS engine, then for correct working of this module is recommended to install one of the following NuGet packages: {1}
 
-After package is installed, need set a name of JavaScript engine (for example, `{2}`) to the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element.</value>
+After package is installed, need set a name of JS engine (for example, `{2}`) to the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element.</value>
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
-    <value>{0}-minifier with name `{1}` is not registered in configuration file.</value>
+    <value>{0} minifier with name `{1}` is not registered in configuration file.</value>
   </data>
   <data name="Configuration_PostProcessorNotRegistered" xml:space="preserve">
-    <value>{0}-postprocessor with name `{1}` is not registered in configuration file.</value>
+    <value>{0} postprocessor with name `{1}` is not registered in configuration file.</value>
   </data>
   <data name="Configuration_TranslatorNotRegistered" xml:space="preserve">
     <value>Translator, which compiles the code on intermediate language to {0}, and has the name `{1}` is not registered in  configuration file.</value>
@@ -270,25 +270,25 @@ After package is installed, need set a name of JavaScript engine (for example, `
     <value>File extension '{0}' has already been added to mapping collection.</value>
   </data>
   <data name="Minifiers_MinificationFailed" xml:space="preserve">
-    <value>During minification of {0}-code, readed from the file '{1}', by {2} error has occurred.	
+    <value>During minification of {0} code, readed from the file '{1}', by {2} error has occurred.	
 See more details:
 
 {3}</value>
   </data>
   <data name="Minifiers_MinificationSyntaxError" xml:space="preserve">
-    <value>During minification of {0}-code, readed from the file '{1}', by {2} syntax error has occurred. 
+    <value>During minification of {0} code, readed from the file '{1}', by {2} syntax error has occurred. 
 See more details:
 
 {3}</value>
   </data>
   <data name="PostProcessors_PostprocessingFailed" xml:space="preserve">
-    <value>During postprocessing of {0}-code, readed from the file '{1}', by {2} error has occurred.	
+    <value>During postprocessing of {0} code, readed from the file '{1}', by {2} error has occurred.	
 See more details:
 
 {3}</value>
   </data>
   <data name="PostProcessors_PostprocessingSyntaxError" xml:space="preserve">
-    <value>During postprocessing of {0}-code, readed from the file '{1}', by {2} syntax error has occurred. 
+    <value>During postprocessing of {0} code, readed from the file '{1}', by {2} syntax error has occurred. 
 See more details:
 
 {3}</value>
@@ -297,13 +297,13 @@ See more details:
     <value>Resource with name '{0}' is null.</value>
   </data>
   <data name="Translators_TranslationFailed" xml:space="preserve">
-    <value>During translation of {0}-code, readed from the file '{2}', to {1}-code error has occurred.
+    <value>During translation of {0} code, readed from the file '{2}', to {1} code error has occurred.
 See more details:
 
 {3}</value>
   </data>
   <data name="Translators_TranslationSyntaxError" xml:space="preserve">
-    <value>During translation of {0}-code, readed from the file '{2}', to {1}-code syntax error has occurred. 
+    <value>During translation of {0} code, readed from the file '{2}', to {1} code syntax error has occurred. 
 See more details:
 
 {3}</value>

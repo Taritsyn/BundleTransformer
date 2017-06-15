@@ -19,7 +19,7 @@ namespace BundleTransformer.Core.Transformers
 	public sealed class ScriptTransformer : TransformerBase
 	{
 		/// <summary>
-		/// List of JS-files with Microsoft-style extensions
+		/// List of JS files with Microsoft-style extensions
 		/// </summary>
 		private readonly string[] _jsFilesWithMsStyleExtensions;
 

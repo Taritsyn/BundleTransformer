@@ -23,7 +23,7 @@ using BtLineFeedType = BundleTransformer.SassAndScss.LineFeedType;
 namespace BundleTransformer.SassAndScss.Translators
 {
 	/// <summary>
-	/// Translator that responsible for translation of Sass- or SCSS-code to CSS-code
+	/// Translator that responsible for translation of Sass or SCSS code to CSS code
 	/// </summary>
 	public sealed class SassAndScssTranslator : TranslatorWithNativeMinificationBase
 	{
@@ -99,16 +99,16 @@ namespace BundleTransformer.SassAndScss.Translators
 
 
 		/// <summary>
-		/// Constructs an instance of Sass- and SCSS-translator
+		/// Constructs an instance of Sass and SCSS translator
 		/// </summary>
 		public SassAndScssTranslator()
 			: this(BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs an instance of Sass- and SCSS-translator
+		/// Constructs an instance of Sass and SCSS translator
 		/// </summary>
-		/// <param name="sassAndScssConfig">Configuration settings of Sass- and SCSS-translator</param>
+		/// <param name="sassAndScssConfig">Configuration settings of Sass and SCSS translator</param>
 		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfig)
 		{
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
@@ -169,7 +169,7 @@ namespace BundleTransformer.SassAndScss.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of asset written on Sass or SCSS to CSS-code
+		/// Translates a code of asset written on Sass or SCSS to CSS code
 		/// </summary>
 		/// <param name="asset">Asset with code written on Sass or SCSS</param>
 		/// <returns>Asset with translated code</returns>
@@ -191,7 +191,7 @@ namespace BundleTransformer.SassAndScss.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of assets written on Sass or SCSS to CSS-code
+		/// Translates a code of assets written on Sass or SCSS to CSS code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on Sass or SCSS</param>
 		/// <returns>Set of assets with translated code</returns>

@@ -3,7 +3,7 @@
 namespace BundleTransformer.MicrosoftAjax.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Microsoft Ajax JS-minifier
+	/// Configuration settings of Microsoft Ajax JS minifier
 	/// </summary>
 	public sealed class JsMinifierSettings : MinifierSettingsBase
 	{

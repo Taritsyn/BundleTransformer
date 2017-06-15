@@ -6,12 +6,12 @@
 	public static class AssetTypeCode
 	{
 		/// <summary>
-		/// Mustache-asset
+		/// Mustache asset
 		/// </summary>
 		public static readonly string Mustache = "Mustache";
 
 		/// <summary>
-		/// Custom Hogan-asset
+		/// Custom Hogan asset
 		/// </summary>
 		public static readonly string Hogan = "Hogan";
 	}

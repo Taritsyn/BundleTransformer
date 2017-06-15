@@ -12,8 +12,8 @@ namespace BundleTransformer.Core.Filters
 {
 	/// <summary>
 	/// Filter that responsible for choosing appropriate version
-	/// of JS-file, depending on current mode of
-	/// web application (debug mode - debug versions of JS-asset files;
+	/// of JS file, depending on current mode of
+	/// web application (debug mode - debug versions of JS asset files;
 	/// release mode - minified versions)
 	/// </summary>
 	public sealed class JsFileExtensionsFilter : FileExtensionsFilterBase
@@ -24,43 +24,43 @@ namespace BundleTransformer.Core.Filters
 		private const string VERSION_NUMBER_PLACEHOLDER = @"$version$";
 
 		/// <summary>
-		/// List of regular expressions of JS-files with Microsoft-style extensions
+		/// List of regular expressions of JS files with Microsoft-style extensions
 		/// </summary>
 		private readonly List<Regex> _jsFilesWithMsStyleExtensionsRegExps;
 
 		/// <summary>
-		/// Extensions of JS-files for debug mode (standard style)
+		/// Extensions of JS files for debug mode (standard style)
 		/// </summary>
 		private static readonly string[] _debugJsExtensionsForStandardStyle = { ".js", ".min.js" };
 
 		/// <summary>
-		/// Extensions of JS-files for release mode (standard style)
+		/// Extensions of JS files for release mode (standard style)
 		/// </summary>
 		private static readonly string[] _releaseJsExtensionsForStandardStyle = { ".min.js", ".js" };
 
 		/// <summary>
-		/// Extensions of JS-files for debug mode (Microsoft style)
+		/// Extensions of JS files for debug mode (Microsoft style)
 		/// </summary>
 		private static readonly string[] _debugJsExtensionsForMicrosoftStyle = { ".debug.js", ".js" };
 
 		/// <summary>
-		/// Extensions of JS-files for release mode (Microsoft style)
+		/// Extensions of JS files for release mode (Microsoft style)
 		/// </summary>
 		private static readonly string[] _releaseJsExtensionsForMicrosoftStyle = { ".js", ".debug.js" };
 
 
 		/// <summary>
-		/// Constructs a instance of JS-file extensions filter
+		/// Constructs a instance of JS file extensions filter
 		/// </summary>
-		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
+		/// <param name="jsFilesWithMsStyleExtensions">JS files with Microsoft-style extensions list</param>
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions)
 			: this(jsFilesWithMsStyleExtensions, BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of JS-file extensions filter
+		/// Constructs a instance of JS file extensions filter
 		/// </summary>
-		/// <param name="jsFilesWithMsStyleExtensions">JS-files with Microsoft-style extensions list</param>
+		/// <param name="jsFilesWithMsStyleExtensions">JS files with Microsoft-style extensions list</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		public JsFileExtensionsFilter(string[] jsFilesWithMsStyleExtensions,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper) : base(virtualFileSystemWrapper)
@@ -94,11 +94,11 @@ namespace BundleTransformer.Core.Filters
 
 
 		/// <summary>
-		/// Chooses a appropriate versions of JS-files, depending on
+		/// Chooses a appropriate versions of JS files, depending on
 		/// current mode of web application
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of JS-assets adapted for current mode of web application</returns>
+		/// <param name="assets">Set of JS assets</param>
+		/// <returns>Set of JS assets adapted for current mode of web application</returns>
 		public override IList<IAsset> Transform(IList<IAsset> assets)
 		{
 			if (assets == null)
@@ -124,13 +124,13 @@ namespace BundleTransformer.Core.Filters
 		}
 
 		/// <summary>
-		/// Gets a version of JS-file virtual path, most appropriate for
+		/// Gets a version of JS file virtual path, most appropriate for
 		/// current mode of web application
 		/// </summary>
-		/// <param name="assetVirtualPath">JS-asset file virtual path</param>
+		/// <param name="assetVirtualPath">JS asset file virtual path</param>
 		/// <param name="isMinified">Flag indicating what appropriate
-		/// virtual file path version of JS-asset is minified</param>
-		/// <returns>Virtual path to JS-file, corresponding current mode
+		/// virtual file path version of JS asset is minified</param>
+		/// <returns>Virtual path to JS file, corresponding current mode
 		/// of web application</returns>
 		protected override string GetAppropriateAssetFilePath(string assetVirtualPath, out bool isMinified)
 		{
@@ -166,10 +166,10 @@ namespace BundleTransformer.Core.Filters
 		}
 
 		/// <summary>
-		/// Checks a existance of specified JS-file in list of
-		/// JS-files that have extensions in Microsoft-style
+		/// Checks a existance of specified JS file in list of
+		/// JS files that have extensions in Microsoft-style
 		/// </summary>
-		/// <param name="assetVirtualPath">JS-asset virtual file path</param>
+		/// <param name="assetVirtualPath">JS asset virtual file path</param>
 		/// <returns>Checking result (true – exist; false – not exist)</returns>
 		private bool IsJsFileWithMicrosoftStyleExtension(string assetVirtualPath)
 		{

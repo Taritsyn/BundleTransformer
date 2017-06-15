@@ -3,7 +3,7 @@
 namespace BundleTransformer.Core.Configuration
 {
 	/// <summary>
-	/// Configuration settings of the debugging HTTP-handler, that responsible
+	/// Configuration settings of the debugging HTTP handler, that responsible
 	/// for text output of processed asset
 	/// </summary>
 	public sealed class AssetHandlerSettings : ConfigurationElement

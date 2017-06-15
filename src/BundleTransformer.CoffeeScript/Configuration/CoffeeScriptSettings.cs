@@ -5,12 +5,12 @@ using BundleTransformer.Core.Configuration;
 namespace BundleTransformer.CoffeeScript.Configuration
 {
 	/// <summary>
-	/// Configuration settings of CoffeeScript-translator
+	/// Configuration settings of CoffeeScript translator
 	/// </summary>
 	public sealed class CoffeeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to allow compilation to JavaScript
+		/// Gets or sets a flag for whether to allow compilation to JS
 		/// without the top-level function safety wrapper
 		/// </summary>
 		[ConfigurationProperty("bare", DefaultValue = true)]
@@ -21,7 +21,7 @@ namespace BundleTransformer.CoffeeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

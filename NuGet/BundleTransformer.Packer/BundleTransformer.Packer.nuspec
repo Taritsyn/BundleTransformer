@@ -10,14 +10,14 @@
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Packer_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) version 3.0.
+		<description>BundleTransformer.Packer contains one minifier-adapter for minification of JS code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer (http://dean.edwards.name/packer/) version 3.0.
 
-As a JS-engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module is recommended to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
-		<summary>BundleTransformer.Packer contains one minifier-adapter for minification of JS-code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer version 3.0.</summary>
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
+		<summary>BundleTransformer.Packer contains one minifier-adapter for minification of JS code - `EdwardsJsMinifier`. `EdwardsJsMinifier` is based on the Dean Edwards' Packer version 3.0.</summary>
 		<releaseNotes>Now all calls of the `ExecuteResource` method takes the assembly as second parameter.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
-		<tags>System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Dean Edwards Packer</tags>
+		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Dean Edwards Packer</tags>
 		<dependencies>
 			<dependency id="BundleTransformer.Core" version="1.9.138" />
 			<dependency id="JavaScriptEngineSwitcher.Core" version="2.0.0" />

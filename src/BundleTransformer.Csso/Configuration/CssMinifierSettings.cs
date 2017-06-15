@@ -3,7 +3,7 @@
 namespace BundleTransformer.Csso.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Sergey Kryzhanovsky's CSS-minifier
+	/// Configuration settings of Sergey Kryzhanovsky's CSS minifier
 	/// </summary>
 	public sealed class CssMinifierSettings : ConfigurationElement
 	{

@@ -6,7 +6,7 @@
 	public static class AssetTypeCode
 	{
 		/// <summary>
-		/// TypeScript-asset
+		/// TypeScript asset
 		/// </summary>
 		public static readonly string TypeScript = "TypeScript";
 	}

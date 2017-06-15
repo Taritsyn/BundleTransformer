@@ -18,7 +18,7 @@ using BundleTransformer.Less.Resources;
 namespace BundleTransformer.Less.Internal
 {
 	/// <summary>
-	/// LESS-compiler
+	/// LESS compiler
 	/// </summary>
 	internal sealed class LessCompiler : IDisposable
 	{
@@ -28,12 +28,12 @@ namespace BundleTransformer.Less.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.Less.Resources";
 
 		/// <summary>
-		/// Name of file, which contains a LESS-library
+		/// Name of file, which contains a LESS library
 		/// </summary>
 		private const string LESS_LIBRARY_FILE_NAME = "less-combined.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a LESS-compiler helper
+		/// Name of file, which contains a LESS compiler helper
 		/// </summary>
 		private const string LESSC_HELPER_FILE_NAME = "lesscHelper.min.js";
 
@@ -84,9 +84,9 @@ namespace BundleTransformer.Less.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of LESS-compiler
+		/// Constructs a instance of LESS compiler
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="virtualFileManager">Virtual file manager</param>
 		/// <param name="options">Compilation options</param>
 		public LessCompiler(Func<IJsEngine> createJsEngineInstance,
@@ -118,10 +118,10 @@ namespace BundleTransformer.Less.Internal
 		}
 
 		/// <summary>
-		/// "Compiles" a LESS-code to CSS-code
+		/// "Compiles" a LESS code to CSS code
 		/// </summary>
 		/// <param name="content">Text content written on LESS</param>
-		/// <param name="path">Path to LESS-file</param>
+		/// <param name="path">Path to LESS file</param>
 		/// <returns>Compilation result</returns>
 		public CompilationResult Compile(string content, string path)
 		{
@@ -295,7 +295,7 @@ namespace BundleTransformer.Less.Internal
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current LESS-file</param>
+		/// <param name="currentFilePath">Path to current LESS file</param>
 		/// <returns>Detailed error message</returns>
 		private string FormatErrorDetails(JToken errorDetails, string sourceCode, string currentFilePath)
 		{

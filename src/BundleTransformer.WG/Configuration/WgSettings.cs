@@ -8,7 +8,7 @@ namespace BundleTransformer.WG.Configuration
 	public sealed class WgSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets a configuration settings of WebGrease Semantic CSS-minifier
+		/// Gets a configuration settings of WebGrease Semantic CSS minifier
 		/// </summary>
 		[ConfigurationProperty("css")]
 		public CssMinifierSettings CssMinifier

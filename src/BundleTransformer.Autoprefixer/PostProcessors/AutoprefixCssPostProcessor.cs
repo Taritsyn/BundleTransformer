@@ -17,7 +17,7 @@ using BundleTransformer.Autoprefixer.Internal;
 namespace BundleTransformer.Autoprefixer.PostProcessors
 {
 	/// <summary>
-	/// Postprocessor that actualizes a vendor prefixes in CSS-code
+	/// Postprocessor that actualizes a vendor prefixes in CSS code
 	/// by using Andrey Sitnik's Autoprefixer
 	/// </summary>
 	public sealed class AutoprefixCssPostProcessor : PostProcessorBase
@@ -25,7 +25,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		/// <summary>
 		/// Name of postprocessor
 		/// </summary>
-		const string POSTPROCESSOR_NAME = "Autoprefix CSS-postprocessor";
+		const string POSTPROCESSOR_NAME = "Autoprefix CSS postprocessor";
 
 		/// <summary>
 		/// Name of code type
@@ -33,7 +33,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		const string CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -118,7 +118,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 
 
 		/// <summary>
-		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
+		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS postprocessor
 		/// </summary>
 		public AutoprefixCssPostProcessor()
 			: this(null,
@@ -127,11 +127,11 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS-postprocessor
+		/// Constructs a instance of Andrey Sitnik's Autoprefix CSS postprocessor
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="autoprefixerConfig">Configuration settings of Andrey Sitnik's Autoprefix CSS-postprocessor</param>
+		/// <param name="autoprefixerConfig">Configuration settings of Andrey Sitnik's Autoprefix CSS postprocessor</param>
 		public AutoprefixCssPostProcessor(Func<IJsEngine> createJsEngineInstance,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			AutoprefixerSettings autoprefixerConfig)
@@ -160,7 +160,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"autoprefixer",
 							@"
-  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
   * JavaScriptEngineSwitcher.V8
   * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")
@@ -192,10 +192,10 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		}
 
 		/// <summary>
-		/// Actualizes a vendor prefixes in CSS-asset by using Andrey Sitnik's Autoprefixer
+		/// Actualizes a vendor prefixes in CSS asset by using Andrey Sitnik's Autoprefixer
 		/// </summary>
-		/// <param name="asset">CSS-asset</param>
-		/// <returns>Processed CSS-asset</returns>
+		/// <param name="asset">CSS asset</param>
+		/// <returns>Processed CSS asset</returns>
 		public override IAsset PostProcess(IAsset asset)
 		{
 			if (asset == null)
@@ -214,10 +214,10 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		}
 
 		/// <summary>
-		/// Actualizes a vendor prefixes in CSS-assets by using Andrey Sitnik's Autoprefixer
+		/// Actualizes a vendor prefixes in CSS assets by using Andrey Sitnik's Autoprefixer
 		/// </summary>
-		/// <param name="assets">Set of CSS-assets</param>
-		/// <returns>Set of processed CSS-assets</returns>
+		/// <param name="assets">Set of CSS assets</param>
+		/// <returns>Set of processed CSS assets</returns>
 		public override IList<IAsset> PostProcess(IList<IAsset> assets)
 		{
 			if (assets == null)

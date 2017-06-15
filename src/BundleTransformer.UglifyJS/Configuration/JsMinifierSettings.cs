@@ -3,7 +3,7 @@
 namespace BundleTransformer.UglifyJs.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Uglify JS-minifier
+	/// Configuration settings of Uglify JS minifier
 	/// </summary>
 	public sealed class JsMinifierSettings : ConfigurationElement
 	{

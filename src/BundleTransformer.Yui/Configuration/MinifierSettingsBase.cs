@@ -19,7 +19,7 @@ namespace BundleTransformer.Yui.Configuration
 
 		/// <summary>
 		/// Gets or sets a column number, after which must be inserted a line break.
-		/// Specify 0 to get a line break after each semi-colon in JavaScript,
+		/// Specify 0 to get a line break after each semi-colon in JS,
 		/// and after each rule in CSS.
 		/// </summary>
 		[ConfigurationProperty("lineBreakPosition", DefaultValue = -1)]

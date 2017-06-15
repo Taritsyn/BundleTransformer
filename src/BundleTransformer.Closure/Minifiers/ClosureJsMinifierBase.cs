@@ -15,7 +15,7 @@ using BundleTransformer.Closure.Internal;
 namespace BundleTransformer.Closure.Minifiers
 {
 	/// <summary>
-	/// Base class of minifier, which produces minifiction of JS-code
+	/// Base class of minifier, which produces minifiction of JS code
 	/// by using Google Closure Compiler
 	/// </summary>
 	public abstract class ClosureJsMinifierBase : IMinifier
@@ -36,7 +36,7 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets a list of common JS-externs file paths
+		/// Gets or sets a list of common JS externs file paths
 		/// </summary>
 		public IList<string> CommonExternsFilePaths
 		{
@@ -45,14 +45,14 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets a degree of compression and optimization to apply to your JavaScript.
+		/// Gets or sets a degree of compression and optimization to apply to your JS.
 		/// There are 3 possible compilation levels:
-		/// WhitespaceOnly - just removes whitespace and comments from your JavaScript;
+		/// WhitespaceOnly - just removes whitespace and comments from your JS;
 		/// Simple - performs compression and optimization that does not interfere with
-		/// the interaction between the compiled JavaScript and other JavaScript.
+		/// the interaction between the compiled JS and other JS.
 		/// This level renames only local variables;
 		/// Advanced - achieves the highest level of compression by renaming symbols in your
-		/// JavaScript. When using this type of compilation you must perform extra steps
+		/// JS. When using this type of compilation you must perform extra steps
 		/// to preserve references to external symbols.
 		/// </summary>
 		public CompilationLevel CompilationLevel
@@ -62,7 +62,7 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets a list of JS-externs file mappings
+		/// Gets or sets a list of JS externs file mappings
 		/// </summary>
 		public IList<JsExternsFileMapping> ExternsFileMappings
 		{
@@ -106,7 +106,7 @@ namespace BundleTransformer.Closure.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of Closure JS-minifier
+		/// Constructs a instance of Closure JS minifier
 		/// </summary>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="closureConfig">Configuration settings of Closure Minifier</param>
@@ -134,23 +134,23 @@ namespace BundleTransformer.Closure.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of JS-asset
+		/// Produces a code minifiction of JS asset
 		/// </summary>
-		/// <param name="asset">JS-asset</param>
-		/// <returns>JS-asset with minified text content</returns>
+		/// <param name="asset">JS asset</param>
+		/// <returns>JS asset with minified text content</returns>
 		public abstract IAsset Minify(IAsset asset);
 
 		/// <summary>
-		/// Produces a code minifiction of JS-assets
+		/// Produces a code minifiction of JS assets
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of JS-assets with minified text content</returns>
+		/// <param name="assets">Set of JS assets</param>
+		/// <returns>Set of JS assets with minified text content</returns>
 		public abstract IList<IAsset> Minify(IList<IAsset> assets);
 
 		/// <summary>
-		/// Gets a list of common JS-externs dependencies
+		/// Gets a list of common JS externs dependencies
 		/// </summary>
-		/// <returns>List of common JS-externs dependencies</returns>
+		/// <returns>List of common JS externs dependencies</returns>
 		protected DependencyCollection GetCommonExternsDependencies()
 		{
 			IList<string> commonExternsFilePaths = CommonExternsFilePaths;
@@ -173,10 +173,10 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Gets a list of asset JS-externs dependencies
+		/// Gets a list of asset JS externs dependencies
 		/// </summary>
 		/// <param name="asset">Asset</param>
-		/// <returns>List of asset JS-externs dependencies</returns>
+		/// <returns>List of asset JS externs dependencies</returns>
 		protected DependencyCollection GetAssetExternsDependencies(IAsset asset)
 		{
 			IList<JsExternsFileMapping> externsFileMappings = ExternsFileMappings;
@@ -223,11 +223,11 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Fills a list of asset JS-externs file paths
+		/// Fills a list of asset JS externs file paths
 		/// </summary>
 		/// <param name="asset">Asset</param>
-		/// <param name="externsFileMappings">List of JS-externs file mappings</param>
-		/// <param name="assetExternsFilePaths">List of asset JS-externs file paths</param>
+		/// <param name="externsFileMappings">List of JS externs file mappings</param>
+		/// <param name="assetExternsFilePaths">List of asset JS externs file paths</param>
 		private void FillAssetExternsFilePaths(IAsset asset, IList<JsExternsFileMapping> externsFileMappings,
 			IList<string> assetExternsFilePaths)
 		{
@@ -249,10 +249,10 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Loads a JS-externs dependencies from virtual file system
+		/// Loads a JS externs dependencies from virtual file system
 		/// </summary>
-		/// <param name="externsFilePaths">List of JS-externs file paths</param>
-		/// <returns>List of JS-externs dependencies</returns>
+		/// <param name="externsFilePaths">List of JS externs file paths</param>
+		/// <returns>List of JS externs dependencies</returns>
 		private DependencyCollection LoadExternsDependenciesFromVirtualFileSystem(IList<string> externsFilePaths)
 		{
 			var externsDependencies = new DependencyCollection();
@@ -278,8 +278,8 @@ namespace BundleTransformer.Closure.Minifiers
 		/// Fills a list of virtual paths to other files required by the primary asset
 		/// </summary>
 		/// <param name="asset">Asset</param>
-		/// <param name="commonExternsDependencies">List of common JS-externs dependencies</param>
-		/// <param name="assetExternsDependencies">List of asset JS-externs dependencies</param>
+		/// <param name="commonExternsDependencies">List of common JS externs dependencies</param>
+		/// <param name="assetExternsDependencies">List of asset JS externs dependencies</param>
 		protected static void FillAssetVirtualPathDependencies(IAsset asset,
 			DependencyCollection commonExternsDependencies, DependencyCollection assetExternsDependencies)
 		{
@@ -316,7 +316,7 @@ namespace BundleTransformer.Closure.Minifiers
 		/// Maps a common settings
 		/// </summary>
 		/// <param name="minifier">Minifier</param>
-		/// <param name="commonJsMinifierConfig">Common configuration settings of JS-minifier</param>
+		/// <param name="commonJsMinifierConfig">Common configuration settings of JS minifier</param>
 		protected static void MapCommonSettings(ClosureJsMinifierBase minifier,
 			JsMinifierSettingsBase commonJsMinifierConfig)
 		{
@@ -328,7 +328,7 @@ namespace BundleTransformer.Closure.Minifiers
 		}
 
 		/// <summary>
-		/// Fills a JavaScript compilation options
+		/// Fills a JS compilation options
 		/// </summary>
 		/// <returns>Compilation options</returns>
 		internal void FillJsCompilationOptions(JsCompilationOptionsBase options)

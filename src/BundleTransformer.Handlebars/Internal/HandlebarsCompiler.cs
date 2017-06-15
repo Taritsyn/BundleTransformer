@@ -16,7 +16,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.Handlebars.Internal
 {
 	/// <summary>
-	/// Handlebars-compiler
+	/// Handlebars compiler
 	/// </summary>
 	internal sealed class HandlebarsCompiler : IDisposable
 	{
@@ -26,12 +26,12 @@ namespace BundleTransformer.Handlebars.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.Handlebars.Resources";
 
 		/// <summary>
-		/// Name of file, which contains a Handlebars-library
+		/// Name of file, which contains a Handlebars library
 		/// </summary>
 		private const string HANDLEBARS_LIBRARY_FILE_NAME = "handlebars.min.js";
 
 		/// <summary>
-		/// Name of file, which contains a Handlebars-compiler helper
+		/// Name of file, which contains a Handlebars compiler helper
 		/// </summary>
 		private const string HBS_HELPER_FILE_NAME = "hbsHelper.min.js";
 
@@ -67,9 +67,9 @@ namespace BundleTransformer.Handlebars.Internal
 
 
 		/// <summary>
-		/// Constructs a instance of Handlebars-compiler
+		/// Constructs a instance of Handlebars compiler
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="options">Compilation options</param>
 		public HandlebarsCompiler(Func<IJsEngine> createJsEngineInstance, CompilationOptions options)
 		{
@@ -94,11 +94,11 @@ namespace BundleTransformer.Handlebars.Internal
 		}
 
 		/// <summary>
-		/// "Compiles" Handlebars-template to JS-code
+		/// "Compiles" Handlebars template to JS code
 		/// </summary>
-		/// <param name="content">Text content of Handlebars-template</param>
-		/// <param name="path">Path to Handlebars-file</param>
-		/// <returns>Translated Handlebars-template</returns>
+		/// <param name="content">Text content of Handlebars template</param>
+		/// <param name="path">Path to Handlebars file</param>
+		/// <returns>Translated Handlebars template</returns>
 		public string Compile(string content, string path)
 		{
 			Initialize();
@@ -252,7 +252,7 @@ namespace BundleTransformer.Handlebars.Internal
 		/// </summary>
 		/// <param name="errorDetails">Error details</param>
 		/// <param name="sourceCode">Source code</param>
-		/// <param name="currentFilePath">Path to current Handlebars-file</param>
+		/// <param name="currentFilePath">Path to current Handlebars file</param>
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(JToken errorDetails, string sourceCode,
 			string currentFilePath)

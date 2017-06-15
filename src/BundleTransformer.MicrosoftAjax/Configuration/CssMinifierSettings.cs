@@ -3,7 +3,7 @@
 namespace BundleTransformer.MicrosoftAjax.Configuration
 {
 	/// <summary>
-	/// Configuration settings of Microsoft Ajax CSS-minifier
+	/// Configuration settings of Microsoft Ajax CSS minifier
 	/// </summary>
 	public sealed class CssMinifierSettings : MinifierSettingsBase
 	{
@@ -29,7 +29,7 @@ namespace BundleTransformer.MicrosoftAjax.Configuration
 
 		/// <summary>
 		/// Gets or sets a value indicating whether to minify the
-		/// JavaScript within expression functions
+		/// JS within expression functions
 		/// </summary>
 		[ConfigurationProperty("minifyExpressions", DefaultValue = true)]
 		public bool MinifyExpressions

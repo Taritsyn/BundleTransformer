@@ -17,7 +17,7 @@ using BundleTransformer.TypeScript.Internal;
 namespace BundleTransformer.TypeScript.Translators
 {
 	/// <summary>
-	/// Translator that responsible for translation of TypeScript-code to JS-code
+	/// Translator that responsible for translation of TypeScript code to JS code
 	/// </summary>
 	public sealed class TypeScriptTranslator : ITranslator
 	{
@@ -32,7 +32,7 @@ namespace BundleTransformer.TypeScript.Translators
 		const string OUTPUT_CODE_TYPE = "JS";
 
 		/// <summary>
-		/// Delegate that creates an instance of JavaScript engine
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
 
@@ -321,7 +321,7 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to run TypeScript to JavaScript transpilation
+		/// Gets or sets a flag for whether to run TypeScript to JS transpilation
 		/// only (skip other passes)
 		/// </summary>
 		public bool TranspileOnly
@@ -332,7 +332,7 @@ namespace BundleTransformer.TypeScript.Translators
 
 
 		/// <summary>
-		/// Constructs a instance of TypeScript-translator
+		/// Constructs a instance of TypeScript translator
 		/// </summary>
 		public TypeScriptTranslator()
 			: this(null,
@@ -341,11 +341,11 @@ namespace BundleTransformer.TypeScript.Translators
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of TypeScript-translator
+		/// Constructs a instance of TypeScript translator
 		/// </summary>
-		/// <param name="createJsEngineInstance">Delegate that creates an instance of JavaScript engine</param>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
 		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		/// <param name="tsConfig">Configuration settings of TypeScript-translator</param>
+		/// <param name="tsConfig">Configuration settings of TypeScript translator</param>
 		public TypeScriptTranslator(Func<IJsEngine> createJsEngineInstance,
 			IVirtualFileSystemWrapper virtualFileSystemWrapper,
 			TypeScriptSettings tsConfig)
@@ -410,7 +410,7 @@ namespace BundleTransformer.TypeScript.Translators
 
 
 		/// <summary>
-		/// Translates a code of asset written on TypeScript to JS-code
+		/// Translates a code of asset written on TypeScript to JS code
 		/// </summary>
 		/// <param name="asset">Asset with code written on TypeScript</param>
 		/// <returns>Asset with translated code</returns>
@@ -433,7 +433,7 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
-		/// Translates a code of assets written on TypeScript to JS-code
+		/// Translates a code of assets written on TypeScript to JS code
 		/// </summary>
 		/// <param name="assets">Set of assets with code written on TypeScript</param>
 		/// <returns>Set of assets with translated code</returns>

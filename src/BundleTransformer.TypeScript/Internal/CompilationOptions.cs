@@ -279,7 +279,7 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to run TypeScript to JavaScript transpilation
+		/// Gets or sets a flag for whether to run TypeScript to JS transpilation
 		/// only (skip other passes)
 		/// </summary>
 		public bool TranspileOnly

@@ -5,7 +5,7 @@ using BundleTransformer.Core.Configuration;
 namespace BundleTransformer.TypeScript.Configuration
 {
 	/// <summary>
-	/// Configuration settings of TypeScript-translator
+	/// Configuration settings of TypeScript translator
 	/// </summary>
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
@@ -308,7 +308,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to run TypeScript to JavaScript transpilation
+		/// Gets or sets a flag for whether to run TypeScript to JS transpilation
 		/// only (skip other passes)
 		/// </summary>
 		[ConfigurationProperty("transpileOnly", DefaultValue = false)]
@@ -319,7 +319,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of JavaScript engine
+		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]
 		public JsEngineSettings JsEngine

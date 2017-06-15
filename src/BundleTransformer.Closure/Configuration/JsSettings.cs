@@ -3,12 +3,12 @@
 namespace BundleTransformer.Closure.Configuration
 {
 	/// <summary>
-	/// Configuration settings of minification JS-assets
+	/// Configuration settings of minification JS assets
 	/// </summary>
 	public sealed class JsSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets a configuration settings of Local JS-minifier
+		/// Gets a configuration settings of Local JS minifier
 		/// </summary>
 		[ConfigurationProperty("local")]
 		public LocalJsMinifierSettings Local
@@ -17,7 +17,7 @@ namespace BundleTransformer.Closure.Configuration
 		}
 
 		/// <summary>
-		/// Gets a configuration settings of Remote JS-minifier
+		/// Gets a configuration settings of Remote JS minifier
 		/// </summary>
 		[ConfigurationProperty("remote")]
 		public RemoteJsMinifierSettings Remote
@@ -26,7 +26,7 @@ namespace BundleTransformer.Closure.Configuration
 		}
 
 		/// <summary>
-		/// Gets a list of registered common JS-externs files
+		/// Gets a list of registered common JS externs files
 		/// </summary>
 		[ConfigurationProperty("commonExternsFiles")]
 		public CommonJsExternsFileRegistrationCollection CommonExternsFiles
@@ -35,7 +35,7 @@ namespace BundleTransformer.Closure.Configuration
 		}
 
 		/// <summary>
-		/// Gets a list of registered JS-externs file mappings
+		/// Gets a list of registered JS externs file mappings
 		/// </summary>
 		[ConfigurationProperty("externsFileMappings")]
 		public JsExternsFileMappingRegistrationCollection ExternMappings

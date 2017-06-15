@@ -21,7 +21,7 @@ using YuiStrings = BundleTransformer.Yui.Resources.Strings;
 namespace BundleTransformer.Yui.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code
+	/// Minifier, which produces minifiction of JS code
 	/// by using YUI Compressor for .NET
 	/// </summary>
 	public sealed class YuiJsMinifier : YuiMinifierBase
@@ -29,7 +29,7 @@ namespace BundleTransformer.Yui.Minifiers
 		/// <summary>
 		/// Name of minifier
 		/// </summary>
-		const string MINIFIER_NAME = "YUI JS-minifier";
+		const string MINIFIER_NAME = "YUI JS minifier";
 
 		/// <summary>
 		/// Name of code type
@@ -37,7 +37,7 @@ namespace BundleTransformer.Yui.Minifiers
 		const string CODE_TYPE = "JS";
 
 		/// <summary>
-		/// JS-compressor
+		/// JS compressor
 		/// </summary>
 		private readonly JavaScriptCompressor _jsCompressor;
 
@@ -118,7 +118,7 @@ namespace BundleTransformer.Yui.Minifiers
 
 		/// <summary>
 		/// Gets or sets a column number, after which must be inserted a line break.
-		/// Specify 0 to get a line break after each semi-colon in JavaScript.
+		/// Specify 0 to get a line break after each semi-colon in JS.
 		/// </summary>
 		public override int LineBreakPosition
 		{
@@ -149,14 +149,14 @@ namespace BundleTransformer.Yui.Minifiers
 
 
 		/// <summary>
-		/// Constructs a instance of YUI JS-minifier
+		/// Constructs a instance of YUI JS minifier
 		/// </summary>
 		public YuiJsMinifier()
 			: this(BundleTransformerContext.Current.Configuration.GetYuiSettings())
 		{ }
 
 		/// <summary>
-		/// Constructs a instance of YUI JS-minifier
+		/// Constructs a instance of YUI JS minifier
 		/// </summary>
 		/// <param name="yuiConfig">Configuration settings of YUI Minifier</param>
 		public YuiJsMinifier(YuiSettings yuiConfig)
@@ -177,10 +177,10 @@ namespace BundleTransformer.Yui.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of JS-asset by using YUI Compressor for .NET
+		/// Produces a code minifiction of JS asset by using YUI Compressor for .NET
 		/// </summary>
-		/// <param name="asset">JS-asset</param>
-		/// <returns>JS-asset with minified text content</returns>
+		/// <param name="asset">JS asset</param>
+		/// <returns>JS asset with minified text content</returns>
 		public override IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -202,10 +202,10 @@ namespace BundleTransformer.Yui.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of JS-assets by using YUI Compressor for .NET
+		/// Produces a code minifiction of JS assets by using YUI Compressor for .NET
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of JS-assets with minified text content</returns>
+		/// <param name="assets">Set of JS assets</param>
+		/// <returns>Set of JS assets with minified text content</returns>
 		public override IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

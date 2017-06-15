@@ -11,7 +11,7 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 namespace BundleTransformer.JsMin.Minifiers
 {
 	/// <summary>
-	/// Minifier, which produces minifiction of JS-code
+	/// Minifier, which produces minifiction of JS code
 	/// by using C# port of Douglas Crockford's JSMin
 	/// </summary>
 	public sealed class CrockfordJsMinifier : IMinifier
@@ -28,11 +28,11 @@ namespace BundleTransformer.JsMin.Minifiers
 
 
 		/// <summary>
-		/// Produces a code minifiction of JS-asset by using C# port of
+		/// Produces a code minifiction of JS asset by using C# port of
 		/// Douglas Crockford's JSMin
 		/// </summary>
-		/// <param name="asset">JS-asset</param>
-		/// <returns>JS-asset with minified text content</returns>
+		/// <param name="asset">JS asset</param>
+		/// <returns>JS asset with minified text content</returns>
 		public IAsset Minify(IAsset asset)
 		{
 			if (asset == null)
@@ -53,11 +53,11 @@ namespace BundleTransformer.JsMin.Minifiers
 		}
 
 		/// <summary>
-		/// Produces a code minifiction of JS-assets by using C# port of
+		/// Produces a code minifiction of JS assets by using C# port of
 		/// Douglas Crockford's JSMin
 		/// </summary>
-		/// <param name="assets">Set of JS-assets</param>
-		/// <returns>Set of JS-assets with minified text content</returns>
+		/// <param name="assets">Set of JS assets</param>
+		/// <returns>Set of JS assets with minified text content</returns>
 		public IList<IAsset> Minify(IList<IAsset> assets)
 		{
 			if (assets == null)

@@ -1,7 +1,7 @@
 ﻿namespace BundleTransformer.Packer.Internal
 {
 	/// <summary>
-	/// JavaScript packing options
+	/// JS packing options
 	/// </summary>
 	internal sealed class PackingOptions
 	{
@@ -25,7 +25,7 @@
 
 
 		/// <summary>
-		/// Constructs a instance of the JavaScript packing options
+		/// Constructs a instance of the JS packing options
 		/// </summary>
 		public PackingOptions()
 		{
