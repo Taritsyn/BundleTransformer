@@ -44,6 +44,12 @@ This extension will help your web applications successfully pass a most part of 
 ## Documentation
 Documentation is located on the [wiki](https://github.com/Taritsyn/BundleTransformer/wiki) of this Repo.
 
+## Release History
+See the [changelog](CHANGELOG.md).
+
+## Old Project Site
+Old project site are located on [CodePlex](https://bundletransformer.codeplex.com/).
+
 ## Who's Using Bundle Transformer
 If you use Bundle Transformer in some project, please send me a message so I can include it in this list:
 
