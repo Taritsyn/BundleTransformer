@@ -47,7 +47,7 @@ if (!String.prototype.hasOwnProperty('repeat')) {
 }
 
 /*!
- * Clean-css v4.1.3
+ * Clean-css v4.1.4
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -5582,7 +5582,8 @@ var CleanCss = (function(){
 		function removeUnusedAtRule(tokens, matchCallback, markCallback, context) {
 		  var atRules = {};
 		  var atRule;
-		  var token;
+		  var atRuleTokens;
+		  var atRuleToken;
 		  var zeroAt;
 		  var i, l;
 
@@ -5597,9 +5598,13 @@ var CleanCss = (function(){
 		  markUsedAtRules(tokens, markCallback, atRules, context);
 
 		  for (atRule in atRules) {
-			token = atRules[atRule];
-			zeroAt = token[0] == Token.AT_RULE ? 1 : 2;
-			token[zeroAt] = [];
+			atRuleTokens = atRules[atRule];
+
+			for (i = 0, l = atRuleTokens.length; i < l; i++) {
+			  atRuleToken = atRuleTokens[i];
+			  zeroAt = atRuleToken[0] == Token.AT_RULE ? 1 : 2;
+			  atRuleToken[zeroAt] = [];
+			}
 		  }
 		}
 
@@ -5623,7 +5628,8 @@ var CleanCss = (function(){
 
 		  if (token[0] == Token.AT_RULE_BLOCK && token[1][0][1].indexOf('@counter-style') === 0) {
 			match = token[1][0][1].split(' ')[1];
-			atRules[match] = token;
+			atRules[match] = atRules[match] || [];
+			atRules[match].push(token);
 		  }
 		}
 
@@ -5665,7 +5671,8 @@ var CleanCss = (function(){
 
 			  if (property[1][1] == 'font-family') {
 				match = property[2][1].toLowerCase();
-				atRules[match] = token;
+				atRules[match] = atRules[match] || [];
+				atRules[match].push(token);
 				break;
 			  }
 			}
@@ -5718,7 +5725,8 @@ var CleanCss = (function(){
 
 		  if (token[0] == Token.NESTED_BLOCK && keyframeRegex.test(token[1][0][1])) {
 			match = token[1][0][1].split(' ')[1];
-			atRules[match] = token;
+			atRules[match] = atRules[match] || [];
+			atRules[match].push(token);
 		  }
 		}
 
@@ -5763,7 +5771,8 @@ var CleanCss = (function(){
 
 		  if (token[0] == Token.AT_RULE && token[1].indexOf('@namespace') === 0) {
 			match = token[1].split(' ')[1];
-			atRules[match] = token;
+			atRules[match] = atRules[match] || [];
+			atRules[match].push(token);
 		  }
 		}
 
