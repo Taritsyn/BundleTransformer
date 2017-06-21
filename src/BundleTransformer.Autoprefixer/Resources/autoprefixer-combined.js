@@ -1,4 +1,60 @@
 /*!
+ * Array.prototype.fill polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fill
+ */
+if (!Array.prototype.hasOwnProperty('fill')) {
+	var fillMethod = function (value) {
+		var arr,
+			length,
+			start,
+			relativeStart,
+			finalStart,
+			end,
+			relativeEnd,
+			finalEnd,
+			itemIndex
+			;
+
+		arr = this;
+		length = arr.length;
+
+		start = arguments[1];
+		relativeStart = parseInt(start, 10) || 0;
+		finalStart = relativeStart < 0 ?
+			Math.max(length + relativeStart, 0)
+			:
+			Math.min(relativeStart, length)
+			;
+
+		end = arguments[2];
+		relativeEnd = typeof end !== 'undefined' ? (parseInt(end, 10) || 0) : length;
+		finalEnd = relativeEnd < 0 ?
+			Math.max(length + relativeEnd, 0)
+			:
+			Math.min(relativeEnd, length)
+			;
+
+		itemIndex = finalStart;
+
+		while (itemIndex < finalEnd) {
+			arr[itemIndex] = value;
+			itemIndex++;
+		}
+
+		return arr;
+	};
+
+	if (Object.hasOwnProperty('defineProperty')) {
+		Object.defineProperty(Array.prototype, 'fill', {
+			value: fillMethod
+		});
+	}
+	else {
+		Array.prototype.fill = fillMethod;
+	}
+}
+
+/*!
  * Math.log2 polyfill
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/log2
  */

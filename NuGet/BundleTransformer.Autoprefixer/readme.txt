@@ -22,7 +22,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 7.1.1.2.
+   Added a `Array.prototype.fill` polyfill.
 
    ====================
    POST-INSTALL ACTIONS
