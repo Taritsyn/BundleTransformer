@@ -128,6 +128,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\DefaultLibraries\lib.esnext.full.d.ts" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.intl.d.ts" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"
