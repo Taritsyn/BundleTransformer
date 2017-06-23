@@ -21,7 +21,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of UglifyJS version 2.8.29.
+   1. Added support of UglifyJS version 2.8.29;
+   2. In code generation settings was changed a default value of `InlineScript`
+      property from `false` to `true`.
 
    ====================
    POST-INSTALL ACTIONS

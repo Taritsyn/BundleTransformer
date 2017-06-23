@@ -77,7 +77,7 @@ namespace BundleTransformer.UglifyJs.Configuration
 		/// Gets or sets a flag for whether to escape the slash in
 		/// occurrences of <code>&lt;/script</code> in strings
 		/// </summary>
-		[ConfigurationProperty("inlineScript", DefaultValue = false)]
+		[ConfigurationProperty("inlineScript", DefaultValue = true)]
 		public bool InlineScript
 		{
 			get { return (bool)this["inlineScript"]; }

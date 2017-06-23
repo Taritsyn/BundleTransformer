@@ -1985,7 +1985,7 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Initial indentation in spaces</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="inlineScript" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="inlineScript" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to escape the slash in occurrences of &lt;/script in strings</xs:documentation>
 			</xs:annotation>

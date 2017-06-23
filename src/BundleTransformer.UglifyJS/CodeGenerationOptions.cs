@@ -178,7 +178,7 @@
 			Comments = "some";
 			IndentLevel = 4;
 			IndentStart = 0;
-			InlineScript = false;
+			InlineScript = true;
 			KeepQuotedProperties = false;
 			MaxLineLength = 32000;
 			PreserveLine = false;
