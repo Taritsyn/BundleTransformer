@@ -1798,7 +1798,7 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to small optimization for sequences</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="collapseVars" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="collapseVars" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to collapse single-use `var` and `const` definitions when possible</xs:documentation>
 			</xs:annotation>

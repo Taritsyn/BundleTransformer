@@ -44,7 +44,7 @@ namespace BundleTransformer.UglifyJs.Configuration
 		/// Gets or sets a flag for whether to collapse single-use <code>var</code> and
 		/// <code>const</code> definitions when possible
 		/// </summary>
-		[ConfigurationProperty("collapseVars", DefaultValue = false)]
+		[ConfigurationProperty("collapseVars", DefaultValue = true)]
 		public bool CollapseVars
 		{
 			get { return (bool)this["collapseVars"]; }

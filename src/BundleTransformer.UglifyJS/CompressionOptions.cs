@@ -267,7 +267,7 @@
 			Angular = false;
 			Booleans = true;
 			Cascade = true;
-			CollapseVars = false;
+			CollapseVars = true;
 			Comparisons = true;
 			Compress = true;
 			Conditionals = true;
