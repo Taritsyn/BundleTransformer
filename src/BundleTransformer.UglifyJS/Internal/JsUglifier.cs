@@ -196,6 +196,7 @@ namespace BundleTransformer.UglifyJs.Internal
 
 			optionsJson.Add("parse", new JObject(
 				new JProperty("bare_returns", parsingOptions.BareReturns),
+				new JProperty("shebang", parsingOptions.Shebang),
 				new JProperty("strict", parsingOptions.Strict)
 			));
 

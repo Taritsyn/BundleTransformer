@@ -25,7 +25,8 @@
    2. In code generation settings was changed a default value of `InlineScript`
       property from `false` to `true`;
    3. In compression settings was changed a default value of `CollapseVars`
-      property from `false` to `true`.
+      property from `false` to `true`;
+   4. In parsing settings was added one new property - `Shebang` (default `true`).
 
    ====================
    POST-INSTALL ACTIONS

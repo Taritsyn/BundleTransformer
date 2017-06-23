@@ -127,6 +127,7 @@ namespace BundleTransformer.UglifyJs.Minifiers
 			ParsingOptions = new ParsingOptions
 			{
 				BareReturns = parsingConfig.BareReturns,
+				Shebang = parsingConfig.Shebang,
 				Strict = parsingConfig.Strict
 			};
 

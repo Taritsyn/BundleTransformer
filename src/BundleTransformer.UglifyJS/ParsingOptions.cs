@@ -16,6 +16,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to allow support <code>#!command</code> as the first line
+		/// </summary>
+		public bool Shebang
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disable automatic semicolon
 		/// insertion and support for trailing comma in arrays and objects
 		/// </summary>
@@ -32,6 +41,7 @@
 		public ParsingOptions()
 		{
 			BareReturns = false;
+			Shebang = true;
 			Strict = false;
 		}
 	}
