@@ -6,20 +6,20 @@
 	public sealed class ParsingOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to disable automatic semicolon
-		/// insertion and support for trailing comma in arrays and objects
+		/// Gets or sets a flag for whether to allow return outside of functions.
+		/// Useful when minifying CommonJS modules.
 		/// </summary>
-		public bool Strict
+		public bool BareReturns
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to allow return outside of functions.
-		/// Useful when minifying CommonJS modules.
+		/// Gets or sets a flag for whether to disable automatic semicolon
+		/// insertion and support for trailing comma in arrays and objects
 		/// </summary>
-		public bool BareReturns
+		public bool Strict
 		{
 			get;
 			set;
@@ -31,8 +31,8 @@
 		/// </summary>
 		public ParsingOptions()
 		{
-			Strict = false;
 			BareReturns = false;
+			Strict = false;
 		}
 	}
 }

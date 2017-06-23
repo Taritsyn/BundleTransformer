@@ -195,40 +195,40 @@ namespace BundleTransformer.UglifyJs.Internal
 			));
 
 			optionsJson.Add("parse", new JObject(
-				new JProperty("strict", parsingOptions.Strict),
-				new JProperty("bare_returns", parsingOptions.BareReturns)
+				new JProperty("bare_returns", parsingOptions.BareReturns),
+				new JProperty("strict", parsingOptions.Strict)
 			));
 
 			if (compressionOptions.Compress)
 			{
 				optionsJson.Add("compress", new JObject(
-					new JProperty("sequences", compressionOptions.Sequences),
-					new JProperty("properties", compressionOptions.PropertiesDotNotation),
-					new JProperty("dead_code", compressionOptions.DeadCode),
-					new JProperty("drop_debugger", compressionOptions.DropDebugger),
-					new JProperty("unsafe", compressionOptions.Unsafe),
-					new JProperty("conditionals", compressionOptions.Conditionals),
-					new JProperty("comparisons", compressionOptions.Comparisons),
-					new JProperty("evaluate", compressionOptions.Evaluate),
+					new JProperty("angular", compressionOptions.Angular),
 					new JProperty("booleans", compressionOptions.Booleans),
-					new JProperty("loops", compressionOptions.Loops),
-					new JProperty("unused", compressionOptions.Unused),
+					new JProperty("cascade", compressionOptions.Cascade),
+					new JProperty("collapse_vars", compressionOptions.CollapseVars),
+					new JProperty("comparisons", compressionOptions.Comparisons),
+					new JProperty("conditionals", compressionOptions.Conditionals),
+					new JProperty("dead_code", compressionOptions.DeadCode),
+					new JProperty("drop_console", compressionOptions.DropConsole),
+					new JProperty("drop_debugger", compressionOptions.DropDebugger),
+					new JProperty("evaluate", compressionOptions.Evaluate),
+					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
 					new JProperty("hoist_funs", compressionOptions.HoistFunctions),
-					new JProperty("keep_fargs", compressionOptions.KeepFunctionArgs),
-					new JProperty("keep_fnames", options.KeepFunctionNames),
 					new JProperty("hoist_vars", compressionOptions.HoistVars),
 					new JProperty("if_return", compressionOptions.IfReturn),
 					new JProperty("join_vars", compressionOptions.JoinVars),
-					new JProperty("collapse_vars", compressionOptions.CollapseVars),
-					new JProperty("cascade", compressionOptions.Cascade),
-					new JProperty("screw_ie8", options.ScrewIe8),
-					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
+					new JProperty("keep_fargs", compressionOptions.KeepFunctionArgs),
+					new JProperty("keep_fnames", options.KeepFunctionNames),
+					new JProperty("loops", compressionOptions.Loops),
+					new JProperty("negate_iife", compressionOptions.NegateIife),
+					new JProperty("passes", compressionOptions.Passes),
+					new JProperty("properties", compressionOptions.PropertiesDotNotation),
 					new JProperty("pure_getters", compressionOptions.PureGetters),
 					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions)),
-					new JProperty("negate_iife", compressionOptions.NegateIife),
-					new JProperty("drop_console", compressionOptions.DropConsole),
-					new JProperty("angular", compressionOptions.Angular),
-					new JProperty("passes", compressionOptions.Passes)
+					new JProperty("screw_ie8", options.ScrewIe8),
+					new JProperty("sequences", compressionOptions.Sequences),
+					new JProperty("unsafe", compressionOptions.Unsafe),
+					new JProperty("unused", compressionOptions.Unused)
 				));
 			}
 			else
@@ -240,11 +240,11 @@ namespace BundleTransformer.UglifyJs.Internal
 			if (manglingOptions.Mangle)
 			{
 				optionsJson.Add("mangle", new JObject(
-					new JProperty("except", ParseExcept(manglingOptions.Except)),
 					new JProperty("eval", manglingOptions.Eval),
-					new JProperty("toplevel", manglingOptions.TopLevel),
+					new JProperty("except", ParseExcept(manglingOptions.Except)),
+					new JProperty("keep_fnames", options.KeepFunctionNames),
 					new JProperty("screw_ie8", options.ScrewIe8),
-					new JProperty("keep_fnames", options.KeepFunctionNames)
+					new JProperty("toplevel", manglingOptions.TopLevel)
 				));
 			}
 			else
@@ -253,23 +253,23 @@ namespace BundleTransformer.UglifyJs.Internal
 			}
 
 			optionsJson.Add("output", new JObject(
+				new JProperty("ascii_only", codeGenerationOptions.AsciiOnly),
 				new JProperty("beautify", codeGenerationOptions.Beautify),
+				new JProperty("bracketize", codeGenerationOptions.Bracketize),
+				new JProperty("comments", codeGenerationOptions.Comments),
 				new JProperty("indent_level", codeGenerationOptions.IndentLevel),
 				new JProperty("indent_start", codeGenerationOptions.IndentStart),
-				new JProperty("quote_keys", codeGenerationOptions.QuoteKeys),
-				new JProperty("space_colon", codeGenerationOptions.SpaceColon),
-				new JProperty("ascii_only", codeGenerationOptions.AsciiOnly),
 				new JProperty("inline_script", codeGenerationOptions.InlineScript),
-				new JProperty("width", codeGenerationOptions.Width),
-				new JProperty("max_line_len", codeGenerationOptions.MaxLineLength),
-				new JProperty("bracketize", codeGenerationOptions.Bracketize),
-				new JProperty("semicolons", codeGenerationOptions.Semicolons),
-				new JProperty("comments", codeGenerationOptions.Comments),
-				new JProperty("preserve_line", codeGenerationOptions.PreserveLine),
-				new JProperty("screw_ie8", options.ScrewIe8),
-				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps),
-				new JProperty("quote_style", codeGenerationOptions.QuoteStyle),
 				new JProperty("keep_quoted_props", codeGenerationOptions.KeepQuotedProperties),
+				new JProperty("max_line_len", codeGenerationOptions.MaxLineLength),
+				new JProperty("preserve_line", codeGenerationOptions.PreserveLine),
+				new JProperty("quote_keys", codeGenerationOptions.QuoteKeys),
+				new JProperty("quote_style", codeGenerationOptions.QuoteStyle),
+				new JProperty("screw_ie8", options.ScrewIe8),
+				new JProperty("semicolons", codeGenerationOptions.Semicolons),
+				new JProperty("space_colon", codeGenerationOptions.SpaceColon),
+				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps),
+				new JProperty("width", codeGenerationOptions.Width),
 				new JProperty("wrap_iife", codeGenerationOptions.WrapIife)
 			));
 

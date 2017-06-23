@@ -8,17 +8,6 @@ namespace BundleTransformer.UglifyJs.Configuration
 	public sealed class ParsingSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to disable automatic semicolon
-		/// insertion and support for trailing comma in arrays and objects
-		/// </summary>
-		[ConfigurationProperty("strict", DefaultValue = false)]
-		public bool Strict
-		{
-			get { return (bool)this["strict"]; }
-			set { this["strict"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to allow return outside of functions.
 		/// Useful when minifying CommonJS modules.
 		/// </summary>
@@ -27,6 +16,17 @@ namespace BundleTransformer.UglifyJs.Configuration
 		{
 			get { return (bool)this["bareReturns"]; }
 			set { this["bareReturns"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable automatic semicolon
+		/// insertion and support for trailing comma in arrays and objects
+		/// </summary>
+		[ConfigurationProperty("strict", DefaultValue = false)]
+		public bool Strict
+		{
+			get { return (bool)this["strict"]; }
+			set { this["strict"] = value; }
 		}
 	}
 }

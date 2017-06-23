@@ -44,17 +44,6 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable full compliance with
-		/// Internet Explorer 6-8 quirks
-		/// </summary>
-		[ConfigurationProperty("screwIe8", DefaultValue = true)]
-		public bool ScrewIe8
-		{
-			get { return (bool)this["screwIe8"]; }
-			set { this["screwIe8"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to do not mangle/drop function names.
 		/// Useful for code relying on <code>Function.prototype.name</code>.
 		/// </summary>
@@ -63,6 +52,17 @@ namespace BundleTransformer.UglifyJs.Configuration
 		{
 			get { return (bool)this["keepFunctionNames"]; }
 			set { this["keepFunctionNames"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full compliance with
+		/// Internet Explorer 6-8 quirks
+		/// </summary>
+		[ConfigurationProperty("screwIe8", DefaultValue = true)]
+		public bool ScrewIe8
+		{
+			get { return (bool)this["screwIe8"]; }
+			set { this["screwIe8"] = value; }
 		}
 
 		/// <summary>

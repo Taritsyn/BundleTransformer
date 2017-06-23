@@ -8,6 +8,16 @@ namespace BundleTransformer.UglifyJs.Configuration
 	public sealed class CodeGenerationSettings : ConfigurationElement
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to escape Unicode characters in strings and regexps
+		/// </summary>
+		[ConfigurationProperty("asciiOnly", DefaultValue = false)]
+		public bool AsciiOnly
+		{
+			get { return (bool)this["asciiOnly"]; }
+			set { this["asciiOnly"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to beautify the output
 		/// </summary>
 		[ConfigurationProperty("beautify", DefaultValue = false)]
@@ -15,6 +25,32 @@ namespace BundleTransformer.UglifyJs.Configuration
 		{
 			get { return (bool)this["beautify"]; }
 			set { this["beautify"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to insert brackets in <code>if</code>,
+		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code>
+		/// statements, even if their body is a single statement
+		/// </summary>
+		[ConfigurationProperty("bracketize", DefaultValue = false)]
+		public bool Bracketize
+		{
+			get { return (bool)this["bracketize"]; }
+			set { this["bracketize"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a value that determines what kind of comments need to preserve:
+		///		"all" - keep all comments;
+		///		"some" - keep JSDoc-style (e.g. <code>@license</code> or <code>@preserve</code>) and conditional compilation comments;
+		///		valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
+		///		empty string - remove all comments.
+		/// </summary>
+		[ConfigurationProperty("comments", DefaultValue = "some")]
+		public string Comments
+		{
+			get { return (string)this["comments"]; }
+			set { this["comments"] = value; }
 		}
 
 		/// <summary>
@@ -38,36 +74,6 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to quote all keys in literal objects
-		/// </summary>
-		[ConfigurationProperty("quoteKeys", DefaultValue = false)]
-		public bool QuoteKeys
-		{
-			get { return (bool)this["quoteKeys"]; }
-			set { this["quoteKeys"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to insert a space after the colon signs
-		/// </summary>
-		[ConfigurationProperty("spaceColon", DefaultValue = true)]
-		public bool SpaceColon
-		{
-			get { return (bool)this["spaceColon"]; }
-			set { this["spaceColon"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to escape Unicode characters in strings and regexps
-		/// </summary>
-		[ConfigurationProperty("asciiOnly", DefaultValue = false)]
-		public bool AsciiOnly
-		{
-			get { return (bool)this["asciiOnly"]; }
-			set { this["asciiOnly"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to escape the slash in
 		/// occurrences of <code>&lt;/script</code> in strings
 		/// </summary>
@@ -79,13 +85,14 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a orientative line width that the beautifier will try to obey
+		/// Gets or sets a flag for whether to prevent stripping quotes
+		/// from property names in object literals
 		/// </summary>
-		[ConfigurationProperty("width", DefaultValue = 80)]
-		public int Width
+		[ConfigurationProperty("keepQuotedProperties", DefaultValue = false)]
+		public bool KeepQuotedProperties
 		{
-			get { return (int)this["width"]; }
-			set { this["width"] = value; }
+			get { return (bool)this["keepQuotedProperties"]; }
+			set { this["keepQuotedProperties"] = value; }
 		}
 
 		/// <summary>
@@ -99,42 +106,6 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to insert brackets in <code>if</code>,
-		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code>
-		/// statements, even if their body is a single statement
-		/// </summary>
-		[ConfigurationProperty("bracketize", DefaultValue = false)]
-		public bool Bracketize
-		{
-			get { return (bool)this["bracketize"]; }
-			set { this["bracketize"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to separate statements with semicolons
-		/// </summary>
-		[ConfigurationProperty("semicolons", DefaultValue = true)]
-		public bool Semicolons
-		{
-			get { return (bool)this["semicolons"]; }
-			set { this["semicolons"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a value that determines what kind of comments need to preserve:
-		///		"all" - keep all comments;
-		///		"some" - keep JSDoc-style (e.g. <code>@license</code> or <code>@preserve</code>) and conditional compilation comments;
-		///		valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
-		///		empty string - remove all comments.
-		/// </summary>
-		[ConfigurationProperty("comments", DefaultValue = "some")]
-		public string Comments
-		{
-			get { return (string)this["comments"]; }
-			set { this["comments"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to preserve line breaks
 		/// </summary>
 		[ConfigurationProperty("preserveLine", DefaultValue = false)]
@@ -145,13 +116,13 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to unescape regular expressions
+		/// Gets or sets a flag for whether to quote all keys in literal objects
 		/// </summary>
-		[ConfigurationProperty("unescapeRegexps", DefaultValue = false)]
-		public bool UnescapeRegexps
+		[ConfigurationProperty("quoteKeys", DefaultValue = false)]
+		public bool QuoteKeys
 		{
-			get { return (bool)this["unescapeRegexps"]; }
-			set { this["unescapeRegexps"] = value; }
+			get { return (bool)this["quoteKeys"]; }
+			set { this["quoteKeys"] = value; }
 		}
 
 		/// <summary>
@@ -165,14 +136,43 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to prevent stripping quotes
-		/// from property names in object literals
+		/// Gets or sets a flag for whether to separate statements with semicolons
 		/// </summary>
-		[ConfigurationProperty("keepQuotedProperties", DefaultValue = false)]
-		public bool KeepQuotedProperties
+		[ConfigurationProperty("semicolons", DefaultValue = true)]
+		public bool Semicolons
 		{
-			get { return (bool)this["keepQuotedProperties"]; }
-			set { this["keepQuotedProperties"] = value; }
+			get { return (bool)this["semicolons"]; }
+			set { this["semicolons"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to insert a space after the colon signs
+		/// </summary>
+		[ConfigurationProperty("spaceColon", DefaultValue = true)]
+		public bool SpaceColon
+		{
+			get { return (bool)this["spaceColon"]; }
+			set { this["spaceColon"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to unescape regular expressions
+		/// </summary>
+		[ConfigurationProperty("unescapeRegexps", DefaultValue = false)]
+		public bool UnescapeRegexps
+		{
+			get { return (bool)this["unescapeRegexps"]; }
+			set { this["unescapeRegexps"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a orientative line width that the beautifier will try to obey
+		/// </summary>
+		[ConfigurationProperty("width", DefaultValue = 80)]
+		public int Width
+		{
+			get { return (int)this["width"]; }
+			set { this["width"] = value; }
 		}
 
 		/// <summary>

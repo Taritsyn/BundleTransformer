@@ -8,13 +8,14 @@ namespace BundleTransformer.UglifyJs.Configuration
 	public sealed class ManglingSettings : ConfigurationElement
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to mangle names
+		/// Gets or sets a flag for whether to mangle names visible in scopes
+		/// where <code>eval</code> or <code>when</code> are used
 		/// </summary>
-		[ConfigurationProperty("mangle", DefaultValue = true)]
-		public bool Mangle
+		[ConfigurationProperty("eval", DefaultValue = false)]
+		public bool Eval
 		{
-			get { return (bool)this["mangle"]; }
-			set { this["mangle"] = value; }
+			get { return (bool)this["eval"]; }
+			set { this["eval"] = value; }
 		}
 
 		/// <summary>
@@ -30,14 +31,13 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to mangle names visible in scopes
-		/// where <code>eval</code> or <code>when</code> are used
+		/// Gets or sets a flag for whether to mangle names
 		/// </summary>
-		[ConfigurationProperty("eval", DefaultValue = false)]
-		public bool Eval
+		[ConfigurationProperty("mangle", DefaultValue = true)]
+		public bool Mangle
 		{
-			get { return (bool)this["eval"]; }
-			set { this["eval"] = value; }
+			get { return (bool)this["mangle"]; }
+			set { this["mangle"] = value; }
 		}
 
 		/// <summary>

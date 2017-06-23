@@ -6,9 +6,42 @@
 	public sealed class CodeGenerationOptions
 	{
 		/// <summary>
+		/// Gets or sets a flag for whether to escape Unicode characters in strings and regexps
+		/// </summary>
+		public bool AsciiOnly
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to beautify the output
 		/// </summary>
 		public bool Beautify
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to insert brackets in <code>if</code>,
+		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code>
+		/// statements, even if their body is a single statement
+		/// </summary>
+		public bool Bracketize
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a value that determines what kind of comments need to preserve:
+		///		"all" - keep all comments;
+		///		"some" - keep JSDoc-style (e.g. <code>@license</code> or <code>@preserve</code>) and conditional compilation comments;
+		///		valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
+		///		empty string - remove all comments.
+		/// </summary>
+		public string Comments
 		{
 			get;
 			set;
@@ -33,33 +66,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to quote all keys in literal objects
-		/// </summary>
-		public bool QuoteKeys
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to insert a space after the colon signs
-		/// </summary>
-		public bool SpaceColon
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to escape Unicode characters in strings and regexps
-		/// </summary>
-		public bool AsciiOnly
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to escape the slash in
 		/// occurrences of <code>&lt;/script</code> in strings
 		/// </summary>
@@ -70,9 +76,10 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a orientative line width that the beautifier will try to obey
+		/// Gets or sets a flag for whether to prevent stripping quotes
+		/// from property names in object literals
 		/// </summary>
-		public int Width
+		public bool KeepQuotedProperties
 		{
 			get;
 			set;
@@ -88,39 +95,6 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to insert brackets in <code>if</code>,
-		/// <code>for</code>, <code>do</code>, <code>while</code> or <code>with</code>
-		/// statements, even if their body is a single statement
-		/// </summary>
-		public bool Bracketize
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to separate statements with semicolons
-		/// </summary>
-		public bool Semicolons
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a value that determines what kind of comments need to preserve:
-		///		"all" - keep all comments;
-		///		"some" - keep JSDoc-style (e.g. <code>@license</code> or <code>@preserve</code>) and conditional compilation comments;
-		///		valid JS RegExp like `/foo/`or `/^!/` - keep only comments that match;
-		///		empty string - remove all comments.
-		/// </summary>
-		public string Comments
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to preserve line breaks
 		/// </summary>
 		public bool PreserveLine
@@ -130,9 +104,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to unescape regular expressions
+		/// Gets or sets a flag for whether to quote all keys in literal objects
 		/// </summary>
-		public bool UnescapeRegexps
+		public bool QuoteKeys
 		{
 			get;
 			set;
@@ -148,10 +122,36 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to prevent stripping quotes
-		/// from property names in object literals
+		/// Gets or sets a flag for whether to separate statements with semicolons
 		/// </summary>
-		public bool KeepQuotedProperties
+		public bool Semicolons
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to insert a space after the colon signs
+		/// </summary>
+		public bool SpaceColon
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to unescape regular expressions
+		/// </summary>
+		public bool UnescapeRegexps
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a orientative line width that the beautifier will try to obey
+		/// </summary>
+		public int Width
 		{
 			get;
 			set;
@@ -172,22 +172,22 @@
 		/// </summary>
 		public CodeGenerationOptions()
 		{
+			AsciiOnly = false;
 			Beautify = false;
+			Bracketize = false;
+			Comments = "some";
 			IndentLevel = 4;
 			IndentStart = 0;
-			QuoteKeys = false;
-			SpaceColon = true;
-			AsciiOnly = false;
 			InlineScript = false;
-			Width = 80;
-			MaxLineLength = 32000;
-			Bracketize = false;
-			Semicolons = true;
-			Comments = "some";
-			PreserveLine = false;
-			UnescapeRegexps = false;
-			QuoteStyle = QuoteStyle.Auto;
 			KeepQuotedProperties = false;
+			MaxLineLength = 32000;
+			PreserveLine = false;
+			QuoteKeys = false;
+			QuoteStyle = QuoteStyle.Auto;
+			Semicolons = true;
+			SpaceColon = true;
+			UnescapeRegexps = false;
+			Width = 80;
 			WrapIife = false;
 		}
 	}

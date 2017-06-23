@@ -6,85 +6,9 @@
 	public sealed class CompressionOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to compress code
+		/// Gets or sets a flag for whether to enable support of <code>@ngInject</code> annotations
 		/// </summary>
-		public bool Compress
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to join consecutive simple
-		/// statements using the comma operator
-		/// </summary>
-		public bool Sequences
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to rewrite property access using
-		/// the dot notation (for example, <code>foo["bar"] → foo.bar</code>)
-		/// </summary>
-		public bool PropertiesDotNotation
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to remove unreachable code
-		/// </summary>
-		public bool DeadCode
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to remove <code>debugger;</code> statements
-		/// </summary>
-		public bool DropDebugger
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to apply "unsafe" transformations
-		/// </summary>
-		public bool Unsafe
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to apply optimizations
-		/// for <code>if</code>-s and conditional expressions
-		/// </summary>
-		public bool Conditionals
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to apply certain optimizations
-		/// to binary nodes, attempts to negate binary nodes, etc.
-		/// </summary>
-		public bool Comparisons
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to attempt to evaluate constant expressions
-		/// </summary>
-		public bool Evaluate
+		public bool Angular
 		{
 			get;
 			set;
@@ -101,19 +25,100 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable optimizations for <code>do</code>, <code>while</code>
-		/// and <code>for</code> loops when we can statically determine the condition
+		/// Gets or sets a flag for whether to small optimization for sequences
+		/// (for example: transform <code>x, x</code> into <code>x</code>
+		/// and <code>x = something(), x</code> into <code>x = something()</code>)
 		/// </summary>
-		public bool Loops
+		public bool Cascade
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to drop unreferenced functions and variables
+		/// Gets or sets a flag for whether to collapse single-use <code>var</code> and
+		/// <code>const</code> definitions when possible
 		/// </summary>
-		public bool Unused
+		public bool CollapseVars
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to apply certain optimizations
+		/// to binary nodes, attempts to negate binary nodes, etc.
+		/// </summary>
+		public bool Comparisons
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to compress code
+		/// </summary>
+		public bool Compress
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to apply optimizations
+		/// for <code>if</code>-s and conditional expressions
+		/// </summary>
+		public bool Conditionals
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to remove unreachable code
+		/// </summary>
+		public bool DeadCode
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to discard calls to <code>console.*</code> functions
+		/// </summary>
+		public bool DropConsole
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to remove <code>debugger;</code> statements
+		/// </summary>
+		public bool DropDebugger
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to attempt to evaluate constant expressions
+		/// </summary>
+		public bool Evaluate
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a string representation of the object
+		/// (comma-separated list of values of the form SYMBOL[=value])
+		/// with properties named after symbols to replace
+		/// (except where symbol has properly declared by a var declaration
+		/// or use as function parameter or similar) and the values
+		/// representing the AST replacement value
+		/// </summary>
+		public string GlobalDefinitions
 		{
 			get;
 			set;
@@ -123,16 +128,6 @@
 		/// Gets or sets a flag for whether to hoist function declarations
 		/// </summary>
 		public bool HoistFunctions
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to prevent the compressor from discarding
-		/// unused function arguments
-		/// </summary>
-		public bool KeepFunctionArgs
 		{
 			get;
 			set;
@@ -167,35 +162,48 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to collapse single-use <code>var</code> and
-		/// <code>const</code> definitions when possible
+		/// Gets or sets a flag for whether to prevent the compressor from discarding
+		/// unused function arguments
 		/// </summary>
-		public bool CollapseVars
+		public bool KeepFunctionArgs
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to small optimization for sequences
-		/// (for example: transform <code>x, x</code> into <code>x</code>
-		/// and <code>x = something(), x</code> into <code>x = something()</code>)
+		/// Gets or sets a flag for whether to enable optimizations for <code>do</code>, <code>while</code>
+		/// and <code>for</code> loops when we can statically determine the condition
 		/// </summary>
-		public bool Cascade
+		public bool Loops
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a string representation of the object
-		/// (comma-separated list of values of the form SYMBOL[=value])
-		/// with properties named after symbols to replace
-		/// (except where symbol has properly declared by a var declaration
-		/// or use as function parameter or similar) and the values
-		/// representing the AST replacement value
+		/// Gets or sets a flag for whether to negate IIFEs
 		/// </summary>
-		public string GlobalDefinitions
+		public bool NegateIife
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a number of times to run compress
+		/// </summary>
+		public int Passes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to rewrite property access using
+		/// the dot notation (for example, <code>foo["bar"] → foo.bar</code>)
+		/// </summary>
+		public bool PropertiesDotNotation
 		{
 			get;
 			set;
@@ -223,36 +231,28 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to negate IIFEs
+		/// Gets or sets a flag for whether to join consecutive simple
+		/// statements using the comma operator
 		/// </summary>
-		public bool NegateIife
+		public bool Sequences
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to discard calls to <code>console.*</code> functions
+		/// Gets or sets a flag for whether to apply "unsafe" transformations
 		/// </summary>
-		public bool DropConsole
+		public bool Unsafe
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable support of <code>@ngInject</code> annotations
+		/// Gets or sets a flag for whether to drop unreferenced functions and variables
 		/// </summary>
-		public bool Angular
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a number of times to run compress
-		/// </summary>
-		public int Passes
+		public bool Unused
 		{
 			get;
 			set;
@@ -264,32 +264,32 @@
 		/// </summary>
 		public CompressionOptions()
 		{
-			Compress = true;
-			Sequences = true;
-			PropertiesDotNotation = true;
-			DeadCode = true;
-			DropDebugger = true;
-			Unsafe = false;
-			Conditionals = true;
-			Comparisons = true;
-			Evaluate = true;
+			Angular = false;
 			Booleans = true;
-			Loops = true;
-			Unused = true;
+			Cascade = true;
+			CollapseVars = false;
+			Comparisons = true;
+			Compress = true;
+			Conditionals = true;
+			DeadCode = true;
+			DropConsole = false;
+			DropDebugger = true;
+			Evaluate = true;
+			GlobalDefinitions = string.Empty;
 			HoistFunctions = true;
-			KeepFunctionArgs = true;
 			HoistVars = false;
 			IfReturn = true;
 			JoinVars = true;
-			CollapseVars = false;
-			Cascade = true;
-			GlobalDefinitions = string.Empty;
+			KeepFunctionArgs = true;
+			Loops = true;
+			NegateIife = true;
+			Passes = 1;
+			PropertiesDotNotation = true;
 			PureGetters = false;
 			PureFunctions = string.Empty;
-			NegateIife = true;
-			DropConsole = false;
-			Angular = false;
-			Passes = 1;
+			Sequences = true;
+			Unsafe = false;
+			Unused = true;
 		}
 	}
 }

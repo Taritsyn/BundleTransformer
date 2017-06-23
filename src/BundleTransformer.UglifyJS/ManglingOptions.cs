@@ -6,9 +6,10 @@
 	public sealed class ManglingOptions
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to mangle names
+		/// Gets or sets a flag for whether to mangle names visible in scopes
+		/// where <code>eval</code> or <code>when</code> are used
 		/// </summary>
-		public bool Mangle
+		public bool Eval
 		{
 			get;
 			set;
@@ -26,10 +27,9 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to mangle names visible in scopes
-		/// where <code>eval</code> or <code>when</code> are used
+		/// Gets or sets a flag for whether to mangle names
 		/// </summary>
-		public bool Eval
+		public bool Mangle
 		{
 			get;
 			set;
@@ -50,9 +50,9 @@
 		/// </summary>
 		public ManglingOptions()
 		{
-			Mangle = true;
-			Except = string.Empty;
 			Eval = false;
+			Except = string.Empty;
+			Mangle = true;
 			TopLevel = false;
 		}
 	}

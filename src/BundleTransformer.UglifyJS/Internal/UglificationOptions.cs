@@ -42,20 +42,20 @@
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable full compliance with
-		/// Internet Explorer 6-8 quirks
+		/// Gets or sets a flag for whether to do not mangle/drop function names.
+		/// Useful for code relying on <code>Function.prototype.name</code>.
 		/// </summary>
-		public bool ScrewIe8
+		public bool KeepFunctionNames
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not mangle/drop function names.
-		/// Useful for code relying on <code>Function.prototype.name</code>.
+		/// Gets or sets a flag for whether to disable full compliance with
+		/// Internet Explorer 6-8 quirks
 		/// </summary>
-		public bool KeepFunctionNames
+		public bool ScrewIe8
 		{
 			get;
 			set;
@@ -82,8 +82,8 @@
 			CompressionOptions = new CompressionOptions();
 			ManglingOptions = new ManglingOptions();
 			CodeGenerationOptions = new CodeGenerationOptions();
-			ScrewIe8 = true;
 			KeepFunctionNames = false;
+			ScrewIe8 = true;
 			Severity = 0;
 		}
 	}

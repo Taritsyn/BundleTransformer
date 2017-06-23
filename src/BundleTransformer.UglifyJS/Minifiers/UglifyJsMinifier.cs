@@ -73,20 +73,20 @@ namespace BundleTransformer.UglifyJs.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable full compliance with
-		/// Internet Explorer 6-8 quirks
+		/// Gets or sets a flag for whether to do not mangle/drop function names.
+		/// Useful for code relying on <code>Function.prototype.name</code>.
 		/// </summary>
-		public bool ScrewIe8
+		public bool KeepFunctionNames
 		{
 			get;
 			set;
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not mangle/drop function names.
-		/// Useful for code relying on <code>Function.prototype.name</code>.
+		/// Gets or sets a flag for whether to disable full compliance with
+		/// Internet Explorer 6-8 quirks
 		/// </summary>
-		public bool KeepFunctionNames
+		public bool ScrewIe8
 		{
 			get;
 			set;
@@ -126,71 +126,71 @@ namespace BundleTransformer.UglifyJs.Minifiers
 
 			ParsingOptions = new ParsingOptions
 			{
-				Strict = parsingConfig.Strict,
-				BareReturns = parsingConfig.BareReturns
+				BareReturns = parsingConfig.BareReturns,
+				Strict = parsingConfig.Strict
 			};
 
 			CompressionOptions = new CompressionOptions
 			{
-				Compress = compressionConfig.Compress,
-				Sequences = compressionConfig.Sequences,
-				PropertiesDotNotation = compressionConfig.PropertiesDotNotation,
-				DeadCode = compressionConfig.DeadCode,
-				DropDebugger = compressionConfig.DropDebugger,
-				Unsafe = compressionConfig.Unsafe,
-				Conditionals = compressionConfig.Conditionals,
-				Comparisons = compressionConfig.Comparisons,
-				Evaluate = compressionConfig.Evaluate,
+				Angular = compressionConfig.Angular,
 				Booleans = compressionConfig.Booleans,
-				Loops = compressionConfig.Loops,
-				Unused = compressionConfig.Unused,
+				Cascade = compressionConfig.Cascade,
+				CollapseVars = compressionConfig.CollapseVars,
+				Comparisons = compressionConfig.Comparisons,
+				Compress = compressionConfig.Compress,
+				Conditionals = compressionConfig.Conditionals,
+				DeadCode = compressionConfig.DeadCode,
+				DropConsole = compressionConfig.DropConsole,
+				DropDebugger = compressionConfig.DropDebugger,
+				Evaluate = compressionConfig.Evaluate,
+				GlobalDefinitions = compressionConfig.GlobalDefinitions,
 				HoistFunctions = compressionConfig.HoistFunctions,
-				KeepFunctionArgs = compressionConfig.KeepFunctionArgs,
 				HoistVars = compressionConfig.HoistVars,
 				IfReturn = compressionConfig.IfReturn,
 				JoinVars = compressionConfig.JoinVars,
-				CollapseVars = compressionConfig.CollapseVars,
-				Cascade = compressionConfig.Cascade,
-				GlobalDefinitions = compressionConfig.GlobalDefinitions,
+				KeepFunctionArgs = compressionConfig.KeepFunctionArgs,
+				Loops = compressionConfig.Loops,
+				NegateIife = compressionConfig.NegateIife,
+				Passes = compressionConfig.Passes,
+				PropertiesDotNotation = compressionConfig.PropertiesDotNotation,
 				PureGetters = compressionConfig.PureGetters,
 				PureFunctions = compressionConfig.PureFunctions,
-				NegateIife = compressionConfig.NegateIife,
-				DropConsole = compressionConfig.DropConsole,
-				Angular = compressionConfig.Angular,
-				Passes = compressionConfig.Passes
+				Sequences = compressionConfig.Sequences,
+				Unsafe = compressionConfig.Unsafe,
+				Unused = compressionConfig.Unused
 			};
 
 			ManglingOptions = new ManglingOptions
 			{
-				Mangle = manglingConfig.Mangle,
-				Except = manglingConfig.Except,
 				Eval = manglingConfig.Eval,
+				Except = manglingConfig.Except,
+				Mangle = manglingConfig.Mangle,
 				TopLevel = manglingConfig.TopLevel,
 			};
 
 			CodeGenerationOptions = new CodeGenerationOptions
 			{
+				AsciiOnly = codeGenerationConfig.AsciiOnly,
 				Beautify = codeGenerationConfig.Beautify,
+				Bracketize = codeGenerationConfig.Bracketize,
+				Comments = codeGenerationConfig.Comments,
 				IndentLevel = codeGenerationConfig.IndentLevel,
 				IndentStart = codeGenerationConfig.IndentStart,
-				QuoteKeys = codeGenerationConfig.QuoteKeys,
-				SpaceColon = codeGenerationConfig.SpaceColon,
-				AsciiOnly = codeGenerationConfig.AsciiOnly,
 				InlineScript = codeGenerationConfig.InlineScript,
-				Width = codeGenerationConfig.Width,
-				MaxLineLength = codeGenerationConfig.MaxLineLength,
-				Bracketize = codeGenerationConfig.Bracketize,
-				Semicolons = codeGenerationConfig.Semicolons,
-				Comments = codeGenerationConfig.Comments,
-				PreserveLine = codeGenerationConfig.PreserveLine,
-				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps,
-				QuoteStyle = codeGenerationConfig.QuoteStyle,
 				KeepQuotedProperties = codeGenerationConfig.KeepQuotedProperties,
+				MaxLineLength = codeGenerationConfig.MaxLineLength,
+				PreserveLine = codeGenerationConfig.PreserveLine,
+				QuoteKeys = codeGenerationConfig.QuoteKeys,
+				QuoteStyle = codeGenerationConfig.QuoteStyle,
+				Semicolons = codeGenerationConfig.Semicolons,
+				SpaceColon = codeGenerationConfig.SpaceColon,
+				UnescapeRegexps = codeGenerationConfig.UnescapeRegexps,
+				Width = codeGenerationConfig.Width,
 				WrapIife = codeGenerationConfig.WrapIife
 			};
 
-			ScrewIe8 = jsMinifierConfig.ScrewIe8;
 			KeepFunctionNames = jsMinifierConfig.KeepFunctionNames;
+			ScrewIe8 = jsMinifierConfig.ScrewIe8;
 			Severity = jsMinifierConfig.Severity;
 
 			if (createJsEngineInstance == null)
@@ -317,8 +317,8 @@ namespace BundleTransformer.UglifyJs.Minifiers
 				CompressionOptions = CompressionOptions,
 				ManglingOptions = ManglingOptions,
 				CodeGenerationOptions = CodeGenerationOptions,
-				ScrewIe8 = ScrewIe8,
 				KeepFunctionNames = KeepFunctionNames,
+				ScrewIe8 = ScrewIe8,
 				Severity = Severity
 			};
 

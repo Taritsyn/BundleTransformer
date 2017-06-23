@@ -16,6 +16,11 @@
    file.
 
    =============
+   RELEASE NOTES
+   =============
+   Updated definitions for configuration settings of Uglify JS minifier.
+
+   =============
    DOCUMENTATION
    =============
    See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki
