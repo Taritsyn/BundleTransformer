@@ -19,16 +19,6 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to allow support <code>#!command</code> as the first line
-		/// </summary>
-		[ConfigurationProperty("shebang", DefaultValue = true)]
-		public bool Shebang
-		{
-			get { return (bool)this["shebang"]; }
-			set { this["shebang"] = value; }
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to disable automatic semicolon
 		/// insertion and support for trailing comma in arrays and objects
 		/// </summary>

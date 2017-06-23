@@ -16,8 +16,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
 		<summary>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS version 2.8.29.</summary>
 		<releaseNotes>1. Added support of UglifyJS version 2.8.29;
 2. In code generation settings was changed a default value of `InlineScript` property from `false` to `true`;
-3. In compression settings was changed a default value of `CollapseVars` property from `false` to `true`;
-4. In parsing settings was added one new property - `Shebang` (default `true`).</releaseNotes>
+3. In compression settings was changed a default value of `CollapseVars` property from `false` to `true`.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify UglifyJS</tags>

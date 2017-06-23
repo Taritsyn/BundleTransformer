@@ -196,7 +196,7 @@ namespace BundleTransformer.UglifyJs.Internal
 
 			optionsJson.Add("parse", new JObject(
 				new JProperty("bare_returns", parsingOptions.BareReturns),
-				new JProperty("shebang", parsingOptions.Shebang),
+				new JProperty("shebang", false),
 				new JProperty("strict", parsingOptions.Strict)
 			));
 
@@ -268,6 +268,7 @@ namespace BundleTransformer.UglifyJs.Internal
 				new JProperty("quote_style", codeGenerationOptions.QuoteStyle),
 				new JProperty("screw_ie8", options.ScrewIe8),
 				new JProperty("semicolons", codeGenerationOptions.Semicolons),
+				new JProperty("shebang", false),
 				new JProperty("space_colon", codeGenerationOptions.SpaceColon),
 				new JProperty("unescape_regexps", codeGenerationOptions.UnescapeRegexps),
 				new JProperty("width", codeGenerationOptions.Width),
