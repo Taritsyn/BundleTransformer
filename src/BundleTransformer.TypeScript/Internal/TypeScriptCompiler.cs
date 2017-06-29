@@ -165,6 +165,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("noImplicitThis", options.NoImplicitThis),
 				new JProperty("noLib", options.NoLib),
 				new JProperty("noResolve", options.NoResolve),
+				new JProperty("noStrictGenericChecks", options.NoStrictGenericChecks),
 				new JProperty("noUnusedLocals", options.NoUnusedLocals),
 				new JProperty("noUnusedParameters", options.NoUnusedParameters),
 				new JProperty("preserveConstEnums", options.PreserveConstEnums),

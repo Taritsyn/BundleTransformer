@@ -26,8 +26,10 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 2.4 RTM (please note: The 2.4 RTM release is
-   also called '2.4.1').
+   1. Added support of TypeScript version 2.4 RTM (please note: The 2.4 RTM release
+      is also called '2.4.1');
+   2. In configuration settings of TypeScript translator was added one new
+      property - `NoStrictGenericChecks` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

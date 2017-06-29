@@ -168,6 +168,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to disable strict checking of generic signatures
+		/// in function types
+		/// </summary>
+		public bool NoStrictGenericChecks
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		public bool NoUnusedLocals
@@ -311,6 +321,7 @@ namespace BundleTransformer.TypeScript.Internal
 			NoImplicitThis = false;
 			NoLib = false;
 			NoResolve = false;
+			NoStrictGenericChecks = false;
 			NoUnusedLocals = false;
 			NoUnusedParameters = false;
 			PreserveConstEnums = false;

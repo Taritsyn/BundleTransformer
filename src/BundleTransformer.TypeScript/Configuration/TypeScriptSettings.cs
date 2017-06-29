@@ -185,6 +185,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to disable strict checking of generic signatures
+		/// in function types
+		/// </summary>
+		[ConfigurationProperty("noStrictGenericChecks", DefaultValue = false)]
+		public bool NoStrictGenericChecks
+		{
+			get { return (bool)this["noStrictGenericChecks"]; }
+			set { this["noStrictGenericChecks"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		[ConfigurationProperty("noUnusedLocals", DefaultValue = false)]

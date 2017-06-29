@@ -210,6 +210,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to disable strict checking of generic signatures
+		/// in function types
+		/// </summary>
+		public bool NoStrictGenericChecks
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		public bool NoUnusedLocals
@@ -373,6 +383,7 @@ namespace BundleTransformer.TypeScript.Translators
 			NoImplicitThis = tsConfig.NoImplicitThis;
 			NoLib = tsConfig.NoLib;
 			NoResolve = tsConfig.NoResolve;
+			NoStrictGenericChecks = tsConfig.NoStrictGenericChecks;
 			NoUnusedLocals = tsConfig.NoUnusedLocals;
 			NoUnusedParameters = tsConfig.NoUnusedParameters;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
@@ -523,6 +534,7 @@ namespace BundleTransformer.TypeScript.Translators
 				NoImplicitThis = NoImplicitThis,
 				NoLib = NoLib,
 				NoResolve = NoResolve,
+				NoStrictGenericChecks = NoStrictGenericChecks,
 				NoUnusedLocals = NoUnusedLocals,
 				NoUnusedParameters = NoUnusedParameters,
 				PreserveConstEnums = PreserveConstEnums,

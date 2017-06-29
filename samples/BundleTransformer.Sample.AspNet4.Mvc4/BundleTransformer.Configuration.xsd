@@ -640,6 +640,11 @@
 				<xs:documentation>Flag for whether to do not resolve a script references</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noStrictGenericChecks" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to disable strict checking of generic signatures</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noUnusedLocals" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to report errors on unused locals</xs:documentation>
