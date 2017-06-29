@@ -149,14 +149,21 @@ namespace BundleTransformer.UglifyJs.Minifiers
 				IfReturn = compressionConfig.IfReturn,
 				JoinVars = compressionConfig.JoinVars,
 				KeepFunctionArgs = compressionConfig.KeepFunctionArgs,
+				KeepInfinity = compressionConfig.KeepInfinity,
 				Loops = compressionConfig.Loops,
 				NegateIife = compressionConfig.NegateIife,
 				Passes = compressionConfig.Passes,
 				PropertiesDotNotation = compressionConfig.PropertiesDotNotation,
 				PureGetters = compressionConfig.PureGetters,
 				PureFunctions = compressionConfig.PureFunctions,
+				ReduceVars = compressionConfig.ReduceVars,
 				Sequences = compressionConfig.Sequences,
+				TopLevel = compressionConfig.TopLevel,
+				TopRetain = compressionConfig.TopRetain,
 				Unsafe = compressionConfig.Unsafe,
+				UnsafeMath = compressionConfig.UnsafeMath,
+				UnsafeProto = compressionConfig.UnsafeProto,
+				UnsafeRegExp = compressionConfig.UnsafeRegExp,
 				Unused = compressionConfig.Unused
 			};
 

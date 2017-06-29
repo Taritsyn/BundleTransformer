@@ -172,6 +172,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to prevent <code>Infinity</code> from being compressed
+		/// into <code>1/0</code>, which may cause performance issues on Chrome
+		/// </summary>
+		public bool KeepInfinity
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable optimizations for <code>do</code>, <code>while</code>
 		/// and <code>for</code> loops when we can statically determine the condition
 		/// </summary>
@@ -231,6 +241,16 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to improve optimization on variables assigned
+		/// with and used as constant values
+		/// </summary>
+		public bool ReduceVars
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to join consecutive simple
 		/// statements using the comma operator
 		/// </summary>
@@ -241,9 +261,59 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to drop unreferenced functions and variables in
+		/// the toplevel scope
+		/// </summary>
+		public bool TopLevel
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of toplevel functions and variables to exclude
+		/// from <code>unused</code> removal
+		/// </summary>
+		public string TopRetain
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to apply "unsafe" transformations
 		/// </summary>
 		public bool Unsafe
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to optimize numerical expressions like <code>2 * x * 3</code>
+		/// into <code>6 * x</code>, which may give imprecise floating point results
+		/// </summary>
+		public bool UnsafeMath
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to optimize expressions like
+		/// <code>Array.prototype.slice.call(a)</code> into <code>[].slice.call(a)</code>
+		/// </summary>
+		public bool UnsafeProto
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable substitutions of variables with <code>RegExp</code>
+		/// values the same way as if they are constants
+		/// </summary>
+		public bool UnsafeRegExp
 		{
 			get;
 			set;
@@ -281,14 +351,21 @@
 			IfReturn = true;
 			JoinVars = true;
 			KeepFunctionArgs = true;
+			KeepInfinity = false;
 			Loops = true;
 			NegateIife = true;
 			Passes = 1;
 			PropertiesDotNotation = true;
 			PureGetters = false;
 			PureFunctions = string.Empty;
+			ReduceVars = true;
 			Sequences = true;
+			TopLevel = false;
+			TopRetain = string.Empty;
 			Unsafe = false;
+			UnsafeMath = false;
+			UnsafeProto = false;
+			UnsafeRegExp = false;
 			Unused = true;
 		}
 	}

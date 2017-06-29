@@ -191,6 +191,17 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to prevent <code>Infinity</code> from being compressed
+		/// into <code>1/0</code>, which may cause performance issues on Chrome
+		/// </summary>
+		[ConfigurationProperty("keepInfinity", DefaultValue = false)]
+		public bool KeepInfinity
+		{
+			get { return (bool)this["keepInfinity"]; }
+			set { this["keepInfinity"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable optimizations for <code>do</code>, <code>while</code>
 		/// and <code>for</code> loops when we can statically determine the condition
 		/// </summary>
@@ -257,6 +268,17 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to improve optimization on variables assigned
+		/// with and used as constant values
+		/// </summary>
+		[ConfigurationProperty("reduceVars", DefaultValue = true)]
+		public bool ReduceVars
+		{
+			get { return (bool)this["reduceVars"]; }
+			set { this["reduceVars"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to join consecutive simple
 		/// statements using the comma operator
 		/// </summary>
@@ -268,13 +290,68 @@ namespace BundleTransformer.UglifyJs.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to drop unreferenced functions and variables in
+		/// the toplevel scope
+		/// </summary>
+		[ConfigurationProperty("topLevel", DefaultValue = false)]
+		public bool TopLevel
+		{
+			get { return (bool)this["topLevel"]; }
+			set { this["topLevel"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of toplevel functions and variables to exclude
+		/// from <code>unused</code> removal
+		/// </summary>
+		[ConfigurationProperty("topRetain", DefaultValue = "")]
+		public string TopRetain
+		{
+			get { return (string)this["topRetain"]; }
+			set { this["topRetain"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to apply "unsafe" transformations
 		/// </summary>
 		[ConfigurationProperty("unsafe", DefaultValue = false)]
 		public bool Unsafe
 		{
-			get { return (bool) this["unsafe"]; }
+			get { return (bool)this["unsafe"]; }
 			set { this["unsafe"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to optimize numerical expressions like <code>2 * x * 3</code>
+		/// into <code>6 * x</code>, which may give imprecise floating point results
+		/// </summary>
+		[ConfigurationProperty("unsafeMath", DefaultValue = false)]
+		public bool UnsafeMath
+		{
+			get { return (bool)this["unsafeMath"]; }
+			set { this["unsafeMath"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to optimize expressions like
+		/// <code>Array.prototype.slice.call(a)</code> into <code>[].slice.call(a)</code>
+		/// </summary>
+		[ConfigurationProperty("unsafeProto", DefaultValue = false)]
+		public bool UnsafeProto
+		{
+			get { return (bool)this["unsafeProto"]; }
+			set { this["unsafeProto"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to enable substitutions of variables with <code>RegExp</code>
+		/// values the same way as if they are constants
+		/// </summary>
+		[ConfigurationProperty("unsafeRegExp", DefaultValue = false)]
+		public bool UnsafeRegExp
+		{
+			get { return (bool)this["unsafeRegExp"]; }
+			set { this["unsafeRegExp"] = value; }
 		}
 
 		/// <summary>

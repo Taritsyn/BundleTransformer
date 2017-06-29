@@ -1868,6 +1868,11 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>Flag for whether to prevent the compressor from discarding unused function arguments</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="keepInfinity" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to prevent `Infinity` from being compressed into `1/0`, which may cause performance issues on Chrome</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="loops" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to enable optimizations for do, while and for loops when we can statically determine the condition</xs:documentation>
@@ -1904,14 +1909,44 @@ to preserve references to external symbols.</xs:documentation>
 				<xs:documentation>String representation of the functions list, that can be safely removed if their return value is not used</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="reduceVars" type="Boolean_SchemaType" use="optional" default="true">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to improve optimization on variables assigned with and used as constant values</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="sequences" type="Boolean_SchemaType" use="optional" default="true">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to join consecutive simple statements using the comma operator</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="topLevel" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to drop unreferenced functions and variables in the toplevel scope</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="topRetain" type="xs:string" use="optional" default="">
+			<xs:annotation>
+				<xs:documentation>Comma-separated list of toplevel functions and variables to exclude from `unused` removal</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="unsafe" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to apply "unsafe" transformations</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unsafeMath" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize numerical expressions like `2 * x * 3` into `6 * x`, which may give imprecise floating point results</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unsafeProto" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to optimize expressions like `Array.prototype.slice.call(a)` into `[].slice.call(a)`</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unsafeRegExp" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable substitutions of variables with `RegExp` values the same way as if they are constants</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="unused" type="Boolean_SchemaType" use="optional" default="true">

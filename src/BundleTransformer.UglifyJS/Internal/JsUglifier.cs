@@ -213,22 +213,32 @@ namespace BundleTransformer.UglifyJs.Internal
 					new JProperty("drop_console", compressionOptions.DropConsole),
 					new JProperty("drop_debugger", compressionOptions.DropDebugger),
 					new JProperty("evaluate", compressionOptions.Evaluate),
-					new JProperty("global_defs", ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
+					new JProperty("global_defs",
+						ParseGlobalDefinitions(compressionOptions.GlobalDefinitions)),
 					new JProperty("hoist_funs", compressionOptions.HoistFunctions),
 					new JProperty("hoist_vars", compressionOptions.HoistVars),
 					new JProperty("if_return", compressionOptions.IfReturn),
 					new JProperty("join_vars", compressionOptions.JoinVars),
 					new JProperty("keep_fargs", compressionOptions.KeepFunctionArgs),
 					new JProperty("keep_fnames", options.KeepFunctionNames),
+					new JProperty("keep_infinity", compressionOptions.KeepInfinity),
 					new JProperty("loops", compressionOptions.Loops),
 					new JProperty("negate_iife", compressionOptions.NegateIife),
 					new JProperty("passes", compressionOptions.Passes),
 					new JProperty("properties", compressionOptions.PropertiesDotNotation),
 					new JProperty("pure_getters", compressionOptions.PureGetters),
-					new JProperty("pure_funcs", ParsePureFunctions(compressionOptions.PureFunctions)),
+					new JProperty("pure_funcs",
+						ConvertCommaSeparatedListToJson(compressionOptions.PureFunctions)),
+					new JProperty("reduce_vars", compressionOptions.ReduceVars),
 					new JProperty("screw_ie8", options.ScrewIe8),
 					new JProperty("sequences", compressionOptions.Sequences),
+					new JProperty("toplevel", compressionOptions.TopLevel),
+					new JProperty("top_retain",
+						ConvertCommaSeparatedListToJson(compressionOptions.TopRetain, new JArray())),
 					new JProperty("unsafe", compressionOptions.Unsafe),
+					new JProperty("unsafe_math", compressionOptions.UnsafeMath),
+					new JProperty("unsafe_proto", compressionOptions.UnsafeProto),
+					new JProperty("unsafe_regexp", compressionOptions.UnsafeRegExp),
 					new JProperty("unused", compressionOptions.Unused)
 				));
 			}
@@ -242,7 +252,8 @@ namespace BundleTransformer.UglifyJs.Internal
 			{
 				optionsJson.Add("mangle", new JObject(
 					new JProperty("eval", manglingOptions.Eval),
-					new JProperty("except", ParseExcept(manglingOptions.Except)),
+					new JProperty("except",
+						ConvertCommaSeparatedListToJson(manglingOptions.Except, new JArray())),
 					new JProperty("keep_fnames", options.KeepFunctionNames),
 					new JProperty("screw_ie8", options.ScrewIe8),
 					new JProperty("toplevel", manglingOptions.TopLevel)
@@ -381,36 +392,19 @@ namespace BundleTransformer.UglifyJs.Internal
 			return globalDefs;
 		}
 
-		/// <summary>
-		/// Parses a string representation of the pure function names to list
-		/// </summary>
-		/// <param name="pureFunctionsString">String representation of the pure function names</param>
-		/// <returns>Pure function names list in JSON format</returns>
-		private static JArray ParsePureFunctions(string pureFunctionsString)
+		private static JArray ConvertCommaSeparatedListToJson(string commaSeparatedList,
+			JArray defaultValue = null)
 		{
-			JArray processedPureFunctions = null;
-			var pureFunctions = Utils.ConvertToStringCollection(pureFunctionsString, ',',
+			JArray result = defaultValue;
+			string[] arr = Utils.ConvertToStringCollection(commaSeparatedList, ',',
 				trimItemValues: true, removeEmptyItems: true);
 
-			if (pureFunctions.Length > 0)
+			if (arr.Length > 0)
 			{
-				processedPureFunctions = new JArray(pureFunctions.Select(e => new JValue(e)));
+				result = new JArray(arr.Select(i => new JValue(i)));
 			}
 
-			return processedPureFunctions;
-		}
-
-		/// <summary>
-		/// Parses a string representation of the "Except" (reserved names) to list
-		/// </summary>
-		/// <param name="exceptString">String representation of the "Except"</param>
-		/// <returns>"Except" list in JSON format</returns>
-		private static JArray ParseExcept(string exceptString)
-		{
-			var except = Utils.ConvertToStringCollection(exceptString, ',',
-				trimItemValues: true, removeEmptyItems: true);
-
-			return new JArray(except.Select(e => new JValue(e)));
+			return result;
 		}
 
 		/// <summary>
