@@ -151,7 +151,7 @@ var ts;
 })(ts || (ts = {}));
 var ts;
 (function (ts) {
-    ts.version = "2.4.0";
+    ts.version = "2.4.1";
 })(ts || (ts = {}));
 (function (ts) {
     ts.collator = typeof Intl === "object" && typeof Intl.Collator === "function" ? new Intl.Collator(undefined, { usage: "sort", sensitivity: "accent" }) : undefined;
@@ -3015,6 +3015,7 @@ var ts;
         Scoped_package_detected_looking_in_0: { code: 6182, category: ts.DiagnosticCategory.Message, key: "Scoped_package_detected_looking_in_0_6182", message: "Scoped package detected, looking in '{0}'" },
         Reusing_resolution_of_module_0_to_file_1_from_old_program: { code: 6183, category: ts.DiagnosticCategory.Message, key: "Reusing_resolution_of_module_0_to_file_1_from_old_program_6183", message: "Reusing resolution of module '{0}' to file '{1}' from old program." },
         Reusing_module_resolutions_originating_in_0_since_resolutions_are_unchanged_from_old_program: { code: 6184, category: ts.DiagnosticCategory.Message, key: "Reusing_module_resolutions_originating_in_0_since_resolutions_are_unchanged_from_old_program_6184", message: "Reusing module resolutions originating in '{0}' since resolutions are unchanged from old program." },
+        Disable_strict_checking_of_generic_signatures_in_function_types: { code: 6185, category: ts.DiagnosticCategory.Message, key: "Disable_strict_checking_of_generic_signatures_in_function_types_6185", message: "Disable strict checking of generic signatures in function types." },
         Variable_0_implicitly_has_an_1_type: { code: 7005, category: ts.DiagnosticCategory.Error, key: "Variable_0_implicitly_has_an_1_type_7005", message: "Variable '{0}' implicitly has an '{1}' type." },
         Parameter_0_implicitly_has_an_1_type: { code: 7006, category: ts.DiagnosticCategory.Error, key: "Parameter_0_implicitly_has_an_1_type_7006", message: "Parameter '{0}' implicitly has an '{1}' type." },
         Member_0_implicitly_has_an_1_type: { code: 7008, category: ts.DiagnosticCategory.Error, key: "Member_0_implicitly_has_an_1_type_7008", message: "Member '{0}' implicitly has an '{1}' type." },
@@ -3100,6 +3101,7 @@ var ts;
         Change_spelling_to_0: { code: 90022, category: ts.DiagnosticCategory.Message, key: "Change_spelling_to_0_90022", message: "Change spelling to '{0}'." },
         Declare_method_0: { code: 90023, category: ts.DiagnosticCategory.Message, key: "Declare_method_0_90023", message: "Declare method '{0}'." },
         Declare_static_method_0: { code: 90024, category: ts.DiagnosticCategory.Message, key: "Declare_static_method_0_90024", message: "Declare static method '{0}'." },
+        Prefix_0_with_an_underscore: { code: 90025, category: ts.DiagnosticCategory.Message, key: "Prefix_0_with_an_underscore_90025", message: "Prefix '{0}' with an underscore." },
         Convert_function_to_an_ES2015_class: { code: 95001, category: ts.DiagnosticCategory.Message, key: "Convert_function_to_an_ES2015_class_95001", message: "Convert function to an ES2015 class" },
         Convert_function_0_to_class: { code: 95002, category: ts.DiagnosticCategory.Message, key: "Convert_function_0_to_class_95002", message: "Convert function '{0}' to class" },
         Octal_literal_types_must_use_ES2015_syntax_Use_the_syntax_0: { code: 8017, category: ts.DiagnosticCategory.Error, key: "Octal_literal_types_must_use_ES2015_syntax_Use_the_syntax_0_8017", message: "Octal literal types must use ES2015 syntax. Use the syntax '{0}'." },
@@ -6007,6 +6009,12 @@ var ts;
         });
     }
     ts.getParameterFromJSDoc = getParameterFromJSDoc;
+    function getTypeParameterFromJsDoc(node) {
+        var name = node.name.text;
+        var typeParameters = node.parent.parent.parent.typeParameters;
+        return ts.find(typeParameters, function (p) { return p.name.text === name; });
+    }
+    ts.getTypeParameterFromJsDoc = getTypeParameterFromJsDoc;
     function getJSDocType(node) {
         var tag = getFirstJSDocTag(node, 289);
         if (!tag && node.kind === 146) {
@@ -6030,6 +6038,11 @@ var ts;
         return getFirstJSDocTag(node, 288);
     }
     ts.getJSDocReturnTag = getJSDocReturnTag;
+    function getJSDocReturnType(node) {
+        var returnTag = getJSDocReturnTag(node);
+        return returnTag && returnTag.typeExpression && returnTag.typeExpression.type;
+    }
+    ts.getJSDocReturnType = getJSDocReturnType;
     function getJSDocTemplateTag(node) {
         return getFirstJSDocTag(node, 290);
     }
@@ -6910,11 +6923,15 @@ var ts;
         });
     }
     ts.getFirstConstructorWithBody = getFirstConstructorWithBody;
-    function getSetAccessorTypeAnnotationNode(accessor) {
+    function getSetAccessorValueParameter(accessor) {
         if (accessor && accessor.parameters.length > 0) {
             var hasThis = accessor.parameters.length === 2 && parameterIsThisKeyword(accessor.parameters[0]);
-            return accessor.parameters[hasThis ? 1 : 0].type;
+            return accessor.parameters[hasThis ? 1 : 0];
         }
+    }
+    function getSetAccessorTypeAnnotationNode(accessor) {
+        var parameter = getSetAccessorValueParameter(accessor);
+        return parameter && parameter.type;
     }
     ts.getSetAccessorTypeAnnotationNode = getSetAccessorTypeAnnotationNode;
     function getThisParameter(signature) {
@@ -6986,6 +7003,39 @@ var ts;
         };
     }
     ts.getAllAccessorDeclarations = getAllAccessorDeclarations;
+    function getEffectiveTypeAnnotationNode(node) {
+        if (node.type) {
+            return node.type;
+        }
+        if (node.flags & 65536) {
+            return getJSDocType(node);
+        }
+    }
+    ts.getEffectiveTypeAnnotationNode = getEffectiveTypeAnnotationNode;
+    function getEffectiveReturnTypeNode(node) {
+        if (node.type) {
+            return node.type;
+        }
+        if (node.flags & 65536) {
+            return getJSDocReturnType(node);
+        }
+    }
+    ts.getEffectiveReturnTypeNode = getEffectiveReturnTypeNode;
+    function getEffectiveTypeParameterDeclarations(node) {
+        if (node.typeParameters) {
+            return node.typeParameters;
+        }
+        if (node.flags & 65536) {
+            var templateTag = getJSDocTemplateTag(node);
+            return templateTag && templateTag.typeParameters;
+        }
+    }
+    ts.getEffectiveTypeParameterDeclarations = getEffectiveTypeParameterDeclarations;
+    function getEffectiveSetAccessorTypeAnnotationNode(node) {
+        var parameter = getSetAccessorValueParameter(node);
+        return parameter && getEffectiveTypeAnnotationNode(parameter);
+    }
+    ts.getEffectiveSetAccessorTypeAnnotationNode = getEffectiveSetAccessorTypeAnnotationNode;
     function emitNewLineBeforeLeadingComments(lineMap, writer, node, leadingComments) {
         emitNewLineBeforeLeadingCommentsOfPosition(lineMap, writer, node.pos, leadingComments);
     }
@@ -7967,10 +8017,10 @@ var ts;
         return node.kind === 144;
     }
     ts.isComputedPropertyName = isComputedPropertyName;
-    function isTypeParameter(node) {
+    function isTypeParameterDeclaration(node) {
         return node.kind === 145;
     }
-    ts.isTypeParameter = isTypeParameter;
+    ts.isTypeParameterDeclaration = isTypeParameterDeclaration;
     function isParameter(node) {
         return node.kind === 146;
     }
@@ -8561,6 +8611,14 @@ var ts;
     ts.isJSDocLiteralType = isJSDocLiteralType;
 })(ts || (ts = {}));
 (function (ts) {
+    function isNode(node) {
+        return isNodeKind(node.kind);
+    }
+    ts.isNode = isNode;
+    function isNodeKind(kind) {
+        return kind >= 143;
+    }
+    ts.isNodeKind = isNodeKind;
     function isToken(n) {
         return n.kind >= 0 && n.kind <= 142;
     }
@@ -8905,6 +8963,10 @@ var ts;
         return false;
     }
     ts.isIterationStatement = isIterationStatement;
+    function isForInOrOfStatement(node) {
+        return node.kind === 215 || node.kind === 216;
+    }
+    ts.isForInOrOfStatement = isForInOrOfStatement;
     function isConciseBody(node) {
         return ts.isBlock(node)
             || isExpression(node);
@@ -9019,6 +9081,9 @@ var ts;
             || kind === 299;
     }
     function isDeclaration(node) {
+        if (node.kind === 145) {
+            return node.parent.kind !== 290 || ts.isInJavaScriptFile(node);
+        }
         return isDeclarationKind(node.kind);
     }
     ts.isDeclaration = isDeclaration;
@@ -9087,6 +9152,10 @@ var ts;
         return node.kind >= 267 && node.kind <= 294;
     }
     ts.isJSDocNode = isJSDocNode;
+    function isJSDocCommentContainingNode(node) {
+        return node.kind === 283 || isJSDocTag(node);
+    }
+    ts.isJSDocCommentContainingNode = isJSDocCommentContainingNode;
     function isJSDocTag(node) {
         return node.kind >= 284 && node.kind <= 294;
     }
@@ -12636,7 +12705,7 @@ var ts;
         else if (kind === 71) {
             return new (IdentifierConstructor || (IdentifierConstructor = ts.objectAllocator.getIdentifierConstructor()))(kind, pos, end);
         }
-        else if (kind < 143) {
+        else if (!ts.isNodeKind(kind)) {
             return new (TokenConstructor || (TokenConstructor = ts.objectAllocator.getTokenConstructor()))(kind, pos, end);
         }
         else {
@@ -13166,7 +13235,7 @@ var ts;
             processReferenceComments(sourceFile);
             sourceFile.statements = parseList(0, parseStatement);
             ts.Debug.assert(token() === 1);
-            sourceFile.endOfFileToken = parseTokenNode();
+            sourceFile.endOfFileToken = addJSDocComment(parseTokenNode());
             setExternalModuleIndicator(sourceFile);
             sourceFile.nodeCount = nodeCount;
             sourceFile.identifierCount = identifierCount;
@@ -13445,7 +13514,7 @@ var ts;
             if (!(pos >= 0)) {
                 pos = scanner.getStartPos();
             }
-            return kind >= 143 ? new NodeConstructor(kind, pos, pos) :
+            return ts.isNodeKind(kind) ? new NodeConstructor(kind, pos, pos) :
                 kind === 71 ? new IdentifierConstructor(kind, pos, pos) :
                     new TokenConstructor(kind, pos, pos);
         }
@@ -15142,7 +15211,7 @@ var ts;
         }
         function parseLeftHandSideExpressionOrHigher() {
             var expression;
-            if (token() === 91) {
+            if (token() === 91 && lookAhead(nextTokenIsOpenParenOrLessThan)) {
                 sourceFile.flags |= 524288;
                 expression = parseTokenNode();
             }
@@ -17565,7 +17634,7 @@ var ts;
                             jsDocNamespaceNode.flags |= flags;
                             jsDocNamespaceNode.name = typeNameOrNamespaceName;
                             jsDocNamespaceNode.body = parseJSDocTypeNameWithNamespace(4);
-                            return jsDocNamespaceNode;
+                            return finishNode(jsDocNamespaceNode);
                         }
                         if (typeNameOrNamespaceName && flags & 4) {
                             typeNameOrNamespaceName.isInJSDocNamespace = true;
@@ -18348,7 +18417,20 @@ var ts;
             ts.forEachChild(node, bind, bindEach);
         }
         function bindChildrenWorker(node) {
-            ts.forEach(node.jsDoc, bind);
+            if (node.jsDoc) {
+                if (ts.isInJavaScriptFile(node)) {
+                    for (var _i = 0, _a = node.jsDoc; _i < _a.length; _i++) {
+                        var j = _a[_i];
+                        bind(j);
+                    }
+                }
+                else {
+                    for (var _b = 0, _c = node.jsDoc; _b < _c.length; _b++) {
+                        var j = _c[_b];
+                        setParentPointers(node, j);
+                    }
+                }
+            }
             if (checkUnreachable(node)) {
                 bindEachChild(node);
                 return;
@@ -18994,7 +19076,7 @@ var ts;
         }
         function bindVariableDeclarationFlow(node) {
             bindEachChild(node);
-            if (node.initializer || node.parent.parent.kind === 215 || node.parent.parent.kind === 216) {
+            if (node.initializer || ts.isForInOrOfStatement(node.parent.parent)) {
                 bindInitializedVariableFlow(node);
             }
         }
@@ -19393,7 +19475,8 @@ var ts;
             }
             node.parent = parent;
             var saveInStrictMode = inStrictMode;
-            bindJSDocTypedefTagIfAny(node);
+            if (ts.isInJavaScriptFile(node))
+                bindJSDocTypedefTagIfAny(node);
             bindWorker(node);
             if (node.kind > 142) {
                 var saveParent = parent;
@@ -19453,7 +19536,7 @@ var ts;
         function bindWorker(node) {
             switch (node.kind) {
                 case 71:
-                    if (ts.isInJavaScriptFile(node) && node.isInJSDocNamespace) {
+                    if (node.isInJSDocNamespace) {
                         var parentNode = node.parent;
                         while (parentNode && parentNode.kind !== 291) {
                             parentNode = parentNode.parent;
@@ -19611,13 +19694,6 @@ var ts;
                     }
                 case 234:
                     return updateStrictModeStatementList(node.statements);
-                default:
-                    if (ts.isInJavaScriptFile(node))
-                        return bindJSDocWorker(node);
-            }
-        }
-        function bindJSDocWorker(node) {
-            switch (node.kind) {
                 case 276:
                     return bindPropertyWorker(node);
                 case 292:
@@ -20603,6 +20679,10 @@ var ts;
         }
     }
     ts.getTransformFlagsSubtreeExclusions = getTransformFlagsSubtreeExclusions;
+    function setParentPointers(parent, child) {
+        child.parent = parent;
+        ts.forEachChild(child, function (childsChild) { return setParentPointers(child, childsChild); });
+    }
 })(ts || (ts = {}));
 var ts;
 (function (ts) {
@@ -22002,14 +22082,7 @@ var ts;
                         }
                         break;
                 }
-                switch (declaration.parent.parent.kind) {
-                    case 215:
-                    case 216:
-                        if (isSameScopeDescendentOf(usage, declaration.parent.parent.expression, container)) {
-                            return true;
-                        }
-                }
-                return false;
+                return ts.isForInOrOfStatement(declaration.parent.parent) && isSameScopeDescendentOf(usage, declaration.parent.parent.expression, container);
             }
             function isUsedInFunctionOrInstanceProperty(usage, declaration, container) {
                 return !!ts.findAncestor(usage, function (current) {
@@ -22221,8 +22294,9 @@ var ts;
                     error(errorLocation, ts.Diagnostics.Initializer_of_instance_member_variable_0_cannot_reference_identifier_1_declared_in_the_constructor, ts.declarationNameToString(propertyName), typeof nameArg === "string" ? nameArg : ts.declarationNameToString(nameArg));
                     return undefined;
                 }
-                if (meaning & 2 ||
-                    ((meaning & 32 || meaning & 384) && (meaning & 107455) === 107455)) {
+                if (errorLocation &&
+                    (meaning & 2 ||
+                        ((meaning & 32 || meaning & 384) && (meaning & 107455) === 107455))) {
                     var exportOrLocalSymbol = getExportSymbolOfValueSymbolIfExported(result);
                     if (exportOrLocalSymbol.flags & 2 || exportOrLocalSymbol.flags & 32 || exportOrLocalSymbol.flags & 384) {
                         checkResolvedBlockScopedVariable(exportOrLocalSymbol, errorLocation);
@@ -23878,9 +23952,15 @@ var ts;
                         writer.writeStringLiteral(literalTypeToString(type));
                     }
                     else if (type.flags & 262144) {
+                        if (flags & 128) {
+                            writePunctuation(writer, 19);
+                        }
                         writer.writeKeyword("keyof");
                         writeSpace(writer);
                         writeType(type.type, 128);
+                        if (flags & 128) {
+                            writePunctuation(writer, 20);
+                        }
                     }
                     else if (type.flags & 524288) {
                         writeType(type.objectType, 128);
@@ -24695,12 +24775,6 @@ var ts;
             return strictNullChecks && optional ? getNullableType(type, 2048) : type;
         }
         function getTypeForVariableLikeDeclaration(declaration, includeOptionality) {
-            if (declaration.flags & 65536) {
-                var type = getTypeForDeclarationFromJSDocComment(declaration);
-                if (type && type !== unknownType) {
-                    return type;
-                }
-            }
             if (declaration.parent.parent.kind === 215) {
                 var indexType = getIndexType(checkNonNullExpression(declaration.parent.parent.expression));
                 return indexType.flags & (16384 | 262144) ? indexType : stringType;
@@ -24712,8 +24786,9 @@ var ts;
             if (ts.isBindingPattern(declaration.parent)) {
                 return getTypeForBindingElement(declaration);
             }
-            if (declaration.type) {
-                var declaredType = getTypeFromTypeNode(declaration.type);
+            var typeNode = ts.getEffectiveTypeAnnotationNode(declaration);
+            if (typeNode) {
+                var declaredType = getTypeFromTypeNode(typeNode);
                 return addOptionality(declaredType, declaration.questionToken && includeOptionality);
             }
             if ((noImplicitAny || declaration.flags & 65536) &&
@@ -24927,10 +25002,11 @@ var ts;
         function getAnnotatedAccessorType(accessor) {
             if (accessor) {
                 if (accessor.kind === 153) {
-                    return accessor.type && getTypeFromTypeNode(accessor.type);
+                    var getterTypeAnnotation = ts.getEffectiveReturnTypeNode(accessor);
+                    return getterTypeAnnotation && getTypeFromTypeNode(getterTypeAnnotation);
                 }
                 else {
-                    var setterTypeAnnotation = ts.getSetAccessorTypeAnnotationNode(accessor);
+                    var setterTypeAnnotation = ts.getEffectiveSetAccessorTypeAnnotationNode(accessor);
                     return setterTypeAnnotation && getTypeFromTypeNode(setterTypeAnnotation);
                 }
             }
@@ -25059,7 +25135,7 @@ var ts;
             return links.type;
         }
         function reportCircularityError(symbol) {
-            if (symbol.valueDeclaration.type) {
+            if (ts.getEffectiveTypeAnnotationNode(symbol.valueDeclaration)) {
                 error(symbol.valueDeclaration, ts.Diagnostics._0_is_referenced_directly_or_indirectly_in_its_own_type_annotation, symbolToString(symbol));
                 return unknownType;
             }
@@ -25188,11 +25264,8 @@ var ts;
         }
         function getInstantiatedConstructorsForTypeArguments(type, typeArgumentNodes, location) {
             var signatures = getConstructorsForTypeArguments(type, typeArgumentNodes, location);
-            if (typeArgumentNodes) {
-                var typeArguments_1 = ts.map(typeArgumentNodes, getTypeFromTypeNode);
-                signatures = ts.map(signatures, function (sig) { return getSignatureInstantiation(sig, typeArguments_1); });
-            }
-            return signatures;
+            var typeArguments = ts.map(typeArgumentNodes, getTypeFromTypeNode);
+            return ts.sameMap(signatures, function (sig) { return ts.some(sig.typeParameters) ? getSignatureInstantiation(sig, typeArguments) : sig; });
         }
         function getBaseConstructorTypeOfClass(type) {
             if (!type.resolvedBaseConstructorType) {
@@ -25561,11 +25634,15 @@ var ts;
             return false;
         }
         function isIndependentVariableLikeDeclaration(node) {
-            return node.type && isIndependentType(node.type) || !node.type && !node.initializer;
+            var typeNode = ts.getEffectiveTypeAnnotationNode(node);
+            return typeNode ? isIndependentType(typeNode) : !node.initializer;
         }
         function isIndependentFunctionLikeDeclaration(node) {
-            if (node.kind !== 152 && (!node.type || !isIndependentType(node.type))) {
-                return false;
+            if (node.kind !== 152) {
+                var typeNode = ts.getEffectiveReturnTypeNode(node);
+                if (!typeNode || !isIndependentType(typeNode)) {
+                    return false;
+                }
             }
             for (var _i = 0, _a = node.parameters; _i < _a.length; _i++) {
                 var parameter = _a[_i];
@@ -26172,7 +26249,7 @@ var ts;
                     typeParameter.default = targetDefault ? instantiateType(targetDefault, typeParameter.mapper) : noConstraintType;
                 }
                 else {
-                    var defaultDeclaration = typeParameter.symbol && ts.forEach(typeParameter.symbol.declarations, function (decl) { return ts.isTypeParameter(decl) && decl.default; });
+                    var defaultDeclaration = typeParameter.symbol && ts.forEach(typeParameter.symbol.declarations, function (decl) { return ts.isTypeParameterDeclaration(decl) && decl.default; });
                     typeParameter.default = defaultDeclaration ? getTypeFromTypeNode(defaultDeclaration) : noConstraintType;
                 }
             }
@@ -26331,20 +26408,14 @@ var ts;
             }
             return undefined;
         }
-        function getTypeParametersFromJSDocTemplate(declaration) {
-            if (declaration.flags & 65536) {
-                var templateTag = ts.getJSDocTemplateTag(declaration);
-                if (templateTag) {
-                    return getTypeParametersFromDeclaration(templateTag.typeParameters);
-                }
-            }
-            return undefined;
-        }
-        function getTypeParametersFromDeclaration(typeParameterDeclarations) {
-            var result = [];
-            ts.forEach(typeParameterDeclarations, function (node) {
+        function getTypeParametersFromDeclaration(declaration) {
+            var result;
+            ts.forEach(ts.getEffectiveTypeParameterDeclarations(declaration), function (node) {
                 var tp = getDeclaredTypeOfTypeParameter(node.symbol);
                 if (!ts.contains(result, tp)) {
+                    if (!result) {
+                        result = [];
+                    }
                     result.push(tp);
                 }
             });
@@ -26501,9 +26572,7 @@ var ts;
                 var classType = declaration.kind === 152 ?
                     getDeclaredTypeOfClassOrInterface(getMergedSymbol(declaration.parent.symbol))
                     : undefined;
-                var typeParameters = classType ? classType.localTypeParameters :
-                    declaration.typeParameters ? getTypeParametersFromDeclaration(declaration.typeParameters) :
-                        getTypeParametersFromJSDocTemplate(declaration);
+                var typeParameters = classType ? classType.localTypeParameters : getTypeParametersFromDeclaration(declaration);
                 var returnType = getSignatureReturnTypeFromDeclaration(declaration, isJSConstructSignature, classType);
                 var typePredicate = declaration.type && declaration.type.kind === 158 ?
                     createTypePredicateFromTypePredicateNode(declaration.type) :
@@ -26527,14 +26596,9 @@ var ts;
             else if (classType) {
                 return classType;
             }
-            else if (declaration.type) {
-                return getTypeFromTypeNode(declaration.type);
-            }
-            if (declaration.flags & 65536) {
-                var type = getReturnTypeFromJSDocComment(declaration);
-                if (type && type !== unknownType) {
-                    return type;
-                }
+            var typeNode = ts.getEffectiveReturnTypeNode(declaration);
+            if (typeNode) {
+                return getTypeFromTypeNode(typeNode);
             }
             if (declaration.kind === 153 && !ts.hasDynamicName(declaration)) {
                 var setter = ts.getDeclarationOfKind(declaration.symbol, 154);
@@ -26871,27 +26935,44 @@ var ts;
             }
             return undefined;
         }
-        function resolveTypeReferenceName(typeReferenceName) {
+        function resolveTypeReferenceName(typeReferenceName, meaning) {
             if (!typeReferenceName) {
                 return unknownSymbol;
             }
-            return resolveEntityName(typeReferenceName, 793064) || unknownSymbol;
+            return resolveEntityName(typeReferenceName, meaning) || unknownSymbol;
         }
         function getTypeReferenceType(node, symbol) {
             var typeArguments = typeArgumentsFromTypeReferenceNode(node);
             if (symbol === unknownSymbol) {
                 return unknownType;
             }
+            var type = getTypeReferenceTypeWorker(node, symbol, typeArguments);
+            if (type) {
+                return type;
+            }
+            if (symbol.flags & 107455 && node.kind === 277) {
+                var valueType = getTypeOfSymbol(symbol);
+                if (valueType.symbol && !isInferredClassType(valueType)) {
+                    var referenceType = getTypeReferenceTypeWorker(node, valueType.symbol, typeArguments);
+                    if (referenceType) {
+                        return referenceType;
+                    }
+                }
+                resolveTypeReferenceName(getTypeReferenceName(node), 793064);
+                return valueType;
+            }
+            return getTypeFromNonGenericTypeReference(node, symbol);
+        }
+        function getTypeReferenceTypeWorker(node, symbol, typeArguments) {
             if (symbol.flags & (32 | 64)) {
                 return getTypeFromClassOrInterfaceReference(node, symbol, typeArguments);
             }
             if (symbol.flags & 524288) {
                 return getTypeFromTypeAliasReference(node, symbol, typeArguments);
             }
-            if (symbol.flags & 107455 && node.kind === 277) {
-                return getTypeOfSymbol(symbol);
+            if (symbol.flags & 16 && node.kind === 277 && (symbol.members || ts.getJSDocClassTag(symbol.valueDeclaration))) {
+                return getInferredClassType(symbol);
             }
-            return getTypeFromNonGenericTypeReference(node, symbol);
         }
         function getPrimitiveTypeFromJSDocTypeReference(node) {
             if (ts.isIdentifier(node.name)) {
@@ -26931,21 +27012,13 @@ var ts;
             if (!links.resolvedType) {
                 var symbol = void 0;
                 var type = void 0;
+                var meaning = 793064;
                 if (node.kind === 277) {
                     type = getPrimitiveTypeFromJSDocTypeReference(node);
-                    if (!type) {
-                        var typeReferenceName = getTypeReferenceName(node);
-                        symbol = resolveTypeReferenceName(typeReferenceName);
-                        type = getTypeReferenceType(node, symbol);
-                    }
+                    meaning |= 107455;
                 }
-                else {
-                    var typeNameOrExpression = node.kind === 159
-                        ? node.typeName
-                        : ts.isEntityNameExpression(node.expression)
-                            ? node.expression
-                            : undefined;
-                    symbol = typeNameOrExpression && resolveEntityName(typeNameOrExpression, 793064) || unknownSymbol;
+                if (!type) {
+                    symbol = resolveTypeReferenceName(getTypeReferenceName(node), meaning);
                     type = getTypeReferenceType(node, symbol);
                 }
                 links.resolvedSymbol = symbol;
@@ -27297,10 +27370,13 @@ var ts;
             else if (type.flags & 1) {
                 typeSet.containsAny = true;
             }
+            else if (type.flags & 8192) {
+                typeSet.containsNever = true;
+            }
             else if (getObjectFlags(type) & 16 && isEmptyObjectType(type)) {
                 typeSet.containsEmptyObject = true;
             }
-            else if (!(type.flags & 8192) && (strictNullChecks || !(type.flags & 6144)) && !ts.contains(typeSet, type)) {
+            else if ((strictNullChecks || !(type.flags & 6144)) && !ts.contains(typeSet, type)) {
                 if (type.flags & 32768) {
                     typeSet.containsObjectType = true;
                 }
@@ -27325,6 +27401,9 @@ var ts;
             }
             var typeSet = [];
             addTypesToIntersection(typeSet, types);
+            if (typeSet.containsNever) {
+                return neverType;
+            }
             if (typeSet.containsAny) {
                 return anyType;
             }
@@ -27598,7 +27677,7 @@ var ts;
                         var declarations = ts.concatenate(leftProp.declarations, rightProp.declarations);
                         var flags = 4 | (leftProp.flags & 67108864);
                         var result = createSymbol(flags, leftProp.name);
-                        result.type = getUnionType([getTypeOfSymbol(leftProp), rightType]);
+                        result.type = getUnionType([getTypeOfSymbol(leftProp), getTypeWithFacts(rightType, 131072)]);
                         result.leftSpread = leftProp;
                         result.rightSpread = rightProp;
                         result.declarations = declarations;
@@ -27890,7 +27969,7 @@ var ts;
             if (signature.typePredicate) {
                 freshTypePredicate = cloneTypePredicate(signature.typePredicate, mapper);
             }
-            var result = createSignature(signature.declaration, freshTypeParameters, signature.thisParameter && instantiateSymbol(signature.thisParameter, mapper), instantiateList(signature.parameters, mapper, instantiateSymbol), instantiateType(signature.resolvedReturnType, mapper), freshTypePredicate, signature.minArgumentCount, signature.hasRestParameter, signature.hasLiteralTypes);
+            var result = createSignature(signature.declaration, freshTypeParameters, signature.thisParameter && instantiateSymbol(signature.thisParameter, mapper), instantiateList(signature.parameters, mapper, instantiateSymbol), undefined, freshTypePredicate, signature.minArgumentCount, signature.hasRestParameter, signature.hasLiteralTypes);
             result.target = signature;
             result.mapper = mapper;
             return result;
@@ -27976,10 +28055,10 @@ var ts;
                     case 199:
                     case 230:
                     case 231:
-                        var declaration = node;
-                        if (declaration.typeParameters) {
-                            for (var _i = 0, _a = declaration.typeParameters; _i < _a.length; _i++) {
-                                var d = _a[_i];
+                        var typeParameters = ts.getEffectiveTypeParameterDeclarations(node);
+                        if (typeParameters) {
+                            for (var _i = 0, typeParameters_1 = typeParameters; _i < typeParameters_1.length; _i++) {
+                                var d = typeParameters_1[_i];
                                 if (ts.contains(mappedTypes, getDeclaredTypeOfTypeParameter(getSymbolOfNode(d)))) {
                                     return true;
                                 }
@@ -27999,8 +28078,8 @@ var ts;
                         break;
                     case 279:
                         var func = node;
-                        for (var _b = 0, _c = func.parameters; _b < _c.length; _b++) {
-                            var p = _c[_b];
+                        for (var _a = 0, _b = func.parameters; _a < _b.length; _a++) {
+                            var p = _b[_a];
                             if (ts.contains(mappedTypes, getTypeOfNode(p))) {
                                 return true;
                             }
@@ -28099,7 +28178,7 @@ var ts;
             if (node.typeParameters) {
                 return false;
             }
-            if (ts.forEach(node.parameters, function (p) { return !p.type; })) {
+            if (ts.forEach(node.parameters, function (p) { return !ts.getEffectiveTypeAnnotationNode(p); })) {
                 return true;
             }
             if (node.kind === 187) {
@@ -28152,9 +28231,6 @@ var ts;
         function areTypesComparable(type1, type2) {
             return isTypeComparableTo(type1, type2) || isTypeComparableTo(type2, type1);
         }
-        function checkTypeSubtypeOf(source, target, errorNode, headMessage, containingMessageChain) {
-            return checkTypeRelatedTo(source, target, subtypeRelation, errorNode, headMessage, containingMessageChain);
-        }
         function checkTypeAssignableTo(source, target, errorNode, headMessage, containingMessageChain) {
             return checkTypeRelatedTo(source, target, assignableRelation, errorNode, headMessage, containingMessageChain);
         }
@@ -28171,8 +28247,9 @@ var ts;
             if (!target.hasRestParameter && source.minArgumentCount > target.parameters.length) {
                 return 0;
             }
-            source = getErasedSignature(source);
-            target = getErasedSignature(target);
+            if (source.typeParameters) {
+                source = instantiateSignatureInContextOf(source, target);
+            }
             var result = -1;
             var sourceThisType = getThisTypeOfSignature(source);
             if (sourceThisType && sourceThisType !== voidType) {
@@ -28575,8 +28652,7 @@ var ts;
                         (isTypeSubsetOf(globalObjectType, target) || (!isComparingJsxAttributes && isEmptyObjectType(target)))) {
                         return false;
                     }
-                    for (var _i = 0, _a = getPropertiesOfObjectType(source); _i < _a.length; _i++) {
-                        var prop = _a[_i];
+                    var _loop_4 = function (prop) {
                         if (!isKnownProperty(target, prop.name, isComparingJsxAttributes)) {
                             if (reportErrors) {
                                 ts.Debug.assert(!!errorNode);
@@ -28584,12 +28660,21 @@ var ts;
                                     reportError(ts.Diagnostics.Property_0_does_not_exist_on_type_1, symbolToString(prop), typeToString(target));
                                 }
                                 else {
-                                    errorNode = prop.valueDeclaration;
+                                    var objectLiteralDeclaration_1 = source.symbol && ts.firstOrUndefined(source.symbol.declarations);
+                                    if (prop.valueDeclaration && ts.findAncestor(prop.valueDeclaration, function (d) { return d === objectLiteralDeclaration_1; })) {
+                                        errorNode = prop.valueDeclaration;
+                                    }
                                     reportError(ts.Diagnostics.Object_literal_may_only_specify_known_properties_and_0_does_not_exist_in_type_1, symbolToString(prop), typeToString(target));
                                 }
                             }
-                            return true;
+                            return { value: true };
                         }
+                    };
+                    for (var _i = 0, _a = getPropertiesOfObjectType(source); _i < _a.length; _i++) {
+                        var prop = _a[_i];
+                        var state_2 = _loop_4(prop);
+                        if (typeof state_2 === "object")
+                            return state_2.value;
                     }
                 }
                 return false;
@@ -29041,12 +29126,16 @@ var ts;
                 var saveErrorInfo = errorInfo;
                 if (getObjectFlags(source) & 64 && getObjectFlags(target) & 64 && source.symbol === target.symbol) {
                     for (var i = 0; i < targetSignatures.length; i++) {
-                        var related = signatureRelatedTo(sourceSignatures[i], targetSignatures[i], reportErrors);
+                        var related = signatureRelatedTo(sourceSignatures[i], targetSignatures[i], true, reportErrors);
                         if (!related) {
                             return 0;
                         }
                         result &= related;
                     }
+                }
+                else if (sourceSignatures.length === 1 && targetSignatures.length === 1) {
+                    var eraseGenerics = relation === comparableRelation || compilerOptions.noStrictGenericChecks;
+                    result = signatureRelatedTo(sourceSignatures[0], targetSignatures[0], eraseGenerics, reportErrors);
                 }
                 else {
                     outer: for (var _i = 0, targetSignatures_1 = targetSignatures; _i < targetSignatures_1.length; _i++) {
@@ -29054,7 +29143,7 @@ var ts;
                         var shouldElaborateErrors = reportErrors;
                         for (var _a = 0, sourceSignatures_1 = sourceSignatures; _a < sourceSignatures_1.length; _a++) {
                             var s = sourceSignatures_1[_a];
-                            var related = signatureRelatedTo(s, t, shouldElaborateErrors);
+                            var related = signatureRelatedTo(s, t, true, shouldElaborateErrors);
                             if (related) {
                                 result &= related;
                                 errorInfo = saveErrorInfo;
@@ -29070,8 +29159,8 @@ var ts;
                 }
                 return result;
             }
-            function signatureRelatedTo(source, target, reportErrors) {
-                return compareSignaturesRelated(source, target, false, false, reportErrors, reportError, isRelatedTo);
+            function signatureRelatedTo(source, target, erase, reportErrors) {
+                return compareSignaturesRelated(erase ? getErasedSignature(source) : source, erase ? getErasedSignature(target) : target, false, false, reportErrors, reportError, isRelatedTo);
             }
             function signaturesIdenticalTo(source, target, kind) {
                 var sourceSignatures = getSignaturesOfType(source, kind);
@@ -29321,18 +29410,10 @@ var ts;
         function isRestParameterIndex(signature, parameterIndex) {
             return signature.hasRestParameter && parameterIndex >= signature.parameters.length - 1;
         }
-        function isSupertypeOfEach(candidate, types) {
-            for (var _i = 0, types_9 = types; _i < types_9.length; _i++) {
-                var t = types_9[_i];
-                if (candidate !== t && !isTypeSubtypeOf(t, candidate))
-                    return false;
-            }
-            return true;
-        }
         function literalTypesWithSameBaseType(types) {
             var commonBaseType;
-            for (var _i = 0, types_10 = types; _i < types_10.length; _i++) {
-                var t = types_10[_i];
+            for (var _i = 0, types_9 = types; _i < types_9.length; _i++) {
+                var t = types_9[_i];
                 var baseType = getBaseTypeOfLiteralType(t);
                 if (!commonBaseType) {
                     commonBaseType = baseType;
@@ -29344,45 +29425,18 @@ var ts;
             return true;
         }
         function getSupertypeOrUnion(types) {
-            return literalTypesWithSameBaseType(types) ? getUnionType(types) : ts.forEach(types, function (t) { return isSupertypeOfEach(t, types) ? t : undefined; });
+            return literalTypesWithSameBaseType(types) ?
+                getUnionType(types) :
+                ts.reduceLeft(types, function (s, t) { return isTypeSubtypeOf(s, t) ? t : s; });
         }
         function getCommonSupertype(types) {
             if (!strictNullChecks) {
                 return getSupertypeOrUnion(types);
             }
             var primaryTypes = ts.filter(types, function (t) { return !(t.flags & 6144); });
-            if (!primaryTypes.length) {
-                return getUnionType(types, true);
-            }
-            var supertype = getSupertypeOrUnion(primaryTypes);
-            return supertype && getNullableType(supertype, getFalsyFlagsOfTypes(types) & 6144);
-        }
-        function reportNoCommonSupertypeError(types, errorLocation, errorMessageChainHead) {
-            var bestSupertype;
-            var bestSupertypeDownfallType;
-            var bestSupertypeScore = 0;
-            for (var i = 0; i < types.length; i++) {
-                var score = 0;
-                var downfallType = undefined;
-                for (var j = 0; j < types.length; j++) {
-                    if (isTypeSubtypeOf(types[j], types[i])) {
-                        score++;
-                    }
-                    else if (!downfallType) {
-                        downfallType = types[j];
-                    }
-                }
-                ts.Debug.assert(!!downfallType, "If there is no common supertype, each type should have a downfallType");
-                if (score > bestSupertypeScore) {
-                    bestSupertype = types[i];
-                    bestSupertypeDownfallType = downfallType;
-                    bestSupertypeScore = score;
-                }
-                if (bestSupertypeScore === types.length - 1) {
-                    break;
-                }
-            }
-            checkTypeSubtypeOf(bestSupertypeDownfallType, bestSupertype, errorLocation, ts.Diagnostics.Type_argument_candidate_1_is_not_a_valid_type_argument_because_it_is_not_a_supertype_of_candidate_0, errorMessageChainHead);
+            return primaryTypes.length ?
+                getNullableType(getSupertypeOrUnion(primaryTypes), getFalsyFlagsOfTypes(types) & 6144) :
+                getUnionType(types, true);
         }
         function isArrayType(type) {
             return getObjectFlags(type) & 4 && type.target === globalArrayType;
@@ -29423,8 +29477,8 @@ var ts;
         }
         function getFalsyFlagsOfTypes(types) {
             var result = 0;
-            for (var _i = 0, types_11 = types; _i < types_11.length; _i++) {
-                var t = types_11[_i];
+            for (var _i = 0, types_10 = types; _i < types_10.length; _i++) {
+                var t = types_10[_i];
                 result |= getFalsyFlags(t);
             }
             return result;
@@ -29945,8 +29999,8 @@ var ts;
             }
         }
         function typeIdenticalToSomeType(type, types) {
-            for (var _i = 0, types_12 = types; _i < types_12.length; _i++) {
-                var t = types_12[_i];
+            for (var _i = 0, types_11 = types; _i < types_11.length; _i++) {
+                var t = types_11[_i];
                 if (isTypeIdenticalTo(t, type)) {
                     return true;
                 }
@@ -29970,7 +30024,6 @@ var ts;
         function getInferredType(context, index) {
             var inference = context.inferences[index];
             var inferredType = inference.inferredType;
-            var inferenceSucceeded;
             if (!inferredType) {
                 if (inference.candidates) {
                     var signature = context.signature;
@@ -29980,36 +30033,27 @@ var ts;
                     var baseCandidates = widenLiteralTypes ? ts.sameMap(inference.candidates, getWidenedLiteralType) : inference.candidates;
                     var unionOrSuperType = context.flags & 1 || inference.priority & 4 ?
                         getUnionType(baseCandidates, true) : getCommonSupertype(baseCandidates);
-                    inferredType = unionOrSuperType ? getWidenedType(unionOrSuperType) : unknownType;
-                    inferenceSucceeded = !!unionOrSuperType;
+                    inferredType = getWidenedType(unionOrSuperType);
+                }
+                else if (context.flags & 2) {
+                    inferredType = silentNeverType;
                 }
                 else {
-                    if (context.flags & 2) {
-                        inferredType = silentNeverType;
+                    var defaultType = getDefaultFromTypeParameter(inference.typeParameter);
+                    if (defaultType) {
+                        inferredType = instantiateType(defaultType, combineTypeMappers(createBackreferenceMapper(context.signature.typeParameters, index), context));
                     }
                     else {
-                        var defaultType = getDefaultFromTypeParameter(inference.typeParameter);
-                        if (defaultType) {
-                            inferredType = instantiateType(defaultType, combineTypeMappers(createBackreferenceMapper(context.signature.typeParameters, index), context));
-                        }
-                        else {
-                            inferredType = context.flags & 4 ? anyType : emptyObjectType;
-                        }
+                        inferredType = context.flags & 4 ? anyType : emptyObjectType;
                     }
-                    inferenceSucceeded = true;
                 }
                 inference.inferredType = inferredType;
-                if (inferenceSucceeded) {
-                    var constraint = getConstraintOfTypeParameter(context.signature.typeParameters[index]);
-                    if (constraint) {
-                        var instantiatedConstraint = instantiateType(constraint, context);
-                        if (!isTypeAssignableTo(inferredType, getTypeWithThisArgument(instantiatedConstraint, inferredType))) {
-                            inference.inferredType = inferredType = instantiatedConstraint;
-                        }
+                var constraint = getConstraintOfTypeParameter(context.signature.typeParameters[index]);
+                if (constraint) {
+                    var instantiatedConstraint = instantiateType(constraint, context);
+                    if (!isTypeAssignableTo(inferredType, getTypeWithThisArgument(instantiatedConstraint, inferredType))) {
+                        inference.inferredType = inferredType = instantiatedConstraint;
                     }
-                }
-                else if (context.failedTypeParameterIndex === undefined || context.failedTypeParameterIndex > index) {
-                    context.failedTypeParameterIndex = index;
                 }
             }
             return inferredType;
@@ -30159,8 +30203,8 @@ var ts;
         }
         function getTypeFactsOfTypes(types) {
             var result = 0;
-            for (var _i = 0, types_13 = types; _i < types_13.length; _i++) {
-                var t = types_13[_i];
+            for (var _i = 0, types_12 = types; _i < types_12.length; _i++) {
+                var t = types_12[_i];
                 result |= getTypeFacts(t);
             }
             return result;
@@ -30410,8 +30454,8 @@ var ts;
             var types = type.types;
             var mappedType;
             var mappedTypes;
-            for (var _i = 0, types_14 = types; _i < types_14.length; _i++) {
-                var current = types_14[_i];
+            for (var _i = 0, types_13 = types; _i < types_13.length; _i++) {
+                var current = types_13[_i];
                 var t = mapper(current);
                 if (t) {
                     if (!mappedType) {
@@ -30480,8 +30524,8 @@ var ts;
         }
         function isEvolvingArrayTypeList(types) {
             var hasEvolvingArrayType = false;
-            for (var _i = 0, types_15 = types; _i < types_15.length; _i++) {
-                var t = types_15[_i];
+            for (var _i = 0, types_14 = types; _i < types_14.length; _i++) {
+                var t = types_14[_i];
                 if (!(t.flags & 8192)) {
                     if (!(getObjectFlags(t) & 256)) {
                         return false;
@@ -31583,8 +31627,15 @@ var ts;
         function getContextualTypeForInitializerExpression(node) {
             var declaration = node.parent;
             if (node === declaration.initializer) {
-                if (declaration.type) {
-                    return getTypeFromTypeNode(declaration.type);
+                var typeNode = ts.getEffectiveTypeAnnotationNode(declaration);
+                if (typeNode) {
+                    return getTypeFromTypeNode(typeNode);
+                }
+                if (ts.isInJavaScriptFile(declaration)) {
+                    var jsDocType = getTypeForDeclarationFromJSDocComment(declaration);
+                    if (jsDocType) {
+                        return jsDocType;
+                    }
                 }
                 if (declaration.kind === 146) {
                     var type = getContextuallyTypedParameterType(declaration);
@@ -31598,12 +31649,13 @@ var ts;
                 if (ts.isBindingPattern(declaration.parent)) {
                     var parentDeclaration = declaration.parent.parent;
                     var name = declaration.propertyName || declaration.name;
-                    if (parentDeclaration.kind !== 176 &&
-                        parentDeclaration.type &&
-                        !ts.isBindingPattern(name)) {
-                        var text = ts.getTextOfPropertyName(name);
-                        if (text) {
-                            return getTypeOfPropertyOfType(getTypeFromTypeNode(parentDeclaration.type), text);
+                    if (parentDeclaration.kind !== 176) {
+                        var parentTypeNode = ts.getEffectiveTypeAnnotationNode(parentDeclaration);
+                        if (parentTypeNode && !ts.isBindingPattern(name)) {
+                            var text = ts.getTextOfPropertyName(name);
+                            if (text) {
+                                return getTypeOfPropertyOfType(getTypeFromTypeNode(parentTypeNode), text);
+                            }
                         }
                     }
                 }
@@ -31647,9 +31699,9 @@ var ts;
             return false;
         }
         function getContextualReturnType(functionDecl) {
-            if (functionDecl.type ||
-                functionDecl.kind === 152 ||
-                functionDecl.kind === 153 && ts.getSetAccessorTypeAnnotationNode(ts.getDeclarationOfKind(functionDecl.symbol, 154))) {
+            if (functionDecl.kind === 152 ||
+                ts.getEffectiveReturnTypeNode(functionDecl) ||
+                isGetAccessorWithAnnotatedSetAccessor(functionDecl)) {
                 return getReturnTypeOfSignature(getSignatureFromDeclaration(functionDecl));
             }
             var signature = getContextualSignatureForFunctionLikeDeclaration(functionDecl);
@@ -31887,8 +31939,8 @@ var ts;
             }
             var signatureList;
             var types = type.types;
-            for (var _i = 0, types_16 = types; _i < types_16.length; _i++) {
-                var current = types_16[_i];
+            for (var _i = 0, types_15 = types; _i < types_15.length; _i++) {
+                var current = types_15[_i];
                 var signature = getContextualCallSignature(current, node);
                 if (signature) {
                     if (!signatureList) {
@@ -32643,7 +32695,7 @@ var ts;
                 var resolved = resolveStructuredTypeMembers(targetType);
                 if (resolved.stringIndexInfo ||
                     resolved.numberIndexInfo && isNumericLiteralName(name) ||
-                    getPropertyOfType(targetType, name) ||
+                    getPropertyOfObjectType(targetType, name) ||
                     isComparingJsxAttributes && !isUnhyphenatedJsxName(name)) {
                     return true;
                 }
@@ -32943,12 +32995,23 @@ var ts;
             var left = node.kind === 179
                 ? node.expression
                 : node.left;
-            var type = checkExpression(left);
+            return isValidPropertyAccessWithType(node, left, propertyName, getWidenedType(checkExpression(left)));
+        }
+        function isValidPropertyAccessWithType(node, left, propertyName, type) {
             if (type !== unknownType && !isTypeAny(type)) {
-                var prop = getPropertyOfType(getWidenedType(type), propertyName);
+                var prop = getPropertyOfType(type, propertyName);
                 if (prop) {
                     return checkPropertyAccessibility(node, left, type, prop);
                 }
+                if (ts.isInJavaScriptFile(left) && (type.flags & 65536)) {
+                    for (var _i = 0, _a = type.types; _i < _a.length; _i++) {
+                        var elementType = _a[_i];
+                        if (isValidPropertyAccessWithType(node, left, propertyName, elementType)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             }
             return true;
         }
@@ -33184,8 +33247,11 @@ var ts;
         function instantiateSignatureInContextOf(signature, contextualSignature, contextualMapper) {
             var context = createInferenceContext(signature, 1);
             forEachMatchingParameterType(contextualSignature, signature, function (source, target) {
-                inferTypes(context.inferences, instantiateType(source, contextualMapper), target);
+                inferTypes(context.inferences, instantiateType(source, contextualMapper || identityMapper), target);
             });
+            if (!contextualMapper) {
+                inferTypes(context.inferences, getReturnTypeOfSignature(contextualSignature), getReturnTypeOfSignature(signature), 4);
+            }
             return getSignatureInstantiation(signature, getInferredTypes(context));
         }
         function inferTypeArguments(node, signature, args, excludeArgument, context) {
@@ -33194,9 +33260,6 @@ var ts;
                 if (!inferences[i].isFixed) {
                     inferences[i].inferredType = undefined;
                 }
-            }
-            if (context.failedTypeParameterIndex !== undefined && !context.inferences[context.failedTypeParameterIndex].isFixed) {
-                context.failedTypeParameterIndex = undefined;
             }
             if (ts.isExpression(node)) {
                 var contextualType = getContextualType(node);
@@ -33519,16 +33582,12 @@ var ts;
             }
             var candidateForArgumentError;
             var candidateForTypeArgumentError;
-            var resultOfFailedInference;
             var result;
             var signatureHelpTrailingComma = candidatesOutArray && node.kind === 181 && node.arguments.hasTrailingComma;
             if (candidates.length > 1) {
                 result = chooseOverload(candidates, subtypeRelation, signatureHelpTrailingComma);
             }
             if (!result) {
-                candidateForArgumentError = undefined;
-                candidateForTypeArgumentError = undefined;
-                resultOfFailedInference = undefined;
                 result = chooseOverload(candidates, assignableRelation, signatureHelpTrailingComma);
             }
             if (result) {
@@ -33541,20 +33600,8 @@ var ts;
                 checkApplicableSignature(node, args, candidateForArgumentError, assignableRelation, undefined, true);
             }
             else if (candidateForTypeArgumentError) {
-                if (!isTaggedTemplate && !isDecorator && typeArguments) {
-                    var typeArguments_2 = node.typeArguments;
-                    checkTypeArguments(candidateForTypeArgumentError, typeArguments_2, ts.map(typeArguments_2, getTypeFromTypeNode), true, fallbackError);
-                }
-                else {
-                    ts.Debug.assert(resultOfFailedInference.failedTypeParameterIndex >= 0);
-                    var failedTypeParameter = candidateForTypeArgumentError.typeParameters[resultOfFailedInference.failedTypeParameterIndex];
-                    var inferenceCandidates = resultOfFailedInference.inferences[resultOfFailedInference.failedTypeParameterIndex].candidates;
-                    var diagnosticChainHead = ts.chainDiagnosticMessages(undefined, ts.Diagnostics.The_type_argument_for_type_parameter_0_cannot_be_inferred_from_the_usage_Consider_specifying_the_type_arguments_explicitly, typeToString(failedTypeParameter));
-                    if (fallbackError) {
-                        diagnosticChainHead = ts.chainDiagnosticMessages(diagnosticChainHead, fallbackError);
-                    }
-                    reportNoCommonSupertypeError(inferenceCandidates, node.tagName || node.expression || node.tag, diagnosticChainHead);
-                }
+                var typeArguments_1 = node.typeArguments;
+                checkTypeArguments(candidateForTypeArgumentError, typeArguments_1, ts.map(typeArguments_1, getTypeFromTypeNode), true, fallbackError);
             }
             else if (typeArguments && ts.every(signatures, function (sig) { return ts.length(sig.typeParameters) !== typeArguments.length; })) {
                 var min = Number.POSITIVE_INFINITY;
@@ -33604,34 +33651,35 @@ var ts;
             return resolveErrorCall(node);
             function chooseOverload(candidates, relation, signatureHelpTrailingComma) {
                 if (signatureHelpTrailingComma === void 0) { signatureHelpTrailingComma = false; }
+                candidateForArgumentError = undefined;
+                candidateForTypeArgumentError = undefined;
                 for (var _i = 0, candidates_2 = candidates; _i < candidates_2.length; _i++) {
                     var originalCandidate = candidates_2[_i];
                     if (!hasCorrectArity(node, args, originalCandidate, signatureHelpTrailingComma)) {
                         continue;
                     }
                     var candidate = void 0;
-                    var typeArgumentsAreValid = void 0;
-                    var inferenceContext = originalCandidate.typeParameters
-                        ? createInferenceContext(originalCandidate, ts.isInJavaScriptFile(node) ? 4 : 0)
-                        : undefined;
+                    var inferenceContext = originalCandidate.typeParameters ?
+                        createInferenceContext(originalCandidate, ts.isInJavaScriptFile(node) ? 4 : 0) :
+                        undefined;
                     while (true) {
                         candidate = originalCandidate;
                         if (candidate.typeParameters) {
                             var typeArgumentTypes = void 0;
                             if (typeArguments) {
                                 typeArgumentTypes = fillMissingTypeArguments(ts.map(typeArguments, getTypeFromTypeNode), candidate.typeParameters, getMinTypeArgumentCount(candidate.typeParameters));
-                                typeArgumentsAreValid = checkTypeArguments(candidate, typeArguments, typeArgumentTypes, false);
+                                if (!checkTypeArguments(candidate, typeArguments, typeArgumentTypes, false)) {
+                                    candidateForTypeArgumentError = originalCandidate;
+                                    break;
+                                }
                             }
                             else {
                                 typeArgumentTypes = inferTypeArguments(node, candidate, args, excludeArgument, inferenceContext);
-                                typeArgumentsAreValid = inferenceContext.failedTypeParameterIndex === undefined;
-                            }
-                            if (!typeArgumentsAreValid) {
-                                break;
                             }
                             candidate = getSignatureInstantiation(candidate, typeArgumentTypes);
                         }
                         if (!checkApplicableSignature(node, args, candidate, relation, excludeArgument, false)) {
+                            candidateForArgumentError = candidate;
                             break;
                         }
                         var index = excludeArgument ? ts.indexOf(excludeArgument, true) : -1;
@@ -33639,22 +33687,6 @@ var ts;
                             return candidate;
                         }
                         excludeArgument[index] = false;
-                    }
-                    if (originalCandidate.typeParameters) {
-                        var instantiatedCandidate = candidate;
-                        if (typeArgumentsAreValid) {
-                            candidateForArgumentError = instantiatedCandidate;
-                        }
-                        else {
-                            candidateForTypeArgumentError = originalCandidate;
-                            if (!typeArguments) {
-                                resultOfFailedInference = inferenceContext;
-                            }
-                        }
-                    }
-                    else {
-                        ts.Debug.assert(originalCandidate === candidate);
-                        candidateForArgumentError = originalCandidate;
                     }
                 }
                 return undefined;
@@ -33858,8 +33890,8 @@ var ts;
             if (elementType.flags & 65536) {
                 var types = elementType.types;
                 var result = void 0;
-                for (var _i = 0, types_17 = types; _i < types_17.length; _i++) {
-                    var type = types_17[_i];
+                for (var _i = 0, types_16 = types; _i < types_16.length; _i++) {
+                    var type = types_16[_i];
                     result = result || resolveStatelessJsxOpeningLikeElement(openingLikeElement, type, candidatesOutArray);
                 }
                 return result;
@@ -33919,6 +33951,11 @@ var ts;
                 links.inferredClassType = createAnonymousType(symbol, symbol.members || emptySymbols, emptyArray, emptyArray, undefined, undefined);
             }
             return links.inferredClassType;
+        }
+        function isInferredClassType(type) {
+            return type.symbol
+                && getObjectFlags(type) & 16
+                && getSymbolLinks(type.symbol).inferredClassType === type;
         }
         function checkCallExpression(node) {
             checkGrammarTypeArguments(node, node.typeArguments) || checkGrammarArguments(node, node.arguments);
@@ -34049,37 +34086,42 @@ var ts;
         function getTypeOfFirstParameterOfSignature(signature) {
             return signature.parameters.length > 0 ? getTypeAtPosition(signature, 0) : neverType;
         }
-        function assignContextualParameterTypes(signature, context, mapper, checkMode) {
+        function inferFromAnnotatedParameters(signature, context, mapper) {
             var len = signature.parameters.length - (signature.hasRestParameter ? 1 : 0);
-            if (checkMode === 2) {
-                for (var i = 0; i < len; i++) {
-                    var declaration = signature.parameters[i].valueDeclaration;
-                    if (declaration.type) {
-                        inferTypes(mapper.inferences, getTypeFromTypeNode(declaration.type), getTypeAtPosition(context, i));
+            for (var i = 0; i < len; i++) {
+                var declaration = signature.parameters[i].valueDeclaration;
+                if (declaration.type) {
+                    var typeNode = ts.getEffectiveTypeAnnotationNode(declaration);
+                    if (typeNode) {
+                        inferTypes(mapper.inferences, getTypeFromTypeNode(typeNode), getTypeAtPosition(context, i));
                     }
                 }
             }
+        }
+        function assignContextualParameterTypes(signature, context) {
+            signature.typeParameters = context.typeParameters;
             if (context.thisParameter) {
                 var parameter = signature.thisParameter;
                 if (!parameter || parameter.valueDeclaration && !parameter.valueDeclaration.type) {
                     if (!parameter) {
                         signature.thisParameter = createSymbolWithType(context.thisParameter, undefined);
                     }
-                    assignTypeToParameterAndFixTypeParameters(signature.thisParameter, getTypeOfSymbol(context.thisParameter), mapper, checkMode);
+                    assignTypeToParameterAndFixTypeParameters(signature.thisParameter, getTypeOfSymbol(context.thisParameter));
                 }
             }
+            var len = signature.parameters.length - (signature.hasRestParameter ? 1 : 0);
             for (var i = 0; i < len; i++) {
                 var parameter = signature.parameters[i];
-                if (!parameter.valueDeclaration.type) {
+                if (!ts.getEffectiveTypeAnnotationNode(parameter.valueDeclaration)) {
                     var contextualParameterType = getTypeAtPosition(context, i);
-                    assignTypeToParameterAndFixTypeParameters(parameter, contextualParameterType, mapper, checkMode);
+                    assignTypeToParameterAndFixTypeParameters(parameter, contextualParameterType);
                 }
             }
             if (signature.hasRestParameter && isRestParameterIndex(context, signature.parameters.length - 1)) {
                 var parameter = ts.lastOrUndefined(signature.parameters);
-                if (!parameter.valueDeclaration.type) {
+                if (!ts.getEffectiveTypeAnnotationNode(parameter.valueDeclaration)) {
                     var contextualParameterType = getTypeOfSymbol(ts.lastOrUndefined(context.parameters));
-                    assignTypeToParameterAndFixTypeParameters(parameter, contextualParameterType, mapper, checkMode);
+                    assignTypeToParameterAndFixTypeParameters(parameter, contextualParameterType);
                 }
             }
         }
@@ -34096,10 +34138,10 @@ var ts;
                 }
             }
         }
-        function assignTypeToParameterAndFixTypeParameters(parameter, contextualType, mapper, checkMode) {
+        function assignTypeToParameterAndFixTypeParameters(parameter, contextualType) {
             var links = getSymbolLinks(parameter);
             if (!links.type) {
-                links.type = instantiateType(contextualType, mapper);
+                links.type = contextualType;
                 var name = ts.getNameOfDeclaration(parameter.valueDeclaration);
                 if (links.type === emptyObjectType &&
                     (name.kind === 174 || name.kind === 175)) {
@@ -34107,16 +34149,6 @@ var ts;
                 }
                 assignBindingElementTypes(parameter.valueDeclaration);
             }
-            else if (checkMode === 2) {
-                inferTypes(mapper.inferences, links.type, instantiateType(contextualType, mapper));
-            }
-        }
-        function getReturnTypeFromJSDocComment(func) {
-            var returnTag = ts.getJSDocReturnTag(func);
-            if (returnTag && returnTag.typeExpression) {
-                return getTypeFromTypeNode(returnTag.typeExpression.type);
-            }
-            return undefined;
         }
         function createPromiseType(promisedType) {
             var globalPromiseType = getGlobalPromiseType(true);
@@ -34293,13 +34325,13 @@ var ts;
             }
             var hasExplicitReturn = func.flags & 256;
             if (returnType && returnType.flags & 8192) {
-                error(func.type, ts.Diagnostics.A_function_returning_never_cannot_have_a_reachable_end_point);
+                error(ts.getEffectiveReturnTypeNode(func), ts.Diagnostics.A_function_returning_never_cannot_have_a_reachable_end_point);
             }
             else if (returnType && !hasExplicitReturn) {
-                error(func.type, ts.Diagnostics.A_function_whose_declared_type_is_neither_void_nor_any_must_return_a_value);
+                error(ts.getEffectiveReturnTypeNode(func), ts.Diagnostics.A_function_whose_declared_type_is_neither_void_nor_any_must_return_a_value);
             }
             else if (returnType && strictNullChecks && !isTypeAssignableTo(undefinedType, returnType)) {
-                error(func.type, ts.Diagnostics.Function_lacks_ending_return_statement_and_return_type_does_not_include_undefined);
+                error(ts.getEffectiveReturnTypeNode(func), ts.Diagnostics.Function_lacks_ending_return_statement_and_return_type_does_not_include_undefined);
             }
             else if (compilerOptions.noImplicitReturns) {
                 if (!returnType) {
@@ -34311,7 +34343,7 @@ var ts;
                         return;
                     }
                 }
-                error(func.type || func, ts.Diagnostics.Not_all_code_paths_return_a_value);
+                error(ts.getEffectiveReturnTypeNode(func) || func, ts.Diagnostics.Not_all_code_paths_return_a_value);
             }
         }
         function checkFunctionExpressionOrObjectLiteralMethod(node, checkMode) {
@@ -34326,29 +34358,30 @@ var ts;
             }
             var links = getNodeLinks(node);
             var type = getTypeOfSymbol(node.symbol);
-            var contextSensitive = isContextSensitive(node);
-            var mightFixTypeParameters = contextSensitive && checkMode === 2;
-            if (mightFixTypeParameters || !(links.flags & 1024)) {
+            if (!(links.flags & 1024)) {
                 var contextualSignature = getContextualSignature(node);
-                var contextChecked = !!(links.flags & 1024);
-                if (mightFixTypeParameters || !contextChecked) {
+                if (!(links.flags & 1024)) {
                     links.flags |= 1024;
                     if (contextualSignature) {
                         var signature = getSignaturesOfType(type, 0)[0];
-                        if (contextSensitive) {
-                            assignContextualParameterTypes(signature, contextualSignature, getContextualMapper(node), checkMode);
+                        if (isContextSensitive(node)) {
+                            var contextualMapper = getContextualMapper(node);
+                            if (checkMode === 2) {
+                                inferFromAnnotatedParameters(signature, contextualSignature, contextualMapper);
+                            }
+                            var instantiatedContextualSignature = contextualMapper === identityMapper ?
+                                contextualSignature : instantiateSignature(contextualSignature, contextualMapper);
+                            assignContextualParameterTypes(signature, instantiatedContextualSignature);
                         }
-                        if (mightFixTypeParameters || !node.type && !signature.resolvedReturnType) {
+                        if (!ts.getEffectiveReturnTypeNode(node) && !signature.resolvedReturnType) {
                             var returnType = getReturnTypeFromBody(node, checkMode);
                             if (!signature.resolvedReturnType) {
                                 signature.resolvedReturnType = returnType;
                             }
                         }
                     }
-                    if (!contextChecked) {
-                        checkSignatureDeclaration(node);
-                        checkNodeDeferred(node);
-                    }
+                    checkSignatureDeclaration(node);
+                    checkNodeDeferred(node);
                 }
             }
             if (produceDiagnostics && node.kind !== 151) {
@@ -34361,15 +34394,16 @@ var ts;
         function checkFunctionExpressionOrObjectLiteralMethodDeferred(node) {
             ts.Debug.assert(node.kind !== 151 || ts.isObjectLiteralMethod(node));
             var functionFlags = ts.getFunctionFlags(node);
-            var returnOrPromisedType = node.type &&
+            var returnTypeNode = ts.getEffectiveReturnTypeNode(node);
+            var returnOrPromisedType = returnTypeNode &&
                 ((functionFlags & 3) === 2 ?
                     checkAsyncFunctionReturnType(node) :
-                    getTypeFromTypeNode(node.type));
+                    getTypeFromTypeNode(returnTypeNode));
             if ((functionFlags & 1) === 0) {
                 checkAllCodePathsInNonVoidFunctionReturnOrThrow(node, returnOrPromisedType);
             }
             if (node.body) {
-                if (!node.type) {
+                if (!returnTypeNode) {
                     getReturnTypeOfSignature(getSignatureFromDeclaration(node));
                 }
                 if (node.body.kind === 207) {
@@ -34433,7 +34467,7 @@ var ts;
             return false;
         }
         function checkReferenceExpression(expr, invalidReferenceMessage) {
-            var node = ts.skipParentheses(expr);
+            var node = ts.skipOuterExpressions(expr, 2 | 1);
             if (node.kind !== 71 && node.kind !== 179 && node.kind !== 180) {
                 error(expr, invalidReferenceMessage);
                 return false;
@@ -34523,8 +34557,8 @@ var ts;
             }
             if (type.flags & 196608) {
                 var types = type.types;
-                for (var _i = 0, types_18 = types; _i < types_18.length; _i++) {
-                    var t = types_18[_i];
+                for (var _i = 0, types_17 = types; _i < types_17.length; _i++) {
+                    var t = types_17[_i];
                     if (maybeTypeOfKind(t, kind)) {
                         return true;
                     }
@@ -34538,8 +34572,8 @@ var ts;
             }
             if (type.flags & 65536) {
                 var types = type.types;
-                for (var _i = 0, types_19 = types; _i < types_19.length; _i++) {
-                    var t = types_19[_i];
+                for (var _i = 0, types_18 = types; _i < types_18.length; _i++) {
+                    var t = types_18[_i];
                     if (!isTypeOfKind(t, kind)) {
                         return false;
                     }
@@ -34548,8 +34582,8 @@ var ts;
             }
             if (type.flags & 131072) {
                 var types = type.types;
-                for (var _a = 0, types_20 = types; _a < types_20.length; _a++) {
-                    var t = types_20[_a];
+                for (var _a = 0, types_19 = types; _a < types_19.length; _a++) {
+                    var t = types_19[_a];
                     if (isTypeOfKind(t, kind)) {
                         return true;
                     }
@@ -35008,8 +35042,9 @@ var ts;
                     if (nodeIsYieldStar) {
                         expressionElementType = checkIteratedTypeOrElementType(expressionType, node.expression, false, (functionFlags & 2) !== 0);
                     }
-                    if (func.type) {
-                        var signatureElementType = getIteratedTypeOfGenerator(getTypeFromTypeNode(func.type), (functionFlags & 2) !== 0) || anyType;
+                    var returnType = ts.getEffectiveReturnTypeNode(func);
+                    if (returnType) {
+                        var signatureElementType = getIteratedTypeOfGenerator(getTypeFromTypeNode(returnType), (functionFlags & 2) !== 0) || anyType;
                         if (nodeIsYieldStar) {
                             checkTypeAssignableTo(functionFlags & 2
                                 ? getAwaitedType(expressionElementType, node.expression, ts.Diagnostics.Type_of_iterated_elements_of_a_yield_Asterisk_operand_must_either_be_a_valid_promise_or_must_not_contain_a_callable_then_member)
@@ -35121,7 +35156,7 @@ var ts;
                 if (signature && signature.typeParameters) {
                     var contextualType = getApparentTypeOfContextualType(node);
                     if (contextualType) {
-                        var contextualSignature = getSingleCallSignature(contextualType);
+                        var contextualSignature = getSingleCallSignature(getNonNullableType(contextualType));
                         if (contextualSignature && !contextualSignature.typeParameters) {
                             return getOrCreateTypeFromSignature(instantiateSignatureInContextOf(signature, contextualSignature, getContextualMapper(node)));
                         }
@@ -35411,7 +35446,8 @@ var ts;
             }
             if (produceDiagnostics) {
                 checkCollisionWithArgumentsInGeneratedCode(node);
-                if (noImplicitAny && !node.type) {
+                var returnTypeNode = ts.getEffectiveReturnTypeNode(node);
+                if (noImplicitAny && !returnTypeNode) {
                     switch (node.kind) {
                         case 156:
                             error(node, ts.Diagnostics.Construct_signature_which_lacks_return_type_annotation_implicitly_has_an_any_return_type);
@@ -35421,19 +35457,19 @@ var ts;
                             break;
                     }
                 }
-                if (node.type) {
+                if (returnTypeNode) {
                     var functionFlags_1 = ts.getFunctionFlags(node);
                     if ((functionFlags_1 & (4 | 1)) === 1) {
-                        var returnType = getTypeFromTypeNode(node.type);
+                        var returnType = getTypeFromTypeNode(returnTypeNode);
                         if (returnType === voidType) {
-                            error(node.type, ts.Diagnostics.A_generator_cannot_have_a_void_type_annotation);
+                            error(returnTypeNode, ts.Diagnostics.A_generator_cannot_have_a_void_type_annotation);
                         }
                         else {
                             var generatorElementType = getIteratedTypeOfGenerator(returnType, (functionFlags_1 & 2) !== 0) || anyType;
                             var iterableIteratorInstantiation = functionFlags_1 & 2
                                 ? createAsyncIterableIteratorType(generatorElementType)
                                 : createIterableIteratorType(generatorElementType);
-                            checkTypeAssignableTo(iterableIteratorInstantiation, returnType, node.type);
+                            checkTypeAssignableTo(iterableIteratorInstantiation, returnType, returnTypeNode);
                         }
                     }
                     else if ((functionFlags_1 & 3) === 2) {
@@ -36148,44 +36184,45 @@ var ts;
             return typeAsAwaitable.awaitedTypeOfType = type;
         }
         function checkAsyncFunctionReturnType(node) {
-            var returnType = getTypeFromTypeNode(node.type);
+            var returnTypeNode = ts.getEffectiveReturnTypeNode(node);
+            var returnType = getTypeFromTypeNode(returnTypeNode);
             if (languageVersion >= 2) {
                 if (returnType === unknownType) {
                     return unknownType;
                 }
                 var globalPromiseType = getGlobalPromiseType(true);
                 if (globalPromiseType !== emptyGenericType && !isReferenceToType(returnType, globalPromiseType)) {
-                    error(node.type, ts.Diagnostics.The_return_type_of_an_async_function_or_method_must_be_the_global_Promise_T_type);
+                    error(returnTypeNode, ts.Diagnostics.The_return_type_of_an_async_function_or_method_must_be_the_global_Promise_T_type);
                     return unknownType;
                 }
             }
             else {
-                markTypeNodeAsReferenced(node.type);
+                markTypeNodeAsReferenced(returnTypeNode);
                 if (returnType === unknownType) {
                     return unknownType;
                 }
-                var promiseConstructorName = ts.getEntityNameFromTypeNode(node.type);
+                var promiseConstructorName = ts.getEntityNameFromTypeNode(returnTypeNode);
                 if (promiseConstructorName === undefined) {
-                    error(node.type, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value, typeToString(returnType));
+                    error(returnTypeNode, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value, typeToString(returnType));
                     return unknownType;
                 }
                 var promiseConstructorSymbol = resolveEntityName(promiseConstructorName, 107455, true);
                 var promiseConstructorType = promiseConstructorSymbol ? getTypeOfSymbol(promiseConstructorSymbol) : unknownType;
                 if (promiseConstructorType === unknownType) {
                     if (promiseConstructorName.kind === 71 && promiseConstructorName.text === "Promise" && getTargetType(returnType) === getGlobalPromiseType(false)) {
-                        error(node.type, ts.Diagnostics.An_async_function_or_method_in_ES5_SlashES3_requires_the_Promise_constructor_Make_sure_you_have_a_declaration_for_the_Promise_constructor_or_include_ES2015_in_your_lib_option);
+                        error(returnTypeNode, ts.Diagnostics.An_async_function_or_method_in_ES5_SlashES3_requires_the_Promise_constructor_Make_sure_you_have_a_declaration_for_the_Promise_constructor_or_include_ES2015_in_your_lib_option);
                     }
                     else {
-                        error(node.type, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value, ts.entityNameToString(promiseConstructorName));
+                        error(returnTypeNode, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value, ts.entityNameToString(promiseConstructorName));
                     }
                     return unknownType;
                 }
                 var globalPromiseConstructorLikeType = getGlobalPromiseConstructorLikeType(true);
                 if (globalPromiseConstructorLikeType === emptyObjectType) {
-                    error(node.type, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value, ts.entityNameToString(promiseConstructorName));
+                    error(returnTypeNode, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value, ts.entityNameToString(promiseConstructorName));
                     return unknownType;
                 }
-                if (!checkTypeAssignableTo(promiseConstructorType, globalPromiseConstructorLikeType, node.type, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value)) {
+                if (!checkTypeAssignableTo(promiseConstructorType, globalPromiseConstructorLikeType, returnTypeNode, ts.Diagnostics.Type_0_is_not_a_valid_async_function_return_type_in_ES5_SlashES3_because_it_does_not_refer_to_a_Promise_compatible_constructor_value)) {
                     return unknownType;
                 }
                 var rootName = promiseConstructorName && getFirstIdentifier(promiseConstructorName);
@@ -36281,7 +36318,8 @@ var ts;
             }
         }
         function getParameterTypeNodeForDecoratorCheck(node) {
-            return node.dotDotDotToken ? ts.getRestParameterElementType(node.type) : node.type;
+            var typeNode = ts.getEffectiveTypeAnnotationNode(node);
+            return ts.isRestParameter(node) ? ts.getRestParameterElementType(typeNode) : typeNode;
         }
         function checkDecorators(node) {
             if (!node.decorators) {
@@ -36317,13 +36355,13 @@ var ts;
                             var parameter = _c[_b];
                             markDecoratorMedataDataTypeNodeAsReferenced(getParameterTypeNodeForDecoratorCheck(parameter));
                         }
-                        markDecoratorMedataDataTypeNodeAsReferenced(node.type);
+                        markDecoratorMedataDataTypeNodeAsReferenced(ts.getEffectiveReturnTypeNode(node));
                         break;
                     case 149:
-                        markDecoratorMedataDataTypeNodeAsReferenced(getParameterTypeNodeForDecoratorCheck(node));
+                        markDecoratorMedataDataTypeNodeAsReferenced(ts.getEffectiveTypeAnnotationNode(node));
                         break;
                     case 146:
-                        markDecoratorMedataDataTypeNodeAsReferenced(node.type);
+                        markDecoratorMedataDataTypeNodeAsReferenced(getParameterTypeNodeForDecoratorCheck(node));
                         break;
                 }
             }
@@ -36331,7 +36369,8 @@ var ts;
         }
         function checkFunctionDeclaration(node) {
             if (produceDiagnostics) {
-                checkFunctionOrMethodDeclaration(node) || checkGrammarForGenerator(node);
+                checkFunctionOrMethodDeclaration(node);
+                checkGrammarForGenerator(node);
                 checkCollisionWithCapturedSuperVariable(node, node.name);
                 checkCollisionWithCapturedThisVariable(node, node.name);
                 checkCollisionWithCapturedNewTargetVariable(node, node.name);
@@ -36361,13 +36400,14 @@ var ts;
                 }
             }
             checkSourceElement(node.body);
+            var returnTypeNode = ts.getEffectiveReturnTypeNode(node);
             if ((functionFlags & 1) === 0) {
-                var returnOrPromisedType = node.type && (functionFlags & 2
+                var returnOrPromisedType = returnTypeNode && (functionFlags & 2
                     ? checkAsyncFunctionReturnType(node)
-                    : getTypeFromTypeNode(node.type));
+                    : getTypeFromTypeNode(returnTypeNode));
                 checkAllCodePathsInNonVoidFunctionReturnOrThrow(node, returnOrPromisedType);
             }
-            if (produceDiagnostics && !node.type) {
+            if (produceDiagnostics && !returnTypeNode) {
                 if (noImplicitAny && ts.nodeIsMissing(node.body) && !isPrivateWithinAmbient(node)) {
                     reportImplicitAnyError(node, anyType);
                 }
@@ -36461,9 +36501,7 @@ var ts;
         function errorUnusedLocal(node, name) {
             if (isIdentifierThatStartsWithUnderScore(node)) {
                 var declaration = ts.getRootDeclaration(node.parent);
-                if (declaration.kind === 226 &&
-                    (declaration.parent.parent.kind === 215 ||
-                        declaration.parent.parent.kind === 216)) {
+                if (declaration.kind === 226 && ts.isForInOrOfStatement(declaration.parent.parent)) {
                     return;
                 }
             }
@@ -37151,7 +37189,8 @@ var ts;
             checkGrammarStatementInAmbientContext(node) || checkGrammarBreakOrContinueStatement(node);
         }
         function isGetAccessorWithAnnotatedSetAccessor(node) {
-            return !!(node.kind === 153 && ts.getSetAccessorTypeAnnotationNode(ts.getDeclarationOfKind(node.symbol, 154)));
+            return node.kind === 153
+                && ts.getEffectiveSetAccessorTypeAnnotationNode(ts.getDeclarationOfKind(node.symbol, 154)) !== undefined;
         }
         function isUnwrappedReturnTypeVoidOrAny(func, returnType) {
             var unwrappedReturnType = (ts.getFunctionFlags(func) & 3) === 2
@@ -37186,7 +37225,7 @@ var ts;
                             error(node, ts.Diagnostics.Return_type_of_constructor_signature_must_be_assignable_to_the_instance_type_of_the_class);
                         }
                     }
-                    else if (func.type || isGetAccessorWithAnnotatedSetAccessor(func)) {
+                    else if (ts.getEffectiveReturnTypeNode(func) || isGetAccessorWithAnnotatedSetAccessor(func)) {
                         if (functionFlags & 2) {
                             var promisedType = getPromisedTypeOfPromise(returnType);
                             var awaitedType = checkAwaitedType(exprType, node, ts.Diagnostics.The_return_type_of_an_async_function_must_either_be_a_valid_promise_or_must_not_contain_a_callable_then_member);
@@ -37510,7 +37549,7 @@ var ts;
                     var staticBaseType = getApparentType(baseConstructorType);
                     checkBaseTypeAccessibility(staticBaseType, baseTypeNode);
                     checkSourceElement(baseTypeNode.expression);
-                    if (baseTypeNode.typeArguments) {
+                    if (ts.some(baseTypeNode.typeArguments)) {
                         ts.forEach(baseTypeNode.typeArguments, checkSourceElement);
                         for (var _i = 0, _a = getConstructorsForTypeArguments(staticBaseType, baseTypeNode.typeArguments, baseTypeNode); _i < _a.length; _i++) {
                             var constructor = _a[_i];
@@ -38089,7 +38128,10 @@ var ts;
                         ts.Diagnostics.Import_declaration_conflicts_with_local_declaration_of_0;
                     error(node, message, symbolToString(symbol));
                 }
-                if (node.kind === 246 && compilerOptions.isolatedModules && !(target.flags & 107455)) {
+                if (compilerOptions.isolatedModules
+                    && node.kind === 246
+                    && !(target.flags & 107455)
+                    && !ts.isInAmbientContext(node)) {
                     error(node, ts.Diagnostics.Cannot_re_export_a_type_when_the_isolatedModules_flag_is_provided);
                 }
             }
@@ -38701,6 +38743,11 @@ var ts;
                 var parameter = ts.getParameterFromJSDoc(entityName.parent);
                 return parameter && parameter.symbol;
             }
+            if (entityName.parent.kind === 145 && entityName.parent.parent.kind === 290) {
+                ts.Debug.assert(!ts.isInJavaScriptFile(entityName));
+                var typeParameter = ts.getTypeParameterFromJsDoc(entityName.parent);
+                return typeParameter && typeParameter.symbol;
+            }
             if (ts.isPartOfExpression(entityName)) {
                 if (ts.nodeIsMissing(entityName)) {
                     return undefined;
@@ -38790,13 +38837,9 @@ var ts;
                     }
                     return undefined;
                 case 9:
-                    if ((ts.isExternalModuleImportEqualsDeclaration(node.parent.parent) &&
-                        ts.getExternalModuleImportEqualsDeclarationExpression(node.parent.parent) === node) ||
-                        ((node.parent.kind === 238 || node.parent.kind === 244) &&
-                            node.parent.moduleSpecifier === node)) {
-                        return resolveExternalModuleName(node, node);
-                    }
-                    if (ts.isInJavaScriptFile(node) && ts.isRequireCall(node.parent, false)) {
+                    if ((ts.isExternalModuleImportEqualsDeclaration(node.parent.parent) && ts.getExternalModuleImportEqualsDeclarationExpression(node.parent.parent) === node) ||
+                        ((node.parent.kind === 238 || node.parent.kind === 244) && node.parent.moduleSpecifier === node) ||
+                        ((ts.isInJavaScriptFile(node) && ts.isRequireCall(node.parent, false)) || ts.isImportCall(node.parent))) {
                         return resolveExternalModuleName(node, node);
                     }
                 case 8:
@@ -39130,6 +39173,12 @@ var ts;
                 parameter.initializer &&
                 !(ts.getModifierFlags(parameter) & 92);
         }
+        function isOptionalUninitializedParameterProperty(parameter) {
+            return strictNullChecks &&
+                isOptionalParameter(parameter) &&
+                !parameter.initializer &&
+                !!(ts.getModifierFlags(parameter) & 92);
+        }
         function getNodeCheckFlags(node) {
             return getNodeLinks(node).flags;
         }
@@ -39305,6 +39354,7 @@ var ts;
                 isDeclarationVisible: isDeclarationVisible,
                 isImplementationOfOverload: isImplementationOfOverload,
                 isRequiredInitializedParameter: isRequiredInitializedParameter,
+                isOptionalUninitializedParameterProperty: isOptionalUninitializedParameterProperty,
                 writeTypeOfDeclaration: writeTypeOfDeclaration,
                 writeReturnTypeOfSignatureDeclaration: writeReturnTypeOfSignatureDeclaration,
                 writeTypeOfExpression: writeTypeOfExpression,
@@ -39910,6 +39960,10 @@ var ts;
                 var sourceFile = ts.getSourceFileOfNode(node);
                 return grammarErrorAtPos(sourceFile, types.pos, 0, ts.Diagnostics._0_list_cannot_be_empty, listType);
             }
+            return ts.forEach(types, checkGrammarExpressionWithTypeArguments);
+        }
+        function checkGrammarExpressionWithTypeArguments(node) {
+            return checkGrammarTypeArguments(node, node.typeArguments);
         }
         function checkGrammarClassDeclarationHeritageClauses(node) {
             var seenExtendsClause = false;
@@ -40519,12 +40573,12 @@ var ts;
             if (node.typeArguments) {
                 return grammarErrorOnNode(node, ts.Diagnostics.Dynamic_import_cannot_have_type_arguments);
             }
-            var arguments = node.arguments;
-            if (arguments.length !== 1) {
+            var nodeArguments = node.arguments;
+            if (nodeArguments.length !== 1) {
                 return grammarErrorOnNode(node, ts.Diagnostics.Dynamic_import_must_have_one_specifier_as_an_argument);
             }
-            if (ts.isSpreadElement(arguments[0])) {
-                return grammarErrorOnNode(arguments[0], ts.Diagnostics.Specifier_of_dynamic_import_cannot_be_spread_element);
+            if (ts.isSpreadElement(nodeArguments[0])) {
+                return grammarErrorOnNode(nodeArguments[0], ts.Diagnostics.Specifier_of_dynamic_import_cannot_be_spread_element);
             }
         }
     }
@@ -40533,9 +40587,7 @@ var ts;
         switch (name.parent.kind) {
             case 242:
             case 246:
-                if (name.parent.propertyName) {
-                    return true;
-                }
+                return true;
             default:
                 return ts.isDeclarationName(name);
         }
@@ -40668,9 +40720,9 @@ var ts;
             case 149:
                 return ts.updateProperty(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.type, visitor, ts.isTypeNode), visitNode(node.initializer, visitor, ts.isExpression));
             case 150:
-                return ts.updateMethodSignature(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode), visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.questionToken, tokenVisitor, ts.isToken));
+                return ts.updateMethodSignature(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode), visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.questionToken, tokenVisitor, ts.isToken));
             case 151:
-                return ts.updateMethod(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.asteriskToken, tokenVisitor, ts.isToken), visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.questionToken, tokenVisitor, ts.isToken), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
+                return ts.updateMethod(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.asteriskToken, tokenVisitor, ts.isToken), visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.questionToken, tokenVisitor, ts.isToken), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
             case 152:
                 return ts.updateConstructor(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitFunctionBody(node.body, visitor, context));
             case 153:
@@ -40678,9 +40730,9 @@ var ts;
             case 154:
                 return ts.updateSetAccessor(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isPropertyName), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitFunctionBody(node.body, visitor, context));
             case 155:
-                return ts.updateCallSignature(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
+                return ts.updateCallSignature(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
             case 156:
-                return ts.updateConstructSignature(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
+                return ts.updateConstructSignature(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
             case 157:
                 return ts.updateIndexSignature(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
             case 158:
@@ -40688,9 +40740,9 @@ var ts;
             case 159:
                 return ts.updateTypeReferenceNode(node, visitNode(node.typeName, visitor, ts.isEntityName), nodesVisitor(node.typeArguments, visitor, ts.isTypeNode));
             case 160:
-                return ts.updateFunctionTypeNode(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
+                return ts.updateFunctionTypeNode(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
             case 161:
-                return ts.updateConstructorTypeNode(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
+                return ts.updateConstructorTypeNode(node, nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.parameters, visitor, ts.isParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
             case 162:
                 return ts.updateTypeQueryNode(node, visitNode(node.exprName, visitor, ts.isEntityName));
             case 163:
@@ -40710,7 +40762,7 @@ var ts;
             case 171:
                 return ts.updateIndexedAccessTypeNode(node, visitNode(node.objectType, visitor, ts.isTypeNode), visitNode(node.indexType, visitor, ts.isTypeNode));
             case 172:
-                return ts.updateMappedTypeNode(node, visitNode(node.readonlyToken, tokenVisitor, ts.isToken), visitNode(node.typeParameter, visitor, ts.isTypeParameter), visitNode(node.questionToken, tokenVisitor, ts.isToken), visitNode(node.type, visitor, ts.isTypeNode));
+                return ts.updateMappedTypeNode(node, visitNode(node.readonlyToken, tokenVisitor, ts.isToken), visitNode(node.typeParameter, visitor, ts.isTypeParameterDeclaration), visitNode(node.questionToken, tokenVisitor, ts.isToken), visitNode(node.type, visitor, ts.isTypeNode));
             case 173:
                 return ts.updateLiteralTypeNode(node, visitNode(node.literal, visitor, ts.isExpression));
             case 174:
@@ -40738,9 +40790,9 @@ var ts;
             case 185:
                 return ts.updateParen(node, visitNode(node.expression, visitor, ts.isExpression));
             case 186:
-                return ts.updateFunctionExpression(node, nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.asteriskToken, tokenVisitor, ts.isToken), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
+                return ts.updateFunctionExpression(node, nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.asteriskToken, tokenVisitor, ts.isToken), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
             case 187:
-                return ts.updateArrowFunction(node, nodesVisitor(node.modifiers, visitor, ts.isModifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
+                return ts.updateArrowFunction(node, nodesVisitor(node.modifiers, visitor, ts.isModifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
             case 188:
                 return ts.updateDelete(node, visitNode(node.expression, visitor, ts.isExpression));
             case 189:
@@ -40764,7 +40816,7 @@ var ts;
             case 198:
                 return ts.updateSpread(node, visitNode(node.expression, visitor, ts.isExpression));
             case 199:
-                return ts.updateClassExpression(node, nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.heritageClauses, visitor, ts.isHeritageClause), nodesVisitor(node.members, visitor, ts.isClassElement));
+                return ts.updateClassExpression(node, nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.heritageClauses, visitor, ts.isHeritageClause), nodesVisitor(node.members, visitor, ts.isClassElement));
             case 201:
                 return ts.updateExpressionWithTypeArguments(node, nodesVisitor(node.typeArguments, visitor, ts.isTypeNode), visitNode(node.expression, visitor, ts.isExpression));
             case 202:
@@ -40814,13 +40866,13 @@ var ts;
             case 227:
                 return ts.updateVariableDeclarationList(node, nodesVisitor(node.declarations, visitor, ts.isVariableDeclaration));
             case 228:
-                return ts.updateFunctionDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.asteriskToken, tokenVisitor, ts.isToken), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
+                return ts.updateFunctionDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.asteriskToken, tokenVisitor, ts.isToken), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), visitParameterList(node.parameters, visitor, context, nodesVisitor), visitNode(node.type, visitor, ts.isTypeNode), visitFunctionBody(node.body, visitor, context));
             case 229:
-                return ts.updateClassDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.heritageClauses, visitor, ts.isHeritageClause), nodesVisitor(node.members, visitor, ts.isClassElement));
+                return ts.updateClassDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.heritageClauses, visitor, ts.isHeritageClause), nodesVisitor(node.members, visitor, ts.isClassElement));
             case 230:
-                return ts.updateInterfaceDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), nodesVisitor(node.heritageClauses, visitor, ts.isHeritageClause), nodesVisitor(node.members, visitor, ts.isTypeElement));
+                return ts.updateInterfaceDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), nodesVisitor(node.heritageClauses, visitor, ts.isHeritageClause), nodesVisitor(node.members, visitor, ts.isTypeElement));
             case 231:
-                return ts.updateTypeAliasDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameter), visitNode(node.type, visitor, ts.isTypeNode));
+                return ts.updateTypeAliasDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.typeParameters, visitor, ts.isTypeParameterDeclaration), visitNode(node.type, visitor, ts.isTypeNode));
             case 232:
                 return ts.updateEnumDeclaration(node, nodesVisitor(node.decorators, visitor, ts.isDecorator), nodesVisitor(node.modifiers, visitor, ts.isModifier), visitNode(node.name, visitor, ts.isIdentifier), nodesVisitor(node.members, visitor, ts.isEnumMember));
             case 233:
@@ -41357,34 +41409,7 @@ var ts;
     }
     var Debug;
     (function (Debug) {
-        if (Debug.isDebugging) {
-            Object.defineProperties(ts.objectAllocator.getSymbolConstructor().prototype, {
-                "__debugFlags": { get: function () { return ts.formatSymbolFlags(this.flags); } }
-            });
-            Object.defineProperties(ts.objectAllocator.getTypeConstructor().prototype, {
-                "__debugFlags": { get: function () { return ts.formatTypeFlags(this.flags); } },
-                "__debugObjectFlags": { get: function () { return this.flags & 32768 ? ts.formatObjectFlags(this.objectFlags) : ""; } },
-                "__debugTypeToString": { value: function () { return this.checker.typeToString(this); } },
-            });
-            for (var _i = 0, _a = [ts.objectAllocator.getNodeConstructor(), ts.objectAllocator.getIdentifierConstructor(), ts.objectAllocator.getTokenConstructor(), ts.objectAllocator.getSourceFileConstructor()]; _i < _a.length; _i++) {
-                var ctor = _a[_i];
-                if (!ctor.prototype.hasOwnProperty("__debugKind")) {
-                    Object.defineProperties(ctor.prototype, {
-                        "__debugKind": { get: function () { return ts.formatSyntaxKind(this.kind); } },
-                        "__debugModifierFlags": { get: function () { return ts.formatModifierFlags(ts.getModifierFlagsNoCache(this)); } },
-                        "__debugTransformFlags": { get: function () { return ts.formatTransformFlags(this.transformFlags); } },
-                        "__debugEmitFlags": { get: function () { return ts.formatEmitFlags(ts.getEmitFlags(this)); } },
-                        "__debugGetText": { value: function (includeTrivia) {
-                                if (ts.nodeIsSynthesized(this))
-                                    return "";
-                                var parseNode = ts.getParseTreeNode(this);
-                                var sourceFile = parseNode && ts.getSourceFileOfNode(parseNode);
-                                return sourceFile ? ts.getSourceTextOfNodeFromSourceFile(sourceFile, parseNode, includeTrivia) : "";
-                            } }
-                    });
-                }
-            }
-        }
+        var isDebugInfoEnabled = false;
         Debug.failBadSyntaxKind = Debug.shouldAssert(1)
             ? function (node, message) { return Debug.fail((message || "Unexpected node.") + "\r\nNode " + ts.formatSyntaxKind(node.kind) + " was unexpected.", Debug.failBadSyntaxKind); }
             : ts.noop;
@@ -41403,6 +41428,46 @@ var ts;
         Debug.assertMissingNode = Debug.shouldAssert(1)
             ? function (node, message) { return Debug.assert(node === undefined, message || "Unexpected node.", function () { return "Node " + ts.formatSyntaxKind(node.kind) + " was unexpected'."; }, Debug.assertMissingNode); }
             : ts.noop;
+        function enableDebugInfo() {
+            if (isDebugInfoEnabled)
+                return;
+            Object.defineProperties(ts.objectAllocator.getSymbolConstructor().prototype, {
+                "__debugFlags": { get: function () { return ts.formatSymbolFlags(this.flags); } }
+            });
+            Object.defineProperties(ts.objectAllocator.getTypeConstructor().prototype, {
+                "__debugFlags": { get: function () { return ts.formatTypeFlags(this.flags); } },
+                "__debugObjectFlags": { get: function () { return this.flags & 32768 ? ts.formatObjectFlags(this.objectFlags) : ""; } },
+                "__debugTypeToString": { value: function () { return this.checker.typeToString(this); } },
+            });
+            var nodeConstructors = [
+                ts.objectAllocator.getNodeConstructor(),
+                ts.objectAllocator.getIdentifierConstructor(),
+                ts.objectAllocator.getTokenConstructor(),
+                ts.objectAllocator.getSourceFileConstructor()
+            ];
+            for (var _i = 0, nodeConstructors_1 = nodeConstructors; _i < nodeConstructors_1.length; _i++) {
+                var ctor = nodeConstructors_1[_i];
+                if (!ctor.prototype.hasOwnProperty("__debugKind")) {
+                    Object.defineProperties(ctor.prototype, {
+                        "__debugKind": { get: function () { return ts.formatSyntaxKind(this.kind); } },
+                        "__debugModifierFlags": { get: function () { return ts.formatModifierFlags(ts.getModifierFlagsNoCache(this)); } },
+                        "__debugTransformFlags": { get: function () { return ts.formatTransformFlags(this.transformFlags); } },
+                        "__debugEmitFlags": { get: function () { return ts.formatEmitFlags(ts.getEmitFlags(this)); } },
+                        "__debugGetText": {
+                            value: function (includeTrivia) {
+                                if (ts.nodeIsSynthesized(this))
+                                    return "";
+                                var parseNode = ts.getParseTreeNode(this);
+                                var sourceFile = parseNode && ts.getSourceFileOfNode(parseNode);
+                                return sourceFile ? ts.getSourceTextOfNodeFromSourceFile(sourceFile, parseNode, includeTrivia) : "";
+                            }
+                        }
+                    });
+                }
+            }
+            isDebugInfoEnabled = true;
+        }
+        Debug.enableDebugInfo = enableDebugInfo;
     })(Debug = ts.Debug || (ts.Debug = {}));
 })(ts || (ts = {}));
 var ts;
@@ -46210,10 +46275,9 @@ var ts;
                     statements.push(extendsCall);
                     classBodyStart++;
                 }
-                statements.push(ts.updateVariableStatement(varStatement, undefined, ts.updateVariableDeclarationList(varStatement.declarationList, [
-                    ts.updateVariableDeclaration(variable, variable.name, undefined, ts.updateBinary(aliasAssignment, aliasAssignment.left, ts.convertFunctionDeclarationToExpression(ts.cast(funcStatements[classBodyStart], ts.isFunctionDeclaration))))
-                ])));
+                statements.push(funcStatements[classBodyStart]);
                 classBodyStart++;
+                statements.push(ts.createStatement(ts.createAssignment(aliasAssignment.left, ts.cast(variable.name, ts.isIdentifier))));
             }
             while (!ts.isReturnStatement(ts.elementAt(funcStatements, classBodyEnd))) {
                 classBodyEnd--;
@@ -46884,7 +46948,7 @@ var ts;
                 if (variables.length === 0) {
                     return undefined;
                 }
-                return ts.createStatement(ts.inlineExpressions(ts.map(variables, transformInitializedVariable)));
+                return ts.setSourceMapRange(ts.createStatement(ts.inlineExpressions(ts.map(variables, transformInitializedVariable))), node);
             }
         }
         function visitBinaryExpression(node) {
@@ -47199,7 +47263,7 @@ var ts;
             return undefined;
         }
         function transformInitializedVariable(node) {
-            return ts.createAssignment(ts.getSynthesizedClone(node.name), ts.visitNode(node.initializer, visitor, ts.isExpression));
+            return ts.setSourceMapRange(ts.createAssignment(ts.setSourceMapRange(ts.getSynthesizedClone(node.name), node.name), ts.visitNode(node.initializer, visitor, ts.isExpression)), node);
         }
         function transformAndEmitIfStatement(node) {
             if (containsYield(node)) {
@@ -50008,7 +50072,7 @@ var ts;
         function hoistVariableDeclaration(name) {
             ts.Debug.assert(state > 0, "Cannot modify the lexical environment during initialization.");
             ts.Debug.assert(state < 2, "Cannot modify the lexical environment after transformation has completed.");
-            var decl = ts.createVariableDeclaration(name);
+            var decl = ts.setEmitFlags(ts.createVariableDeclaration(name), 64);
             if (!lexicalEnvironmentVariableDeclarations) {
                 lexicalEnvironmentVariableDeclarations = [decl];
             }
@@ -50968,7 +51032,8 @@ var ts;
             writer.getSymbolAccessibilityDiagnostic = getSymbolAccessibilityDiagnostic;
             write(": ");
             var shouldUseResolverType = declaration.kind === 146 &&
-                resolver.isRequiredInitializedParameter(declaration);
+                (resolver.isRequiredInitializedParameter(declaration) ||
+                    resolver.isOptionalUninitializedParameterProperty(declaration));
             if (type && !shouldUseResolverType) {
                 emitType(type);
             }
@@ -55088,6 +55153,9 @@ var ts;
                         oldProgram.structureIsReused = 1;
                     }
                     if (!ts.arrayIsEqualTo(oldSourceFile.moduleAugmentations, newSourceFile.moduleAugmentations, moduleNameIsEqualTo)) {
+                        oldProgram.structureIsReused = 1;
+                    }
+                    if ((oldSourceFile.flags & 524288) !== (newSourceFile.flags & 524288)) {
                         oldProgram.structureIsReused = 1;
                     }
                     if (!ts.arrayIsEqualTo(oldSourceFile.typeReferenceDirectives, newSourceFile.typeReferenceDirectives, fileReferenceIsEqualTo)) {

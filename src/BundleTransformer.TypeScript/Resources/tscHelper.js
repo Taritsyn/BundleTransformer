@@ -37,6 +37,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			noImplicitUseStrict: false,
 			noLib: false,
 			noResolve: false,
+			noStrictGenericChecks: false,
 			noUnusedLocals: false,
 			noUnusedParameters: false,
 			out: '',
