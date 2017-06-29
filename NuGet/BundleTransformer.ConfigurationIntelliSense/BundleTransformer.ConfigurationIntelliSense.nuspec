@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>BundleTransformer.ConfigurationIntelliSense</id>
-		<version>1.9.160</version>
+		<version>1.9.162</version>
 		<title>Bundle Transformer: IntelliSense</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
@@ -12,7 +12,7 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</description>
 		<summary>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</summary>
-		<releaseNotes>Updated definitions for configuration settings of Uglify JS minifier.</releaseNotes>
+		<releaseNotes>Updated definitions for configuration settings of TypeScript translator and Uglify JS minifier.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer Web.config IntelliSense</tags>

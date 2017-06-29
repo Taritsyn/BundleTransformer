@@ -1,6 +1,17 @@
 Change log
 ==========
 
+## v1.9.162 - June 29, 2017
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator and Uglify JS minifier
+ * In BundleTransformer.TypeScript:
+   * Added support of TypeScript version 2.4 RTM (please note: The 2.4 RTM release is also called '2.4.1')
+   * In configuration settings of TypeScript translator was added one new property - `NoStrictGenericChecks` (default `false`)
+ * In BundleTransformer.UglifyJs:
+   * Added support of UglifyJS version 2.8.29
+   * In code generation settings was changed a default value of `InlineScript` property from `false` to `true`
+   * In compression settings was changed a default value of `CollapseVars` property from `false` to `true`
+   * In compression settings was added 7 new properties: `KeepInfinity` (default `false`), `ReduceVars` (default `true`), `TopLevel` (default `false`), `TopRetain` (default empty string), `UnsafeMath` (default `false`), `UnsafeProto` (default `false`) and `UnsafeRegExp` (default `false`)
+
 ## v1.9.161 - June 21, 2017
  * In BundleTransformer.Autoprefixer added a `Array.prototype.fill` polyfill
  * In BundleTransformer.CleanCss added support of Clean-css version 4.1.4
