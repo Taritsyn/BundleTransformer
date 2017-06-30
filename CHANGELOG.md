@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.163 - June 30, 2017
+ * In BundleTransformer.CleanCss added support of Clean-css version 4.1.5
+
 ## v1.9.162 - June 29, 2017
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator and Uglify JS minifier
  * In BundleTransformer.TypeScript:
