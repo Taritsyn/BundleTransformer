@@ -47,7 +47,7 @@ if (!String.prototype.hasOwnProperty('repeat')) {
 }
 
 /*!
- * Clean-css v4.1.4
+ * Clean-css v4.1.5
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -203,11 +203,11 @@ var CleanCss = (function(){
 			.replace(/hsl\((-?\d+),(-?\d+)%?,(-?\d+)%?\)/g, function (match, hue, saturation, lightness) {
 			  return shortenHsl(hue, saturation, lightness);
 			})
-			.replace(/(^|[^='"])#([0-9a-f]{6})/gi, function (match, prefix, color) {
+			.replace(/(^|[^='"])#([0-9a-f]{6})($|[^0-9a-f])/gi, function (match, prefix, color, suffix) {
 			  if (color[0] == color[1] && color[2] == color[3] && color[4] == color[5]) {
-				return (prefix + '#' + color[0] + color[2] + color[4]).toLowerCase();
+				return (prefix + '#' + color[0] + color[2] + color[4]).toLowerCase() + suffix;
 			  } else {
-				return (prefix + '#' + color).toLowerCase();
+				return (prefix + '#' + color).toLowerCase() + suffix;
 			  }
 			})
 			.replace(/(^|[^='"])#([0-9a-f]{3})/gi, function (match, prefix, color) {
@@ -8738,6 +8738,34 @@ var CleanCss = (function(){
 		  '@supports'
 		];
 
+		var PAGE_MARGIN_BOXES = [
+		  '@bottom-center',
+		  '@bottom-left',
+		  '@bottom-left-corner',
+		  '@bottom-right',
+		  '@bottom-right-corner',
+		  '@left-bottom',
+		  '@left-middle',
+		  '@left-top',
+		  '@right-bottom',
+		  '@right-middle',
+		  '@right-top',
+		  '@top-center',
+		  '@top-left',
+		  '@top-left-corner',
+		  '@top-right',
+		  '@top-right-corner'
+		];
+
+		var EXTRA_PAGE_BOXES = [
+		  '@footnote',
+		  '@footnotes',
+		  '@left',
+		  '@page-float-bottom',
+		  '@page-float-top',
+		  '@right'
+		];
+
 		var REPEAT_PATTERN = /^\[\s*\d+\s*\]$/;
 		var RULE_WORD_SEPARATOR_PATTERN = /[\s\(]/;
 		var TAIL_BROKEN_VALUE_PATTERN = /[\s|\}]*$/;
@@ -8931,6 +8959,18 @@ var CleanCss = (function(){
 			  levels.push(level);
 			  level = Level.RULE;
 			  seekingValue = false;
+			} else if (character == Marker.OPEN_CURLY_BRACKET && level == Level.RULE && isPageMarginBox(buffer)) {
+			  // open brace opening page-margin box at rule level, e.g. @page{@top-center{<--
+			  serializedBuffer = buffer.join('').trim();
+			  ruleTokens.push(ruleToken);
+			  ruleToken = [Token.AT_RULE_BLOCK, [], []];
+			  ruleToken[1].push([Token.AT_RULE_BLOCK_SCOPE, serializedBuffer, [originalMetadata(metadata, serializedBuffer, externalContext)]]);
+			  newTokens.push(ruleToken);
+			  newTokens = ruleToken[2];
+
+			  levels.push(level);
+			  level = Level.RULE;
+			  buffer = [];
 			} else if (character == Marker.COLON && level == Level.RULE && !seekingValue) {
 			  // colon at rule level, e.g. a{color:<--
 			  serializedBuffer = buffer.join('').trim();
@@ -9175,6 +9215,12 @@ var CleanCss = (function(){
 		  } else if (tokenType == Token.AT_RULE_BLOCK) {
 			return Token.AT_RULE_BLOCK_SCOPE;
 		  }
+		}
+
+		function isPageMarginBox(buffer) {
+		  var serializedBuffer = buffer.join('').trim();
+
+		  return PAGE_MARGIN_BOXES.indexOf(serializedBuffer) > -1 || EXTRA_PAGE_BOXES.indexOf(serializedBuffer) > -1;
 		}
 
 		function isRepeatToken(buffer) {
@@ -9438,6 +9484,12 @@ var CleanCss = (function(){
 			case Token.AT_RULE:
 			  store(context, token);
 			  store(context, semicolon(context, Breaks.AfterProperty, false));
+			  break;
+			case Token.AT_RULE_BLOCK:
+			  rules(context, token[1]);
+			  store(context, openBrace(context, Breaks.AfterRuleBegins, true));
+			  body(context, token[2]);
+			  store(context, closeBrace(context, Breaks.AfterRuleEnds, false, isLast));
 			  break;
 			case Token.COMMENT:
 			  store(context, token);
