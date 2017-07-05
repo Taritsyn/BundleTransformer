@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.164 - July 5, 2017
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.1.3
+
 ## v1.9.163 - June 30, 2017
  * In BundleTransformer.CleanCss added support of Clean-css version 4.1.5
 
