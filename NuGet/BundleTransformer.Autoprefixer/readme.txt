@@ -14,7 +14,7 @@
    BundleTransformer.Autoprefixer contains one postprocessor-adapter for
    postprocessing of CSS code - `AutoprefixCssPostProcessor`.
    `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer
-   (https://github.com/postcss/autoprefixer) version 7.1.1.2.
+   (https://github.com/postcss/autoprefixer) version 7.1.1.3.
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
@@ -22,7 +22,7 @@
    =============
    RELEASE NOTES
    =============
-   Added a `Array.prototype.fill` polyfill.
+   Added support of Autoprefixer version 7.1.1.3.
 
    ====================
    POST-INSTALL ACTIONS
