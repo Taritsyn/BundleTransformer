@@ -47,7 +47,7 @@ if (!String.prototype.hasOwnProperty('repeat')) {
 }
 
 /*!
- * Clean-css v4.1.5
+ * Clean-css v4.1.6
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -596,10 +596,7 @@ var CleanCss = (function(){
 
 		  restoreFromOptimizing(_properties);
 		  removeUnused(_properties);
-
-		  if (_properties.length != properties.length) {
-			removeComments(properties, options);
-		  }
+		  removeComments(properties, options);
 		}
 
 		function removeComments(tokens, options) {
@@ -759,7 +756,7 @@ var CleanCss = (function(){
 				break;
 			}
 
-			if (levelOptions.removeEmpty && (token[1].length === 0 || (token[2] && token[2].length === 0))) {
+			if (token[0] == Token.COMMENT && token[1].length === 0 || levelOptions.removeEmpty && (token[1].length === 0 || (token[2] && token[2].length === 0))) {
 			  tokens.splice(i, 1);
 			  i--;
 			  l--;
@@ -1196,7 +1193,7 @@ var CleanCss = (function(){
 			isNewLineNix = character == Marker.NEW_LINE_NIX;
 			isNewLineWin = character == Marker.NEW_LINE_NIX && value[i - 1] == Marker.NEW_LINE_WIN;
 			isQuoted = isSingleQuoted || isDoubleQuoted;
-			isRelation = !isEscaped && roundBracketLevel === 0 && RELATION_PATTERN.test(character);
+			isRelation = !isAttribute && !isEscaped && roundBracketLevel === 0 && RELATION_PATTERN.test(character);
 			isWhitespace = WHITESPACE_PATTERN.test(character);
 
 			if (wasEscaped && isQuoted && isNewLineWin) {
