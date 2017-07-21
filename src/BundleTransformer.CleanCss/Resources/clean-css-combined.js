@@ -47,7 +47,7 @@ if (!String.prototype.hasOwnProperty('repeat')) {
 }
 
 /*!
- * Clean-css v4.1.6
+ * Clean-css v4.1.7
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -374,7 +374,7 @@ var CleanCss = (function(){
 			return value;
 		  }
 
-		  if (value.indexOf('%') > 0 && (name == 'height' || name == 'max-height')) {
+		  if (value.indexOf('%') > 0 && (name == 'height' || name == 'max-height' || name == 'width' || name == 'max-width')) {
 			return value;
 		  }
 
