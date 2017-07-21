@@ -13,12 +13,17 @@
    ===========
    BundleTransformer.CoffeeScript contains one translator-adapter -
    `CoffeeScriptTranslator` (supports the CoffeeScript (http://coffeescript.org)
-   version 1.12.6). This adapter makes translation of CoffeeScript code to JS code.
+   version 1.12.7). This adapter makes translation of CoffeeScript code to JS code.
    Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated CoffeeScript asset.
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
+
+   =============
+   RELEASE NOTES
+   =============
+   Added support of CoffeeScript version 1.12.7.
 
    ====================
    POST-INSTALL ACTIONS
