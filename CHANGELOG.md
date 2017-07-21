@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.9.167 - July 21, 2017
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 1.12.7
+ * In BundleTransformer.TypeScript added support of TypeScript version 2.4.2
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.2.3
+ * In BundleTransformer.CleanCss added support of Clean-css version 4.1.7
+
 ## v1.9.166 - July 13, 2017
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.2.2
  * In BundleTransformer.CleanCss added support of Clean-css version 4.1.6
