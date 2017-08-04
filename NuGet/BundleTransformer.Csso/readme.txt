@@ -13,10 +13,15 @@
    ===========
    BundleTransformer.Csso contains one minifier-adapter for minification of
    CSS code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the
-   Sergey Kryzhanovsky's CSSO (https://github.com/css/csso) version 2.3.1.
+   Sergey Kryzhanovsky's CSSO (https://github.com/css/csso) version 3.1.1.
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
+
+   =============
+   RELEASE NOTES
+   =============
+   Added support of CSSO version 3.1.1.
 
    ====================
    POST-INSTALL ACTIONS

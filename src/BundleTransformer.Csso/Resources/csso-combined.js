@@ -1,6 +1,6 @@
 /*!
-* CSSO (CSS Optimizer) v2.3.1
-* http://github.com/css/csso
+* CSSO (CSS Optimizer) v3.1.1
+* https://github.com/css/csso
 *
 * Copyright 2011-2017, Sergey Kryzhanovsky
 * Released under the MIT License
@@ -30,209 +30,184 @@ var CSSO = (function(){
 		}
 		;
 
-	//#region URL: /compressor
-	modules['/compressor'] = function () {
-		var List = require('/utils/list');
-		var clone = require('/utils/clone');
-		var usageUtils = require('/compressor/usage');
-		var clean = require('/compressor/clean');
-		var compress = require('/compressor/compress');
-		var restructureBlock = require('/compressor/restructure');
-		var walkRules = require('/utils/walk').rules;
+	//#region URL: /
+	modules['/'] = function () {
+		var csstree = require('/css-tree');
+		var parse = csstree.parse;
+		var compress = require('/compress');
+		var translate = csstree.translate;
+		/*BT-
+		var translateWithSourceMap = csstree.translateWithSourceMap;
+		*/
 
-		function readRulesChunk(rules, specialComments) {
-			var buffer = new List();
-			var nonSpaceTokenInBuffer = false;
-			var protectedComment;
+		function debugOutput(name, options, startTime, data) {
+			/*BT-
+			if (options.debug) {
+				console.error('## ' + name + ' done in %d ms\n', Date.now() - startTime);
+			}
+			*/
 
-			rules.nextUntil(rules.head, function(node, item, list) {
-				if (node.type === 'Comment') {
-					if (!specialComments || node.value.charAt(0) !== '!') {
-						list.remove(item);
-						return;
+			return data;
+		}
+
+		/*BT-
+		function createDefaultLogger(level) {
+			var lastDebug;
+
+			return function logger(title, ast) {
+				var line = title;
+
+				if (ast) {
+					line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
+				}
+
+				if (level > 1 && ast) {
+					var css = translate(ast, true);
+
+					// when level 2, limit css to 256 symbols
+					if (level === 2 && css.length > 256) {
+						css = css.substr(0, 256) + '...';
 					}
 
-					if (nonSpaceTokenInBuffer || protectedComment) {
-						return true;
-					}
-
-					list.remove(item);
-					protectedComment = node;
-					return;
+					line += '\n  ' + css + '\n';
 				}
 
-				if (node.type !== 'Space') {
-					nonSpaceTokenInBuffer = true;
-				}
-
-				buffer.insert(list.remove(item));
-			});
-
-			return {
-				comment: protectedComment,
-				stylesheet: {
-					type: 'StyleSheet',
-					info: null,
-					rules: buffer
-				}
+				console.error(line);
+				lastDebug = Date.now();
 			};
 		}
+		*/
 
-		function compressChunk(ast, firstAtrulesAllowed, usageData, num/*, logger*/) {
-//			logger('Compress block #' + num, null, true);
+		function copy(obj) {
+			var result = {};
 
-			var seed = 1;
-			walkRules(ast, function markStylesheets() {
-				if ('id' in this.stylesheet === false) {
-					this.stylesheet.firstAtrulesAllowed = firstAtrulesAllowed;
-					this.stylesheet.id = seed++;
-				}
-			});
-//			logger('init', ast);
-
-			// remove redundant
-			clean(ast, usageData);
-//			logger('clean', ast);
-
-			// compress nodes
-			compress(ast, usageData);
-//			logger('compress', ast);
-
-			return ast;
-		}
-
-		function getCommentsOption(options) {
-			var comments = 'comments' in options ? options.comments : 'exclamation';
-
-			if (typeof comments === 'boolean') {
-				comments = comments ? 'exclamation' : false;
-			} else if (comments !== 'exclamation' && comments !== 'first-exclamation') {
-				comments = false;
+			for (var key in obj) {
+				result[key] = obj[key];
 			}
 
-			return comments;
+			return result;
 		}
 
-		function getRestructureOption(options) {
-			return 'restructure' in options ? options.restructure :
-				   'restructuring' in options ? options.restructuring :
-				   true;
+		function buildCompressOptions(options) {
+			options = copy(options);
+
+			/*BT-
+			if (typeof options.logger !== 'function' && options.debug) {
+				options.logger = createDefaultLogger(options.debug);
+			}
+			*/
+
+			return options;
 		}
 
-		function wrapBlock(block) {
-			return new List([{
-				type: 'Ruleset',
-				selector: {
-					type: 'Selector',
-					selectors: new List([{
-						type: 'SimpleSelector',
-						sequence: new List([{
-							type: 'Identifier',
-							name: 'x'
-						}])
-					}])
-				},
-				block: block
-			}]);
-		}
+		/*BT-
+		function runHandler(ast, options, handlers) {
+			if (!Array.isArray(handlers)) {
+				handlers = [handlers];
+			}
 
-		var exports = function compress(ast, options) {
-			ast = ast || { type: 'StyleSheet', info: null, rules: new List() };
+			handlers.forEach(function(fn) {
+				fn(ast, options);
+			});
+		}
+		*/
+
+		function minify(context, source, options) {
 			options = options || {};
 
-//			var logger = typeof options.logger === 'function' ? options.logger : Function();
-			var specialComments = getCommentsOption(options);
-			var restructuring = getRestructureOption(options);
-			var firstAtrulesAllowed = true;
-			var usageData = false;
-			var inputRules;
-			var outputRules = new List();
-			var chunk;
-			var chunkNum = 1;
-			var chunkRules;
+			var filename = options.filename || '<unknown>';
+			var result;
 
-			if (options.clone) {
-				ast = clone(ast);
+			// parse
+			var ast = debugOutput('parsing', options, Date.now(),
+				parse(source, {
+					context: context,
+					filename: filename/*BT-,
+					positions: Boolean(options.sourceMap)
+					*/
+				})
+			);
+
+			/*BT-
+			// before compress handlers
+			if (options.beforeCompress) {
+				debugOutput('beforeCompress', options, Date.now(),
+					runHandler(ast, options, options.beforeCompress)
+				);
+			}
+			*/
+
+			// compress
+			var compressResult = debugOutput('compress', options, Date.now(),
+				compress(ast, buildCompressOptions(options))
+			);
+
+			/*BT-
+			// after compress handlers
+			if (options.afterCompress) {
+				debugOutput('afterCompress', options, Date.now(),
+					runHandler(compressResult, options, options.afterCompress)
+				);
 			}
 
-			if (ast.type === 'StyleSheet') {
-				inputRules = ast.rules;
-				ast.rules = outputRules;
+			// translate
+			if (options.sourceMap) {
+				result = debugOutput('translateWithSourceMap', options, Date.now(), (function() {
+					var tmp = translateWithSourceMap(compressResult.ast);
+					tmp.map._file = filename; // since other tools can relay on file in source map transform chain
+					tmp.map.setSourceContent(filename, source);
+					return tmp;
+				})());
 			} else {
-				inputRules = wrapBlock(ast);
+			*/
+				result = debugOutput('translate', options, Date.now(), {
+					css: translate(compressResult.ast),
+					map: null
+				});
+			/*BT-
 			}
+			*/
 
-			if (options.usage) {
-				usageData = usageUtils.buildIndex(options.usage);
-			}
+			return result;
+		}
 
-			do {
-				chunk = readRulesChunk(inputRules, Boolean(specialComments));
+		function minifyStylesheet(source, options) {
+			return minify('stylesheet', source, options);
+		};
 
-				compressChunk(chunk.stylesheet, firstAtrulesAllowed, usageData, chunkNum++/*, logger*/);
+		function minifyBlock(source, options) {
+			return minify('declarationList', source, options);
+		}
 
-				// structure optimisations
-				if (restructuring) {
-					restructureBlock(chunk.stylesheet, usageData/*, logger*/);
-				}
+		var exports = {
+			version: '3.1.1',
 
-				chunkRules = chunk.stylesheet.rules;
+			// main methods
+			minify: minifyStylesheet,
+			minifyBlock: minifyBlock,
 
-				if (chunk.comment) {
-					// add \n before comment if there is another content in outputRules
-					if (!outputRules.isEmpty()) {
-						outputRules.insert(List.createItem({
-							type: 'Raw',
-							value: '\n'
-						}));
-					}
+			// compress an AST
+			compress: compress,
 
-					outputRules.insert(List.createItem(chunk.comment));
-
-					// add \n after comment if chunk is not empty
-					if (!chunkRules.isEmpty()) {
-						outputRules.insert(List.createItem({
-							type: 'Raw',
-							value: '\n'
-						}));
-					}
-				}
-
-				if (firstAtrulesAllowed && !chunkRules.isEmpty()) {
-					var lastRule = chunkRules.last();
-
-					if (lastRule.type !== 'Atrule' ||
-					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
-						firstAtrulesAllowed = false;
-					}
-				}
-
-				if (specialComments !== 'exclamation') {
-					specialComments = false;
-				}
-
-				outputRules.appendList(chunkRules);
-			} while (!inputRules.isEmpty());
-
-			return {
-				ast: ast
-			};
+			// css syntax parser/walkers/generator/etc
+			syntax: csstree
 		};
 
 		return exports;
 	};
 	//#endregion
 
-	//#region URL: /compressor/clean
-	modules['/compressor/clean'] = function () {
-		var walk = require('/utils/walk').all;
+	//#region URL: /clean
+	modules['/clean'] = function () {
+		var walk = require('/css-tree').walkUp;
 		var handlers = {
-			Space: require('/compressor/clean/Space'),
-			Atrule: require('/compressor/clean/Atrule'),
-			Ruleset: require('/compressor/clean/Ruleset'),
-			Declaration: require('/compressor/clean/Declaration'),
-			Identifier: require('/compressor/clean/Identifier'),
-			Comment: require('/compressor/clean/Comment')
+			Atrule: require('/clean/Atrule'),
+			Rule: require('/clean/Rule'),
+			Declaration: require('/clean/Declaration'),
+			TypeSelector: require('/clean/TypeSelector'),
+			Comment: require('/clean/Comment'),
+			Operator: require('/clean/Operator'),
+			WhiteSpace: require('/clean/WhiteSpace')
 		};
 
 		var exports = function(ast, usageData) {
@@ -247,19 +222,16 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /compressor/clean/Atrule
-	modules['/compressor/clean/Atrule'] = function () {
-		var exports = function cleanAtrule(node, item, list) {
+	//#region URL: /clean/Atrule
+	modules['/clean/Atrule'] = function () {
+		function cleanAtrule(node, item, list) {
 			if (node.block) {
 				// otherwise removed at-rule don't prevent @import for removal
-				this.root.firstAtrulesAllowed = false;
-
-				if (node.block.type === 'Block' && node.block.declarations.isEmpty()) {
-					list.remove(item);
-					return;
+				if (this.stylesheet !== null) {
+					this.stylesheet.firstAtrulesAllowed = false;
 				}
 
-				if (node.block.type === 'StyleSheet' && node.block.rules.isEmpty()) {
+				if (node.block.children.isEmpty()) {
 					list.remove(item);
 					return;
 				}
@@ -267,7 +239,7 @@ var CSSO = (function(){
 
 			switch (node.name) {
 				case 'charset':
-					if (node.expression.sequence.isEmpty()) {
+					if (!node.expression || node.expression.children.isEmpty()) {
 						list.remove(item);
 						return;
 					}
@@ -281,7 +253,7 @@ var CSSO = (function(){
 					break;
 
 				case 'import':
-					if (!this.root.firstAtrulesAllowed) {
+					if (this.stylesheet === null || !this.stylesheet.firstAtrulesAllowed) {
 						list.remove(item);
 						return;
 					}
@@ -302,88 +274,139 @@ var CSSO = (function(){
 
 					break;
 			}
-		};
+		}
 
-		return exports;
+		return cleanAtrule;
 	};
 	//#endregion
 
-	//#region URL: /compressor/clean/Comment
-	modules['/compressor/clean/Comment'] = function () {
-		var exports = function cleanComment(data, item, list) {
+	//#region URL: /clean/Comment
+	modules['/clean/Comment'] = function () {
+		function cleanComment(data, item, list) {
 			list.remove(item);
-		};
+		}
 
-		return exports;
+		return cleanComment;
 	};
 	//#endregion
 
-	//#region URL: /compressor/clean/Declaration
-	modules['/compressor/clean/Declaration'] = function () {
-		var exports = function cleanDeclartion(node, item, list) {
-			if (node.value.sequence.isEmpty()) {
+	//#region URL: /clean/Declaration
+	modules['/clean/Declaration'] = function () {
+		function cleanDeclartion(node, item, list) {
+			if (node.value.children && node.value.children.isEmpty()) {
 				list.remove(item);
 			}
-		};
-	
-		return exports;
+		}
+
+		return cleanDeclartion;
 	};
 	//#endregion
 
-	//#region URL: /compressor/clean/Identifier
-	modules['/compressor/clean/Identifier'] = function () {
-		var exports = function cleanIdentifier(node, item, list) {
-			// remove useless universal selector
-			if (this.selector !== null && node.name === '*') {
-				// remove when universal selector isn't last
-				if (item.next && item.next.data.type !== 'Combinator') {
-					list.remove(item);
-				}
+	//#region URL: /clean/Operator
+	modules['/clean/Operator'] = function () {
+		// remove white spaces around operators when safe
+		function cleanWhitespace(node, item, list) {
+			if (node.value === '+' || node.value === '-') {
+				return;
 			}
-		};
 
-		return exports;
+			if (item.prev !== null && item.prev.data.type === 'WhiteSpace') {
+				list.remove(item.prev);
+			}
+
+			if (item.next !== null && item.next.data.type === 'WhiteSpace') {
+				list.remove(item.next);
+			}
+		}
+
+		return cleanWhitespace;
 	};
 	//#endregion
 
-	//#region URL: /compressor/clean/Ruleset
-	modules['/compressor/clean/Ruleset'] = function () {
+	//#region URL: /clean/Rule
+	modules['/clean/Rule'] = function () {
 		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var walk = require('/css-tree').walk;
 
-		function cleanUnused(node, usageData) {
-			return node.selector.selectors.each(function(selector, item, list) {
-				var hasUnused = selector.sequence.some(function(node) {
-					switch (node.type) {
-						case 'Class':
-							return usageData.classes && !hasOwnProperty.call(usageData.classes, node.name);
+		function cleanUnused(selectorList, usageData) {
+			selectorList.children.each(function(selector, item, list) {
+				var shouldRemove = false;
 
-						case 'Id':
-							return usageData.ids && !hasOwnProperty.call(usageData.ids, node.name);
+				walk(selector, function(node) {
+					// ignore nodes in nested selectors
+					if (this.selector === null || this.selector === selectorList) {
+						switch (node.type) {
+							case 'SelectorList':
+								// TODO: remove toLowerCase when pseudo selectors will be normalized
+								// ignore selectors inside :not()
+								if (this['function'] === null || this['function'].name.toLowerCase() !== 'not') {
+									if (cleanUnused(node, usageData)) {
+										shouldRemove = true;
+									}
+								}
+								break;
 
-						case 'Identifier':
-							// ignore universal selector
-							if (node.name !== '*') {
+							case 'ClassSelector':
+								if (usageData.whitelist !== null &&
+									usageData.whitelist.classes !== null &&
+									!hasOwnProperty.call(usageData.whitelist.classes, node.name)) {
+									shouldRemove = true;
+								}
+								if (usageData.blacklist !== null &&
+									usageData.blacklist.classes !== null &&
+									hasOwnProperty.call(usageData.blacklist.classes, node.name)) {
+									shouldRemove = true;
+								}
+								break;
+
+							case 'IdSelector':
+								if (usageData.whitelist !== null &&
+									usageData.whitelist.ids !== null &&
+									!hasOwnProperty.call(usageData.whitelist.ids, node.name)) {
+									shouldRemove = true;
+								}
+								if (usageData.blacklist !== null &&
+									usageData.blacklist.ids !== null &&
+									hasOwnProperty.call(usageData.blacklist.ids, node.name)) {
+									shouldRemove = true;
+								}
+								break;
+
+							case 'TypeSelector':
 								// TODO: remove toLowerCase when type selectors will be normalized
-								return usageData.tags && !hasOwnProperty.call(usageData.tags, node.name.toLowerCase());
-							}
-
-							break;
+								// ignore universal selectors
+								if (node.name.charAt(node.name.length - 1) !== '*') {
+									if (usageData.whitelist !== null &&
+										usageData.whitelist.tags !== null &&
+										!hasOwnProperty.call(usageData.whitelist.tags, node.name.toLowerCase())) {
+										shouldRemove = true;
+									}
+									if (usageData.blacklist !== null &&
+										usageData.blacklist.tags !== null &&
+										hasOwnProperty.call(usageData.blacklist.tags, node.name.toLowerCase())) {
+										shouldRemove = true;
+									}
+								}
+								break;
+						}
 					}
 				});
 
-				if (hasUnused) {
+				if (shouldRemove) {
 					list.remove(item);
 				}
 			});
+
+			return selectorList.children.isEmpty();
 		}
 
 		var exports = function cleanRuleset(node, item, list, usageData) {
-			if (usageData) {
-				cleanUnused(node, usageData);
+			if (usageData && (usageData.whitelist !== null || usageData.blacklist !== null)) {
+				cleanUnused(node.selector, usageData);
 			}
 
-			if (node.selector.selectors.isEmpty() ||
-				node.block.declarations.isEmpty()) {
+			if (node.selector.children.isEmpty() ||
+				node.block.children.isEmpty()) {
 				list.remove(item);
 			}
 		};
@@ -392,44 +415,73 @@ var CSSO = (function(){
 	};
 	//#endregion
 	
-	//#region URL: /compressor/clean/Space
-	modules['/compressor/clean/Space'] = function () {
-		function canCleanWhitespace(node) {
-			if (node.type !== 'Operator') {
-				return false;
+	//#region URL: /clean/TypeSelector
+	modules['/clean/TypeSelector'] = function () {
+		// remove useless universal selector
+		function cleanType(node, item, list) {
+			var name = item.data.name;
+
+			// check it's a non-namespaced universal selector
+			if (name !== '*') {
+				return;
 			}
 
-			return node.value !== '+' && node.value !== '-';
+			// remove when universal selector before other selectors
+			var nextType = item.next && item.next.data.type;
+			if (nextType === 'IdSelector' ||
+				nextType === 'ClassSelector' ||
+				nextType === 'AttributeSelector' ||
+				nextType === 'PseudoClassSelector' ||
+				nextType === 'PseudoElementSelector') {
+				list.remove(item);
+			}
+		};
+
+		return cleanType;
+	};
+	//#endregion
+
+	//#region URL: /clean/WhiteSpace
+	modules['/clean/WhiteSpace'] = function () {
+		function cleanWhitespace(node, item, list) {
+			// remove when first or last item in sequence
+			if (item.next === null || item.prev === null) {
+				list.remove(item);
+				return;
+			}
+
+			// remove when previous node is whitespace
+			if (item.prev.data.type === 'WhiteSpace') {
+				list.remove(item);
+				return;
+			}
+
+			if ((this.stylesheet !== null && this.stylesheet.children === list) ||
+				(this.block !== null && this.block.children === list)) {
+				list.remove(item);
+				return;
+			}
 		}
 
-		var exports = function cleanWhitespace(node, item, list) {
-			var prev = item.prev && item.prev.data;
-			var next = item.next && item.next.data;
-
-			if (canCleanWhitespace(prev) || canCleanWhitespace(next)) {
-				list.remove(item);
-			}
-		};
-
-		return exports;
+		return cleanWhitespace;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress
-	modules['/compressor/compress'] = function () {
-		var walk = require('/utils/walk').all;
+
+	//#region URL: /replace
+	modules['/replace'] = function () {
+		var walk = require('/css-tree').walkUp;
 		var handlers = {
-			Atrule: require('/compressor/compress/Atrule'),
-			Attribute: require('/compressor/compress/Attribute'),
-			Value: require('/compressor/compress/Value'),
-			Dimension: require('/compressor/compress/Dimension'),
-			Percentage: require('/compressor/compress/Number'),
-			Number: require('/compressor/compress/Number'),
-			String: require('/compressor/compress/String'),
-			Url: require('/compressor/compress/Url'),
-			Hash: require('/compressor/compress/color').compressHex,
-			Identifier: require('/compressor/compress/color').compressIdent,
-			Function: require('/compressor/compress/color').compressFunction
+			Atrule: require('/replace/Atrule'),
+			AttributeSelector: require('/replace/AttributeSelector'),
+			Value: require('/replace/Value'),
+			Dimension: require('/replace/Dimension'),
+			Percentage: require('/replace/Number'),
+			Number: require('/replace/Number'),
+			String: require('/replace/String'),
+			Url: require('/replace/Url'),
+			HexColor: require('/replace/color').compressHex,
+			Identifier: require('/replace/color').compressIdent,
+			Function: require('/replace/color').compressFunction
 		};
 
 		var exports = function(ast) {
@@ -443,23 +495,23 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/atrule/keyframes
-	modules['/compressor/compress/atrule/keyframes'] = function () {
+
+	//#region URL: /replace/atrule/keyframes
+	modules['/replace/atrule/keyframes'] = function () {
 		var exports = function(node) {
-			node.block.rules.each(function(ruleset) {
-				ruleset.selector.selectors.each(function(simpleselector) {
-					simpleselector.sequence.each(function(data, item) {
+			node.block.children.each(function(rule) {
+				rule.selector.children.each(function(simpleselector) {
+					simpleselector.children.each(function(data, item) {
 						if (data.type === 'Percentage' && data.value === '100') {
 							item.data = {
-								type: 'Identifier',
-								info: data.info,
+								type: 'TypeSelector',
+								loc: data.loc,
 								name: 'to'
 							};
-						} else if (data.type === 'Identifier' && data.name === 'from') {
+						} else if (data.type === 'TypeSelector' && data.name === 'from') {
 							item.data = {
 								type: 'Percentage',
-								info: data.info,
+								loc: data.loc,
 								value: '0'
 							};
 						}
@@ -471,11 +523,206 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/Atrule
-	modules['/compressor/compress/Atrule'] = function () {
-		var resolveKeyword = require('/utils/names').keyword;
-		var compressKeyframes = require('/compressor/compress/atrule/keyframes');
+
+	//#region URL: /replace/property/background
+	modules['/replace/property/background'] = function () {
+		var List = require('/css-tree').List;
+
+		var exports = function compressBackground(node) {
+			function lastType() {
+				if (buffer.length) {
+					return buffer[buffer.length - 1].type;
+				}
+			}
+
+			function flush() {
+				if (lastType() === 'WhiteSpace') {
+					buffer.pop();
+				}
+
+				if (!buffer.length) {
+					buffer.unshift(
+						{
+							type: 'Number',
+							loc: null,
+							value: '0'
+						},
+						{
+							type: 'WhiteSpace',
+							value: ' '
+						},
+						{
+							type: 'Number',
+							loc: null,
+							value: '0'
+						}
+					);
+				}
+
+				newValue.push.apply(newValue, buffer);
+
+				buffer = [];
+			}
+
+			var newValue = [];
+			var buffer = [];
+
+			node.children.each(function(node) {
+				if (node.type === 'Operator' && node.value === ',') {
+					flush();
+					newValue.push(node);
+					return;
+				}
+
+				// remove defaults
+				if (node.type === 'Identifier') {
+					if (node.name === 'transparent' ||
+						node.name === 'none' ||
+						node.name === 'repeat' ||
+						node.name === 'scroll') {
+						return;
+					}
+				}
+
+				// don't add redundant spaces
+				if (node.type === 'WhiteSpace' && (!buffer.length || lastType() === 'WhiteSpace')) {
+					return;
+				}
+
+				buffer.push(node);
+			});
+
+			flush();
+			node.children = new List().fromArray(newValue);
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /replace/property/border
+	modules['/replace/property/border'] = function () {
+		function removeItemAndRedundantWhiteSpace(list, item) {
+			var prev = item.prev;
+			var next = item.next;
+
+			if (next !== null) {
+				if (next.data.type === 'WhiteSpace' && (prev === null || prev.data.type === 'WhiteSpace')) {
+					list.remove(next);
+				}
+			} else if (prev !== null && prev.data.type === 'WhiteSpace') {
+				list.remove(prev);
+			}
+
+			list.remove(item);
+		}
+
+		var exports = function compressBorder(node) {
+			node.children.each(function(node, item, list) {
+				if (node.type === 'Identifier' && node.name.toLowerCase() === 'none') {
+					if (list.head === list.tail) {
+						// replace `none` for zero when `none` is a single term
+						item.data = {
+							type: 'Number',
+							loc: node.loc,
+							value: '0'
+						};
+					} else {
+						removeItemAndRedundantWhiteSpace(list, item);
+					}
+				}
+			});
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /replace/property/font
+	modules['/replace/property/font'] = function () {
+		function compressFont(node) {
+			var list = node.children;
+
+			list.eachRight(function(node, item) {
+				if (node.type === 'Identifier') {
+					if (node.name === 'bold') {
+						item.data = {
+							type: 'Number',
+							loc: node.loc,
+							value: '700'
+						};
+					} else if (node.name === 'normal') {
+						var prev = item.prev;
+
+						if (prev && prev.data.type === 'Operator' && prev.data.value === '/') {
+							this.remove(prev);
+						}
+
+						this.remove(item);
+					} else if (node.name === 'medium') {
+						var next = item.next;
+
+						if (!next || next.data.type !== 'Operator') {
+							this.remove(item);
+						}
+					}
+				}
+			});
+
+			// remove redundant spaces
+			list.each(function(node, item) {
+				if (node.type === 'WhiteSpace') {
+					if (!item.prev || !item.next || item.next.data.type === 'WhiteSpace') {
+						this.remove(item);
+					}
+				}
+			});
+
+			if (list.isEmpty()) {
+				list.insert(list.createItem({
+					type: 'Identifier',
+					name: 'normal'
+				}));
+			}
+		};
+
+		return compressFont;
+	};
+	//#endregion
+
+	//#region URL: /replace/property/font-weight
+	modules['/replace/property/font-weight'] = function () {
+		function compressFontWeight(node) {
+			var value = node.children.head.data;
+
+			if (value.type === 'Identifier') {
+				switch (value.name) {
+					case 'normal':
+						node.children.head.data = {
+							type: 'Number',
+							loc: value.loc,
+							value: '400'
+						};
+						break;
+					case 'bold':
+						node.children.head.data = {
+							type: 'Number',
+							loc: value.loc,
+							value: '700'
+						};
+						break;
+				}
+			}
+		};
+
+		return compressFontWeight;
+	};
+	//#endregion
+
+	//#region URL: /replace/Atrule
+	modules['/replace/Atrule'] = function () {
+		var resolveKeyword = require('/css-tree').keyword;
+		var compressKeyframes = require('/replace/atrule/keyframes');
 
 		var exports = function(node) {
 			// compress @keyframe selectors
@@ -487,13 +734,13 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/Attribute
-	modules['/compressor/compress/Attribute'] = function () {
+
+	//#region URL: /replace/AttributeSelector
+	modules['/replace/AttributeSelector'] = function () {
 		// Can unquote attribute detection
 		// Adopted implementation of Mathias Bynens
 		// https://github.com/mathiasbynens/mothereff.in/blob/master/unquoted-attributes/eff.js
-		var escapesRx = /\\([0-9A-Fa-f]{1,6})[ \t\n\f\r]?|\\./g;
+		var escapesRx = /\\([0-9A-Fa-f]{1,6})(\r\n|[ \t\n\f\r])?|\\./g;
 		var blockUnquoteRx = /^(-?\d|--)|[\u0000-\u002c\u002e\u002f\u003A-\u0040\u005B-\u005E\u0060\u007B-\u009f]/;
 
 		function canUnquote(value) {
@@ -518,7 +765,7 @@ var CSSO = (function(){
 			if (canUnquote(unquotedValue)) {
 				node.value = {
 					type: 'Identifier',
-					info: attrValue.info,
+					loc: attrValue.loc,
 					name: unquotedValue
 				};
 			}
@@ -527,11 +774,10 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/color
-	modules['/compressor/compress/color'] = function () {
-		var List = require('/utils/list');
-		var packNumber = require('/compressor/compress/Number').pack;
+
+	//#region URL: /replace/color
+	modules['/replace/color'] = function () {
+		var packNumber = require('/replace/Number').pack;
 
 		// http://www.w3.org/TR/css3-color/#svg-color
 		var NAME_TO_HEX = {
@@ -750,7 +996,7 @@ var CSSO = (function(){
 			var g;
 			var b;
 
-			if (s == 0) {
+			if (s === 0) {
 				r = g = b = l; // achromatic
 			} else {
 				var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
@@ -775,46 +1021,45 @@ var CSSO = (function(){
 		}
 
 		function parseFunctionArgs(functionArgs, count, rgb) {
-			var argument = functionArgs.head;
+			var cursor = functionArgs.head;
 			var args = [];
+			var wasValue = false;
 
-			while (argument !== null) {
-				var argumentPart = argument.data.sequence.head;
-				var wasValue = false;
+			while (cursor !== null) {
+				var node = cursor.data;
+				var type = node.type;
 
-				while (argumentPart !== null) {
-					var value = argumentPart.data;
-					var type = value.type;
-
-					switch (type) {
-						case 'Number':
-						case 'Percentage':
-							if (wasValue) {
-								return;
-							}
-
-							wasValue = true;
-							args.push({
-								type: type,
-								value: Number(value.value)
-							});
-							break;
-
-						case 'Operator':
-							if (wasValue || value.value !== '+') {
-								return;
-							}
-							break;
-
-						default:
-							// something we couldn't understand
+				switch (type) {
+					case 'Number':
+					case 'Percentage':
+						if (wasValue) {
 							return;
-					}
+						}
 
-					argumentPart = argumentPart.next;
+						wasValue = true;
+						args.push({
+							type: type,
+							value: Number(node.value)
+						});
+						break;
+
+					case 'Operator':
+						if (node.value === ',') {
+							if (!wasValue) {
+								return;
+							}
+							wasValue = false;
+						} else if (wasValue || node.value !== '+') {
+							return;
+						}
+						break;
+
+					default:
+						// something we couldn't understand
+						return;
 				}
 
-				argument = argument.next;
+				cursor = cursor.next;
 			}
 
 			if (args.length !== count) {
@@ -889,7 +1134,7 @@ var CSSO = (function(){
 			var args;
 
 			if (functionName === 'rgba' || functionName === 'hsla') {
-				args = parseFunctionArgs(node.arguments, 4, functionName === 'rgba');
+				args = parseFunctionArgs(node.children, 4, functionName === 'rgba');
 
 				if (!args) {
 					// something went wrong
@@ -901,20 +1146,40 @@ var CSSO = (function(){
 					node.name = 'rgba';
 				}
 
+				if (args[3] === 0) {
+					// try to replace `rgba(x, x, x, 0)` to `transparent`
+					// always replace `rgba(0, 0, 0, 0)` to `transparent`
+					// otherwise avoid replacement in gradients since it may break color transition
+					// http://stackoverflow.com/questions/11829410/css3-gradient-rendering-issues-from-transparent-to-white
+					var scopeFunctionName = this['function'] && this['function'].name;
+					if ((args[0] === 0 && args[1] === 0 && args[2] === 0) ||
+						!/^(?:to|from|color-stop)$|gradient$/i.test(scopeFunctionName)) {
+
+						item.data = {
+							type: 'Identifier',
+							loc: node.loc,
+							name: 'transparent'
+						};
+
+						return;
+					}
+				}
+
 				if (args[3] !== 1) {
 					// replace argument values for normalized/interpolated
-					node.arguments.each(function(argument) {
-						var item = argument.sequence.head;
-
-						if (item.data.type === 'Operator') {
-							item = item.next;
+					node.children.each(function(node, item, list) {
+						if (node.type === 'Operator') {
+							if (node.value !== ',') {
+								list.remove(item);
+							}
+							return;
 						}
 
-						argument.sequence = new List([{
+						item.data = {
 							type: 'Number',
-							info: item.data.info,
-							value: packNumber(args.shift())
-						}]);
+							loc: node.loc,
+							value: packNumber(args.shift(), null)
+						};
 					});
 
 					return;
@@ -925,7 +1190,7 @@ var CSSO = (function(){
 			}
 
 			if (functionName === 'hsl') {
-				args = args || parseFunctionArgs(node.arguments, 3, false);
+				args = args || parseFunctionArgs(node.children, 3, false);
 
 				if (!args) {
 					// something went wrong
@@ -938,7 +1203,7 @@ var CSSO = (function(){
 			}
 
 			if (functionName === 'rgb') {
-				args = args || parseFunctionArgs(node.arguments, 3, true);
+				args = args || parseFunctionArgs(node.children, 3, true);
 
 				if (!args) {
 					// something went wrong
@@ -947,15 +1212,16 @@ var CSSO = (function(){
 
 				// check if color is not at the end and not followed by space
 				var next = item.next;
-				if (next && next.data.type !== 'Space') {
+				if (next && next.data.type !== 'WhiteSpace') {
 					list.insert(list.createItem({
-						type: 'Space'
+						type: 'WhiteSpace',
+						value: ' '
 					}), next);
 				}
 
 				item.data = {
-					type: 'Hash',
-					info: node.info,
+					type: 'HexColor',
+					loc: node.loc,
 					value: toHex(args[0]) + toHex(args[1]) + toHex(args[2])
 				};
 
@@ -976,8 +1242,8 @@ var CSSO = (function(){
 				if (hex.length + 1 <= color.length) {
 					// replace for shorter hex value
 					item.data = {
-						type: 'Hash',
-						info: node.info,
+						type: 'HexColor',
+						loc: node.loc,
 						value: hex
 					};
 				} else {
@@ -1006,7 +1272,7 @@ var CSSO = (function(){
 			if (HEX_TO_NAME[color]) {
 				item.data = {
 					type: 'Identifier',
-					info: node.info,
+					loc: node.loc,
 					name: HEX_TO_NAME[color]
 				};
 			} else {
@@ -1023,10 +1289,10 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/Dimension
-	modules['/compressor/compress/Dimension'] = function () {
-		var packNumber = require('/compressor/compress/Number').pack;
+
+	//#region URL: /replace/Dimension
+	modules['/replace/Dimension'] = function () {
+		var packNumber = require('/replace/Number').pack;
 		var LENGTH_UNIT = {
 			// absolute length units
 			'px': true,
@@ -1051,11 +1317,11 @@ var CSSO = (function(){
 		};
 
 		var exports = function compressDimension(node, item) {
-			var value = packNumber(node.value);
+			var value = packNumber(node.value, item);
 
 			node.value = value;
 
-			if (value === '0' && this.declaration) {
+			if (value === '0' && this.declaration !== null && this.atruleExpression === null) {
 				var unit = node.unit.toLowerCase();
 
 				// only length values can be compressed
@@ -1064,7 +1330,7 @@ var CSSO = (function(){
 				}
 
 				// issue #200: don't remove units in flex property as it could change value meaning
-				if (this.declaration.property.name === 'flex') {
+				if (this.declaration.property === 'flex') {
 					return;
 				}
 
@@ -1075,7 +1341,7 @@ var CSSO = (function(){
 
 				item.data = {
 					type: 'Number',
-					info: node.info,
+					loc: node.loc,
 					value: value
 				};
 			}
@@ -1084,201 +1350,64 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/Number
-	modules['/compressor/compress/Number'] = function () {
-		function packNumber(value) {
+
+	//#region URL: /replace/Number
+	modules['/replace/Number'] = function () {
+		var OMIT_PLUSSIGN = /^(?:\+|(-))?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
+		var KEEP_PLUSSIGN = /^([\+\-])?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/;
+		var unsafeToRemovePlusSignAfter = {
+			Dimension: true,
+			HexColor: true,
+			Identifier: true,
+			Number: true,
+			Raw: true,
+			UnicodeRange: true
+		};
+
+		function packNumber(value, item) {
+			// omit plus sign only if no prev or prev is safe type
+			var regexp = item && item.prev !== null && unsafeToRemovePlusSignAfter.hasOwnProperty(item.prev.data.type)
+				? KEEP_PLUSSIGN
+				: OMIT_PLUSSIGN;
+
 			// 100 -> '100'
 			// 00100 -> '100'
-			// +100 -> '100'
+			// +100 -> '100' (only when safe, e.g. omitting plus sign for 1px+1px leads to single dimension instead of two)
 			// -100 -> '-100'
 			// 0.123 -> '.123'
 			// 0.12300 -> '.123'
 			// 0.0 -> ''
 			// 0 -> ''
-			value = String(value).replace(/^(?:\+|(-))?0*(\d*)(?:\.0*|(\.\d*?)0*)?$/, '$1$2$3');
+			// -0 -> '-'
+			value = String(value).replace(regexp, '$1$2$3');
 
-			if (value.length === 0 || value === '-') {
+			if (value === '' || value === '-') {
 				value = '0';
 			}
 
 			return value;
 		};
 
-		var exports = function(node) {
-			node.value = packNumber(node.value);
+		var exports = function(node, item) {
+			node.value = packNumber(node.value, item);
 		};
 		exports.pack = packNumber;
 
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/property/background
-	modules['/compressor/compress/property/background'] = function () {
-		var List = require('/utils/list');
 
-		var exports = function compressBackground(node) {
-			function lastType() {
-				if (buffer.length) {
-					return buffer[buffer.length - 1].type;
-				}
-			}
-
-			function flush() {
-				if (lastType() === 'Space') {
-					buffer.pop();
-				}
-
-				if (!buffer.length) {
-					buffer.unshift(
-						{
-							type: 'Number',
-							value: '0'
-						},
-						{
-							type: 'Space'
-						},
-						{
-							type: 'Number',
-							value: '0'
-						}
-					);
-				}
-
-				newValue.push.apply(newValue, buffer);
-
-				buffer = [];
-			}
-
-			var newValue = [];
-			var buffer = [];
-
-			node.sequence.each(function(node) {
-				if (node.type === 'Operator' && node.value === ',') {
-					flush();
-					newValue.push(node);
-					return;
-				}
-
-				// remove defaults
-				if (node.type === 'Identifier') {
-					if (node.name === 'transparent' ||
-						node.name === 'none' ||
-						node.name === 'repeat' ||
-						node.name === 'scroll') {
-						return;
-					}
-				}
-
-				// don't add redundant spaces
-				if (node.type === 'Space' && (!buffer.length || lastType() === 'Space')) {
-					return;
-				}
-
-				buffer.push(node);
-			});
-
-			flush();
-			node.sequence = new List(newValue);
-		};
-
-		return exports;
-	};
-	//#endregion
-	
-	//#region URL: /compressor/compress/property/font
-	modules['/compressor/compress/property/font'] = function () {
-		var exports = function compressFont(node) {
-			var list = node.sequence;
-
-			list.eachRight(function(node, item) {
-				if (node.type === 'Identifier') {
-					if (node.name === 'bold') {
-						item.data = {
-							type: 'Number',
-							info: node.info,
-							value: '700'
-						};
-					} else if (node.name === 'normal') {
-						var prev = item.prev;
-
-						if (prev && prev.data.type === 'Operator' && prev.data.value === '/') {
-							this.remove(prev);
-						}
-
-						this.remove(item);
-					} else if (node.name === 'medium') {
-						var next = item.next;
-
-						if (!next || next.data.type !== 'Operator') {
-							this.remove(item);
-						}
-					}
-				}
-			});
-
-			// remove redundant spaces
-			list.each(function(node, item) {
-				if (node.type === 'Space') {
-					if (!item.prev || !item.next || item.next.data.type === 'Space') {
-						this.remove(item);
-					}
-				}
-			});
-
-			if (list.isEmpty()) {
-				list.insert(list.createItem({
-					type: 'Identifier',
-					name: 'normal'
-				}));
-			}
-		};
-
-		return exports;
-	};
-	//#endregion
-	
-	//#region URL: /compressor/compress/property/font-weight
-	modules['/compressor/compress/property/font-weight'] = function () {
-		var exports = function compressFontWeight(node) {
-			var value = node.sequence.head.data;
-
-			if (value.type === 'Identifier') {
-				switch (value.name) {
-					case 'normal':
-						node.sequence.head.data = {
-							type: 'Number',
-							info: value.info,
-							value: '400'
-						};
-						break;
-					case 'bold':
-						node.sequence.head.data = {
-							type: 'Number',
-							info: value.info,
-							value: '700'
-						};
-						break;
-				}
-			}
-		};
-
-		return exports;
-	};
-	//#endregion
-	
-	//#region URL: /compressor/compress/String
-	modules['/compressor/compress/String'] = function () {
+	//#region URL: /replace/String
+	modules['/replace/String'] = function () {
 		var exports = function(node) {
 			var value = node.value;
 
-			// remove escaped \n, i.e.
+			// remove escaped newlines, i.e.
 			// .a { content: "foo\
 			// bar"}
 			// ->
 			// .a { content: "foobar" }
-			value = value.replace(/\\\n/g, '');
+			value = value.replace(/\\(\r\n|\r|\n|\f)/g, '');
 
 			node.value = value;
 		};
@@ -1287,8 +1416,8 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /compressor/compress/Url
-	modules['/compressor/compress/Url'] = function () {
+	//#region URL: /replace/Url
+	modules['/replace/Url'] = function () {
 		var UNICODE = '\\\\[0-9a-f]{1,6}(\\r\\n|[ \\n\\r\\t\\f])?';
 		var ESCAPE = '(' + UNICODE + '|\\\\[^\\n\\r\\f0-9a-fA-F])';
 		var NONPRINTABLE = '\u0000\u0008\u000b\u000e-\u001f\u007f';
@@ -1312,7 +1441,7 @@ var CSSO = (function(){
 			if (SAFE_URL.test(url)) {
 				node.value = {
 					type: 'Raw',
-					info: node.value.info,
+					loc: node.value.loc,
 					value: url
 				};
 			} else {
@@ -1326,14 +1455,16 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/compress/Value
-	modules['/compressor/compress/Value'] = function () {
-		var resolveName = require('/utils/names').property;
+
+	//#region URL: /replace/Value
+	modules['/replace/Value'] = function () {
+		var resolveName = require('/css-tree').property;
 		var handlers = {
-			'font': require('/compressor/compress/property/font'),
-			'font-weight': require('/compressor/compress/property/font-weight'),
-			'background': require('/compressor/compress/property/background')
+			'font': require('/replace/property/font'),
+			'font-weight': require('/replace/property/font-weight'),
+			'background': require('/replace/property/background'),
+			'border': require('/replace/property/border'),
+			'outline': require('/replace/property/border')
 		};
 
 		var exports = function compressValue(node) {
@@ -1341,7 +1472,7 @@ var CSSO = (function(){
 				return;
 			}
 
-			var property = resolveName(this.declaration.property.name);
+			var property = resolveName(this.declaration.property);
 
 			if (handlers.hasOwnProperty(property.name)) {
 				handlers[property.name](node);
@@ -1351,71 +1482,342 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure
-	modules['/compressor/restructure'] = function () {
-		var prepare = require('/compressor/restructure/prepare');
-		var initialMergeRuleset = require('/compressor/restructure/1-initialMergeRuleset');
-		var mergeAtrule = require('/compressor/restructure/2-mergeAtrule');
-		var disjoinRuleset = require('/compressor/restructure/3-disjoinRuleset');
-		var restructShorthand = require('/compressor/restructure/4-restructShorthand');
-		var restructBlock = require('/compressor/restructure/6-restructBlock');
-		var mergeRuleset = require('/compressor/restructure/7-mergeRuleset');
-		var restructRuleset = require('/compressor/restructure/8-restructRuleset');
 
-		var exports = function(ast, usageData/*, debug*/) {
+	//#region URL: /restructure
+	modules['/restructure'] = function () {
+		var prepare = require('/restructure/prepare');
+		var initialMergeRuleset = require('/restructure/1-initialMergeRuleset');
+		var mergeAtrule = require('/restructure/2-mergeAtrule');
+		var disjoinRuleset = require('/restructure/3-disjoinRuleset');
+		var restructShorthand = require('/restructure/4-restructShorthand');
+		var restructBlock = require('/restructure/6-restructBlock');
+		var mergeRuleset = require('/restructure/7-mergeRuleset');
+		var restructRuleset = require('/restructure/8-restructRuleset');
+
+		var exports = function(ast, usageData/*BT-, debug*/) {
 			// prepare ast for restructing
 			var indexer = prepare(ast, usageData);
-//			debug('prepare', ast);
+			/*BT-
+			debug('prepare', ast);
+			*/
 
 			initialMergeRuleset(ast);
-//			debug('initialMergeRuleset', ast);
+			/*BT-
+			debug('initialMergeRuleset', ast);
+			*/
 
 			mergeAtrule(ast);
-//			debug('mergeAtrule', ast);
+			/*BT-
+			debug('mergeAtrule', ast);
+			*/
 
 			disjoinRuleset(ast);
-//			debug('disjoinRuleset', ast);
+			/*BT-
+			debug('disjoinRuleset', ast);
+			*/
 
 			restructShorthand(ast, indexer);
-//			debug('restructShorthand', ast);
+			/*BT-
+			debug('restructShorthand', ast);
+			*/
 
 			restructBlock(ast);
-//			debug('restructBlock', ast);
+			/*BT-
+			debug('restructBlock', ast);
+			*/
 
 			mergeRuleset(ast);
-//			debug('mergeRuleset', ast);
+			/*BT-
+			debug('mergeRuleset', ast);
+			*/
 
 			restructRuleset(ast);
-//			debug('restructRuleset', ast);
+			/*BT-
+			debug('restructRuleset', ast);
+			*/
 		};
 
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/1-initialMergeRuleset
-	modules['/compressor/restructure/1-initialMergeRuleset'] = function () {
-		var utils = require('/compressor/restructure/utils');
-		var walkRules = require('/utils/walk').rules;
 
-		function processRuleset(node, item, list) {
-			var selectors = node.selector.selectors;
-			var declarations = node.block.declarations;
+	//#region URL: /restructure/prepare
+	modules['/restructure/prepare'] = function () {
+		var resolveKeyword = require('/css-tree').keyword;
+		var walkRules = require('/css-tree').walkRules;
+		var translate = require('/css-tree').translate;
+		var createDeclarationIndexer = require('/restructure/prepare/createDeclarationIndexer');
+		var processSelector = require('/restructure/prepare/processSelector');
+
+		function walk(node, markDeclaration, usageData) {
+			switch (node.type) {
+				case 'Rule':
+					node.block.children.each(markDeclaration);
+					processSelector(node, usageData);
+					break;
+
+				case 'Atrule':
+					if (node.expression) {
+						node.expression.id = null; // pre-init property to avoid multiple hidden class for translate
+						node.expression.id = translate(node.expression);
+					}
+
+					// compare keyframe selectors by its values
+					// NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
+					if (resolveKeyword(node.name).name === 'keyframes') {
+						node.block.avoidRulesMerge = true;  /* probably we don't need to prevent those merges for @keyframes
+															   TODO: need to be checked */
+						node.block.children.each(function(rule) {
+							rule.selector.children.each(function(simpleselector) {
+								simpleselector.compareMarker = simpleselector.id;
+							});
+						});
+					}
+					break;
+			}
+		};
+
+		var exports = function prepare(ast, usageData) {
+			var markDeclaration = createDeclarationIndexer();
+
+			walkRules(ast, function(node) {
+				walk(node, markDeclaration, usageData);
+			});
+
+			return {
+				declaration: markDeclaration
+			};
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /restructure/prepare/createDeclarationIndexer
+	modules['/restructure/prepare/createDeclarationIndexer'] = function () {
+		var translate = require('/css-tree').translate;
+
+		function Index() {
+			this.seed = 0;
+			this.map = Object.create(null);
+		}
+
+		Index.prototype.resolve = function(str) {
+			var index = this.map[str];
+
+			if (!index) {
+				index = ++this.seed;
+				this.map[str] = index;
+			}
+
+			return index;
+		};
+
+		var exports = function createDeclarationIndexer() {
+			var ids = new Index();
+
+			return function markDeclaration(node) {
+				var id = translate(node);
+
+				node.id = ids.resolve(id);
+				node.length = id.length;
+				node.fingerprint = null;
+
+				return node;
+			};
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /restructure/prepare/processSelector
+	modules['/restructure/prepare/processSelector'] = function () {
+		var translate = require('/css-tree').translate;
+		var specificity = require('/restructure/prepare/specificity');
+
+		var nonFreezePseudoElements = {
+			'first-letter': true,
+			'first-line': true,
+			'after': true,
+			'before': true
+		};
+		var nonFreezePseudoClasses = {
+			'link': true,
+			'visited': true,
+			'hover': true,
+			'active': true,
+			'first-letter': true,
+			'first-line': true,
+			'after': true,
+			'before': true
+		};
+
+		var exports = function freeze(node, usageData) {
+			var pseudos = Object.create(null);
+			var hasPseudo = false;
+
+			node.selector.children.each(function(simpleSelector) {
+				var tagName = '*';
+				var scope = 0;
+
+				simpleSelector.children.some(function(node) {
+					switch (node.type) {
+						case 'ClassSelector':
+							if (usageData && usageData.scopes) {
+								var classScope = usageData.scopes[node.name] || 0;
+
+								if (scope !== 0 && classScope !== scope) {
+									throw new Error('Selector can\'t has classes from different scopes: ' + translate(simpleSelector));
+								}
+
+								scope = classScope;
+							}
+							break;
+
+						case 'PseudoClassSelector':
+							var name = node.name.toLowerCase();
+
+							if (!nonFreezePseudoClasses.hasOwnProperty(name)) {
+								pseudos[name] = true;
+								hasPseudo = true;
+							}
+							break;
+
+						case 'PseudoElementSelector':
+							var name = node.name.toLowerCase();
+
+							if (!nonFreezePseudoElements.hasOwnProperty(name)) {
+								pseudos[name] = true;
+								hasPseudo = true;
+							}
+							break;
+
+						case 'TypeSelector':
+							tagName = node.name.toLowerCase();
+							break;
+
+						case 'AttributeSelector':
+							if (node.flags) {
+								pseudos['[' + node.flags.toLowerCase() + ']'] = true;
+								hasPseudo = true;
+							}
+							break;
+
+						case 'WhiteSpace':
+						case 'Combinator':
+							tagName = '*';
+							break;
+					}
+				});
+
+				simpleSelector.compareMarker = specificity(simpleSelector).toString();
+				simpleSelector.id = null; // pre-init property to avoid multiple hidden class
+				simpleSelector.id = translate(simpleSelector);
+
+				if (scope) {
+					simpleSelector.compareMarker += ':' + scope;
+				}
+
+				if (tagName !== '*') {
+					simpleSelector.compareMarker += ',' + tagName;
+				}
+			});
+
+			// add property to all rule nodes to avoid multiple hidden class
+			node.pseudoSignature = hasPseudo && Object.keys(pseudos).sort().join(',');
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /restructure/prepare/specificity
+	modules['/restructure/prepare/specificity'] = function () {
+		function specificity(simpleSelector) {
+			var A = 0;
+			var B = 0;
+			var C = 0;
+
+			simpleSelector.children.each(function walk(node) {
+				switch (node.type) {
+					case 'SelectorList':
+					case 'Selector':
+						node.children.each(walk);
+						break;
+
+					case 'IdSelector':
+						A++;
+						break;
+
+					case 'ClassSelector':
+					case 'AttributeSelector':
+						B++;
+						break;
+
+					case 'PseudoClassSelector':
+						switch (node.name.toLowerCase()) {
+							case 'not':
+								node.children.each(walk);
+								break;
+
+							case 'before':
+							case 'after':
+							case 'first-line':
+							case 'first-letter':
+								C++;
+								break;
+
+							// TODO: support for :nth-*(.. of <SelectorList>), :matches(), :has()
+
+							default:
+								B++;
+						}
+						break;
+
+					case 'PseudoElementSelector':
+						C++;
+						break;
+
+					case 'TypeSelector':
+						// ignore universal selector
+						if (node.name.charAt(node.name.length - 1) !== '*') {
+							C++;
+						}
+						break;
+
+				}
+			});
+
+			return [A, B, C];
+		};
+
+		return specificity;
+	};
+	//#endregion
+
+	//#region URL: /restructure/1-initialMergeRuleset
+	modules['/restructure/1-initialMergeRuleset'] = function () {
+		var walkRules = require('/css-tree').walkRules;
+		var utils = require('/restructure/utils');
+
+		function processRule(node, item, list) {
+			var selectors = node.selector.children;
+			var declarations = node.block.children;
 
 			list.prevUntil(item.prev, function(prev) {
 				// skip non-ruleset node if safe
-				if (prev.type !== 'Ruleset') {
+				if (prev.type !== 'Rule') {
 					return utils.unsafeToSkipNode.call(selectors, prev);
 				}
 
-				var prevSelectors = prev.selector.selectors;
-				var prevDeclarations = prev.block.declarations;
+				var prevSelectors = prev.selector.children;
+				var prevDeclarations = prev.block.children;
 
 				// try to join rulesets with equal pseudo signature
 				if (node.pseudoSignature === prev.pseudoSignature) {
 					// try to join by selectors
-					if (utils.isEqualLists(prevSelectors, selectors)) {
+					if (utils.isEqualSelectors(prevSelectors, selectors)) {
 						prevDeclarations.appendList(declarations);
 						list.remove(item);
 						return true;
@@ -1432,15 +1834,15 @@ var CSSO = (function(){
 				// go to prev ruleset if has no selector similarities
 				return utils.hasSimilarSelectors(selectors, prevSelectors);
 			});
-		};
+		}
 
 		// NOTE: direction should be left to right, since rulesets merge to left
 		// ruleset. When direction right to left unmerged rulesets may prevent lookup
 		// TODO: remove initial merge
-		var exports = function initialMergeRuleset(ast) {
+		var exports = function initialMergeRule(ast) {
 			walkRules(ast, function(node, item, list) {
-				if (node.type === 'Ruleset') {
-					processRuleset(node, item, list);
+				if (node.type === 'Rule') {
+					processRule(node, item, list);
 				}
 			});
 		};
@@ -1448,10 +1850,10 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/2-mergeAtrule
-	modules['/compressor/restructure/2-mergeAtrule'] = function () {
-		var walkRulesRight = require('/utils/walk').rulesRight;
+
+	//#region URL: /restructure/2-mergeAtrule
+	modules['/restructure/2-mergeAtrule'] = function () {
+		var walkRulesRight = require('/css-tree').walkRulesRight;
 
 		function isMediaRule(node) {
 			return node.type === 'Atrule' && node.name === 'media';
@@ -1469,15 +1871,19 @@ var CSSO = (function(){
 			}
 
 			// merge @media with same query
-			if (node.expression.id === prev.expression.id) {
-				prev.block.rules.appendList(node.block.rules);
-				prev.info = {
-					primary: prev.info,
-					merged: node.info
-				};
+			if (node.expression &&
+				prev.expression &&
+				node.expression.id === prev.expression.id) {
+				prev.block.children.appendList(node.block.children);
 				list.remove(item);
+
+				// TODO: use it when we can refer to several points in source
+				// prev.loc = {
+				//	 primary: prev.loc,
+				//	 merged: node.loc
+				// };
 			}
-		};
+		}
 
 		var exports = function rejoinAtrule(ast) {
 			walkRulesRight(ast, function(node, item, list) {
@@ -1490,14 +1896,14 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/3-disjoinRuleset
-	modules['/compressor/restructure/3-disjoinRuleset'] = function () {
-		var List = require('/utils/list');
-		var walkRulesRight = require('/utils/walk').rulesRight;
 
-		function processRuleset(node, item, list) {
-			var selectors = node.selector.selectors;
+	//#region URL: /restructure/3-disjoinRuleset
+	modules['/restructure/3-disjoinRuleset'] = function () {
+		var List = require('/css-tree').List;
+		var walkRulesRight = require('/css-tree').walkRulesRight;
+
+		function processRule(node, item, list) {
+			var selectors = node.selector.children;
 
 			// generate new rule sets:
 			// .a, .b { color: red; }
@@ -1511,27 +1917,27 @@ var CSSO = (function(){
 				newSelectors.insert(selectors.remove(selectors.head));
 
 				list.insert(list.createItem({
-					type: 'Ruleset',
-					info: node.info,
-					pseudoSignature: node.pseudoSignature,
+					type: 'Rule',
+					loc: node.loc,
 					selector: {
-						type: 'Selector',
-						info: node.selector.info,
-						selectors: newSelectors
+						type: 'SelectorList',
+						loc: node.selector.loc,
+						children: newSelectors
 					},
 					block: {
 						type: 'Block',
-						info: node.block.info,
-						declarations: node.block.declarations.copy()
-					}
+						loc: node.block.loc,
+						children: node.block.children.copy()
+					},
+					pseudoSignature: node.pseudoSignature
 				}), item);
 			}
-		};
+		}
 
-		var exports = function disjoinRuleset(ast) {
+		var exports = function disjoinRule(ast) {
 			walkRulesRight(ast, function(node, item, list) {
-				if (node.type === 'Ruleset') {
-					processRuleset(node, item, list);
+				if (node.type === 'Rule') {
+					processRule(node, item, list);
 				}
 			});
 		};
@@ -1539,12 +1945,12 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/4-restructShorthand
-	modules['/compressor/restructure/4-restructShorthand'] = function () {
-		var List = require('/utils/list');
-		var translate = require('/utils/translate');
-		var walkRulesRight = require('/utils/walk').rulesRight;
+
+	//#region URL: /restructure/4-restructShorthand
+	modules['/restructure/4-restructShorthand'] = function () {
+		var List = require('/css-tree').List;
+		var translate = require('/css-tree').translate;
+		var walkRulesRight = require('/css-tree').walkRulesRight;
 
 		var REPLACE = 1;
 		var REMOVE = 2;
@@ -1609,7 +2015,7 @@ var CSSO = (function(){
 
 		function TRBL(name) {
 			this.name = name;
-			this.info = null;
+			this.loc = null;
 			this.iehack = undefined;
 			this.sides = {
 				'top': null,
@@ -1619,10 +2025,10 @@ var CSSO = (function(){
 			};
 		}
 
-		TRBL.prototype.getValueSequence = function(value, count) {
+		TRBL.prototype.getValueSequence = function(declaration, count) {
 			var values = [];
 			var iehack = '';
-			var hasBadValues = value.sequence.some(function(child) {
+			var hasBadValues = declaration.value.children.some(function(child) {
 				var special = false;
 
 				switch (child.type) {
@@ -1659,7 +2065,7 @@ var CSSO = (function(){
 						}
 						break;
 
-					case 'Hash': // color
+					case 'HexColor': // color
 					case 'Number':
 					case 'Percentage':
 						break;
@@ -1668,7 +2074,7 @@ var CSSO = (function(){
 						special = child.name;
 						break;
 
-					case 'Space':
+					case 'WhiteSpace':
 						return false; // ignore space
 
 					default:
@@ -1678,7 +2084,7 @@ var CSSO = (function(){
 				values.push({
 					node: child,
 					special: special,
-					important: value.important
+					important: declaration.important
 				});
 			});
 
@@ -1701,7 +2107,7 @@ var CSSO = (function(){
 			return !currentValue || (value.important && !currentValue.important);
 		};
 
-		TRBL.prototype.add = function(name, value, info) {
+		TRBL.prototype.add = function(name, declaration) {
 			function attemptToAdd() {
 				var sides = this.sides;
 				var side = SIDE[name];
@@ -1711,7 +2117,7 @@ var CSSO = (function(){
 						return false;
 					}
 
-					var values = this.getValueSequence(value, 1);
+					var values = this.getValueSequence(declaration, 1);
 
 					if (!values || !values.length) {
 						return false;
@@ -1731,7 +2137,7 @@ var CSSO = (function(){
 					sides[side] = values[0];
 					return true;
 				} else if (name === this.name) {
-					var values = this.getValueSequence(value, 4);
+					var values = this.getValueSequence(declaration, 4);
 
 					if (!values || !values.length) {
 						return false;
@@ -1777,13 +2183,17 @@ var CSSO = (function(){
 				return false;
 			}
 
-			if (this.info) {
-				this.info = {
-					primary: this.info,
-					merged: info
-				};
-			} else {
-				this.info = info;
+			// TODO: use it when we can refer to several points in source
+			// if (this.loc) {
+			//	 this.loc = {
+			//		 primary: this.loc,
+			//		 merged: declaration.loc
+			//	 };
+			// } else {
+			//	 this.loc = declaration.loc;
+			// }
+			if (!this.loc) {
+				this.loc = declaration.loc;
 			}
 
 			return true;
@@ -1809,7 +2219,7 @@ var CSSO = (function(){
 		};
 
 		TRBL.prototype.getValue = function() {
-			var result = [];
+			var result = new List();
 			var sides = this.sides;
 			var values = [
 				sides.top,
@@ -1836,42 +2246,44 @@ var CSSO = (function(){
 
 			for (var i = 0; i < values.length; i++) {
 				if (i) {
-					result.push({ type: 'Space' });
+					result.appendData({ type: 'WhiteSpace', value: ' ' });
 				}
 
-				result.push(values[i].node);
+				result.appendData(values[i].node);
 			}
 
 			if (this.iehack) {
-				result.push({ type: 'Space' }, {
+				result.appendData({ type: 'WhiteSpace', value: ' ' });
+				result.appendData({
 					type: 'Identifier',
-					info: {},
+					loc: null,
 					name: this.iehack
 				});
 			}
 
 			return {
 				type: 'Value',
-				info: {},
-				important: sides.top.important,
-				sequence: new List(result)
+				loc: null,
+				children: result
 			};
 		};
 
-		TRBL.prototype.getProperty = function() {
+		TRBL.prototype.getDeclaration = function() {
 			return {
-				type: 'Property',
-				info: {},
-				name: this.name
+				type: 'Declaration',
+				loc: this.loc,
+				important: this.sides.top.important,
+				property: this.name,
+				value: this.getValue()
 			};
 		};
 
-		function processRuleset(ruleset, shorts, shortDeclarations, lastShortSelector) {
-			var declarations = ruleset.block.declarations;
-			var selector = ruleset.selector.selectors.first().id;
+		function processRule(rule, shorts, shortDeclarations, lastShortSelector) {
+			var declarations = rule.block.children;
+			var selector = rule.selector.children.first().id;
 
-			ruleset.block.declarations.eachRight(function(declaration, item) {
-				var property = declaration.property.name;
+			rule.block.children.eachRight(function(declaration, item) {
+				var property = declaration.property;
 
 				if (!MAIN_PROPERTY.hasOwnProperty(property)) {
 					return;
@@ -1888,12 +2300,12 @@ var CSSO = (function(){
 					}
 				}
 
-				if (!shorthand || !shorthand.add(property, declaration.value, declaration.info)) {
+				if (!shorthand || !shorthand.add(property, declaration)) {
 					operation = REPLACE;
 					shorthand = new TRBL(key);
 
-					// if can't parse value ignore it and break shorthand sequence
-					if (!shorthand.add(property, declaration.value, declaration.info)) {
+					// if can't parse value ignore it and break shorthand children
+					if (!shorthand.add(property, declaration)) {
 						lastShortSelector = null;
 						return;
 					}
@@ -1911,7 +2323,7 @@ var CSSO = (function(){
 			});
 
 			return lastShortSelector;
-		};
+		}
 
 		function processShorthands(shortDeclarations, markDeclaration) {
 			shortDeclarations.forEach(function(item) {
@@ -1922,52 +2334,44 @@ var CSSO = (function(){
 				}
 
 				if (item.operation === REPLACE) {
-					item.item.data = markDeclaration({
-						type: 'Declaration',
-						info: shorthand.info,
-						property: shorthand.getProperty(),
-						value: shorthand.getValue(),
-						id: 0,
-						length: 0,
-						fingerprint: null
-					});
+					item.item.data = markDeclaration(shorthand.getDeclaration());
 				} else {
 					item.block.remove(item.item);
 				}
 			});
-		};
+		}
 
 		var exports = function restructBlock(ast, indexer) {
 			var stylesheetMap = {};
 			var shortDeclarations = [];
 
 			walkRulesRight(ast, function(node) {
-				if (node.type !== 'Ruleset') {
+				if (node.type !== 'Rule') {
 					return;
 				}
 
-				var stylesheet = this.stylesheet;
-				var rulesetId = (node.pseudoSignature || '') + '|' + node.selector.selectors.first().id;
-				var rulesetMap;
+				var stylesheet = this.block || this.stylesheet;
+				var ruleId = (node.pseudoSignature || '') + '|' + node.selector.children.first().id;
+				var ruleMap;
 				var shorts;
 
 				if (!stylesheetMap.hasOwnProperty(stylesheet.id)) {
-					rulesetMap = {
+					ruleMap = {
 						lastShortSelector: null
 					};
-					stylesheetMap[stylesheet.id] = rulesetMap;
+					stylesheetMap[stylesheet.id] = ruleMap;
 				} else {
-					rulesetMap = stylesheetMap[stylesheet.id];
+					ruleMap = stylesheetMap[stylesheet.id];
 				}
 
-				if (rulesetMap.hasOwnProperty(rulesetId)) {
-					shorts = rulesetMap[rulesetId];
+				if (ruleMap.hasOwnProperty(ruleId)) {
+					shorts = ruleMap[ruleId];
 				} else {
 					shorts = {};
-					rulesetMap[rulesetId] = shorts;
+					ruleMap[ruleId] = shorts;
 				}
 
-				rulesetMap.lastShortSelector = processRuleset.call(this, node, shorts, shortDeclarations, rulesetMap.lastShortSelector);
+				ruleMap.lastShortSelector = processRule.call(this, node, shorts, shortDeclarations, ruleMap.lastShortSelector);
 			});
 
 			processShorthands(shortDeclarations, indexer.declaration);
@@ -1976,13 +2380,14 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/6-restructBlock
-	modules['/compressor/restructure/6-restructBlock'] = function () {
-		var resolveProperty = require('/utils/names').property;
-		var resolveKeyword = require('/utils/names').keyword;
-		var walkRulesRight = require('/utils/walk').rulesRight;
-		var translate = require('/utils/translate');
+
+	//#region URL: /restructure/6-restructBlock
+	modules['/restructure/6-restructBlock'] = function () {
+		var resolveProperty = require('/css-tree').property;
+		var resolveKeyword = require('/css-tree').keyword;
+		var walkRulesRight = require('/css-tree').walkRulesRight;
+		var translate = require('/css-tree').translate;
+		var fingerprintId = 1;
 		var dontRestructure = {
 			'src': 1 // https://github.com/afelix/csso/issues/50
 		};
@@ -2043,8 +2448,7 @@ var CSSO = (function(){
 		function getPropertyFingerprint(propertyName, declaration, fingerprints) {
 			var realName = resolveProperty(propertyName).name;
 
-			if (realName === 'background' ||
-			   (realName === 'filter' && declaration.value.sequence.first().type === 'Progid')) {
+			if (realName === 'background') {
 				return propertyName + ':' + translate(declaration.value);
 			}
 
@@ -2052,87 +2456,108 @@ var CSSO = (function(){
 			var fingerprint = fingerprints[declarationId];
 
 			if (!fingerprint) {
-				var vendorId = '';
-				var iehack = '';
-				var special = {};
+				switch (declaration.value.type) {
+					case 'Value':
+						var vendorId = '';
+						var iehack = '';
+						var special = {};
+						var raw = false;
 
-				declaration.value.sequence.each(function walk(node) {
-					switch (node.type) {
-						case 'Argument':
-						case 'Value':
-						case 'Braces':
-							node.sequence.each(walk);
-							break;
+						declaration.value.children.each(function walk(node) {
+							switch (node.type) {
+								case 'Value':
+								case 'Brackets':
+								case 'Parentheses':
+									node.children.each(walk);
+									break;
 
-						case 'Identifier':
-							var name = node.name;
+								case 'Raw':
+									raw = true;
+									break;
 
-							if (!vendorId) {
-								vendorId = resolveKeyword(name).vendor;
-							}
+								case 'Identifier':
+									var name = node.name;
 
-							if (/\\[09]/.test(name)) {
-								iehack = RegExp.lastMatch;
-							}
+									if (!vendorId) {
+										vendorId = resolveKeyword(name).vendor;
+									}
 
-							if (realName === 'cursor') {
-								if (CURSOR_SAFE_VALUE.indexOf(name) === -1) {
-									special[name] = true;
-								}
-							} else if (DONT_MIX_VALUE.hasOwnProperty(realName)) {
-								if (DONT_MIX_VALUE[realName].test(name)) {
-									special[name] = true;
-								}
-							}
+									if (/\\[09]/.test(name)) {
+										iehack = RegExp.lastMatch;
+									}
 
-							break;
+									if (realName === 'cursor') {
+										if (CURSOR_SAFE_VALUE.indexOf(name) === -1) {
+											special[name] = true;
+										}
+									} else if (DONT_MIX_VALUE.hasOwnProperty(realName)) {
+										if (DONT_MIX_VALUE[realName].test(name)) {
+											special[name] = true;
+										}
+									}
 
-						case 'Function':
-							var name = node.name;
+									break;
 
-							if (!vendorId) {
-								vendorId = resolveKeyword(name).vendor;
-							}
+								case 'Function':
+									var name = node.name;
 
-							if (name === 'rect') {
-								// there are 2 forms of rect:
-								//   rect(<top>, <right>, <bottom>, <left>) - standart
-								//   rect(<top> <right> <bottom> <left>) – backwards compatible syntax
-								// only the same form values can be merged
-								if (node.arguments.size < 4) {
-									name = 'rect-backward';
-								}
-							}
+									if (!vendorId) {
+										vendorId = resolveKeyword(name).vendor;
+									}
 
-							special[name + '()'] = true;
+									if (name === 'rect') {
+										// there are 2 forms of rect:
+										//   rect(<top>, <right>, <bottom>, <left>) - standart
+										//   rect(<top> <right> <bottom> <left>) – backwards compatible syntax
+										// only the same form values can be merged
+										var hasComma = node.children.some(function(node) {
+											return node.type === 'Operator' && node.value === ',';
+										});
+										if (!hasComma) {
+											name = 'rect-backward';
+										}
+									}
 
-							// check nested tokens too
-							node.arguments.each(walk);
+									special[name + '()'] = true;
 
-							break;
+									// check nested tokens too
+									node.children.each(walk);
 
-						case 'Dimension':
-							var unit = node.unit;
+									break;
 
-							switch (unit) {
-								// is not supported until IE11
-								case 'rem':
+								case 'Dimension':
+									var unit = node.unit;
 
-								// v* units is too buggy across browsers and better
-								// don't merge values with those units
-								case 'vw':
-								case 'vh':
-								case 'vmin':
-								case 'vmax':
-								case 'vm': // IE9 supporting "vm" instead of "vmin".
-									special[unit] = true;
+									switch (unit) {
+										// is not supported until IE11
+										case 'rem':
+
+										// v* units is too buggy across browsers and better
+										// don't merge values with those units
+										case 'vw':
+										case 'vh':
+										case 'vmin':
+										case 'vmax':
+										case 'vm': // IE9 supporting "vm" instead of "vmin".
+											special[unit] = true;
+											break;
+									}
 									break;
 							}
-							break;
-					}
-				});
+						});
 
-				fingerprint = '|' + Object.keys(special).sort() + '|' + iehack + vendorId;
+						fingerprint = raw
+							? '!' + fingerprintId++
+							: '!' + Object.keys(special).sort() + '|' + iehack + vendorId;
+						break;
+
+					case 'Raw':
+						fingerprint = '!' + declaration.value.value;
+						break;
+
+					default:
+						fingerprint = translate(declaration.value);
+				}
 
 				fingerprints[declarationId] = fingerprint;
 			}
@@ -2141,58 +2566,64 @@ var CSSO = (function(){
 		}
 
 		function needless(props, declaration, fingerprints) {
-			var property = resolveProperty(declaration.property.name);
+			var property = resolveProperty(declaration.property);
 
 			if (NEEDLESS_TABLE.hasOwnProperty(property.name)) {
 				var table = NEEDLESS_TABLE[property.name];
 
 				for (var i = 0; i < table.length; i++) {
 					var ppre = getPropertyFingerprint(property.prefix + table[i], declaration, fingerprints);
-					var prev = props[ppre];
+					var prev = props.hasOwnProperty(ppre) ? props[ppre] : null;
 
-					if (prev && (!declaration.value.important || prev.item.data.value.important)) {
+					if (prev && (!declaration.important || prev.item.data.important)) {
 						return prev;
 					}
 				}
 			}
 		}
 
-		function processRuleset(ruleset, item, list, props, fingerprints) {
-			var declarations = ruleset.block.declarations;
+		function processRule(rule, item, list, props, fingerprints) {
+			var declarations = rule.block.children;
 
 			declarations.eachRight(function(declaration, declarationItem) {
-				var property = declaration.property.name;
+				var property = declaration.property;
 				var fingerprint = getPropertyFingerprint(property, declaration, fingerprints);
 				var prev = props[fingerprint];
 
 				if (prev && !dontRestructure.hasOwnProperty(property)) {
-					if (declaration.value.important && !prev.item.data.value.important) {
+					if (declaration.important && !prev.item.data.important) {
 						props[fingerprint] = {
 							block: declarations,
 							item: declarationItem
 						};
 
 						prev.block.remove(prev.item);
-						declaration.info = {
-							primary: declaration.info,
-							merged: prev.item.data.info
-						};
+
+						// TODO: use it when we can refer to several points in source
+						// declaration.loc = {
+						//	 primary: declaration.loc,
+						//	 merged: prev.item.data.loc
+						// };
 					} else {
 						declarations.remove(declarationItem);
-						prev.item.data.info = {
-							primary: prev.item.data.info,
-							merged: declaration.info
-						};
+
+						// TODO: use it when we can refer to several points in source
+						// prev.item.data.loc = {
+						//	 primary: prev.item.data.loc,
+						//	 merged: declaration.loc
+						// };
 					}
 				} else {
 					var prev = needless(props, declaration, fingerprints);
 
 					if (prev) {
 						declarations.remove(declarationItem);
-						prev.item.data.info = {
-							primary: prev.item.data.info,
-							merged: declaration.info
-						};
+
+						// TODO: use it when we can refer to several points in source
+						// prev.item.data.loc = {
+						//	 primary: prev.item.data.loc,
+						//	 merged: declaration.loc
+						// };
 					} else {
 						declaration.fingerprint = fingerprint;
 
@@ -2207,48 +2638,48 @@ var CSSO = (function(){
 			if (declarations.isEmpty()) {
 				list.remove(item);
 			}
-		};
+		}
 
 		var exports = function restructBlock(ast) {
 			var stylesheetMap = {};
 			var fingerprints = Object.create(null);
 
 			walkRulesRight(ast, function(node, item, list) {
-				if (node.type !== 'Ruleset') {
+				if (node.type !== 'Rule') {
 					return;
 				}
 
-				var stylesheet = this.stylesheet;
-				var rulesetId = (node.pseudoSignature || '') + '|' + node.selector.selectors.first().id;
-				var rulesetMap;
+				var stylesheet = this.block || this.stylesheet;
+				var ruleId = (node.pseudoSignature || '') + '|' + node.selector.children.first().id;
+				var ruleMap;
 				var props;
 
 				if (!stylesheetMap.hasOwnProperty(stylesheet.id)) {
-					rulesetMap = {};
-					stylesheetMap[stylesheet.id] = rulesetMap;
+					ruleMap = {};
+					stylesheetMap[stylesheet.id] = ruleMap;
 				} else {
-					rulesetMap = stylesheetMap[stylesheet.id];
+					ruleMap = stylesheetMap[stylesheet.id];
 				}
 
-				if (rulesetMap.hasOwnProperty(rulesetId)) {
-					props = rulesetMap[rulesetId];
+				if (ruleMap.hasOwnProperty(ruleId)) {
+					props = ruleMap[ruleId];
 				} else {
 					props = {};
-					rulesetMap[rulesetId] = props;
+					ruleMap[ruleId] = props;
 				}
 
-				processRuleset.call(this, node, item, list, props, fingerprints);
+				processRule.call(this, node, item, list, props, fingerprints);
 			});
 		};
 
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/7-mergeRuleset
-	modules['/compressor/restructure/7-mergeRuleset'] = function () {
-		var utils = require('/compressor/restructure/utils');
-		var walkRules = require('/utils/walk').rules;
+
+	//#region URL: /restructure/7-mergeRuleset
+	modules['/restructure/7-mergeRuleset'] = function () {
+		var utils = require('/restructure/utils');
+		var walkRules = require('/css-tree').walkRules;
 
 		/*
 			At this step all rules has single simple selector. We try to join by equal
@@ -2262,15 +2693,15 @@ var CSSO = (function(){
 			b { ... }
 		*/
 
-		function processRuleset(node, item, list) {
-			var selectors = node.selector.selectors;
-			var declarations = node.block.declarations;
+		function processRule(node, item, list) {
+			var selectors = node.selector.children;
+			var declarations = node.block.children;
 			var nodeCompareMarker = selectors.first().compareMarker;
 			var skippedCompareMarkers = {};
 
 			list.nextUntil(item.next, function(next, nextItem) {
 				// skip non-ruleset node if safe
-				if (next.type !== 'Ruleset') {
+				if (next.type !== 'Rule') {
 					return utils.unsafeToSkipNode.call(selectors, next);
 				}
 
@@ -2278,8 +2709,8 @@ var CSSO = (function(){
 					return true;
 				}
 
-				var nextFirstSelector = next.selector.selectors.head;
-				var nextDeclarations = next.block.declarations;
+				var nextFirstSelector = next.selector.children.head;
+				var nextDeclarations = next.block.children;
 				var nextCompareMarker = nextFirstSelector.data.compareMarker;
 
 				// if next ruleset has same marked as one of skipped then stop joining
@@ -2325,12 +2756,12 @@ var CSSO = (function(){
 
 				skippedCompareMarkers[nextCompareMarker] = true;
 			});
-		};
+		}
 
-		var exports = function mergeRuleset(ast) {
+		var exports = function mergeRule(ast) {
 			walkRules(ast, function(node, item, list) {
-				if (node.type === 'Ruleset') {
-					processRuleset(node, item, list);
+				if (node.type === 'Rule') {
+					processRule(node, item, list);
 				}
 			});
 		};
@@ -2338,12 +2769,12 @@ var CSSO = (function(){
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /compressor/restructure/8-restructRuleset
-	modules['/compressor/restructure/8-restructRuleset'] = function () {
-		var List = require('/utils/list');
-		var utils = require('/compressor/restructure/utils');
-		var walkRulesRight = require('/utils/walk').rulesRight;
+
+	//#region URL: /restructure/8-restructRuleset
+	modules['/restructure/8-restructRuleset'] = function () {
+		var List = require('/css-tree').List;
+		var walkRulesRight = require('/css-tree').walkRulesRight;
+		var utils = require('/restructure/utils');
 
 		function calcSelectorLength(list) {
 			var length = 0;
@@ -2368,9 +2799,9 @@ var CSSO = (function(){
 			);
 		}
 
-		function processRuleset(node, item, list) {
-			var avoidRulesMerge = this.stylesheet.avoidRulesMerge;
-			var selectors = node.selector.selectors;
+		function processRule(node, item, list) {
+			var avoidRulesMerge = this.block !== null ? this.block.avoidRulesMerge : false;
+			var selectors = node.selector.children;
 			var block = node.block;
 			var disallowDownMarkers = Object.create(null);
 			var allowMergeUp = true;
@@ -2378,11 +2809,11 @@ var CSSO = (function(){
 
 			list.prevUntil(item.prev, function(prev, prevItem) {
 				// skip non-ruleset node if safe
-				if (prev.type !== 'Ruleset') {
+				if (prev.type !== 'Rule') {
 					return utils.unsafeToSkipNode.call(selectors, prev);
 				}
 
-				var prevSelectors = prev.selector.selectors;
+				var prevSelectors = prev.selector.children;
 				var prevBlock = prev.block;
 
 				if (node.pseudoSignature !== prev.pseudoSignature) {
@@ -2399,14 +2830,14 @@ var CSSO = (function(){
 				}
 
 				// try to join by selectors
-				if (allowMergeUp && utils.isEqualLists(prevSelectors, selectors)) {
-					prevBlock.declarations.appendList(block.declarations);
+				if (allowMergeUp && utils.isEqualSelectors(prevSelectors, selectors)) {
+					prevBlock.children.appendList(block.children);
 					list.remove(item);
 					return true;
 				}
 
 				// try to join by properties
-				var diff = utils.compareDeclarations(block.declarations, prevBlock.declarations);
+				var diff = utils.compareDeclarations(block.children, prevBlock.children);
 
 				// console.log(diff.eq, diff.ne1, diff.ne2);
 
@@ -2429,7 +2860,7 @@ var CSSO = (function(){
 
 							if (allowMergeUp && selectorLength < blockLength) {
 								utils.addSelectors(prevSelectors, selectors);
-								block.declarations = new List(diff.ne1);
+								block.children = new List().fromArray(diff.ne1);
 							}
 						} else if (!diff.ne1.length && diff.ne2.length) {
 							// node is subset of prevBlock
@@ -2438,37 +2869,37 @@ var CSSO = (function(){
 
 							if (allowMergeDown && selectorLength < blockLength) {
 								utils.addSelectors(selectors, prevSelectors);
-								prevBlock.declarations = new List(diff.ne2);
+								prevBlock.children = new List().fromArray(diff.ne2);
 							}
 						} else {
 							// diff.ne1.length && diff.ne2.length
 							// extract equal block
 							var newSelector = {
-								type: 'Selector',
-								info: {},
-								selectors: utils.addSelectors(prevSelectors.copy(), selectors)
+								type: 'SelectorList',
+								loc: null,
+								children: utils.addSelectors(prevSelectors.copy(), selectors)
 							};
-							var newBlockLength = calcSelectorLength(newSelector.selectors) + 2; // selectors length + curly braces length
+							var newBlockLength = calcSelectorLength(newSelector.children) + 2; // selectors length + curly braces length
 							var blockLength = calcDeclarationsLength(diff.eq); // declarations length
 
 							// create new ruleset if declarations length greater than
 							// ruleset description overhead
 							if (allowMergeDown && blockLength >= newBlockLength) {
-								var newRuleset = {
-									type: 'Ruleset',
-									info: {},
-									pseudoSignature: node.pseudoSignature,
+								var newRule = {
+									type: 'Rule',
+									loc: null,
 									selector: newSelector,
 									block: {
 										type: 'Block',
-										info: {},
-										declarations: new List(diff.eq)
-									}
+										loc: null,
+										children: new List().fromArray(diff.eq)
+									},
+									pseudoSignature: node.pseudoSignature
 								};
 
-								block.declarations = new List(diff.ne1);
-								prevBlock.declarations = new List(diff.ne2.concat(diff.ne2overrided));
-								list.insert(list.createItem(newRuleset), prevItem);
+								block.children = new List().fromArray(diff.ne1);
+								prevBlock.children = new List().fromArray(diff.ne2.concat(diff.ne2overrided));
+								list.insert(list.createItem(newRule), prevItem);
 								return true;
 							}
 						}
@@ -2489,276 +2920,25 @@ var CSSO = (function(){
 					disallowDownMarkers[data.compareMarker] = true;
 				});
 			});
-		};
-
-		var exports = function restructRuleset(ast) {
-			walkRulesRight(ast, function(node, item, list) {
-				if (node.type === 'Ruleset') {
-					processRuleset.call(this, node, item, list);
-				}
-			});
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /compressor/restructure/prepare
-	modules['/compressor/restructure/prepare'] = function () {
-		var resolveKeyword = require('/utils/names').keyword;
-		var walkRules = require('/utils/walk').rules;
-		var translate = require('/utils/translate');
-		var createDeclarationIndexer = require('/compressor/restructure/prepare/createDeclarationIndexer');
-		var processSelector = require('/compressor/restructure/prepare/processSelector');
-
-		function walk(node, markDeclaration, usageData) {
-			switch (node.type) {
-				case 'Ruleset':
-					node.block.declarations.each(markDeclaration);
-					processSelector(node, usageData);
-					break;
-
-				case 'Atrule':
-					if (node.expression) {
-						node.expression.id = translate(node.expression);
-					}
-
-					// compare keyframe selectors by its values
-					// NOTE: still no clarification about problems with keyframes selector grouping (issue #197)
-					if (resolveKeyword(node.name).name === 'keyframes') {
-						node.block.avoidRulesMerge = true;  /* probably we don't need to prevent those merges for @keyframes
-															   TODO: need to be checked */
-						node.block.rules.each(function(ruleset) {
-							ruleset.selector.selectors.each(function(simpleselector) {
-								simpleselector.compareMarker = simpleselector.id;
-							});
-						});
-					}
-					break;
-			}
-		};
-
-		var exports = function prepare(ast, usageData) {
-			var markDeclaration = createDeclarationIndexer();
-
-			walkRules(ast, function(node) {
-				walk(node, markDeclaration, usageData);
-			});
-
-			return {
-				declaration: markDeclaration
-			};
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /compressor/restructure/prepare/createDeclarationIndexer
-	modules['/compressor/restructure/prepare/createDeclarationIndexer'] = function () {
-		var translate = require('/utils/translate');
-
-		function Index() {
-			this.seed = 0;
-			this.map = Object.create(null);
 		}
 
-		Index.prototype.resolve = function(str) {
-			var index = this.map[str];
-
-			if (!index) {
-				index = ++this.seed;
-				this.map[str] = index;
-			}
-
-			return index;
-		};
-
-		var exports = function createDeclarationIndexer() {
-			var names = new Index();
-			var values = new Index();
-
-			return function markDeclaration(node) {
-				var property = node.property.name;
-				var value = translate(node.value);
-
-				node.id = names.resolve(property) + (values.resolve(value) << 12);
-				node.length = property.length + 1 + value.length;
-
-				return node;
-			};
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /compressor/restructure/prepare/processSelector
-	modules['/compressor/restructure/prepare/processSelector'] = function () {
-		var translate = require('/utils/translate');
-		var specificity = require('/compressor/restructure/prepare/specificity');
-
-		var nonFreezePseudoElements = {
-			'first-letter': true,
-			'first-line': true,
-			'after': true,
-			'before': true
-		};
-		var nonFreezePseudoClasses = {
-			'link': true,
-			'visited': true,
-			'hover': true,
-			'active': true,
-			'first-letter': true,
-			'first-line': true,
-			'after': true,
-			'before': true
-		};
-
-		var exports = function freeze(node, usageData) {
-			var pseudos = Object.create(null);
-			var hasPseudo = false;
-
-			node.selector.selectors.each(function(simpleSelector) {
-				var tagName = '*';
-				var scope = 0;
-
-				simpleSelector.sequence.some(function(node) {
-					switch (node.type) {
-						case 'Class':
-							if (usageData && usageData.scopes) {
-								var classScope = usageData.scopes[node.name] || 0;
-
-								if (scope !== 0 && classScope !== scope) {
-									throw new Error('Selector can\'t has classes from different scopes: ' + translate(simpleSelector));
-								}
-
-								scope = classScope;
-							}
-							break;
-
-						case 'PseudoClass':
-							if (!nonFreezePseudoClasses.hasOwnProperty(node.name)) {
-								pseudos[node.name] = true;
-								hasPseudo = true;
-							}
-							break;
-
-						case 'PseudoElement':
-							if (!nonFreezePseudoElements.hasOwnProperty(node.name)) {
-								pseudos[node.name] = true;
-								hasPseudo = true;
-							}
-							break;
-
-						case 'FunctionalPseudo':
-							pseudos[node.name] = true;
-							hasPseudo = true;
-							break;
-
-						case 'Negation':
-							pseudos.not = true;
-							hasPseudo = true;
-							break;
-
-						case 'Identifier':
-							tagName = node.name;
-							break;
-
-						case 'Attribute':
-							if (node.flags) {
-								pseudos['[' + node.flags + ']'] = true;
-								hasPseudo = true;
-							}
-							break;
-
-						case 'Combinator':
-							tagName = '*';
-							break;
-					}
-				});
-
-				simpleSelector.id = translate(simpleSelector);
-				simpleSelector.compareMarker = specificity(simpleSelector).toString();
-
-				if (scope) {
-					simpleSelector.compareMarker += ':' + scope;
-				}
-
-				if (tagName !== '*') {
-					simpleSelector.compareMarker += ',' + tagName;
+		var exports = function restructRule(ast) {
+			walkRulesRight(ast, function(node, item, list) {
+				if (node.type === 'Rule') {
+					processRule.call(this, node, item, list);
 				}
 			});
-
-			if (hasPseudo) {
-				node.pseudoSignature = Object.keys(pseudos).sort().join(',');
-			}
 		};
 
 		return exports;
 	};
 	//#endregion
 
-	//#region URL: /compressor/restructure/prepare/specificity
-	modules['/compressor/restructure/prepare/specificity'] = function () {
-		var exports = function specificity(simpleSelector) {
-			var A = 0;
-			var B = 0;
-			var C = 0;
-
-			simpleSelector.sequence.each(function walk(data) {
-				switch (data.type) {
-					case 'SimpleSelector':
-					case 'Negation':
-						data.sequence.each(walk);
-						break;
-
-					case 'Id':
-						A++;
-						break;
-
-					case 'Class':
-					case 'Attribute':
-					case 'FunctionalPseudo':
-						B++;
-						break;
-
-					case 'Identifier':
-						if (data.name !== '*') {
-							C++;
-						}
-						break;
-
-					case 'PseudoElement':
-						C++;
-						break;
-
-					case 'PseudoClass':
-						var name = data.name.toLowerCase();
-						if (name === 'before' ||
-							name === 'after' ||
-							name === 'first-line' ||
-							name === 'first-letter') {
-							C++;
-						} else {
-							B++;
-						}
-						break;
-				}
-			});
-
-			return [A, B, C];
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /compressor/restructure/utils
-	modules['/compressor/restructure/utils'] = function () {
+	//#region URL: /restructure/utils
+	modules['/restructure/utils'] = function () {
 		var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-		function isEqualLists(a, b) {
+		function isEqualSelectors(a, b) {
 			var cursor1 = a.head;
 			var cursor2 = b.head;
 
@@ -2801,7 +2981,7 @@ var CSSO = (function(){
 				var data = cursor.data;
 
 				if (data.fingerprint) {
-					fingerprints[data.fingerprint] = data.value.important;
+					fingerprints[data.fingerprint] = data.important;
 				}
 
 				if (declarations2hash[data.id]) {
@@ -2819,7 +2999,7 @@ var CSSO = (function(){
 					// if declarations1 has overriding declaration, this is not a difference
 					// but take in account !important - prev should be equal or greater than follow
 					if (hasOwnProperty.call(fingerprints, data.fingerprint) &&
-						Number(fingerprints[data.fingerprint]) >= Number(data.value.important)) {
+						Number(fingerprints[data.fingerprint]) >= Number(data.important)) {
 						result.ne2overrided.push(data);
 					} else {
 						result.ne2.push(data);
@@ -2867,22 +3047,20 @@ var CSSO = (function(){
 		// test node can't to be skipped
 		function unsafeToSkipNode(node) {
 			switch (node.type) {
-				case 'Ruleset':
+				case 'Rule':
 					// unsafe skip ruleset with selector similarities
-					return hasSimilarSelectors(node.selector.selectors, this);
+					return hasSimilarSelectors(node.selector.children, this);
 
 				case 'Atrule':
 					// can skip at-rules with blocks
 					if (node.block) {
-						// non-stylesheet blocks are safe to skip since have no selectors
-						if (node.block.type !== 'StyleSheet') {
-							return false;
-						}
-
 						// unsafe skip at-rule if block contains something unsafe to skip
-						return node.block.rules.some(unsafeToSkipNode, this);
+						return node.block.children.some(unsafeToSkipNode, this);
 					}
 					break;
+
+				case 'Declaration':
+					return false;
 			}
 
 			// unsafe by default
@@ -2890,7 +3068,7 @@ var CSSO = (function(){
 		}
 
 		var exports = {
-			isEqualLists: isEqualLists,
+			isEqualSelectors: isEqualSelectors,
 			isEqualDeclarations: isEqualDeclarations,
 			compareDeclarations: compareDeclarations,
 			addSelectors: addSelectors,
@@ -2902,15 +3080,223 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /compressor/usage
-	modules['/compressor/usage'] = function () {
+	//#region URL: /compress
+	modules['/compress'] = function () {
+		var List = require('/css-tree').List;
+		var clone = require('/css-tree').clone;
+		var usageUtils = require('/usage');
+		var clean = require('/clean');
+		var replace = require('/replace');
+		var restructureBlock = require('/restructure');
+		var walkRules = require('/css-tree').walkRules;
+
+		function readChunk(children, specialComments) {
+			var buffer = new List();
+			var nonSpaceTokenInBuffer = false;
+			var protectedComment;
+
+			children.nextUntil(children.head, function(node, item, list) {
+				if (node.type === 'Comment') {
+					if (!specialComments || node.value.charAt(0) !== '!') {
+						list.remove(item);
+						return;
+					}
+
+					if (nonSpaceTokenInBuffer || protectedComment) {
+						return true;
+					}
+
+					list.remove(item);
+					protectedComment = node;
+					return;
+				}
+
+				if (node.type !== 'WhiteSpace') {
+					nonSpaceTokenInBuffer = true;
+				}
+
+				buffer.insert(list.remove(item));
+			});
+
+			return {
+				comment: protectedComment,
+				stylesheet: {
+					type: 'StyleSheet',
+					loc: null,
+					children: buffer
+				}
+			};
+		}
+
+		function compressChunk(ast, firstAtrulesAllowed, usageData, num/*BT-, logger*/) {
+			/*BT-
+			logger('Compress block #' + num, null, true);
+			*/
+
+			var seed = 1;
+
+			if (ast.type === 'StyleSheet') {
+				ast.firstAtrulesAllowed = firstAtrulesAllowed;
+				ast.id = seed++;
+			}
+
+			walkRules(ast, function markScopes(node) {
+				if (node.type === 'Atrule' && node.block !== null) {
+					node.block.id = seed++;
+				}
+			});
+			/*BT-
+			logger('init', ast);
+			*/
+
+			// remove redundant
+			clean(ast, usageData);
+			/*BT-
+			logger('clean', ast);
+			*/
+
+			// replace nodes for shortened forms
+			replace(ast, usageData);
+			/*BT-
+			logger('replace', ast);
+			*/
+
+			return ast;
+		}
+
+		function getCommentsOption(options) {
+			var comments = 'comments' in options ? options.comments : 'exclamation';
+
+			if (typeof comments === 'boolean') {
+				comments = comments ? 'exclamation' : false;
+			} else if (comments !== 'exclamation' && comments !== 'first-exclamation') {
+				comments = false;
+			}
+
+			return comments;
+		}
+
+		function getRestructureOption(options) {
+			return 'restructure' in options ? options.restructure :
+				   'restructuring' in options ? options.restructuring :
+				   true;
+		}
+
+		function wrapBlock(block) {
+			return new List().appendData({
+				type: 'Rule',
+				selector: {
+					type: 'SelectorList',
+					children: new List().appendData({
+						type: 'Selector',
+						children: new List().appendData({
+							type: 'Identifier',
+							name: 'x'
+						})
+					})
+				},
+				block: block
+			});
+		}
+
+		var exports = function compress(ast, options) {
+			ast = ast || { type: 'StyleSheet', loc: null, children: new List() };
+			options = options || {};
+
+			/*BT-
+			var logger = typeof options.logger === 'function' ? options.logger : function() {};
+			*/
+			var specialComments = getCommentsOption(options);
+			var restructuring = getRestructureOption(options);
+			var firstAtrulesAllowed = true;
+			var usageData = false;
+			var inputRules;
+			var outputRules = new List();
+			var chunk;
+			var chunkNum = 1;
+			var chunkRules;
+
+			if (options.clone) {
+				ast = clone(ast);
+			}
+
+			if (ast.type === 'StyleSheet') {
+				inputRules = ast.children;
+				ast.children = outputRules;
+			} else {
+				inputRules = wrapBlock(ast);
+			}
+
+			if (options.usage) {
+				usageData = usageUtils.buildIndex(options.usage);
+			}
+
+			do {
+				chunk = readChunk(inputRules, Boolean(specialComments));
+
+				compressChunk(chunk.stylesheet, firstAtrulesAllowed, usageData, chunkNum++/*BT-, logger*/);
+
+				// structure optimisations
+				if (restructuring) {
+					restructureBlock(chunk.stylesheet, usageData/*BT-, logger*/);
+				}
+
+				chunkRules = chunk.stylesheet.children;
+
+				if (chunk.comment) {
+					// add \n before comment if there is another content in outputRules
+					if (!outputRules.isEmpty()) {
+						outputRules.insert(List.createItem({
+							type: 'Raw',
+							value: '\n'
+						}));
+					}
+
+					outputRules.insert(List.createItem(chunk.comment));
+
+					// add \n after comment if chunk is not empty
+					if (!chunkRules.isEmpty()) {
+						outputRules.insert(List.createItem({
+							type: 'Raw',
+							value: '\n'
+						}));
+					}
+				}
+
+				if (firstAtrulesAllowed && !chunkRules.isEmpty()) {
+					var lastRule = chunkRules.last();
+
+					if (lastRule.type !== 'Atrule' ||
+					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
+						firstAtrulesAllowed = false;
+					}
+				}
+
+				if (specialComments !== 'exclamation') {
+					specialComments = false;
+				}
+
+				outputRules.appendList(chunkRules);
+			} while (!inputRules.isEmpty());
+
+			return {
+				ast: ast
+			};
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /usage
+	modules['/usage'] = function () {
 		var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 		function buildMap(list, caseInsensitive) {
 			var map = Object.create(null);
 
 			if (!Array.isArray(list)) {
-				return false;
+				return null;
 			}
 
 			for (var i = 0; i < list.length; i++) {
@@ -2924,6 +3310,28 @@ var CSSO = (function(){
 			}
 
 			return map;
+		}
+
+		function buildList(data) {
+			if (!data) {
+				return null;
+			}
+
+			var tags = buildMap(data.tags, true);
+			var ids = buildMap(data.ids);
+			var classes = buildMap(data.classes);
+
+			if (tags === null &&
+				ids === null &&
+				classes === null) {
+				return null;
+			}
+
+			return {
+				tags: tags,
+				ids: ids,
+				classes: classes
+			};
 		}
 
 		function buildIndex(data) {
@@ -2952,9 +3360,8 @@ var CSSO = (function(){
 			}
 
 			return {
-				tags: buildMap(data.tags, true),
-				ids: buildMap(data.ids),
-				classes: buildMap(data.classes),
+				whitelist: buildList(data),
+				blacklist: buildList(data.blacklist),
 				scopes: scopes
 			};
 		}
@@ -2967,221 +3374,12163 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /parser
-	modules['/parser'] = function () {
+	/*!
+	* CSSTree v1.0.0 Alpha 19
+	* https://github.com/csstree/csstree
+	*
+	* Copyright 2016-2017, Roman Dvornov
+	* Released under the MIT License
+	*/
+	//#region URL: /css-tree
+	modules['/css-tree'] = function () {
 		'use strict';
 
-		var TokenType = require('/parser/const').TokenType;
-		var Scanner = require('/parser/scanner');
-		var List = require('/utils/list');
-		var needPositions;
-		var filename;
-		var scanner;
+		var exports = require('/css-tree/syntax/default');
 
-		var SCOPE_ATRULE_EXPRESSION = 1;
-		var SCOPE_SELECTOR = 2;
-		var SCOPE_VALUE = 3;
+		return exports;
+	};
+	//#endregion
 
-		var specialFunctions = {};
-		specialFunctions[SCOPE_ATRULE_EXPRESSION] = {
-			url: getUri
-		};
-		specialFunctions[SCOPE_SELECTOR] = {
-			url: getUri,
-			not: getNotFunction
-		};
-		specialFunctions[SCOPE_VALUE] = {
-			url: getUri,
-			expression: getOldIEExpression,
-			var: getVarFunction
+	//#region URL: /css-tree/data
+	modules['/css-tree/data'] = function () {
+		var mdnProperties = require('/css-tree/data/mdn-data-properties');
+		var mdnSyntaxes = require('/css-tree/data/mdn-data-syntaxes');
+		var patch = require('/css-tree/data/patch');
+		var data = {
+			properties: {},
+			types: {}
 		};
 
-		var initialContext = {
-			stylesheet: getStylesheet,
-			atrule: getAtrule,
-			atruleExpression: getAtruleExpression,
-			ruleset: getRuleset,
-			selector: getSelector,
-			simpleSelector: getSimpleSelector,
-			block: getBlock,
-			declaration: getDeclaration,
-			value: getValue
-		};
+		function normalizeSyntax(syntax) {
+			return syntax
+				.replace(/&lt;/g, '<')
+				.replace(/&gt;/g, '>')
+				.replace(/&nbsp;/g, ' ')
+				.replace(/&amp;/g, '&');
+		}
 
-		var blockMode = {
-			'declaration': true,
-			'property': true
-		};
+		// apply patch
+		for (var key in patch.properties) {
+			if (key in mdnProperties) {
+				if (patch.properties[key]) {
+					mdnProperties[key].syntax = patch.properties[key].syntax;
+				} else {
+					delete mdnProperties[key];
+				}
+			} else {
+				mdnProperties[key] = patch.properties[key];
+			}
+		}
 
-		function parseError(message) {
-			var error = new Error(message);
-			var offset = 0;
-			var line = 1;
-			var column = 1;
-			var lines;
+		for (var key in patch.syntaxes) {
+			if (patch.syntaxes[key].syntax) {
+				mdnSyntaxes[key] = patch.syntaxes[key].syntax;
+			} else {
+				delete mdnSyntaxes[key];
+			}
+		}
 
-			if (scanner.token !== null) {
-				offset = scanner.token.offset;
-				line = scanner.token.line;
-				column = scanner.token.column;
-			} else if (scanner.prevToken !== null) {
-				lines = scanner.prevToken.value.trimRight();
-				offset = scanner.prevToken.offset + lines.length;
-				lines = lines.split(/\n|\r\n?|\f/);
-				line = scanner.prevToken.line + lines.length - 1;
-				column = lines.length > 1
-					? lines[lines.length - 1].length + 1
-					: scanner.prevToken.column + lines[lines.length - 1].length;
+		// normalize source mdnProperties syntaxes, since it uses html token
+		for (var key in mdnProperties) {
+			data.properties[key] = normalizeSyntax(mdnProperties[key].syntax);
+		}
+
+		for (var key in mdnSyntaxes) {
+			data.types[key] = normalizeSyntax(mdnSyntaxes[key]);
+		}
+
+		return data;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/data/mdn-data-properties
+	modules['/css-tree/data/mdn-data-properties'] = function () {
+		var exports = {
+			"--*": {
+				"syntax": "<declaration-value>",
+				"media": "all",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Variables"
+				],
+				"initial": "seeProse",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedWithVarsSubstituted",
+				"order": "perGrammar",
+				"status": "experimental"
+			},
+			"-ms-overflow-style": {
+				"syntax": "auto | none | scrollbar | -ms-autohiding-scrollbar",
+				"media": "interactive",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Microsoft Extensions"
+				],
+				"initial": "auto",
+				"appliesto": "nonReplacedBlockAndInlineBlockElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-appearance": {
+				"syntax": "none | button | button-arrow-down | button-arrow-next | button-arrow-previous | button-arrow-up | button-bevel | button-focus | caret | checkbox | checkbox-container | checkbox-label | checkmenuitem | dualbutton | groupbox | listbox | listitem | menuarrow | menubar | menucheckbox | menuimage | menuitem | menuitemtext | menulist | menulist-button | menulist-text | menulist-textfield | menupopup | menuradio | menuseparator | meterbar | meterchunk | progressbar | progressbar-vertical | progresschunk | progresschunk-vertical | radio | radio-container | radio-label | radiomenuitem | range | range-thumb | resizer | resizerpanel | scale-horizontal | scalethumbend | scalethumb-horizontal | scalethumbstart | scalethumbtick | scalethumb-vertical | scale-vertical | scrollbarbutton-down | scrollbarbutton-left | scrollbarbutton-right | scrollbarbutton-up | scrollbarthumb-horizontal | scrollbarthumb-vertical | scrollbartrack-horizontal | scrollbartrack-vertical | searchfield | separator | sheet | spinner | spinner-downbutton | spinner-textfield | spinner-upbutton | splitter | statusbar | statusbarpanel | tab | tabpanel | tabpanels | tab-scroll-arrow-back | tab-scroll-arrow-forward | textfield | textfield-multiline | toolbar | toolbarbutton | toolbarbutton-dropdown | toolbargripper | toolbox | tooltip | treeheader | treeheadercell | treeheadersortarrow | treeitem | treeline | treetwisty | treetwistyopen | treeview | -moz-mac-unified-toolbar | -moz-win-borderless-glass | -moz-win-browsertabbar-toolbox | -moz-win-communicationstext | -moz-win-communications-toolbox | -moz-win-exclude-glass | -moz-win-glass | -moz-win-mediatext | -moz-win-media-toolbox | -moz-window-button-box | -moz-window-button-box-maximized | -moz-window-button-close | -moz-window-button-maximize | -moz-window-button-minimize | -moz-window-button-restore | -moz-window-frame-bottom | -moz-window-frame-left | -moz-window-frame-right | -moz-window-titlebar | -moz-window-titlebar-maximized",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "noneButOverriddenInUserAgentCSS",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-binding": {
+				"syntax": "<url> | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElementsExceptGeneratedContentOrPseudoElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-border-bottom-colors": {
+				"syntax": "[ <color> ]* <color> | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-border-left-colors": {
+				"syntax": "[ <color> ]* <color> | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-border-right-colors": {
+				"syntax": "[ <color> ]* <color> | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-border-top-colors": {
+				"syntax": "[ <color> ]* <color> | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-float-edge": {
+				"syntax": "border-box | content-box | margin-box | padding-box",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "content-box",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-force-broken-image-icon": {
+				"syntax": "<integer>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "0",
+				"appliesto": "images",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-image-region": {
+				"syntax": "<shape> | auto",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "auto",
+				"appliesto": "xulImageElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-orient": {
+				"syntax": "inline | block | horizontal | vertical",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "inline",
+				"appliesto": "anyElementEffectOnProgressAndMeter",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-outline-radius": {
+				"syntax": "<outline-radius>{1,4} [ / <outline-radius>{1,4} ]?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"-moz-outline-radius-topleft",
+					"-moz-outline-radius-topright",
+					"-moz-outline-radius-bottomright",
+					"-moz-outline-radius-bottomleft"
+				],
+				"percentages": [
+					"-moz-outline-radius-topleft",
+					"-moz-outline-radius-topright",
+					"-moz-outline-radius-bottomright",
+					"-moz-outline-radius-bottomleft"
+				],
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": [
+					"-moz-outline-radius-topleft",
+					"-moz-outline-radius-topright",
+					"-moz-outline-radius-bottomright",
+					"-moz-outline-radius-bottomleft"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"-moz-outline-radius-topleft",
+					"-moz-outline-radius-topright",
+					"-moz-outline-radius-bottomright",
+					"-moz-outline-radius-bottomleft"
+				],
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-outline-radius-bottomleft": {
+				"syntax": "<outline-radius>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "yes",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-outline-radius-bottomright": {
+				"syntax": "<outline-radius>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "yes",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-outline-radius-topleft": {
+				"syntax": "<outline-radius>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "yes",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-outline-radius-topright": {
+				"syntax": "<outline-radius>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "yes",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-stack-sizing": {
+				"syntax": "ignore | stretch-to-fit",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "stretch-to-fit",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-text-blink": {
+				"syntax": "none | blink",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-user-focus": {
+				"syntax": "ignore | normal | select-after | select-before | select-menu | select-same | select-all | none",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-user-input": {
+				"syntax": "auto | none | enabled | disabled",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-user-modify": {
+				"syntax": "read-only | read-write | write-only",
+				"media": "interactive",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "read-only",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-moz-window-shadow": {
+				"syntax": "default | menu | tooltip | sheet | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "default",
+				"appliesto": "allElementsCreatingNativeWindows",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-border-before": {
+				"syntax": "<'border-width'> || <'border-style'> || <'color'>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": [
+					"-webkit-border-before-width"
+				],
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-border-before-color": {
+				"syntax": "<'color'>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "computedColor",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-border-before-style": {
+				"syntax": "<'border-style'>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-border-before-width": {
+				"syntax": "<'border-width'>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthZeroIfBorderStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-box-reflect": {
+				"syntax": "[ above | below | right | left ]? <length>? <image>?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-mask": {
+				"syntax": "<mask-image> [ <mask-repeat> || <mask-attachment> || <mask-position> || <mask-origin> || <mask-clip> ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": [
+					"-webkit-mask-image",
+					"-webkit-mask-repeat",
+					"-webkit-mask-attachment",
+					"-webkit-mask-position",
+					"-webkit-mask-origin",
+					"-webkit-mask-clip"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"-webkit-mask-image",
+					"-webkit-mask-repeat",
+					"-webkit-mask-attachment",
+					"-webkit-mask-position",
+					"-webkit-mask-origin",
+					"-webkit-mask-clip"
+				],
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-attachment": {
+				"syntax": "<attachment> [, <attachment> ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "scroll",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-clip": {
+				"syntax": "<clip-style> [, <clip-style> ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "border",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-composite": {
+				"syntax": "<composite-style> [, <composite-style> ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "source-over",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-image": {
+				"syntax": "<mask-image> [, <mask-image> ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "absoluteURIOrNone",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-origin": {
+				"syntax": "[ padding | border | content ] [, [ border | padding | content ] ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "padding",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-position": {
+				"syntax": "<mask-position>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToSizeOfElement",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "0% 0%",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOrPercentage",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-position-x": {
+				"syntax": "[ <length-percentage> | left | center | right ]#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToSizeOfElement",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "0%",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOrPercentage",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-position-y": {
+				"syntax": "[ <length-percentage> | top | center | bottom ]#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToSizeOfElement",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "0%",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOrPercentage",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-repeat": {
+				"syntax": "<repeat-style> [, <repeat-style> ]*",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "repeat",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-repeat-x": {
+				"syntax": "repeat | no-repeat | space | round",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "repeat",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-mask-repeat-y": {
+				"syntax": "repeat | no-repeat | space | round",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "repeat",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "nonstandard"
+			},
+			"-webkit-tap-highlight-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "black",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-text-fill-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-text-stroke": {
+				"syntax": "<length> || <color>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": [
+					"-webkit-text-stroke-width",
+					"-webkit-text-stroke-color"
+				],
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": [
+					"-webkit-text-stroke-width",
+					"-webkit-text-stroke-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"-webkit-text-stroke-width",
+					"-webkit-text-stroke-color"
+				],
+				"order": "canonicalOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-text-stroke-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-text-stroke-width": {
+				"syntax": "<length>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "absoluteLength",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"-webkit-touch-callout": {
+				"syntax": "default | none",
+				"groups": [
+					"WebKit Extensions"
+				],
+				"status": "nonstandard"
+			},
+			"align-content": {
+				"syntax": "flex-start | flex-end | center | space-between | space-around | space-evenly | stretch",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "stretch",
+				"appliesto": "multilineFlexContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"align-items": {
+				"syntax": "flex-start | flex-end | center | baseline | stretch",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "stretch",
+				"appliesto": "flexContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"align-self": {
+				"syntax": "auto | flex-start | flex-end | center | baseline | stretch",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "auto",
+				"appliesto": "flexItemsAndInFlowPseudos",
+				"computed": "autoOnAbsolutelyPositionedElementsValueOfAlignItemsOnParent",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"all": {
+				"syntax": "initial | inherit | unset",
+				"media": "noPracticalMedia",
+				"inherited": false,
+				"animationType": "eachOfShorthandPropertiesExceptUnicodeBiDiAndDirection",
+				"percentages": "no",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "noPracticalInitialValue",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedAppliesToEachProperty",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation": {
+				"syntax": "<single-animation>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": [
+					"animation-name",
+					"animation-duration",
+					"animation-timing-function",
+					"animation-delay",
+					"animation-iteration-count",
+					"animation-direction",
+					"animation-fill-mode",
+					"animation-play-state"
+				],
+				"appliesto": "allElementsAndPseudos",
+				"computed": [
+					"animation-name",
+					"animation-duration",
+					"animation-timing-function",
+					"animation-delay",
+					"animation-direction",
+					"animation-iteration-count",
+					"animation-fill-mode",
+					"animation-play-state"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"animation-delay": {
+				"syntax": "<time>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "0s",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-direction": {
+				"syntax": "<single-animation-direction>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "normal",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-duration": {
+				"syntax": "<time>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "0s",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-fill-mode": {
+				"syntax": "<single-animation-fill-mode>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "none",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-iteration-count": {
+				"syntax": "<single-animation-iteration-count>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "1",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-name": {
+				"syntax": "[ none | <keyframes-name> ]#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "none",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-play-state": {
+				"syntax": "<single-animation-play-state>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "running",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"animation-timing-function": {
+				"syntax": "<single-timing-function>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Animations"
+				],
+				"initial": "ease",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"appearance": {
+				"syntax": "auto | none",
+				"media": "all",
+				"inherited": "no",
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "As specified",
+				"order": "per grammar",
+				"status": "experimental"
+			},
+			"azimuth": {
+				"syntax": "<angle> | [ [ left-side | far-left | left | center-left | center | center-right | right | far-right | right-side ] || behind ] | leftwards | rightwards",
+				"media": "aural",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Speech"
+				],
+				"initial": "center",
+				"appliesto": "allElements",
+				"computed": "normalizedAngle",
+				"order": "orderOfAppearance",
+				"status": "obsolete"
+			},
+			"backdrop-filter": {
+				"syntax": "none | <filter-function-list>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "filterList",
+				"percentages": "no",
+				"groups": [
+					"Filter Effects"
+				],
+				"initial": "none",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"backface-visibility": {
+				"syntax": "visible | hidden",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "visible",
+				"appliesto": "transformableElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"background": {
+				"syntax": "[ <bg-layer> , ]* <final-bg-layer>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"background-color",
+					"background-image",
+					"background-clip",
+					"background-position",
+					"background-size",
+					"background-repeat",
+					"background-attachment"
+				],
+				"percentages": [
+					"background-position",
+					"background-size"
+				],
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"background-image",
+					"background-position",
+					"background-size",
+					"background-repeat",
+					"background-origin",
+					"background-clip",
+					"background-attachment",
+					"background-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"background-image",
+					"background-position",
+					"background-size",
+					"background-repeat",
+					"background-origin",
+					"background-clip",
+					"background-attachment",
+					"background-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-attachment": {
+				"syntax": "<attachment>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "scroll",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-blend-mode": {
+				"syntax": "<blend-mode>#",
+				"media": "none",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Compositing and Blending"
+				],
+				"initial": "normal",
+				"appliesto": "allElementsSVGContainerGraphicsAndGraphicsReferencingElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-clip": {
+				"syntax": "<box>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "border-box",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "transparent",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-image": {
+				"syntax": "<bg-image>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedURIsAbsolute",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-origin": {
+				"syntax": "<box>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "padding-box",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-position": {
+				"syntax": "<position>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "repeatableList simpleList lpc",
+				"percentages": "referToSizeOfBackgroundPositioningAreaMinusBackgroundImageSize",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "0% 0%",
+				"appliesto": "allElements",
+				"computed": "listEachItemTwoKeywordsOriginOffsets",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-position-x": {
+				"syntax": "[ center | [ left | right | x-start | x-end ]? <length-percentage>? ]#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToWidthOfBackgroundPositioningAreaMinusBackgroundImageHeight",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "left",
+				"appliesto": "allElements",
+				"computed": "listEachItemConsistingOfAbsoluteLengthPercentageAndOrigin",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"background-position-y": {
+				"syntax": "[ center | [ top | bottom | y-start | y-end ]? <length-percentage>? ]#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToHeightOfBackgroundPositioningAreaMinusBackgroundImageHeight",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "top",
+				"appliesto": "allElements",
+				"computed": "listEachItemConsistingOfAbsoluteLengthPercentageAndOrigin",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"background-repeat": {
+				"syntax": "<repeat-style>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "repeat",
+				"appliesto": "allElements",
+				"computed": "listEachItemHasTwoKeywordsOnePerDimension",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"background-size": {
+				"syntax": "<bg-size>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "repeatableList simpleList lpc keywords",
+				"percentages": "relativeToBackgroundPositioningArea",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "auto auto",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"block-size": {
+				"syntax": "<'width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "blockSizeOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "auto",
+				"appliesto": "sameAsWidthAndHeight",
+				"computed": "sameAsWidthAndHeight",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border": {
+				"syntax": "<br-width> || <br-style> || <color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-color",
+					"border-style",
+					"border-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-width",
+					"border-style",
+					"border-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-width",
+					"border-style",
+					"border-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-block-end": {
+				"syntax": "<'border-width'> || <'border-style'> || <'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-end-color": {
+				"syntax": "<'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "computedColor",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-end-style": {
+				"syntax": "<'border-style'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-end-width": {
+				"syntax": "<'border-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthZeroIfBorderStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-start": {
+				"syntax": "<'border-width'> || <'border-style'> || <'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-start-color": {
+				"syntax": "<'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "computedColor",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-start-style": {
+				"syntax": "<'border-style'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-block-start-width": {
+				"syntax": "<'border-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthZeroIfBorderStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-bottom": {
+				"syntax": "<br-width> || <br-style> || <color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-bottom-color",
+					"border-bottom-style",
+					"border-bottom-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-bottom-width",
+					"border-bottom-style",
+					"border-bottom-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-bottom-width",
+					"border-bottom-style",
+					"border-bottom-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-bottom-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-bottom-left-radius": {
+				"syntax": "<length-percentage>{1,2}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToDimensionOfBorderBox",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "0",
+				"appliesto": "allElementsUAsNotRequiredWhenCollapse",
+				"computed": "twoAbsoluteLengthOrPercentages",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-bottom-right-radius": {
+				"syntax": "<length-percentage>{1,2}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToDimensionOfBorderBox",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "0",
+				"appliesto": "allElementsUAsNotRequiredWhenCollapse",
+				"computed": "twoAbsoluteLengthOrPercentages",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-bottom-style": {
+				"syntax": "<br-style>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-bottom-width": {
+				"syntax": "<br-width>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOr0IfBorderBottomStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-collapse": {
+				"syntax": "collapse | separate",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Table"
+				],
+				"initial": "separate",
+				"appliesto": "tableElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-color": {
+				"syntax": "<color>{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-bottom-color",
+					"border-left-color",
+					"border-right-color",
+					"border-top-color"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-top-color",
+					"border-right-color",
+					"border-bottom-color",
+					"border-left-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-bottom-color",
+					"border-left-color",
+					"border-right-color",
+					"border-top-color"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-image": {
+				"syntax": "<'border-image-source'> || <'border-image-slice'> [ / <'border-image-width'> | / <'border-image-width'>? / <'border-image-outset'> ]? || <'border-image-repeat'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": [
+					"border-image-slice",
+					"border-image-width"
+				],
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-image-source",
+					"border-image-slice",
+					"border-image-width",
+					"border-image-outset",
+					"border-image-repeat"
+				],
+				"appliesto": [
+					"border-image-outset",
+					"border-image-repeat",
+					"border-image-slice",
+					"border-image-source",
+					"border-image-width"
+				],
+				"computed": [
+					"border-image-outset",
+					"border-image-repeat",
+					"border-image-slice",
+					"border-image-source",
+					"border-image-width"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-image-outset": {
+				"syntax": "[ <length> | <number> ]{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "0s",
+				"appliesto": "allElementsExceptTableElementsWhenCollapse",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-image-repeat": {
+				"syntax": "[ stretch | repeat | round | space ]{1,2}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "stretch",
+				"appliesto": "allElementsExceptTableElementsWhenCollapse",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-image-slice": {
+				"syntax": "<number-percentage>{1,4} && fill?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToSizeOfBorderImage",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "100%",
+				"appliesto": "allElementsExceptTableElementsWhenCollapse",
+				"computed": "oneToFourPercentagesOrAbsoluteLengthsPlusFill",
+				"order": "percentagesOrLengthsFollowedByFill",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-image-source": {
+				"syntax": "none | <image>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "none",
+				"appliesto": "allElementsExceptTableElementsWhenCollapse",
+				"computed": "noneOrImageWithAbsoluteURI",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-image-width": {
+				"syntax": "[ <length-percentage> | <number> | auto ]{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToWidthOrHeightOfBorderImageArea",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "1",
+				"appliesto": "allElementsExceptTableElementsWhenBorderCollapseCollapse",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-inline-end": {
+				"syntax": "<'border-width'> || <'border-style'> || <'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-end-color": {
+				"syntax": "<'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "computedColor",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-end-style": {
+				"syntax": "<'border-style'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-end-width": {
+				"syntax": "<'border-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthZeroIfBorderStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-start": {
+				"syntax": "<'border-width'> || <'border-style'> || <'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-width",
+					"border-style",
+					"color"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-start-color": {
+				"syntax": "<'color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "computedColor",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-start-style": {
+				"syntax": "<'border-style'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-inline-start-width": {
+				"syntax": "<'border-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthZeroIfBorderStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-left": {
+				"syntax": "<br-width> || <br-style> || <color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-left-color",
+					"border-left-style",
+					"border-left-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-left-width",
+					"border-left-style",
+					"border-left-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-left-width",
+					"border-left-style",
+					"border-left-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-left-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-left-style": {
+				"syntax": "<br-style>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-left-width": {
+				"syntax": "<br-width>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOr0IfBorderLeftStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-radius": {
+				"syntax": "<length-percentage>{1,4} [ / <length-percentage>{1,4} ]?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-top-left-radius",
+					"border-top-right-radius",
+					"border-bottom-right-radius",
+					"border-bottom-left-radius"
+				],
+				"percentages": "referToDimensionOfBorderBox",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-top-left-radius",
+					"border-top-right-radius",
+					"border-bottom-right-radius",
+					"border-bottom-left-radius"
+				],
+				"appliesto": "allElementsUAsNotRequiredWhenCollapse",
+				"computed": [
+					"border-bottom-left-radius",
+					"border-bottom-right-radius",
+					"border-top-left-radius",
+					"border-top-right-radius"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-right": {
+				"syntax": "<br-width> || <br-style> || <color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-right-color",
+					"border-right-style",
+					"border-right-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-right-width",
+					"border-right-style",
+					"border-right-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-right-width",
+					"border-right-style",
+					"border-right-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-right-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-right-style": {
+				"syntax": "<br-style>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-right-width": {
+				"syntax": "<br-width>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOr0IfBorderRightStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-spacing": {
+				"syntax": "<length> <length>?",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Table"
+				],
+				"initial": "0",
+				"appliesto": "tableElements",
+				"computed": "twoAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"border-style": {
+				"syntax": "<br-style>{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-top-style",
+					"border-right-style",
+					"border-bottom-style",
+					"border-left-style"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-bottom-style",
+					"border-left-style",
+					"border-right-style",
+					"border-top-style"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-top": {
+				"syntax": "<br-width> || <br-style> || <color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-top-color",
+					"border-top-style",
+					"border-top-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-top-width",
+					"border-top-style",
+					"border-top-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-top-width",
+					"border-top-style",
+					"border-top-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-top-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-top-left-radius": {
+				"syntax": "<length-percentage>{1,2}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToDimensionOfBorderBox",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "0",
+				"appliesto": "allElementsUAsNotRequiredWhenCollapse",
+				"computed": "twoAbsoluteLengthOrPercentages",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-top-right-radius": {
+				"syntax": "<length-percentage>{1,2}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToDimensionOfBorderBox",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "0",
+				"appliesto": "allElementsUAsNotRequiredWhenCollapse",
+				"computed": "twoAbsoluteLengthOrPercentages",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-top-style": {
+				"syntax": "<br-style>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-top-width": {
+				"syntax": "<br-width>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOr0IfBorderTopStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"border-width": {
+				"syntax": "<br-width>{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"border-bottom-width",
+					"border-left-width",
+					"border-right-width",
+					"border-top-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Background and Borders"
+				],
+				"initial": [
+					"border-top-width",
+					"border-right-width",
+					"border-bottom-width",
+					"border-left-width"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"border-bottom-width",
+					"border-left-width",
+					"border-right-width",
+					"border-top-width"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"bottom": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToContainingBlockHeight",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"box-align": {
+				"syntax": "start | center | end | baseline | stretch",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "stretch",
+				"appliesto": "elementsWithDisplayBoxOrInlineBox",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-decoration-break": {
+				"syntax": "slice | clone",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "slice",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"box-direction": {
+				"syntax": "normal | reverse | inherit",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "normal",
+				"appliesto": "elementsWithDisplayBoxOrInlineBox",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-flex": {
+				"syntax": "<number>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "0",
+				"appliesto": "directChildrenOfElementsWithDisplayMozBoxMozInlineBox",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-flex-group": {
+				"syntax": "<integer>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "1",
+				"appliesto": "inFlowChildrenOfBoxElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-lines": {
+				"syntax": "single | multiple",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "single",
+				"appliesto": "boxElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-ordinal-group": {
+				"syntax": "<integer>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "1",
+				"appliesto": "childrenOfBoxElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-orient": {
+				"syntax": "horizontal | vertical | inline-axis | block-axis | inherit",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "inlineAxisHorizontalInXUL",
+				"appliesto": "elementsWithDisplayBoxOrInlineBox",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-pack": {
+				"syntax": "start | center | end | justify",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions",
+					"WebKit Extensions"
+				],
+				"initial": "start",
+				"appliesto": "elementsWithDisplayMozBoxMozInlineBox",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"box-shadow": {
+				"syntax": "none | <shadow>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "shadowList",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthsSpecifiedColorAsSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"box-sizing": {
+				"syntax": "content-box | border-box",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "content-box",
+				"appliesto": "allElementsAcceptingWidthOrHeight",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"box-suppress": {
+				"syntax": "show | discard | hide",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Display"
+				],
+				"initial": "show",
+				"appliesto": "allElements",
+				"computed": "seeProse",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"break-after": {
+				"syntax": "auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region",
+				"media": "paged",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "auto",
+				"appliesto": "blockLevelElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"break-before": {
+				"syntax": "auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region",
+				"media": "paged",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "auto",
+				"appliesto": "blockLevelElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"break-inside": {
+				"syntax": "auto | avoid | avoid-page | avoid-column | avoid-region",
+				"media": "paged",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "auto",
+				"appliesto": "blockLevelElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"caption-side": {
+				"syntax": "top | bottom | block-start | block-end | inline-start | inline-end",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Table"
+				],
+				"initial": "top",
+				"appliesto": "tableCaptionElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"caret-color": {
+				"syntax": "auto | <color>",
+				"media": "interactive",
+				"inherited": true,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asAutoOrColor",
+				"order": "perGrammar",
+				"status": "standard"
+			},
+			"clear": {
+				"syntax": "none | left | right | both | inline-start | inline-end",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "none",
+				"appliesto": "blockLevelElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"clip": {
+				"syntax": "<shape> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "rectangle",
+				"percentages": "no",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "auto",
+				"appliesto": "absolutelyPositionedElements",
+				"computed": "autoOrRectangle",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"clip-path": {
+				"syntax": "<clip-source> | [ <basic-shape> || <geometry-box> ] | none",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "basicShapeOtherwiseNo",
+				"percentages": "asSpecified",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "none",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecifiedURLsAbsolute",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Colors"
+				],
+				"initial": "variesFromBrowserToBrowser",
+				"appliesto": "allElements",
+				"computed": "translucentValuesRGBAOtherwiseRGB",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"column-count": {
+				"syntax": "<number> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "integer",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "auto",
+				"appliesto": "nonReplacedBlockElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-fill": {
+				"syntax": "auto | balance",
+				"media": "visualInContinuousMediaNoEffectInOverflowColumns",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "balance",
+				"appliesto": "multicolElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-gap": {
+				"syntax": "<length> | normal",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "normal",
+				"appliesto": "multicolElements",
+				"computed": "absoluteLengthOrNormal",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-rule": {
+				"syntax": "<'column-rule-width'> || <'column-rule-style'> || <'column-rule-color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"column-rule-color",
+					"column-rule-style",
+					"column-rule-width"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": [
+					"column-rule-width",
+					"column-rule-style",
+					"column-rule-color"
+				],
+				"appliesto": "multicolElements",
+				"computed": [
+					"column-rule-color",
+					"column-rule-style",
+					"column-rule-width"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"column-rule-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "currentcolor",
+				"appliesto": "multicolElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-rule-style": {
+				"syntax": "<br-style>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "none",
+				"appliesto": "multicolElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-rule-width": {
+				"syntax": "<br-width>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "medium",
+				"appliesto": "multicolElements",
+				"computed": "absoluteLength0IfColumnRuleStyleNoneOrHidden",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-span": {
+				"syntax": "none | all",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "none",
+				"appliesto": "inFlowBlockLevelElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"column-width": {
+				"syntax": "<length> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": "auto",
+				"appliesto": "nonReplacedBlockElements",
+				"computed": "absoluteLengthZeroOrLarger",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"columns": {
+				"syntax": "<'column-width'> || <'column-count'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"column-width",
+					"column-count"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Columns"
+				],
+				"initial": [
+					"column-width",
+					"column-count"
+				],
+				"appliesto": "nonReplacedBlockElements",
+				"computed": [
+					"column-width",
+					"column-count"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"contain": {
+				"syntax": "none | strict | content | [ size || layout || style || paint ]",
+				"media": "all",
+				"inherited": "false",
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Containment"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "per grammar",
+				"status": "experimental"
+			},
+			"content": {
+				"syntax": "[ <image> , ]* [ normal | none | <content-list> ] [/ <string> ]?",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Generated Content"
+				],
+				"initial": "normal",
+				"appliesto": "beforeAndAfterPseudos",
+				"computed": "normalOnElementsForPseudosNoneAbsoluteURIStringOrAsSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"counter-increment": {
+				"syntax": "[ <custom-ident> <integer>? ]+ | none",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Lists and Counters"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"counter-reset": {
+				"syntax": "[ <custom-ident> <integer>? ]+ | none",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Lists and Counters"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"cursor": {
+				"syntax": "[ [ <url> [ <x> <y> ]? , ]* [ auto | default | none | context-menu | help | pointer | progress | wait | cell | crosshair | text | vertical-text | alias | copy | move | no-drop | not-allowed | e-resize | n-resize | ne-resize | nw-resize | s-resize | se-resize | sw-resize | w-resize | ew-resize | ns-resize | nesw-resize | nwse-resize | col-resize | row-resize | all-scroll | zoom-in | zoom-out | grab | grabbing ] ]",
+				"media": "visual, interactive",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedURIsAbsolute",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"direction": {
+				"syntax": "ltr | rtl",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Writing Modes"
+				],
+				"initial": "ltr",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"display": {
+				"syntax": "[ <display-outside> || <display-inside> ] | <display-listitem> | <display-internal> | <display-box> | <display-legacy>",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "inline",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedExceptPositionedFloatingAndRootElementsKeywordMaybeDifferent",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"display-inside": {
+				"syntax": "auto | block | table | flex | grid | ruby",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Display"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"display-list": {
+				"syntax": "none | list-item",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Display"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"display-outside": {
+				"syntax": "block-level | inline-level | run-in | contents | none | table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Display"
+				],
+				"initial": "inline-level",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"empty-cells": {
+				"syntax": "show | hide",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Table"
+				],
+				"initial": "show",
+				"appliesto": "tableCellElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"filter": {
+				"syntax": "none | <filter-function-list>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "filterList",
+				"percentages": "no",
+				"groups": [
+					"Filter Effects"
+				],
+				"initial": "none",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"flex": {
+				"syntax": "none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"flex-grow",
+					"flex-shrink",
+					"flex-basis"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": [
+					"flex-grow",
+					"flex-shrink",
+					"flex-basis"
+				],
+				"appliesto": "flexItemsAndInFlowPseudos",
+				"computed": [
+					"flex-grow",
+					"flex-shrink",
+					"flex-basis"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"flex-basis": {
+				"syntax": "content | <'width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToFlexContainersInnerMainSize",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "auto",
+				"appliesto": "flexItemsAndInFlowPseudos",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "lengthOrPercentageBeforeKeywordIfBothPresent",
+				"status": "standard"
+			},
+			"flex-direction": {
+				"syntax": "row | row-reverse | column | column-reverse",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "row",
+				"appliesto": "flexContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"flex-flow": {
+				"syntax": "<'flex-direction'> || <'flex-wrap'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": [
+					"flex-direction",
+					"flex-wrap"
+				],
+				"appliesto": "flexContainers",
+				"computed": [
+					"flex-direction",
+					"flex-wrap"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"flex-grow": {
+				"syntax": "<number>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "number",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "0",
+				"appliesto": "flexItemsAndInFlowPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"flex-shrink": {
+				"syntax": "<number>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "number",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "1",
+				"appliesto": "flexItemsAndInFlowPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"flex-wrap": {
+				"syntax": "nowrap | wrap | wrap-reverse",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "nowrap",
+				"appliesto": "flexContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"float": {
+				"syntax": "left | right | none | inline-start | inline-end",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "none",
+				"appliesto": "allElementsNoEffectIfDisplayNone",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"font": {
+				"syntax": "[ [ <'font-style'> || <font-variant-css21> || <'font-weight'> || <'font-stretch'> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | caption | icon | menu | message-box | small-caption | status-bar",
+				"media": "visual",
+				"inherited": true,
+				"animationType": [
+					"font-style",
+					"font-variant",
+					"font-weight",
+					"font-stretch",
+					"font-size",
+					"line-height",
+					"font-family"
+				],
+				"percentages": [
+					"font-size",
+					"line-height"
+				],
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": [
+					"font-style",
+					"font-variant",
+					"font-weight",
+					"font-stretch",
+					"font-size",
+					"line-height",
+					"font-family"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"font-style",
+					"font-variant",
+					"font-weight",
+					"font-stretch",
+					"font-size",
+					"line-height",
+					"font-family"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-family": {
+				"syntax": "[ <family-name> | <generic-family> ]#",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "dependsOnUserAgent",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-feature-settings": {
+				"syntax": "normal | <feature-tag-value>#",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-kerning": {
+				"syntax": "auto | normal | none",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-language-override": {
+				"syntax": "normal | <string>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variation-settings": {
+				"syntax": "normal | [ <string> <number> ]#",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "asTransform",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "perGrammar",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "experimental"
+			},
+			"font-size": {
+				"syntax": "<absolute-size> | <relative-size> | <length-percentage>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "length",
+				"percentages": "referToParentElementsFontSize",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-size-adjust": {
+				"syntax": "none | <number>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "number",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-stretch": {
+				"syntax": "normal | ultra-condensed | extra-condensed | condensed | semi-condensed | semi-expanded | expanded | extra-expanded | ultra-expanded",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "fontStretch",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-style": {
+				"syntax": "normal | italic | oblique",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-synthesis": {
+				"syntax": "none | [ weight || style ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "weight style",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant": {
+				"syntax": "normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> || stylistic( <feature-value-name> ) || historical-forms || styleset( <feature-value-name># ) || character-variant( <feature-value-name># ) || swash( <feature-value-name> ) || ornaments( <feature-value-name> ) || annotation( <feature-value-name> ) || [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] || <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero || <east-asian-variant-values> || <east-asian-width-values> || ruby ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant-alternates": {
+				"syntax": "normal | [ stylistic( <feature-value-name> ) || historical-forms || styleset( <feature-value-name># ) || character-variant( <feature-value-name># ) || swash( <feature-value-name> ) || ornaments( <feature-value-name> ) || annotation( <feature-value-name> ) ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant-caps": {
+				"syntax": "normal | small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant-east-asian": {
+				"syntax": "normal | [ <east-asian-variant-values> || <east-asian-width-values> || ruby ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant-ligatures": {
+				"syntax": "normal | none | [ <common-lig-values> || <discretionary-lig-values> || <historical-lig-values> || <contextual-alt-values> ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant-numeric": {
+				"syntax": "normal | [ <numeric-figure-values> || <numeric-spacing-values> || <numeric-fraction-values> || ordinal || slashed-zero ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-variant-position": {
+				"syntax": "normal | sub | super",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"font-weight": {
+				"syntax": "normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "fontWeight",
+				"percentages": "no",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "keywordOrNumericalValueBolderLighterTransformedToRealValue",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"grid": {
+				"syntax": "<'grid-template'> | <'grid-template-rows'> / [ auto-flow && dense? ] <'grid-auto-columns'>? | [ auto-flow && dense? ] <'grid-auto-rows'>? / <'grid-template-columns'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": [
+					"grid-template-rows",
+					"grid-template-columns",
+					"grid-auto-rows",
+					"grid-auto-columns"
+				],
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": [
+					"grid-template-rows",
+					"grid-template-columns",
+					"grid-template-areas",
+					"grid-auto-rows",
+					"grid-auto-columns",
+					"grid-auto-flow",
+					"grid-column-gap",
+					"grid-row-gap"
+				],
+				"appliesto": "gridContainers",
+				"computed": [
+					"grid-template-rows",
+					"grid-template-columns",
+					"grid-template-areas",
+					"grid-auto-rows",
+					"grid-auto-columns",
+					"grid-auto-flow",
+					"grid-column-gap",
+					"grid-row-gap"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-area": {
+				"syntax": "<grid-line> [ / <grid-line> ]{0,3}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": [
+					"grid-row-start",
+					"grid-column-start",
+					"grid-row-end",
+					"grid-column-end"
+				],
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": [
+					"grid-row-start",
+					"grid-column-start",
+					"grid-row-end",
+					"grid-column-end"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-auto-columns": {
+				"syntax": "<track-size>+",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "seeGridTemplateRowsColumns",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "auto",
+				"appliesto": "gridContainers",
+				"computed": "seeGridTemplateRowsColumns",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-auto-flow": {
+				"syntax": "[ row | column ] || dense",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "row",
+				"appliesto": "gridContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-auto-rows": {
+				"syntax": "<track-size>+",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "seeGridTemplateRowsColumns",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "auto",
+				"appliesto": "gridContainers",
+				"computed": "seeGridTemplateRowsColumns",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-column": {
+				"syntax": "<grid-line> [ / <grid-line> ]?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": [
+					"grid-column-start",
+					"grid-column-end"
+				],
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": [
+					"grid-column-start",
+					"grid-column-end"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-column-end": {
+				"syntax": "<grid-line>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "auto",
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-column-gap": {
+				"syntax": "<length-percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "yes, as the dimension of the element",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "0",
+				"appliesto": "gridContainers",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-column-start": {
+				"syntax": "<grid-line>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "auto",
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-gap": {
+				"syntax": "<'grid-row-gap'> <'grid-column-gap'>?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"grid-row-gap",
+					"grid-column-gap"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": [
+					"grid-row-gap",
+					"grid-column-gap"
+				],
+				"appliesto": "gridContainers",
+				"computed": [
+					"grid-row-gap",
+					"grid-column-gap"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-row": {
+				"syntax": "<grid-line> [ / <grid-line> ]?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": [
+					"grid-row-start",
+					"grid-row-end"
+				],
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": [
+					"grid-row-start",
+					"grid-row-end"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-row-end": {
+				"syntax": "<grid-line>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "auto",
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-row-gap": {
+				"syntax": "<length-percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "yes, as the dimension of the element",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "0",
+				"appliesto": "gridContainers",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-row-start": {
+				"syntax": "<grid-line>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "auto",
+				"appliesto": "gridItemsAndBoxesWithinGridContainer",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-template": {
+				"syntax": "none | [ <'grid-template-rows'> / <'grid-template-columns'> ] | [ <line-names>? <string> <track-size>? <line-names>? ]+ [ / <explicit-track-list> ]?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": [
+					"grid-template-columns",
+					"grid-template-rows"
+				],
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": [
+					"grid-template-columns",
+					"grid-template-rows",
+					"grid-template-areas"
+				],
+				"appliesto": "gridContainers",
+				"computed": [
+					"grid-template-columns",
+					"grid-template-rows",
+					"grid-template-areas"
+				],
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-template-areas": {
+				"syntax": "none | <string>+",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "none",
+				"appliesto": "gridContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-template-columns": {
+				"syntax": "none | <track-list> | <auto-track-list>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToDimensionOfContentArea",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "none",
+				"appliesto": "gridContainers",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"grid-template-rows": {
+				"syntax": "none | <track-list> | <auto-track-list>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "referToDimensionOfContentArea",
+				"groups": [
+					"CSS Grid Layout"
+				],
+				"initial": "none",
+				"appliesto": "gridContainers",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"height": {
+				"syntax": "[ <length> | <percentage> ] && [ border-box | content-box ]? | available | min-content | max-content | fit-content | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "regardingHeightOfGeneratedBoxContainingBlockPercentagesRelativeToContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "auto",
+				"appliesto": "allElementsButNonReplacedAndTableColumns",
+				"computed": "percentageAutoOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"hyphens": {
+				"syntax": "none | manual | auto",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "manual",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"image-orientation": {
+				"syntax": "from-image | <angle> | [ <angle>? flip ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Images"
+				],
+				"initial": "0deg",
+				"appliesto": "allElements",
+				"computed": "angleRoundedToNextQuarter",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"image-rendering": {
+				"syntax": "auto | crisp-edges | pixelated",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Images"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"image-resolution": {
+				"syntax": "[ from-image || <resolution> ] && snap?",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Images"
+				],
+				"initial": "1dppx",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedWithExceptionOfResolution",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"ime-mode": {
+				"syntax": "auto | normal | active | inactive | disabled",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "auto",
+				"appliesto": "textFields",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"initial-letter": {
+				"syntax": "normal | [ <number> <integer>? ]",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Inline"
+				],
+				"initial": "normal",
+				"appliesto": "firstLetterPseudoElementsAndInlineLevelFirstChildren",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"initial-letter-align": {
+				"syntax": "[ auto | alphabetic | hanging | ideographic ]",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Inline"
+				],
+				"initial": "auto",
+				"appliesto": "firstLetterPseudoElementsAndInlineLevelFirstChildren",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"inline-size": {
+				"syntax": "<'width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "inlineSizeOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "auto",
+				"appliesto": "sameAsWidthAndHeight",
+				"computed": "sameAsWidthAndHeight",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"isolation": {
+				"syntax": "auto | isolate",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Compositing and Blending"
+				],
+				"initial": "auto",
+				"appliesto": "allElementsSVGContainerGraphicsAndGraphicsReferencingElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"justify-content": {
+				"syntax": "flex-start | flex-end | center | space-between | space-around | space-evenly",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "flex-start",
+				"appliesto": "flexContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"left": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"letter-spacing": {
+				"syntax": "normal | <length>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "optimumValueOfAbsoluteLengthOrNormal",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line"
+				],
+				"status": "standard"
+			},
+			"line-break": {
+				"syntax": "auto | loose | normal | strict",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"line-height": {
+				"syntax": "normal | <number> | <length> | <percentage>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "number length",
+				"percentages": "referToElementFontSize",
+				"groups": [
+					"CSS Fonts"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "absoluteLengthOrAsSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"list-style": {
+				"syntax": "<'list-style-type'> || <'list-style-position'> || <'list-style-image'>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Lists and Counters"
+				],
+				"initial": [
+					"list-style-type",
+					"list-style-position",
+					"list-style-image"
+				],
+				"appliesto": "listItems",
+				"computed": [
+					"list-style-image",
+					"list-style-position",
+					"list-style-type"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"list-style-image": {
+				"syntax": "<url> | none",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Lists and Counters"
+				],
+				"initial": "none",
+				"appliesto": "listItems",
+				"computed": "noneOrImageWithAbsoluteURI",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"list-style-position": {
+				"syntax": "inside | outside",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Lists and Counters"
+				],
+				"initial": "outside",
+				"appliesto": "listItems",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"list-style-type": {
+				"syntax": "<counter-style> | <string> | none",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Lists and Counters"
+				],
+				"initial": "disc",
+				"appliesto": "listItems",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"margin": {
+				"syntax": "[ <length> | <percentage> | auto ]{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": [
+					"margin-bottom",
+					"margin-left",
+					"margin-right",
+					"margin-top"
+				],
+				"appliesto": "allElementsExceptTableDisplayTypes",
+				"computed": [
+					"margin-bottom",
+					"margin-left",
+					"margin-right",
+					"margin-top"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"margin-block-end": {
+				"syntax": "<'margin-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "dependsOnLayoutModel",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsMargin",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"margin-block-start": {
+				"syntax": "<'margin-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "dependsOnLayoutModel",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsMargin",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"margin-bottom": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"margin-inline-end": {
+				"syntax": "<'margin-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "dependsOnLayoutModel",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsMargin",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"margin-inline-start": {
+				"syntax": "<'margin-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "dependsOnLayoutModel",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsMargin",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"margin-left": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"margin-right": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"margin-top": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"marker-offset": {
+				"syntax": "<length> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Generated Content"
+				],
+				"initial": "auto",
+				"appliesto": "elementsWithDisplayMarker",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"mask": {
+				"syntax": "<mask-layer>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"mask-position",
+					"mask-size"
+				],
+				"percentages": [
+					"mask-position"
+				],
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": [
+					"mask-origin",
+					"mask-clip"
+				],
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": [
+					"mask-origin",
+					"mask-clip"
+				],
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			},
+			"mask-clip": {
+				"syntax": "[ <geometry-box> | no-clip ]#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "border-box",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-composite": {
+				"syntax": "<compositing-operator>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "add",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-image": {
+				"syntax": "<mask-reference>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "none",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecifiedURIsAbsolute",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-mode": {
+				"syntax": "<masking-mode>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "match-source",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-origin": {
+				"syntax": "<geometry-box>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "border-box",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-position": {
+				"syntax": "<position>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "repeatableList simpleList lpc",
+				"percentages": "referToSizeOfMaskPaintingArea",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "0% 0%",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "consistsOfTwoKeywordsForOriginAndOffsets",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-repeat": {
+				"syntax": "<repeat-style>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "repeat",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "consistsOfTwoDimensionKeywords",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-size": {
+				"syntax": "<bg-size>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "repeatableList simpleList lpc",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "auto",
+				"appliesto": "allElementsSVGContainerElements",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mask-type": {
+				"syntax": "luminance | alpha",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Masks"
+				],
+				"initial": "luminance",
+				"appliesto": "maskElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"max-block-size": {
+				"syntax": "<'max-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "blockSizeOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsWidthAndHeight",
+				"computed": "sameAsMaxWidthAndMaxHeight",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"max-height": {
+				"syntax": "<length> | <percentage> | none | max-content | min-content | fit-content | fill-available",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "regardingHeightOfGeneratedBoxContainingBlockPercentagesNone",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "none",
+				"appliesto": "allElementsButNonReplacedAndTableColumns",
+				"computed": "percentageAsSpecifiedAbsoluteLengthOrNone",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"max-inline-size": {
+				"syntax": "<'max-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "inlineSizeOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsWidthAndHeight",
+				"computed": "sameAsMaxWidthAndMaxHeight",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"max-width": {
+				"syntax": "<length> | <percentage> | none | max-content | min-content | fit-content | fill-available",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "none",
+				"appliesto": "allElementsButNonReplacedAndTableRows",
+				"computed": "percentageAsSpecifiedAbsoluteLengthOrNone",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"min-block-size": {
+				"syntax": "<'min-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "blockSizeOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsWidthAndHeight",
+				"computed": "sameAsMinWidthAndMinHeight",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"min-height": {
+				"syntax": "<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "regardingHeightOfGeneratedBoxContainingBlockPercentages0",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsButNonReplacedAndTableColumns",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"min-inline-size": {
+				"syntax": "<'min-width'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "inlineSizeOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "sameAsWidthAndHeight",
+				"computed": "sameAsMinWidthAndMinHeight",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"min-width": {
+				"syntax": "<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsButNonReplacedAndTableRows",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"mix-blend-mode": {
+				"syntax": "<blend-mode>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Compositing and Blending"
+				],
+				"initial": "normal",
+				"appliesto": "allHTMLElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			},
+			"object-fit": {
+				"syntax": "fill | contain | cover | none | scale-down",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Images"
+				],
+				"initial": "fill",
+				"appliesto": "replacedElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"object-position": {
+				"syntax": "<position>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "repeatableList simpleList lpc",
+				"percentages": "referToWidthAndHeightOfElement",
+				"groups": [
+					"CSS Images"
+				],
+				"initial": "50% 50%",
+				"appliesto": "replacedElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"offset": {
+				"syntax": "[ <'offset-position'>? [ <'offset-path'> [ <'offset-distance'> || <'offset-rotate'> ]? ]? ]! [ / <'offset-anchor'> ]?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"offset-position",
+					"offset-path",
+					"offset-distance",
+					"offset-anchor",
+					"offset-rotate"
+				],
+				"percentages": [
+					"offset-position",
+					"offset-distance",
+					"offset-anchor"
+				],
+				"groups": [
+					"CSS Motion"
+				],
+				"initial": [
+					"offset-position",
+					"offset-path",
+					"offset-distance",
+					"offset-anchor",
+					"offset-rotate"
+				],
+				"appliesto": "transformableElements",
+				"computed": [
+					"offset-position",
+					"offset-path",
+					"offset-distance",
+					"offset-anchor",
+					"offset-rotate"
+				],
+				"order": "perGrammar",
+				"stacking": true,
+				"status": "experimental"
+			},
+			"offset-anchor": {
+				"syntax": "auto | <position>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "position",
+				"percentages": "relativeToWidthAndHeight",
+				"groups": [
+					"CSS Motion"
+				],
+				"initial": "auto",
+				"appliesto": "transformableElements",
+				"computed": "forLengthAbsoluteValueOtherwisePercentage",
+				"order": "perGrammar",
+				"status": "experimental"
+			},
+			"offset-block-end": {
+				"syntax": "<'left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalHeightOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "sameAsBoxOffsets",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"offset-block-start": {
+				"syntax": "<'left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalHeightOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "sameAsBoxOffsets",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"offset-inline-end": {
+				"syntax": "<'left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "sameAsBoxOffsets",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"offset-inline-start": {
+				"syntax": "<'left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "sameAsBoxOffsets",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"offset-distance": {
+				"syntax": "<length-percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToTotalPathLength",
+				"groups": [
+					"CSS Motion"
+				],
+				"initial": "0",
+				"appliesto": "transformableElements",
+				"computed": "forLengthAbsoluteValueOtherwisePercentage",
+				"order": "perGrammar",
+				"status": "experimental"
+			},
+			"offset-path": {
+				"syntax": "none | ray( [ <angle> && <size>? && contain? ] ) | <path()> | <url> | [ <basic-shape> || <geometry-box> ]",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "AsAngleBasicshapeOrPath",
+				"percentages": "no",
+				"groups": [
+					"CSS Motion"
+				],
+				"initial": "none",
+				"appliesto": "transformableElements",
+				"computed": "asSpecified",
+				"order": "perGrammar",
+				"stacking": true,
+				"status": "experimental"
+			},
+			"offset-rotate": {
+				"syntax": "[ auto | reverse ] || <angle>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "angle",
+				"percentages": "no",
+				"groups": [
+					"CSS Motion"
+				],
+				"initial": "auto",
+				"appliesto": "transformableElements",
+				"computed": "asSpecified",
+				"order": "perGrammar",
+				"status": "experimental"
+			},
+			"opacity": {
+				"syntax": "<number>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "number",
+				"percentages": "no",
+				"groups": [
+					"CSS Colors"
+				],
+				"initial": "1.0",
+				"appliesto": "allElements",
+				"computed": "specifiedValueClipped0To1",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"order": {
+				"syntax": "<integer>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "integer",
+				"percentages": "no",
+				"groups": [
+					"CSS Flexible Box Layout"
+				],
+				"initial": "0",
+				"appliesto": "flexItemsAndAbsolutelyPositionedFlexContainerChildren",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"orphans": {
+				"syntax": "<integer>",
+				"media": "visual, paged",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Pages"
+				],
+				"initial": "2",
+				"appliesto": "blockContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"outline": {
+				"syntax": "[ <'outline-color'> || <'outline-style'> || <'outline-width'> ]",
+				"media": "visual, interactive",
+				"inherited": false,
+				"animationType": [
+					"outline-color",
+					"outline-width",
+					"outline-style"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": [
+					"outline-color",
+					"outline-style",
+					"outline-width"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"outline-color",
+					"outline-width",
+					"outline-style"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"outline-color": {
+				"syntax": "<color> | invert",
+				"media": "visual, interactive",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "invertOrCurrentColor",
+				"appliesto": "allElements",
+				"computed": "invertForTranslucentColorRGBAOtherwiseRGB",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"outline-offset": {
+				"syntax": "<length>",
+				"media": "visual, interactive",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"outline-style": {
+				"syntax": "auto | <br-style>",
+				"media": "visual, interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"outline-width": {
+				"syntax": "<br-width>",
+				"media": "visual, interactive",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "medium",
+				"appliesto": "allElements",
+				"computed": "absoluteLength0ForNone",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"overflow": {
+				"syntax": "visible | hidden | scroll | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "visible",
+				"appliesto": "nonReplacedBlockAndInlineBlockElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"overflow-clip-box": {
+				"syntax": "padding-box | content-box",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "padding-box",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"overflow-wrap": {
+				"syntax": "normal | break-word",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"overflow-x": {
+				"syntax": "visible | hidden | scroll | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "visible",
+				"appliesto": "nonReplacedBlockAndInlineBlockElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"overflow-y": {
+				"syntax": "visible | hidden | scroll | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "visible",
+				"appliesto": "nonReplacedBlockAndInlineBlockElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"padding": {
+				"syntax": "[ <length> | <percentage> ]{1,4}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": [
+					"padding-bottom",
+					"padding-left",
+					"padding-right",
+					"padding-top"
+				],
+				"appliesto": "allElementsExceptInternalTableDisplayTypes",
+				"computed": [
+					"padding-bottom",
+					"padding-left",
+					"padding-right",
+					"padding-top"
+				],
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"padding-block-end": {
+				"syntax": "<'padding-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"padding-block-start": {
+				"syntax": "<'padding-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"padding-bottom": {
+				"syntax": "<length> | <percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptInternalTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"padding-inline-end": {
+				"syntax": "<'padding-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"padding-inline-start": {
+				"syntax": "<'padding-left'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "logicalWidthOfContainingBlock",
+				"groups": [
+					"CSS Logical Properties"
+				],
+				"initial": "0",
+				"appliesto": "allElements",
+				"computed": "asLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"padding-left": {
+				"syntax": "<length> | <percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptInternalTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"padding-right": {
+				"syntax": "<length> | <percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptInternalTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"padding-top": {
+				"syntax": "<length> | <percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "0",
+				"appliesto": "allElementsExceptInternalTableDisplayTypes",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter"
+				],
+				"status": "standard"
+			},
+			"page-break-after": {
+				"syntax": "auto | always | avoid | left | right",
+				"media": "visual, paged",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Pages"
+				],
+				"initial": "auto",
+				"appliesto": "blockElementsInNormalFlow",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"page-break-before": {
+				"syntax": "auto | always | avoid | left | right",
+				"media": "visual, paged",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Pages"
+				],
+				"initial": "auto",
+				"appliesto": "blockElementsInNormalFlow",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"page-break-inside": {
+				"syntax": "auto | avoid",
+				"media": "visual, paged",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Pages"
+				],
+				"initial": "auto",
+				"appliesto": "blockElementsInNormalFlow",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"perspective": {
+				"syntax": "none | <length>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "none",
+				"appliesto": "transformableElements",
+				"computed": "absoluteLengthOrNone",
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			},
+			"perspective-origin": {
+				"syntax": "<position>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "simpleList lpc",
+				"percentages": "referToSizeOfBoundingBox",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "50% 50%",
+				"appliesto": "transformableElements",
+				"computed": "forLengthAbsoluteValueOtherwisePercentage",
+				"order": "oneOrTwoValuesLengthAbsoluteKeywordsPercentages",
+				"status": "standard"
+			},
+			"pointer-events": {
+				"syntax": "auto | none | visiblePainted | visibleFill | visibleStroke | visible | painted | fill | stroke | all | inherit",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Pointer Events"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"position": {
+				"syntax": "static | relative | absolute | sticky | fixed",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "static",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			},
+			"quotes": {
+				"syntax": "[ <string> <string> ]+ | none",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Generated Content"
+				],
+				"initial": "dependsOnUserAgent",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"resize": {
+				"syntax": "none | both | horizontal | vertical",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "none",
+				"appliesto": "elementsWithOverflowNotVisibleAndReplacedElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"right": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"ruby-align": {
+				"syntax": "start | center | space-between | space-around",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Ruby"
+				],
+				"initial": "space-around",
+				"appliesto": "rubyBasesAnnotationsBaseAnnotationContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"ruby-merge": {
+				"syntax": "separate | collapse | auto",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Ruby"
+				],
+				"initial": "separate",
+				"appliesto": "rubyAnnotationsContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"ruby-position": {
+				"syntax": "over | under | inter-character",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Ruby"
+				],
+				"initial": "over",
+				"appliesto": "rubyAnnotationsContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"scroll-behavior": {
+				"syntax": "auto | smooth",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSSOM View"
+				],
+				"initial": "auto",
+				"appliesto": "scrollingBoxes",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"scroll-snap-coordinate": {
+				"syntax": "none | <position>#",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "position",
+				"percentages": "referToBorderBox",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"scroll-snap-destination": {
+				"syntax": "<position>",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "position",
+				"percentages": "relativeToScrollContainerPaddingBoxAxis",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "0px 0px",
+				"appliesto": "scrollContainers",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"scroll-snap-points-x": {
+				"syntax": "none | repeat( <length-percentage> )",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "relativeToScrollContainerPaddingBoxAxis",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "none",
+				"appliesto": "scrollContainers",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "obsolete"
+			},
+			"scroll-snap-points-y": {
+				"syntax": "none | repeat( <length-percentage> )",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "relativeToScrollContainerPaddingBoxAxis",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "none",
+				"appliesto": "scrollContainers",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "obsolete"
+			},
+			"scroll-snap-type": {
+				"syntax": "none | mandatory | proximity",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "none",
+				"appliesto": "scrollContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"scroll-snap-type-x": {
+				"syntax": "none | mandatory | proximity",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "none",
+				"appliesto": "scrollContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"scroll-snap-type-y": {
+				"syntax": "none | mandatory | proximity",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Scroll Snap Points"
+				],
+				"initial": "none",
+				"appliesto": "scrollContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"shape-image-threshold": {
+				"syntax": "<number>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "number",
+				"percentages": "no",
+				"groups": [
+					"CSS Shapes"
+				],
+				"initial": "0.0",
+				"appliesto": "floats",
+				"computed": "specifiedValueNumberClipped0To1",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"shape-margin": {
+				"syntax": "<length-percentage>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Shapes"
+				],
+				"initial": "0",
+				"appliesto": "floats",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"shape-outside": {
+				"syntax": "none | <shape-box> || <basic-shape> | <image>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "basic-shape",
+				"percentages": "no",
+				"groups": [
+					"CSS Shapes"
+				],
+				"initial": "none",
+				"appliesto": "floats",
+				"computed": "asDefinedForBasicShapeWithAbsoluteURIOtherwiseAsSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"tab-size": {
+				"syntax": "<integer> | <length>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "length",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "8",
+				"appliesto": "blockContainers",
+				"computed": "specifiedIntegerOrAbsoluteLength",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"table-layout": {
+				"syntax": "auto | fixed",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Table"
+				],
+				"initial": "auto",
+				"appliesto": "tableElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-align": {
+				"syntax": "start | end | left | right | center | justify | match-parent",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "startOrNamelessValueIfLTRRightIfRTL",
+				"appliesto": "blockContainers",
+				"computed": "asSpecifiedExceptMatchParent",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-align-last": {
+				"syntax": "auto | start | end | left | right | center | justify",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "auto",
+				"appliesto": "blockContainers",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-combine-upright": {
+				"syntax": "none | all | [ digits <integer>? ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Writing Modes"
+				],
+				"initial": "none",
+				"appliesto": "nonReplacedInlineElements",
+				"computed": "keywordPlusIntegerIfDigits",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-decoration": {
+				"syntax": "<'text-decoration-line'> || <'text-decoration-style'> || <'text-decoration-color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"text-decoration-color",
+					"text-decoration-style",
+					"text-decoration-line"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": [
+					"text-decoration-color",
+					"text-decoration-style",
+					"text-decoration-line"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"text-decoration-line",
+					"text-decoration-style",
+					"text-decoration-color"
+				],
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-decoration-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-decoration-line": {
+				"syntax": "none | [ underline || overline || line-through || blink ]",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-decoration-skip": {
+				"syntax": "none | [ objects || spaces || ink || edges || box-decoration ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "objects",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "experimental"
+			},
+			"text-decoration-style": {
+				"syntax": "solid | double | dotted | dashed | wavy",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "solid",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-emphasis": {
+				"syntax": "<'text-emphasis-style'> || <'text-emphasis-color'>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": [
+					"text-emphasis-color",
+					"text-emphasis-style"
+				],
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": [
+					"text-emphasis-style",
+					"text-emphasis-color"
+				],
+				"appliesto": "allElements",
+				"computed": [
+					"text-emphasis-style",
+					"text-emphasis-color"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"text-emphasis-color": {
+				"syntax": "<color>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "color",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "currentcolor",
+				"appliesto": "allElements",
+				"computed": "'color'",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-emphasis-position": {
+				"syntax": "[ over | under ] && [ right | left ]",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "over right",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-emphasis-style": {
+				"syntax": "none | [ [ filled | open ] || [ dot | circle | double-circle | triangle | sesame ] ] | <string>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": ["CSS Text Decoration"],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-indent": {
+				"syntax": "<length-percentage> && hanging? && each-line?",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "0",
+				"appliesto": "blockContainers",
+				"computed": "percentageOrAbsoluteLengthPlusKeywords",
+				"order": "lengthOrPercentageBeforeKeywords",
+				"status": "standard"
+			},
+			"text-orientation": {
+				"syntax": "mixed | upright | sideways",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Writing Modes"
+				],
+				"initial": "mixed",
+				"appliesto": "allElementsExceptTableRowGroupsRowsColumnGroupsAndColumns",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-overflow": {
+				"syntax": "[ clip | ellipsis | <string> ]{1,2}",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS User Interface"
+				],
+				"initial": "clip",
+				"appliesto": "blockContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-rendering": {
+				"syntax": "auto | optimizeSpeed | optimizeLegibility | geometricPrecision",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "auto",
+				"appliesto": "textElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"text-shadow": {
+				"syntax": "none | <shadow-t>#",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "shadowList",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "colorPlusThreeAbsoluteLengths",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-size-adjust": {
+				"syntax": "none | auto | <percentage>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "referToSizeOfFont",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "autoForSmartphoneBrowsersSupportingInflation",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "experimental"
+			},
+			"text-transform": {
+				"syntax": "none | capitalize | uppercase | lowercase | full-width",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "none",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"text-underline-position": {
+				"syntax": "auto | [ under || [ left | right ] ]",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text Decoration"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"top": {
+				"syntax": "<length> | <percentage> | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToContainingBlockHeight",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "lengthAbsolutePercentageAsSpecifiedOtherwiseAuto",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"touch-action": {
+				"syntax": "auto | none | [ [ pan-x | pan-left | pan-right ] || [ pan-y | pan-up | pan-down ] || pinch-zoom ] | manipulation",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Pointer Events"
+				],
+				"initial": "auto",
+				"appliesto": "allElementsExceptNonReplacedInlineElementsTableRowsColumnsRowColumnGroups",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"transform": {
+				"syntax": "none | <transform-list>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "transform",
+				"percentages": "referToSizeOfBoundingBox",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "none",
+				"appliesto": "transformableElements",
+				"computed": "asSpecifiedRelativeToAbsoluteLengths",
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			},
+			"transform-box": {
+				"syntax": "border-box | fill-box | view-box",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "border-box ",
+				"appliesto": "transformableElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"transform-origin": {
+				"syntax": "[ <length-percentage> | left | center | right | top | bottom ] | [ [ <length-percentage> | left | center | right ] && [ <length-percentage> | top | center | bottom ] ] <length>?",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "simpleList lpc",
+				"percentages": "referToSizeOfBoundingBox",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "50% 50% 0",
+				"appliesto": "transformableElements",
+				"computed": "forLengthAbsoluteValueOtherwisePercentage",
+				"order": "oneOrTwoValuesLengthAbsoluteKeywordsPercentages",
+				"status": "standard"
+			},
+			"transform-style": {
+				"syntax": "flat | preserve-3d",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transforms"
+				],
+				"initial": "flat",
+				"appliesto": "transformableElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			},
+			"transition": {
+				"syntax": "<single-transition>#",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transitions"
+				],
+				"initial": [
+					"transition-delay",
+					"transition-duration",
+					"transition-property",
+					"transition-timing-function"
+				],
+				"appliesto": "allElementsAndPseudos",
+				"computed": [
+					"transition-delay",
+					"transition-duration",
+					"transition-property",
+					"transition-timing-function"
+				],
+				"order": "orderOfAppearance",
+				"status": "standard"
+			},
+			"transition-delay": {
+				"syntax": "<time>#",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transitions"
+				],
+				"initial": "0s",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"transition-duration": {
+				"syntax": "<time>#",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transitions"
+				],
+				"initial": "0s",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"transition-property": {
+				"syntax": "none | <single-transition-property>#",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transitions"
+				],
+				"initial": "all",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"transition-timing-function": {
+				"syntax": "<single-transition-timing-function>#",
+				"media": "interactive",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Transitions"
+				],
+				"initial": "ease",
+				"appliesto": "allElementsAndPseudos",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"unicode-bidi": {
+				"syntax": "normal | embed | isolate | bidi-override | isolate-override | plaintext",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Writing Modes"
+				],
+				"initial": "normal",
+				"appliesto": "allElementsSomeValuesNoEffectOnNonInlineElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"user-select": {
+				"syntax": "auto | text | none | contain | all",
+				"media": "visual",
+				"inherited": "no",
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
+			"vertical-align": {
+				"syntax": "baseline | sub | super | text-top | text-bottom | middle | top | bottom | <percentage> | <length>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "length",
+				"percentages": "referToLineHeight",
+				"groups": [
+					"CSS Table"
+				],
+				"initial": "baseline",
+				"appliesto": "inlineLevelAndTableCellElements",
+				"computed": "absoluteLengthOrKeyword",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"visibility": {
+				"syntax": "visible | hidden | collapse",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "visibility",
+				"percentages": "no",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "visible",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"white-space": {
+				"syntax": "normal | pre | nowrap | pre-wrap | pre-line",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"widows": {
+				"syntax": "<integer>",
+				"media": "visual, paged",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Pages"
+				],
+				"initial": "2",
+				"appliesto": "blockContainerElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"width": {
+				"syntax": "[ <length> | <percentage> ] && [ border-box | content-box ]? | available | min-content | max-content | fit-content | auto",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "lpc",
+				"percentages": "referToWidthOfContainingBlock",
+				"groups": [
+					"CSS Box Model"
+				],
+				"initial": "auto",
+				"appliesto": "allElementsButNonReplacedAndTableRows",
+				"computed": "percentageAutoOrAbsoluteLength",
+				"order": "lengthOrPercentageBeforeKeywordIfBothPresent",
+				"status": "standard"
+			},
+			"will-change": {
+				"syntax": "auto | <animateable-feature>#",
+				"media": "all",
+				"inherited": false,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Miscellaneous"
+				],
+				"initial": "auto",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"word-break": {
+				"syntax": "normal | break-all | keep-all",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"word-spacing": {
+				"syntax": "normal | <length-percentage>",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "length",
+				"percentages": "referToWidthOfAffectedGlyph",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "optimumMinAndMaxValueOfAbsoluteLengthPercentageOrNormal",
+				"order": "uniqueOrder",
+				"alsoAppliesTo": [
+					"::first-letter",
+					"::first-line",
+					"::placeholder"
+				],
+				"status": "standard"
+			},
+			"word-wrap": {
+				"syntax": "normal | break-word",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "normal",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"writing-mode": {
+				"syntax": "horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Writing Modes"
+				],
+				"initial": "horizontal-tb",
+				"appliesto": "allElementsExceptTableRowColumnGroupsTableRowsColumns",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "standard"
+			},
+			"z-index": {
+				"syntax": "auto | <integer>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "integer",
+				"percentages": "no",
+				"groups": [
+					"CSS Positioning"
+				],
+				"initial": "auto",
+				"appliesto": "positionedElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"stacking": true,
+				"status": "standard"
+			}
+		}
+		;
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/data/mdn-data-syntaxes
+	modules['/css-tree/data/mdn-data-syntaxes'] = function () {
+		var exports = {
+			"absolute-size": "xx-small | x-small | small | medium | large | x-large | xx-large",
+			"alpha-value": "<number> | <percentage>",
+			"angle-percentage": "<angle> | <percentage>",
+			"animateable-feature": "scroll-position | contents | <custom-ident>",
+			"attachment": "scroll | fixed | local",
+			"attr()": "attr( <attr-name> <type-or-unit>? [, <attr-fallback> ]? )",
+			"auto-repeat": "repeat( [ auto-fill | auto-fit ] , [ <line-names>? <fixed-size> ]+ <line-names>? )",
+			"auto-track-list": "[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>? <auto-repeat>\n[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>?",
+			"basic-shape": "<inset()> | <circle()> | <ellipse()> | <polygon()>",
+			"bg-image": "none | <image>",
+			"bg-layer": "<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box>{1,2}",
+			"bg-size": "[ <length-percentage> | auto ]{1,2} | cover | contain",
+			"blur()": "blur( <length> )",
+			"blend-mode": "normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity",
+			"box": "border-box | padding-box | content-box",
+			"br-style": "none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset",
+			"br-width": "<length> | thin | medium | thick",
+			"brightness()": "brightness( <number-percentage> )",
+			"calc()": "calc( <calc-sum> )",
+			"calc-sum": "<calc-product> [ [ '+' | '-' ] <calc-product> ]*",
+			"calc-product": "<calc-value> [ '*' <calc-value> | '/' <number> ]*",
+			"calc-value": "<number> | <dimension> | <percentage> | ( <calc-sum> )",
+			"cf-final-image": "<image> | <color>",
+			"cf-mixing-image": "<percentage>? && <image>",
+			"circle()": "circle( [ <shape-radius> ]? [ at <position> ]? )",
+			"clip-source": "<url>",
+			"color": "<rgb()> | <rgba()> | <hsl()> | <hsla()> | <hex-color> | <named-color> | currentcolor | <deprecated-system-color>",
+			"color-stop": "<color> <length-percentage>?",
+			"color-stop-list": "<color-stop>{2,}",
+			"common-lig-values": "[ common-ligatures | no-common-ligatures ]",
+			"composite-style": "clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor",
+			"compositing-operator": "add | subtract | intersect | exclude",
+			"contextual-alt-values": "[ contextual | no-contextual ]",
+			"content-list": "[ <string> | contents | <url> | <quote> | <target> | <leader()> ]+",
+			"contrast()": "contrast( [ <number-percentage> ] )",
+			"counter-style": "<counter-style-name> | symbols()",
+			"counter-style-name": "<custom-ident>",
+			"cross-fade()": "cross-fade( <cf-mixing-image> , <cf-final-image>? )",
+			"deprecated-system-color": "ActiveBorder | ActiveCaption | AppWorkspace | Background | ButtonFace | ButtonHighlight | ButtonShadow | ButtonText | CaptionText | GrayText | Highlight | HighlightText | InactiveBorder | InactiveCaption | InactiveCaptionText | InfoBackground | InfoText | Menu | MenuText | Scrollbar | ThreeDDarkShadow | ThreeDFace | ThreeDHighlight | ThreeDLightShadow | ThreeDShadow | Window | WindowFrame | WindowText",
+			"discretionary-lig-values": "[ discretionary-ligatures | no-discretionary-ligatures ]",
+			"display-box": "contents | none",
+			"display-inside": "flow | flow-root | table | flex | grid | subgrid | ruby",
+			"display-internal": "table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container",
+			"display-legacy": "inline-block | inline-list-item | inline-table | inline-flex | inline-grid",
+			"display-listitem": "list-item && <display-outside>? && [ flow | flow-root ]?",
+			"display-outside": "block | inline | run-in",
+			"drop-shadow()": "drop-shadow( <length>{2,3} <color>? )",
+			"east-asian-variant-values": "[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ]",
+			"east-asian-width-values": "[ full-width | proportional-width ]",
+			"element()": "element( <id-selector> )",
+			"ellipse()": "ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )",
+			"ending-shape": "circle | ellipse",
+			"explicit-track-list": "[ <line-names>? <track-size> ]+ <line-names>?",
+			"family-name": "<string> | <custom-ident>+",
+			"feature-tag-value": "<string> [ <integer> | on | off ]?",
+			"feature-type": "@stylistic | @historical-forms | @styleset | @character-variant | @swash | @ornaments | @annotation",
+			"feature-value-block": "<feature-type> {\n	<feature-value-declaration-list>\n}",
+			"feature-value-block-list": "<feature-value-block>+",
+			"feature-value-declaration": "<custom-ident>: <integer>+;",
+			"feature-value-declaration-list": "<feature-value-declaration>",
+			"feature-value-name": "<custom-ident>",
+			"fill-rule": "nonzero | evenodd",
+			"filter-function": "<blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()>",
+			"filter-function-list": "[ <filter-function> | <url> ]+",
+			"final-bg-layer": "<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box> || <box> || <'background-color'>",
+			"fit-content()": "fit-content( [ <length> | <percentage> ] )",
+			"fixed-breadth": "<length-percentage>",
+			"fixed-repeat": "repeat( [ <positive-integer> ] , [ <line-names>? <fixed-size> ]+ <line-names>? )",
+			"fixed-size": "<fixed-breadth> | minmax( <fixed-breadth> , <track-breadth> ) | minmax( <inflexible-breadth> , <fixed-breadth> )",
+			"font-variant-css21": "[ normal | small-caps ]",
+			"frequency-percentage": "<frequency> | <percentage>",
+			"general-enclosed": "[ <function-token> <any-value> ) ] | ( <ident> <any-value> )",
+			"generic-family": "serif | sans-serif | cursive | fantasy | monospace",
+			"generic-name": "serif | sans-serif | cursive | fantasy | monospace",
+			"geometry-box": "<shape-box> | fill-box | stroke-box | view-box",
+			"gradient": "<linear-gradient()> | <repeating-linear-gradient()> | <radial-gradient()> | <repeating-radial-gradient()>",
+			"grayscale()": "grayscale( <number-percentage> )",
+			"grid-line": "auto | <custom-ident> | [ <integer> && <custom-ident>? ] | [ span && [ <integer> || <custom-ident> ] ]",
+			"historical-lig-values": "[ historical-ligatures | no-historical-ligatures ]",
+			"hsl()": "hsl( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue>, <percentage>, <percentage>, <alpha-value>? ] )",
+			"hsla()": "hsla( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue>, <percentage>, <percentage>, <alpha-value>? ] )",
+			"hue": "<number> | <angle>",
+			"hue-rotate()": "hue-rotate( <angle> )",
+			"image": "<url> | <image()> | <image-set()> | <element()> | <cross-fade()> | <gradient>",
+			"image()": "image( [ [ <image> | <string> ]? , <color>? ]! )",
+			"image-set()": "image-set( <image-set-option># )",
+			"image-set-option": "[ <image> | <string> ] <resolution>",
+			"inflexible-breadth": "<length> | <percentage> | min-content | max-content | auto",
+			"inset()": "inset( <length-percentage>{1,4} [ round <border-radius> ]? )",
+			"invert()": "invert( <number-percentage> )",
+			"keyframes-name": "<custom-ident> | <string>",
+			"keyframe-block": "<keyframe-selector># {\n	<declaration-list>\n}",
+			"keyframe-block-list": "<keyframe-block>+",
+			"keyframe-selector": "from | to | <percentage>",
+			"leader()": "leader( dotted | solid | space | <string> )",
+			"length-percentage": "<length> | <percentage>",
+			"line-names": "'[' <custom-ident>* ']'",
+			"line-name-list": "[ <line-names> | <name-repeat> ]+",
+			"linear-gradient()": "linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )",
+			"mask-layer": "<mask-reference> || <position> [ / <bg-size> ]? || <repeat-style> || <geometry-box> || [ <geometry-box> | no-clip ] || <compositing-operator> || <masking-mode>",
+			"mask-position": "[ <length-percentage> | left | center | right ] [ <length-percentage> | top | center | bottom ]?",
+			"mask-reference": "none | <image> | <mask-source>",
+			"mask-source": "<url>",
+			"masking-mode": "alpha | luminance | match-source",
+			"matrix()": "matrix( <number> [, <number> ]{5,5} )",
+			"matrix3d()": "matrix3d( <number> [, <number> ]{15,15} )",
+			"media-and": "<media-in-parens> [ and <media-in-parens> ]+",
+			"media-condition": "<media-not> | <media-and> | <media-or> | <media-in-parens>",
+			"media-condition-without-or": "<media-not> | <media-and> | <media-in-parens>",
+			"media-feature": "( [ <mf-plain> | <mf-boolean> | <mf-range> ] )",
+			"media-in-parens": "( <media-condition> ) | <media-feature> | <general-enclosed>",
+			"media-not": "not <media-in-parens>",
+			"media-or": "<media-in-parens> [ or <media-in-parens> ]+",
+			"media-query": "<media-condition> | [ not | only ]? <media-type> [ and <media-condition-without-or> ]?",
+			"media-query-list": "<media-query>#",
+			"media-type": "<ident>",
+			"mf-boolean": "<mf-name>",
+			"mf-name": "<ident>",
+			"mf-plain": "<mf-name> : <mf-value>",
+			"mf-range": "<mf-name> [ '<' | '>' ]? '='? <mf-value>\n| <mf-value> [ '<' | '>' ]? '='? <mf-name>\n| <mf-value> '<' '='? <mf-name> '<' '='? <mf-value>\n| <mf-value> '>' '='? <mf-name> '>' '='? <mf-value>",
+			"mf-value": "<number> | <dimension> | <ident> | <ratio>",
+			"minmax()": "minmax( [ <length> | <percentage> | <flex> | min-content | max-content | auto ] , [ <length> | <percentage> | <flex> | min-content | max-content | auto ] )",
+			"named-color": "transparent | aliceblue | antiquewhite | aqua | aquamarine | azure | beige | bisque | black | blanchedalmond | blue | blueviolet | brown | burlywood | cadetblue | chartreuse | chocolate | coral | cornflowerblue | cornsilk | crimson | cyan | darkblue | darkcyan | darkgoldenrod | darkgray | darkgreen | darkgrey | darkkhaki | darkmagenta | darkolivegreen | darkorange | darkorchid | darkred | darksalmon | darkseagreen | darkslateblue | darkslategray | darkslategrey | darkturquoise | darkviolet | deeppink | deepskyblue | dimgray | dimgrey | dodgerblue | firebrick | floralwhite | forestgreen | fuchsia | gainsboro | ghostwhite | gold | goldenrod | gray | green | greenyellow | grey | honeydew | hotpink | indianred | indigo | ivory | khaki | lavender | lavenderblush | lawngreen | lemonchiffon | lightblue | lightcoral | lightcyan | lightgoldenrodyellow | lightgray | lightgreen | lightgrey | lightpink | lightsalmon | lightseagreen | lightskyblue | lightslategray | lightslategrey | lightsteelblue | lightyellow | lime | limegreen | linen | magenta | maroon | mediumaquamarine | mediumblue | mediumorchid | mediumpurple | mediumseagreen | mediumslateblue | mediumspringgreen | mediumturquoise | mediumvioletred | midnightblue | mintcream | mistyrose | moccasin | navajowhite | navy | oldlace | olive | olivedrab | orange | orangered | orchid | palegoldenrod | palegreen | paleturquoise | palevioletred | papayawhip | peachpuff | peru | pink | plum | powderblue | purple | rebeccapurple | red | rosybrown | royalblue | saddlebrown | salmon | sandybrown | seagreen | seashell | sienna | silver | skyblue | slateblue | slategray | slategrey | snow | springgreen | steelblue | tan | teal | thistle | tomato | turquoise | violet | wheat | white | whitesmoke | yellow | yellowgreen",
+			"namespace-prefix": "<ident>",
+			"number-percentage": "<number> | <percentage>",
+			"numeric-figure-values": "[ lining-nums | oldstyle-nums ]",
+			"numeric-fraction-values": "[ diagonal-fractions | stacked-fractions ]",
+			"numeric-spacing-values": "[ proportional-nums | tabular-nums ]",
+			"nth": "<an-plus-b> | even | odd",
+			"opacity()": "opacity( [ <number-percentage> ] )",
+			"page-body": "<declaration>? [ ; <page-body> ]? | <page-margin-box> <page-body>",
+			"page-margin-box": "<page-margin-box-type> {\n	<declaration-list>\n}",
+			"page-margin-box-type": "@top-left-corner | @top-left | @top-center | @top-right | @top-right-corner | @bottom-left-corner | @bottom-left | @bottom-center | @bottom-right | @bottom-right-corner | @left-top | @left-middle | @left-bottom | @right-top | @right-middle | @right-bottom",
+			"page-selector-list": "[ <page-selector># ]?",
+			"page-selector": "<pseudo-page>+ | <ident> <pseudo-page>*",
+			"perspective()": "perspective( <length> )",
+			"polygon()": "polygon( <fill-rule>? , [ <length-percentage> <length-percentage> ]# )",
+			"position": "[[ left | center | right | top | bottom | <length-percentage> ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ] | [ center | [ left | right ] <length-percentage>? ] && [ center | [ top | bottom ] <length-percentage>? ]]",
+			"pseudo-page": ": [ left | right | first | blank ]",
+			"quote": "open-quote | close-quote | no-open-quote | no-close-quote",
+			"radial-gradient()": "radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )",
+			"relative-size": "larger | smaller",
+			"repeat-style": "repeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}",
+			"repeating-linear-gradient()": "repeating-linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )",
+			"repeating-radial-gradient()": "repeating-radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )",
+			"rgb()": "rgb( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )",
+			"rgba()": "rgba( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )",
+			"rotate()": "rotate( <angle> )",
+			"rotate3d()": "rotate3d( <number> , <number> , <number> , <angle> )",
+			"rotateX()": "rotateX( <angle> )",
+			"rotateY()": "rotateY( <angle> )",
+			"rotateZ()": "rotateZ( <angle> )",
+			"saturate()": "saturate( <number-percentage> )",
+			"scale()": "scale( <number> [, <number> ]? )",
+			"scale3d()": "scale3d( <number> , <number> , <number> )",
+			"scaleX()": "scaleX( <number> )",
+			"scaleY()": "scaleY( <number> )",
+			"scaleZ()": "scaleZ( <number> )",
+			"shape-radius": "<length-percentage> | closest-side | farthest-side",
+			"skew()": "skew( <angle> [, <angle> ]? )",
+			"skewX()": "skewX( <angle> )",
+			"skewY()": "skewY( <angle> )",
+			"sepia()": "sepia( <number-percentage> )",
+			"shadow": "inset? && <length>{2,4} && <color>?",
+			"shadow-t": "[ <length>{2,3} && <color>? ]",
+			"shape": "rect(<top>, <right>, <bottom>, <left>)",
+			"shape-box": "<box> | margin-box",
+			"side-or-corner": "[ left | right ] || [ top | bottom ]",
+			"single-animation": "<time> || <single-timing-function> || <time> || <single-animation-iteration-count> || <single-animation-direction> || <single-animation-fill-mode> || <single-animation-play-state> || [ none | <keyframes-name> ]",
+			"single-animation-direction": "normal | reverse | alternate | alternate-reverse",
+			"single-animation-fill-mode": "none | forwards | backwards | both",
+			"single-animation-iteration-count": "infinite | <number>",
+			"single-animation-play-state": "running | paused",
+			"single-timing-function": "<single-transition-timing-function>",
+			"single-transition": "[ none | <single-transition-property> ] || <time> || <single-transition-timing-function> || <time>",
+			"single-transition-timing-function": "ease | linear | ease-in | ease-out | ease-in-out | step-start | step-end | steps( <integer> [, [ start | end ] ]? ) | cubic-bezier( <number>, <number>, <number>, <number> )",
+			"single-transition-property": "all | <custom-ident>",
+			"size": "closest-side | farthest-side | closest-corner | farthest-corner | <length> | <length-percentage>{2}",
+			"symbol": "<string> | <image> | <ident>",
+			"target": "<target-counter()> | <target-counters()> | <target-text()>",
+			"target-counter()": "target-counter( [ <string> | <url> ] , <custom-ident> [, <counter-style> ]? )",
+			"target-counters()": "target-counters( [ <string> | <url> ] , <custom-ident> , <string> [, <counter-style> ]? )",
+			"target-text()": "target-text( [ <string> | <url> ] [, [ content | before | after | first-letter ] ]? )",
+			"time-percentage": "<time> | <percentage>",
+			"track-breadth": "<length-percentage> | <flex> | min-content | max-content | auto",
+			"track-list": "[ <line-names>? [ <track-size> | <track-repeat> ] ]+ <line-names>?",
+			"track-repeat": "repeat( [ <positive-integer> ] , [ <line-names>? <track-size> ]+ <line-names>? )",
+			"track-size": "<track-breadth> | minmax( <inflexible-breadth> , <track-breadth> ) | fit-content( [ <length> | <percentage> ] )",
+			"transform-function": "[ <matrix()> || <translate()> || <translateX()> || <translateY()> || <scale()> || <scaleX()> || <scaleY()> || <rotate()> || <skew()> || <skewX()> || <skewY()> || <matrix3d()> || <translate3d()> || <translateZ()> || <scale3d()> || <scaleZ()> || <rotate3d()> || <rotateX()> || <rotateY()> || <rotateZ()> || <perspective()> ]+",
+			"transform-list": "<transform-function>+",
+			"translate()": "translate( <length-percentage> [, <length-percentage> ]? )",
+			"translate3d()": "translate3d( <length-percentage> , <length-percentage> , <length> )",
+			"translateX()": "translateX( <length-percentage> )",
+			"translateY()": "translateY( <length-percentage> )",
+			"translateZ()": "translateZ( <length> )",
+			"type-or-unit": "string | integer | color | url | integer | number | length | angle | time | frequency | em | ex | px | rem | vw | vh | vmin | vmax | mm | q | cm | in | pt | pc | deg | grad | rad | ms | s | Hz | kHz | %",
+			"var()": "var( <custom-property-name> [, <declaration-value> ]? )",
+			"viewport-length": "auto | <length-percentage>"
+		}
+		;
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/data/patch
+	modules['/css-tree/data/patch'] = function () {
+		var exports = {
+			"properties": {
+				"--*": null,
+				"-moz-background-clip": {
+					"comment": "deprecated syntax in old Firefox, https://developer.mozilla.org/en/docs/Web/CSS/background-clip",
+					"syntax": "padding | border"
+				},
+				"-moz-border-radius-bottomleft": {
+					"comment": "https://developer.mozilla.org/en-US/docs/Web/CSS/border-bottom-left-radius",
+					"syntax": "<'border-bottom-left-radius'>"
+				},
+				"-moz-border-radius-bottomright": {
+					"comment": "https://developer.mozilla.org/en-US/docs/Web/CSS/border-bottom-right-radius",
+					"syntax": "<'border-bottom-right-radius'>"
+				},
+				"-moz-border-radius-topleft": {
+					"comment": "https://developer.mozilla.org/en-US/docs/Web/CSS/border-top-left-radius",
+					"syntax": "<'border-top-left-radius'>"
+				},
+				"-moz-border-radius-topright": {
+					"comment": "https://developer.mozilla.org/en-US/docs/Web/CSS/border-bottom-right-radius",
+					"syntax": "<'border-bottom-right-radius'>"
+				},
+				"-moz-osx-font-smoothing": {
+					"comment": "misssed old syntax https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth",
+					"syntax": "auto | unset | grayscale"
+				},
+				"-moz-user-select": {
+					"comment": "https://developer.mozilla.org/en-US/docs/Web/CSS/user-select",
+					"syntax": "none | text | all | -moz-none"
+				},
+				"-ms-filter": {
+					"comment": "added missed syntax https://blogs.msdn.microsoft.com/ie/2009/02/19/the-css-corner-using-filters-in-ie8/",
+					"syntax": "<string>"
+				},
+				"-ms-flex-align": {
+					"comment": "misssed old syntax implemented in IE, https://www.w3.org/TR/2012/WD-css3-flexbox-20120322/#flex-align",
+					"syntax": "start | end | center | baseline | stretch"
+				},
+				"-ms-flex-item-align": {
+					"comment": "misssed old syntax implemented in IE, https://www.w3.org/TR/2012/WD-css3-flexbox-20120322/#flex-align",
+					"syntax": "auto | start | end | center | baseline | stretch"
+				},
+				"-ms-flex-line-pack": {
+					"comment": "misssed old syntax implemented in IE, https://www.w3.org/TR/2012/WD-css3-flexbox-20120322/#flex-line-pack",
+					"syntax": "start | end | center | justify | distribute | stretch"
+				},
+				"-ms-flex-negative": {
+					"comment": "misssed old syntax implemented in IE; TODO: find references for comfirmation",
+					"syntax": "<'flex-shrink'>"
+				},
+				"-ms-flex-pack": {
+					"comment": "misssed old syntax implemented in IE, https://www.w3.org/TR/2012/WD-css3-flexbox-20120322/#flex-pack",
+					"syntax": "start | end | center | justify | distribute"
+				},
+				"-ms-flex-order": {
+					"comment": "misssed old syntax implemented in IE; https://msdn.microsoft.com/en-us/library/jj127303(v=vs.85).aspx",
+					"syntax": "<integer>"
+				},
+				"-ms-flex-positive": {
+					"comment": "misssed old syntax implemented in IE; TODO: find references for comfirmation",
+					"syntax": "<'flex-grow'>"
+				},
+				"-ms-flex-preferred-size": {
+					"comment": "misssed old syntax implemented in IE; TODO: find references for comfirmation",
+					"syntax": "<'flex-basis'>"
+				},
+				"-ms-interpolation-mode": {
+					"comment": "https://msdn.microsoft.com/en-us/library/ff521095(v=vs.85).aspx",
+					"syntax": "nearest-neighbor | bicubic"
+				},
+				"-ms-grid-column-align": {
+					"comment": "add this property first since it uses as fallback for flexbox, https://msdn.microsoft.com/en-us/library/windows/apps/hh466338.aspx",
+					"syntax": "start | end | center | stretch"
+				},
+				"-ms-grid-row-align": {
+					"comment": "add this property first since it uses as fallback for flexbox, https://msdn.microsoft.com/en-us/library/windows/apps/hh466348.aspx",
+					"syntax": "start | end | center | stretch"
+				},
+				"-ms-high-contrast-adjust": {
+					"comment": "https://msdn.microsoft.com/en-us/library/hh771863(v=vs.85).aspx",
+					"syntax": "auto | none"
+				},
+				"-ms-user-select": {
+					"comment": "https://msdn.microsoft.com/en-us/library/hh781492(v=vs.85).aspx",
+					"syntax": "none | element | text"
+				},
+				"-webkit-appearance": {
+					"comment": "webkit specific keywords",
+					"references": [
+						"http://css-infos.net/property/-webkit-appearance"
+					],
+					"syntax": "none | button | button-bevel | caps-lock-indicator | caret | checkbox | default-button | listbox | listitem | media-fullscreen-button | media-mute-button | media-play-button | media-seek-back-button | media-seek-forward-button | media-slider | media-sliderthumb | menulist | menulist-button | menulist-text | menulist-textfield | push-button | radio | scrollbarbutton-down | scrollbarbutton-left | scrollbarbutton-right | scrollbarbutton-up | scrollbargripper-horizontal | scrollbargripper-vertical | scrollbarthumb-horizontal | scrollbarthumb-vertical | scrollbartrack-horizontal | scrollbartrack-vertical | searchfield | searchfield-cancel-button | searchfield-decoration | searchfield-results-button | searchfield-results-decoration | slider-horizontal | slider-vertical | sliderthumb-horizontal | sliderthumb-vertical | square-button | textarea | textfield"
+				},
+				"-webkit-background-clip": {
+					"comment": "https://developer.mozilla.org/en/docs/Web/CSS/background-clip",
+					"syntax": "[ <box> | border | padding | content | text ]#"
+				},
+				"-webkit-column-break-after": {
+					"comment": "added, http://help.dottoro.com/lcrthhhv.php",
+					"syntax": "always | auto | avoid"
+				},
+				"-webkit-column-break-before": {
+					"comment": "added, http://help.dottoro.com/lcxquvkf.php",
+					"syntax": "always | auto | avoid"
+				},
+				"-webkit-column-break-inside": {
+					"comment": "added, http://help.dottoro.com/lclhnthl.php",
+					"syntax": "always | auto | avoid"
+				},
+				"-webkit-font-smoothing": {
+					"comment": "https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth",
+					"syntax": "none | antialiased | subpixel-antialiased"
+				},
+				"-webkit-line-clamp": {
+					"comment": "non-standard and deprecated but may still using by some sites",
+					"syntax": "<positive-integer>"
+				},
+				"-webkit-mask": {
+					"comment": "changing for property references due webkit version of properties can differ from current mask spec; needs for revision",
+					"syntax": "<mask-image> [ <'-webkit-mask-repeat'> || <'-webkit-mask-attachment'> || <'-webkit-mask-position'> || <'-webkit-mask-origin'> || <'-webkit-mask-clip'> ]*"
+				},
+				"-webkit-mask-box-image": {
+					"comment": "missed; https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-mask-box-image",
+					"syntax": "[ <url> | <gradient> | none ] [ <length-percentage>{4} <-webkit-mask-box-repeat>{2} ]?"
+				},
+				"-webkit-mask-clip": {
+					"comment": "change type to <-webkit-mask-clip-style> since it differ from <mask-clip>, extra space between [ and ,",
+					"syntax": "<-webkit-mask-clip-style> [, <-webkit-mask-clip-style> ]*"
+				},
+				"-webkit-overflow-scrolling": {
+					"comment": "missed; https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-overflow-scrolling",
+					"syntax": "auto | touch"
+				},
+				"-webkit-print-color-adjust": {
+					"comment": "missed",
+					"references": [
+						"https://developer.mozilla.org/en/docs/Web/CSS/-webkit-print-color-adjust"
+					],
+					"syntax": "economy | exact"
+				},
+				"-webkit-text-security": {
+					"comment": "missed; http://help.dottoro.com/lcbkewgt.php",
+					"syntax": "none | circle | disc | square"
+				},
+				"-webkit-user-drag": {
+					"comment": "missed; http://help.dottoro.com/lcbixvwm.php",
+					"syntax": "none | element | auto"
+				},
+				"-webkit-user-select": {
+					"comment": "auto is supported by old webkit, https://developer.mozilla.org/en-US/docs/Web/CSS/user-select",
+					"syntax": "auto | none | text | all"
+				},
+				"alignment-baseline": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#AlignmentBaselineProperty"
+					],
+					"syntax": "auto | baseline | before-edge | text-before-edge | middle | central | after-edge | text-after-edge | ideographic | alphabetic | hanging | mathematical"
+				},
+				"baseline-shift": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#BaselineShiftProperty"
+					],
+					"syntax": "baseline | sub | super | <svg-length>"
+				},
+				"behavior": {
+					"comment": "added old IE property https://msdn.microsoft.com/en-us/library/ms530723(v=vs.85).aspx",
+					"syntax": "<url>+"
+				},
+				"clip-rule": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/masking.html#ClipRuleProperty"
+					],
+					"syntax": "nonzero | evenodd"
+				},
+				"cue": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<'cue-before'> <'cue-after'>?"
+				},
+				"cue-after": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<url> <decibel>? | none"
+				},
+				"cue-before": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<url> <decibel>? | none"
+				},
+				"cursor": {
+					"comment": "added legacy keywords: hand, -webkit-grab. -webkit-grabbing, -webkit-zoom-in, -webkit-zoom-out, -moz-grab, -moz-grabbing, -moz-zoom-in, -moz-zoom-out",
+					"refenrences": ["https://www.sitepoint.com/css3-cursor-styles/"],
+					"syntax": "[ [ <url> [ <x> <y> ]? , ]* [ auto | default | none | context-menu | help | pointer | progress | wait | cell | crosshair | text | vertical-text | alias | copy | move | no-drop | not-allowed | e-resize | n-resize | ne-resize | nw-resize | s-resize | se-resize | sw-resize | w-resize | ew-resize | ns-resize | nesw-resize | nwse-resize | col-resize | row-resize | all-scroll | zoom-in | zoom-out | grab | grabbing | hand | -webkit-grab | -webkit-grabbing | -webkit-zoom-in | -webkit-zoom-out | -moz-grab | -moz-grabbing | -moz-zoom-in | -moz-zoom-out ] ]"
+				},
+				"display": {
+					"comment": "extended with -ms-flexbox",
+					"syntax": "none | inline | block | list-item | inline-list-item | inline-block | inline-table | table | table-cell | table-column | table-column-group | table-footer-group | table-header-group | table-row | table-row-group | flex | inline-flex | grid | inline-grid | run-in | ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container | contents | -ms-flexbox | -ms-inline-flexbox | -ms-grid | -ms-inline-grid | -webkit-flex | -webkit-inline-flex | -webkit-box | -webkit-inline-box | -moz-inline-stack | -moz-box | -moz-inline-box"
+				},
+				"position": {
+					"comment": "extended with -webkit-sticky",
+					"syntax": "static | relative | absolute | sticky | fixed | -webkit-sticky"
+				},
+				"dominant-baseline": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#DominantBaselineProperty"
+					],
+					"syntax": "auto | use-script | no-change | reset-size | ideographic | alphabetic | hanging | mathematical | central | middle | text-after-edge | text-before-edge"
+				},
+				"image-rendering": {
+					"comment": "extended with <-non-standart-image-rendering>, added SVG keywords optimizeSpeed and optimizeQuality",
+					"references": [
+						"https://developer.mozilla.org/en/docs/Web/CSS/image-rendering",
+						"https://www.w3.org/TR/SVG/painting.html#ImageRenderingProperty"
+					],
+					"syntax": "auto | crisp-edges | pixelated | optimizeSpeed | optimizeQuality | <-non-standart-image-rendering>"
+				},
+				"fill": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#FillProperty"
+					],
+					"syntax": "<paint>"
+				},
+				"fill-opacity": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#FillProperty"
+					],
+					"syntax": "<number-zero-one>"
+				},
+				"fill-rule": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#FillProperty"
+					],
+					"syntax": "nonzero | evenodd"
+				},
+				"filter": {
+					"comment": "extend with IE legacy syntaxes",
+					"syntax": "none | <filter-function-list> | <-ms-filter>"
+				},
+				"font": {
+					"comment": "extend with non-standart fonts",
+					"syntax": "[ [ <'font-style'> || <font-variant-css21> || <'font-weight'> || <'font-stretch'> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ] | caption | icon | menu | message-box | small-caption | status-bar | <-non-standart-font>"
+				},
+				"glyph-orientation-horizontal": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#GlyphOrientationHorizontalProperty"
+					],
+					"syntax": "<angle>"
+				},
+				"glyph-orientation-vertical": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#GlyphOrientationVerticalProperty"
+					],
+					"syntax": "<angle>"
+				},
+				"kerning": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#KerningProperty"
+					],
+					"syntax": "auto | <svg-length>"
+				},
+				"letter-spacing": {
+					"comment": "fix syntax <length> -> <length-percentage>",
+					"references": [
+						"https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/letter-spacing"
+					],
+					"syntax": "normal | <length-percentage>"
+				},
+				"marker": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#MarkerProperties"
+					],
+					"syntax": "none | <url>"
+				},
+				"marker-end": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#MarkerProperties"
+					],
+					"syntax": "none | <url>"
+				},
+				"marker-mid": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#MarkerProperties"
+					],
+					"syntax": "none | <url>"
+				},
+				"marker-start": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#MarkerProperties"
+					],
+					"syntax": "none | <url>"
+				},
+				"max-width": {
+					"comment": "extend by non-standart width keywords https://developer.mozilla.org/en-US/docs/Web/CSS/max-width",
+					"syntax": "<length> | <percentage> | none | max-content | min-content | fit-content | fill-available | <-non-standart-width>"
+				},
+				"min-width": {
+					"comment": "extend by non-standart width keywords https://developer.mozilla.org/en-US/docs/Web/CSS/width",
+					"syntax": "<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available | <-non-standart-width>"
+				},
+				"offset-position": {
+					"comment": "missed",
+					"references": [
+						"https://drafts.fxtf.org/motion-1/#offset-position-property"
+					],
+					"syntax": "auto | <position>"
+				},
+				"opacity": {
+					"comment": "strict to 0..1 <number> -> <number-zero-one>",
+					"syntax": "<number-zero-one>"
+				},
+				"pause": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<'pause-before'> <'pause-after'>?"
+				},
+				"pause-after": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<time> | none | x-weak | weak | medium | strong | x-strong"
+				},
+				"pause-before": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<time> | none | x-weak | weak | medium | strong | x-strong"
+				},
+				"rest": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<'rest-before'> <'rest-after'>?"
+				},
+				"rest-after": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<time> | none | x-weak | weak | medium | strong | x-strong"
+				},
+				"rest-before": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<time> | none | x-weak | weak | medium | strong | x-strong"
+				},
+				"shape-rendering": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#ShapeRenderingPropert"
+					],
+					"syntax": "auto | optimizeSpeed | crispEdges | geometricPrecision"
+				},
+				"src": {
+					"comment": "added @font-face's src property https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/src",
+					"syntax": "[ <url> format( <string># )? | local( <family-name> ) ]#"
+				},
+				"speak": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "auto | none | normal"
+				},
+				"speak-as": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "normal | spell-out || digits || [ literal-punctuation | no-punctuation ]"
+				},
+				"stroke": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "<paint>"
+				},
+				"stroke-dasharray": {
+					"comment": "added SVG property; a list of comma and/or white space separated <length>s and <percentage>s",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "none | [ <svg-length>+ ]#"
+				},
+				"stroke-dashoffset": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "<svg-length>"
+				},
+				"stroke-linecap": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "butt | round | square"
+				},
+				"stroke-linejoin": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "miter | round | bevel"
+				},
+				"stroke-miterlimit": {
+					"comment": "added SVG property (<miterlimit> = <number-one-or-greater>) ",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "<number-one-or-greater>"
+				},
+				"stroke-opacity": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "<number-zero-one>"
+				},
+				"stroke-width": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/painting.html#StrokeProperties"
+					],
+					"syntax": "<svg-length>"
+				},
+				"text-anchor": {
+					"comment": "added SVG property",
+					"references": [
+						"https://www.w3.org/TR/SVG/text.html#TextAlignmentProperties"
+					],
+					"syntax": "start | middle | end"
+				},
+				"transform-origin": {
+					"comment": "move first group to the end since less collecting",
+					"syntax": "[ [ <length-percentage> | left | center | right ] && [ <length-percentage> | top | center | bottom ] ] <length>? | [ <length-percentage> | left | center | right | top | bottom ]"
+				},
+				"unicode-bidi": {
+					"comment": "added prefixed keywords https://developer.mozilla.org/en-US/docs/Web/CSS/unicode-bidi",
+					"syntax": "normal | embed | isolate | bidi-override | isolate-override | plaintext | -moz-isolate | -moz-isolate-override | -moz-plaintext | -webkit-isolate"
+				},
+				"unicode-range": {
+					"comment": "added missed property https://developer.mozilla.org/en-US/docs/Web/CSS/%40font-face/unicode-range",
+					"syntax": "<unicode-range>#"
+				},
+				"voice-balance": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<number> | left | center | right | leftwards | rightwards"
+				},
+				"voice-duration": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "auto | <time>"
+				},
+				"voice-family": {
+					"comment": "<name> -> <family-name>, https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "[ [ <family-name> | <generic-voice> ] , ]* [ <family-name> | <generic-voice> ] | preserve"
+				},
+				"voice-pitch": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<frequency> && absolute | [ [ x-low | low | medium | high | x-high ] || [ <frequency> | <semitones> | <percentage> ] ]"
+				},
+				"voice-range": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "<frequency> && absolute | [ [ x-low | low | medium | high | x-high ] || [ <frequency> | <semitones> | <percentage> ] ]"
+				},
+				"voice-rate": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "[ normal | x-slow | slow | medium | fast | x-fast ] || <percentage>"
+				},
+				"voice-stress": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "normal | strong | moderate | none | reduced"
+				},
+				"voice-volume": {
+					"comment": "https://www.w3.org/TR/css3-speech/#property-index",
+					"syntax": "silent | [ [ x-soft | soft | medium | loud | x-loud ] || <decibel> ]"
+				},
+				"word-break": {
+					"comment": "extend with non-standart keywords",
+					"syntax": "normal | break-all | keep-all | <-non-standart-word-break>"
+				},
+				"writing-mode": {
+					"comment": "extend with SVG keywords",
+					"syntax": "horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr | <svg-writing-mode>"
+				},
+				"zoom": {
+					"comment": "missed, not in DB, https://developer.mozilla.org/en-US/docs/Web/CSS/zoom",
+					"syntax": "normal | reset | <number> | <percentage>"
+				}
+			},
+			"syntaxes": {
+				"-legacy-gradient()": {
+					"comment": "added collection of legacy gradient syntaxes",
+					"syntax": "<-webkit-gradient()> | <-legacy-linear-gradient()> | <-legacy-repeating-linear-gradient()> | <-legacy-radial-gradient()> | <-legacy-repeating-radial-gradient()>"
+				},
+				"-legacy-linear-gradient()": {
+					"comment": "like standart syntax but w/o `to` keyword https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient",
+					"syntax": "-moz-linear-gradient( <-legacy-linear-gradient-arguments> ) | -ms-linear-gradient( <-legacy-linear-gradient-arguments> ) | -webkit-linear-gradient( <-legacy-linear-gradient-arguments> ) | -o-linear-gradient( <-legacy-linear-gradient-arguments> )"
+				},
+				"-legacy-repeating-linear-gradient()": {
+					"comment": "like standart syntax but w/o `to` keyword https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient",
+					"syntax": "-moz-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -ms-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -webkit-repeating-linear-gradient( <-legacy-linear-gradient-arguments> ) | -o-repeating-linear-gradient( <-legacy-linear-gradient-arguments> )"
+				},
+				"-legacy-linear-gradient-arguments": {
+					"comment": "like standart syntax but w/o `to` keyword https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient",
+					"syntax": "[ <angle> | <side-or-corner> ]? , <color-stop-list>"
+				},
+				"-legacy-radial-gradient()": {
+					"comment": "deprecated syntax that implemented by some browsers https://www.w3.org/TR/2011/WD-css3-images-20110908/#radial-gradients",
+					"syntax": "-moz-radial-gradient( <-legacy-radial-gradient-arguments> ) | -ms-radial-gradient( <-legacy-radial-gradient-arguments> ) | -webkit-radial-gradient( <-legacy-radial-gradient-arguments> ) | -o-radial-gradient( <-legacy-radial-gradient-arguments> )"
+				},
+				"-legacy-repeating-radial-gradient()": {
+					"comment": "deprecated syntax that implemented by some browsers https://www.w3.org/TR/2011/WD-css3-images-20110908/#radial-gradients",
+					"syntax": "-moz-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -ms-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -webkit-repeating-radial-gradient( <-legacy-radial-gradient-arguments> ) | -o-repeating-radial-gradient( <-legacy-radial-gradient-arguments> )"
+				},
+				"-legacy-radial-gradient-arguments": {
+					"comment": "deprecated syntax that implemented by some browsers https://www.w3.org/TR/2011/WD-css3-images-20110908/#radial-gradients",
+					"syntax": "[ <position> , ]? [ [ [ <-legacy-radial-gradient-shape> || <-legacy-radial-gradient-size> ] | [ <length> | <percentage> ]{2} ] , ]? <color-stop-list>"
+				},
+				"-legacy-radial-gradient-size": {
+					"comment": "before standart it contains 2 extra keywords (`contain` and `cover`) https://www.w3.org/TR/2011/WD-css3-images-20110908/#ltsize",
+					"syntax": "closest-side | closest-corner | farthest-side | farthest-corner | contain | cover"
+				},
+				"-legacy-radial-gradient-shape": {
+					"comment": "define to duoble sure it doesn't extends in future https://www.w3.org/TR/2011/WD-css3-images-20110908/#ltshape",
+					"syntax": "circle | ellipse"
+				},
+				"-non-standart-font": {
+					"comment": "non standart fonts",
+					"preferences": [
+						"https://webkit.org/blog/3709/using-the-system-font-in-web-content/"
+					],
+					"syntax": "-apple-system-body | -apple-system-headline | -apple-system-subheadline | -apple-system-caption1 | -apple-system-caption2 | -apple-system-footnote | -apple-system-short-body | -apple-system-short-headline | -apple-system-short-subheadline | -apple-system-short-caption1 | -apple-system-short-footnote | -apple-system-tall-body"
+				},
+				"-non-standart-color": {
+					"comment": "non standart colors",
+					"references": [
+						"http://cssdot.ru/%D0%A1%D0%BF%D1%80%D0%B0%D0%B2%D0%BE%D1%87%D0%BD%D0%B8%D0%BA_CSS/color-i305.html",
+						"https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#Mozilla_Color_Preference_Extensions"
+					],
+					"syntax": "-moz-ButtonDefault | -moz-ButtonHoverFace | -moz-ButtonHoverText | -moz-CellHighlight | -moz-CellHighlightText | -moz-Combobox | -moz-ComboboxText | -moz-Dialog | -moz-DialogText | -moz-dragtargetzone | -moz-EvenTreeRow | -moz-Field | -moz-FieldText | -moz-html-CellHighlight | -moz-html-CellHighlightText | -moz-mac-accentdarkestshadow | -moz-mac-accentdarkshadow | -moz-mac-accentface | -moz-mac-accentlightesthighlight | -moz-mac-accentlightshadow | -moz-mac-accentregularhighlight | -moz-mac-accentregularshadow | -moz-mac-chrome-active | -moz-mac-chrome-inactive | -moz-mac-focusring | -moz-mac-menuselect | -moz-mac-menushadow | -moz-mac-menutextselect | -moz-MenuHover | -moz-MenuHoverText | -moz-MenuBarText | -moz-MenuBarHoverText | -moz-nativehyperlinktext | -moz-OddTreeRow | -moz-win-communicationstext | -moz-win-mediatext | -moz-activehyperlinktext | -moz-default-background-color | -moz-default-color | -moz-hyperlinktext | -moz-visitedhyperlinktext | -webkit-activelink | -webkit-focus-ring-color | -webkit-link | -webkit-text"
+				},
+				"-non-standart-image-rendering": {
+					"comment": "non-standart keywords http://phrogz.net/tmp/canvas_image_zoom.html",
+					"syntax": "optimize-contrast | -moz-crisp-edges | -o-crisp-edges | -webkit-optimize-contrast"
+				},
+				"-non-standart-width": {
+					"comment": "non-standart keywords https://developer.mozilla.org/en-US/docs/Web/CSS/width",
+					"syntax": "min-intrinsic | intrinsic | -moz-min-content | -moz-max-content | -webkit-min-content | -webkit-max-content"
+				},
+				"-non-standart-word-break": {
+					"comment": "non-standart keywords https://css-tricks.com/almanac/properties/w/word-break/",
+					"syntax": "break-word"
+				},
+				"-webkit-image-set()": {
+					"comment": "added alias",
+					"syntax": "<image-set()>"
+				},
+				"-webkit-gradient()": {
+					"comment": "first Apple proposal gradient syntax https://webkit.org/blog/175/introducing-css-gradients/ - TODO: simplify when after match algorithm improvement ( [, point, radius | , point] -> [, radius]? , point )",
+					"syntax": "-webkit-gradient( <-webkit-gradient-type>, <-webkit-gradient-point> [, <-webkit-gradient-point> | , <-webkit-gradient-radius>, <-webkit-gradient-point> ] [, <-webkit-gradient-radius>]? [, <-webkit-gradient-color-stop()>]* )"
+				},
+				"-webkit-gradient-color-stop()": {
+					"comment": "first Apple proposal gradient syntax https://webkit.org/blog/175/introducing-css-gradients/",
+					"syntax": "from( <color> ) | color-stop( [ <number-zero-one> | <percentage> ] , <color> ) | to( <color> )"
+				},
+				"-webkit-gradient-point": {
+					"comment": "first Apple proposal gradient syntax https://webkit.org/blog/175/introducing-css-gradients/",
+					"syntax": " [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ]"
+				},
+				"-webkit-gradient-radius": {
+					"comment": "first Apple proposal gradient syntax https://webkit.org/blog/175/introducing-css-gradients/",
+					"syntax": "<length> | <percentage>"
+				},
+				"-webkit-gradient-type": {
+					"comment": "first Apple proposal gradient syntax https://webkit.org/blog/175/introducing-css-gradients/",
+					"syntax": "linear | radial"
+				},
+				"-webkit-mask-box-repeat": {
+					"comment": "missed; https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-mask-box-image",
+					"syntax": "repeat | stretch | round"
+				},
+				"-webkit-mask-clip-style": {
+					"comment": "missed; there is no enough information about `-webkit-mask-clip` property, but looks like all those keywords are working",
+					"syntax": "border | border-box | padding | padding-box | content | content-box | text"
+				},
+				"-ms-filter": {
+					"syntax": "[ <progid> | FlipH | FlipV ]+"
+				},
+				"age": {
+					"comment": "https://www.w3.org/TR/css3-speech/#voice-family",
+					"syntax": "child | young | old"
+				},
+				"attr()": {
+					"comment": "drop it since it's a generic",
+					"syntax": null
+				},
+				"border-radius": {
+					"comment": "missed, https://drafts.csswg.org/css-backgrounds-3/#the-border-radius",
+					"syntax": "<length-percentage>{1,2}"
+				},
+				"bottom": {
+					"comment": "missed; not sure we should add it, but no others except `shape` is using it so it's ok for now; https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect",
+					"syntax": "<length> | auto"
+				},
+				"color-stop-list": {
+					"comment": "missed #",
+					"syntax": "<color-stop>#{2,}"
+				},
+				"content-list": {
+					"comment": "missed -> https://drafts.csswg.org/css-content/#typedef-content-list (document-url, <target> and leader() is omitted util stabilization)",
+					"syntax": "[ <string> | contents | <url> | <quote> | <attr()> | counter( <ident>, <'list-style-type'>? ) ]+"
+				},
+				"inset()": {
+					"comment": "changed <border-radius> to <'border-radius'>",
+					"syntax": "inset( <length-percentage>{1,4} [ round <'border-radius'> ]? )"
+				},
+				"generic-voice": {
+					"comment": "https://www.w3.org/TR/css3-speech/#voice-family",
+					"syntax": "[ <age>? <gender> <integer>? ]"
+				},
+				"gender": {
+					"comment": "https://www.w3.org/TR/css3-speech/#voice-family",
+					"syntax": "male | female | neutral"
+				},
+				"generic-family": {
+					"comment": "added -apple-system",
+					"references": [
+						"https://webkit.org/blog/3709/using-the-system-font-in-web-content/"
+					],
+					"syntax": "serif | sans-serif | cursive | fantasy | monospace | -apple-system"
+				},
+				"gradient": {
+					"comment": "added -webkit-gradient() since may to be used for legacy support",
+					"syntax": "<-legacy-gradient()> | <linear-gradient()> | <repeating-linear-gradient()> | <radial-gradient()> | <repeating-radial-gradient()>"
+				},
+				"left": {
+					"comment": "missed; not sure we should add it, but no others except `shape` is using it so it's ok for now; https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect",
+					"syntax": "<length> | auto"
+				},
+				"mask-image": {
+					"comment": "missed; https://drafts.fxtf.org/css-masking-1/#the-mask-image",
+					"syntax": "<mask-reference>#"
+				},
+				"matrix()": {
+					"comment": "redundant max",
+					"syntax": "matrix( <number> [, <number> ]{5} )"
+				},
+				"matrix3d()": {
+					"comment": "redundant max",
+					"syntax": "matrix3d( <number> [, <number> ]{15} )"
+				},
+				"name-repeat": {
+					"comment": "missed, and looks like obsolete, keep it as is since other property syntaxes should be changed too; https://www.w3.org/TR/2015/WD-css-grid-1-20150917/#typedef-name-repeat",
+					"syntax": "repeat( [ <positive-integer> | auto-fill ], <line-names>+)"
+				},
+				"named-color": {
+					"comment": "replaced <ident> to list of colors according to https://www.w3.org/TR/css-color-4/#named-colors",
+					"syntax": "transparent | aliceblue | antiquewhite | aqua | aquamarine | azure | beige | bisque | black | blanchedalmond | blue | blueviolet | brown | burlywood | cadetblue | chartreuse | chocolate | coral | cornflowerblue | cornsilk | crimson | cyan | darkblue | darkcyan | darkgoldenrod | darkgray | darkgreen | darkgrey | darkkhaki | darkmagenta | darkolivegreen | darkorange | darkorchid | darkred | darksalmon | darkseagreen | darkslateblue | darkslategray | darkslategrey | darkturquoise | darkviolet | deeppink | deepskyblue | dimgray | dimgrey | dodgerblue | firebrick | floralwhite | forestgreen | fuchsia | gainsboro | ghostwhite | gold | goldenrod | gray | green | greenyellow | grey | honeydew | hotpink | indianred | indigo | ivory | khaki | lavender | lavenderblush | lawngreen | lemonchiffon | lightblue | lightcoral | lightcyan | lightgoldenrodyellow | lightgray | lightgreen | lightgrey | lightpink | lightsalmon | lightseagreen | lightskyblue | lightslategray | lightslategrey | lightsteelblue | lightyellow | lime | limegreen | linen | magenta | maroon | mediumaquamarine | mediumblue | mediumorchid | mediumpurple | mediumseagreen | mediumslateblue | mediumspringgreen | mediumturquoise | mediumvioletred | midnightblue | mintcream | mistyrose | moccasin | navajowhite | navy | oldlace | olive | olivedrab | orange | orangered | orchid | palegoldenrod | palegreen | paleturquoise | palevioletred | papayawhip | peachpuff | peru | pink | plum | powderblue | purple | rebeccapurple | red | rosybrown | royalblue | saddlebrown | salmon | sandybrown | seagreen | seashell | sienna | silver | skyblue | slateblue | slategray | slategrey | snow | springgreen | steelblue | tan | teal | thistle | tomato | turquoise | violet | wheat | white | whitesmoke | yellow | yellowgreen | <-non-standart-color>"
+				},
+				"outline-radius": {
+					"comment": "missed, looks like it's a similar to <border-radius> https://developer.mozilla.org/en/docs/Web/CSS/-moz-outline-radius",
+					"syntax": "<border-radius>"
+				},
+				"paint": {
+					"comment": "simplified SVG syntax (omit <icccolor>, replace <funciri> for <url>) https://www.w3.org/TR/SVG/painting.html#SpecifyingPaint",
+					"syntax": "none | currentColor | <color> | <url> [ none | currentColor | <color> ]?"
+				},
+				"path()": {
+					"comment": "missed, `motion` property was renamed, but left it as is for now; path() syntax was get from last draft https://drafts.fxtf.org/motion-1/#funcdef-offset-path-path",
+					"syntax": "path( <string> )"
+				},
+				"position": {
+					"comment": "rewrite syntax (TODO: make match work with original syntax)",
+					"syntax": "[ center && [ left | right | top | bottom ] <length-percentage>? ] | [ [ left | right ] <length-percentage>? ] && [ [ top | bottom ] <length-percentage>? ] | [ [ left | center | right | <length-percentage> ] || [ top | center | bottom | <length-percentage> ] ]"
+				},
+				"right": {
+					"comment": "missed; not sure we should add it, but no others except `shape` is using it so it's ok for now; https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect",
+					"syntax": "<length> | auto"
+				},
+				"shape": {
+					"comment": "missed spaces in function body and add backwards compatible syntax",
+					"syntax": "rect( [ [ <top>, <right>, <bottom>, <left> ] | [ <top> <right> <bottom> <left> ] ] )"
+				},
+				"single-transition": {
+					"comment": "moved <single-transition-timing-function> in the beginning to avoid wrong match to <single-transition-property>",
+					"syntax": "<single-transition-timing-function> || [ none | <single-transition-property> ] || <time> || <time>"
+				},
+				"svg-length": {
+					"comment": "All coordinates and lengths in SVG can be specified with or without a unit identifier",
+					"references": [
+						"https://www.w3.org/TR/SVG11/coords.html#Units"
+					],
+					"syntax": "<percentage> | <length> | <number>"
+				},
+				"svg-writing-mode": {
+					"comment": "SVG specific keywords (deprecated for CSS)",
+					"references": [
+						"https://developer.mozilla.org/en/docs/Web/CSS/writing-mode",
+						"https://www.w3.org/TR/SVG/text.html#WritingModeProperty"
+					],
+					"syntax": "lr-tb | rl-tb | tb-rl | lr | rl | tb"
+				},
+				"top": {
+					"comment": "missed; not sure we should add it, but no others except `shape` is using it so it's ok for now; https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect",
+					"syntax": "<length> | auto"
+				},
+				"x": {
+					"comment": "missed; not sure we should add it, but no others except `cursor` is using it so it's ok for now; https://drafts.csswg.org/css-ui-3/#cursor",
+					"syntax": "<number>"
+				},
+				"y": {
+					"comment": "missed; not sure we should add it, but no others except `cursor` is using so it's ok for now; https://drafts.csswg.org/css-ui-3/#cursor",
+					"syntax": "<number>"
+				},
+				"var()": {
+					"comment": "drop it since it's a generic (also syntax is incorrect and can't be parsed)",
+					"syntax": null
+				},
+
+				"an-plus-b": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"feature-type": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"feature-value-block": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"feature-value-declaration": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"feature-value-block-list": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"feature-value-declaration-list": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"general-enclosed": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"keyframe-block": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"keyframe-block-list": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"mf-plain": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"mf-range": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"mf-value": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"minmax()": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-and": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-condition": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-not": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-or": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-in-parens": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-feature": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-condition-without-or": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-query": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"media-query-list": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"nth": {
+					"comment": "syntax has <an-plus-b> that doesn't support currently, drop for now",
+					"syntax": null
+				},
+				"page-selector": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"page-selector-list": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"page-body": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"page-margin-box": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"page-margin-box-type": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
+				"pseudo-page": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				}
+			}
+		}
+		;
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/generator
+	modules['/css-tree/generator'] = function () {
+		'use strict';
+
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+		function each(list) {
+			var cursor = list.head;
+			var result = [];
+
+			while (cursor !== null) {
+				result.push(this.generate(cursor.data, cursor, list));
+				cursor = cursor.next;
 			}
 
-			error.name = 'CssSyntaxError';
-			error.parseError = {
-				offset: offset,
-				line: line,
-				column: column
+			return result;
+		}
+
+		function eachComma(list) {
+			var cursor = list.head;
+			var result = [];
+
+			while (cursor !== null) {
+				if (cursor.prev) {
+					result.push(',', this.generate(cursor.data));
+				} else {
+					result.push(this.generate(cursor.data));
+				}
+
+				cursor = cursor.next;
+			}
+
+			return result;
+		}
+
+		function createGenerator(types) {
+			var context = {
+				generate: function(node, item, list) {
+					if (hasOwnProperty.call(types, node.type)) {
+						var ret = types[node.type].call(this, node, item, list);
+						return typeof ret === 'string' ? ret : ret.join('');
+					} else {
+						throw new Error('Unknown node type: ' + node.type);
+					}
+				},
+				each: each,
+				eachComma: eachComma
 			};
 
-			throw error;
+			return function(node) {
+				return context.generate(node);
+			};
 		}
 
-		function eat(tokenType) {
-			if (scanner.token !== null && scanner.token.type === tokenType) {
-				scanner.next();
-				return true;
-			}
+		function createMarkupGenerator(types) {
+			var context = {
+				generate: function(node, item, list) {
+					if (hasOwnProperty.call(types, node.type)) {
+						return {
+							node: node,
+							value: types[node.type].call(this, node, item, list)
+						};
+					} else {
+						throw new Error('Unknown node type: ' + node.type);
+					}
+				},
+				each: each,
+				eachComma: eachComma
+			};
 
-			parseError(tokenType + ' is expected');
-		}
+			return function(node, before, after) {
+				function walk(node, buffer) {
+					var value = node.value;
 
-		function expectIdentifier(name, eat) {
-			if (scanner.token !== null) {
-				if (scanner.token.type === TokenType.Identifier &&
-					scanner.token.value.toLowerCase() === name) {
-					if (eat) {
-						scanner.next();
+					before(node.node, buffer, value);
+
+					if (typeof value === 'string') {
+						buffer += value;
+					} else {
+						for (var i = 0; i < value.length; i++) {
+							if (typeof value[i] === 'string') {
+								buffer += value[i];
+							} else {
+								buffer = walk(value[i], buffer);
+							}
+						}
 					}
 
-					return true;
+					after(node.node, buffer, value);
+
+					return buffer;
+				}
+
+				if (typeof before !== 'function') {
+					before = function() {};
+				}
+				if (typeof after !== 'function') {
+					after = function() {};
+				}
+
+				return walk(context.generate(node), '');
+			};
+		}
+
+		var exports = {
+			createGenerator: createGenerator,
+			createMarkupGenerator: createMarkupGenerator/*BT-,
+			sourceMap: require('/css-tree/generator/sourceMap')
+			*/
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer
+	modules['/css-tree/lexer'] = function () {
+		'use strict';
+
+		var exports = {
+			Lexer: require('/css-tree/lexer/Lexer'),
+			grammar: require('/css-tree/lexer/grammar')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/grammar
+	modules['/css-tree/lexer/grammar'] = function () {
+		var exports = {
+			parse: require('/css-tree/lexer/grammar/parse'),
+			translate: require('/css-tree/lexer/grammar/translate'),
+			walk: require('/css-tree/lexer/grammar/walk')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/grammar/error
+	modules['/css-tree/lexer/grammar/error'] = function () {
+		'use strict';
+
+		var SyntaxParseError = function(message, syntaxStr, offset) {
+			var error = new SyntaxError();
+			error.name = 'SyntaxParseError';
+			error.rawMessage = message;
+			error.syntax = syntaxStr;
+			error.offset = offset;
+			error.message = error.rawMessage + '\n' +
+				'  ' + error.syntax + '\n' +
+				'--' + new Array((error.offset || error.syntax.length) + 1).join('-') + '^';
+
+			return error;
+		};
+
+		var exports = {
+			SyntaxParseError: SyntaxParseError
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/grammar/parse
+	modules['/css-tree/lexer/grammar/parse'] = function () {
+		'use strict';
+
+		var SyntaxParseError = require('/css-tree/lexer/grammar/error').SyntaxParseError;
+
+		var TAB = 9;
+		var N = 10;
+		var F = 12;
+		var R = 13;
+		var SPACE = 32;
+		var EXCLAMATIONMARK = 33;    // !
+		var NUMBERSIGN = 35;         // #
+		var PERCENTSIGN = 37;        // %
+		var AMPERSAND = 38;          // &
+		var APOSTROPHE = 39;         // '
+		var LEFTPARENTHESIS = 40;    // (
+		var RIGHTPARENTHESIS = 41;   // )
+		var ASTERISK = 42;           // *
+		var PLUSSIGN = 43;           // +
+		var COMMA = 44;              // ,
+		var SOLIDUS = 47;            // /
+		var LESSTHANSIGN = 60;       // <
+		var GREATERTHANSIGN = 62;    // >
+		var QUESTIONMARK = 63;       // ?
+		var LEFTSQUAREBRACKET = 91;  // [
+		var RIGHTSQUAREBRACKET = 93; // ]
+		var LEFTCURLYBRACKET = 123;  // {
+		var VERTICALLINE = 124;      // |
+		var RIGHTCURLYBRACKET = 125; // }
+		var COMBINATOR_PRECEDENCE = {
+			' ': 1,
+			'&&': 2,
+			'||': 3,
+			'|': 4
+		};
+		var MULTIPLIER_DEFAULT = {
+			comma: false,
+			min: 1,
+			max: 1
+		};
+		var MULTIPLIER_ZERO_OR_MORE = {
+			comma: false,
+			min: 0,
+			max: 0
+		};
+		var MULTIPLIER_ONE_OR_MORE = {
+			comma: false,
+			min: 1,
+			max: 0
+		};
+		var MULTIPLIER_ONE_OR_MORE_COMMA_SEPARATED = {
+			comma: true,
+			min: 1,
+			max: 0
+		};
+		var MULTIPLIER_ZERO_OR_ONE = {
+			comma: false,
+			min: 0,
+			max: 1
+		};
+		var NAME_CHAR = (function() {
+			var array = typeof Uint32Array === 'function' ? new Uint32Array(128) : new Array(128);
+			for (var i = 0; i < 128; i++) {
+				array[i] = /[a-zA-Z0-9\-]/.test(String.fromCharCode(i)) ? 1 : 0;
+			}
+			return array;
+		})();
+
+		var Tokenizer = function(str) {
+			this.str = str;
+			this.pos = 0;
+		};
+		Tokenizer.prototype = {
+			charCode: function() {
+				return this.pos < this.str.length ? this.str.charCodeAt(this.pos) : 0;
+			},
+			nextCharCode: function() {
+				return this.pos + 1 < this.str.length ? this.str.charCodeAt(this.pos + 1) : 0;
+			},
+
+			substringToPos: function(end) {
+				return this.str.substring(this.pos, this.pos = end);
+			},
+			eat: function(code) {
+				if (this.charCode() !== code) {
+					error(this, this.pos, 'Expect `' + String.fromCharCode(code) + '`');
+				}
+
+				this.pos++;
+			}
+		};
+
+		function scanSpaces(tokenizer) {
+			var end = tokenizer.pos + 1;
+
+			for (; end < tokenizer.str.length; end++) {
+				var code = tokenizer.str.charCodeAt(end);
+				if (code !== R && code !== N && code !== F && code !== SPACE && code !== TAB) {
+					break;
 				}
 			}
 
-			parseError('Identifier `' + name + '` is expected');
+			return tokenizer.substringToPos(end);
 		}
 
-		function expectAny(what) {
-			if (scanner.token !== null) {
-				for (var i = 1, type = scanner.token.type; i < arguments.length; i++) {
-					if (type === arguments[i]) {
+		function scanWord(tokenizer) {
+			var end = tokenizer.pos;
+
+			for (; end < tokenizer.str.length; end++) {
+				var code = tokenizer.str.charCodeAt(end);
+				if (code >= 128 || NAME_CHAR[code] === 0) {
+					break;
+				}
+			}
+
+			if (tokenizer.pos === end) {
+				error(tokenizer, tokenizer.pos, 'Expect a keyword');
+			}
+
+			return tokenizer.substringToPos(end);
+		}
+
+		function scanNumber(tokenizer) {
+			var end = tokenizer.pos;
+
+			for (; end < tokenizer.str.length; end++) {
+				var code = tokenizer.str.charCodeAt(end);
+				if (code < 48 || code > 57) {
+					break;
+				}
+			}
+
+			if (tokenizer.pos === end) {
+				error(tokenizer, tokenizer.pos, 'Expect a number');
+			}
+
+			return tokenizer.substringToPos(end);
+		}
+
+		function scanString(tokenizer) {
+			var end = tokenizer.str.indexOf('\'', tokenizer.pos + 1);
+
+			if (end === -1) {
+				error(tokenizer, tokenizer.str.length, 'Expect a quote');
+			}
+
+			return tokenizer.substringToPos(end + 1);
+		}
+
+		function readMultiplierRange(tokenizer, comma) {
+			var min = null;
+			var max = null;
+
+			tokenizer.eat(LEFTCURLYBRACKET);
+
+			min = scanNumber(tokenizer);
+
+			if (tokenizer.charCode() === COMMA) {
+				tokenizer.pos++;
+				if (tokenizer.charCode() !== RIGHTCURLYBRACKET) {
+					max = scanNumber(tokenizer);
+				}
+			} else {
+				max = min;
+			}
+
+			tokenizer.eat(RIGHTCURLYBRACKET);
+
+			return {
+				comma: comma,
+				min: Number(min),
+				max: max ? Number(max) : 0
+			};
+		}
+
+		function readMultiplier(tokenizer) {
+			switch (tokenizer.charCode()) {
+				case ASTERISK:
+					tokenizer.pos++;
+					return MULTIPLIER_ZERO_OR_MORE;
+
+				case PLUSSIGN:
+					tokenizer.pos++;
+					return MULTIPLIER_ONE_OR_MORE;
+
+				case QUESTIONMARK:
+					tokenizer.pos++;
+					return MULTIPLIER_ZERO_OR_ONE;
+
+				case NUMBERSIGN:
+					tokenizer.pos++;
+
+					if (tokenizer.charCode() !== LEFTCURLYBRACKET) {
+						return MULTIPLIER_ONE_OR_MORE_COMMA_SEPARATED;
+					}
+
+					return readMultiplierRange(tokenizer, true);
+
+				case LEFTCURLYBRACKET:
+					return readMultiplierRange(tokenizer, false);
+			}
+
+			return MULTIPLIER_DEFAULT;
+		}
+
+		function readProperty(tokenizer) {
+			var name;
+
+			tokenizer.eat(LESSTHANSIGN);
+			tokenizer.eat(APOSTROPHE);
+
+			name = scanWord(tokenizer);
+
+			tokenizer.eat(APOSTROPHE);
+			tokenizer.eat(GREATERTHANSIGN);
+
+			return {
+				type: 'Property',
+				name: name,
+				multiplier: readMultiplier(tokenizer)
+			};
+		}
+
+		function readType(tokenizer) {
+			var name;
+
+			tokenizer.eat(LESSTHANSIGN);
+			name = scanWord(tokenizer);
+
+			if (tokenizer.charCode() === LEFTPARENTHESIS &&
+				tokenizer.nextCharCode() === RIGHTPARENTHESIS) {
+				tokenizer.pos += 2;
+				name += '()';
+			}
+
+			tokenizer.eat(GREATERTHANSIGN);
+
+			return {
+				type: 'Type',
+				name: name,
+				multiplier: readMultiplier(tokenizer)
+			};
+		}
+
+		function readKeywordOrFunction(tokenizer) {
+			var sequence = null;
+			var name;
+
+			name = scanWord(tokenizer);
+
+			if (tokenizer.charCode() === LEFTPARENTHESIS) {
+				tokenizer.pos++;
+				sequence = readSequence(tokenizer);
+				tokenizer.eat(RIGHTPARENTHESIS);
+
+				return {
+					type: 'Function',
+					name: name,
+					sequence: sequence,
+					multiplier: readMultiplier(tokenizer)
+				};
+			}
+
+			return {
+				type: 'Keyword',
+				name: name,
+				multiplier: readMultiplier(tokenizer)
+			};
+		}
+
+		function regroupTerms(terms, combinators) {
+			function createGroup(terms, combinator) {
+				return {
+					type: 'Sequence',
+					terms: terms,
+					combinator: combinator
+				};
+			}
+
+			combinators = Object.keys(combinators).sort(function(a, b) {
+				return COMBINATOR_PRECEDENCE[a] - COMBINATOR_PRECEDENCE[b];
+			});
+
+			while (combinators.length > 0) {
+				var combinator = combinators.shift();
+				for (var i = 0, subgroupStart = 0; i < terms.length; i++) {
+					var term = terms[i];
+					if (term.type === 'Combinator') {
+						if (term.value === combinator) {
+							if (subgroupStart === -1) {
+								subgroupStart = i - 1;
+							}
+							terms.splice(i, 1);
+							i--;
+						} else {
+							if (subgroupStart !== -1 && i - subgroupStart > 1) {
+								terms.splice(
+									subgroupStart,
+									i - subgroupStart,
+									createGroup(terms.slice(subgroupStart, i), combinator)
+								);
+								i = subgroupStart + 1;
+							}
+							subgroupStart = -1;
+						}
+					}
+				}
+
+				if (subgroupStart !== -1 && combinators.length) {
+					terms.splice(
+						subgroupStart,
+						i - subgroupStart,
+						createGroup(terms.slice(subgroupStart, i), combinator)
+					);
+				}
+			}
+
+			return combinator;
+		}
+
+		function readSequence(tokenizer) {
+			var terms = [];
+			var combinators = {};
+			var token;
+			var prevToken = null;
+			var prevTokenPos = tokenizer.pos;
+
+			while (token = peek(tokenizer)) {
+				if (token.type !== 'Spaces') {
+					if (token.type === 'Combinator') {
+						// check for combinator in group beginning and double combinator sequence
+						if (prevToken === null || prevToken.type === 'Combinator') {
+							error(tokenizer, prevTokenPos, 'Unexpected combinator');
+						}
+
+						combinators[token.value] = true;
+					} else if (prevToken !== null && prevToken.type !== 'Combinator') {
+						combinators[' '] = true;  // a b
+						terms.push({
+							type: 'Combinator',
+							value: ' '
+						});
+					}
+
+					terms.push(token);
+					prevToken = token;
+					prevTokenPos = tokenizer.pos;
+				}
+			}
+
+			// check for combinator in group ending
+			if (prevToken !== null && prevToken.type === 'Combinator') {
+				error(tokenizer, tokenizer.pos - prevTokenPos, 'Unexpected combinator');
+			}
+
+			return {
+				type: 'Sequence',
+				terms: terms,
+				combinator: regroupTerms(terms, combinators) || ' '
+			};
+		}
+
+		function readGroup(tokenizer) {
+			var sequence;
+			var nonEmpty = false;
+			var multiplier;
+
+			tokenizer.eat(LEFTSQUAREBRACKET);
+			sequence = readSequence(tokenizer);
+
+			tokenizer.eat(RIGHTSQUAREBRACKET);
+			multiplier = readMultiplier(tokenizer);
+
+			if (tokenizer.charCode() === EXCLAMATIONMARK) {
+				tokenizer.pos++;
+				nonEmpty = true;
+			}
+
+			return {
+				type: 'Group',
+				terms: sequence.terms,
+				combinator: sequence.combinator,
+				nonEmpty: nonEmpty,
+				multiplier: multiplier
+			};
+		}
+
+		function peek(tokenizer) {
+			var code = tokenizer.charCode();
+
+			if (code < 128 && NAME_CHAR[code] === 1) {
+				return readKeywordOrFunction(tokenizer);
+			}
+
+			switch (code) {
+				case LEFTSQUAREBRACKET:
+					return readGroup(tokenizer);
+
+				case LESSTHANSIGN:
+					if (tokenizer.nextCharCode() === APOSTROPHE) {
+						return readProperty(tokenizer);
+					} else {
+						return readType(tokenizer);
+					}
+
+				case VERTICALLINE:
+					return {
+						type: 'Combinator',
+						value: tokenizer.substringToPos(tokenizer.nextCharCode() === VERTICALLINE ? tokenizer.pos + 2 : tokenizer.pos + 1)
+					};
+
+				case AMPERSAND:
+					tokenizer.pos++;
+					tokenizer.eat(AMPERSAND);
+					return {
+						type: 'Combinator',
+						value: '&&'
+					};
+
+				case COMMA:
+					tokenizer.pos++;
+					return {
+						type: 'Comma',
+						value: ','
+					};
+
+				case SOLIDUS:
+					tokenizer.pos++;
+					return {
+						type: 'Slash',
+						value: '/'
+					};
+
+				case PERCENTSIGN:  // looks like exception, needs for attr()'s <type-or-unit>
+					tokenizer.pos++;
+					return {
+						type: 'Percent',
+						value: '%'
+					};
+
+				case LEFTPARENTHESIS:
+					tokenizer.pos++;
+					var sequence = readSequence(tokenizer);
+					tokenizer.eat(RIGHTPARENTHESIS);
+
+					return {
+						type: 'Parentheses',
+						sequence: sequence
+					};
+
+				case APOSTROPHE:
+					return {
+						type: 'String',
+						value: scanString(tokenizer)
+					};
+
+				case SPACE:
+				case TAB:
+				case N:
+				case R:
+				case F:
+					return {
+						type: 'Spaces',
+						value: scanSpaces(tokenizer)
+					};
+			}
+		}
+
+		function error(tokenizer, pos, msg) {
+			throw new SyntaxParseError(msg || 'Unexpected input', tokenizer.str, pos);
+		}
+
+		function parse(str) {
+			var tokenizer = new Tokenizer(str);
+			var result = readSequence(tokenizer);
+
+			if (tokenizer.pos !== str.length) {
+				error(tokenizer, tokenizer.pos);
+			}
+
+			// reduce redundant sequences with single term
+			// if (result.terms.length === 1) {
+			//	 result = result.terms[0];
+			// }
+
+			return result;
+		}
+
+		// warm up parse to elimitate code branches that never execute
+		// fix soft deoptimizations (insufficient type feedback)
+		parse('[a&&<b>#|<\'c\'>*||e(){2,} f{2} /,(% g#{1,2})]!');
+
+		return parse;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/grammar/translate
+	modules['/css-tree/lexer/grammar/translate'] = function () {
+		'use strict';
+
+		function isTokenType(token/*, type, type*/) {
+			if (token) {
+				for (var i = 1; i < arguments.length; i++) {
+					if (token.type === arguments[i]) {
 						return true;
 					}
 				}
 			}
 
-			parseError(what + ' is expected');
+			return false;
 		}
 
-		function getInfo() {
-			if (needPositions && scanner.token) {
+		function serializeMultiplier(token) {
+			if (token.min === 0 && token.max === 1) {
+				return '?';
+			}
+
+			if (token.min === 1 && token.max === 1) {
+				return '';
+			}
+
+			if (token.min === 0 && token.max === 0) {
+				return '*';
+			}
+
+			if (token.min === 1 && token.max === 0) {
+				return token.comma ? '#' : '+';
+			}
+
+			return (
+				(token.comma ? '#' : '') +
+				'{' + token.min + (token.min !== token.max ? ',' + (token.max !== 0 ? token.max : '') : '') + '}'
+			);
+		}
+
+		function translateSequence(token, implicitBraces) {
+			var result = '';
+
+			if (token.type === 'Group' || implicitBraces) {
+				result += '[' + (!isTokenType(token.terms[0], 'Comma') ? ' ' : '');
+			}
+
+			result += token.terms.map(function(term) {
+				return translate(term, implicitBraces);
+			}).join(token.combinator === ' ' ? ' ' : ' ' + token.combinator + ' ');
+
+			if (token.type === 'Group' || implicitBraces) {
+				result += ' ]';
+			}
+
+			return result;
+		}
+
+		function translateParentheses(sequence, implicitBraces) {
+			if (!sequence.terms.length) {
+				return '()';
+			}
+
+			return '( ' + translateSequence(sequence, implicitBraces) + ' )';
+		}
+
+		function translate(token, implicitBraces) {
+			if (Array.isArray(token)) {
+				return token.map(function(item) {
+					return translate(item, implicitBraces);
+				}).join('');
+			}
+
+			switch (token.type) {
+				case 'Sequence':
+					return translateSequence(token, implicitBraces);
+
+				case 'Group':
+					return (
+						translateSequence(token, implicitBraces) +
+						(token.nonEmpty ? '!' : '') +
+						serializeMultiplier(token.multiplier)
+					);
+
+				case 'Keyword':
+					return token.name + serializeMultiplier(token.multiplier);
+
+				case 'Function':
+					return token.name + translateParentheses(token.sequence, implicitBraces) + serializeMultiplier(token.multiplier);
+
+				case 'Parentheses': // replace for seq('(' seq(...token.sequence) ')')
+					return translateParentheses(token.sequence, implicitBraces);
+
+				case 'Type':
+					return '<' + token.name + '>' + serializeMultiplier(token.multiplier);
+
+				case 'Property':
+					return '<\'' + token.name + '\'>' + serializeMultiplier(token.multiplier);
+
+				case 'Combinator': // remove?
+				case 'Slash':	  // replace for String? '/'
+				case 'Percent':	// replace for String? '%'
+				case 'String':
+				case 'Comma':
+					return token.value;
+
+				default:
+					throw new Error('Unknown type: ' + token.type);
+			}
+		}
+
+		return translate;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/grammar/walk
+	modules['/css-tree/lexer/grammar/walk'] = function () {
+		'use strict';
+
+		var exports = function walk(node, fn, context) {
+			switch (node.type) {
+				case 'Sequence':
+				case 'Group':
+					node.terms.forEach(function(term) {
+						walk(term, fn, context);
+					});
+					break;
+
+				case 'Function':
+				case 'Parentheses':
+					walk(node.sequence, fn, context);
+					break;
+
+				case 'Keyword':
+				case 'Type':
+				case 'Property':
+				case 'Combinator':
+				case 'Comma':
+				case 'Slash':
+				case 'String':
+				case 'Percent':
+					break;
+
+				default:
+					throw new Error('Unknown type: ' + node.type);
+			}
+
+			fn.call(context, node);
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/error
+	modules['/css-tree/lexer/error'] = function () {
+		'use strict';
+
+		var translateGrammar = require('/css-tree/lexer/grammar/translate');
+
+		function getLocation(node, point) {
+			var loc = node && node.loc && node.loc[point];
+
+			return loc
+				? { offset: loc.offset,
+					line: loc.line,
+					column: loc.column }
+				: null;
+		}
+
+		var MatchError = function(message, lexer, syntax, value, badNode) {
+			var errorOffset = -1;
+			var error = new SyntaxError(message);
+			var start = getLocation(badNode, 'start');
+			var end = getLocation(badNode, 'end');
+			var css = lexer.syntax.translateMarkup(value, function(node, buffer) {
+				if (node === badNode) {
+					errorOffset = buffer.length;
+				}
+			});
+
+			if (errorOffset === -1) {
+				errorOffset = css.length;
+			}
+
+			error.name = 'SyntaxMatchError';
+			error.rawMessage = message;
+			error.syntax = syntax ? translateGrammar(syntax) : '<generic>';
+			error.css = css;
+			error.mismatchOffset = errorOffset;
+			error.loc = {
+				source: badNode && badNode.loc && badNode.loc.source || '<unknown>',
+				start: start,
+				end: end
+			};
+			error.line = start ? start.line : undefined;
+			error.column = start ? start.column : undefined;
+			error.offset = start ? start.offset : undefined;
+			error.message = message + '\n' +
+				'  syntax: ' + error.syntax + '\n' +
+				'   value: ' + (error.css || '<empty string>') + '\n' +
+				'  --------' + new Array(error.mismatchOffset + 1).join('-') + '^';
+
+			return error;
+		};
+
+		var exports = {
+			MatchError: MatchError
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/generic
+	modules['/css-tree/lexer/generic'] = function () {
+		'use strict';
+
+		var names = require('/css-tree/utils/names');
+
+		// https://www.w3.org/TR/css-values-3/#lengths
+		var LENGTH = {
+			// absolute length units
+			'px': true,
+			'mm': true,
+			'cm': true,
+			'in': true,
+			'pt': true,
+			'pc': true,
+			'q': true,
+
+			// relative length units
+			'em': true,
+			'ex': true,
+			'ch': true,
+			'rem': true,
+
+			// viewport-percentage lengths
+			'vh': true,
+			'vw': true,
+			'vmin': true,
+			'vmax': true,
+			'vm': true
+		};
+
+		var ANGLE = {
+			'deg': true,
+			'grad': true,
+			'rad': true,
+			'turn': true
+		};
+
+		var TIME = {
+			's': true,
+			'ms': true
+		};
+
+		var FREQUENCY = {
+			'hz': true,
+			'khz': true
+		};
+
+		// https://www.w3.org/TR/css-values-3/#resolution
+		// https://www.w3.org/TR/css3-images/#resolution-type
+		var RESOLUTION = {
+			'dpi': true,
+			'dpcm': true,
+			'dppx': true
+		};
+
+		// https://drafts.csswg.org/css-grid/#fr-unit
+		var FLEX = {
+			'fr': true
+		};
+
+		// https://www.w3.org/TR/css3-speech/#mixing-props-voice-volume
+		var DECIBEL = {
+			'db': true
+		};
+
+		// https://www.w3.org/TR/css3-speech/#voice-props-voice-pitch
+		var SEMITONES = {
+			'st': true
+		};
+
+		// can be used wherever <length>, <frequency>, <angle>, <time>, <percentage>, <number>, or <integer> values are allowed
+		// https://drafts.csswg.org/css-values/#calc-notation
+		function isCalc(node) {
+			if (node.data.type !== 'Function') {
+				return false;
+			}
+
+			var keyword = names.keyword(node.data.name);
+
+			if (keyword.name !== 'calc') {
+				return false;
+			}
+
+			// there were some prefixed implementations
+			return keyword.vendor === '' ||
+				   keyword.vendor === '-moz-' ||
+				   keyword.vendor === '-webkit-';
+		}
+
+		function astNode(type) {
+			return function(node) {
+				return node.data.type === type;
+			};
+		}
+
+		function dimension(type) {
+			return function(node) {
+				return isCalc(node) ||
+					   (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase()));
+			};
+		}
+
+		function zeroUnitlessDimension(type) {
+			return function(node) {
+				return isCalc(node) ||
+					   (node.data.type === 'Dimension' && type.hasOwnProperty(node.data.unit.toLowerCase())) ||
+					   (node.data.type === 'Number' && Number(node.data.value) === 0);
+			};
+		}
+
+		function attr(node) {
+			return node.data.type === 'Function' && node.data.name.toLowerCase() === 'attr';
+		}
+
+		function number(node) {
+			return isCalc(node) || node.data.type === 'Number';
+		}
+
+		function numberZeroOne(node) {
+			if (isCalc(node) || node.data.type === 'Number') {
+				var value = Number(node.data.value);
+
+				return value >= 0 && value <= 1;
+			}
+
+			return false;
+		}
+
+		function numberOneOrGreater(node) {
+			if (isCalc(node) || node.data.type === 'Number') {
+				return Number(node.data.value) >= 1;
+			}
+
+			return false;
+		}
+
+		// TODO: fail on 10e-2
+		function integer(node) {
+			return isCalc(node) ||
+				   (node.data.type === 'Number' && node.data.value.indexOf('.') === -1);
+		}
+
+		// TODO: fail on 10e-2
+		function positiveInteger(node) {
+			return isCalc(node) ||
+				   (node.data.type === 'Number' && node.data.value.indexOf('.') === -1 && node.data.value.charAt(0) !== '-');
+		}
+
+		function percentage(node) {
+			return isCalc(node) ||
+				   node.data.type === 'Percentage';
+		}
+
+		function hexColor(node) {
+			if (node.data.type !== 'HexColor') {
+				return false;
+			}
+
+			var hex = node.data.value;
+
+			return /^[0-9a-fA-F]{3,8}$/.test(hex) &&
+				   (hex.length === 3 || hex.length === 4 || hex.length === 6 || hex.length === 8);
+		}
+
+		function expression(node) {
+			return node.data.type === 'Function' && node.data.name.toLowerCase() === 'expression';
+		}
+
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident
+		function customIdent(node) {
+			if (node.data.type !== 'Identifier') {
+				return false;
+			}
+
+			var name = node.data.name.toLowerCase();
+
+			// can't be a global CSS value
+			if (name === 'unset' || name === 'initial' || name === 'inherit') {
+				return false;
+			}
+
+			// TODO: ignore property specific keywords (as described https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident)
+
+			return true;
+		}
+
+		var exports = {
+			'angle': zeroUnitlessDimension(ANGLE),
+			'attr()': attr,
+			'custom-ident': customIdent,
+			'decibel': dimension(DECIBEL),
+			'dimension': astNode('Dimension'),
+			'frequency': dimension(FREQUENCY),
+			'flex': dimension(FLEX),
+			'hex-color': hexColor,
+			'id-selector': astNode('IdSelector'), // element( <id-selector> )
+			'ident': astNode('Identifier'),
+			'integer': integer,
+			'length': zeroUnitlessDimension(LENGTH),
+			'number': number,
+			'number-zero-one': numberZeroOne,
+			'number-one-or-greater': numberOneOrGreater,
+			'percentage': percentage,
+			'positive-integer': positiveInteger,
+			'resolution': dimension(RESOLUTION),
+			'semitones': dimension(SEMITONES),
+			'string': astNode('String'),
+			'time': dimension(TIME),
+			'unicode-range': astNode('UnicodeRange'),
+			'url': astNode('Url'),
+
+			// old IE stuff
+			'progid': astNode('Raw'),
+			'expression': expression
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/Lexer
+	modules['/css-tree/lexer/Lexer'] = function () {
+		'use strict';
+
+		var MatchError = require('/css-tree/lexer/error').MatchError;
+		var names = require('/css-tree/utils/names');
+		var generic = require('/css-tree/lexer/generic');
+		var parse = require('/css-tree/lexer/grammar/parse');
+		var translate = require('/css-tree/lexer/grammar/translate');
+		var walk = require('/css-tree/lexer/grammar/walk');
+		var match = require('/css-tree/lexer/match');
+		var cssWideKeywords = parse('inherit | initial | unset');
+		var cssWideKeywordsWithExpression = parse('inherit | initial | unset | <expression>');
+
+		function dumpMapSyntax(map, syntaxAsAst) {
+			var result = {};
+
+			for (var name in map) {
+				if (map[name].syntax) {
+					result[name] = syntaxAsAst ? map[name].syntax : translate(map[name].syntax);
+				}
+			}
+
+			return result;
+		}
+
+		function unwrapNode(item) {
+			return item && item.data;
+		}
+
+		function valueHasVar(value) {
+			var hasVar = false;
+
+			this.syntax.walk(value, function(node) {
+				if (node.type === 'Function' && node.name.toLowerCase() === 'var') {
+					hasVar = true;
+				}
+			});
+
+			return hasVar;
+		}
+
+		// check node is \0 or \9 hack
+		function isHack(node) {
+			return node.type === 'Identifier' && /^\\[09]/.test(node.name);
+		}
+
+		// white spaces, comments and some hacks can to be ignored at the end of value
+		function isNextMayToBeIgnored(cursor) {
+			while (cursor !== null) {
+				if (cursor.data.type !== 'WhiteSpace' &&
+					cursor.data.type !== 'Comment' &&
+					!isHack(cursor.data)) {
+					return false;
+				}
+
+				cursor = cursor.next;
+			}
+
+			return true;
+		}
+
+		function matchSyntax(lexer, syntax, value) {
+			var result;
+
+			if (!value || value.type !== 'Value') {
 				return {
-					source: filename,
-					offset: scanner.token.offset,
-					line: scanner.token.line,
-					column: scanner.token.column
+					type: 'NoMatch',
+					comment: 'Not a Value node'
 				};
 			}
 
-			return null;
+			if (valueHasVar.call(lexer, value)) {
+				return {
+					type: 'NoMatch',
+					comment: 'Due to matching for value with var() is very complex those values are always valid for now'
+				};
+			}
 
-		}
+			result = match(lexer, lexer.valueCommonSyntax, value.children.head);
 
-		function removeTrailingSpaces(list) {
-			while (list.tail) {
-				if (list.tail.data.type === 'Space') {
-					list.remove(list.tail);
-				} else {
-					break;
+			if (!result.match) {
+				result = syntax.match(value.children.head);
+				if (!result || !result.match) {
+					lexer.lastMatchError = new MatchError('Mismatch', lexer, syntax.syntax, value, result.badNode || unwrapNode(result.next));
+					return null;
 				}
 			}
+
+			if (result.next && !isNextMayToBeIgnored(result.next)) {
+				lexer.lastMatchError = new MatchError('Uncomplete match', lexer, syntax.syntax, value, result.badNode || unwrapNode(result.next));
+				return null;
+			}
+
+			lexer.lastMatchError = null;
+			return result.match;
 		}
 
-		function getStylesheet(nested) {
-			var child = null;
-			var node = {
-				type: 'StyleSheet',
-				info: getInfo(),
-				rules: new List()
-			};
+		var Lexer = function(config, syntax, structure) {
+			this.valueCommonSyntax = cssWideKeywords;
+			this.syntax = syntax;
+			this.generic = false;
+			this.properties = {};
+			this.types = {};
+			this.structure = structure;
 
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.Space:
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.Comment:
-						// ignore comments except exclamation comments on top level
-						if (nested || scanner.token.value.charAt(2) !== '!') {
-							scanner.next();
-							child = null;
-						} else {
-							child = getComment();
-						}
-						break;
-
-					case TokenType.Unknown:
-						child = getUnknown();
-						break;
-
-					case TokenType.CommercialAt:
-						child = getAtrule();
-						break;
-
-					case TokenType.RightCurlyBracket:
-						if (!nested) {
-							parseError('Unexpected right curly brace');
-						}
-
-						break scan;
-
-					default:
-						child = getRuleset();
+			if (config) {
+				if (config.generic) {
+					this.generic = true;
+					for (var name in generic) {
+						this.addType_(name, generic[name]);
+					}
 				}
 
-				if (child !== null) {
-					node.rules.insert(List.createItem(child));
+				if (config.types) {
+					for (var name in config.types) {
+						this.addType_(name, config.types[name]);
+					}
 				}
+
+				if (config.properties) {
+					for (var name in config.properties) {
+						this.addProperty_(name, config.properties[name]);
+					}
+				}
+			}
+		};
+
+		Lexer.prototype = {
+			structure: {},
+			checkStructure: function(ast) {
+				var structure = this.structure;
+				var warns = [];
+
+				this.syntax.walk(ast, function(node) {
+					if (structure.hasOwnProperty(node.type)) {
+						structure[node.type].check(node, warns.push.bind(warns));
+					} else {
+						throw new Error('Unknown node type: ' + node.type);
+					}
+				});
+
+				return warns.length ? warns : false;
+			},
+
+			createDescriptor: function(syntax) {
+				var self = this;
+				var descriptor = {
+					syntax: null,
+					match: null
+				};
+
+				if (typeof syntax === 'function') {
+					descriptor.match = function(node) {
+						if (node && syntax(node)) {
+							return {
+								badNode: null,
+								lastNode: null,
+								next: node.next,
+								match: [node.data]
+							};
+						}
+
+						return null;
+					};
+				} else {
+					if (typeof syntax === 'string') {
+						Object.defineProperty(descriptor, 'syntax', {
+							get: function() {
+								Object.defineProperty(descriptor, 'syntax', {
+									value: parse(syntax)
+								});
+
+								return descriptor.syntax;
+							}
+						});
+					} else {
+						descriptor.syntax = syntax;
+					}
+
+					descriptor.match = function(ast) {
+						return match(self, descriptor.syntax, ast);
+					};
+				}
+
+				return descriptor;
+			},
+			addProperty_: function(name, syntax) {
+				this.properties[name] = this.createDescriptor(syntax);
+			},
+			addType_: function(name, syntax) {
+				this.types[name] = this.createDescriptor(syntax);
+
+				if (syntax === generic.expression) {
+					this.valueCommonSyntax = cssWideKeywordsWithExpression;
+				}
+			},
+
+			lastMatchError: null,
+			matchProperty: function(propertyName, value) {
+				var property = names.property(propertyName);
+
+				// don't match syntax for a custom property
+				if (property.variable) {
+					return {
+						type: 'NoMatch',
+						comment: 'Lexer matching doesn\'t applicable for custom properties'
+					};
+				}
+
+				var propertySyntax = property.vendor
+					? this.getProperty(property.vendor + property.name) || this.getProperty(property.name)
+					: this.getProperty(property.name);
+
+				if (!propertySyntax) {
+					this.lastMatchError = new Error('Unknown property: ' + propertyName);
+					return null;
+				}
+
+				return matchSyntax(this, propertySyntax, value);
+			},
+			matchType: function(typeName, value) {
+				var typeSyntax = this.getType(typeName);
+
+				if (!typeSyntax) {
+					this.lastMatchError = new Error('Unknown type: ' + typeName);
+					return null;
+				}
+
+				return matchSyntax(this, typeSyntax, value);
+			},
+
+			getProperty: function(name) {
+				return this.properties.hasOwnProperty(name) ? this.properties[name] : null;
+			},
+			getType: function(name) {
+				return this.types.hasOwnProperty(name) ? this.types[name] : null;
+			},
+
+			validate: function() {
+				function validate(syntax, name, broken, descriptor) {
+					if (broken.hasOwnProperty(name)) {
+						return broken[name];
+					}
+
+					broken[name] = false;
+					if (descriptor.syntax !== null) {
+						walk(descriptor.syntax, function(node) {
+							if (node.type !== 'Type' && node.type !== 'Property') {
+								return;
+							}
+
+							var map = node.type === 'Type' ? syntax.types : syntax.properties;
+							var brokenMap = node.type === 'Type' ? brokenTypes : brokenProperties;
+
+							if (!map.hasOwnProperty(node.name) || validate(syntax, node.name, brokenMap, map[node.name])) {
+								broken[name] = true;
+							}
+						}, this);
+					}
+				}
+
+				var brokenTypes = {};
+				var brokenProperties = {};
+
+				for (var key in this.types) {
+					validate(this, key, brokenTypes, this.types[key]);
+				}
+
+				for (var key in this.properties) {
+					validate(this, key, brokenProperties, this.properties[key]);
+				}
+
+				brokenTypes = Object.keys(brokenTypes).filter(function(name) {
+					return brokenTypes[name];
+				});
+				brokenProperties = Object.keys(brokenProperties).filter(function(name) {
+					return brokenProperties[name];
+				});
+
+				if (brokenTypes.length || brokenProperties.length) {
+					return {
+						types: brokenTypes,
+						properties: brokenProperties
+					};
+				}
+
+				return null;
+			},
+			dump: function(syntaxAsAst) {
+				return {
+					generic: this.generic,
+					types: dumpMapSyntax(this.types, syntaxAsAst),
+					properties: dumpMapSyntax(this.properties, syntaxAsAst)
+				};
+			},
+			toString: function() {
+				return JSON.stringify(this.dump());
+			}
+		};
+
+		return Lexer;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/match
+	modules['/css-tree/lexer/match'] = function () {
+		'use strict';
+
+		var names = require('/css-tree/utils/names');
+		var MULTIPLIER_DEFAULT = {
+			comma: false,
+			min: 1,
+			max: 1,
+			value: ''
+		};
+
+		function skipSpaces(node) {
+			while (node !== null && (node.data.type === 'WhiteSpace' || node.data.type === 'Comment')) {
+				node = node.next;
 			}
 
 			return node;
 		}
 
-		// '//' ...
-		// TODO: remove it as wrong thing
-		function getUnknown() {
-			var info = getInfo();
-			var value = scanner.token.value;
+		var exports = function match(syntax, syntaxNode, node) {
+			var result = [];
+			var multiplier = syntaxNode.multiplier || MULTIPLIER_DEFAULT;
+			var min = multiplier.min;
+			var max = multiplier.max === 0 ? Infinity : multiplier.max;
+			var lastCommaTermCount;
+			var lastComma;
+			var matchCount = 0;
+			var lastNode = null;
+			var badNode = null;
 
-			eat(TokenType.Unknown);
+			mismatch:
+			while (matchCount < max) {
+				node = skipSpaces(node);
+				switch (syntaxNode.type) {
+					case 'Sequence':
+					case 'Group':
+						next:
+						switch (syntaxNode.combinator) {
+							case '|':
+								for (var i = 0; i < syntaxNode.terms.length; i++) {
+									var term = syntaxNode.terms[i];
+									var res = match(syntax, term, node);
+
+									if (res.match) {
+										result.push(res.match);
+										node = res.next;
+										break next;  // continue matching
+									} else if (res.badNode) {
+										badNode = res.badNode;
+										break mismatch;
+									}
+								}
+								break mismatch; // nothing found -> stop matching
+
+							case ' ':
+								var beforeMatchNode = node;
+								var lastMatchedTerm = null;
+								var hasTailMatch = false;
+								var commaMissed = false;
+
+								for (var i = 0; i < syntaxNode.terms.length; i++) {
+									var term = syntaxNode.terms[i];
+									var res = match(syntax, term, node);
+
+									if (res.match) {
+										if (term.type === 'Comma' && i !== 0 && !hasTailMatch) {
+											// recover cursor to state before last match and stop matching
+											lastNode = node && node.data;
+											node = beforeMatchNode;
+											break mismatch;
+										}
+
+										// non-empty match
+										if (res.match.match.length) {
+											// match should be preceded by a comma
+											if (commaMissed) {
+												lastNode = node && node.data;
+												node = beforeMatchNode;
+												break mismatch;
+											}
+
+											hasTailMatch = term.type !== 'Comma';
+											lastMatchedTerm = term;
+										}
+
+										result.push(res.match);
+										node = skipSpaces(res.next);
+									} else if (res.badNode) {
+										badNode = res.badNode;
+										break mismatch;
+									} else {
+										// it's ok when comma doesn't match when no matches yet
+										// but only if comma is not first or last term
+										if (term.type === 'Comma' && i !== 0 && i !== syntaxNode.terms.length - 1) {
+											if (hasTailMatch) {
+												commaMissed = true;
+											}
+											continue;
+										}
+
+										// recover cursor to state before last match and stop matching
+										lastNode = res.lastNode || (node && node.data);
+										node = beforeMatchNode;
+										break mismatch;
+									}
+								}
+
+								// don't allow empty match when [ ]!
+								if (!lastMatchedTerm && syntaxNode.nonEmpty) {
+									// empty match but shouldn't
+									// recover cursor to state before last match and stop matching
+									lastNode = node && node.data;
+									node = beforeMatchNode;
+									break mismatch;
+								}
+
+								// don't allow comma at the end but only if last term isn't a comma
+								if (lastMatchedTerm && lastMatchedTerm.type === 'Comma' && term.type !== 'Comma') {
+									lastNode = node && node.data;
+									node = beforeMatchNode;
+									break mismatch;
+								}
+
+								break;
+
+							case '&&':
+								var beforeMatchNode = node;
+								var lastMatchedTerm = null;
+								var terms = syntaxNode.terms.slice();
+
+								while (terms.length) {
+									var wasMatch = false;
+									var emptyMatched = 0;
+
+									for (var i = 0; i < terms.length; i++) {
+										var term = terms[i];
+										var res = match(syntax, term, node);
+
+										if (res.match) {
+											// non-empty match
+											if (res.match.match.length) {
+												lastMatchedTerm = term;
+											} else {
+												emptyMatched++;
+												continue;
+											}
+
+											wasMatch = true;
+											terms.splice(i--, 1);
+											result.push(res.match);
+											node = skipSpaces(res.next);
+											break;
+										} else if (res.badNode) {
+											badNode = res.badNode;
+											break mismatch;
+										}
+									}
+
+									if (!wasMatch) {
+										// terms left, but they all are optional
+										if (emptyMatched === terms.length) {
+											break;
+										}
+
+										// not ok
+										lastNode = node && node.data;
+										node = beforeMatchNode;
+										break mismatch;
+									}
+								}
+
+								if (!lastMatchedTerm && syntaxNode.nonEmpty) { // don't allow empty match when [ ]!
+									// empty match but shouldn't
+									// recover cursor to state before last match and stop matching
+									lastNode = node && node.data;
+									node = beforeMatchNode;
+									break mismatch;
+								}
+
+								break;
+
+							case '||':
+								var beforeMatchNode = node;
+								var lastMatchedTerm = null;
+								var terms = syntaxNode.terms.slice();
+
+								while (terms.length) {
+									var wasMatch = false;
+									var emptyMatched = 0;
+
+									for (var i = 0; i < terms.length; i++) {
+										var term = terms[i];
+										var res = match(syntax, term, node);
+										if (res.match) {
+											// non-empty match
+											if (res.match.match.length) {
+												lastMatchedTerm = term;
+											} else {
+												emptyMatched++;
+												continue;
+											}
+
+											wasMatch = true;
+											terms.splice(i--, 1);
+											result.push(res.match);
+											node = skipSpaces(res.next);
+											break;
+										} else if (res.badNode) {
+											badNode = res.badNode;
+											break mismatch;
+										}
+									}
+
+									if (!wasMatch) {
+										break;
+									}
+								}
+
+								// don't allow empty match
+								if (!lastMatchedTerm && (emptyMatched !== terms.length || syntaxNode.nonEmpty)) {
+									// empty match but shouldn't
+									// recover cursor to state before last match and stop matching
+									lastNode = node && node.data;
+									node = beforeMatchNode;
+									break mismatch;
+								}
+
+								break;
+						}
+
+						break;
+
+					case 'Function':
+						// expect a function node
+						if (!node || node.data.type !== 'Function') {
+							break mismatch;
+						}
+
+						var keyword = names.keyword(node.data.name);
+						var name = syntaxNode.name.toLowerCase();
+
+						// check function name with vendor consideration
+						if (name !== keyword.vendor + keyword.name) {
+							break mismatch;
+						}
+
+						var res = match(syntax, syntaxNode.sequence, node.data.children.head);
+						if (!res.match || res.next) {
+							badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;
+							break mismatch;
+						}
+
+						result.push(res.match);
+						// Use node.next instead of res.next here since syntax is matching
+						// for internal list and it's should be completelly matched (res.next is null at this point).
+						// Therefore function is matched and we going to next node
+						node = node.next;
+						break;
+
+					case 'Parentheses':
+						if (!node || node.data.type !== 'Parentheses') {
+							break mismatch;
+						}
+
+						var res = match(syntax, syntaxNode.sequence, node.data.children.head);
+						if (!res.match || res.next) {
+							badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;  // TODO: case when res.next === null
+							break mismatch;
+						}
+
+						result.push(res.match);
+						node = res.next;
+						break;
+
+					case 'Type':
+						var typeSyntax = syntax.getType(syntaxNode.name);
+						if (!typeSyntax) {
+							throw new Error('Unknown syntax type `' + syntaxNode.name + '`');
+						}
+
+						var res = typeSyntax.match(node);
+						if (!res || !res.match) {
+							badNode = res && res.badNode; // TODO: case when res.next === null
+							lastNode = (res && res.lastNode) || (node && node.data);
+							break mismatch;
+						}
+
+						result.push(res.match);
+						node = res.next;
+						break;
+
+					case 'Property':
+						var propertySyntax = syntax.getProperty(syntaxNode.name);
+						if (!propertySyntax) {
+							throw new Error('Unknown property `' + syntaxNode.name + '`');
+						}
+
+						var res = propertySyntax.match(node);
+						if (!res || !res.match) {
+							badNode = res && res.badNode; // TODO: case when res.next === null
+							lastNode = (res && res.lastNode) || (node && node.data);
+							break mismatch;
+						}
+
+						result.push(res.match);
+						node = res.next;
+						break;
+
+					case 'Keyword':
+						if (!node) {
+							break mismatch;
+						}
+
+						if (node.data.type === 'Identifier') {
+							var keyword = names.keyword(node.data.name);
+							var keywordName = keyword.name;
+							var name = syntaxNode.name.toLowerCase();
+
+							// drop \0 and \9 hack from keyword name
+							if (keywordName.indexOf('\\') !== -1) {
+								keywordName = keywordName.replace(/\\[09].*$/, '');
+							}
+
+							if (name !== keyword.vendor + keywordName) {
+								break mismatch;
+							}
+						} else {
+							// keyword may to be a number (a.e. font-weight: 400 )
+							if (node.data.type !== 'Number' || node.data.value !== syntaxNode.name) {
+								break mismatch;
+							}
+						}
+
+						result.push(node.data);
+						node = node.next;
+						break;
+
+					case 'Slash':
+					case 'Comma':
+						if (!node || node.data.type !== 'Operator' || node.data.value !== syntaxNode.value) {
+							break mismatch;
+						}
+
+						result.push(node.data);
+						node = node.next;
+						break;
+
+					case 'String':
+						if (!node || node.data.type !== 'String') {
+							break mismatch;
+						}
+
+						result.push(node.data);
+						node = node.next;
+						break;
+
+					default:
+						throw new Error('Not implemented yet node type: ' + syntaxNode.type);
+				}
+
+				matchCount++;
+				if (!node) {
+					break;
+				}
+
+				if (multiplier.comma) {
+					if (lastComma && lastCommaTermCount === result.length) {
+						// nothing match after comma
+						break mismatch;
+					}
+
+					node = skipSpaces(node);
+					if (node && node.data.type === 'Operator' && node.data.value === ',') {
+						lastCommaTermCount = result.length;
+						lastComma = node;
+						node = node.next;
+					} else {
+						lastNode = node && node.data;
+						break mismatch;
+					}
+				}
+			}
+
+			// console.log(syntaxNode.type, badNode, lastNode);
+
+			if (lastComma && lastCommaTermCount === result.length) {
+				// nothing match after comma
+				node = lastComma;
+			}
+
+			if (badNode) {
+				return {
+					badNode: badNode,
+					lastNode: null,
+					next: null,
+					match: null
+				};
+			}
 
 			return {
-				type: 'Unknown',
-				info: info,
-				value: value
+				badNode: null,
+				lastNode: lastNode,
+				next: node,
+				match: matchCount < min ? null : {
+					type: syntaxNode.type,
+					name: syntaxNode.name,
+					match: result
+				}
+			};
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/parser
+	modules['/css-tree/parser'] = function () {
+		'use strict';
+
+		var Tokenizer = require('/css-tree/tokenizer');
+		var sequence = require('/css-tree/parser/sequence');
+
+		var exports = function createParser(config) {
+			var parser = {
+				scanner: new Tokenizer(),
+				filename: '<unknown>',
+				needPositions: false,
+				parseAtruleExpression: true,
+				parseSelector: true,
+				parseValue: true,
+				parseCustomProperty: false,
+
+				readSequence: sequence,
+
+				getLocation: function(start, end) {
+					if (this.needPositions) {
+						return this.scanner.getLocationRange(
+							start,
+							end,
+							this.filename
+						);
+					}
+
+					return null;
+				},
+				getLocationFromList: function(list) {
+					if (this.needPositions) {
+						return this.scanner.getLocationRange(
+							list.head !== null ? list.first().loc.start.offset - this.scanner.startOffset : this.scanner.tokenStart,
+							list.head !== null ? list.last().loc.end.offset - this.scanner.startOffset : this.scanner.tokenStart,
+							this.filename
+						);
+					}
+
+					return null;
+				},
+
+				parse: function(source, options) {
+					options = options || {};
+
+					var context = options.context || 'default';
+					var ast;
+
+					this.scanner.setSource(source, options.offset, options.line, options.column);
+					this.filename = options.filename || '<unknown>';
+					this.needPositions = Boolean(options.positions);
+					this.parseAtruleExpression = 'parseAtruleExpression' in options ? Boolean(options.parseAtruleExpression) : true;
+					this.parseSelector = 'parseSelector' in options ? Boolean(options.parseSelector) : true;
+					this.parseValue = 'parseValue' in options ? Boolean(options.parseValue) : true;
+					this.parseCustomProperty = 'parseCustomProperty' in options ? Boolean(options.parseCustomProperty) : false;
+
+					if (!this.context.hasOwnProperty(context)) {
+						throw new Error('Unknown context `' + context + '`');
+					}
+
+					ast = this.context[context].call(this, options);
+
+					if (!this.scanner.eof) {
+						this.scanner.error();
+					}
+
+					// console.log(JSON.stringify(ast, null, 4));
+					return ast;
+				}
+			};
+
+			for (var key in config) {
+				parser[key] = config[key];
+			}
+
+			return parser.parse.bind(parser);
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/parser/sequence
+	modules['/css-tree/parser/sequence'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+
+		var exports = function readSequence(recognizer) {
+			var children = new List();
+			var child = null;
+			var context = {
+				recognizer: recognizer,
+				space: null,
+				ignoreWS: false,
+				ignoreWSAfter: false
+			};
+
+			this.scanner.skipSC();
+
+			while (!this.scanner.eof) {
+				switch (this.scanner.tokenType) {
+					case COMMENT:
+						this.scanner.next();
+						continue;
+
+					case WHITESPACE:
+						if (context.ignoreWS) {
+							this.scanner.next();
+						} else {
+							context.space = this.WhiteSpace();
+						}
+						continue;
+				}
+
+				child = recognizer.getNode.call(this, context);
+
+				if (child === undefined) {
+					break;
+				}
+
+				if (context.space !== null) {
+					children.appendData(context.space);
+					context.space = null;
+				}
+
+				children.appendData(child);
+
+				if (context.ignoreWSAfter) {
+					context.ignoreWSAfter = false;
+					context.ignoreWS = true;
+				} else {
+					context.ignoreWS = false;
+				}
+			}
+
+			return children;
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax
+	modules['/css-tree/syntax'] = function () {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var List = require('/css-tree/utils/list');
+		var createParser = require('/css-tree/parser');
+		var createGenerator = require('/css-tree/generator').createGenerator;
+		var createMarkupGenerator = require('/css-tree/generator').createMarkupGenerator;
+		/*BT-
+		var sourceMapGenerator = require('/css-tree/generator').sourceMap;
+		*/
+		var createConvertors = require('/css-tree/utils/convert');
+		var createWalker = require('/css-tree/walker');
+		var names = require('/css-tree/utils/names');
+		var mix = require('/css-tree/syntax/mix');
+
+		function assign(dest, src) {
+			for (var key in src) {
+				dest[key] = src[key];
+			}
+
+			return dest;
+		}
+
+		function createParseContext(name) {
+			return function() {
+				return this[name]();
 			};
 		}
 
-		function isBlockAtrule() {
-			for (var offset = 1, cursor; cursor = scanner.lookup(offset); offset++) {
-				var type = cursor.type;
+		function isValidNumber(value) {
+			// Number.isInteger(value) && value >= 0
+			return (
+				typeof value === 'number' &&
+				isFinite(value) &&
+				Math.floor(value) === value &&
+				value >= 0
+			);
+		}
 
-				if (type === TokenType.RightCurlyBracket) {
+		function isValidLocation(loc) {
+			return (
+				Boolean(loc) &&
+				isValidNumber(loc.offset) &&
+				isValidNumber(loc.line) &&
+				isValidNumber(loc.column)
+			);
+		}
+
+		function createNodeStructureChecker(type, fields) {
+			return function checkNode(node, warn) {
+				if (!node || node.constructor !== Object) {
+					return warn('Type of node should be an object');
+				}
+
+				for (var key in node) {
+					if (key === 'type') {
+						if (node.type !== type) {
+							warn('Wrong node type `' + node.type + '` but expected `' + type + '`');
+						}
+					} else if (key === 'loc') {
+						if (node.loc === null) {
+							continue;
+						} else if (node.loc && node.loc.constructor === Object) {
+							if (typeof node.loc.source === 'string' &&
+								isValidLocation(node.loc.start) &&
+								isValidLocation(node.loc.end)) {
+								continue;
+							}
+						}
+						warn('Wrong value for `' + type + '.' + key + '` field');
+					} else if (fields.hasOwnProperty(key)) {
+						for (var i = 0, valid = false; !valid && i < fields[key].length; i++) {
+							var fieldType = fields[key][i];
+
+							switch (fieldType) {
+								case String:
+									valid = typeof node[key] === 'string';
+									break;
+
+								case Boolean:
+									valid = typeof node[key] === 'boolean';
+									break;
+
+								case null:
+									valid = node[key] === null;
+									break;
+
+								default:
+									if (typeof fieldType === 'string') {
+										valid = node[key] && node[key].type === fieldType;
+									} else if (Array.isArray(fieldType)) {
+										valid = node[key] instanceof List;
+									}
+							}
+						}
+						if (!valid) {
+							warn('Wrong value for `' + type + '.' + key + '` field');
+						}
+					} else {
+						warn('Unknown field `' + key + '` for ' + type);
+					}
+				}
+
+				for (var key in fields) {
+					if (hasOwnProperty.call(node, key) === false) {
+						warn('Field `' + type + '.' + key + '` is missed');
+					}
+				}
+			};
+		}
+
+		function processStructure(name, nodeType) {
+			var structure = nodeType.structure;
+			var fields = {
+				type: String,
+				loc: true
+			};
+			var walkers = [];
+			var docs = {
+				type: '"' + name + '"'
+			};
+
+			for (var key in structure) {
+				var walker = {
+					name: key,
+					type: false,
+					nullable: false
+				};
+				var docsTypes = [];
+				var fieldTypes = fields[key] = Array.isArray(structure[key])
+					? structure[key].slice()
+					: [structure[key]];
+
+				for (var i = 0; i < fieldTypes.length; i++) {
+					var fieldType = fieldTypes[i];
+					if (fieldType === String || fieldType === Boolean) {
+						docsTypes.push(fieldType.name);
+					} else if (fieldType === null) {
+						walker.nullable = true;
+						docsTypes.push('null');
+					} else if (typeof fieldType === 'string') {
+						walker.type = 'node';
+						docsTypes.push('<' + fieldType + '>');
+					} else if (Array.isArray(fieldType)) {
+						walker.type = 'list';
+						docsTypes.push('List'); // TODO: use type enum
+					} else {
+						throw new Error('Wrong value in `' + name + '` structure definition');
+					}
+				}
+
+				docs[key] = docsTypes.join(' | ');
+
+				if (walker.type) {
+					walkers.push(walker);
+				}
+			}
+
+			return {
+				docs: docs,
+				check: createNodeStructureChecker(name, fields),
+				walk: walkers.length ? {
+					context: nodeType.walkContext,
+					fields: walkers
+				} : null
+			};
+		}
+
+		function createSyntax(config) {
+			var parser = { context: {}, scope: {}, atrule: {}, pseudo: {} };
+			var walker = { type: {} };
+			var generator = {};
+			var lexer = { structure: {} };
+
+			if (config.parseContext) {
+				for (var name in config.parseContext) {
+					switch (typeof config.parseContext[name]) {
+						case 'function':
+							parser.context[name] = config.parseContext[name];
+							break;
+
+						case 'string':
+							parser.context[name] = createParseContext(config.parseContext[name]);
+							break;
+					}
+				}
+			}
+
+			if (config.scope) {
+				for (var name in config.scope) {
+					parser.scope[name] = config.scope[name];
+				}
+			}
+
+			if (config.atrule) {
+				for (var name in config.atrule) {
+					var atrule = config.atrule[name];
+
+					if (atrule.parse) {
+						parser.atrule[name] = atrule.parse;
+					}
+				}
+			}
+
+			if (config.pseudo) {
+				for (var name in config.pseudo) {
+					var pseudo = config.pseudo[name];
+
+					if (pseudo.parse) {
+						parser.pseudo[name] = pseudo.parse;
+					}
+				}
+			}
+
+			if (config.node) {
+				for (var name in config.node) {
+					var nodeType = config.node[name];
+
+					parser[name] = nodeType.parse;
+					generator[name] = nodeType.generate;
+
+					if (nodeType.structure) {
+						var structure = processStructure(name, nodeType);
+						lexer.structure[name] = {
+							docs: structure.docs,
+							check: structure.check
+						};
+						if (structure.walk) {
+							walker.type[name] = structure.walk;
+						}
+					} else {
+						throw new Error('Missed `structure` field in `' + name + '` node type definition');
+					}
+				}
+			}
+
+			var parse = createParser(parser);
+			var Lexer = require('/css-tree/lexer/Lexer');
+			var walker = createWalker(walker.type);
+			var convertors = createConvertors(walker);
+			var markupGenerator = createMarkupGenerator(generator);
+
+			var syntax = {
+				List: require('/css-tree/utils/list'),
+				Tokenizer: require('/css-tree/tokenizer'),
+				Lexer: require('/css-tree/lexer/Lexer'),
+
+				property: names.property,
+				keyword: names.keyword,
+
+				lexer: null,
+				syntax: require('/css-tree/lexer'),
+				createLexer: function(config) {
+					return new Lexer(config, syntax, lexer.structure);
+				},
+
+				parse: parse,
+
+				walk: walker.all,
+				walkUp: walker.allUp,
+				walkRules: walker.rules,
+				walkRulesRight: walker.rulesRight,
+				walkDeclarations: walker.declarations,
+
+				translate: createGenerator(generator),
+				/*BT-
+				translateWithSourceMap: function(node) {
+					return sourceMapGenerator(markupGenerator, node);
+				},
+				*/
+				translateMarkup: markupGenerator,
+
+				clone: require('/css-tree/utils/clone'),
+				fromPlainObject: convertors.fromPlainObject,
+				toPlainObject: convertors.toPlainObject,
+
+				createSyntax: function(config) {
+					return createSyntax(mix({}, config));
+				},
+				fork: function(extension) {
+					var base = mix({}, config); // copy of config
+					return createSyntax(
+						typeof extension === 'function'
+							? extension(base, assign)
+							: mix(base, extension)
+					);
+				}
+			};
+
+			syntax.lexer = new Lexer({
+				generic: true,
+				types: config.types,
+				properties: config.properties
+			}, syntax, lexer.structure);
+
+			return syntax;
+		};
+
+		var exports = {};
+		exports.create = function(config) {
+			return createSyntax(mix({}, config));
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/atrule/font-face
+	modules['/css-tree/syntax/atrule/font-face'] = function () {
+		var exports = {
+			parse: {
+				expression: null,
+				block: function() {
+					return this.Block(this.Declaration);
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/atrule/import
+	modules['/css-tree/syntax/atrule/import'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var STRING = TYPE.String;
+		var IDENTIFIER = TYPE.Identifier;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+
+		var exports = {
+			parse: {
+				expression: function() {
+					var children = new List();
+
+					this.scanner.skipSC();
+
+					switch (this.scanner.tokenType) {
+						case STRING:
+							children.appendData(this.String());
+							break;
+
+						case IDENTIFIER:
+							children.appendData(this.Url());
+							break;
+
+						default:
+							this.scanner.error('String or url() is expected');
+					}
+
+					if (this.scanner.lookupNonWSType(0) === IDENTIFIER ||
+						this.scanner.lookupNonWSType(0) === LEFTPARENTHESIS) {
+						children.appendData(this.WhiteSpace());
+						children.appendData(this.MediaQueryList());
+					}
+
+					return children;
+				},
+				block: false
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/atrule/media
+	modules['/css-tree/syntax/atrule/media'] = function () {
+		var exports = {
+			parse: {
+				expression: function() {
+					return this.MediaQueryList();
+				},
+				block: function() {
+					return this.Block(this.Rule);
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/atrule/page
+	modules['/css-tree/syntax/atrule/page'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+
+		var exports = {
+			parse: {
+				expression: function() {
+					if (this.scanner.lookupNonWSType(0) === LEFTCURLYBRACKET) {
+						return null;
+					}
+
+					return this.SelectorList();
+				},
+				block: function() {
+					return this.Block(this.Declaration);
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/atrule/supports
+	modules['/css-tree/syntax/atrule/supports'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+		var IDENTIFIER = TYPE.Identifier;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var COLON = TYPE.Colon;
+		var BALANCED = true;
+
+		function readRaw() {
+			return new List().appendData(
+				this.Raw(BALANCED, 0, 0)
+			);
+		}
+
+		function parentheses() {
+			var index = 0;
+
+			this.scanner.skipSC();
+
+			// TODO: make it simplier
+			if (this.scanner.tokenType === IDENTIFIER) {
+				index = 1;
+			} else if (this.scanner.tokenType === HYPHENMINUS &&
+					   this.scanner.lookupType(1) === IDENTIFIER) {
+				index = 2;
+			}
+
+			if (index !== 0 && this.scanner.lookupNonWSType(index) === COLON) {
+				return new List().appendData(
+					this.Declaration()
+				);
+			}
+
+			return readSequence.call(this);
+		}
+
+		function readSequence() {
+			var children = new List();
+			var space = null;
+			var child;
+
+			this.scanner.skipSC();
+
+			scan:
+			while (!this.scanner.eof) {
+				switch (this.scanner.tokenType) {
+					case WHITESPACE:
+						space = this.WhiteSpace();
+						continue;
+
+					case COMMENT:
+						this.scanner.next();
+						continue;
+
+					case IDENTIFIER:
+						if (this.scanner.lookupType(1) === LEFTPARENTHESIS) {
+							child = this.Function(readRaw, this.scope.AtruleExpression);
+						} else {
+							child = this.Identifier();
+						}
+
+						break;
+
+					case LEFTPARENTHESIS:
+						child = this.Parentheses(parentheses, this.scope.AtruleExpression);
+						break;
+
+					default:
+						break scan;
+				}
+
+				if (space !== null) {
+					children.appendData(space);
+					space = null;
+				}
+
+				children.appendData(child);
+			}
+
+			return children;
+		}
+
+		var exports = {
+			parse: {
+				expression: function() {
+					var children = readSequence.call(this);
+
+					if (children.isEmpty()) {
+						this.scanner.error('Condition is expected');
+					}
+
+					return children;
+				},
+				block: function() {
+					return this.Block(this.Rule);
+				}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/function/element
+	modules['/css-tree/syntax/function/element'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		// https://drafts.csswg.org/css-images-4/#element-notation
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/element
+		var exports = function() {
+			this.scanner.skipSC();
+
+			var id = this.IdSelector();
+
+			this.scanner.skipSC();
+
+			return new List().appendData(
+				id
+			);
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/function/expression
+	modules['/css-tree/syntax/function/expression'] = function () {
+		var List = require('/css-tree/utils/list');
+		var BALANCED = true;
+
+		// legacy IE function
+		// expression '(' raw ')'
+		var exports = function() {
+			return new List().appendData(
+				this.Raw(BALANCED, 0, 0)
+			);
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/function/var
+	modules['/css-tree/syntax/function/var'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var COMMA = TYPE.Comma;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var EXCLAMATIONMARK = TYPE.ExclamationMark;
+		var BALANCED = true;
+
+		// var '(' ident (',' <value>? )? ')'
+		var exports = function() {
+			var children = new List();
+
+			this.scanner.skipSC();
+
+			var identStart = this.scanner.tokenStart;
+
+			this.scanner.eat(HYPHENMINUS);
+			if (this.scanner.source.charCodeAt(this.scanner.tokenStart) !== HYPHENMINUS) {
+				this.scanner.error('HyphenMinus is expected');
+			}
+			this.scanner.eat(IDENTIFIER);
+
+			children.appendData({
+				type: 'Identifier',
+				loc: this.getLocation(identStart, this.scanner.tokenStart),
+				name: this.scanner.substrToCursor(identStart)
+			});
+
+			this.scanner.skipSC();
+
+			if (this.scanner.tokenType === COMMA) {
+				children.appendData(this.Operator());
+				children.appendData(this.parseCustomProperty
+					? this.Value(null)
+					: this.Raw(BALANCED, HYPHENMINUS, EXCLAMATIONMARK)
+				);
+			}
+
+			return children;
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/AnPlusB
+	modules['/css-tree/syntax/node/AnPlusB'] = function () {
+		var cmpChar = require('/css-tree/tokenizer').cmpChar;
+		var isNumber = require('/css-tree/tokenizer').isNumber;
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBER = TYPE.Number;
+		var PLUSSIGN = TYPE.PlusSign;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var N = 110; // 'n'.charCodeAt(0)
+		var DISALLOW_SIGN = true;
+		var ALLOW_SIGN = false;
+
+		function checkTokenIsInteger(scanner, disallowSign) {
+			var pos = scanner.tokenStart;
+
+			if (scanner.source.charCodeAt(pos) === PLUSSIGN ||
+				scanner.source.charCodeAt(pos) === HYPHENMINUS) {
+				if (disallowSign) {
+					scanner.error();
+				}
+				pos++;
+			}
+
+			for (; pos < scanner.tokenEnd; pos++) {
+				if (!isNumber(scanner.source.charCodeAt(pos))) {
+					scanner.error('Unexpected input', pos);
+				}
+			}
+		}
+
+		// An+B microsyntax https://www.w3.org/TR/css-syntax-3/#anb
+		var exports = {
+			name: 'AnPlusB',
+			structure: {
+				a: [String, null],
+				b: [String, null]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var end = start;
+				var prefix = '';
+				var a = null;
+				var b = null;
+
+				if (this.scanner.tokenType === NUMBER ||
+					this.scanner.tokenType === PLUSSIGN) {
+					checkTokenIsInteger(this.scanner, ALLOW_SIGN);
+					prefix = this.scanner.getTokenValue();
+					this.scanner.next();
+					end = this.scanner.tokenStart;
+				}
+
+				if (this.scanner.tokenType === IDENTIFIER) {
+					var bStart = this.scanner.tokenStart;
+
+					if (cmpChar(this.scanner.source, bStart, HYPHENMINUS)) {
+						if (prefix === '') {
+							prefix = '-';
+							bStart++;
+						} else {
+							this.scanner.error('Unexpected hyphen minus');
+						}
+					}
+
+					if (!cmpChar(this.scanner.source, bStart, N)) {
+						this.scanner.error();
+					}
+
+					a = prefix === ''  ? '1'  :
+						prefix === '+' ? '+1' :
+						prefix === '-' ? '-1' :
+						prefix;
+
+					var len = this.scanner.tokenEnd - bStart;
+					if (len > 1) {
+						// ..n-..
+						if (this.scanner.source.charCodeAt(bStart + 1) !== HYPHENMINUS) {
+							this.scanner.error('Unexpected input', bStart + 1);
+						}
+
+						if (len > 2) {
+							// ..n-{number}..
+							this.scanner.tokenStart = bStart + 2;
+						} else {
+							// ..n- {number}
+							this.scanner.next();
+							this.scanner.skipSC();
+						}
+
+						checkTokenIsInteger(this.scanner, DISALLOW_SIGN);
+						b = '-' + this.scanner.getTokenValue();
+						this.scanner.next();
+						end = this.scanner.tokenStart;
+					} else {
+						prefix = '';
+						this.scanner.next();
+						end = this.scanner.tokenStart;
+						this.scanner.skipSC();
+
+						if (this.scanner.tokenType === HYPHENMINUS ||
+							this.scanner.tokenType === PLUSSIGN) {
+							prefix = this.scanner.getTokenValue();
+							this.scanner.next();
+							this.scanner.skipSC();
+						}
+
+						if (this.scanner.tokenType === NUMBER) {
+							checkTokenIsInteger(this.scanner, prefix !== '');
+
+							if (!isNumber(this.scanner.source.charCodeAt(this.scanner.tokenStart))) {
+								prefix = this.scanner.source.charAt(this.scanner.tokenStart);
+								this.scanner.tokenStart++;
+							}
+
+							if (prefix === '') {
+								// should be an operator before number
+								this.scanner.error();
+							} else if (prefix === '+') {
+								// plus is using by default
+								prefix = '';
+							}
+
+							b = prefix + this.scanner.getTokenValue();
+
+							this.scanner.next();
+							end = this.scanner.tokenStart;
+						} else {
+							if (prefix) {
+								this.scanner.eat(NUMBER);
+							}
+						}
+					}
+				} else {
+					if (prefix === '' || prefix === '+') { // no number
+						this.scanner.error(
+							'Number or identifier is expected',
+							this.scanner.tokenStart + (
+								this.scanner.tokenType === PLUSSIGN ||
+								this.scanner.tokenType === HYPHENMINUS
+							)
+						);
+					}
+
+					b = prefix;
+				}
+
+				return {
+					type: 'AnPlusB',
+					loc: this.getLocation(start, end),
+					a: a,
+					b: b
+				};
+			},
+			generate: function(node) {
+				var a = node.a !== null && node.a !== undefined;
+				var b = node.b !== null && node.b !== undefined;
+				var result;
+
+				if (a) {
+					result =
+						node.a === '+1' || node.a === '1' ? 'n' :
+						node.a === '-1' ? '-n' :
+						node.a + 'n';
+
+					if (b) {
+						b = String(node.b);
+						if (b.charAt(0) === '-' || b.charAt(0) === '+') {
+							result = [result, b.charAt(0), b.substr(1)];
+						} else {
+							result = [result, '+', b];
+						}
+					}
+				} else {
+					result = String(node.b);
+				}
+
+				return result;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Atrule
+	modules['/css-tree/syntax/node/Atrule'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var SEMICOLON = TYPE.Semicolon;
+		var COMMERCIALAT = TYPE.CommercialAt;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+		var BALANCED = true;
+
+		function isBlockAtrule() {
+			for (var offset = 1, type; type = this.scanner.lookupType(offset); offset++) {
+				if (type === RIGHTCURLYBRACKET) {
 					return true;
 				}
 
-				if (type === TokenType.LeftCurlyBracket ||
-					type === TokenType.CommercialAt) {
+				if (type === LEFTCURLYBRACKET ||
+					type === COMMERCIALAT) {
+					return false;
+				}
+			}
+
+			this.scanner.skip(offset);
+			this.scanner.eat(RIGHTCURLYBRACKET);
+		}
+
+		var exports = {
+			name: 'Atrule',
+			structure: {
+				name: String,
+				expression: ['AtruleExpression', 'MediaQueryList', 'SelectorList', 'Raw', null],
+				block: ['Block', null]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var name;
+				var nameLowerCase;
+				var expression = null;
+				var block = null;
+
+				this.scanner.eat(COMMERCIALAT);
+
+				name = this.scanner.consume(IDENTIFIER);
+				nameLowerCase = name.toLowerCase();
+				this.scanner.skipSC();
+
+				if (this.parseAtruleExpression) {
+					expression = this.AtruleExpression(name);
+					this.scanner.skipSC();
+				} else {
+					expression = this.Raw(BALANCED, SEMICOLON, LEFTCURLYBRACKET);
+				}
+
+				if (this.atrule.hasOwnProperty(nameLowerCase)) {
+					if (typeof this.atrule[nameLowerCase].block === 'function') {
+						if (this.scanner.tokenType !== LEFTCURLYBRACKET) {
+							this.scanner.error('Curly bracket is expected');
+						}
+
+						block = this.atrule[nameLowerCase].block.call(this);
+					} else {
+						this.scanner.eat(SEMICOLON);
+					}
+				} else {
+					switch (this.scanner.tokenType) {
+						case SEMICOLON:
+							this.scanner.next();
+							break;
+
+						case LEFTCURLYBRACKET:
+							block = this.Block(isBlockAtrule.call(this) ? this.Declaration : this.Rule);
+							break;
+
+						default:
+							this.scanner.error('Semicolon or block is expected');
+					}
+				}
+
+				return {
+					type: 'Atrule',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: name,
+					expression: expression,
+					block: block
+				};
+			},
+			generate: function(node) {
+				var result = ['@', node.name];
+
+				if (node.expression !== null) {
+					result.push(' ', this.generate(node.expression));
+				}
+
+				result.push(node.block ? this.generate(node.block) : ';');
+
+				return result;
+			},
+			walkContext: 'atrule'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/AtruleExpression
+	modules['/css-tree/syntax/node/AtruleExpression'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = {
+			name: 'AtruleExpression',
+			structure: {
+				children: [[]]
+			},
+			parse: function(name) {
+				var children = null;
+
+				if (name !== null) {
+					name = name.toLowerCase();
+				}
+
+				// custom consumer
+				if (this.atrule.hasOwnProperty(name)) {
+					if (typeof this.atrule[name].expression === 'function') {
+						children = this.atrule[name].expression.call(this);
+
+						if (children instanceof List === false) {
+							return children;
+						}
+					}
+				} else {
+					// default consumer
+					this.scanner.skipSC();
+					children = this.readSequence(this.scope.AtruleExpression);
+				}
+
+				if (children === null || children.isEmpty()) {
+					return null;
+				}
+
+				return {
+					type: 'AtruleExpression',
+					loc: this.getLocationFromList(children),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.each(node.children);
+			},
+			walkContext: 'atruleExpression'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/AttributeSelector
+	modules['/css-tree/syntax/node/AttributeSelector'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var STRING = TYPE.String;
+		var DOLLARSIGN = TYPE.DollarSign;
+		var ASTERISK = TYPE.Asterisk;
+		var COLON = TYPE.Colon;
+		var EQUALSSIGN = TYPE.EqualsSign;
+		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+		var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
+		var CIRCUMFLEXACCENT = TYPE.CircumflexAccent;
+		var VERTICALLINE = TYPE.VerticalLine;
+		var TILDE = TYPE.Tilde;
+
+		function getAttributeName() {
+			if (this.scanner.eof) {
+				this.scanner.error('Unexpected end of input');
+			}
+
+			var start = this.scanner.tokenStart;
+			var expectIdentifier = false;
+			var checkColon = true;
+
+			if (this.scanner.tokenType === ASTERISK) {
+				expectIdentifier = true;
+				checkColon = false;
+				this.scanner.next();
+			} else if (this.scanner.tokenType !== VERTICALLINE) {
+				this.scanner.eat(IDENTIFIER);
+			}
+
+			if (this.scanner.tokenType === VERTICALLINE) {
+				if (this.scanner.lookupType(1) !== EQUALSSIGN) {
+					this.scanner.next();
+					this.scanner.eat(IDENTIFIER);
+				} else if (expectIdentifier) {
+					this.scanner.error('Identifier is expected', this.scanner.tokenEnd);
+				}
+			} else if (expectIdentifier) {
+				this.scanner.error('Vertical line is expected');
+			}
+
+			if (checkColon && this.scanner.tokenType === COLON) {
+				this.scanner.next();
+				this.scanner.eat(IDENTIFIER);
+			}
+
+			return {
+				type: 'Identifier',
+				loc: this.getLocation(start, this.scanner.tokenStart),
+				name: this.scanner.substrToCursor(start)
+			};
+		}
+
+		function getOperator() {
+			var start = this.scanner.tokenStart;
+			var tokenType = this.scanner.tokenType;
+
+			if (tokenType !== EQUALSSIGN &&		// =
+				tokenType !== TILDE &&			 // ~=
+				tokenType !== CIRCUMFLEXACCENT &&  // ^=
+				tokenType !== DOLLARSIGN &&		// $=
+				tokenType !== ASTERISK &&		  // *=
+				tokenType !== VERTICALLINE		 // |=
+			) {
+				this.scanner.error('Attribute selector (=, ~=, ^=, $=, *=, |=) is expected');
+			}
+
+			if (tokenType === EQUALSSIGN) {
+				this.scanner.next();
+			} else {
+				this.scanner.next();
+				this.scanner.eat(EQUALSSIGN);
+			}
+
+			return this.scanner.substrToCursor(start);
+		}
+
+		// '[' S* attrib_name ']'
+		// '[' S* attrib_name S* attrib_match S* [ IDENT | STRING ] S* attrib_flags? S* ']'
+		var exports = {
+			name: 'AttributeSelector',
+			structure: {
+				name: 'Identifier',
+				operator: [String, null],
+				value: ['String', 'Identifier', null],
+				flags: [String, null]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var name;
+				var operator = null;
+				var value = null;
+				var flags = null;
+
+				this.scanner.eat(LEFTSQUAREBRACKET);
+				this.scanner.skipSC();
+
+				name = getAttributeName.call(this);
+				this.scanner.skipSC();
+
+				if (this.scanner.tokenType !== RIGHTSQUAREBRACKET) {
+					// avoid case `[name i]`
+					if (this.scanner.tokenType !== IDENTIFIER) {
+						operator = getOperator.call(this);
+
+						this.scanner.skipSC();
+
+						value = this.scanner.tokenType === STRING
+							? this.String()
+							: this.Identifier();
+
+						this.scanner.skipSC();
+					}
+
+					// attribute flags
+					if (this.scanner.tokenType === IDENTIFIER) {
+						flags = this.scanner.getTokenValue();
+						this.scanner.next();
+
+						this.scanner.skipSC();
+					}
+				}
+
+				this.scanner.eat(RIGHTSQUAREBRACKET);
+
+				return {
+					type: 'AttributeSelector',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: name,
+					operator: operator,
+					value: value,
+					flags: flags
+				};
+			},
+			generate: function(node) {
+				var result = ['[', this.generate(node.name)];
+				var flagsPrefix = ' ';
+
+				if (node.operator !== null) {
+					result.push(node.operator);
+
+					if (node.value !== null) {
+						result.push(this.generate(node.value));
+
+						// space between string and flags is not required
+						if (node.value.type === 'String') {
+							flagsPrefix = '';
+						}
+					}
+				}
+
+				if (node.flags !== null) {
+					result.push(flagsPrefix, node.flags);
+				}
+
+				result.push(']');
+
+				return result;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Block
+	modules['/css-tree/syntax/node/Block'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+		var SEMICOLON = TYPE.Semicolon;
+		var COMMERCIALAT = TYPE.CommercialAt;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+
+		var exports = {
+			name: 'Block',
+			structure: {
+				children: [['Atrule', 'Rule', 'Declaration']]
+			},
+			parse: function(defaultConsumer) {
+				defaultConsumer = defaultConsumer || this.Declaration;
+
+				var start = this.scanner.tokenStart;
+				var children = new List();
+
+				this.scanner.eat(LEFTCURLYBRACKET);
+
+				scan:
+				while (!this.scanner.eof) {
+					switch (this.scanner.tokenType) {
+						case RIGHTCURLYBRACKET:
+							break scan;
+
+						case WHITESPACE:
+						case COMMENT:
+						case SEMICOLON:
+							this.scanner.next();
+							break;
+
+						case COMMERCIALAT:
+							children.appendData(this.Atrule());
+							break;
+
+						default:
+							children.appendData(defaultConsumer.call(this));
+					}
+				}
+
+				this.scanner.eat(RIGHTCURLYBRACKET);
+
+				return {
+					type: 'Block',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return [].concat('{', this.each(node.children), '}');
+			},
+			walkContext: 'block'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Brackets
+	modules['/css-tree/syntax/node/Brackets'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+		var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
+
+		// currently only Grid Layout uses square brackets, but left it universal
+		// https://drafts.csswg.org/css-grid/#track-sizing
+		// [ ident* ]
+		var exports = {
+			name: 'Brackets',
+			structure: {
+				children: [[]]
+			},
+			parse: function(readSequence, recognizer) {
+				var start = this.scanner.tokenStart;
+				var children = null;
+
+				this.scanner.eat(LEFTSQUAREBRACKET);
+				children = readSequence.call(this, recognizer);
+				this.scanner.eat(RIGHTSQUAREBRACKET);
+
+				return {
+					type: 'Brackets',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return [].concat('[', this.each(node.children), ']');
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/CDC
+	modules['/css-tree/syntax/node/CDC'] = function () {
+		var CDC = require('/css-tree/tokenizer').TYPE.CDC;
+
+		var exports = {
+			name: 'CDC',
+			structure: [],
+			parse: function() {
+				var start = this.scanner.tokenStart;
+
+				this.scanner.eat(CDC); // -->
+
+				return {
+					type: 'CDC',
+					loc: this.getLocation(start, this.scanner.tokenStart)
+				};
+			},
+			generate: function() {
+				return '-->';
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/CDO
+	modules['/css-tree/syntax/node/CDO'] = function () {
+		var CDO = require('/css-tree/tokenizer').TYPE.CDO;
+
+		var exports = {
+			name: 'CDO',
+			structure: [],
+			parse: function() {
+				var start = this.scanner.tokenStart;
+
+				this.scanner.eat(CDO); // <!--
+
+				return {
+					type: 'CDO',
+					loc: this.getLocation(start, this.scanner.tokenStart)
+				};
+			},
+			generate: function() {
+				return '<!--';
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/ClassSelector
+	modules['/css-tree/syntax/node/ClassSelector'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var IDENTIFIER = TYPE.Identifier;
+		var FULLSTOP = TYPE.FullStop;
+
+		// '.' ident
+		var exports = {
+			name: 'ClassSelector',
+			structure: {
+				name: String
+			},
+			parse: function() {
+				this.scanner.eat(FULLSTOP);
+
+				return {
+					type: 'ClassSelector',
+					loc: this.getLocation(this.scanner.tokenStart - 1, this.scanner.tokenEnd),
+					name: this.scanner.consume(IDENTIFIER)
+				};
+			},
+			generate: function(node) {
+				return '.' + node.name;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Combinator
+	modules['/css-tree/syntax/node/Combinator'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var PLUSSIGN = TYPE.PlusSign;
+		var SOLIDUS = TYPE.Solidus;
+		var GREATERTHANSIGN = TYPE.GreaterThanSign;
+		var TILDE = TYPE.Tilde;
+
+		// + | > | ~ | /deep/
+		var exports = {
+			name: 'Combinator',
+			structure: {
+				name: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+
+				switch (this.scanner.tokenType) {
+					case GREATERTHANSIGN:
+					case PLUSSIGN:
+					case TILDE:
+						this.scanner.next();
+						break;
+
+					case SOLIDUS:
+						this.scanner.next();
+						this.scanner.expectIdentifier('deep');
+						this.scanner.eat(SOLIDUS);
+						break;
+
+					default:
+						this.scanner.error('Combinator is expected');
+				}
+
+				return {
+					type: 'Combinator',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: this.scanner.substrToCursor(start)
+				};
+			},
+			generate: function(node) {
+				return node.name;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Comment
+	modules['/css-tree/syntax/node/Comment'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var ASTERISK = TYPE.Asterisk;
+		var SOLIDUS = TYPE.Solidus;
+
+		// '/*' .* '*/'
+		var exports = {
+			name: 'Comment',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var end = this.scanner.tokenEnd;
+
+				if ((end - start + 2) >= 2 &&
+					this.scanner.source.charCodeAt(end - 2) === ASTERISK &&
+					this.scanner.source.charCodeAt(end - 1) === SOLIDUS) {
+					end -= 2;
+				}
+
+				this.scanner.next();
+
+				return {
+					type: 'Comment',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: this.scanner.source.substring(start + 2, end)
+				};
+			},
+			generate: function(node) {
+				return '/*' + node.value + '*/';
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Declaration
+	modules['/css-tree/syntax/node/Declaration'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var COLON = TYPE.Colon;
+		var EXCLAMATIONMARK = TYPE.ExclamationMark;
+		var SOLIDUS = TYPE.Solidus;
+		var ASTERISK = TYPE.Asterisk;
+		var DOLLARSIGN = TYPE.DollarSign;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var SEMICOLON = TYPE.Semicolon;
+		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var PLUSSIGN = TYPE.PlusSign;
+		var NUMBERSIGN = TYPE.NumberSign;
+		var BALANCED = true;
+
+		var exports = {
+			name: 'Declaration',
+			structure: {
+				important: [Boolean, String],
+				property: String,
+				value: ['Value', 'Raw']
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var property = readProperty.call(this);
+				var important = false;
+				var value;
+
+				this.scanner.skipSC();
+				this.scanner.eat(COLON);
+
+				if (isCustomProperty(property) ? this.parseCustomProperty : this.parseValue) {
+					value = this.Value(property);
+				} else {
+					value = this.Raw(BALANCED, SEMICOLON, EXCLAMATIONMARK);
+				}
+
+				if (this.scanner.tokenType === EXCLAMATIONMARK) {
+					important = getImportant(this.scanner);
+					this.scanner.skipSC();
+				}
+
+				// TODO: include or not to include semicolon to range?
+				// if (this.scanner.tokenType === SEMICOLON) {
+				//	 this.scanner.next();
+				// }
+
+				if (!this.scanner.eof &&
+					this.scanner.tokenType !== SEMICOLON &&
+					this.scanner.tokenType !== RIGHTPARENTHESIS &&
+					this.scanner.tokenType !== RIGHTCURLYBRACKET) {
+					this.scanner.error();
+				}
+
+				return {
+					type: 'Declaration',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					important: important,
+					property: property,
+					value: value
+				};
+			},
+			generate: function(node, item) {
+				var result = [node.property, ':', this.generate(node.value)];
+
+				if (node.important) {
+					result.push(node.important === true ? '!important' : '!' + node.important);
+				}
+
+				if (item && item.next) {
+					result.push(';');
+				}
+
+				return result;
+			},
+			walkContext: 'declaration'
+		};
+
+		function isCustomProperty(name) {
+			return name.length >= 2 &&
+				   name.charCodeAt(0) === HYPHENMINUS &&
+				   name.charCodeAt(1) === HYPHENMINUS;
+		}
+
+		function readProperty() {
+			var start = this.scanner.tokenStart;
+			var prefix = 0;
+
+			// hacks
+			switch (this.scanner.tokenType) {
+				case ASTERISK:
+				case DOLLARSIGN:
+				case PLUSSIGN:
+				case NUMBERSIGN:
+					prefix = 1;
+					break;
+
+				// TODO: not sure we should support this hack
+				case SOLIDUS:
+					prefix = this.scanner.lookupType(1) === SOLIDUS ? 2 : 1;
+					break;
+			}
+
+			if (this.scanner.lookupType(prefix) === HYPHENMINUS) {
+				prefix++;
+			}
+
+			if (prefix) {
+				this.scanner.skip(prefix);
+			}
+
+			this.scanner.eat(IDENTIFIER);
+
+			return this.scanner.substrToCursor(start);
+		}
+
+		// ! ws* important
+		function getImportant(scanner) {
+			scanner.eat(EXCLAMATIONMARK);
+			scanner.skipSC();
+
+			var important = scanner.consume(IDENTIFIER);
+
+			// store original value in case it differ from `important`
+			// for better original source restoring and hacks like `!ie` support
+			return important === 'important' ? true : important;
+		}
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/DeclarationList
+	modules['/css-tree/syntax/node/DeclarationList'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+		var SEMICOLON = TYPE.Semicolon;
+
+		var exports = {
+			name: 'DeclarationList',
+			structure: {
+				children: [['Declaration']]
+			},
+			parse: function() {
+				var children = new List();
+
+				scan:
+				while (!this.scanner.eof) {
+					switch (this.scanner.tokenType) {
+						case WHITESPACE:
+						case COMMENT:
+						case SEMICOLON:
+							this.scanner.next();
+							break;
+
+						default:
+							children.appendData(this.Declaration());
+					}
+				}
+
+				return {
+					type: 'DeclarationList',
+					loc: this.getLocationFromList(children),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.each(node.children);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Dimension
+	modules['/css-tree/syntax/node/Dimension'] = function () {
+		var NUMBER = require('/css-tree/tokenizer').TYPE.Number;
+
+		// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
+		function readUnit(scanner) {
+			var unit = scanner.getTokenValue();
+			var backSlashPos = unit.indexOf('\\');
+
+			if (backSlashPos > 0) {
+				// patch token offset
+				scanner.tokenStart += backSlashPos;
+
+				// return part before backslash
+				return unit.substring(0, backSlashPos);
+			}
+
+			// no backslash in unit name
+			scanner.next();
+
+			return unit;
+		}
+
+		// number ident
+		var exports = {
+			name: 'Dimension',
+			structure: {
+				value: String,
+				unit: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var value = this.scanner.consume(NUMBER);
+				var unit = readUnit(this.scanner);
+
+				return {
+					type: 'Dimension',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: value,
+					unit: unit
+				};
+			},
+			generate: function(node) {
+				return node.value + node.unit;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Function
+	modules['/css-tree/syntax/node/Function'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+
+		// ident '(' <sequence> ')'
+		var exports = {
+			name: 'Function',
+			structure: {
+				name: String,
+				children: [[]]
+			},
+			parse: function(readSequence, recognizer) {
+				var start = this.scanner.tokenStart;
+				var name = this.scanner.consume(IDENTIFIER);
+				var nameLowerCase = name.toLowerCase();
+				var children;
+
+				this.scanner.eat(LEFTPARENTHESIS);
+
+				children = recognizer.hasOwnProperty(nameLowerCase)
+					? recognizer[nameLowerCase].call(this, recognizer)
+					: readSequence.call(this, recognizer);
+
+				this.scanner.eat(RIGHTPARENTHESIS);
+
+				return {
+					type: 'Function',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: name,
+					children: children
+				};
+			},
+			generate: function(node) {
+				return [].concat(node.name + '(', this.each(node.children), ')');
+			},
+			walkContext: 'function'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/HexColor
+	modules['/css-tree/syntax/node/HexColor'] = function () {
+		var isHex = require('/css-tree/tokenizer').isHex;
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBER = TYPE.Number;
+		var NUMBERSIGN = TYPE.NumberSign;
+
+		function consumeHexSequence(scanner, required) {
+			if (!isHex(scanner.source.charCodeAt(scanner.tokenStart))) {
+				if (required) {
+					scanner.error('Unexpected input', scanner.tokenStart);
+				} else {
+					return;
+				}
+			}
+
+			for (var pos = scanner.tokenStart + 1; pos < scanner.tokenEnd; pos++) {
+				var code = scanner.source.charCodeAt(pos);
+
+				// break on non-hex char
+				if (!isHex(code)) {
+					// break token, exclude symbol
+					scanner.tokenStart = pos;
+					return;
+				}
+			}
+
+			// token is full hex sequence, go to next token
+			scanner.next();
+		}
+
+		// # ident
+		var exports = {
+			name: 'HexColor',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+
+				this.scanner.eat(NUMBERSIGN);
+
+				scan:
+				switch (this.scanner.tokenType) {
+					case NUMBER:
+						consumeHexSequence(this.scanner, true);
+
+						// if token is identifier then number consists of hex only,
+						// try to add identifier to result
+						if (this.scanner.tokenType === IDENTIFIER) {
+							consumeHexSequence(this.scanner, false);
+						}
+
+						break;
+
+					case IDENTIFIER:
+						consumeHexSequence(this.scanner, true);
+						break;
+
+					default:
+						this.scanner.error('Number or identifier is expected');
+				}
+
+				return {
+					type: 'HexColor',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: this.scanner.substrToCursor(start + 1) // skip #
+				};
+			},
+			generate: function(node) {
+				return '#' + node.value;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Identifier
+	modules['/css-tree/syntax/node/Identifier'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var IDENTIFIER = TYPE.Identifier;
+
+		var exports = {
+			name: 'Identifier',
+			structure: {
+				name: String
+			},
+			parse: function() {
+				return {
+					type: 'Identifier',
+					loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+					name: this.scanner.consume(IDENTIFIER)
+				};
+			},
+			generate: function(node) {
+				return node.name;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/IdSelector
+	modules['/css-tree/syntax/node/IdSelector'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBERSIGN = TYPE.NumberSign;
+
+		// '#' ident
+		var exports = {
+			name: 'IdSelector',
+			structure: {
+				name: String
+			},
+			parse: function() {
+				this.scanner.eat(NUMBERSIGN);
+
+				return {
+					type: 'IdSelector',
+					loc: this.getLocation(this.scanner.tokenStart - 1, this.scanner.tokenEnd),
+					name: this.scanner.consume(IDENTIFIER)
+				};
+			},
+			generate: function(node) {
+				return '#' + node.name;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/MediaFeature
+	modules['/css-tree/syntax/node/MediaFeature'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBER = TYPE.Number;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var COLON = TYPE.Colon;
+		var SOLIDUS = TYPE.Solidus;
+
+		var exports = {
+			name: 'MediaFeature',
+			structure: {
+				name: String,
+				value: ['Identifier', 'Number', 'Dimension', 'Ratio', null]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var name;
+				var value = null;
+
+				this.scanner.eat(LEFTPARENTHESIS);
+				this.scanner.skipSC();
+
+				name = this.scanner.consume(IDENTIFIER);
+				this.scanner.skipSC();
+
+				if (this.scanner.tokenType !== RIGHTPARENTHESIS) {
+					this.scanner.eat(COLON);
+					this.scanner.skipSC();
+
+					switch (this.scanner.tokenType) {
+						case NUMBER:
+							if (this.scanner.lookupType(1) === IDENTIFIER) {
+								value = this.Dimension();
+							} else if (this.scanner.lookupNonWSType(1) === SOLIDUS) {
+								value = this.Ratio();
+							} else {
+								value = this.Number();
+							}
+
+							break;
+
+						case IDENTIFIER:
+							value = this.Identifier();
+
+							break;
+
+						default:
+							this.scanner.error('Number, dimension, ratio or identifier is expected');
+					}
+
+					this.scanner.skipSC();
+				}
+
+				this.scanner.eat(RIGHTPARENTHESIS);
+
+				return {
+					type: 'MediaFeature',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: name,
+					value: value
+				};
+			},
+			generate: function(node) {
+				return node.value !== null
+					? ['(', node.name, ':', this.generate(node.value), ')']
+					: ['(', node.name, ')'];
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/MediaQuery
+	modules['/css-tree/syntax/node/MediaQuery'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+		var IDENTIFIER = TYPE.Identifier;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+
+		var exports = {
+			name: 'MediaQuery',
+			structure: {
+				children: [['Identifier', 'MediaFeature', 'WhiteSpace']]
+			},
+			parse: function() {
+				this.scanner.skipSC();
+
+				var children = new List();
+				var child = null;
+				var space = null;
+
+				scan:
+				while (!this.scanner.eof) {
+					switch (this.scanner.tokenType) {
+						case COMMENT:
+							this.scanner.next();
+							continue;
+
+						case WHITESPACE:
+							space = this.WhiteSpace();
+							continue;
+
+						case IDENTIFIER:
+							child = this.Identifier();
+							break;
+
+						case LEFTPARENTHESIS:
+							child = this.MediaFeature();
+							break;
+
+						default:
+							break scan;
+					}
+
+					if (space !== null) {
+						children.appendData(space);
+						space = null;
+					}
+
+					children.appendData(child);
+				}
+
+				if (child === null) {
+					this.scanner.error('Identifier or parenthesis is expected');
+				}
+
+				return {
+					type: 'MediaQuery',
+					loc: this.getLocationFromList(children),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.each(node.children);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/MediaQueryList
+	modules['/css-tree/syntax/node/MediaQueryList'] = function () {
+		var List = require('/css-tree/utils/list');
+		var COMMA = require('/css-tree/tokenizer').TYPE.Comma;
+
+		var exports = {
+			name: 'MediaQueryList',
+			structure: {
+				children: [['MediaQuery']]
+			},
+			parse: function(relative) {
+				var children = new List();
+
+				this.scanner.skipSC();
+
+				while (!this.scanner.eof) {
+					children.appendData(this.MediaQuery(relative));
+
+					if (this.scanner.tokenType !== COMMA) {
+						break;
+					}
+
+					this.scanner.next();
+				}
+
+				return {
+					type: 'MediaQueryList',
+					loc: this.getLocationFromList(children),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.eachComma(node.children);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Nth
+	modules['/css-tree/syntax/node/Nth'] = function () {
+		// https://drafts.csswg.org/css-syntax-3/#the-anb-type
+		var exports = {
+			name: 'Nth',
+			structure: {
+				nth: ['AnPlusB', 'Identifier'],
+				selector: ['SelectorList', null]
+			},
+			parse: function(allowOfClause) {
+				this.scanner.skipSC();
+
+				var start = this.scanner.tokenStart;
+				var end = start;
+				var selector = null;
+				var query;
+
+				if (this.scanner.lookupValue(0, 'odd') || this.scanner.lookupValue(0, 'even')) {
+					query = this.Identifier();
+				} else {
+					query = this.AnPlusB();
+				}
+
+				this.scanner.skipSC();
+
+				if (allowOfClause && this.scanner.lookupValue(0, 'of')) {
+					this.scanner.next();
+
+					selector = this.SelectorList();
+
+					if (this.needPositions) {
+						end = selector.children.last().loc.end.offset;
+					}
+				} else {
+					if (this.needPositions) {
+						end = query.loc.end.offset;
+					}
+				}
+
+				return {
+					type: 'Nth',
+					loc: this.getLocation(start, end),
+					nth: query,
+					selector: selector
+				};
+			},
+			generate: function(node) {
+				return node.selector !== null
+					? [this.generate(node.nth), ' of ', this.generate(node.selector)]
+					: [this.generate(node.nth)];
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Number
+	modules['/css-tree/syntax/node/Number'] = function () {
+		var NUMBER = require('/css-tree/tokenizer').TYPE.Number;
+
+		var exports = {
+			name: 'Number',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				return {
+					type: 'Number',
+					loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+					value: this.scanner.consume(NUMBER)
+				};
+			},
+			generate: function(node) {
+				return node.value;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Operator
+	modules['/css-tree/syntax/node/Operator'] = function () {
+		// '/' | '*' | ',' | ':' | '+' | '-'
+		var exports = {
+			name: 'Operator',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+
+				this.scanner.next();
+
+				return {
+					type: 'Operator',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: this.scanner.substrToCursor(start)
+				};
+			},
+			generate: function(node) {
+				return node.value;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Parentheses
+	modules['/css-tree/syntax/node/Parentheses'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+
+		var exports = {
+			name: 'Parentheses',
+			structure: {
+				children: [[]]
+			},
+			parse: function(readSequence, recognizer) {
+				var start = this.scanner.tokenStart;
+				var children = null;
+
+				this.scanner.eat(LEFTPARENTHESIS);
+				children = readSequence.call(this, recognizer);
+				this.scanner.eat(RIGHTPARENTHESIS);
+
+				return {
+					type: 'Parentheses',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return [].concat('(', this.each(node.children), ')');
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Percentage
+	modules['/css-tree/syntax/node/Percentage'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var NUMBER = TYPE.Number;
+		var PERCENTSIGN = TYPE.PercentSign;
+
+		var exports = {
+			name: 'Percentage',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var number = this.scanner.consume(NUMBER);
+
+				this.scanner.eat(PERCENTSIGN);
+
+				return {
+					type: 'Percentage',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: number
+				};
+			},
+			generate: function(node) {
+				return node.value + '%';
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/PseudoClassSelector
+	modules['/css-tree/syntax/node/PseudoClassSelector'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var COLON = TYPE.Colon;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var BALANCED = true;
+
+		// : ident [ '(' .. ')' ]?
+		var exports = {
+			name: 'PseudoClassSelector',
+			structure: {
+				name: String,
+				children: [['Raw'], null]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var name;
+				var children = null;
+
+				this.scanner.eat(COLON);
+
+				name = this.scanner.consume(IDENTIFIER);
+
+				if (this.scanner.tokenType === LEFTPARENTHESIS) {
+					var nameLowerCase = name.toLowerCase();
+
+					this.scanner.next();
+
+					if (this.pseudo.hasOwnProperty(nameLowerCase)) {
+						this.scanner.skipSC();
+						children = this.pseudo[nameLowerCase].call(this);
+						this.scanner.skipSC();
+					} else {
+						children = new List().appendData(this.Raw(BALANCED, 0, 0));
+					}
+
+					this.scanner.eat(RIGHTPARENTHESIS);
+				}
+
+				return {
+					type: 'PseudoClassSelector',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: name,
+					children: children
+				};
+			},
+			generate: function(node) {
+				return node.children !== null
+					? [].concat(':' + node.name + '(', this.each(node.children), ')')
+					: ':' + node.name;
+			},
+			walkContext: 'function'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/PseudoElementSelector
+	modules['/css-tree/syntax/node/PseudoElementSelector'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var COLON = TYPE.Colon;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var BALANCED = true;
+
+		// :: ident [ '(' .. ')' ]?
+		var exports = {
+			name: 'PseudoElementSelector',
+			structure: {
+				name: String,
+				children: [['Raw'], null]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var name;
+				var children = null;
+
+				this.scanner.eat(COLON);
+				this.scanner.eat(COLON);
+
+				name = this.scanner.consume(IDENTIFIER);
+
+				if (this.scanner.tokenType === LEFTPARENTHESIS) {
+					var nameLowerCase = name.toLowerCase();
+
+					this.scanner.next();
+
+					if (this.pseudo.hasOwnProperty(nameLowerCase)) {
+						this.scanner.skipSC();
+						children = this.pseudo[nameLowerCase].call(this);
+						this.scanner.skipSC();
+					} else {
+						children = new List().appendData(this.Raw(BALANCED, 0, 0));
+					}
+
+					this.scanner.eat(RIGHTPARENTHESIS);
+				}
+
+				return {
+					type: 'PseudoElementSelector',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: name,
+					children: children
+				};
+			},
+			generate: function(node) {
+				return node.children !== null
+					? [].concat('::' + node.name + '(', this.each(node.children), ')')
+					: '::' + node.name;
+			},
+			walkContext: 'function'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Ratio
+	modules['/css-tree/syntax/node/Ratio'] = function () {
+		var isNumber = require('/css-tree/tokenizer').isNumber;
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var NUMBER = TYPE.Number;
+		var SOLIDUS = TYPE.Solidus;
+		var FULLSTOP = TYPE.FullStop;
+
+		// Terms of <ratio> should to be a positive number (not zero or negative)
+		// (see https://drafts.csswg.org/mediaqueries-3/#values)
+		// However, -o-min-device-pixel-ratio takes fractional values as a ratio's term
+		// and this is using by various sites. Therefore we relax checking on parse
+		// to test a term is unsigned number without exponent part.
+		// Additional checks may to be applied on lexer validation.
+		function consumeNumber(scanner) {
+			var value = scanner.consumeNonWS(NUMBER);
+
+			for (var i = 0; i < value.length; i++) {
+				var code = value.charCodeAt(i);
+				if (!isNumber(code) && code !== FULLSTOP) {
+					scanner.error('Unsigned number is expected', scanner.tokenStart - value.length + i);
+				}
+			}
+
+			if (Number(value) === 0) {
+				scanner.error('Zero number is not allowed', scanner.tokenStart - value.length);
+			}
+
+			return value;
+		}
+
+		// <positive-integer> S* '/' S* <positive-integer>
+		var exports = {
+			name: 'Ratio',
+			structure: {
+				left: String,
+				right: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var left = consumeNumber(this.scanner);
+				var right;
+
+				this.scanner.eatNonWS(SOLIDUS);
+				right = consumeNumber(this.scanner);
+
+				return {
+					type: 'Ratio',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					left: left,
+					right: right
+				};
+			},
+			generate: function(node) {
+				return [node.left, '/', node.right];
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Raw
+	modules['/css-tree/syntax/node/Raw'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+		var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
+
+		var exports = {
+			name: 'Raw',
+			structure: {
+				value: String
+			},
+			parse: function(balanced, endTokenType1, endTokenType2) {
+				var start = this.scanner.tokenStart;
+				var stack = [];
+				var popType = 0;
+				var type = 0;
+
+				if (balanced) {
+					scan:
+					for (var i = 0; type = this.scanner.lookupType(i); i++) {
+						if (popType === 0) {
+							if (type === endTokenType1 ||
+								type === endTokenType2) {
+								break scan;
+							}
+						}
+
+						switch (type) {
+							case popType:
+								popType = stack.pop();
+								break;
+
+							case RIGHTPARENTHESIS:
+							case RIGHTCURLYBRACKET:
+							case RIGHTSQUAREBRACKET:
+								if (popType !== 0) {
+									this.scanner.skip(i);
+									this.scanner.error();
+								}
+								break scan;
+
+							case LEFTPARENTHESIS:
+								stack.push(popType);
+								popType = RIGHTPARENTHESIS;
+								break;
+
+							case LEFTCURLYBRACKET:
+								stack.push(popType);
+								popType = RIGHTCURLYBRACKET;
+								break;
+
+							case LEFTSQUAREBRACKET:
+								stack.push(popType);
+								popType = RIGHTSQUAREBRACKET;
+								break;
+						}
+					}
+				} else {
+					for (var i = 0; type = this.scanner.lookupType(i); i++) {
+						if (type === WHITESPACE ||
+							type === endTokenType1 ||
+							type === endTokenType2) {
+							break;
+						}
+					}
+				}
+
+				this.scanner.skip(i);
+
+				if (popType !== 0) {
+					this.scanner.eat(popType);
+				}
+
+				return {
+					type: 'Raw',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: this.scanner.substrToCursor(start)
+				};
+			},
+			generate: function(node) {
+				return node.value;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Rule
+	modules['/css-tree/syntax/node/Rule'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+		var BALANCED = true;
+
+		var exports = {
+			name: 'Rule',
+			structure: {
+				selector: ['SelectorList', 'Raw'],
+				block: ['Block']
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var selector = this.parseSelector ? this.SelectorList() : this.Raw(BALANCED, LEFTCURLYBRACKET, 0);
+				var block = this.Block(this.Declaration);
+
+				return {
+					type: 'Rule',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					selector: selector,
+					block: block
+				};
+			},
+			generate: function(node) {
+				return [
+					this.generate(node.selector),
+					this.generate(node.block)
+				];
+			},
+			walkContext: 'rule'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Selector
+	modules['/css-tree/syntax/node/Selector'] = function () {
+		var exports = {
+			name: 'Selector',
+			structure: {
+				children: [[
+					'TypeSelector',
+					'IdSelector',
+					'ClassSelector',
+					'AttributeSelector',
+					'PseudoClassSelector',
+					'PseudoElementSelector',
+					'Combinator',
+					'WhiteSpace'
+				]]
+			},
+			parse: function() {
+				var children = this.readSequence(this.scope.Selector);
+
+				// nothing were consumed
+				if (children.isEmpty()) {
+					this.scanner.error('Selector is expected');
+				}
+
+				return {
+					type: 'Selector',
+					loc: this.getLocationFromList(children),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.each(node.children);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/SelectorList
+	modules['/css-tree/syntax/node/SelectorList'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var COMMA = TYPE.Comma;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+		var BALANCED = true;
+
+		var exports = {
+			name: 'SelectorList',
+			structure: {
+				children: [['Selector']]
+			},
+			parse: function() {
+				var children = new List();
+
+				while (!this.scanner.eof) {
+					children.appendData(this.parseSelector
+						? this.Selector()
+						: this.Raw(BALANCED, COMMA, LEFTCURLYBRACKET)
+					);
+
+					if (this.scanner.tokenType === COMMA) {
+						this.scanner.next();
+						continue;
+					}
+
+					break;
+				}
+
+				return {
+					type: 'SelectorList',
+					loc: this.getLocationFromList(children),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.eachComma(node.children);
+			},
+			walkContext: 'selector'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/String
+	modules['/css-tree/syntax/node/String'] = function () {
+		var STRING = require('/css-tree/tokenizer').TYPE.String;
+
+		var exports = {
+			name: 'String',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				return {
+					type: 'String',
+					loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+					value: this.scanner.consume(STRING)
+				};
+			},
+			generate: function(node) {
+				return node.value;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/StyleSheet
+	modules['/css-tree/syntax/node/StyleSheet'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+		var EXCLAMATIONMARK = TYPE.ExclamationMark;
+		var COMMERCIALAT = TYPE.CommercialAt;
+		var CDO = TYPE.CDO;
+		var CDC = TYPE.CDC;
+
+		var exports = {
+			name: 'StyleSheet',
+			structure: {
+				children: [['Comment', 'Atrule', 'Rule']]
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var children = new List();
+				var child;
+
+				scan:
+				while (!this.scanner.eof) {
+					switch (this.scanner.tokenType) {
+						case WHITESPACE:
+							this.scanner.next();
+							continue;
+
+						case COMMENT:
+							// ignore comments except exclamation comments (i.e. /*! .. */) on top level
+							if (this.scanner.source.charCodeAt(this.scanner.tokenStart + 2) !== EXCLAMATIONMARK) {
+								this.scanner.next();
+								continue;
+							}
+
+							child = this.Comment();
+							break;
+
+						case COMMERCIALAT:
+							child = this.Atrule();
+							break;
+
+						case CDO: // <!--
+							child = this.CDO();
+							break;
+
+						case CDC: // -->
+							child = this.CDC();
+							break;
+
+						default:
+							child = this.Rule();
+					}
+
+					children.appendData(child);
+				}
+
+				return {
+					type: 'StyleSheet',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					children: children
+				};
+			},
+			generate: function(node) {
+				return this.each(node.children);
+			},
+			walkContext: 'stylesheet'
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/TypeSelector
+	modules['/css-tree/syntax/node/TypeSelector'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var ASTERISK = TYPE.Asterisk;
+		var VERTICALLINE = TYPE.VerticalLine;
+
+		function eatIdentifierOrAsterisk() {
+			if (this.scanner.tokenType !== IDENTIFIER &&
+				this.scanner.tokenType !== ASTERISK) {
+				this.scanner.error('Identifier or asterisk is expected');
+			}
+
+			this.scanner.next();
+		}
+
+		// ident
+		// ident|ident
+		// ident|*
+		// *
+		// *|ident
+		// *|*
+		// |ident
+		// |*
+		var exports = {
+			name: 'TypeSelector',
+			structure: {
+				name: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+
+				if (this.scanner.tokenType === VERTICALLINE) {
+					this.scanner.next();
+					eatIdentifierOrAsterisk.call(this);
+				} else {
+					eatIdentifierOrAsterisk.call(this);
+
+					if (this.scanner.tokenType === VERTICALLINE) {
+						this.scanner.next();
+						eatIdentifierOrAsterisk.call(this);
+					}
+				}
+
+				return {
+					type: 'TypeSelector',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					name: this.scanner.substrToCursor(start)
+				};
+			},
+			generate: function(node) {
+				return node.name;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/UnicodeRange
+	modules['/css-tree/syntax/node/UnicodeRange'] = function () {
+		var isHex = require('/css-tree/tokenizer').isHex;
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBER = TYPE.Number;
+		var PLUSSIGN = TYPE.PlusSign;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var FULLSTOP = TYPE.FullStop;
+		var QUESTIONMARK = TYPE.QuestionMark;
+
+		function scanUnicodeNumber(scanner) {
+			for (var pos = scanner.tokenStart + 1; pos < scanner.tokenEnd; pos++) {
+				var code = scanner.source.charCodeAt(pos);
+
+				// break on fullstop or hyperminus/plussign after exponent
+				if (code === FULLSTOP || code === PLUSSIGN) {
+					// break token, exclude symbol
+					scanner.tokenStart = pos;
 					return false;
 				}
 			}
@@ -3189,2104 +15538,1692 @@ var CSSO = (function(){
 			return true;
 		}
 
-		function getAtruleExpression() {
-			var child = null;
-			var node = {
-				type: 'AtruleExpression',
-				info: getInfo(),
-				sequence: new List()
-			};
+		// https://drafts.csswg.org/css-syntax-3/#urange
+		function scanUnicodeRange(scanner) {
+			var hexStart = scanner.tokenStart + 1; // skip +
+			var hexLength = 0;
 
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.Semicolon:
-						break scan;
-
-					case TokenType.LeftCurlyBracket:
-						break scan;
-
-					case TokenType.Space:
-						if (node.sequence.isEmpty()) {
-							scanner.next(); // ignore spaces in beginning
-							child = null;
-						} else {
-							child = getS();
-						}
-						break;
-
-					case TokenType.Comment: // ignore comments
+			scan: {
+				if (scanner.tokenType === NUMBER) {
+					if (scanner.source.charCodeAt(scanner.tokenStart) !== FULLSTOP && scanUnicodeNumber(scanner)) {
 						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.Comma:
-						child = getOperator();
-						break;
-
-					case TokenType.Colon:
-						child = getPseudo();
-						break;
-
-					case TokenType.LeftParenthesis:
-						child = getBraces(SCOPE_ATRULE_EXPRESSION);
-						break;
-
-					default:
-						child = getAny(SCOPE_ATRULE_EXPRESSION);
-				}
-
-				if (child !== null) {
-					node.sequence.insert(List.createItem(child));
-				}
-			}
-
-			removeTrailingSpaces(node.sequence);
-
-			return node;
-		}
-
-		function getAtrule() {
-			eat(TokenType.CommercialAt);
-
-			var node = {
-				type: 'Atrule',
-				info: getInfo(),
-				name: readIdent(false),
-				expression: getAtruleExpression(),
-				block: null
-			};
-
-			if (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.Semicolon:
-						scanner.next();  // {
-						break;
-
-					case TokenType.LeftCurlyBracket:
-						scanner.next();  // {
-
-						if (isBlockAtrule()) {
-							node.block = getBlock();
-						} else {
-							node.block = getStylesheet(true);
-						}
-
-						eat(TokenType.RightCurlyBracket);
-						break;
-
-					default:
-						parseError('Unexpected input');
-				}
-			}
-
-			return node;
-		}
-
-		function getRuleset() {
-			return {
-				type: 'Ruleset',
-				info: getInfo(),
-				selector: getSelector(),
-				block: getBlockWithBrackets()
-			};
-		}
-
-		function getSelector() {
-			var isBadSelector = false;
-			var lastComma = true;
-			var node = {
-				type: 'Selector',
-				info: getInfo(),
-				selectors: new List()
-			};
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.LeftCurlyBracket:
+					} else if (scanner.source.charCodeAt(scanner.tokenStart) !== HYPHENMINUS) {
 						break scan;
-
-					case TokenType.Comma:
-						if (lastComma) {
-							isBadSelector = true;
-						}
-
-						lastComma = true;
-						scanner.next();
-						break;
-
-					default:
-						if (!lastComma) {
-							isBadSelector = true;
-						}
-
-						lastComma = false;
-						node.selectors.insert(List.createItem(getSimpleSelector()));
-
-						if (node.selectors.tail.data.sequence.isEmpty()) {
-							isBadSelector = true;
-						}
-				}
-			}
-
-			if (lastComma) {
-				isBadSelector = true;
-				// parseError('Unexpected trailing comma');
-			}
-
-			if (isBadSelector) {
-				node.selectors = new List();
-			}
-
-			return node;
-		}
-
-		function getSimpleSelector(nested) {
-			var child = null;
-			var combinator = null;
-			var node = {
-				type: 'SimpleSelector',
-				info: getInfo(),
-				sequence: new List()
-			};
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.Comma:
-						break scan;
-
-					case TokenType.LeftCurlyBracket:
-						if (nested) {
-							parseError('Unexpected input');
-						}
-
-						break scan;
-
-					case TokenType.RightParenthesis:
-						if (!nested) {
-							parseError('Unexpected input');
-						}
-
-						break scan;
-
-					case TokenType.Comment:
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.Space:
-						child = null;
-						if (!combinator && node.sequence.head) {
-							combinator = getCombinator();
-						} else {
-							scanner.next();
-						}
-						break;
-
-					case TokenType.PlusSign:
-					case TokenType.GreaterThanSign:
-					case TokenType.Tilde:
-					case TokenType.Solidus:
-						if (combinator && combinator.name !== ' ') {
-							parseError('Unexpected combinator');
-						}
-
-						child = null;
-						combinator = getCombinator();
-						break;
-
-					case TokenType.FullStop:
-						child = getClass();
-						break;
-
-					case TokenType.LeftSquareBracket:
-						child = getAttribute();
-						break;
-
-					case TokenType.NumberSign:
-						child = getShash();
-						break;
-
-					case TokenType.Colon:
-						child = getPseudo();
-						break;
-
-					case TokenType.LowLine:
-					case TokenType.Identifier:
-					case TokenType.Asterisk:
-						child = getNamespacedIdentifier(false);
-						break;
-
-					case TokenType.HyphenMinus:
-					case TokenType.DecimalNumber:
-						child = tryGetPercentage() || getNamespacedIdentifier(false);
-						break;
-
-					default:
-						parseError('Unexpected input');
-				}
-
-				if (child !== null) {
-					if (combinator !== null) {
-						node.sequence.insert(List.createItem(combinator));
-						combinator = null;
 					}
-
-					node.sequence.insert(List.createItem(child));
-				}
-			}
-
-			if (combinator && combinator.name !== ' ') {
-				parseError('Unexpected combinator');
-			}
-
-			return node;
-		}
-
-		function getDeclarations() {
-			var child = null;
-			var declarations = new List();
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.RightCurlyBracket:
-						break scan;
-
-					case TokenType.Space:
-					case TokenType.Comment:
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.Semicolon: // ;
-						scanner.next();
-						child = null;
-						break;
-
-					default:
-						child = getDeclaration();
+				} else {
+					scanner.next(); // PLUSSIGN
 				}
 
-				if (child !== null) {
-					declarations.insert(List.createItem(child));
-				}
-			}
-
-			return declarations;
-		}
-
-		function getBlockWithBrackets() {
-			var info = getInfo();
-			var node;
-
-			eat(TokenType.LeftCurlyBracket);
-			node = {
-				type: 'Block',
-				info: info,
-				declarations: getDeclarations()
-			};
-			eat(TokenType.RightCurlyBracket);
-
-			return node;
-		}
-
-		function getBlock() {
-			return {
-				type: 'Block',
-				info: getInfo(),
-				declarations: getDeclarations()
-			};
-		}
-
-		function getDeclaration(nested) {
-			var info = getInfo();
-			var property = getProperty();
-			var value;
-
-			eat(TokenType.Colon);
-
-			// check it's a filter
-			if (/filter$/.test(property.name.toLowerCase()) && checkProgid()) {
-				value = getFilterValue();
-			} else {
-				value = getValue(nested);
-			}
-
-			return {
-				type: 'Declaration',
-				info: info,
-				property: property,
-				value: value
-			};
-		}
-
-		function getProperty() {
-			var name = '';
-			var node = {
-				type: 'Property',
-				info: getInfo(),
-				name: null
-			};
-
-			for (; scanner.token !== null; scanner.next()) {
-				var type = scanner.token.type;
-
-				if (type !== TokenType.Solidus &&
-					type !== TokenType.Asterisk &&
-					type !== TokenType.DollarSign) {
-					break;
-				}
-
-				name += scanner.token.value;
-			}
-
-			node.name = name + readIdent(true);
-
-			readSC();
-
-			return node;
-		}
-
-		function getValue(nested) {
-			var child = null;
-			var node = {
-				type: 'Value',
-				info: getInfo(),
-				important: false,
-				sequence: new List()
-			};
-
-			readSC();
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.RightCurlyBracket:
-					case TokenType.Semicolon:
-						break scan;
-
-					case TokenType.RightParenthesis:
-						if (!nested) {
-							parseError('Unexpected input');
-						}
-						break scan;
-
-					case TokenType.Space:
-						child = getS();
-						break;
-
-					case TokenType.Comment: // ignore comments
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.NumberSign:
-						child = getVhash();
-						break;
-
-					case TokenType.Solidus:
-					case TokenType.Comma:
-						child = getOperator();
-						break;
-
-					case TokenType.LeftParenthesis:
-					case TokenType.LeftSquareBracket:
-						child = getBraces(SCOPE_VALUE);
-						break;
-
-					case TokenType.ExclamationMark:
-						node.important = getImportant();
-						child = null;
-						break;
-
-					default:
-						// check for unicode range: U+0F00, U+0F00-0FFF, u+0F00??
-						if (scanner.token.type === TokenType.Identifier) {
-							var prefix = scanner.token.value;
-							if (prefix === 'U' || prefix === 'u') {
-								if (scanner.lookupType(1, TokenType.PlusSign)) {
-									scanner.next(); // U or u
-									scanner.next(); // +
-
-									child = {
-										type: 'Identifier',
-										info: getInfo(), // FIXME: wrong position
-										name: prefix + '+' + readUnicodeRange(true)
-									};
-								}
-								break;
-							}
-						}
-
-						child = getAny(SCOPE_VALUE);
-				}
-
-				if (child !== null) {
-					node.sequence.insert(List.createItem(child));
-				}
-			}
-
-			removeTrailingSpaces(node.sequence);
-
-			return node;
-		}
-
-		// any = string | percentage | dimension | number | uri | functionExpression | funktion | unary | operator | ident
-		function getAny(scope) {
-			switch (scanner.token.type) {
-				case TokenType.String:
-					return getString();
-
-				case TokenType.LowLine:
-				case TokenType.Identifier:
-					break;
-
-				case TokenType.FullStop:
-				case TokenType.DecimalNumber:
-				case TokenType.HyphenMinus:
-				case TokenType.PlusSign:
-					var number = tryGetNumber();
-
-					if (number !== null) {
-						if (scanner.token !== null) {
-							if (scanner.token.type === TokenType.PercentSign) {
-								return getPercentage(number);
-							} else if (scanner.token.type === TokenType.Identifier) {
-								return getDimension(number.value);
-							}
-						}
-
-						return number;
-					}
-
-					if (scanner.token.type === TokenType.HyphenMinus) {
-						var next = scanner.lookup(1);
-						if (next && (next.type === TokenType.Identifier || next.type === TokenType.HyphenMinus)) {
-							break;
-						}
-					}
-
-					if (scanner.token.type === TokenType.HyphenMinus ||
-						scanner.token.type === TokenType.PlusSign) {
-						return getOperator();
-					}
-
-					parseError('Unexpected input');
-
-				default:
-					parseError('Unexpected input');
-			}
-
-			var ident = getIdentifier(false);
-
-			if (scanner.token !== null && scanner.token.type === TokenType.LeftParenthesis) {
-				return getFunction(scope, ident);
-			}
-
-			return ident;
-		}
-
-		function readAttrselector() {
-			expectAny('Attribute selector (=, ~=, ^=, $=, *=, |=)',
-				TokenType.EqualsSign,        // =
-				TokenType.Tilde,             // ~=
-				TokenType.CircumflexAccent,  // ^=
-				TokenType.DollarSign,        // $=
-				TokenType.Asterisk,          // *=
-				TokenType.VerticalLine       // |=
-			);
-
-			var name;
-
-			if (scanner.token.type === TokenType.EqualsSign) {
-				name = '=';
-				scanner.next();
-			} else {
-				name = scanner.token.value + '=';
-				scanner.next();
-				eat(TokenType.EqualsSign);
-			}
-
-			return name;
-		}
-
-		// '[' S* attrib_name ']'
-		// '[' S* attrib_name S* attrib_match S* [ IDENT | STRING ] S* attrib_flags? S* ']'
-		function getAttribute() {
-			var node = {
-				type: 'Attribute',
-				info: getInfo(),
-				name: null,
-				operator: null,
-				value: null,
-				flags: null
-			};
-
-			eat(TokenType.LeftSquareBracket);
-
-			readSC();
-
-			node.name = getNamespacedIdentifier(true);
-
-			readSC();
-
-			if (scanner.token !== null && scanner.token.type !== TokenType.RightSquareBracket) {
-				// avoid case `[name i]`
-				if (scanner.token.type !== TokenType.Identifier) {
-					node.operator = readAttrselector();
-
-					readSC();
-
-					if (scanner.token !== null && scanner.token.type === TokenType.String) {
-						node.value = getString();
-					} else {
-						node.value = getIdentifier(false);
-					}
-
-					readSC();
-				}
-
-				// attribute flags
-				if (scanner.token !== null && scanner.token.type === TokenType.Identifier) {
-					node.flags = scanner.token.value;
-
+				if (scanner.tokenType === HYPHENMINUS) {
 					scanner.next();
-					readSC();
-				}
-			}
-
-			eat(TokenType.RightSquareBracket);
-
-			return node;
-		}
-
-		function getBraces(scope) {
-			var close;
-			var child = null;
-			var node = {
-				type: 'Braces',
-				info: getInfo(),
-				open: scanner.token.value,
-				close: null,
-				sequence: new List()
-			};
-
-			if (scanner.token.type === TokenType.LeftParenthesis) {
-				close = TokenType.RightParenthesis;
-			} else {
-				close = TokenType.RightSquareBracket;
-			}
-
-			// left brace
-			scanner.next();
-
-			readSC();
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case close:
-						node.close = scanner.token.value;
-						break scan;
-
-					case TokenType.Space:
-						child = getS();
-						break;
-
-					case TokenType.Comment:
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.NumberSign: // ??
-						child = getVhash();
-						break;
-
-					case TokenType.LeftParenthesis:
-					case TokenType.LeftSquareBracket:
-						child = getBraces(scope);
-						break;
-
-					case TokenType.Solidus:
-					case TokenType.Asterisk:
-					case TokenType.Comma:
-					case TokenType.Colon:
-						child = getOperator();
-						break;
-
-					default:
-						child = getAny(scope);
 				}
 
-				if (child !== null) {
-					node.sequence.insert(List.createItem(child));
-				}
-			}
-
-			removeTrailingSpaces(node.sequence);
-
-			// right brace
-			eat(close);
-
-			return node;
-		}
-
-		// '.' ident
-		function getClass() {
-			var info = getInfo();
-
-			eat(TokenType.FullStop);
-
-			return {
-				type: 'Class',
-				info: info,
-				name: readIdent(false)
-			};
-		}
-
-		// '#' ident
-		function getShash() {
-			var info = getInfo();
-
-			eat(TokenType.NumberSign);
-
-			return {
-				type: 'Id',
-				info: info,
-				name: readIdent(false)
-			};
-		}
-
-		// + | > | ~ | /deep/
-		function getCombinator() {
-			var info = getInfo();
-			var combinator;
-
-			switch (scanner.token.type) {
-				case TokenType.Space:
-					combinator = ' ';
+				if (scanner.tokenType === NUMBER) {
 					scanner.next();
-					break;
+				}
 
-				case TokenType.PlusSign:
-				case TokenType.GreaterThanSign:
-				case TokenType.Tilde:
-					combinator = scanner.token.value;
+				if (scanner.tokenType === IDENTIFIER) {
 					scanner.next();
-					break;
-
-				case TokenType.Solidus:
-					combinator = '/deep/';
-					scanner.next();
-
-					expectIdentifier('deep', true);
-
-					eat(TokenType.Solidus);
-					break;
-
-				default:
-					parseError('Combinator (+, >, ~, /deep/) is expected');
-			}
-
-			return {
-				type: 'Combinator',
-				info: info,
-				name: combinator
-			};
-		}
-
-		// '/*' .* '*/'
-		function getComment() {
-			var info = getInfo();
-			var value = scanner.token.value;
-			var len = value.length;
-
-			if (len > 4 && value.charAt(len - 2) === '*' && value.charAt(len - 1) === '/') {
-				len -= 2;
-			}
-
-			scanner.next();
-
-			return {
-				type: 'Comment',
-				info: info,
-				value: value.substring(2, len)
-			};
-		}
-
-		// special reader for units to avoid adjoined IE hacks (i.e. '1px\9')
-		function readUnit() {
-			if (scanner.token !== null && scanner.token.type === TokenType.Identifier) {
-				var unit = scanner.token.value;
-				var backSlashPos = unit.indexOf('\\');
-
-				// no backslash in unit name
-				if (backSlashPos === -1) {
-					scanner.next();
-					return unit;
 				}
 
-				// patch token
-				scanner.token.value = unit.substr(backSlashPos);
-				scanner.token.offset += backSlashPos;
-				scanner.token.column += backSlashPos;
-
-				// return unit w/o backslash part
-				return unit.substr(0, backSlashPos);
-			}
-
-			parseError('Identifier is expected');
-		}
-
-		// number ident
-		function getDimension(number) {
-			return {
-				type: 'Dimension',
-				info: getInfo(),
-				value: number || readNumber(),
-				unit: readUnit()
-			};
-		}
-
-		// number "%"
-		function tryGetPercentage() {
-			var number = tryGetNumber();
-
-			if (number && scanner.token !== null && scanner.token.type === TokenType.PercentSign) {
-				return getPercentage(number);
-			}
-
-			return null;
-		}
-
-		function getPercentage(number) {
-			var info;
-
-			if (!number) {
-				info = getInfo();
-				number = readNumber();
-			} else {
-				info = number.info;
-				number = number.value;
-			}
-
-			eat(TokenType.PercentSign);
-
-			return {
-				type: 'Percentage',
-				info: info,
-				value: number
-			};
-		}
-
-		// ident '(' functionBody ')' |
-		// not '(' <simpleSelector>* ')'
-		function getFunction(scope, ident) {
-			var defaultArguments = getFunctionArguments;
-
-			if (!ident) {
-				ident = getIdentifier(false);
-			}
-
-			// parse special functions
-			var name = ident.name.toLowerCase();
-
-			if (specialFunctions.hasOwnProperty(scope)) {
-				if (specialFunctions[scope].hasOwnProperty(name)) {
-					return specialFunctions[scope][name](scope, ident);
+				if (scanner.tokenStart === hexStart) {
+					scanner.error('Unexpected input', hexStart);
 				}
 			}
 
-			return getFunctionInternal(defaultArguments, scope, ident);
-		}
+			// validate for U+x{1,6} or U+x{1,6}-x{1,6}
+			// where x is [0-9a-fA-F]
+			for (var i = hexStart, wasHyphenMinus = false; i < scanner.tokenStart; i++) {
+				var code = scanner.source.charCodeAt(i);
 
-		function getFunctionInternal(functionArgumentsReader, scope, ident) {
-			var args;
-
-			eat(TokenType.LeftParenthesis);
-			args = functionArgumentsReader(scope);
-			eat(TokenType.RightParenthesis);
-
-			return {
-				type: scope === SCOPE_SELECTOR ? 'FunctionalPseudo' : 'Function',
-				info: ident.info,
-				name: ident.name,
-				arguments: args
-			};
-		}
-
-		function getFunctionArguments(scope) {
-			var args = new List();
-			var argument = null;
-			var child = null;
-
-			readSC();
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.RightParenthesis:
-						break scan;
-
-					case TokenType.Space:
-						child = getS();
-						break;
-
-					case TokenType.Comment: // ignore comments
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.NumberSign: // TODO: not sure it should be here
-						child = getVhash();
-						break;
-
-					case TokenType.LeftParenthesis:
-					case TokenType.LeftSquareBracket:
-						child = getBraces(scope);
-						break;
-
-					case TokenType.Comma:
-						if (argument) {
-							removeTrailingSpaces(argument.sequence);
-						} else {
-							args.insert(List.createItem({
-								type: 'Argument',
-								sequence: new List()
-							}));
-						}
-						scanner.next();
-						readSC();
-						argument = null;
-						child = null;
-						break;
-
-					case TokenType.Solidus:
-					case TokenType.Asterisk:
-					case TokenType.Colon:
-					case TokenType.EqualsSign:
-						child = getOperator();
-						break;
-
-					default:
-						child = getAny(scope);
+				if (isHex(code) === false && (code !== HYPHENMINUS || wasHyphenMinus)) {
+					scanner.error('Unexpected input', i);
 				}
 
-				if (argument === null) {
-					argument = {
-						type: 'Argument',
-						sequence: new List()
-					};
-					args.insert(List.createItem(argument));
-				}
-
-				if (child !== null) {
-					argument.sequence.insert(List.createItem(child));
-				}
-			}
-
-			if (argument !== null) {
-				removeTrailingSpaces(argument.sequence);
-			}
-
-			return args;
-		}
-
-		function getVarFunction(scope, ident) {
-			return getFunctionInternal(getVarFunctionArguments, scope, ident);
-		}
-
-		function getNotFunctionArguments() {
-			var args = new List();
-			var wasSelector = false;
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.RightParenthesis:
-						if (!wasSelector) {
-							parseError('Simple selector is expected');
-						}
-
-						break scan;
-
-					case TokenType.Comma:
-						if (!wasSelector) {
-							parseError('Simple selector is expected');
-						}
-
-						wasSelector = false;
-						scanner.next();
-						break;
-
-					default:
-						wasSelector = true;
-						args.insert(List.createItem(getSimpleSelector(true)));
-				}
-			}
-
-			return args;
-		}
-
-		function getNotFunction(scope, ident) {
-			var args;
-
-			eat(TokenType.LeftParenthesis);
-			args = getNotFunctionArguments(scope);
-			eat(TokenType.RightParenthesis);
-
-			return {
-				type: 'Negation',
-				info: ident.info,
-				// name: ident.name,  // TODO: add name?
-				sequence: args        // FIXME: -> arguments?
-			};
-		}
-
-		// var '(' ident (',' <declaration-value>)? ')'
-		function getVarFunctionArguments() { // TODO: special type Variable?
-			var args = new List();
-
-			readSC();
-
-			args.insert(List.createItem({
-				type: 'Argument',
-				sequence: new List([getIdentifier(true)])
-			}));
-
-			readSC();
-
-			if (scanner.token !== null && scanner.token.type === TokenType.Comma) {
-				eat(TokenType.Comma);
-				readSC();
-
-				args.insert(List.createItem({
-					type: 'Argument',
-					sequence: new List([getValue(true)])
-				}));
-
-				readSC();
-			}
-
-			return args;
-		}
-
-		// url '(' ws* (string | raw) ws* ')'
-		function getUri(scope, ident) {
-			var node = {
-				type: 'Url',
-				info: ident.info,
-				// name: ident.name,
-				value: null
-			};
-
-			eat(TokenType.LeftParenthesis); // (
-
-			readSC();
-
-			if (scanner.token.type === TokenType.String) {
-				node.value = getString();
-				readSC();
-			} else {
-				var rawInfo = getInfo();
-				var raw = '';
-
-				for (; scanner.token !== null; scanner.next()) {
-					var type = scanner.token.type;
-
-					if (type === TokenType.Space ||
-						type === TokenType.LeftParenthesis ||
-						type === TokenType.RightParenthesis) {
-						break;
+				if (code === HYPHENMINUS) {
+					// hex sequence shouldn't be an empty
+					if (hexLength === 0) {
+						scanner.error('Unexpected input', i);
 					}
 
-					raw += scanner.token.value;
-				}
+					wasHyphenMinus = true;
+					hexLength = 0;
+				} else {
+					hexLength++;
 
-				node.value = {
-					type: 'Raw',
-					info: rawInfo,
-					value: raw
-				};
-
-				readSC();
-			}
-
-			eat(TokenType.RightParenthesis); // )
-
-			return node;
-		}
-
-		// expression '(' raw ')'
-		function getOldIEExpression(scope, ident) {
-			var balance = 0;
-			var raw = '';
-
-			eat(TokenType.LeftParenthesis);
-
-			for (; scanner.token !== null; scanner.next()) {
-				if (scanner.token.type === TokenType.RightParenthesis) {
-					if (balance === 0) {
-						break;
+					// too long hex sequence
+					if (hexLength > 6) {
+						scanner.error('Too long hex sequence', i);
 					}
-
-					balance--;
-				} else if (scanner.token.type === TokenType.LeftParenthesis) {
-					balance++;
 				}
 
-				raw += scanner.token.value;
 			}
 
-			eat(TokenType.RightParenthesis);
-
-			return {
-				type: 'Function',
-				info: ident.info,
-				name: ident.name,
-				arguments: new List([{
-					type: 'Argument',
-					sequence: new List([{
-						type: 'Raw',
-						value: raw
-					}])
-				}])
-			};
-		}
-
-		function readUnicodeRange(tryNext) {
-			var hex = '';
-
-			for (; scanner.token !== null; scanner.next()) {
-				if (scanner.token.type !== TokenType.DecimalNumber &&
-					scanner.token.type !== TokenType.Identifier) {
-					break;
-				}
-
-				hex += scanner.token.value;
-			}
-
-			if (!/^[0-9a-f]{1,6}$/i.test(hex)) {
-				parseError('Unexpected input');
+			// check we have a non-zero sequence
+			if (hexLength === 0) {
+				scanner.error('Unexpected input', i - 1);
 			}
 
 			// U+abc???
-			if (tryNext) {
-				for (; hex.length < 6 && scanner.token !== null; scanner.next()) {
-					if (scanner.token.type !== TokenType.QuestionMark) {
+			if (!wasHyphenMinus) {
+				// consume as many U+003F QUESTION MARK (?) code points as possible
+				for (; hexLength < 6 && !scanner.eof; scanner.next()) {
+					if (scanner.tokenType !== QUESTIONMARK) {
 						break;
 					}
 
-					hex += scanner.token.value;
-					tryNext = false;
+					hexLength++;
 				}
 			}
-
-			// U+aaa-bbb
-			if (tryNext) {
-				if (scanner.token !== null && scanner.token.type === TokenType.HyphenMinus) {
-					scanner.next();
-
-					var next = readUnicodeRange(false);
-
-					if (!next) {
-						parseError('Unexpected input');
-					}
-
-					hex += '-' + next;
-				}
-			}
-
-			return hex;
 		}
 
-		function readIdent(varAllowed) {
-			var name = '';
+		var exports = {
+			name: 'UnicodeRange',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
 
-			// optional first -
-			if (scanner.token !== null && scanner.token.type === TokenType.HyphenMinus) {
-				name = '-';
-				scanner.next();
+				this.scanner.next(); // U or u
+				scanUnicodeRange(this.scanner);
 
-				if (varAllowed && scanner.token !== null && scanner.token.type === TokenType.HyphenMinus) {
-					name = '--';
-					scanner.next();
+				return {
+					type: 'UnicodeRange',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: this.scanner.substrToCursor(start)
+				};
+			},
+			generate: function(node) {
+				return node.value;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Url
+	modules['/css-tree/syntax/node/Url'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var STRING = TYPE.String;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var NONBALANCED = false;
+
+		// url '(' S* (string | raw) S* ')'
+		var exports = {
+			name: 'Url',
+			structure: {
+				value: ['String', 'Raw']
+			},
+			parse: function() {
+				var start = this.scanner.tokenStart;
+				var value;
+
+				this.scanner.expectIdentifier('url');
+				this.scanner.eat(LEFTPARENTHESIS);
+				this.scanner.skipSC();
+
+				if (this.scanner.tokenType === STRING) {
+					value = this.String();
+				} else {
+					value = this.Raw(NONBALANCED, LEFTPARENTHESIS, RIGHTPARENTHESIS);
+				}
+
+				this.scanner.skipSC();
+				this.scanner.eat(RIGHTPARENTHESIS);
+
+				return {
+					type: 'Url',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					value: value
+				};
+			},
+			generate: function(node) {
+				return ['url(', this.generate(node.value), ')'];
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node/Value
+	modules['/css-tree/syntax/node/Value'] = function () {
+		var endsWith = require('/css-tree/tokenizer').endsWith;
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var WHITESPACE = TYPE.Whitespace;
+		var COMMENT = TYPE.Comment;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var COLON = TYPE.Colon;
+		var SEMICOLON = TYPE.Semicolon;
+		var EXCLAMATIONMARK = TYPE.ExclamationMark;
+		var BALANCED = true;
+
+		// 'progid:' ws* 'DXImageTransform.Microsoft.' ident ws* '(' .* ')'
+		function checkProgid(scanner) {
+			var offset = 0;
+
+			for (var type; type = scanner.lookupType(offset); offset++) {
+				if (type !== WHITESPACE && type !== COMMENT) {
+					break;
 				}
 			}
 
-			expectAny('Identifier',
-				TokenType.LowLine,
-				TokenType.Identifier
-			);
-
-			if (scanner.token !== null) {
-				name += scanner.token.value;
-				scanner.next();
-
-				for (; scanner.token !== null; scanner.next()) {
-					var type = scanner.token.type;
-
-					if (type !== TokenType.LowLine &&
-						type !== TokenType.Identifier &&
-						type !== TokenType.DecimalNumber &&
-						type !== TokenType.HyphenMinus) {
-						break;
-					}
-
-					name += scanner.token.value;
+			if (scanner.lookupValue(offset, 'alpha') ||
+				scanner.lookupValue(offset, 'chroma') ||
+				scanner.lookupValue(offset, 'dropshadow')) {
+				if (scanner.lookupType(offset + 1) !== LEFTPARENTHESIS) {
+					return false;
 				}
-			}
-
-			return name;
-		}
-
-		function getNamespacedIdentifier(checkColon) {
-			if (scanner.token === null) {
-				parseError('Unexpected end of input');
-			}
-
-			var info = getInfo();
-			var name;
-
-			if (scanner.token.type === TokenType.Asterisk) {
-				checkColon = false;
-				name = '*';
-				scanner.next();
 			} else {
-				name = readIdent(false);
-			}
-
-			if (scanner.token !== null) {
-				if (scanner.token.type === TokenType.VerticalLine &&
-					scanner.lookupType(1, TokenType.EqualsSign) === false) {
-					name += '|';
-
-					if (scanner.next() !== null) {
-						if (scanner.token.type === TokenType.HyphenMinus ||
-							scanner.token.type === TokenType.Identifier ||
-							scanner.token.type === TokenType.LowLine) {
-							name += readIdent(false);
-						} else if (scanner.token.type === TokenType.Asterisk) {
-							checkColon = false;
-							name += '*';
-							scanner.next();
-						}
-					}
+				if (scanner.lookupValue(offset, 'progid') === false ||
+					scanner.lookupType(offset + 1) !== COLON) {
+					return false;
 				}
 			}
 
-			if (checkColon && scanner.token !== null && scanner.token.type === TokenType.Colon) {
-				scanner.next();
-				name += ':' + readIdent(false);
-			}
-
-			return {
-				type: 'Identifier',
-				info: info,
-				name: name
-			};
-		}
-
-		function getIdentifier(varAllowed) {
-			return {
-				type: 'Identifier',
-				info: getInfo(),
-				name: readIdent(varAllowed)
-			};
-		}
-
-		// ! ws* important
-		function getImportant() { // TODO?
-			// var info = getInfo();
-
-			eat(TokenType.ExclamationMark);
-
-			readSC();
-
-			// return {
-			//     type: 'Identifier',
-			//     info: info,
-			//     name: readIdent(false)
-			// };
-
-			expectIdentifier('important');
-
-			readIdent(false);
-
-			// should return identifier in future for original source restoring as is
-			// returns true for now since it's fit to optimizer purposes
 			return true;
 		}
 
-		// odd | even | number? n
-		function getNth() {
-			expectAny('Number, odd or even',
-				TokenType.Identifier,
-				TokenType.DecimalNumber
-			);
-
-			var info = getInfo();
-			var value = scanner.token.value;
-			var cmpValue;
-
-			if (scanner.token.type === TokenType.DecimalNumber) {
-				var next = scanner.lookup(1);
-				if (next !== null &&
-					next.type === TokenType.Identifier &&
-					next.value.toLowerCase() === 'n') {
-					value += next.value;
-					scanner.next();
-				}
-			} else {
-				var cmpValue = value.toLowerCase();
-				if (cmpValue !== 'odd' && cmpValue !== 'even' && cmpValue !== 'n') {
-					parseError('Unexpected identifier');
-				}
-			}
-
-			scanner.next();
-
-			return {
-				type: 'Nth',
-				info: info,
-				value: value
-			};
-		}
-
-		function getNthSelector() {
-			var info = getInfo();
-			var sequence = new List();
-			var node;
-			var child = null;
-
-			eat(TokenType.Colon);
-			expectIdentifier('nth', false);
-
-			node = {
-				type: 'FunctionalPseudo',
-				info: info,
-				name: readIdent(false),
-				arguments: new List([{
-					type: 'Argument',
-					sequence: sequence
-				}])
-			};
-
-			eat(TokenType.LeftParenthesis);
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.RightParenthesis:
-						break scan;
-
-					case TokenType.Space:
-					case TokenType.Comment:
-						scanner.next();
-						child = null;
-						break;
-
-					case TokenType.HyphenMinus:
-					case TokenType.PlusSign:
-						child = getOperator();
-						break;
-
-					default:
-						child = getNth();
+		var exports = {
+			name: 'Value',
+			structure: {
+				children: [[]]
+			},
+			parse: function(property) {
+				// special parser for filter property since it can contains non-standart syntax for old IE
+				if (property !== null && endsWith(property, 'filter') && checkProgid(this.scanner)) {
+					this.scanner.skipSC();
+					return this.Raw(BALANCED, SEMICOLON, EXCLAMATIONMARK);
 				}
 
-				if (child !== null) {
-					sequence.insert(List.createItem(child));
-				}
-			}
+				var start = this.scanner.tokenStart;
+				var children = this.readSequence(this.scope.Value);
 
-			eat(TokenType.RightParenthesis);
-
-			return node;
-		}
-
-		function readNumber() {
-			var wasDigits = false;
-			var number = '';
-			var offset = 0;
-
-			if (scanner.lookupType(offset, TokenType.HyphenMinus)) {
-				number = '-';
-				offset++;
-			}
-
-			if (scanner.lookupType(offset, TokenType.DecimalNumber)) {
-				wasDigits = true;
-				number += scanner.lookup(offset).value;
-				offset++;
-			}
-
-			if (scanner.lookupType(offset, TokenType.FullStop)) {
-				number += '.';
-				offset++;
-			}
-
-			if (scanner.lookupType(offset, TokenType.DecimalNumber)) {
-				wasDigits = true;
-				number += scanner.lookup(offset).value;
-				offset++;
-			}
-
-			if (wasDigits) {
-				while (offset--) {
-					scanner.next();
-				}
-
-				return number;
-			}
-
-			return null;
-		}
-
-		function tryGetNumber() {
-			var info = getInfo();
-			var number = readNumber();
-
-			if (number !== null) {
 				return {
-					type: 'Number',
-					info: info,
-					value: number
+					type: 'Value',
+					loc: this.getLocation(start, this.scanner.tokenStart),
+					children: children
 				};
+			},
+			generate: function(node) {
+				return this.each(node.children);
 			}
+		};
 
-			return null;
-		}
+		return exports;
+	};
+	//#endregion
 
-		// '/' | '*' | ',' | ':' | '=' | '+' | '-'
-		// TODO: remove '=' since it's wrong operator, but theat as operator
-		// to make old things like `filter: alpha(opacity=0)` works
-		function getOperator() {
-			var node = {
-				type: 'Operator',
-				info: getInfo(),
-				value: scanner.token.value
-			};
+	//#region URL: /css-tree/syntax/node/WhiteSpace
+	modules['/css-tree/syntax/node/WhiteSpace'] = function () {
+		var WHITESPACE = require('/css-tree/tokenizer').TYPE.Whitespace;
+		var SPACE = Object.freeze({
+			type: 'WhiteSpace',
+			loc: null,
+			value: ' '
+		});
 
-			scanner.next();
+		var exports = {
+			name: 'WhiteSpace',
+			structure: {
+				value: String
+			},
+			parse: function() {
+				this.scanner.eat(WHITESPACE);
+				return SPACE;
 
-			return node;
-		}
-
-		function getFilterValue() { // TODO
-			var progid;
-			var node = {
-				type: 'Value',
-				info: getInfo(),
-				important: false,
-				sequence: new List()
-			};
-
-			while (progid = checkProgid()) {
-				node.sequence.insert(List.createItem(getProgid(progid)));
+				// return {
+				//	 type: 'WhiteSpace',
+				//	 loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+				//	 value: this.scanner.consume(WHITESPACE)
+				// };
+			},
+			generate: function(node) {
+				return node.value;
 			}
+		};
 
-			readSC(node);
+		return exports;
+	};
+	//#endregion
 
-			if (scanner.token !== null && scanner.token.type === TokenType.ExclamationMark) {
-				node.important = getImportant();
+	//#region URL: /css-tree/syntax/pseudo/common/nth
+	modules['/css-tree/syntax/pseudo/common/nth'] = function () {
+		var List = require('/css-tree/utils/list');
+		var DISALLOW_OF_CLAUSE = false;
+
+		var exports = {
+			parse: function nth() {
+				return new List().appendData(
+					this.Nth(DISALLOW_OF_CLAUSE)
+				);
 			}
+		};
 
-			return node;
-		}
+		return exports;
+	};
+	//#endregion
 
-		// 'progid:' ws* 'DXImageTransform.Microsoft.' ident ws* '(' .* ')'
-		function checkProgid() {
-			function checkSC(offset) {
-				for (var cursor; cursor = scanner.lookup(offset); offset++) {
-					if (cursor.type !== TokenType.Space &&
-						cursor.type !== TokenType.Comment) {
-						break;
+	//#region URL: /css-tree/syntax/pseudo/common/nthWithOfClause
+	modules['/css-tree/syntax/pseudo/common/nthWithOfClause'] = function () {
+		var List = require('/css-tree/utils/list');
+		var ALLOW_OF_CLAUSE = true;
+
+		var exports = {
+			parse: function() {
+				return new List().appendData(
+					this.Nth(ALLOW_OF_CLAUSE)
+				);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/common/selectorList
+	modules['/css-tree/syntax/pseudo/common/selectorList'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = {
+			parse: function selectorList() {
+				return new List().appendData(
+					this.SelectorList()
+				);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/dir
+	modules['/css-tree/syntax/pseudo/dir'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = {
+			parse: function() {
+				return new List().appendData(
+					this.Identifier()
+				);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/has
+	modules['/css-tree/syntax/pseudo/has'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = {
+			parse: function() {
+				return new List().appendData(
+					this.SelectorList()
+				);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/lang
+	modules['/css-tree/syntax/pseudo/lang'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = {
+			parse: function() {
+				return new List().appendData(
+					this.Identifier()
+				);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/matches
+	modules['/css-tree/syntax/pseudo/matches'] = function () {
+		var exports = require('/css-tree/syntax/pseudo/common/selectorList');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/not
+	modules['/css-tree/syntax/pseudo/not'] = function () {
+		var exports = require('/css-tree/syntax/pseudo/common/selectorList');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/nth-child
+	modules['/css-tree/syntax/pseudo/nth-child'] = function () {
+		var exports = require('/css-tree/syntax/pseudo/common/nthWithOfClause');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/nth-last-child
+	modules['/css-tree/syntax/pseudo/nth-last-child'] = function () {
+		var exports = require('/css-tree/syntax/pseudo/common/nthWithOfClause');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/nth-last-of-type
+	modules['/css-tree/syntax/pseudo/nth-last-of-type'] = function () {
+		var exports = require('/css-tree/syntax/pseudo/common/nth');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/nth-of-type
+	modules['/css-tree/syntax/pseudo/nth-of-type'] = function () {
+		var exports = require('/css-tree/syntax/pseudo/common/nth');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo/slotted
+	modules['/css-tree/syntax/pseudo/slotted'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = {
+			parse: function compoundSelector() {
+				return new List().appendData(
+					this.Selector()
+				);
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/scope/atruleExpression
+	modules['/css-tree/syntax/scope/atruleExpression'] = function () {
+		var exports = {
+			getNode: require('/css-tree/syntax/scope/default')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/scope/default
+	modules['/css-tree/syntax/scope/default'] = function () {
+		var cmpChar = require('/css-tree/tokenizer').cmpChar;
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var STRING = TYPE.String;
+		var NUMBER = TYPE.Number;
+		var NUMBERSIGN = TYPE.NumberSign;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+		var PLUSSIGN = TYPE.PlusSign;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var COMMA = TYPE.Comma;
+		var SOLIDUS = TYPE.Solidus;
+		var ASTERISK = TYPE.Asterisk;
+		var PERCENTSIGN = TYPE.PercentSign;
+		var BACKSLASH = TYPE.Backslash;
+		var U = 117; // 'u'.charCodeAt(0)
+
+		var exports = function defaultRecognizer(context) {
+			switch (this.scanner.tokenType) {
+				case NUMBERSIGN:
+					return this.HexColor();
+
+				case COMMA:
+					context.space = null;
+					context.ignoreWSAfter = true;
+					return this.Operator();
+
+				case SOLIDUS:
+				case ASTERISK:
+				case PLUSSIGN:
+				case HYPHENMINUS:
+					return this.Operator();
+
+				case LEFTPARENTHESIS:
+					return this.Parentheses(this.readSequence, context.recognizer);
+
+				case LEFTSQUAREBRACKET:
+					return this.Brackets(this.readSequence, context.recognizer);
+
+				case STRING:
+					return this.String();
+
+				case NUMBER:
+					switch (this.scanner.lookupType(1)) {
+						case PERCENTSIGN:
+							return this.Percentage();
+
+						case IDENTIFIER:
+							// edge case: number with folowing \0 and \9 hack shouldn't to be a Dimension
+							if (cmpChar(this.scanner.source, this.scanner.tokenEnd, BACKSLASH)) {
+								return this.Number();
+							} else {
+								return this.Dimension();
+							}
+
+						default:
+							return this.Number();
+					}
+
+				case IDENTIFIER:
+					// check for unicode range, it should start with u+ or U+
+					if (cmpChar(this.scanner.source, this.scanner.tokenStart, U) &&
+						cmpChar(this.scanner.source, this.scanner.tokenStart + 1, PLUSSIGN)) {
+						return this.UnicodeRange();
+					} else if (this.scanner.lookupType(1) === LEFTPARENTHESIS) {
+						if (this.scanner.lookupValue(0, 'url')) {
+							return this.Url();
+						} else {
+							return this.Function(this.readSequence, context.recognizer);
+						}
+					} else {
+						return this.Identifier();
+					}
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/scope/selector
+	modules['/css-tree/syntax/scope/selector'] = function () {
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBER = TYPE.Number;
+		var NUMBERSIGN = TYPE.NumberSign;
+		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+		var PLUSSIGN = TYPE.PlusSign;
+		var SOLIDUS = TYPE.Solidus;
+		var ASTERISK = TYPE.Asterisk;
+		var FULLSTOP = TYPE.FullStop;
+		var COLON = TYPE.Colon;
+		var GREATERTHANSIGN = TYPE.GreaterThanSign;
+		var VERTICALLINE = TYPE.VerticalLine;
+		var TILDE = TYPE.Tilde;
+
+		function getNode(context) {
+			switch (this.scanner.tokenType) {
+				case PLUSSIGN:
+				case GREATERTHANSIGN:
+				case TILDE:
+					context.space = null;
+					context.ignoreWSAfter = true;
+					return this.Combinator();
+
+				case SOLIDUS:  // /deep/
+					return this.Combinator();
+
+				case FULLSTOP:
+					return this.ClassSelector();
+
+				case LEFTSQUAREBRACKET:
+					return this.AttributeSelector();
+
+				case NUMBERSIGN:
+					return this.IdSelector();
+
+				case COLON:
+					if (this.scanner.lookupType(1) === COLON) {
+						return this.PseudoElementSelector();
+					} else {
+						return this.PseudoClassSelector();
+					}
+
+				case IDENTIFIER:
+				case ASTERISK:
+				case VERTICALLINE:
+					return this.TypeSelector();
+
+				case NUMBER:
+					return this.Percentage();
+			}
+		};
+
+		var exports = {
+			getNode: getNode
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/scope/value
+	modules['/css-tree/syntax/scope/value'] = function () {
+		var exports = {
+			getNode: require('/css-tree/syntax/scope/default'),
+			'-moz-element': require('/css-tree/syntax/function/element'),
+			'element': require('/css-tree/syntax/function/element'),
+			'expression': require('/css-tree/syntax/function/expression'),
+			'var': require('/css-tree/syntax/function/var')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/default
+	modules['/css-tree/syntax/default'] = function () {
+		var data = require('/css-tree/data');
+
+		var exports = require('/css-tree/syntax').create({
+			generic: true,
+			types: data.types,
+			properties: data.properties,
+
+			parseContext: {
+				default: 'StyleSheet',
+				stylesheet: 'StyleSheet',
+				atrule: 'Atrule',
+				atruleExpression: function(options) {
+					return this.AtruleExpression(options.atrule ? String(options.atrule) : null);
+				},
+				mediaQueryList: 'MediaQueryList',
+				mediaQuery: 'MediaQuery',
+				rule: 'Rule',
+				selectorList: 'SelectorList',
+				selector: 'Selector',
+				block: function() {
+					return this.Block(this.Declaration);
+				},
+				declarationList: 'DeclarationList',
+				declaration: 'Declaration',
+				value: function(options) {
+					return this.Value(options.property ? String(options.property) : null);
+				}
+			},
+			scope: {
+				AtruleExpression: require('/css-tree/syntax/scope/atruleExpression'),
+				Selector: require('/css-tree/syntax/scope/selector'),
+				Value: require('/css-tree/syntax/scope/value')
+			},
+			atrule: {
+				'font-face': require('/css-tree/syntax/atrule/font-face'),
+				'import': require('/css-tree/syntax/atrule/import'),
+				'media': require('/css-tree/syntax/atrule/media'),
+				'page': require('/css-tree/syntax/atrule/page'),
+				'supports': require('/css-tree/syntax/atrule/supports')
+			},
+			pseudo: {
+				'dir': require('/css-tree/syntax/pseudo/dir'),
+				'has': require('/css-tree/syntax/pseudo/has'),
+				'lang': require('/css-tree/syntax/pseudo/lang'),
+				'matches': require('/css-tree/syntax/pseudo/matches'),
+				'not': require('/css-tree/syntax/pseudo/not'),
+				'nth-child': require('/css-tree/syntax/pseudo/nth-child'),
+				'nth-last-child': require('/css-tree/syntax/pseudo/nth-last-child'),
+				'nth-last-of-type': require('/css-tree/syntax/pseudo/nth-last-of-type'),
+				'nth-of-type': require('/css-tree/syntax/pseudo/nth-of-type'),
+				'slotted': require('/css-tree/syntax/pseudo/slotted')
+			},
+			node: {
+				AnPlusB: require('/css-tree/syntax/node/AnPlusB'),
+				Atrule: require('/css-tree/syntax/node/Atrule'),
+				AtruleExpression: require('/css-tree/syntax/node/AtruleExpression'),
+				AttributeSelector: require('/css-tree/syntax/node/AttributeSelector'),
+				Block: require('/css-tree/syntax/node/Block'),
+				Brackets: require('/css-tree/syntax/node/Brackets'),
+				CDC: require('/css-tree/syntax/node/CDC'),
+				CDO: require('/css-tree/syntax/node/CDO'),
+				ClassSelector: require('/css-tree/syntax/node/ClassSelector'),
+				Combinator: require('/css-tree/syntax/node/Combinator'),
+				Comment: require('/css-tree/syntax/node/Comment'),
+				Declaration: require('/css-tree/syntax/node/Declaration'),
+				DeclarationList: require('/css-tree/syntax/node/DeclarationList'),
+				Dimension: require('/css-tree/syntax/node/Dimension'),
+				Function: require('/css-tree/syntax/node/Function'),
+				HexColor: require('/css-tree/syntax/node/HexColor'),
+				Identifier: require('/css-tree/syntax/node/Identifier'),
+				IdSelector: require('/css-tree/syntax/node/IdSelector'),
+				MediaFeature: require('/css-tree/syntax/node/MediaFeature'),
+				MediaQuery: require('/css-tree/syntax/node/MediaQuery'),
+				MediaQueryList: require('/css-tree/syntax/node/MediaQueryList'),
+				Nth: require('/css-tree/syntax/node/Nth'),
+				Number: require('/css-tree/syntax/node/Number'),
+				Operator: require('/css-tree/syntax/node/Operator'),
+				Parentheses: require('/css-tree/syntax/node/Parentheses'),
+				Percentage: require('/css-tree/syntax/node/Percentage'),
+				PseudoClassSelector: require('/css-tree/syntax/node/PseudoClassSelector'),
+				PseudoElementSelector: require('/css-tree/syntax/node/PseudoElementSelector'),
+				Ratio: require('/css-tree/syntax/node/Ratio'),
+				Raw: require('/css-tree/syntax/node/Raw'),
+				Rule: require('/css-tree/syntax/node/Rule'),
+				Selector: require('/css-tree/syntax/node/Selector'),
+				SelectorList: require('/css-tree/syntax/node/SelectorList'),
+				String: require('/css-tree/syntax/node/String'),
+				StyleSheet: require('/css-tree/syntax/node/StyleSheet'),
+				TypeSelector: require('/css-tree/syntax/node/TypeSelector'),
+				UnicodeRange: require('/css-tree/syntax/node/UnicodeRange'),
+				Url: require('/css-tree/syntax/node/Url'),
+				Value: require('/css-tree/syntax/node/Value'),
+				WhiteSpace: require('/css-tree/syntax/node/WhiteSpace')
+			}
+		});
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/mix
+	modules['/css-tree/syntax/mix'] = function () {
+		var shape = {
+			generic: true,
+			types: {},
+			properties: {},
+			parseContext: {},
+			scope: {},
+			atrule: ['parse'],
+			pseudo: ['parse'],
+			node: ['name', 'structure', 'parse', 'generate', 'walkContext']
+		};
+
+		function mix(dest, src, shape) {
+			for (var key in shape) {
+				if (shape[key] === true) {
+					if (key in src) {
+						dest[key] = src[key];
+					}
+				} else if (shape[key]) {
+					if (shape[key].constructor === Object) {
+						var res = {};
+						for (var name in dest[key]) {
+							res[name] = dest[key][name];
+						}
+						for (var name in src[key]) {
+							res[name] = src[key][name];
+						}
+						dest[key] = res;
+					} else if (Array.isArray(shape[key])) {
+						var res = {};
+						var innerShape = shape[key].reduce(function(s, k) {
+							s[k] = true;
+							return s;
+						}, {});
+						for (var name in dest[key]) {
+							res[name] = {};
+							if (dest[key] && dest[key][name]) {
+								mix(res[name], dest[key][name], innerShape);
+							}
+						}
+						for (var name in src[key]) {
+							if (!res[name]) {
+								res[name] = {};
+							}
+							if (src[key] && src[key][name]) {
+								mix(res[name], src[key][name], innerShape);
+							}
+						}
+						dest[key] = res;
 					}
 				}
-
-				return offset;
 			}
-
-			var offset = checkSC(0);
-
-			if (scanner.lookup(offset + 1) === null ||
-				scanner.lookup(offset + 0).value.toLowerCase() !== 'progid' ||
-				scanner.lookup(offset + 1).type !== TokenType.Colon) {
-				return false; // fail
-			}
-
-			offset += 2;
-			offset = checkSC(offset);
-
-			if (scanner.lookup(offset + 5) === null ||
-				scanner.lookup(offset + 0).value.toLowerCase() !== 'dximagetransform' ||
-				scanner.lookup(offset + 1).type !== TokenType.FullStop ||
-				scanner.lookup(offset + 2).value.toLowerCase() !== 'microsoft' ||
-				scanner.lookup(offset + 3).type !== TokenType.FullStop ||
-				scanner.lookup(offset + 4).type !== TokenType.Identifier) {
-				return false; // fail
-			}
-
-			offset += 5;
-			offset = checkSC(offset);
-
-			if (scanner.lookupType(offset, TokenType.LeftParenthesis) === false) {
-				return false; // fail
-			}
-
-			for (var cursor; cursor = scanner.lookup(offset); offset++) {
-				if (cursor.type === TokenType.RightParenthesis) {
-					return cursor;
-				}
-			}
-
-			return false;
+			return dest;
 		}
 
-		function getProgid(progidEnd) {
-			var value = '';
-			var node = {
-				type: 'Progid',
-				info: getInfo(),
-				value: null
-			};
-
-			if (!progidEnd) {
-				progidEnd = checkProgid();
-			}
-
-			if (!progidEnd) {
-				parseError('progid is expected');
-			}
-
-			readSC(node);
-
-			var rawInfo = getInfo();
-			for (; scanner.token && scanner.token !== progidEnd; scanner.next()) {
-				value += scanner.token.value;
-			}
-
-			eat(TokenType.RightParenthesis);
-			value += ')';
-
-			node.value = {
-				type: 'Raw',
-				info: rawInfo,
-				value: value
-			};
-
-			readSC(node);
-
-			return node;
-		}
-
-		// <pseudo-element> | <nth-selector> | <pseudo-class>
-		function getPseudo() {
-			var next = scanner.lookup(1);
-
-			if (next === null) {
-				scanner.next();
-				parseError('Colon or identifier is expected');
-			}
-
-			if (next.type === TokenType.Colon) {
-				return getPseudoElement();
-			}
-
-			if (next.type === TokenType.Identifier &&
-				next.value.toLowerCase() === 'nth') {
-				return getNthSelector();
-			}
-
-			return getPseudoClass();
-		}
-
-		// :: ident
-		function getPseudoElement() {
-			var info = getInfo();
-
-			eat(TokenType.Colon);
-			eat(TokenType.Colon);
-
-			return {
-				type: 'PseudoElement',
-				info: info,
-				name: readIdent(false)
-			};
-		}
-
-		// : ( ident | function )
-		function getPseudoClass() {
-			var info = getInfo();
-			var ident = eat(TokenType.Colon) && getIdentifier(false);
-
-			if (scanner.token !== null && scanner.token.type === TokenType.LeftParenthesis) {
-				return getFunction(SCOPE_SELECTOR, ident);
-			}
-
-			return {
-				type: 'PseudoClass',
-				info: info,
-				name: ident.name
-			};
-		}
-
-		// ws
-		function getS() {
-			var node = {
-				type: 'Space'
-				// value: scanner.token.value
-			};
-
-			scanner.next();
-
-			return node;
-		}
-
-		function readSC() {
-			// var nodes = [];
-
-			scan:
-			while (scanner.token !== null) {
-				switch (scanner.token.type) {
-					case TokenType.Space:
-						scanner.next();
-						// nodes.push(getS());
-						break;
-
-					case TokenType.Comment:
-						scanner.next();
-						// nodes.push(getComment());
-						break;
-
-					default:
-						break scan;
-				}
-			}
-
-			return null;
-
-			// return nodes.length ? new List(nodes) : null;
-		}
-
-		// node: String
-		function getString() {
-			var node = {
-				type: 'String',
-				info: getInfo(),
-				value: scanner.token.value
-			};
-
-			scanner.next();
-
-			return node;
-		}
-
-		// # ident
-		function getVhash() {
-			var info = getInfo();
-			var value;
-
-			eat(TokenType.NumberSign);
-
-			expectAny('Number or identifier',
-				TokenType.DecimalNumber,
-				TokenType.Identifier
-			);
-
-			value = scanner.token.value;
-
-			if (scanner.token.type === TokenType.DecimalNumber &&
-				scanner.lookupType(1, TokenType.Identifier)) {
-				scanner.next();
-				value += scanner.token.value;
-			}
-
-			scanner.next();
-
-			return {
-				type: 'Hash',
-				info: info,
-				value: value
-			};
-		}
-
-		var exports = function parse(source, options) {
-			var ast;
-
-			if (!options || typeof options !== 'object') {
-				options = {};
-			}
-
-			var context = options.context || 'stylesheet';
-			needPositions = Boolean(options.positions);
-			filename = options.filename || '<unknown>';
-
-			if (!initialContext.hasOwnProperty(context)) {
-				throw new Error('Unknown context `' + context + '`');
-			}
-
-			scanner = new Scanner(source, blockMode.hasOwnProperty(context), options.line, options.column);
-			scanner.next();
-			ast = initialContext[context]();
-
-			scanner = null;
-
-			// console.log(JSON.stringify(ast, null, 4));
-			return ast;
+		var exports = function(dest, src) {
+			return mix(dest, src, shape);
 		};
 
 		return exports;
 	};
 	//#endregion
-	
-	//#region URL: /parser/const
-	modules['/parser/const'] = function () {
-		var exports = {};
 
-		exports.TokenType = {
-			String: 'String',
-			Comment: 'Comment',
-			Unknown: 'Unknown',
-			Newline: 'Newline',
-			Space: 'Space',
-			Tab: 'Tab',
-			ExclamationMark: 'ExclamationMark',         // !
-			QuotationMark: 'QuotationMark',             // "
-			NumberSign: 'NumberSign',                   // #
-			DollarSign: 'DollarSign',                   // $
-			PercentSign: 'PercentSign',                 // %
-			Ampersand: 'Ampersand',                     // &
-			Apostrophe: 'Apostrophe',                   // '
-			LeftParenthesis: 'LeftParenthesis',         // (
-			RightParenthesis: 'RightParenthesis',       // )
-			Asterisk: 'Asterisk',                       // *
-			PlusSign: 'PlusSign',                       // +
-			Comma: 'Comma',                             // ,
-			HyphenMinus: 'HyphenMinus',                 // -
-			FullStop: 'FullStop',                       // .
-			Solidus: 'Solidus',                         // /
-			Colon: 'Colon',                             // :
-			Semicolon: 'Semicolon',                     // ;
-			LessThanSign: 'LessThanSign',               // <
-			EqualsSign: 'EqualsSign',                   // =
-			GreaterThanSign: 'GreaterThanSign',         // >
-			QuestionMark: 'QuestionMark',               // ?
-			CommercialAt: 'CommercialAt',               // @
-			LeftSquareBracket: 'LeftSquareBracket',     // [
-			ReverseSolidus: 'ReverseSolidus',           // \
-			RightSquareBracket: 'RightSquareBracket',   // ]
-			CircumflexAccent: 'CircumflexAccent',       // ^
-			LowLine: 'LowLine',                         // _
-			LeftCurlyBracket: 'LeftCurlyBracket',       // {
-			VerticalLine: 'VerticalLine',               // |
-			RightCurlyBracket: 'RightCurlyBracket',     // }
-			Tilde: 'Tilde',                             // ~
-			Identifier: 'Identifier',
-			DecimalNumber: 'DecimalNumber'
-		};
-
-		// var i = 1;
-		// for (var key in exports.TokenType) {
-		//     exports.TokenType[key] = i++;
-		// }
+	//#region URL: /css-tree/tokenizer
+	modules['/css-tree/tokenizer'] = function () {
+		var exports = require('/css-tree/tokenizer/Tokenizer');
 
 		return exports;
 	};
 	//#endregion
 
-	//#region URL: /parser/scanner
-	modules['/parser/scanner'] = function () {
+	//#region URL: /css-tree/tokenizer/const
+	modules['/css-tree/tokenizer/const'] = function () {
 		'use strict';
 
-		var TokenType = require('/parser/const').TokenType;
+		// token types (note: value shouldn't intersect with used char codes)
+		var WHITESPACE = 1;
+		var IDENTIFIER = 2;
+		var NUMBER = 3;
+		var STRING = 4;
+		var COMMENT = 5;
+		var PUNCTUATOR = 6;
+		var CDO = 7;
+		var CDC = 8;
 
 		var TAB = 9;
 		var N = 10;
 		var F = 12;
 		var R = 13;
 		var SPACE = 32;
-		var DOUBLE_QUOTE = 34;
-		var QUOTE = 39;
-		var RIGHT_PARENTHESIS = 41;
-		var STAR = 42;
-		var SLASH = 47;
-		var BACK_SLASH = 92;
-		var UNDERSCORE = 95;
-		var LEFT_CURLY_BRACE = 123;
-		var RIGHT_CURLY_BRACE = 125;
 
-		var WHITESPACE = 1;
-		var PUNCTUATOR = 2;
-		var DIGIT = 3;
-		var STRING = 4;
+		var TYPE = {
+			Whitespace:   WHITESPACE,
+			Identifier:   IDENTIFIER,
+			Number:		   NUMBER,
+			String:		   STRING,
+			Comment:		 COMMENT,
+			Punctuator:   PUNCTUATOR,
+			CDO:				 CDO,
+			CDC:				 CDC,
 
-		var PUNCTUATION = {
-			9:  TokenType.Tab,                // '\t'
-			10: TokenType.Newline,            // '\n'
-			13: TokenType.Newline,            // '\r'
-			32: TokenType.Space,              // ' '
-			33: TokenType.ExclamationMark,    // '!'
-			34: TokenType.QuotationMark,      // '"'
-			35: TokenType.NumberSign,         // '#'
-			36: TokenType.DollarSign,         // '$'
-			37: TokenType.PercentSign,        // '%'
-			38: TokenType.Ampersand,          // '&'
-			39: TokenType.Apostrophe,         // '\''
-			40: TokenType.LeftParenthesis,    // '('
-			41: TokenType.RightParenthesis,   // ')'
-			42: TokenType.Asterisk,           // '*'
-			43: TokenType.PlusSign,           // '+'
-			44: TokenType.Comma,              // ','
-			45: TokenType.HyphenMinus,        // '-'
-			46: TokenType.FullStop,           // '.'
-			47: TokenType.Solidus,            // '/'
-			58: TokenType.Colon,              // ':'
-			59: TokenType.Semicolon,          // ';'
-			60: TokenType.LessThanSign,       // '<'
-			61: TokenType.EqualsSign,         // '='
-			62: TokenType.GreaterThanSign,    // '>'
-			63: TokenType.QuestionMark,       // '?'
-			64: TokenType.CommercialAt,       // '@'
-			91: TokenType.LeftSquareBracket,  // '['
-			93: TokenType.RightSquareBracket, // ']'
-			94: TokenType.CircumflexAccent,   // '^'
-			95: TokenType.LowLine,            // '_'
-			123: TokenType.LeftCurlyBracket,  // '{'
-			124: TokenType.VerticalLine,      // '|'
-			125: TokenType.RightCurlyBracket, // '}'
-			126: TokenType.Tilde              // '~'
+			ExclamationMark:	  33,  // !
+			QuotationMark:		34,  // "
+			NumberSign:		   35,  // #
+			DollarSign:		   36,  // $
+			PercentSign:		  37,  // %
+			Ampersand:			38,  // &
+			Apostrophe:		   39,  // '
+			LeftParenthesis:	  40,  // (
+			RightParenthesis:	 41,  // )
+			Asterisk:			 42,  // *
+			PlusSign:			 43,  // +
+			Comma:				44,  // ,
+			HyphenMinus:		  45,  // -
+			FullStop:			 46,  // .
+			Solidus:			  47,  // /
+			Colon:				58,  // :
+			Semicolon:			59,  // ;
+			LessThanSign:		 60,  // <
+			EqualsSign:		   61,  // =
+			GreaterThanSign:	  62,  // >
+			QuestionMark:		 63,  // ?
+			CommercialAt:		 64,  // @
+			LeftSquareBracket:	91,  // [
+			Backslash:			92,  // \
+			RightSquareBracket:   93,  // ]
+			CircumflexAccent:	 94,  // ^
+			LowLine:			  95,  // _
+			GraveAccent:		  96,  // `
+			LeftCurlyBracket:	123,  // {
+			VerticalLine:		124,  // |
+			RightCurlyBracket:   125,  // }
+			Tilde:			   126   // ~
 		};
-		var SYMBOL_CATEGORY_LENGTH = Math.max.apply(null, Object.keys(PUNCTUATION)) + 1;
-		var SYMBOL_CATEGORY = new Uint32Array(SYMBOL_CATEGORY_LENGTH);
-		var IS_PUNCTUATOR = new Uint32Array(SYMBOL_CATEGORY_LENGTH);
 
-		// fill categories
-		Object.keys(PUNCTUATION).forEach(function(key) {
-			SYMBOL_CATEGORY[Number(key)] = PUNCTUATOR;
-			IS_PUNCTUATOR[Number(key)] = PUNCTUATOR;
-		}, SYMBOL_CATEGORY);
+		var NAME = Object.keys(TYPE).reduce(function(result, key) {
+			result[TYPE[key]] = key;
+			return result;
+		}, {});
 
-		// don't treat as punctuator
-		IS_PUNCTUATOR[UNDERSCORE] = 0;
+		var SafeUint32Array = typeof Uint32Array !== 'undefined' ? Uint32Array : Array; // fallback on Array when TypedArray is not supported
+		var SYMBOL_TYPE = new SafeUint32Array(Math.max.apply(null, Object.keys(NAME).map(Number)) + 1);
+		var PUNCTUATION = new SafeUint32Array(SYMBOL_TYPE.length);
 
-		for (var i = 48; i <= 57; i++) {
-			SYMBOL_CATEGORY[i] = DIGIT;
+		for (var i = 0; i < SYMBOL_TYPE.length; i++) {
+			SYMBOL_TYPE[i] = IDENTIFIER;
 		}
 
-		SYMBOL_CATEGORY[SPACE] = WHITESPACE;
-		SYMBOL_CATEGORY[TAB] = WHITESPACE;
-		SYMBOL_CATEGORY[N] = WHITESPACE;
-		SYMBOL_CATEGORY[R] = WHITESPACE;
-		SYMBOL_CATEGORY[F] = WHITESPACE;
+		// fill categories
+		[
+			TYPE.ExclamationMark,	// !
+			TYPE.QuotationMark,	  // "
+			TYPE.NumberSign,		 // #
+			TYPE.DollarSign,		 // $
+			TYPE.PercentSign,		// %
+			TYPE.Ampersand,		  // &
+			TYPE.Apostrophe,		 // '
+			TYPE.LeftParenthesis,	// (
+			TYPE.RightParenthesis,   // )
+			TYPE.Asterisk,		   // *
+			TYPE.PlusSign,		   // +
+			TYPE.Comma,			  // ,
+			TYPE.HyphenMinus,		// -
+			TYPE.FullStop,		   // .
+			TYPE.Solidus,			// /
+			TYPE.Colon,			  // :
+			TYPE.Semicolon,		  // ;
+			TYPE.LessThanSign,	   // <
+			TYPE.EqualsSign,		 // =
+			TYPE.GreaterThanSign,	// >
+			TYPE.QuestionMark,	   // ?
+			TYPE.CommercialAt,	   // @
+			TYPE.LeftSquareBracket,  // [
+			// TYPE.Backslash,		  // \
+			TYPE.RightSquareBracket, // ]
+			TYPE.CircumflexAccent,   // ^
+			// TYPE.LowLine,			// _
+			TYPE.GraveAccent,		// `
+			TYPE.LeftCurlyBracket,   // {
+			TYPE.VerticalLine,	   // |
+			TYPE.RightCurlyBracket,  // }
+			TYPE.Tilde			   // ~
+		].forEach(function(key) {
+			SYMBOL_TYPE[Number(key)] = PUNCTUATOR;
+			PUNCTUATION[Number(key)] = PUNCTUATOR;
+		}, SYMBOL_TYPE);
 
-		SYMBOL_CATEGORY[QUOTE] = STRING;
-		SYMBOL_CATEGORY[DOUBLE_QUOTE] = STRING;
+		for (var i = 48; i <= 57; i++) {
+			SYMBOL_TYPE[i] = NUMBER;
+		}
 
-		//
-		// scanner
-		//
+		SYMBOL_TYPE[SPACE] = WHITESPACE;
+		SYMBOL_TYPE[TAB] = WHITESPACE;
+		SYMBOL_TYPE[N] = WHITESPACE;
+		SYMBOL_TYPE[R] = WHITESPACE;
+		SYMBOL_TYPE[F] = WHITESPACE;
 
-		var Scanner = function(source, initBlockMode, initLine, initColumn) {
-			this.source = source;
+		SYMBOL_TYPE[TYPE.Apostrophe] = STRING;
+		SYMBOL_TYPE[TYPE.QuotationMark] = STRING;
 
-			this.pos = source.charCodeAt(0) === 0xFEFF ? 1 : 0;
-			this.eof = this.pos === this.source.length;
-			this.line = typeof initLine === 'undefined' ? 1 : initLine;
-			this.lineStartPos = typeof initColumn === 'undefined' ? -1 : -initColumn;
+		// whitespace is punctuation ...
+		PUNCTUATION[SPACE] = PUNCTUATOR;
+		PUNCTUATION[TAB] = PUNCTUATOR;
+		PUNCTUATION[N] = PUNCTUATOR;
+		PUNCTUATION[R] = PUNCTUATOR;
+		PUNCTUATION[F] = PUNCTUATOR;
+		// ... hyper minus is not
+		PUNCTUATION[TYPE.HyphenMinus] = 0;
 
-			this.minBlockMode = initBlockMode ? 1 : 0;
-			this.blockMode = this.minBlockMode;
-			this.urlMode = false;
+		var exports = {
+			TYPE: TYPE,
+			NAME: NAME,
 
-			this.prevToken = null;
-			this.token = null;
-			this.buffer = [];
+			SYMBOL_TYPE: SYMBOL_TYPE,
+			PUNCTUATION: PUNCTUATION
 		};
 
-		Scanner.prototype = {
-			lookup: function(offset) {
-				if (offset === 0) {
-					return this.token;
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/tokenizer/error
+	modules['/css-tree/tokenizer/error'] = function () {
+		'use strict';
+
+		var MAX_LINE_LENGTH = 100;
+		var OFFSET_CORRECTION = 60;
+		var TAB_REPLACEMENT = '    ';
+
+		function sourceFragment(error, extraLines) {
+			function processLines(start, end) {
+				return lines.slice(start, end).map(function(line, idx) {
+					var num = String(start + idx + 1);
+
+					while (num.length < maxNumLength) {
+						num = ' ' + num;
+					}
+
+					return num + ' |' + line;
+				}).join('\n');
+			}
+
+			var lines = error.source.split(/\n|\r\n?|\f/);
+			var line = error.line;
+			var column = error.column;
+			var startLine = Math.max(1, line - extraLines) - 1;
+			var endLine = Math.min(line + extraLines, lines.length + 1);
+			var maxNumLength = Math.max(4, String(endLine).length) + 1;
+			var cutLeft = 0;
+
+			// correct column according to replaced tab before column
+			column += (TAB_REPLACEMENT.length - 1) * (lines[line - 1].substr(0, column - 1).match(/\t/g) || []).length;
+
+			if (column > MAX_LINE_LENGTH) {
+				cutLeft = column - OFFSET_CORRECTION + 3;
+				column = OFFSET_CORRECTION - 2;
+			}
+
+			for (var i = startLine; i <= endLine; i++) {
+				if (i >= 0 && i < lines.length) {
+					lines[i] = lines[i].replace(/\t/g, TAB_REPLACEMENT);
+					lines[i] =
+						(cutLeft > 0 && lines[i].length > cutLeft ? '\u2026' : '') +
+						lines[i].substr(cutLeft, MAX_LINE_LENGTH - 2) +
+						(lines[i].length > cutLeft + MAX_LINE_LENGTH - 1 ? '\u2026' : '');
 				}
+			}
 
-				for (var i = this.buffer.length; !this.eof && i < offset; i++) {
-					this.buffer.push(this.getToken());
+			return [
+				processLines(startLine, line),
+				new Array(column + maxNumLength + 2).join('-') + '^',
+				processLines(line, endLine)
+			].join('\n');
+		}
+
+		var CssSyntaxError = function(message, source, offset, line, column) {
+			var error = new SyntaxError();
+			error.name = 'CssSyntaxError';
+			error.message = message;
+			error.source = source;
+			error.offset = offset;
+			error.line = line;
+			error.column = column;
+
+			error.sourceFragment = function(extraLines) {
+				return sourceFragment(error, isNaN(extraLines) ? 0 : extraLines);
+			};
+			Object.defineProperty(error, 'formattedMessage', {
+				get: function() {
+					return (
+						'Parse error: ' + error.message + '\n' +
+						sourceFragment(error, 2)
+					);
 				}
+			});
 
-				return offset <= this.buffer.length ? this.buffer[offset - 1] : null;
-			},
-			lookupType: function(offset, type) {
-				var token = this.lookup(offset);
+			// for backward capability
+			error.parseError = {
+				offset: offset,
+				line: line,
+				column: column
+			};
 
-				return token !== null && token.type === type;
-			},
-			next: function() {
-				var newToken = null;
+			return error;
+		};
 
-				if (this.buffer.length !== 0) {
-					newToken = this.buffer.shift();
-				} else if (!this.eof) {
-					newToken = this.getToken();
+		var exports = CssSyntaxError;
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/tokenizer/Tokenizer
+	modules['/css-tree/tokenizer/Tokenizer'] = function () {
+		'use strict';
+
+		var CssSyntaxError = require('/css-tree/tokenizer/error');
+
+		var constants = require('/css-tree/tokenizer/const');
+		var TYPE = constants.TYPE;
+		var NAME = constants.NAME;
+		var SYMBOL_TYPE = constants.SYMBOL_TYPE;
+		var SYMBOL_TYPE_LENGTH = SYMBOL_TYPE.length;
+
+		var utils = require('/css-tree/tokenizer/utils');
+		var firstCharOffset = utils.firstCharOffset;
+		var cmpStr = utils.cmpStr;
+		var isNumber = utils.isNumber;
+		var findLastNonSpaceLocation = utils.findLastNonSpaceLocation;
+		var findWhitespaceEnd = utils.findWhitespaceEnd;
+		var findCommentEnd = utils.findCommentEnd;
+		var findStringEnd = utils.findStringEnd;
+		var findNumberEnd = utils.findNumberEnd;
+		var findIdentifierEnd = utils.findIdentifierEnd;
+
+		var NULL = 0;
+		var WHITESPACE = TYPE.Whitespace;
+		var IDENTIFIER = TYPE.Identifier;
+		var NUMBER = TYPE.Number;
+		var STRING = TYPE.String;
+		var COMMENT = TYPE.Comment;
+		var PUNCTUATOR = TYPE.Punctuator;
+		var CDO = TYPE.CDO;
+		var CDC = TYPE.CDC;
+
+		var N = 10;
+		var F = 12;
+		var R = 13;
+		var STAR = TYPE.Asterisk;
+		var SLASH = TYPE.Solidus;
+		var FULLSTOP = TYPE.FullStop;
+		var PLUSSIGN = TYPE.PlusSign;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var GREATERTHANSIGN = TYPE.GreaterThanSign;
+		var LESSTHANSIGN = TYPE.LessThanSign;
+		var EXCLAMATIONMARK = TYPE.ExclamationMark;
+
+		var MIN_BUFFER_SIZE = 16 * 1024;
+		var OFFSET_MASK = 0x00FFFFFF;
+		var TYPE_OFFSET = 24;
+		var SafeUint32Array = typeof Uint32Array !== 'undefined' ? Uint32Array : Array; // fallback on Array when TypedArray is not supported
+
+		function computeLinesAndColumns(tokenizer, source) {
+			var sourceLength = source.length;
+			var start = firstCharOffset(source);
+			var lines = tokenizer.lines;
+			var line = tokenizer.startLine;
+			var columns = tokenizer.columns;
+			var column = tokenizer.startColumn;
+
+			if (lines === null || lines.length < sourceLength + 1) {
+				lines = new SafeUint32Array(Math.max(sourceLength + 1024, MIN_BUFFER_SIZE));
+				columns = new SafeUint32Array(lines.length);
+			}
+
+			for (var i = start; i < sourceLength; i++) {
+				var code = source.charCodeAt(i);
+
+				lines[i] = line;
+				columns[i] = column++;
+
+				if (code === N || code === R || code === F) {
+					if (code === R && i + 1 < sourceLength && source.charCodeAt(i + 1) === N) {
+						i++;
+						lines[i] = line;
+						columns[i] = column;
+					}
+
+					line++;
+					column = 1;
 				}
+			}
 
-				this.prevToken = this.token;
-				this.token = newToken;
+			lines[i] = line;
+			columns[i] = column;
 
-				return newToken;
-			},
+			tokenizer.linesAnsColumnsComputed = true;
+			tokenizer.lines = lines;
+			tokenizer.columns = columns;
+		}
 
-			tokenize: function() {
-				var tokens = [];
+		function tokenLayout(tokenizer, source, startPos) {
+			var sourceLength = source.length;
+			var offsetAndType = tokenizer.offsetAndType;
+			var tokenCount = 0;
+			var prevType = 0;
+			var offset = startPos;
 
-				for (; this.pos < this.source.length; this.pos++) {
-					tokens.push(this.getToken());
-				}
+			if (offsetAndType === null || offsetAndType.length < sourceLength + 1) {
+				offsetAndType = new SafeUint32Array(sourceLength + 1024);
+			}
 
-				return tokens;
-			},
+			while (offset < sourceLength) {
+				var code = source.charCodeAt(offset);
+				var type = code < SYMBOL_TYPE_LENGTH ? SYMBOL_TYPE[code] : IDENTIFIER;
 
-			getToken: function() {
-				var code = this.source.charCodeAt(this.pos);
-				var line = this.line;
-				var column = this.pos - this.lineStartPos;
-				var offset = this.pos;
-				var next;
-				var type;
-				var value;
-
-				switch (code < SYMBOL_CATEGORY_LENGTH ? SYMBOL_CATEGORY[code] : 0) {
-					case DIGIT:
-						type = TokenType.DecimalNumber;
-						value = this.readDecimalNumber();
-						break;
-
-					case STRING:
-						type = TokenType.String;
-						value = this.readString(code);
-						break;
-
+				switch (type) {
 					case WHITESPACE:
-						type = TokenType.Space;
-						value = this.readSpaces();
+						offset = findWhitespaceEnd(source, offset + 1);
 						break;
 
 					case PUNCTUATOR:
-						if (code === SLASH) {
-							next = this.pos + 1 < this.source.length ? this.source.charCodeAt(this.pos + 1) : 0;
+						// /*
+						if (code === STAR && prevType === SLASH) {
+							type = COMMENT;
+							offset = findCommentEnd(source, offset + 1);
+							tokenCount--; // rewrite prev token
+							break;
+						}
 
-							if (next === STAR) { // /*
-								type = TokenType.Comment;
-								value = this.readComment();
-								break;
-							} else if (next === SLASH && !this.urlMode) { // //
-								if (this.blockMode > 0) {
-									var skip = 2;
-
-									while (this.source.charCodeAt(this.pos + 2) === SLASH) {
-										skip++;
-									}
-
-									type = TokenType.Identifier;
-									value = this.readIdentifier(skip);
-
-									this.urlMode = this.urlMode || value === 'url';
-								} else {
-									type = TokenType.Unknown;
-									value = this.readUnknown();
-								}
+						// edge case for -.123 and +.123
+						if (code === FULLSTOP && (prevType === PLUSSIGN || prevType === HYPHENMINUS)) {
+							if (offset + 1 < sourceLength && isNumber(source.charCodeAt(offset + 1))) {
+								type = NUMBER;
+								offset = findNumberEnd(source, offset + 2, false);
+								tokenCount--; // rewrite prev token
 								break;
 							}
 						}
 
-						type = PUNCTUATION[code];
-						value = String.fromCharCode(code);
-						this.pos++;
-
-						if (code === RIGHT_PARENTHESIS) {
-							this.urlMode = false;
-						} else if (code === LEFT_CURLY_BRACE) {
-							this.blockMode++;
-						} else if (code === RIGHT_CURLY_BRACE) {
-							if (this.blockMode > this.minBlockMode) {
-								this.blockMode--;
+						// <!--
+						if (code === EXCLAMATIONMARK && prevType === LESSTHANSIGN) {
+							if (offset + 2 < sourceLength &&
+								source.charCodeAt(offset + 1) === HYPHENMINUS &&
+								source.charCodeAt(offset + 2) === HYPHENMINUS) {
+								type = CDO;
+								offset = offset + 3;
+								tokenCount--; // rewrite prev token
+								break;
 							}
+						}
+
+						// -->
+						if (code === HYPHENMINUS && prevType === HYPHENMINUS) {
+							if (offset + 1 < sourceLength && source.charCodeAt(offset + 1) === GREATERTHANSIGN) {
+								type = CDC;
+								offset = offset + 2;
+								tokenCount--; // rewrite prev token
+								break;
+							}
+						}
+
+						type = code;
+						offset = offset + 1;
+						break;
+
+					case NUMBER:
+						offset = findNumberEnd(source, offset + 1, prevType !== FULLSTOP);
+
+						// merge number with a preceding dot, dash or plus
+						if (prevType === FULLSTOP ||
+							prevType === HYPHENMINUS ||
+							prevType === PLUSSIGN) {
+							tokenCount--; // rewrite prev token
 						}
 
 						break;
 
-					default:
-						type = TokenType.Identifier;
-						value = this.readIdentifier(0);
+					case STRING:
+						offset = findStringEnd(source, offset + 1, code);
+						break;
 
-						this.urlMode = this.urlMode || value === 'url';
+					default:
+						offset = findIdentifierEnd(source, offset);
+
+						// merge identifier with a preceding dash
+						if (prevType === HYPHENMINUS) {
+							tokenCount--; // rewrite prev token
+						}
 				}
 
-				this.eof = this.pos === this.source.length;
+				offsetAndType[tokenCount++] = (type << TYPE_OFFSET) | offset;
+				prevType = type;
+			}
 
-				return {
-					type: type,
-					value: value,
+			offsetAndType[tokenCount] = offset;
 
-					offset: offset,
-					line: line,
-					column: column
-				};
+			tokenizer.offsetAndType = offsetAndType;
+			tokenizer.tokenCount = tokenCount;
+		}
+
+		//
+		// tokenizer
+		//
+
+		var Tokenizer = function(source, startOffset, startLine, startColumn) {
+			this.offsetAndType = null;
+			this.lines = null;
+			this.columns = null;
+
+			this.setSource(source, startOffset, startLine, startColumn);
+		};
+
+		Tokenizer.prototype = {
+			setSource: function(source, startOffset, startLine, startColumn) {
+				var safeSource = String(source || '');
+				var start = firstCharOffset(safeSource);
+
+				this.source = safeSource;
+				this.startOffset = typeof startOffset === 'undefined' ? 0 : startOffset;
+				this.startLine = typeof startLine === 'undefined' ? 1 : startLine;
+				this.startColumn = typeof startColumn === 'undefined' ? 1 : startColumn;
+				this.linesAnsColumnsComputed = false;
+
+				this.eof = false;
+				this.currentToken = -1;
+				this.tokenType = 0;
+				this.tokenStart = start;
+				this.tokenEnd = start;
+
+				tokenLayout(this, safeSource, start);
+				this.next();
 			},
 
-			isNewline: function(code) {
-				if (code === N || code === F || code === R) {
-					if (code === R && this.pos + 1 < this.source.length && this.source.charCodeAt(this.pos + 1) === N) {
-						this.pos++;
-					}
+			lookupType: function(offset) {
+				offset += this.currentToken;
 
-					this.line++;
-					this.lineStartPos = this.pos;
-					return true;
+				if (offset < this.tokenCount) {
+					return this.offsetAndType[offset] >> TYPE_OFFSET;
+				}
+
+				return NULL;
+			},
+			lookupNonWSType: function(offset) {
+				offset += this.currentToken;
+
+				for (var type; offset < this.tokenCount; offset++) {
+					type = this.offsetAndType[offset] >> TYPE_OFFSET;
+
+					if (type !== WHITESPACE) {
+						return type;
+					}
+				}
+
+				return NULL;
+			},
+			lookupValue: function(offset, referenceStr) {
+				offset += this.currentToken;
+
+				if (offset < this.tokenCount) {
+					return cmpStr(
+						this.source,
+						this.offsetAndType[offset - 1] & OFFSET_MASK,
+						this.offsetAndType[offset] & OFFSET_MASK,
+						referenceStr
+					);
 				}
 
 				return false;
 			},
 
-			readSpaces: function() {
-				var start = this.pos;
+			getTokenValue: function() {
+				return this.source.substring(this.tokenStart, this.tokenEnd);
+			},
+			substrToCursor: function(start) {
+				return this.source.substring(start, this.tokenStart);
+			},
 
-				for (; this.pos < this.source.length; this.pos++) {
-					var code = this.source.charCodeAt(this.pos);
-
-					if (!this.isNewline(code) && code !== SPACE && code !== TAB) {
+			skipWS: function() {
+				for (var i = this.currentToken, skipTokenCount = 0; i < this.tokenCount; i++, skipTokenCount++) {
+					if ((this.offsetAndType[i] >> TYPE_OFFSET) !== WHITESPACE) {
 						break;
 					}
 				}
 
-				return this.source.substring(start, this.pos);
+				if (skipTokenCount > 0) {
+					this.skip(skipTokenCount);
+				}
+			},
+			skipSC: function() {
+				while (this.tokenType === WHITESPACE || this.tokenType === COMMENT) {
+					this.next();
+				}
+			},
+			skip: function(tokenCount) {
+				var next = this.currentToken + tokenCount;
+
+				if (next < this.tokenCount) {
+					this.currentToken = next;
+					this.tokenStart = this.offsetAndType[next - 1] & OFFSET_MASK;
+					next = this.offsetAndType[next];
+					this.tokenType = next >> TYPE_OFFSET;
+					this.tokenEnd = next & OFFSET_MASK;
+				} else {
+					this.currentToken = this.tokenCount;
+					this.next();
+				}
+			},
+			next: function() {
+				var next = this.currentToken + 1;
+
+				if (next < this.tokenCount) {
+					this.currentToken = next;
+					this.tokenStart = this.tokenEnd;
+					next = this.offsetAndType[next];
+					this.tokenType = next >> TYPE_OFFSET;
+					this.tokenEnd = next & OFFSET_MASK;
+				} else {
+					this.currentToken = this.tokenCount;
+					this.eof = true;
+					this.tokenType = NULL;
+					this.tokenStart = this.tokenEnd = this.source.length;
+				}
 			},
 
-			readComment: function() {
-				var start = this.pos;
-
-				for (this.pos += 2; this.pos < this.source.length; this.pos++) {
-					var code = this.source.charCodeAt(this.pos);
-
-					if (code === STAR) { // */
-						if (this.source.charCodeAt(this.pos + 1) === SLASH) {
-							this.pos += 2;
-							break;
-						}
-					} else {
-						this.isNewline(code);
-					}
+			eat: function(tokenType) {
+				if (this.tokenType !== tokenType) {
+					this.error(
+						NAME[tokenType] + ' is expected',
+						// when test type is part of another token show error for current position + 1
+						// e.g. eat(HYPHENMINUS) will fail on "-foo", but pointing on "-" is odd
+						this.tokenStart + (this.source.charCodeAt(this.tokenStart) === tokenType ? 1 : 0)
+					);
 				}
 
-				return this.source.substring(start, this.pos);
+				this.next();
+			},
+			eatNonWS: function(tokenType) {
+				this.skipWS();
+				this.eat(tokenType);
 			},
 
-			readUnknown: function() {
-				var start = this.pos;
+			consume: function(tokenType) {
+				var start = this.tokenStart;
 
-				for (this.pos += 2; this.pos < this.source.length; this.pos++) {
-					if (this.isNewline(this.source.charCodeAt(this.pos), this.source)) {
-						break;
-					}
-				}
+				this.eat(tokenType);
 
-				return this.source.substring(start, this.pos);
+				return this.substrToCursor(start);
+			},
+			consumeNonWS: function(tokenType) {
+				this.skipWS();
+
+				return this.consume(tokenType);
 			},
 
-			readString: function(quote) {
-				var start = this.pos;
-				var res = '';
-
-				for (this.pos++; this.pos < this.source.length; this.pos++) {
-					var code = this.source.charCodeAt(this.pos);
-
-					if (code === BACK_SLASH) {
-						var end = this.pos++;
-
-						if (this.isNewline(this.source.charCodeAt(this.pos), this.source)) {
-							res += this.source.substring(start, end);
-							start = this.pos + 1;
-						}
-					} else if (code === quote) {
-						this.pos++;
-						break;
-					}
+			expectIdentifier: function(name) {
+				if (this.tokenType !== IDENTIFIER || cmpStr(this.source, this.tokenStart, this.tokenEnd, name) === false) {
+					this.error('Identifier `' + name + '` is expected');
 				}
 
-				return res + this.source.substring(start, this.pos);
+				this.next();
 			},
 
-			readDecimalNumber: function() {
-				var start = this.pos;
-				var code;
-
-				for (this.pos++; this.pos < this.source.length; this.pos++) {
-					code = this.source.charCodeAt(this.pos);
-
-					if (code < 48 || code > 57) {  // 0 .. 9
-						break;
-					}
+			getLocation: function(offset, filename) {
+				if (!this.linesAnsColumnsComputed) {
+					computeLinesAndColumns(this, this.source);
 				}
 
-				return this.source.substring(start, this.pos);
+				return {
+					source: filename,
+					offset: this.startOffset + offset,
+					line: this.lines[offset],
+					column: this.columns[offset]
+				};
 			},
 
-			readIdentifier: function(skip) {
-				var start = this.pos;
-
-				for (this.pos += skip; this.pos < this.source.length; this.pos++) {
-					var code = this.source.charCodeAt(this.pos);
-
-					if (code === BACK_SLASH) {
-						this.pos++;
-
-						// skip escaped unicode sequence that can ends with space
-						// [0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?
-						for (var i = 0; i < 7 && this.pos + i < this.source.length; i++) {
-							code = this.source.charCodeAt(this.pos + i);
-
-							if (i !== 6) {
-								if ((code >= 48 && code <= 57) ||  // 0 .. 9
-									(code >= 65 && code <= 70) ||  // A .. F
-									(code >= 97 && code <= 102)) { // a .. f
-									continue;
-								}
-							}
-
-							if (i > 0) {
-								this.pos += i - 1;
-								if (code === SPACE || code === TAB || this.isNewline(code)) {
-									this.pos++;
-								}
-							}
-
-							break;
-						}
-					} else if (code < SYMBOL_CATEGORY_LENGTH &&
-							   IS_PUNCTUATOR[code] === PUNCTUATOR) {
-						break;
-					}
+			getLocationRange: function(start, end, filename) {
+				if (!this.linesAnsColumnsComputed) {
+					computeLinesAndColumns(this, this.source);
 				}
 
-				return this.source.substring(start, this.pos);
+				return {
+					source: filename,
+					start: {
+						offset: this.startOffset + start,
+						line: this.lines[start],
+						column: this.columns[start]
+					},
+					end: {
+						offset: this.startOffset + end,
+						line: this.lines[end],
+						column: this.columns[end]
+					}
+				};
+			},
+
+			error: function(message, offset) {
+				var location = typeof offset !== 'undefined' && offset < this.source.length
+					? this.getLocation(offset)
+					: this.eof
+						? findLastNonSpaceLocation(this)
+						: this.getLocation(this.tokenStart);
+
+				throw new CssSyntaxError(
+					message || 'Unexpected input',
+					this.source,
+					location.offset,
+					location.line,
+					location.column
+				);
+			},
+
+			getTypes: function() {
+				return Array.prototype.slice.call(this.offsetAndType, 0, this.tokenCount).map(function(item) {
+					return NAME[item >> TYPE_OFFSET];
+				});
 			}
 		};
 
+		// extend with error class
+		Tokenizer.CssSyntaxError = CssSyntaxError;
+
+		// extend tokenizer with constants
+		Object.keys(constants).forEach(function(key) {
+			Tokenizer[key] = constants[key];
+		});
+
+		// extend tokenizer with static methods from utils
+		Object.keys(utils).forEach(function(key) {
+			Tokenizer[key] = utils[key];
+		});
+
 		// warm up tokenizer to elimitate code branches that never execute
 		// fix soft deoptimizations (insufficient type feedback)
-		new Scanner('\n\r\r\n\f//""\'\'/**/1a;.{url(a)}').lookup(1e3);
+		new Tokenizer('\n\r\r\n\f<!---->//""\'\'/*\r\n\f*/1a;.\\31\t\+2{url(a);+1.2e3 -.4e-5 .6e+7}').getLocation();
 
-		return Scanner;
+		return Tokenizer;
 	};
 	//#endregion
 
-	//#region URL: /utils/clone
-	modules['/utils/clone'] = function () {
-		var List = require('/utils/list');
+	//#region URL: /css-tree/tokenizer/utils
+	modules['/css-tree/tokenizer/utils'] = function () {
+		'use strict';
+
+		var constants = require('/css-tree/tokenizer/const');
+		var PUNCTUATION = constants.PUNCTUATION;
+		var SYMBOL_TYPE = constants.SYMBOL_TYPE;
+		var SYMBOL_TYPE_LENGTH = SYMBOL_TYPE.length;
+		var TYPE = constants.TYPE;
+		var FULLSTOP = TYPE.FullStop;
+		var PLUSSIGN = TYPE.PlusSign;
+		var HYPHENMINUS = TYPE.HyphenMinus;
+		var PUNCTUATOR = TYPE.Punctuator;
+		var TAB = 9;
+		var N = 10;
+		var F = 12;
+		var R = 13;
+		var SPACE = 32;
+		var BACK_SLASH = 92;
+		var E = 101; // 'e'.charCodeAt(0)
+
+		function firstCharOffset(source) {
+			// detect BOM (https://en.wikipedia.org/wiki/Byte_order_mark)
+			if (source.charCodeAt(0) === 0xFEFF ||  // UTF-16BE
+				source.charCodeAt(0) === 0xFFFE) {  // UTF-16LE
+				return 1;
+			}
+
+			return 0;
+		}
+
+		function isHex(code) {
+			return (code >= 48 && code <= 57) || // 0 .. 9
+				   (code >= 65 && code <= 70) || // A .. F
+				   (code >= 97 && code <= 102);  // a .. f
+		}
+
+		function isNumber(code) {
+			return code >= 48 && code <= 57;
+		}
+
+		function isNewline(source, offset, code) {
+			if (code === N || code === F || code === R) {
+				if (code === R && offset + 1 < source.length && source.charCodeAt(offset + 1) === N) {
+					return 2;
+				}
+
+				return 1;
+			}
+
+			return 0;
+		}
+
+		function cmpChar(testStr, offset, referenceCode) {
+			var code = testStr.charCodeAt(offset);
+
+			// code.toLowerCase()
+			if (code >= 65 && code <= 90) {
+				code = code | 32;
+			}
+
+			return code === referenceCode;
+		}
+
+		function cmpStr(testStr, start, end, referenceStr) {
+			if (end - start !== referenceStr.length) {
+				return false;
+			}
+
+			if (start < 0 || end > testStr.length) {
+				return false;
+			}
+
+			for (var i = start; i < end; i++) {
+				var testCode = testStr.charCodeAt(i);
+				var refCode = referenceStr.charCodeAt(i - start);
+
+				// testStr[i].toLowerCase()
+				if (testCode >= 65 && testCode <= 90) {
+					testCode = testCode | 32;
+				}
+
+				if (testCode !== refCode) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		function endsWith(testStr, referenceStr) {
+			return cmpStr(testStr, testStr.length - referenceStr.length, testStr.length, referenceStr);
+		}
+
+		function findLastNonSpaceLocation(scanner) {
+			for (var i = scanner.source.length - 1; i >= 0; i--) {
+				var code = scanner.source.charCodeAt(i);
+
+				if (code !== SPACE && code !== TAB && code !== R && code !== N && code !== F) {
+					break;
+				}
+			}
+
+			return scanner.getLocation(i + 1);
+		}
+
+		function findWhitespaceEnd(source, offset) {
+			for (; offset < source.length; offset++) {
+				var code = source.charCodeAt(offset);
+
+				if (code !== SPACE && code !== TAB && code !== R && code !== N && code !== F) {
+					break;
+				}
+			}
+
+			return offset;
+		}
+
+		function findCommentEnd(source, offset) {
+			var commentEnd = source.indexOf('*/', offset);
+
+			if (commentEnd === -1) {
+				return source.length;
+			}
+
+			return commentEnd + 2;
+		}
+
+		function findStringEnd(source, offset, quote) {
+			for (; offset < source.length; offset++) {
+				var code = source.charCodeAt(offset);
+
+				// TODO: bad string
+				if (code === BACK_SLASH) {
+					offset++;
+				} else if (code === quote) {
+					offset++;
+					break;
+				}
+			}
+
+			return offset;
+		}
+
+		function findDecimalNumberEnd(source, offset) {
+			for (; offset < source.length; offset++) {
+				var code = source.charCodeAt(offset);
+
+				if (code < 48 || code > 57) {  // not a 0 .. 9
+					break;
+				}
+			}
+
+			return offset;
+		}
+
+		function findNumberEnd(source, offset, allowFraction) {
+			var code;
+
+			offset = findDecimalNumberEnd(source, offset);
+
+			// fraction: .\d+
+			if (allowFraction && offset + 1 < source.length && source.charCodeAt(offset) === FULLSTOP) {
+				code = source.charCodeAt(offset + 1);
+
+				if (isNumber(code)) {
+					offset = findDecimalNumberEnd(source, offset + 1);
+				}
+			}
+
+			// exponent: e[+-]\d+
+			if (offset + 1 < source.length) {
+				if ((source.charCodeAt(offset) | 32) === E) { // case insensitive check for `e`
+					code = source.charCodeAt(offset + 1);
+
+					if (code === PLUSSIGN || code === HYPHENMINUS) {
+						if (offset + 2 < source.length) {
+							code = source.charCodeAt(offset + 2);
+						}
+					}
+
+					if (isNumber(code)) {
+						offset = findDecimalNumberEnd(source, offset + 2);
+					}
+				}
+			}
+
+			return offset;
+		}
+
+		// skip escaped unicode sequence that can ends with space
+		// [0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?
+		function findEscaseEnd(source, offset) {
+			for (var i = 0; i < 7 && offset + i < source.length; i++) {
+				var code = source.charCodeAt(offset + i);
+
+				if (i !== 6 && isHex(code)) {
+					continue;
+				}
+
+				if (i > 0) {
+					offset += i - 1 + isNewline(source, offset + i, code);
+					if (code === SPACE || code === TAB) {
+						offset++;
+					}
+				}
+
+				break;
+			}
+
+			return offset;
+		}
+
+		function findIdentifierEnd(source, offset) {
+			for (; offset < source.length; offset++) {
+				var code = source.charCodeAt(offset);
+
+				if (code === BACK_SLASH) {
+					offset = findEscaseEnd(source, offset + 1);
+				} else if (code < SYMBOL_TYPE_LENGTH && PUNCTUATION[code] === PUNCTUATOR) {
+					break;
+				}
+			}
+
+			return offset;
+		}
+
+		var exports = {
+			firstCharOffset: firstCharOffset,
+
+			isHex: isHex,
+			isNumber: isNumber,
+			isNewline: isNewline,
+
+			cmpChar: cmpChar,
+			cmpStr: cmpStr,
+			endsWith: endsWith,
+
+			findLastNonSpaceLocation: findLastNonSpaceLocation,
+			findWhitespaceEnd: findWhitespaceEnd,
+			findCommentEnd: findCommentEnd,
+			findStringEnd: findStringEnd,
+			findDecimalNumberEnd: findDecimalNumberEnd,
+			findNumberEnd: findNumberEnd,
+			findEscaseEnd: findEscaseEnd,
+			findIdentifierEnd: findIdentifierEnd
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/utils/clone
+	modules['/css-tree/utils/clone'] = function () {
+		'use strict';
+
+		var List = require('/css-tree/utils/list');
 
 		var exports = function clone(node) {
 			var result = {};
@@ -5298,7 +17235,7 @@ var CSSO = (function(){
 					if (Array.isArray(value)) {
 						value = value.slice(0);
 					} else if (value instanceof List) {
-						value = new List(value.map(clone));
+						value = new List().fromArray(value.map(clone));
 					} else if (value.constructor === Object) {
 						value = clone(value);
 					}
@@ -5314,8 +17251,44 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /utils/list
-	modules['/utils/list'] = function () {
+	//#region URL: /css-tree/utils/convert
+	modules['/css-tree/utils/convert'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = function createConvertors(walker) {
+			var walk = walker.all;
+			var walkUp = walker.allUp;
+
+			return {
+				fromPlainObject: function(ast) {
+					walk(ast, function(node) {
+						if (node.children && node.children instanceof List === false) {
+							node.children = new List().fromArray(node.children);
+						}
+					});
+
+					return ast;
+				},
+				toPlainObject: function(ast) {
+					walkUp(ast, function(node) {
+						if (node.children && node.children instanceof List) {
+							node.children = node.children.toArray();
+						}
+					});
+
+					return ast;
+				}
+			};
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/utils/list
+	modules['/css-tree/utils/list'] = function () {
+		'use strict';
+
 		//
 		//            item        item        item        item
 		//          /------\    /------\    /------\    /------\
@@ -5333,53 +17306,56 @@ var CSSO = (function(){
 
 		function createItem(data) {
 			return {
-				data: data,
+				prev: null,
 				next: null,
-				prev: null
+				data: data
 			};
 		}
 
-		var List = function(values) {
+		var cursors = null;
+		var List = function() {
 			this.cursor = null;
 			this.head = null;
 			this.tail = null;
-
-			if (Array.isArray(values)) {
-				var cursor = null;
-
-				for (var i = 0; i < values.length; i++) {
-					var item = createItem(values[i]);
-
-					if (cursor !== null) {
-						cursor.next = item;
-					} else {
-						this.head = item;
-					}
-
-					item.prev = cursor;
-					cursor = item;
-				}
-
-				this.tail = cursor;
-			}
 		};
-
-		Object.defineProperty(List.prototype, 'size', {
-			get: function() {
-				var size = 0;
-				var cursor = this.head;
-
-				while (cursor) {
-					size++;
-					cursor = cursor.next;
-				}
-
-				return size;
-			}
-		});
 
 		List.createItem = createItem;
 		List.prototype.createItem = createItem;
+
+		List.prototype.getSize = function() {
+			var size = 0;
+			var cursor = this.head;
+
+			while (cursor) {
+				size++;
+				cursor = cursor.next;
+			}
+
+			return size;
+		};
+
+		List.prototype.fromArray = function(array) {
+			var cursor = null;
+
+			this.head = null;
+
+			for (var i = 0; i < array.length; i++) {
+				var item = createItem(array[i]);
+
+				if (cursor !== null) {
+					cursor.next = item;
+				} else {
+					this.head = item;
+				}
+
+				item.prev = cursor;
+				cursor = item;
+			}
+
+			this.tail = cursor;
+
+			return this;
+		};
 
 		List.prototype.toArray = function() {
 			var cursor = this.head;
@@ -5392,9 +17368,8 @@ var CSSO = (function(){
 
 			return result;
 		};
-		List.prototype.toJSON = function() {
-			return this.toArray();
-		};
+
+		List.prototype.toJSON = List.prototype.toArray;
 
 		List.prototype.isEmpty = function() {
 			return this.head === null;
@@ -5408,20 +17383,47 @@ var CSSO = (function(){
 			return this.tail && this.tail.data;
 		};
 
+		function allocateCursor(node, prev, next) {
+			var cursor;
+
+			if (cursors !== null) {
+				cursor = cursors;
+				cursors = cursors.cursor;
+				cursor.prev = prev;
+				cursor.next = next;
+				cursor.cursor = node.cursor;
+			} else {
+				cursor = {
+					prev: prev,
+					next: next,
+					cursor: node.cursor
+				};
+			}
+
+			node.cursor = cursor;
+
+			return cursor;
+		}
+
+		function releaseCursor(node) {
+			var cursor = node.cursor;
+
+			node.cursor = cursor.cursor;
+			cursor.prev = null;
+			cursor.next = null;
+			cursor.cursor = cursors;
+			cursors = cursor;
+		}
+
 		List.prototype.each = function(fn, context) {
 			var item;
-			var cursor = {
-				prev: null,
-				next: this.head,
-				cursor: this.cursor
-			};
 
 			if (context === undefined) {
 				context = this;
 			}
 
 			// push cursor
-			this.cursor = cursor;
+			var cursor = allocateCursor(this, null, this.head);
 
 			while (cursor.next !== null) {
 				item = cursor.next;
@@ -5431,23 +17433,18 @@ var CSSO = (function(){
 			}
 
 			// pop cursor
-			this.cursor = this.cursor.cursor;
+			releaseCursor(this);
 		};
 
 		List.prototype.eachRight = function(fn, context) {
 			var item;
-			var cursor = {
-				prev: this.tail,
-				next: null,
-				cursor: this.cursor
-			};
 
 			if (context === undefined) {
 				context = this;
 			}
 
 			// push cursor
-			this.cursor = cursor;
+			var cursor = allocateCursor(this, this.tail, null);
 
 			while (cursor.prev !== null) {
 				item = cursor.prev;
@@ -5457,7 +17454,7 @@ var CSSO = (function(){
 			}
 
 			// pop cursor
-			this.cursor = this.cursor.cursor;
+			releaseCursor(this);
 		};
 
 		List.prototype.nextUntil = function(start, fn, context) {
@@ -5466,18 +17463,13 @@ var CSSO = (function(){
 			}
 
 			var item;
-			var cursor = {
-				prev: null,
-				next: start,
-				cursor: this.cursor
-			};
 
 			if (context === undefined) {
 				context = this;
 			}
 
 			// push cursor
-			this.cursor = cursor;
+			var cursor = allocateCursor(this, null, start);
 
 			while (cursor.next !== null) {
 				item = cursor.next;
@@ -5489,7 +17481,7 @@ var CSSO = (function(){
 			}
 
 			// pop cursor
-			this.cursor = this.cursor.cursor;
+			releaseCursor(this);
 		};
 
 		List.prototype.prevUntil = function(start, fn, context) {
@@ -5498,18 +17490,13 @@ var CSSO = (function(){
 			}
 
 			var item;
-			var cursor = {
-				prev: start,
-				next: null,
-				cursor: this.cursor
-			};
 
 			if (context === undefined) {
 				context = this;
 			}
 
 			// push cursor
-			this.cursor = cursor;
+			var cursor = allocateCursor(this, start, null);
 
 			while (cursor.prev !== null) {
 				item = cursor.prev;
@@ -5521,7 +17508,7 @@ var CSSO = (function(){
 			}
 
 			// pop cursor
-			this.cursor = this.cursor.cursor;
+			releaseCursor(this);
 		};
 
 		List.prototype.some = function(fn, context) {
@@ -5558,6 +17545,11 @@ var CSSO = (function(){
 			return result;
 		};
 
+		List.prototype.clear = function() {
+			this.head = null;
+			this.tail = null;
+		};
+
 		List.prototype.copy = function() {
 			var result = new List();
 			var cursor = this.head;
@@ -5574,11 +17566,11 @@ var CSSO = (function(){
 			var cursor = this.cursor;
 
 			while (cursor !== null) {
-				if (prevNew === true || cursor.prev === prevOld) {
+				if (cursor.prev === prevOld) {
 					cursor.prev = prevNew;
 				}
 
-				if (nextNew === true || cursor.next === nextOld) {
+				if (cursor.next === nextOld) {
 					cursor.next = nextNew;
 				}
 
@@ -5586,17 +17578,75 @@ var CSSO = (function(){
 			}
 		};
 
+		List.prototype.prepend = function(item) {
+			//	  head
+			//	^
+			// item
+			this.updateCursors(null, item, this.head, item);
+
+			// insert to the beginning of the list
+			if (this.head !== null) {
+				// new item <- first item
+				this.head.prev = item;
+
+				// new item -> first item
+				item.next = this.head;
+			} else {
+				// if list has no head, then it also has no tail
+				// in this case tail points to the new item
+				this.tail = item;
+			}
+
+			// head always points to new item
+			this.head = item;
+
+			return this;
+		};
+
+		List.prototype.prependData = function(data) {
+			return this.prepend(createItem(data));
+		};
+
+		List.prototype.append = function(item) {
+			// tail
+			//	  ^
+			//	  item
+			this.updateCursors(this.tail, item, null, item);
+
+			// insert to the ending of the list
+			if (this.tail !== null) {
+				// last item -> new item
+				this.tail.next = item;
+
+				// last item <- new item
+				item.prev = this.tail;
+			} else {
+				// if list has no tail, then it also has no head
+				// in this case head points to new item
+				this.head = item;
+			}
+
+			// tail always points to new item
+			this.tail = item;
+
+			return this;
+		};
+
+		List.prototype.appendData = function(data) {
+			return this.append(createItem(data));
+		};
+
 		List.prototype.insert = function(item, before) {
 			if (before !== undefined && before !== null) {
 				// prev   before
-				//      ^
-				//     item
+				//	  ^
+				//	 item
 				this.updateCursors(before.prev, item, before, item);
 
 				if (before.prev === null) {
 					// insert to the beginning of list
 					if (this.head !== before) {
-						throw new Error('before doesn\'t below to list');
+						throw new Error('before doesn\'t belong to list');
 					}
 
 					// since head points to before therefore list doesn't empty
@@ -5616,42 +17666,25 @@ var CSSO = (function(){
 					item.next = before;
 				}
 			} else {
-				// tail
-				//      ^
-				//     item
-				this.updateCursors(this.tail, item, null, item);
-
-				// insert to end of the list
-				if (this.tail !== null) {
-					// if list has a tail, then it also has a head, but head doesn't change
-
-					// last item -> new item
-					this.tail.next = item;
-
-					// last item <- new item
-					item.prev = this.tail;
-				} else {
-					// if list has no a tail, then it also has no a head
-					// in this case points head to new item
-					this.head = item;
-				}
-
-				// tail always start point to new item
-				this.tail = item;
+				this.append(item);
 			}
 		};
 
+		List.prototype.insertData = function(data, before) {
+			this.insert(createItem(data), before);
+		};
+
 		List.prototype.remove = function(item) {
-			//      item
-			//       ^
-			// prev     next
+			//	  item
+			//	   ^
+			// prev	 next
 			this.updateCursors(item, item.prev, item, item.next);
 
 			if (item.prev !== null) {
 				item.prev.next = item.next;
 			} else {
 				if (this.head !== item) {
-					throw new Error('item doesn\'t below to list');
+					throw new Error('item doesn\'t belong to list');
 				}
 
 				this.head = item.next;
@@ -5661,7 +17694,7 @@ var CSSO = (function(){
 				item.next.prev = item.prev;
 			} else {
 				if (this.tail !== item) {
-					throw new Error('item doesn\'t below to list');
+					throw new Error('item doesn\'t belong to list');
 				}
 
 				this.tail = item.prev;
@@ -5704,23 +17737,68 @@ var CSSO = (function(){
 			list.tail = null;
 		};
 
+		List.prototype.insertList = function(list, before) {
+			if (before !== undefined && before !== null) {
+				// ignore empty lists
+				if (list.head === null) {
+					return;
+				}
+
+				this.updateCursors(before.prev, list.tail, before, list.head);
+
+				// insert in the middle of dist list
+				if (before.prev !== null) {
+					// before.prev <-> list.head
+					before.prev.next = list.head;
+					list.head.prev = before.prev;
+				} else {
+					this.head = list.head;
+				}
+
+				before.prev = list.tail;
+				list.tail.next = before;
+
+				list.head = null;
+				list.tail = null;
+			} else {
+				this.appendList(list);
+			}
+		};
+
+		List.prototype.replace = function(oldItem, newItemOrList) {
+			if ('head' in newItemOrList) {
+				this.insertList(newItemOrList, oldItem);
+			} else {
+				this.insert(newItemOrList, oldItem);
+			}
+			this.remove(oldItem);
+		};
+
 		return List;
 	};
 	//#endregion
 
-	//#region URL: /utils/names
-	modules['/utils/names'] = function () {
-		var hasOwnProperty = Object.prototype.hasOwnProperty;
-		var knownKeywords = Object.create(null);
-		var knownProperties = Object.create(null);
+	//#region URL: /css-tree/utils/names
+	modules['/css-tree/utils/names'] = function () {
+		'use strict';
 
-		function getVendorPrefix(string) {
-			if (string[0] === '-') {
-				// skip 2 chars to avoid wrong match with variables names
-				var secondDashIndex = string.indexOf('-', 2);
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var keywords = Object.create(null);
+		var properties = Object.create(null);
+		var HYPHENMINUS = 45; // '-'.charCodeAt()
+
+		function isVariable(str, offset) {
+			return str.charCodeAt(offset) === HYPHENMINUS &&
+					str.charCodeAt(offset + 1) === HYPHENMINUS;
+		}
+
+		function getVendorPrefix(str, offset) {
+			if (str.charCodeAt(offset) === HYPHENMINUS) {
+				// vendor should contain at least one letter
+				var secondDashIndex = str.indexOf('-', offset + 2);
 
 				if (secondDashIndex !== -1) {
-					return string.substr(0, secondDashIndex + 1);
+					return str.substring(offset, secondDashIndex + 1);
 				}
 			}
 
@@ -5728,54 +17806,60 @@ var CSSO = (function(){
 		}
 
 		function getKeywordInfo(keyword) {
-			if (hasOwnProperty.call(knownKeywords, keyword)) {
-				return knownKeywords[keyword];
+			if (hasOwnProperty.call(keywords, keyword)) {
+				return keywords[keyword];
 			}
 
-			var lowerCaseKeyword = keyword.toLowerCase();
-			var vendor = getVendorPrefix(lowerCaseKeyword);
-			var name = lowerCaseKeyword;
+			var name = keyword.toLowerCase();
 
-			if (vendor) {
-				name = name.substr(vendor.length);
+			if (hasOwnProperty.call(keywords, name)) {
+				return keywords[keyword] = keywords[name];
 			}
 
-			return knownKeywords[keyword] = Object.freeze({
+			var vendor = !isVariable(name, 0) ? getVendorPrefix(name, 0) : '';
+
+			return keywords[keyword] = Object.freeze({
 				vendor: vendor,
 				prefix: vendor,
-				name: name
+				name: name.substr(vendor.length)
 			});
 		}
 
 		function getPropertyInfo(property) {
-			if (hasOwnProperty.call(knownProperties, property)) {
-				return knownProperties[property];
+			if (hasOwnProperty.call(properties, property)) {
+				return properties[property];
 			}
 
-			var lowerCaseProperty = property.toLowerCase();
-			var hack = lowerCaseProperty[0];
+			var name = property;
+			var hack = property[0];
 
-			if (hack === '*' || hack === '_' || hack === '$') {
-				lowerCaseProperty = lowerCaseProperty.substr(1);
-			} else if (hack === '/' && property[1] === '/') {
+			if (hack === '/' && property[1] === '/') {
 				hack = '//';
-				lowerCaseProperty = lowerCaseProperty.substr(2);
-			} else {
+			} else if (hack !== '_' &&
+					   hack !== '*' &&
+					   hack !== '$' &&
+					   hack !== '#' &&
+					   hack !== '+') {
 				hack = '';
 			}
 
-			var vendor = getVendorPrefix(lowerCaseProperty);
-			var name = lowerCaseProperty;
+			var variable = isVariable(name, hack.length);
 
-			if (vendor) {
-				name = name.substr(vendor.length);
+			if (!variable) {
+				name = name.toLowerCase();
+				if (hasOwnProperty.call(properties, name)) {
+					return properties[property] = properties[name];
+				}
 			}
 
-			return knownProperties[property] = Object.freeze({
+			var vendor = !variable ? getVendorPrefix(name, hack.length) : '';
+
+			return properties[property] = Object.freeze({
 				hack: hack,
 				vendor: vendor,
 				prefix: hack + vendor,
-				name: name
+				name: name.substr(hack.length + vendor.length),
+				variable: variable
 			});
 		}
 
@@ -5788,215 +17872,54 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /utils/translate
-	modules['/utils/translate'] = function () {
-		function each(list) {
-			if (list.head === null) {
-				return '';
-			}
+	//#region URL: /css-tree/walker
+	modules['/css-tree/walker'] = function () {
+		'use strict';
 
-			if (list.head === list.tail) {
-				return translate(list.head.data);
-			}
-
-			return list.map(translate).join('');
-		}
-
-		function eachDelim(list, delimeter) {
-			if (list.head === null) {
-				return '';
-			}
-
-			if (list.head === list.tail) {
-				return translate(list.head.data);
-			}
-
-			return list.map(translate).join(delimeter);
-		}
-
-		function translate(node) {
-			switch (node.type) {
-				case 'StyleSheet':
-					return each(node.rules);
-
-				case 'Atrule':
-					var nodes = ['@', node.name];
-
-					if (node.expression && !node.expression.sequence.isEmpty()) {
-						nodes.push(' ', translate(node.expression));
-					}
-
-					if (node.block) {
-						nodes.push('{', translate(node.block), '}');
-					} else {
-						nodes.push(';');
-					}
-
-					return nodes.join('');
-
-				case 'Ruleset':
-					return translate(node.selector) + '{' + translate(node.block) + '}';
-
-				case 'Selector':
-					return eachDelim(node.selectors, ',');
-
-				case 'SimpleSelector':
-					var nodes = node.sequence.map(function(node) {
-						// add extra spaces around /deep/ combinator since comment beginning/ending may to be produced
-						if (node.type === 'Combinator' && node.name === '/deep/') {
-							return ' ' + translate(node) + ' ';
-						}
-
-						return translate(node);
-					});
-
-					return nodes.join('');
-
-				case 'Block':
-					return eachDelim(node.declarations, ';');
-
-				case 'Declaration':
-					return translate(node.property) + ':' + translate(node.value);
-
-				case 'Property':
-					return node.name;
-
-				case 'Value':
-					return node.important
-						? each(node.sequence) + '!important'
-						: each(node.sequence);
-
-				case 'Attribute':
-					var result = translate(node.name);
-					var flagsPrefix = ' ';
-
-					if (node.operator !== null) {
-						result += node.operator;
-
-						if (node.value !== null) {
-							result += translate(node.value);
-
-							// space between string and flags is not required
-							if (node.value.type === 'String') {
-								flagsPrefix = '';
-							}
-						}
-					}
-
-					if (node.flags !== null) {
-						result += flagsPrefix + node.flags;
-					}
-
-					return '[' + result + ']';
-
-				case 'FunctionalPseudo':
-					return ':' + node.name + '(' + eachDelim(node.arguments, ',') + ')';
-
-				case 'Function':
-					return node.name + '(' + eachDelim(node.arguments, ',') + ')';
-
-				case 'Negation':
-					return ':not(' + eachDelim(node.sequence, ',') + ')';
-
-				case 'Braces':
-					return node.open + each(node.sequence) + node.close;
-
-				case 'Argument':
-				case 'AtruleExpression':
-					return each(node.sequence);
-
-				case 'Url':
-					return 'url(' + translate(node.value) + ')';
-
-				case 'Progid':
-					return translate(node.value);
-
-				case 'Combinator':
-					return node.name;
-
-				case 'Identifier':
-					return node.name;
-
-				case 'PseudoClass':
-					return ':' + node.name;
-
-				case 'PseudoElement':
-					return '::' + node.name;
-
-				case 'Class':
-					return '.' + node.name;
-
-				case 'Id':
-					return '#' + node.name;
-
-				case 'Hash':
-					return '#' + node.value;
-
-				case 'Dimension':
-					return node.value + node.unit;
-
-				case 'Nth':
-					return node.value;
-
-				case 'Number':
-					return node.value;
-
-				case 'String':
-					return node.value;
-
-				case 'Operator':
-					return node.value;
-
-				case 'Raw':
-					return node.value;
-
-				case 'Unknown':
-					return node.value;
-
-				case 'Percentage':
-					return node.value + '%';
-
-				case 'Space':
-					return ' ';
-
-				case 'Comment':
-					return '/*' + node.value + '*/';
-
-				default:
-					throw new Error('Unknown node type: ' + node.type);
-			}
-		}
-
-		return translate;
-	};
-	//#endregion
-	
-	//#region URL: /utils/walk
-	modules['/utils/walk'] = function () {
 		function walkRules(node, item, list) {
 			switch (node.type) {
 				case 'StyleSheet':
 					var oldStylesheet = this.stylesheet;
 					this.stylesheet = node;
 
-					node.rules.each(walkRules, this);
+					node.children.each(walkRules, this);
 
 					this.stylesheet = oldStylesheet;
 					break;
 
 				case 'Atrule':
 					if (node.block !== null) {
+						var oldAtrule = this.atrule;
+						this.atrule = node;
+
 						walkRules.call(this, node.block);
+
+						this.atrule = oldAtrule;
 					}
 
 					this.fn(node, item, list);
 					break;
 
-				case 'Ruleset':
+				case 'Rule':
 					this.fn(node, item, list);
+
+					var oldRule = this.rule;
+					this.rule = node;
+
+					walkRules.call(this, node.block);
+
+					this.rule = oldRule;
+					break;
+
+				case 'Block':
+					var oldBlock = this.block;
+					this.block = node;
+
+					node.children.each(walkRules, this);
+
+					this.block = oldBlock;
 					break;
 			}
-
 		}
 
 		function walkRulesRight(node, item, list) {
@@ -6005,135 +17928,89 @@ var CSSO = (function(){
 					var oldStylesheet = this.stylesheet;
 					this.stylesheet = node;
 
-					node.rules.eachRight(walkRulesRight, this);
+					node.children.eachRight(walkRulesRight, this);
 
 					this.stylesheet = oldStylesheet;
 					break;
 
 				case 'Atrule':
 					if (node.block !== null) {
+						var oldAtrule = this.atrule;
+						this.atrule = node;
+
 						walkRulesRight.call(this, node.block);
+
+						this.atrule = oldAtrule;
 					}
 
 					this.fn(node, item, list);
 					break;
 
-				case 'Ruleset':
+				case 'Rule':
+					var oldRule = this.rule;
+					this.rule = node;
+
+					walkRulesRight.call(this, node.block);
+
+					this.rule = oldRule;
+
 					this.fn(node, item, list);
+					break;
+
+				case 'Block':
+					var oldBlock = this.block;
+					this.block = node;
+
+					node.children.eachRight(walkRulesRight, this);
+
+					this.block = oldBlock;
 					break;
 			}
 		}
 
-		function walkAll(node, item, list) {
+		function walkDeclarations(node) {
 			switch (node.type) {
 				case 'StyleSheet':
 					var oldStylesheet = this.stylesheet;
 					this.stylesheet = node;
 
-					node.rules.each(walkAll, this);
+					node.children.each(walkDeclarations, this);
 
 					this.stylesheet = oldStylesheet;
 					break;
 
 				case 'Atrule':
-					if (node.expression !== null) {
-						walkAll.call(this, node.expression);
-					}
 					if (node.block !== null) {
-						walkAll.call(this, node.block);
+						var oldAtrule = this.atrule;
+						this.atrule = node;
+
+						walkDeclarations.call(this, node.block);
+
+						this.atrule = oldAtrule;
 					}
 					break;
 
-				case 'Ruleset':
-					this.ruleset = node;
+				case 'Rule':
+					var oldRule = this.rule;
+					this.rule = node;
 
-					if (node.selector !== null) {
-						walkAll.call(this, node.selector);
+					if (node.block !== null) {
+						walkDeclarations.call(this, node.block);
 					}
-					walkAll.call(this, node.block);
 
-					this.ruleset = null;
-					break;
-
-				case 'Selector':
-					var oldSelector = this.selector;
-					this.selector = node;
-
-					node.selectors.each(walkAll, this);
-
-					this.selector = oldSelector;
+					this.rule = oldRule;
 					break;
 
 				case 'Block':
-					node.declarations.each(walkAll, this);
+					node.children.each(function(node, item, list) {
+						if (node.type === 'Declaration') {
+							this.fn(node, item, list);
+						} else {
+							walkDeclarations.call(this, node);
+						}
+					}, this);
 					break;
-
-				case 'Declaration':
-					this.declaration = node;
-
-					walkAll.call(this, node.property);
-					walkAll.call(this, node.value);
-
-					this.declaration = null;
-					break;
-
-				case 'Attribute':
-					walkAll.call(this, node.name);
-					if (node.value !== null) {
-						walkAll.call(this, node.value);
-					}
-					break;
-
-				case 'FunctionalPseudo':
-				case 'Function':
-					this['function'] = node;
-
-					node.arguments.each(walkAll, this);
-
-					this['function'] = null;
-					break;
-
-				case 'AtruleExpression':
-					this.atruleExpression = node;
-
-					node.sequence.each(walkAll, this);
-
-					this.atruleExpression = null;
-					break;
-
-				case 'Value':
-				case 'Argument':
-				case 'SimpleSelector':
-				case 'Braces':
-				case 'Negation':
-					node.sequence.each(walkAll, this);
-					break;
-
-				case 'Url':
-				case 'Progid':
-					walkAll.call(this, node.value);
-					break;
-
-				// nothig to do with
-				// case 'Property':
-				// case 'Combinator':
-				// case 'Dimension':
-				// case 'Hash':
-				// case 'Identifier':
-				// case 'Nth':
-				// case 'Class':
-				// case 'Id':
-				// case 'Percentage':
-				// case 'PseudoClass':
-				// case 'PseudoElement':
-				// case 'Space':
-				// case 'Number':
-				// case 'String':
-				// case 'Operator':
-				// case 'Raw':
 			}
-
-			this.fn(node, item, list);
 		}
 
 		function createContext(root, fn) {
@@ -6141,9 +18018,11 @@ var CSSO = (function(){
 				fn: fn,
 				root: root,
 				stylesheet: null,
+				atrule: null,
 				atruleExpression: null,
-				ruleset: null,
+				rule: null,
 				selector: null,
+				block: null,
 				declaration: null,
 				function: null
 			};
@@ -6151,184 +18030,68 @@ var CSSO = (function(){
 			return context;
 		}
 
-		var exports = {
-			all: function(root, fn) {
-				walkAll.call(createContext(root, fn), root);
-			},
-			rules: function(root, fn) {
-				walkRules.call(createContext(root, fn), root);
-			},
-			rulesRight: function(root, fn) {
-				walkRulesRight.call(createContext(root, fn), root);
+		var exports = function createWalker(types) {
+			var walkers = {};
+
+			for (var name in types) {
+				var config = types[name];
+				walkers[name] = Function('node', 'context', 'walk',
+					(config.context ? 'var old = context.' + config.context + ';\ncontext.' + config.context + ' = node;\n' : '') +
+					config.fields.map(function(field) {
+						var line = field.type === 'list'
+							? 'node.' + field.name + '.each(walk);'
+							: 'walk(node.' + field.name + ');';
+
+						if (field.nullable) {
+							line = 'if (node.' + field.name + ') {\n	' + line + '}';
+						}
+
+						return line;
+					}).join('\n') +
+					(config.context ? '\ncontext.' + config.context + ' = old;' : '')
+				);
 			}
+
+			return {
+				all: function(root, fn) {
+					function walk(node, item, list) {
+						fn.call(context, node, item, list);
+						if (walkers.hasOwnProperty(node.type)) {
+							walkers[node.type](node, context, walk);
+						}
+					}
+
+					var context = createContext(root, fn);
+
+					walk(root);
+				},
+				allUp: function(root, fn) {
+					function walk(node, item, list) {
+						if (walkers.hasOwnProperty(node.type)) {
+							walkers[node.type](node, context, walk);
+						}
+						fn.call(context, node, item, list);
+					}
+
+					var context = createContext(root, fn);
+
+					walk(root);
+				},
+				rules: function(root, fn) {
+					walkRules.call(createContext(root, fn), root);
+				},
+				rulesRight: function(root, fn) {
+					walkRulesRight.call(createContext(root, fn), root);
+				},
+				declarations: function(root, fn) {
+					walkDeclarations.call(createContext(root, fn), root);
+				}
+			};
 		};
 
 		return exports;
 	};
 	//#endregion
 
-	//#region URL: /
-	modules['/'] = function () {
-		var parse = require('/parser');
-		var compress = require('/compressor');
-		var translate = require('/utils/translate');
-//		var translateWithSourceMap = require('/utils/translateWithSourceMap');
-		var walkers = require('/utils/walk');
-		var clone = require('/utils/clone');
-		var List = require('/utils/list');
-
-		function debugOutput(name, options, startTime, data) {
-//			if (options.debug) {
-//				console.error('## ' + name + ' done in %d ms\n', Date.now() - startTime);
-//			}
-
-			return data;
-		}
-
-//		function createDefaultLogger(level) {
-//			var lastDebug;
-//
-//			return function logger(title, ast) {
-//				var line = title;
-//
-//				if (ast) {
-//					line = '[' + ((Date.now() - lastDebug) / 1000).toFixed(3) + 's] ' + line;
-//				}
-//
-//				if (level > 1 && ast) {
-//					var css = translate(ast, true);
-//
-//					// when level 2, limit css to 256 symbols
-//					if (level === 2 && css.length > 256) {
-//						css = css.substr(0, 256) + '...';
-//					}
-//
-//					line += '\n  ' + css + '\n';
-//				}
-//
-//				console.error(line);
-//				lastDebug = Date.now();
-//			};
-//		}
-
-		function copy(obj) {
-			var result = {};
-
-			for (var key in obj) {
-				result[key] = obj[key];
-			}
-
-			return result;
-		}
-
-		function buildCompressOptions(options) {
-			options = copy(options);
-
-//			if (typeof options.logger !== 'function' && options.debug) {
-//				options.logger = createDefaultLogger(options.debug);
-//			}
-
-			return options;
-		}
-
-//		function runHandler(ast, options, handlers) {
-//			if (!Array.isArray(handlers)) {
-//				handlers = [handlers];
-//			}
-//
-//			handlers.forEach(function(fn) {
-//				fn(ast, options);
-//			});
-//		}
-
-		function minify(context, source, options) {
-			options = options || {};
-
-			var filename = options.filename || '<unknown>';
-			var result;
-
-			// parse
-			var ast = debugOutput('parsing', options, Date.now(),
-				parse(source, {
-					context: context,
-					filename: filename//,
-//					positions: Boolean(options.sourceMap)
-				})
-			);
-
-//			// before compress handlers
-//			if (options.beforeCompress) {
-//				debugOutput('beforeCompress', options, Date.now(),
-//					runHandler(ast, options, options.beforeCompress)
-//				);
-//			}
-
-			// compress
-			var compressResult = debugOutput('compress', options, Date.now(),
-				compress(ast, buildCompressOptions(options))
-			);
-
-//			// after compress handlers
-//			if (options.afterCompress) {
-//				debugOutput('afterCompress', options, Date.now(),
-//					runHandler(compressResult, options, options.afterCompress)
-//				);
-//			}
-
-			// translate
-//			if (options.sourceMap) {
-//				result = debugOutput('translateWithSourceMap', options, Date.now(), (function() {
-//					var tmp = translateWithSourceMap(compressResult.ast);
-//					tmp.map._file = filename; // since other tools can relay on file in source map transform chain
-//					tmp.map.setSourceContent(filename, source);
-//					return tmp;
-//				})());
-//			} else {
-				result = debugOutput('translate', options, Date.now(), {
-					css: translate(compressResult.ast),
-					map: null
-				});
-//			}
-
-			return result;
-		}
-
-		function minifyStylesheet(source, options) {
-			return minify('stylesheet', source, options);
-		};
-
-		function minifyBlock(source, options) {
-			return minify('block', source, options);
-		}
-
-		var exports = {
-			version: '2.3.1',
-
-			// classes
-			List: List,
-
-			// main methods
-			minify: minifyStylesheet,
-			minifyBlock: minifyBlock,
-
-			// step by step
-			parse: parse,
-			compress: compress,
-			translate: translate,
-//			translateWithSourceMap: translateWithSourceMap,
-
-			// walkers
-			walk: walkers.all,
-			walkRules: walkers.rules,
-			walkRulesRight: walkers.rulesRight,
-
-			// utils
-			clone: clone
-		};
-
-		return exports;
-	};
-	//#endregion
-	
 	return require('/');
 })();
