@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.168 - August 4, 2017
+ * In BundleTransformer.Csso added support of CSSO version 3.1.1
+
 ## v1.9.167 - July 21, 2017
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 1.12.7
  * In BundleTransformer.TypeScript added support of TypeScript version 2.4.2
