@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.169 - August 7, 2017
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.2.4
+
 ## v1.9.168 - August 4, 2017
  * In BundleTransformer.Csso added support of CSSO version 3.1.1
 
