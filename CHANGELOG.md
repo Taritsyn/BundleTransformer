@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.170 - August 17, 2017
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.2.6
+
 ## v1.9.169 - August 7, 2017
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.2.4
 
