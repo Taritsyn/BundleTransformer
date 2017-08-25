@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Web;
 using System.Web.Caching;
 using System.Web.Hosting;
 using System.Web.Optimization;
@@ -117,9 +118,9 @@ namespace BundleTransformer.Core.FileSystem
 		/// <returns>The absolute path representation of the specified virtual path</returns>
 		public string ToAbsolutePath(string virtualPath)
 		{
-			VirtualFile virtualFile = BundleTable.VirtualPathProvider.GetFile(virtualPath);
+			string absolutePath = VirtualPathUtility.ToAbsolute(virtualPath);
 
-			return virtualFile.VirtualPath;
+			return absolutePath;
 		}
 
 		/// <summary>

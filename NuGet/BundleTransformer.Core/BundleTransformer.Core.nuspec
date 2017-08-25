@@ -16,6 +16,7 @@ The main differences of the `StyleTransformer` and `ScriptTransformer` classes f
 
 This extension will help your web applications successfully pass a most part of the tests in YSlow.</description>
 		<summary>Bundle Transformer - a modular extension for System.Web.Optimization (also known as the Microsoft ASP.NET Web Optimization Framework). `StyleTransformer` and `ScriptTransformer` classes, included in the core of Bundle Transformer and implement the `IBundleTransform` interface. They are intended to replace the standard classes: `CssMinify` and `JsMinify`.</summary>
+		<releaseNotes>Changed a implementation of the `ToAbsolutePath` method of `VirtualFileSystemWrapper` class.</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Performance Optimization YSlow Speed Pre-minified Combine Compression</tags>

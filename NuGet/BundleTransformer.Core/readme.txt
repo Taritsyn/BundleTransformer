@@ -38,6 +38,12 @@
    This extension will help your web applications successfully pass a most part of
    the tests in YSlow.
 
+   =============
+   RELEASE NOTES
+   =============
+   Changed a implementation of the `ToAbsolutePath` method of
+   `VirtualFileSystemWrapper` class.
+
    ====================
    POST-INSTALL ACTIONS
    ====================
