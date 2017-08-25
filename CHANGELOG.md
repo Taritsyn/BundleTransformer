@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.171 Beta 1 - August 25, 2017
+ * Changed a implementation of the `ToAbsolutePath` method of `VirtualFileSystemWrapper` class
+
 ## v1.9.170 - August 17, 2017
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.2.6
 
