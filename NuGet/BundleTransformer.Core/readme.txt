@@ -41,8 +41,8 @@
    =============
    RELEASE NOTES
    =============
-   Changed a implementation of the `ToAbsolutePath` method of
-   `VirtualFileSystemWrapper` class.
+   For compatibility with Mono was changed a implementation of the `ToAbsolutePath`
+   method of `VirtualFileSystemWrapper` class.
 
    ====================
    POST-INSTALL ACTIONS
