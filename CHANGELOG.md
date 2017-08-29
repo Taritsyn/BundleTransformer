@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.171 - August 29, 2017
+ * For compatibility with [Mono](http://www.mono-project.com/) was changed a implementation of the `ToAbsolutePath` method of `VirtualFileSystemWrapper` class
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.3
+
 ## v1.9.171 Beta 1 - August 25, 2017
  * Changed a implementation of the `ToAbsolutePath` method of `VirtualFileSystemWrapper` class
 
