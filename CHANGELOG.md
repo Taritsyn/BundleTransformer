@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.172 - September 1, 2017
+ * In BundleTransformer.TypeScript added support of TypeScript version 2.5 RTM (please note: The 2.5 RTM release is also called '2.5.2')
+
 ## v1.9.171 - August 29, 2017
  * For compatibility with [Mono](http://www.mono-project.com/) was changed a implementation of the `ToAbsolutePath` method of `VirtualFileSystemWrapper` class
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.3
