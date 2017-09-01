@@ -10,18 +10,18 @@
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (http://www.typescriptlang.org) version 2.4.2). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
+		<description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (http://www.typescriptlang.org) version 2.5 RTM). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
 
 BundleTransformer.TypeScript does not support external modules (CommonJS, AMD, SystemJS, UMD and ES6 modules).
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</description>
-		<summary>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript version 2.4.2). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.</summary>
-		<releaseNotes>Added support of TypeScript version 2.4.2.</releaseNotes>
+		<summary>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript version 2.5 RTM). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.</summary>
+		<releaseNotes>Added support of TypeScript version 2.5 RTM (please note: The 2.5 RTM release is also called '2.5.2').</releaseNotes>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling TypeScript Translation Translator Compilation Compiler</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.160" />
+			<dependency id="BundleTransformer.Core" version="1.9.171" />
 			<dependency id="JavaScriptEngineSwitcher.Core" version="2.0.0" />
 			<dependency id="Newtonsoft.Json" version="8.0.2" />
 		</dependencies>

@@ -43,6 +43,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			out: '',
 			outDir: '',
 			preserveConstEnums: false,
+			preserveSymlinks: false,
 			reactNamespace: '',
 			removeComments: false,
 			rootDir: '',
