@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.173 - September 6, 2017
+ * In BundleTransformer.CleanCss added support of Clean-css version 4.1.8
+
 ## v1.9.172 - September 1, 2017
  * In BundleTransformer.TypeScript added support of TypeScript version 2.5 RTM (please note: The 2.5 RTM release is also called '2.5.2')
 
