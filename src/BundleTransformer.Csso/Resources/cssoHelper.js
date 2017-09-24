@@ -8,6 +8,7 @@ var cssoHelper = (function (csso, undefined) {
 			sourceMap: null,
 			usage: false,
 			restructure: true,
+			forceMediaMerge: false,
 			comments: 'exclamation',
 			debug: false
 		}

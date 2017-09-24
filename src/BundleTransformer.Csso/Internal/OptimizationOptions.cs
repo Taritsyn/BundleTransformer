@@ -15,6 +15,15 @@
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable unsafe merge of <code>@media</code> rules
+		/// </summary>
+		public bool ForceMediaMerge
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a comments mode
 		/// </summary>
 		public CommentsMode Comments
@@ -30,6 +39,7 @@
 		public OptimizationOptions()
 		{
 			Restructure = true;
+			ForceMediaMerge = false;
 			Comments = CommentsMode.Exclamation;
 		}
 	}

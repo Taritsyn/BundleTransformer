@@ -134,6 +134,7 @@ namespace BundleTransformer.Csso.Internal
 		{
 			var optionsJson = new JObject(
 				new JProperty("restructure", options.Restructure),
+				new JProperty("forceMediaMerge", options.ForceMediaMerge),
 				new JProperty("comments", ConvertCommentsModeEnumValueToCode(options.Comments))
 			);
 

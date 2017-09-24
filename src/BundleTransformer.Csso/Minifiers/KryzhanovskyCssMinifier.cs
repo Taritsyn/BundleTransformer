@@ -46,6 +46,15 @@ namespace BundleTransformer.Csso.Minifiers
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable unsafe merge of <code>@media</code> rules
+		/// </summary>
+		public bool ForceMediaMerge
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a comments mode
 		/// </summary>
 		public CommentsMode Comments
@@ -71,6 +80,7 @@ namespace BundleTransformer.Csso.Minifiers
 		{
 			CssMinifierSettings cssMinifierConfig = cssoConfig.CssMinifier;
 			DisableRestructuring = cssMinifierConfig.DisableRestructuring;
+			ForceMediaMerge = cssMinifierConfig.ForceMediaMerge;
 			Comments = cssMinifierConfig.Comments;
 
 			if (createJsEngineInstance == null)
@@ -193,6 +203,7 @@ namespace BundleTransformer.Csso.Minifiers
 			var options = new OptimizationOptions
 			{
 				Restructure = !DisableRestructuring,
+				ForceMediaMerge = ForceMediaMerge,
 				Comments = Comments
 			};
 

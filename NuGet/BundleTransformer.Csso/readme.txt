@@ -21,7 +21,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CSSO version 3.2.0.
+   1. Added support of CSSO version 3.2.0;
+   2. In configuration settings of CSS minifier was added one new property -
+      `ForceMediaMerge` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

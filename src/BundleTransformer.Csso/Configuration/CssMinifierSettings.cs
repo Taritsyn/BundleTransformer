@@ -18,6 +18,16 @@ namespace BundleTransformer.Csso.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable unsafe merge of <code>@media</code> rules
+		/// </summary>
+		[ConfigurationProperty("forceMediaMerge", DefaultValue = false)]
+		public bool ForceMediaMerge
+		{
+			get { return (bool)this["forceMediaMerge"]; }
+			set { this["forceMediaMerge"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a comments mode
 		/// </summary>
 		[ConfigurationProperty("comments", DefaultValue = CommentsMode.Exclamation)]

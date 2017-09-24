@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of TypeScript translator and
-   Uglify JS minifier.
+   Updated definitions for configuration settings of CSSO CSS minifier.
 
    =============
    DOCUMENTATION
