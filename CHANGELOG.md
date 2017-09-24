@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.9.175 - September 24, 2017
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of CSSO CSS minifier
+ * In BundleTransformer.Csso:
+   * Added support of CSSO version 3.2.0
+   * In configuration settings of CSS minifier was added one new property - `ForceMediaMerge` (default `false`)
+ * In BundleTransformer.CleanCss added support of Clean-css version 4.1.9
+
 ## v1.9.174 - September 7, 2017
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.4
 
