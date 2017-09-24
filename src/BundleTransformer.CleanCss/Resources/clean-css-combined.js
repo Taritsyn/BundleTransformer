@@ -47,7 +47,7 @@ if (!String.prototype.hasOwnProperty('repeat')) {
 }
 
 /*!
- * Clean-css v4.1.8
+ * Clean-css v4.1.9
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -5573,6 +5573,11 @@ var CleanCss = (function(){
 		var animationNameRegex = /^(\-moz\-|\-o\-|\-webkit\-)?animation-name$/;
 		var animationRegex = /^(\-moz\-|\-o\-|\-webkit\-)?animation$/;
 		var keyframeRegex = /^@(\-moz\-|\-o\-|\-webkit\-)?keyframes /;
+		var optionalMatchingQuotesRegex = /^(['"]?)(.*)\1$/;
+
+		function removeQuotes(value) {
+		  return value.replace(optionalMatchingQuotesRegex, '$2');
+		}
 
 		function removeUnusedAtRules(tokens, context) {
 		  removeUnusedAtRule(tokens, matchCounterStyle, markCounterStylesAsUsed, context);
@@ -5672,7 +5677,7 @@ var CleanCss = (function(){
 			  property = token[2][i];
 
 			  if (property[1][1] == 'font-family') {
-				match = property[2][1].toLowerCase();
+				match = removeQuotes(property[2][1].toLowerCase());
 				atRules[match] = atRules[match] || [];
 				atRules[match].push(token);
 				break;
@@ -5699,7 +5704,7 @@ var CleanCss = (function(){
 				component = wrappedProperty.components[6];
 
 				for (j = 0, m = component.value.length; j < m; j++) {
-				  normalizedMatch = component.value[j][1].toLowerCase();
+				  normalizedMatch = removeQuotes(component.value[j][1].toLowerCase());
 
 				  if (normalizedMatch in atRules) {
 					delete atRules[normalizedMatch];
@@ -5711,7 +5716,7 @@ var CleanCss = (function(){
 
 			  if (property[1][1] == 'font-family') {
 				for (j = 2, m = property.length; j < m; j++) {
-				  normalizedMatch = property[j][1].toLowerCase();
+				  normalizedMatch = removeQuotes(property[j][1].toLowerCase());
 
 				  if (normalizedMatch in atRules) {
 					delete atRules[normalizedMatch];
