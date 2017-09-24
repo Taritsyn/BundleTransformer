@@ -1,5 +1,5 @@
 /*!
-* CSSO (CSS Optimizer) v3.1.1
+* CSSO (CSS Optimizer) v3.2.0
 * https://github.com/css/csso
 *
 * Copyright 2011-2017, Sergey Kryzhanovsky
@@ -173,14 +173,14 @@ var CSSO = (function(){
 
 		function minifyStylesheet(source, options) {
 			return minify('stylesheet', source, options);
-		};
+		}
 
 		function minifyBlock(source, options) {
 			return minify('declarationList', source, options);
 		}
 
 		var exports = {
-			version: '3.1.1',
+			version: '3.2.0',
 
 			// main methods
 			minify: minifyStylesheet,
@@ -210,10 +210,10 @@ var CSSO = (function(){
 			WhiteSpace: require('/clean/WhiteSpace')
 		};
 
-		var exports = function(ast, usageData) {
+		var exports = function(ast, options) {
 			walk(ast, function(node, item, list) {
 				if (handlers.hasOwnProperty(node.type)) {
-					handlers[node.type].call(this, node, item, list, usageData);
+					handlers[node.type].call(this, node, item, list, options);
 				}
 			});
 		};
@@ -224,7 +224,9 @@ var CSSO = (function(){
 
 	//#region URL: /clean/Atrule
 	modules['/clean/Atrule'] = function () {
-		function cleanAtrule(node, item, list) {
+		var resolveKeyword = require('/css-tree').keyword;
+
+		var exports = function cleanAtrule(node, item, list) {
 			if (node.block) {
 				// otherwise removed at-rule don't prevent @import for removal
 				if (this.stylesheet !== null) {
@@ -239,7 +241,7 @@ var CSSO = (function(){
 
 			switch (node.name) {
 				case 'charset':
-					if (!node.expression || node.expression.children.isEmpty()) {
+					if (!node.prelude || node.prelude.children.isEmpty()) {
 						list.remove(item);
 						return;
 					}
@@ -273,10 +275,22 @@ var CSSO = (function(){
 					}, this);
 
 					break;
-			}
-		}
 
-		return cleanAtrule;
+				default:
+					var keyword = resolveKeyword(node.name);
+					if (keyword.name === 'keyframes' ||
+						keyword.name === 'media' ||
+						keyword.name === 'supports') {
+
+						// drop at-rule with no prelude
+						if (!node.prelude || node.prelude.children.isEmpty()) {
+							list.remove(item);
+						}
+					}
+			}
+		};
+
+		return exports;
 	};
 	//#endregion
 
@@ -400,7 +414,9 @@ var CSSO = (function(){
 			return selectorList.children.isEmpty();
 		}
 
-		var exports = function cleanRuleset(node, item, list, usageData) {
+		var exports = function cleanRuleset(node, item, list, options) {
+			var usageData = options.usage;
+
 			if (usageData && (usageData.whitelist !== null || usageData.blacklist !== null)) {
 				cleanUnused(node.selector, usageData);
 			}
@@ -777,6 +793,7 @@ var CSSO = (function(){
 
 	//#region URL: /replace/color
 	modules['/replace/color'] = function () {
+		var lexer = require('/css-tree').lexer;
 		var packNumber = require('/replace/Number').pack;
 
 		// http://www.w3.org/TR/css3-color/#svg-color
@@ -1236,7 +1253,8 @@ var CSSO = (function(){
 
 			var color = node.name.toLowerCase();
 
-			if (NAME_TO_HEX.hasOwnProperty(color)) {
+			if (NAME_TO_HEX.hasOwnProperty(color) &&
+				lexer.matchDeclaration(this.declaration).isType(node, 'color')) {
 				var hex = NAME_TO_HEX[color];
 
 				if (hex.length + 1 <= color.length) {
@@ -1321,7 +1339,7 @@ var CSSO = (function(){
 
 			node.value = value;
 
-			if (value === '0' && this.declaration !== null && this.atruleExpression === null) {
+			if (value === '0' && this.declaration !== null && this.atrulePrelude === null) {
 				var unit = node.unit.toLowerCase();
 
 				// only length values can be compressed
@@ -1386,7 +1404,7 @@ var CSSO = (function(){
 			}
 
 			return value;
-		};
+		}
 
 		var exports = function(node, item) {
 			node.value = packNumber(node.value, item);
@@ -1486,54 +1504,54 @@ var CSSO = (function(){
 	//#region URL: /restructure
 	modules['/restructure'] = function () {
 		var prepare = require('/restructure/prepare');
-		var initialMergeRuleset = require('/restructure/1-initialMergeRuleset');
-		var mergeAtrule = require('/restructure/2-mergeAtrule');
+		var mergeAtrule = require('/restructure/1-mergeAtrule');
+		var initialMergeRuleset = require('/restructure/2-initialMergeRuleset');
 		var disjoinRuleset = require('/restructure/3-disjoinRuleset');
 		var restructShorthand = require('/restructure/4-restructShorthand');
 		var restructBlock = require('/restructure/6-restructBlock');
 		var mergeRuleset = require('/restructure/7-mergeRuleset');
 		var restructRuleset = require('/restructure/8-restructRuleset');
 
-		var exports = function(ast, usageData/*BT-, debug*/) {
+		var exports = function(ast, options) {
 			// prepare ast for restructing
-			var indexer = prepare(ast, usageData);
+			var indexer = prepare(ast, options);
 			/*BT-
-			debug('prepare', ast);
+			options.logger('prepare', ast);
+			*/
+
+			mergeAtrule(ast, options);
+			/*BT-
+			options.logger('mergeAtrule', ast);
 			*/
 
 			initialMergeRuleset(ast);
 			/*BT-
-			debug('initialMergeRuleset', ast);
-			*/
-
-			mergeAtrule(ast);
-			/*BT-
-			debug('mergeAtrule', ast);
+			options.logger('initialMergeRuleset', ast);
 			*/
 
 			disjoinRuleset(ast);
 			/*BT-
-			debug('disjoinRuleset', ast);
+			options.logger('disjoinRuleset', ast);
 			*/
 
 			restructShorthand(ast, indexer);
 			/*BT-
-			debug('restructShorthand', ast);
+			options.logger('restructShorthand', ast);
 			*/
 
 			restructBlock(ast);
 			/*BT-
-			debug('restructBlock', ast);
+			options.logger('restructBlock', ast);
 			*/
 
 			mergeRuleset(ast);
 			/*BT-
-			debug('mergeRuleset', ast);
+			options.logger('mergeRuleset', ast);
 			*/
 
 			restructRuleset(ast);
 			/*BT-
-			debug('restructRuleset', ast);
+			options.logger('restructRuleset', ast);
 			*/
 		};
 
@@ -1549,17 +1567,17 @@ var CSSO = (function(){
 		var createDeclarationIndexer = require('/restructure/prepare/createDeclarationIndexer');
 		var processSelector = require('/restructure/prepare/processSelector');
 
-		function walk(node, markDeclaration, usageData) {
+		function walk(node, markDeclaration, options) {
 			switch (node.type) {
 				case 'Rule':
 					node.block.children.each(markDeclaration);
-					processSelector(node, usageData);
+					processSelector(node, options.usage);
 					break;
 
 				case 'Atrule':
-					if (node.expression) {
-						node.expression.id = null; // pre-init property to avoid multiple hidden class for translate
-						node.expression.id = translate(node.expression);
+					if (node.prelude) {
+						node.prelude.id = null; // pre-init property to avoid multiple hidden class for translate
+						node.prelude.id = translate(node.prelude);
 					}
 
 					// compare keyframe selectors by its values
@@ -1575,13 +1593,13 @@ var CSSO = (function(){
 					}
 					break;
 			}
-		};
+		}
 
-		var exports = function prepare(ast, usageData) {
+		var exports = function prepare(ast, options) {
 			var markDeclaration = createDeclarationIndexer();
 
 			walkRules(ast, function(node) {
-				walk(node, markDeclaration, usageData);
+				walk(node, markDeclaration, options);
 			});
 
 			return {
@@ -1661,7 +1679,7 @@ var CSSO = (function(){
 				var tagName = '*';
 				var scope = 0;
 
-				simpleSelector.children.some(function(node) {
+				simpleSelector.children.each(function(node) {
 					switch (node.type) {
 						case 'ClassSelector':
 							if (usageData && usageData.scopes) {
@@ -1796,8 +1814,119 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /restructure/1-initialMergeRuleset
-	modules['/restructure/1-initialMergeRuleset'] = function () {
+	//#region URL: /restructure/1-mergeAtrule
+	modules['/restructure/1-mergeAtrule'] = function () {
+		var List = require('/css-tree').List;
+		var resolveKeyword = require('/css-tree').keyword;
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var walkRulesRight = require('/css-tree').walkRulesRight;
+
+		function addRuleToMap(map, item, list, single) {
+			var node = item.data;
+			var name = resolveKeyword(node.name).name;
+			var id = node.name.toLowerCase() + '/' + (node.prelude ? node.prelude.id : null);
+
+			if (!hasOwnProperty.call(map, name)) {
+				map[name] = Object.create(null);
+			}
+
+			if (single) {
+				delete map[name][id];
+			}
+
+			if (!hasOwnProperty.call(map[name], id)) {
+				map[name][id] = new List();
+			}
+
+			map[name][id].append(list.remove(item));
+		}
+
+		function relocateAtrules(ast, options) {
+			var collected = Object.create(null);
+			var topInjectPoint = null;
+
+			ast.children.each(function(node, item, list) {
+				if (node.type === 'Atrule') {
+					var keyword = resolveKeyword(node.name);
+
+					switch (keyword.name) {
+						case 'keyframes':
+							addRuleToMap(collected, item, list, true);
+							return;
+
+						case 'media':
+							if (options.forceMediaMerge) {
+								addRuleToMap(collected, item, list, false);
+								return;
+							}
+							break;
+					}
+
+					if (topInjectPoint === null &&
+						keyword.name !== 'charset' &&
+						keyword.name !== 'import') {
+						topInjectPoint = item;
+					}
+				} else {
+					if (topInjectPoint === null) {
+						topInjectPoint = item;
+					}
+				}
+			});
+
+			for (var atrule in collected) {
+				for (var id in collected[atrule]) {
+					ast.children.insertList(collected[atrule][id], atrule === 'media' ? null : topInjectPoint);
+				}
+			}
+		};
+
+		function isMediaRule(node) {
+			return node.type === 'Atrule' && node.name === 'media';
+		}
+
+		function processAtrule(node, item, list) {
+			if (!isMediaRule(node)) {
+				return;
+			}
+
+			var prev = item.prev && item.prev.data;
+
+			if (!prev || !isMediaRule(prev)) {
+				return;
+			}
+
+			// merge @media with same query
+			if (node.prelude &&
+				prev.prelude &&
+				node.prelude.id === prev.prelude.id) {
+				prev.block.children.appendList(node.block.children);
+				list.remove(item);
+
+				// TODO: use it when we can refer to several points in source
+				// prev.loc = {
+				//     primary: prev.loc,
+				//     merged: node.loc
+				// };
+			}
+		}
+
+		var exports = function rejoinAtrule(ast, options) {
+			relocateAtrules(ast, options);
+
+			walkRulesRight(ast, function(node, item, list) {
+				if (node.type === 'Atrule') {
+					processAtrule(node, item, list);
+				}
+			});
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /restructure/2-initialMergeRuleset
+	modules['/restructure/2-initialMergeRuleset'] = function () {
 		var walkRules = require('/css-tree').walkRules;
 		var utils = require('/restructure/utils');
 
@@ -1843,52 +1972,6 @@ var CSSO = (function(){
 			walkRules(ast, function(node, item, list) {
 				if (node.type === 'Rule') {
 					processRule(node, item, list);
-				}
-			});
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /restructure/2-mergeAtrule
-	modules['/restructure/2-mergeAtrule'] = function () {
-		var walkRulesRight = require('/css-tree').walkRulesRight;
-
-		function isMediaRule(node) {
-			return node.type === 'Atrule' && node.name === 'media';
-		}
-
-		function processAtrule(node, item, list) {
-			if (!isMediaRule(node)) {
-				return;
-			}
-
-			var prev = item.prev && item.prev.data;
-
-			if (!prev || !isMediaRule(prev)) {
-				return;
-			}
-
-			// merge @media with same query
-			if (node.expression &&
-				prev.expression &&
-				node.expression.id === prev.expression.id) {
-				prev.block.children.appendList(node.block.children);
-				list.remove(item);
-
-				// TODO: use it when we can refer to several points in source
-				// prev.loc = {
-				//	 primary: prev.loc,
-				//	 merged: node.loc
-				// };
-			}
-		}
-
-		var exports = function rejoinAtrule(ast) {
-			walkRulesRight(ast, function(node, item, list) {
-				if (node.type === 'Atrule') {
-					processAtrule(node, item, list);
 				}
 			});
 		};
@@ -2678,8 +2761,8 @@ var CSSO = (function(){
 
 	//#region URL: /restructure/7-mergeRuleset
 	modules['/restructure/7-mergeRuleset'] = function () {
-		var utils = require('/restructure/utils');
 		var walkRules = require('/css-tree').walkRules;
+		var utils = require('/restructure/utils');
 
 		/*
 			At this step all rules has single simple selector. We try to join by equal
@@ -3087,7 +3170,7 @@ var CSSO = (function(){
 		var usageUtils = require('/usage');
 		var clean = require('/clean');
 		var replace = require('/replace');
-		var restructureBlock = require('/restructure');
+		var restructure = require('/restructure');
 		var walkRules = require('/css-tree').walkRules;
 
 		function readChunk(children, specialComments) {
@@ -3128,9 +3211,9 @@ var CSSO = (function(){
 			};
 		}
 
-		function compressChunk(ast, firstAtrulesAllowed, usageData, num/*BT-, logger*/) {
+		function compressChunk(ast, firstAtrulesAllowed, num, options) {
 			/*BT-
-			logger('Compress block #' + num, null, true);
+			options.logger('Compress block #' + num, null, true);
 			*/
 
 			var seed = 1;
@@ -3146,20 +3229,25 @@ var CSSO = (function(){
 				}
 			});
 			/*BT-
-			logger('init', ast);
+			options.logger('init', ast);
 			*/
 
 			// remove redundant
-			clean(ast, usageData);
+			clean(ast, options);
 			/*BT-
-			logger('clean', ast);
+			options.logger('clean', ast);
 			*/
 
 			// replace nodes for shortened forms
-			replace(ast, usageData);
+			replace(ast, options);
 			/*BT-
-			logger('replace', ast);
+			options.logger('replace', ast);
 			*/
+
+			// structure optimisations
+			if (options.restructuring) {
+				restructure(ast, options);
+			}
 
 			return ast;
 		}
@@ -3185,12 +3273,16 @@ var CSSO = (function(){
 		function wrapBlock(block) {
 			return new List().appendData({
 				type: 'Rule',
+				loc: null,
 				selector: {
 					type: 'SelectorList',
+					loc: null,
 					children: new List().appendData({
 						type: 'Selector',
+						loc: null,
 						children: new List().appendData({
-							type: 'Identifier',
+							type: 'TypeSelector',
+							loc: null,
 							name: 'x'
 						})
 					})
@@ -3203,68 +3295,60 @@ var CSSO = (function(){
 			ast = ast || { type: 'StyleSheet', loc: null, children: new List() };
 			options = options || {};
 
-			/*BT-
-			var logger = typeof options.logger === 'function' ? options.logger : function() {};
-			*/
+			var compressOptions = {
+				/*BT-
+				logger: typeof options.logger === 'function' ? options.logger : function() {},
+				*/
+				restructuring: getRestructureOption(options),
+				forceMediaMerge: Boolean(options.forceMediaMerge),
+				usage: options.usage ? usageUtils.buildIndex(options.usage) : false
+			};
 			var specialComments = getCommentsOption(options);
-			var restructuring = getRestructureOption(options);
 			var firstAtrulesAllowed = true;
-			var usageData = false;
-			var inputRules;
-			var outputRules = new List();
+			var input;
+			var output = new List();
 			var chunk;
 			var chunkNum = 1;
-			var chunkRules;
+			var chunkChildren;
 
 			if (options.clone) {
 				ast = clone(ast);
 			}
 
 			if (ast.type === 'StyleSheet') {
-				inputRules = ast.children;
-				ast.children = outputRules;
+				input = ast.children;
+				ast.children = output;
 			} else {
-				inputRules = wrapBlock(ast);
-			}
-
-			if (options.usage) {
-				usageData = usageUtils.buildIndex(options.usage);
+				input = wrapBlock(ast);
 			}
 
 			do {
-				chunk = readChunk(inputRules, Boolean(specialComments));
-
-				compressChunk(chunk.stylesheet, firstAtrulesAllowed, usageData, chunkNum++/*BT-, logger*/);
-
-				// structure optimisations
-				if (restructuring) {
-					restructureBlock(chunk.stylesheet, usageData/*BT-, logger*/);
-				}
-
-				chunkRules = chunk.stylesheet.children;
+				chunk = readChunk(input, Boolean(specialComments));
+				compressChunk(chunk.stylesheet, firstAtrulesAllowed, chunkNum++, compressOptions);
+				chunkChildren = chunk.stylesheet.children;
 
 				if (chunk.comment) {
-					// add \n before comment if there is another content in outputRules
-					if (!outputRules.isEmpty()) {
-						outputRules.insert(List.createItem({
+					// add \n before comment if there is another content in output
+					if (!output.isEmpty()) {
+						output.insert(List.createItem({
 							type: 'Raw',
 							value: '\n'
 						}));
 					}
 
-					outputRules.insert(List.createItem(chunk.comment));
+					output.insert(List.createItem(chunk.comment));
 
 					// add \n after comment if chunk is not empty
-					if (!chunkRules.isEmpty()) {
-						outputRules.insert(List.createItem({
+					if (!chunkChildren.isEmpty()) {
+						output.insert(List.createItem({
 							type: 'Raw',
 							value: '\n'
 						}));
 					}
 				}
 
-				if (firstAtrulesAllowed && !chunkRules.isEmpty()) {
-					var lastRule = chunkRules.last();
+				if (firstAtrulesAllowed && !chunkChildren.isEmpty()) {
+					var lastRule = chunkChildren.last();
 
 					if (lastRule.type !== 'Atrule' ||
 					   (lastRule.name !== 'import' && lastRule.name !== 'charset')) {
@@ -3276,8 +3360,8 @@ var CSSO = (function(){
 					specialComments = false;
 				}
 
-				outputRules.appendList(chunkRules);
-			} while (!inputRules.isEmpty());
+				output.appendList(chunkChildren);
+			} while (!input.isEmpty());
 
 			return {
 				ast: ast
@@ -3375,7 +3459,7 @@ var CSSO = (function(){
 	//#endregion
 
 	/*!
-	* CSSTree v1.0.0 Alpha 19
+	* CSSTree v1.0.0 Alpha 23
 	* https://github.com/csstree/csstree
 	*
 	* Copyright 2016-2017, Roman Dvornov
@@ -3385,7 +3469,51 @@ var CSSO = (function(){
 	modules['/css-tree'] = function () {
 		'use strict';
 
-		var exports = require('/css-tree/syntax/default');
+		var exports = require('/css-tree/syntax');
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/convertor
+	modules['/css-tree/convertor'] = function () {
+		var createConvertor = require('/css-tree/convertor/create');
+
+		var exports = createConvertor(require('/css-tree/walker'));
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/convertor/create
+	modules['/css-tree/convertor/create'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		var exports = function createConvertors(walker) {
+			var walk = walker.walk;
+			var walkUp = walker.walkUp;
+
+			return {
+				fromPlainObject: function(ast) {
+					walk(ast, function(node) {
+						if (node.children && node.children instanceof List === false) {
+							node.children = new List().fromArray(node.children);
+						}
+					});
+
+					return ast;
+				},
+				toPlainObject: function(ast) {
+					walkUp(ast, function(node) {
+						if (node.children && node.children instanceof List) {
+							node.children = node.children.toArray();
+						}
+					});
+
+					return ast;
+				}
+			};
+		};
 
 		return exports;
 	};
@@ -3393,8 +3521,8 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/data
 	modules['/css-tree/data'] = function () {
-		var mdnProperties = require('/css-tree/data/mdn-data-properties');
-		var mdnSyntaxes = require('/css-tree/data/mdn-data-syntaxes');
+		var mdnProperties = require('/css-tree/data/mdn-data/css/properties');
+		var mdnSyntaxes = require('/css-tree/data/mdn-data/css/syntaxes');
 		var patch = require('/css-tree/data/patch');
 		var data = {
 			properties: {},
@@ -3409,26 +3537,25 @@ var CSSO = (function(){
 				.replace(/&amp;/g, '&');
 		}
 
-		// apply patch
-		for (var key in patch.properties) {
-			if (key in mdnProperties) {
-				if (patch.properties[key]) {
-					mdnProperties[key].syntax = patch.properties[key].syntax;
+		function patchDict(dict, patchDict) {
+			for (var key in patchDict) {
+				if (key in dict) {
+					if (patchDict[key].syntax) {
+						dict[key].syntax = patchDict[key].syntax;
+					} else {
+						delete dict[key];
+					}
 				} else {
-					delete mdnProperties[key];
+					if (patchDict[key].syntax) {
+						dict[key] = patchDict[key];
+					}
 				}
-			} else {
-				mdnProperties[key] = patch.properties[key];
 			}
 		}
 
-		for (var key in patch.syntaxes) {
-			if (patch.syntaxes[key].syntax) {
-				mdnSyntaxes[key] = patch.syntaxes[key].syntax;
-			} else {
-				delete mdnSyntaxes[key];
-			}
-		}
+		// apply patch
+		patchDict(mdnProperties, patch.properties);
+		patchDict(mdnSyntaxes, patch.syntaxes);
 
 		// normalize source mdnProperties syntaxes, since it uses html token
 		for (var key in mdnProperties) {
@@ -3436,15 +3563,15 @@ var CSSO = (function(){
 		}
 
 		for (var key in mdnSyntaxes) {
-			data.types[key] = normalizeSyntax(mdnSyntaxes[key]);
+			data.types[key] = normalizeSyntax(mdnSyntaxes[key].syntax);
 		}
 
 		return data;
 	};
 	//#endregion
 
-	//#region URL: /css-tree/data/mdn-data-properties
-	modules['/css-tree/data/mdn-data-properties'] = function () {
+	//#region URL: /css-tree/data/mdn-data/css/properties
+	modules['/css-tree/data/mdn-data/css/properties'] = function () {
 		var exports = {
 			"--*": {
 				"syntax": "<declaration-value>",
@@ -3567,6 +3694,21 @@ var CSSO = (function(){
 				"order": "uniqueOrder",
 				"status": "nonstandard"
 			},
+			"-moz-context-properties": {
+				"syntax": "none | [ fill | fill-opacity | stroke | stroke-opacity ]#",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"Mozilla Extensions"
+				],
+				"initial": "none",
+				"appliesto": "allElementsThatCanReferenceImages",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
+				"status": "nonstandard"
+			},
 			"-moz-float-edge": {
 				"syntax": "border-box | content-box | margin-box | padding-box",
 				"media": "visual",
@@ -3667,7 +3809,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "lpc",
-				"percentages": "yes",
+				"percentages": "referToDimensionOfBorderBox",
 				"groups": [
 					"Mozilla Extensions"
 				],
@@ -3682,7 +3824,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "lpc",
-				"percentages": "yes",
+				"percentages": "referToDimensionOfBorderBox",
 				"groups": [
 					"Mozilla Extensions"
 				],
@@ -3697,7 +3839,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "lpc",
-				"percentages": "yes",
+				"percentages": "referToDimensionOfBorderBox",
 				"groups": [
 					"Mozilla Extensions"
 				],
@@ -3712,7 +3854,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "lpc",
-				"percentages": "yes",
+				"percentages": "referToDimensionOfBorderBox",
 				"groups": [
 					"Mozilla Extensions"
 				],
@@ -3898,7 +4040,7 @@ var CSSO = (function(){
 				"status": "nonstandard"
 			},
 			"-webkit-mask": {
-				"syntax": "<mask-image> [ <mask-repeat> || <mask-attachment> || <mask-position> || <mask-origin> || <mask-clip> ]*",
+				"syntax": "<mask-image> [ <'-webkit-mask-repeat'> || <'-webkit-mask-attachment'> || <'-webkit-mask-position'> || <'-webkit-mask-origin'> || <'-webkit-mask-clip'> ]*",
 				"media": "visual",
 				"inherited": false,
 				"animationType": "discrete",
@@ -3942,7 +4084,7 @@ var CSSO = (function(){
 				"status": "nonstandard"
 			},
 			"-webkit-mask-clip": {
-				"syntax": "<clip-style> [, <clip-style> ]*",
+				"syntax": "[ border | border-box | padding | padding-box | content | content-box | text ]#",
 				"media": "visual",
 				"inherited": false,
 				"animationType": "discrete",
@@ -4117,7 +4259,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"status": "nonstandard"
 			},
@@ -4156,7 +4298,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"status": "nonstandard"
 			},
@@ -4177,9 +4319,17 @@ var CSSO = (function(){
 			},
 			"-webkit-touch-callout": {
 				"syntax": "default | none",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
 				"groups": [
 					"WebKit Extensions"
 				],
+				"initial": "default",
+				"appliesto": "allElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
 				"status": "nonstandard"
 			},
 			"align-content": {
@@ -4398,7 +4548,7 @@ var CSSO = (function(){
 			"appearance": {
 				"syntax": "auto | none",
 				"media": "all",
-				"inherited": "no",
+				"inherited": false,
 				"animationType": "discrete",
 				"percentages": "no",
 				"groups": [
@@ -4406,8 +4556,8 @@ var CSSO = (function(){
 				],
 				"initial": "auto",
 				"appliesto": "allElements",
-				"computed": "As specified",
-				"order": "per grammar",
+				"computed": "asSpecified",
+				"order": "perGrammar",
 				"status": "experimental"
 			},
 			"azimuth": {
@@ -4575,7 +4725,7 @@ var CSSO = (function(){
 				],
 				"initial": "transparent",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter",
@@ -4595,7 +4745,7 @@ var CSSO = (function(){
 				],
 				"initial": "none",
 				"appliesto": "allElements",
-				"computed": "asSpecifiedURIsAbsolute",
+				"computed": "asSpecifiedURLsAbsolute",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter",
@@ -4628,7 +4778,7 @@ var CSSO = (function(){
 				"syntax": "<position>#",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "repeatableList simpleList lpc",
+				"animationType": "repeatableListOfSimpleListOfLpc",
 				"percentages": "referToSizeOfBackgroundPositioningAreaMinusBackgroundImageSize",
 				"groups": [
 					"CSS Background and Borders"
@@ -4698,7 +4848,7 @@ var CSSO = (function(){
 				"syntax": "<bg-size>#",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "repeatableList simpleList lpc keywords",
+				"animationType": "repeatableListOfSimpleListOfLpc",
 				"percentages": "relativeToBackgroundPositioningArea",
 				"groups": [
 					"CSS Background and Borders"
@@ -4936,7 +5086,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter"
@@ -5082,13 +5232,7 @@ var CSSO = (function(){
 					"border-image-outset",
 					"border-image-repeat"
 				],
-				"appliesto": [
-					"border-image-outset",
-					"border-image-repeat",
-					"border-image-slice",
-					"border-image-source",
-					"border-image-width"
-				],
+				"appliesto": "allElementsExceptTableElementsWhenCollapse",
 				"computed": [
 					"border-image-outset",
 					"border-image-repeat",
@@ -5184,7 +5328,7 @@ var CSSO = (function(){
 					"CSS Background and Borders"
 				],
 				"initial": "1",
-				"appliesto": "allElementsExceptTableElementsWhenBorderCollapseCollapse",
+				"appliesto": "allElementsExceptTableElementsWhenCollapse",
 				"computed": "asSpecifiedRelativeToAbsoluteLengths",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
@@ -5369,7 +5513,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter"
@@ -5486,7 +5630,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter"
@@ -5613,7 +5757,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter"
@@ -5890,7 +6034,7 @@ var CSSO = (function(){
 				"animationType": "shadowList",
 				"percentages": "no",
 				"groups": [
-					"CSS Box Model"
+					"CSS Background and Borders"
 				],
 				"initial": "none",
 				"appliesto": "allElements",
@@ -5915,21 +6059,6 @@ var CSSO = (function(){
 				"computed": "asSpecified",
 				"order": "uniqueOrder",
 				"status": "standard"
-			},
-			"box-suppress": {
-				"syntax": "show | discard | hide",
-				"media": "all",
-				"inherited": false,
-				"animationType": "discrete",
-				"percentages": "no",
-				"groups": [
-					"CSS Display"
-				],
-				"initial": "show",
-				"appliesto": "allElements",
-				"computed": "seeProse",
-				"order": "uniqueOrder",
-				"status": "experimental"
 			},
 			"break-after": {
 				"syntax": "auto | avoid | avoid-page | page | left | right | recto | verso | avoid-column | column | avoid-region | region",
@@ -6041,7 +6170,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "basicShapeOtherwiseNo",
-				"percentages": "asSpecified",
+				"percentages": "referToReferenceBoxWhenSpecifiedOtherwiseBorderBox",
 				"groups": [
 					"CSS Miscellaneous"
 				],
@@ -6154,7 +6283,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "multicolElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"status": "standard"
 			},
@@ -6245,7 +6374,7 @@ var CSSO = (function(){
 			"contain": {
 				"syntax": "none | strict | content | [ size || layout || style || paint ]",
 				"media": "all",
-				"inherited": "false",
+				"inherited": false,
 				"animationType": "discrete",
 				"percentages": "no",
 				"groups": [
@@ -6254,11 +6383,11 @@ var CSSO = (function(){
 				"initial": "none",
 				"appliesto": "allElements",
 				"computed": "asSpecified",
-				"order": "per grammar",
+				"order": "perGrammar",
 				"status": "experimental"
 			},
 			"content": {
-				"syntax": "[ <image> , ]* [ normal | none | <content-list> ] [/ <string> ]?",
+				"syntax": "normal | none | [ <content-replacement> | <content-list> ] [/ <string> ]?",
 				"media": "all",
 				"inherited": false,
 				"animationType": "discrete",
@@ -6313,7 +6442,7 @@ var CSSO = (function(){
 				],
 				"initial": "auto",
 				"appliesto": "allElements",
-				"computed": "asSpecifiedURIsAbsolute",
+				"computed": "asSpecifiedURLsAbsolute",
 				"order": "uniqueOrder",
 				"status": "standard"
 			},
@@ -6691,7 +6820,7 @@ var CSSO = (function(){
 				"syntax": "normal | [ <string> <number> ]#",
 				"media": "visual",
 				"inherited": true,
-				"animationType": "asTransform",
+				"animationType": "transform",
 				"percentages": "no",
 				"groups": [
 					"CSS Fonts"
@@ -7035,13 +7164,13 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "discrete",
-				"percentages": "seeGridTemplateRowsColumns",
+				"percentages": "referToDimensionOfContentArea",
 				"groups": [
 					"CSS Grid Layout"
 				],
 				"initial": "auto",
 				"appliesto": "gridContainers",
-				"computed": "seeGridTemplateRowsColumns",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
 				"order": "uniqueOrder",
 				"status": "standard"
 			},
@@ -7065,13 +7194,13 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "discrete",
-				"percentages": "seeGridTemplateRowsColumns",
+				"percentages": "referToDimensionOfContentArea",
 				"groups": [
 					"CSS Grid Layout"
 				],
 				"initial": "auto",
 				"appliesto": "gridContainers",
-				"computed": "seeGridTemplateRowsColumns",
+				"computed": "percentageAsSpecifiedOrAbsoluteLength",
 				"order": "uniqueOrder",
 				"status": "standard"
 			},
@@ -7116,7 +7245,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "length",
-				"percentages": "yes, as the dimension of the element",
+				"percentages": "referToDimensionOfContentArea",
 				"groups": [
 					"CSS Grid Layout"
 				],
@@ -7206,7 +7335,7 @@ var CSSO = (function(){
 				"media": "visual",
 				"inherited": false,
 				"animationType": "length",
-				"percentages": "yes, as the dimension of the element",
+				"percentages": "referToDimensionOfContentArea",
 				"groups": [
 					"CSS Grid Layout"
 				],
@@ -7520,7 +7649,7 @@ var CSSO = (function(){
 				"syntax": "normal | <number> | <length> | <percentage>",
 				"media": "visual",
 				"inherited": true,
-				"animationType": "number length",
+				"animationType": "numberOrLength",
 				"percentages": "referToElementFontSize",
 				"groups": [
 					"CSS Fonts"
@@ -7847,7 +7976,7 @@ var CSSO = (function(){
 				],
 				"initial": "none",
 				"appliesto": "allElementsSVGContainerElements",
-				"computed": "asSpecifiedURIsAbsolute",
+				"computed": "asSpecifiedURLsAbsolute",
 				"order": "uniqueOrder",
 				"status": "standard"
 			},
@@ -7885,7 +8014,7 @@ var CSSO = (function(){
 				"syntax": "<position>#",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "repeatableList simpleList lpc",
+				"animationType": "repeatableListOfSimpleListOfLpc",
 				"percentages": "referToSizeOfMaskPaintingArea",
 				"groups": [
 					"CSS Masks"
@@ -7915,7 +8044,7 @@ var CSSO = (function(){
 				"syntax": "<bg-size>#",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "repeatableList simpleList lpc",
+				"animationType": "repeatableListOfSimpleListOfLpc",
 				"percentages": "no",
 				"groups": [
 					"CSS Masks"
@@ -8071,7 +8200,7 @@ var CSSO = (function(){
 					"Compositing and Blending"
 				],
 				"initial": "normal",
-				"appliesto": "allHTMLElements",
+				"appliesto": "allElements",
 				"computed": "asSpecified",
 				"order": "uniqueOrder",
 				"stacking": true,
@@ -8096,7 +8225,7 @@ var CSSO = (function(){
 				"syntax": "<position>",
 				"media": "visual",
 				"inherited": true,
-				"animationType": "repeatableList simpleList lpc",
+				"animationType": "repeatableListOfSimpleListOfLpc",
 				"percentages": "referToWidthAndHeightOfElement",
 				"groups": [
 					"CSS Images"
@@ -8239,7 +8368,7 @@ var CSSO = (function(){
 				"syntax": "none | ray( [ <angle> && <size>? && contain? ] ) | <path()> | <url> | [ <basic-shape> || <geometry-box> ]",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "AsAngleBasicshapeOrPath",
+				"animationType": "angleOrBasicShapeOrPath",
 				"percentages": "no",
 				"groups": [
 					"CSS Motion"
@@ -8249,6 +8378,21 @@ var CSSO = (function(){
 				"computed": "asSpecified",
 				"order": "perGrammar",
 				"stacking": true,
+				"status": "experimental"
+			},
+			"offset-position": {
+				"syntax": "auto | <position>",
+				"media": "visual",
+				"inherited": false,
+				"animationType": "position",
+				"percentages": "referToSizeOfContainingBlock",
+				"groups": [
+					"CSS Motion"
+				],
+				"initial": "auto",
+				"appliesto": "transformableElements",
+				"computed": "forLengthAbsoluteValueOtherwisePercentage",
+				"order": "perGrammar",
 				"status": "experimental"
 			},
 			"offset-rotate": {
@@ -8701,7 +8845,7 @@ var CSSO = (function(){
 				"syntax": "<position>",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "simpleList lpc",
+				"animationType": "simpleListOfLpc",
 				"percentages": "referToSizeOfBoundingBox",
 				"groups": [
 					"CSS Transforms"
@@ -8744,7 +8888,7 @@ var CSSO = (function(){
 				"status": "standard"
 			},
 			"quotes": {
-				"syntax": "[ <string> <string> ]+ | none",
+				"syntax": "none | [ <string> <string> ]+",
 				"media": "visual",
 				"inherited": true,
 				"animationType": "discrete",
@@ -8987,7 +9131,7 @@ var CSSO = (function(){
 				"syntax": "none | <shape-box> || <basic-shape> | <image>",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "basic-shape",
+				"animationType": "basicShapeOtherwiseNo",
 				"percentages": "no",
 				"groups": [
 					"CSS Shapes"
@@ -9119,7 +9263,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"alsoAppliesTo": [
 					"::first-letter",
@@ -9218,7 +9362,7 @@ var CSSO = (function(){
 				],
 				"initial": "currentcolor",
 				"appliesto": "allElements",
-				"computed": "'color'",
+				"computed": "computedColor",
 				"order": "uniqueOrder",
 				"status": "standard"
 			},
@@ -9243,7 +9387,9 @@ var CSSO = (function(){
 				"inherited": false,
 				"animationType": "discrete",
 				"percentages": "no",
-				"groups": ["CSS Text Decoration"],
+				"groups": [
+					"CSS Text Decoration"
+				],
 				"initial": "none",
 				"appliesto": "allElements",
 				"computed": "asSpecified",
@@ -9263,6 +9409,21 @@ var CSSO = (function(){
 				"appliesto": "blockContainers",
 				"computed": "percentageOrAbsoluteLengthPlusKeywords",
 				"order": "lengthOrPercentageBeforeKeywords",
+				"status": "standard"
+			},
+			"text-justify": {
+				"syntax": "auto | inter-character | inter-word | none",
+				"media": "visual",
+				"inherited": true,
+				"animationType": "discrete",
+				"percentages": "no",
+				"groups": [
+					"CSS Text"
+				],
+				"initial": "auto",
+				"appliesto": "inlineLevelAndTableCellElements",
+				"computed": "asSpecified",
+				"order": "uniqueOrder",
 				"status": "standard"
 			},
 			"text-orientation": {
@@ -9448,7 +9609,7 @@ var CSSO = (function(){
 				"syntax": "[ <length-percentage> | left | center | right | top | bottom ] | [ [ <length-percentage> | left | center | right ] && [ <length-percentage> | top | center | bottom ] ] <length>?",
 				"media": "visual",
 				"inherited": false,
-				"animationType": "simpleList lpc",
+				"animationType": "simpleListOfLpc",
 				"percentages": "referToSizeOfBoundingBox",
 				"groups": [
 					"CSS Transforms"
@@ -9578,7 +9739,7 @@ var CSSO = (function(){
 			"user-select": {
 				"syntax": "auto | text | none | contain | all",
 				"media": "visual",
-				"inherited": "no",
+				"inherited": false,
 				"animationType": "discrete",
 				"percentages": "no",
 				"groups": [
@@ -9773,209 +9934,619 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /css-tree/data/mdn-data-syntaxes
-	modules['/css-tree/data/mdn-data-syntaxes'] = function () {
+	//#region URL: /css-tree/data/mdn-data/css/syntaxes
+	modules['/css-tree/data/mdn-data/css/syntaxes'] = function () {
 		var exports = {
-			"absolute-size": "xx-small | x-small | small | medium | large | x-large | xx-large",
-			"alpha-value": "<number> | <percentage>",
-			"angle-percentage": "<angle> | <percentage>",
-			"animateable-feature": "scroll-position | contents | <custom-ident>",
-			"attachment": "scroll | fixed | local",
-			"attr()": "attr( <attr-name> <type-or-unit>? [, <attr-fallback> ]? )",
-			"auto-repeat": "repeat( [ auto-fill | auto-fit ] , [ <line-names>? <fixed-size> ]+ <line-names>? )",
-			"auto-track-list": "[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>? <auto-repeat>\n[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>?",
-			"basic-shape": "<inset()> | <circle()> | <ellipse()> | <polygon()>",
-			"bg-image": "none | <image>",
-			"bg-layer": "<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box>{1,2}",
-			"bg-size": "[ <length-percentage> | auto ]{1,2} | cover | contain",
-			"blur()": "blur( <length> )",
-			"blend-mode": "normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity",
-			"box": "border-box | padding-box | content-box",
-			"br-style": "none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset",
-			"br-width": "<length> | thin | medium | thick",
-			"brightness()": "brightness( <number-percentage> )",
-			"calc()": "calc( <calc-sum> )",
-			"calc-sum": "<calc-product> [ [ '+' | '-' ] <calc-product> ]*",
-			"calc-product": "<calc-value> [ '*' <calc-value> | '/' <number> ]*",
-			"calc-value": "<number> | <dimension> | <percentage> | ( <calc-sum> )",
-			"cf-final-image": "<image> | <color>",
-			"cf-mixing-image": "<percentage>? && <image>",
-			"circle()": "circle( [ <shape-radius> ]? [ at <position> ]? )",
-			"clip-source": "<url>",
-			"color": "<rgb()> | <rgba()> | <hsl()> | <hsla()> | <hex-color> | <named-color> | currentcolor | <deprecated-system-color>",
-			"color-stop": "<color> <length-percentage>?",
-			"color-stop-list": "<color-stop>{2,}",
-			"common-lig-values": "[ common-ligatures | no-common-ligatures ]",
-			"composite-style": "clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor",
-			"compositing-operator": "add | subtract | intersect | exclude",
-			"contextual-alt-values": "[ contextual | no-contextual ]",
-			"content-list": "[ <string> | contents | <url> | <quote> | <target> | <leader()> ]+",
-			"contrast()": "contrast( [ <number-percentage> ] )",
-			"counter-style": "<counter-style-name> | symbols()",
-			"counter-style-name": "<custom-ident>",
-			"cross-fade()": "cross-fade( <cf-mixing-image> , <cf-final-image>? )",
-			"deprecated-system-color": "ActiveBorder | ActiveCaption | AppWorkspace | Background | ButtonFace | ButtonHighlight | ButtonShadow | ButtonText | CaptionText | GrayText | Highlight | HighlightText | InactiveBorder | InactiveCaption | InactiveCaptionText | InfoBackground | InfoText | Menu | MenuText | Scrollbar | ThreeDDarkShadow | ThreeDFace | ThreeDHighlight | ThreeDLightShadow | ThreeDShadow | Window | WindowFrame | WindowText",
-			"discretionary-lig-values": "[ discretionary-ligatures | no-discretionary-ligatures ]",
-			"display-box": "contents | none",
-			"display-inside": "flow | flow-root | table | flex | grid | subgrid | ruby",
-			"display-internal": "table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container",
-			"display-legacy": "inline-block | inline-list-item | inline-table | inline-flex | inline-grid",
-			"display-listitem": "list-item && <display-outside>? && [ flow | flow-root ]?",
-			"display-outside": "block | inline | run-in",
-			"drop-shadow()": "drop-shadow( <length>{2,3} <color>? )",
-			"east-asian-variant-values": "[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ]",
-			"east-asian-width-values": "[ full-width | proportional-width ]",
-			"element()": "element( <id-selector> )",
-			"ellipse()": "ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )",
-			"ending-shape": "circle | ellipse",
-			"explicit-track-list": "[ <line-names>? <track-size> ]+ <line-names>?",
-			"family-name": "<string> | <custom-ident>+",
-			"feature-tag-value": "<string> [ <integer> | on | off ]?",
-			"feature-type": "@stylistic | @historical-forms | @styleset | @character-variant | @swash | @ornaments | @annotation",
-			"feature-value-block": "<feature-type> {\n	<feature-value-declaration-list>\n}",
-			"feature-value-block-list": "<feature-value-block>+",
-			"feature-value-declaration": "<custom-ident>: <integer>+;",
-			"feature-value-declaration-list": "<feature-value-declaration>",
-			"feature-value-name": "<custom-ident>",
-			"fill-rule": "nonzero | evenodd",
-			"filter-function": "<blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()>",
-			"filter-function-list": "[ <filter-function> | <url> ]+",
-			"final-bg-layer": "<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box> || <box> || <'background-color'>",
-			"fit-content()": "fit-content( [ <length> | <percentage> ] )",
-			"fixed-breadth": "<length-percentage>",
-			"fixed-repeat": "repeat( [ <positive-integer> ] , [ <line-names>? <fixed-size> ]+ <line-names>? )",
-			"fixed-size": "<fixed-breadth> | minmax( <fixed-breadth> , <track-breadth> ) | minmax( <inflexible-breadth> , <fixed-breadth> )",
-			"font-variant-css21": "[ normal | small-caps ]",
-			"frequency-percentage": "<frequency> | <percentage>",
-			"general-enclosed": "[ <function-token> <any-value> ) ] | ( <ident> <any-value> )",
-			"generic-family": "serif | sans-serif | cursive | fantasy | monospace",
-			"generic-name": "serif | sans-serif | cursive | fantasy | monospace",
-			"geometry-box": "<shape-box> | fill-box | stroke-box | view-box",
-			"gradient": "<linear-gradient()> | <repeating-linear-gradient()> | <radial-gradient()> | <repeating-radial-gradient()>",
-			"grayscale()": "grayscale( <number-percentage> )",
-			"grid-line": "auto | <custom-ident> | [ <integer> && <custom-ident>? ] | [ span && [ <integer> || <custom-ident> ] ]",
-			"historical-lig-values": "[ historical-ligatures | no-historical-ligatures ]",
-			"hsl()": "hsl( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue>, <percentage>, <percentage>, <alpha-value>? ] )",
-			"hsla()": "hsla( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue>, <percentage>, <percentage>, <alpha-value>? ] )",
-			"hue": "<number> | <angle>",
-			"hue-rotate()": "hue-rotate( <angle> )",
-			"image": "<url> | <image()> | <image-set()> | <element()> | <cross-fade()> | <gradient>",
-			"image()": "image( [ [ <image> | <string> ]? , <color>? ]! )",
-			"image-set()": "image-set( <image-set-option># )",
-			"image-set-option": "[ <image> | <string> ] <resolution>",
-			"inflexible-breadth": "<length> | <percentage> | min-content | max-content | auto",
-			"inset()": "inset( <length-percentage>{1,4} [ round <border-radius> ]? )",
-			"invert()": "invert( <number-percentage> )",
-			"keyframes-name": "<custom-ident> | <string>",
-			"keyframe-block": "<keyframe-selector># {\n	<declaration-list>\n}",
-			"keyframe-block-list": "<keyframe-block>+",
-			"keyframe-selector": "from | to | <percentage>",
-			"leader()": "leader( dotted | solid | space | <string> )",
-			"length-percentage": "<length> | <percentage>",
-			"line-names": "'[' <custom-ident>* ']'",
-			"line-name-list": "[ <line-names> | <name-repeat> ]+",
-			"linear-gradient()": "linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )",
-			"mask-layer": "<mask-reference> || <position> [ / <bg-size> ]? || <repeat-style> || <geometry-box> || [ <geometry-box> | no-clip ] || <compositing-operator> || <masking-mode>",
-			"mask-position": "[ <length-percentage> | left | center | right ] [ <length-percentage> | top | center | bottom ]?",
-			"mask-reference": "none | <image> | <mask-source>",
-			"mask-source": "<url>",
-			"masking-mode": "alpha | luminance | match-source",
-			"matrix()": "matrix( <number> [, <number> ]{5,5} )",
-			"matrix3d()": "matrix3d( <number> [, <number> ]{15,15} )",
-			"media-and": "<media-in-parens> [ and <media-in-parens> ]+",
-			"media-condition": "<media-not> | <media-and> | <media-or> | <media-in-parens>",
-			"media-condition-without-or": "<media-not> | <media-and> | <media-in-parens>",
-			"media-feature": "( [ <mf-plain> | <mf-boolean> | <mf-range> ] )",
-			"media-in-parens": "( <media-condition> ) | <media-feature> | <general-enclosed>",
-			"media-not": "not <media-in-parens>",
-			"media-or": "<media-in-parens> [ or <media-in-parens> ]+",
-			"media-query": "<media-condition> | [ not | only ]? <media-type> [ and <media-condition-without-or> ]?",
-			"media-query-list": "<media-query>#",
-			"media-type": "<ident>",
-			"mf-boolean": "<mf-name>",
-			"mf-name": "<ident>",
-			"mf-plain": "<mf-name> : <mf-value>",
-			"mf-range": "<mf-name> [ '<' | '>' ]? '='? <mf-value>\n| <mf-value> [ '<' | '>' ]? '='? <mf-name>\n| <mf-value> '<' '='? <mf-name> '<' '='? <mf-value>\n| <mf-value> '>' '='? <mf-name> '>' '='? <mf-value>",
-			"mf-value": "<number> | <dimension> | <ident> | <ratio>",
-			"minmax()": "minmax( [ <length> | <percentage> | <flex> | min-content | max-content | auto ] , [ <length> | <percentage> | <flex> | min-content | max-content | auto ] )",
-			"named-color": "transparent | aliceblue | antiquewhite | aqua | aquamarine | azure | beige | bisque | black | blanchedalmond | blue | blueviolet | brown | burlywood | cadetblue | chartreuse | chocolate | coral | cornflowerblue | cornsilk | crimson | cyan | darkblue | darkcyan | darkgoldenrod | darkgray | darkgreen | darkgrey | darkkhaki | darkmagenta | darkolivegreen | darkorange | darkorchid | darkred | darksalmon | darkseagreen | darkslateblue | darkslategray | darkslategrey | darkturquoise | darkviolet | deeppink | deepskyblue | dimgray | dimgrey | dodgerblue | firebrick | floralwhite | forestgreen | fuchsia | gainsboro | ghostwhite | gold | goldenrod | gray | green | greenyellow | grey | honeydew | hotpink | indianred | indigo | ivory | khaki | lavender | lavenderblush | lawngreen | lemonchiffon | lightblue | lightcoral | lightcyan | lightgoldenrodyellow | lightgray | lightgreen | lightgrey | lightpink | lightsalmon | lightseagreen | lightskyblue | lightslategray | lightslategrey | lightsteelblue | lightyellow | lime | limegreen | linen | magenta | maroon | mediumaquamarine | mediumblue | mediumorchid | mediumpurple | mediumseagreen | mediumslateblue | mediumspringgreen | mediumturquoise | mediumvioletred | midnightblue | mintcream | mistyrose | moccasin | navajowhite | navy | oldlace | olive | olivedrab | orange | orangered | orchid | palegoldenrod | palegreen | paleturquoise | palevioletred | papayawhip | peachpuff | peru | pink | plum | powderblue | purple | rebeccapurple | red | rosybrown | royalblue | saddlebrown | salmon | sandybrown | seagreen | seashell | sienna | silver | skyblue | slateblue | slategray | slategrey | snow | springgreen | steelblue | tan | teal | thistle | tomato | turquoise | violet | wheat | white | whitesmoke | yellow | yellowgreen",
-			"namespace-prefix": "<ident>",
-			"number-percentage": "<number> | <percentage>",
-			"numeric-figure-values": "[ lining-nums | oldstyle-nums ]",
-			"numeric-fraction-values": "[ diagonal-fractions | stacked-fractions ]",
-			"numeric-spacing-values": "[ proportional-nums | tabular-nums ]",
-			"nth": "<an-plus-b> | even | odd",
-			"opacity()": "opacity( [ <number-percentage> ] )",
-			"page-body": "<declaration>? [ ; <page-body> ]? | <page-margin-box> <page-body>",
-			"page-margin-box": "<page-margin-box-type> {\n	<declaration-list>\n}",
-			"page-margin-box-type": "@top-left-corner | @top-left | @top-center | @top-right | @top-right-corner | @bottom-left-corner | @bottom-left | @bottom-center | @bottom-right | @bottom-right-corner | @left-top | @left-middle | @left-bottom | @right-top | @right-middle | @right-bottom",
-			"page-selector-list": "[ <page-selector># ]?",
-			"page-selector": "<pseudo-page>+ | <ident> <pseudo-page>*",
-			"perspective()": "perspective( <length> )",
-			"polygon()": "polygon( <fill-rule>? , [ <length-percentage> <length-percentage> ]# )",
-			"position": "[[ left | center | right | top | bottom | <length-percentage> ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ] | [ center | [ left | right ] <length-percentage>? ] && [ center | [ top | bottom ] <length-percentage>? ]]",
-			"pseudo-page": ": [ left | right | first | blank ]",
-			"quote": "open-quote | close-quote | no-open-quote | no-close-quote",
-			"radial-gradient()": "radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )",
-			"relative-size": "larger | smaller",
-			"repeat-style": "repeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}",
-			"repeating-linear-gradient()": "repeating-linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )",
-			"repeating-radial-gradient()": "repeating-radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )",
-			"rgb()": "rgb( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )",
-			"rgba()": "rgba( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )",
-			"rotate()": "rotate( <angle> )",
-			"rotate3d()": "rotate3d( <number> , <number> , <number> , <angle> )",
-			"rotateX()": "rotateX( <angle> )",
-			"rotateY()": "rotateY( <angle> )",
-			"rotateZ()": "rotateZ( <angle> )",
-			"saturate()": "saturate( <number-percentage> )",
-			"scale()": "scale( <number> [, <number> ]? )",
-			"scale3d()": "scale3d( <number> , <number> , <number> )",
-			"scaleX()": "scaleX( <number> )",
-			"scaleY()": "scaleY( <number> )",
-			"scaleZ()": "scaleZ( <number> )",
-			"shape-radius": "<length-percentage> | closest-side | farthest-side",
-			"skew()": "skew( <angle> [, <angle> ]? )",
-			"skewX()": "skewX( <angle> )",
-			"skewY()": "skewY( <angle> )",
-			"sepia()": "sepia( <number-percentage> )",
-			"shadow": "inset? && <length>{2,4} && <color>?",
-			"shadow-t": "[ <length>{2,3} && <color>? ]",
-			"shape": "rect(<top>, <right>, <bottom>, <left>)",
-			"shape-box": "<box> | margin-box",
-			"side-or-corner": "[ left | right ] || [ top | bottom ]",
-			"single-animation": "<time> || <single-timing-function> || <time> || <single-animation-iteration-count> || <single-animation-direction> || <single-animation-fill-mode> || <single-animation-play-state> || [ none | <keyframes-name> ]",
-			"single-animation-direction": "normal | reverse | alternate | alternate-reverse",
-			"single-animation-fill-mode": "none | forwards | backwards | both",
-			"single-animation-iteration-count": "infinite | <number>",
-			"single-animation-play-state": "running | paused",
-			"single-timing-function": "<single-transition-timing-function>",
-			"single-transition": "[ none | <single-transition-property> ] || <time> || <single-transition-timing-function> || <time>",
-			"single-transition-timing-function": "ease | linear | ease-in | ease-out | ease-in-out | step-start | step-end | steps( <integer> [, [ start | end ] ]? ) | cubic-bezier( <number>, <number>, <number>, <number> )",
-			"single-transition-property": "all | <custom-ident>",
-			"size": "closest-side | farthest-side | closest-corner | farthest-corner | <length> | <length-percentage>{2}",
-			"symbol": "<string> | <image> | <ident>",
-			"target": "<target-counter()> | <target-counters()> | <target-text()>",
-			"target-counter()": "target-counter( [ <string> | <url> ] , <custom-ident> [, <counter-style> ]? )",
-			"target-counters()": "target-counters( [ <string> | <url> ] , <custom-ident> , <string> [, <counter-style> ]? )",
-			"target-text()": "target-text( [ <string> | <url> ] [, [ content | before | after | first-letter ] ]? )",
-			"time-percentage": "<time> | <percentage>",
-			"track-breadth": "<length-percentage> | <flex> | min-content | max-content | auto",
-			"track-list": "[ <line-names>? [ <track-size> | <track-repeat> ] ]+ <line-names>?",
-			"track-repeat": "repeat( [ <positive-integer> ] , [ <line-names>? <track-size> ]+ <line-names>? )",
-			"track-size": "<track-breadth> | minmax( <inflexible-breadth> , <track-breadth> ) | fit-content( [ <length> | <percentage> ] )",
-			"transform-function": "[ <matrix()> || <translate()> || <translateX()> || <translateY()> || <scale()> || <scaleX()> || <scaleY()> || <rotate()> || <skew()> || <skewX()> || <skewY()> || <matrix3d()> || <translate3d()> || <translateZ()> || <scale3d()> || <scaleZ()> || <rotate3d()> || <rotateX()> || <rotateY()> || <rotateZ()> || <perspective()> ]+",
-			"transform-list": "<transform-function>+",
-			"translate()": "translate( <length-percentage> [, <length-percentage> ]? )",
-			"translate3d()": "translate3d( <length-percentage> , <length-percentage> , <length> )",
-			"translateX()": "translateX( <length-percentage> )",
-			"translateY()": "translateY( <length-percentage> )",
-			"translateZ()": "translateZ( <length> )",
-			"type-or-unit": "string | integer | color | url | integer | number | length | angle | time | frequency | em | ex | px | rem | vw | vh | vmin | vmax | mm | q | cm | in | pt | pc | deg | grad | rad | ms | s | Hz | kHz | %",
-			"var()": "var( <custom-property-name> [, <declaration-value> ]? )",
-			"viewport-length": "auto | <length-percentage>"
+			"absolute-size": {
+				"syntax": "xx-small | x-small | small | medium | large | x-large | xx-large"
+			},
+			"alpha-value": {
+				"syntax": "<number> | <percentage>"
+			},
+			"angle-percentage": {
+				"syntax": "<angle> | <percentage>"
+			},
+			"animateable-feature": {
+				"syntax": "scroll-position | contents | <custom-ident>"
+			},
+			"attachment": {
+				"syntax": "scroll | fixed | local"
+			},
+			"attr()": {
+				"syntax": "attr( <attr-name> <type-or-unit>? [, <attr-fallback> ]? )"
+			},
+			"auto-repeat": {
+				"syntax": "repeat( [ auto-fill | auto-fit ] , [ <line-names>? <fixed-size> ]+ <line-names>? )"
+			},
+			"auto-track-list": {
+				"syntax": "[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>? <auto-repeat>\n[ <line-names>? [ <fixed-size> | <fixed-repeat> ] ]* <line-names>?"
+			},
+			"basic-shape": {
+				"syntax": "<inset()> | <circle()> | <ellipse()> | <polygon()>"
+			},
+			"bg-image": {
+				"syntax": "none | <image>"
+			},
+			"bg-layer": {
+				"syntax": "<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box>{1,2}"
+			},
+			"bg-size": {
+				"syntax": "[ <length-percentage> | auto ]{1,2} | cover | contain"
+			},
+			"blur()": {
+				"syntax": "blur( <length> )"
+			},
+			"blend-mode": {
+				"syntax": "normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity"
+			},
+			"box": {
+				"syntax": "border-box | padding-box | content-box"
+			},
+			"br-style": {
+				"syntax": "none | hidden | dotted | dashed | solid | double | groove | ridge | inset | outset"
+			},
+			"br-width": {
+				"syntax": "<length> | thin | medium | thick"
+			},
+			"brightness()": {
+				"syntax": "brightness( <number-percentage> )"
+			},
+			"calc()": {
+				"syntax": "calc( <calc-sum> )"
+			},
+			"calc-sum": {
+				"syntax": "<calc-product> [ [ '+' | '-' ] <calc-product> ]*"
+			},
+			"calc-product": {
+				"syntax": "<calc-value> [ '*' <calc-value> | '/' <number> ]*"
+			},
+			"calc-value": {
+				"syntax": "<number> | <dimension> | <percentage> | ( <calc-sum> )"
+			},
+			"cf-final-image": {
+				"syntax": "<image> | <color>"
+			},
+			"cf-mixing-image": {
+				"syntax": "<percentage>? && <image>"
+			},
+			"circle()": {
+				"syntax": "circle( [ <shape-radius> ]? [ at <position> ]? )"
+			},
+			"clip-source": {
+				"syntax": "<url>"
+			},
+			"color": {
+				"syntax": "<rgb()> | <rgba()> | <hsl()> | <hsla()> | <hex-color> | <named-color> | currentcolor | <deprecated-system-color>"
+			},
+			"color-stop": {
+				"syntax": "<color> <length-percentage>?"
+			},
+			"color-stop-list": {
+				"syntax": "<color-stop>#{2,}"
+			},
+			"common-lig-values": {
+				"syntax": "[ common-ligatures | no-common-ligatures ]"
+			},
+			"composite-style": {
+				"syntax": "clear | copy | source-over | source-in | source-out | source-atop | destination-over | destination-in | destination-out | destination-atop | xor"
+			},
+			"compositing-operator": {
+				"syntax": "add | subtract | intersect | exclude"
+			},
+			"contextual-alt-values": {
+				"syntax": "[ contextual | no-contextual ]"
+			},
+			"content-list": {
+				"syntax": "[ <string> | contents | <image> | <quote> | <target> | <leader()> ]+"
+			},
+			"content-replacement": {
+				"syntax": "<image>"
+			},
+			"contrast()": {
+				"syntax": "contrast( [ <number-percentage> ] )"
+			},
+			"counter-style": {
+				"syntax": "<counter-style-name> | symbols()"
+			},
+			"counter-style-name": {
+				"syntax": "<custom-ident>"
+			},
+			"cross-fade()": {
+				"syntax": "cross-fade( <cf-mixing-image> , <cf-final-image>? )"
+			},
+			"cubic-bezier-timing-function": {
+				"syntax": "ease | ease-in | ease-out | ease-in-out | cubic-bezier(<number>, <number>, <number>, <number>)"
+			},
+			"deprecated-system-color": {
+				"syntax": "ActiveBorder | ActiveCaption | AppWorkspace | Background | ButtonFace | ButtonHighlight | ButtonShadow | ButtonText | CaptionText | GrayText | Highlight | HighlightText | InactiveBorder | InactiveCaption | InactiveCaptionText | InfoBackground | InfoText | Menu | MenuText | Scrollbar | ThreeDDarkShadow | ThreeDFace | ThreeDHighlight | ThreeDLightShadow | ThreeDShadow | Window | WindowFrame | WindowText"
+			},
+			"discretionary-lig-values": {
+				"syntax": "[ discretionary-ligatures | no-discretionary-ligatures ]"
+			},
+			"display-box": {
+				"syntax": "contents | none"
+			},
+			"display-inside": {
+				"syntax": "flow | flow-root | table | flex | grid | subgrid | ruby"
+			},
+			"display-internal": {
+				"syntax": "table-row-group | table-header-group | table-footer-group | table-row | table-cell | table-column-group | table-column | table-caption | ruby-base | ruby-text | ruby-base-container | ruby-text-container"
+			},
+			"display-legacy": {
+				"syntax": "inline-block | inline-list-item | inline-table | inline-flex | inline-grid"
+			},
+			"display-listitem": {
+				"syntax": "list-item && <display-outside>? && [ flow | flow-root ]?"
+			},
+			"display-outside": {
+				"syntax": "block | inline | run-in"
+			},
+			"drop-shadow()": {
+				"syntax": "drop-shadow( <length>{2,3} <color>? )"
+			},
+			"east-asian-variant-values": {
+				"syntax": "[ jis78 | jis83 | jis90 | jis04 | simplified | traditional ]"
+			},
+			"east-asian-width-values": {
+				"syntax": "[ full-width | proportional-width ]"
+			},
+			"element()": {
+				"syntax": "element( <id-selector> )"
+			},
+			"ellipse()": {
+				"syntax": "ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )"
+			},
+			"ending-shape": {
+				"syntax": "circle | ellipse"
+			},
+			"explicit-track-list": {
+				"syntax": "[ <line-names>? <track-size> ]+ <line-names>?"
+			},
+			"family-name": {
+				"syntax": "<string> | <custom-ident>+"
+			},
+			"feature-tag-value": {
+				"syntax": "<string> [ <integer> | on | off ]?"
+			},
+			"feature-type": {
+				"syntax": "@stylistic | @historical-forms | @styleset | @character-variant | @swash | @ornaments | @annotation"
+			},
+			"feature-value-block": {
+				"syntax": "<feature-type> {\n	<feature-value-declaration-list>\n}"
+			},
+			"feature-value-block-list": {
+				"syntax": "<feature-value-block>+"
+			},
+			"feature-value-declaration": {
+				"syntax": "<custom-ident>: <integer>+;"
+			},
+			"feature-value-declaration-list": {
+				"syntax": "<feature-value-declaration>"
+			},
+			"feature-value-name": {
+				"syntax": "<custom-ident>"
+			},
+			"fill-rule": {
+				"syntax": "nonzero | evenodd"
+			},
+			"filter-function": {
+				"syntax": "<blur()> | <brightness()> | <contrast()> | <drop-shadow()> | <grayscale()> | <hue-rotate()> | <invert()> | <opacity()> | <sepia()> | <saturate()>"
+			},
+			"filter-function-list": {
+				"syntax": "[ <filter-function> | <url> ]+"
+			},
+			"final-bg-layer": {
+				"syntax": "<bg-image> || <position> [ / <bg-size> ]? || <repeat-style> || <attachment> || <box> || <box> || <'background-color'>"
+			},
+			"fit-content()": {
+				"syntax": "fit-content( [ <length> | <percentage> ] )"
+			},
+			"fixed-breadth": {
+				"syntax": "<length-percentage>"
+			},
+			"fixed-repeat": {
+				"syntax": "repeat( [ <positive-integer> ] , [ <line-names>? <fixed-size> ]+ <line-names>? )"
+			},
+			"fixed-size": {
+				"syntax": "<fixed-breadth> | minmax( <fixed-breadth> , <track-breadth> ) | minmax( <inflexible-breadth> , <fixed-breadth> )"
+			},
+			"font-variant-css21": {
+				"syntax": "[ normal | small-caps ]"
+			},
+			"frames-timing-function": {
+				"syntax": "frames(<integer>)"
+			},
+			"frequency-percentage": {
+				"syntax": "<frequency> | <percentage>"
+			},
+			"general-enclosed": {
+				"syntax": "[ <function-token> <any-value> ) ] | ( <ident> <any-value> )"
+			},
+			"generic-family": {
+				"syntax": "serif | sans-serif | cursive | fantasy | monospace"
+			},
+			"generic-name": {
+				"syntax": "serif | sans-serif | cursive | fantasy | monospace"
+			},
+			"geometry-box": {
+				"syntax": "<shape-box> | fill-box | stroke-box | view-box"
+			},
+			"gradient": {
+				"syntax": "<linear-gradient()> | <repeating-linear-gradient()> | <radial-gradient()> | <repeating-radial-gradient()>"
+			},
+			"grayscale()": {
+				"syntax": "grayscale( <number-percentage> )"
+			},
+			"grid-line": {
+				"syntax": "auto | <custom-ident> | [ <integer> && <custom-ident>? ] | [ span && [ <integer> || <custom-ident> ] ]"
+			},
+			"historical-lig-values": {
+				"syntax": "[ historical-ligatures | no-historical-ligatures ]"
+			},
+			"hsl()": {
+				"syntax": "hsl( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue>, <percentage>, <percentage>, <alpha-value>? ] )"
+			},
+			"hsla()": {
+				"syntax": "hsla( [ <hue> <percentage> <percentage> [ / <alpha-value> ]? ] | [ <hue>, <percentage>, <percentage>, <alpha-value>? ] )"
+			},
+			"hue": {
+				"syntax": "<number> | <angle>"
+			},
+			"hue-rotate()": {
+				"syntax": "hue-rotate( <angle> )"
+			},
+			"image": {
+				"syntax": "<url> | <image()> | <image-set()> | <element()> | <cross-fade()> | <gradient>"
+			},
+			"image()": {
+				"syntax": "image( [ [ <image> | <string> ]? , <color>? ]! )"
+			},
+			"image-set()": {
+				"syntax": "image-set( <image-set-option># )"
+			},
+			"image-set-option": {
+				"syntax": "[ <image> | <string> ] <resolution>"
+			},
+			"inflexible-breadth": {
+				"syntax": "<length> | <percentage> | min-content | max-content | auto"
+			},
+			"inset()": {
+				"syntax": "inset( <length-percentage>{1,4} [ round <border-radius> ]? )"
+			},
+			"invert()": {
+				"syntax": "invert( <number-percentage> )"
+			},
+			"keyframes-name": {
+				"syntax": "<custom-ident> | <string>"
+			},
+			"keyframe-block": {
+				"syntax": "<keyframe-selector># {\n	<declaration-list>\n}"
+			},
+			"keyframe-block-list": {
+				"syntax": "<keyframe-block>+"
+			},
+			"keyframe-selector": {
+				"syntax": "from | to | <percentage>"
+			},
+			"leader()": {
+				"syntax": "leader( <leader-type> )"
+			},
+			"leader-type": {
+				"syntax": "dotted | solid | space | <string>"
+			},
+			"length-percentage": {
+				"syntax": "<length> | <percentage>"
+			},
+			"line-names": {
+				"syntax": "'[' <custom-ident>* ']'"
+			},
+			"line-name-list": {
+				"syntax": "[ <line-names> | <name-repeat> ]+"
+			},
+			"linear-gradient()": {
+				"syntax": "linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )"
+			},
+			"mask-layer": {
+				"syntax": "<mask-reference> || <position> [ / <bg-size> ]? || <repeat-style> || <geometry-box> || [ <geometry-box> | no-clip ] || <compositing-operator> || <masking-mode>"
+			},
+			"mask-position": {
+				"syntax": "[ <length-percentage> | left | center | right ] [ <length-percentage> | top | center | bottom ]?"
+			},
+			"mask-reference": {
+				"syntax": "none | <image> | <mask-source>"
+			},
+			"mask-source": {
+				"syntax": "<url>"
+			},
+			"masking-mode": {
+				"syntax": "alpha | luminance | match-source"
+			},
+			"matrix()": {
+				"syntax": "matrix( <number> [, <number> ]{5,5} )"
+			},
+			"matrix3d()": {
+				"syntax": "matrix3d( <number> [, <number> ]{15,15} )"
+			},
+			"media-and": {
+				"syntax": "<media-in-parens> [ and <media-in-parens> ]+"
+			},
+			"media-condition": {
+				"syntax": "<media-not> | <media-and> | <media-or> | <media-in-parens>"
+			},
+			"media-condition-without-or": {
+				"syntax": "<media-not> | <media-and> | <media-in-parens>"
+			},
+			"media-feature": {
+				"syntax": "( [ <mf-plain> | <mf-boolean> | <mf-range> ] )"
+			},
+			"media-in-parens": {
+				"syntax": "( <media-condition> ) | <media-feature> | <general-enclosed>"
+			},
+			"media-not": {
+				"syntax": "not <media-in-parens>"
+			},
+			"media-or": {
+				"syntax": "<media-in-parens> [ or <media-in-parens> ]+"
+			},
+			"media-query": {
+				"syntax": "<media-condition> | [ not | only ]? <media-type> [ and <media-condition-without-or> ]?"
+			},
+			"media-query-list": {
+				"syntax": "<media-query>#"
+			},
+			"media-type": {
+				"syntax": "<ident>"
+			},
+			"mf-boolean": {
+				"syntax": "<mf-name>"
+			},
+			"mf-name": {
+				"syntax": "<ident>"
+			},
+			"mf-plain": {
+				"syntax": "<mf-name> : <mf-value>"
+			},
+			"mf-range": {
+				"syntax": "<mf-name> [ '<' | '>' ]? '='? <mf-value>\n| <mf-value> [ '<' | '>' ]? '='? <mf-name>\n| <mf-value> '<' '='? <mf-name> '<' '='? <mf-value>\n| <mf-value> '>' '='? <mf-name> '>' '='? <mf-value>"
+			},
+			"mf-value": {
+				"syntax": "<number> | <dimension> | <ident> | <ratio>"
+			},
+			"minmax()": {
+				"syntax": "minmax( [ <length> | <percentage> | <flex> | min-content | max-content | auto ] , [ <length> | <percentage> | <flex> | min-content | max-content | auto ] )"
+			},
+			"named-color": {
+				"syntax": "transparent | aliceblue | antiquewhite | aqua | aquamarine | azure | beige | bisque | black | blanchedalmond | blue | blueviolet | brown | burlywood | cadetblue | chartreuse | chocolate | coral | cornflowerblue | cornsilk | crimson | cyan | darkblue | darkcyan | darkgoldenrod | darkgray | darkgreen | darkgrey | darkkhaki | darkmagenta | darkolivegreen | darkorange | darkorchid | darkred | darksalmon | darkseagreen | darkslateblue | darkslategray | darkslategrey | darkturquoise | darkviolet | deeppink | deepskyblue | dimgray | dimgrey | dodgerblue | firebrick | floralwhite | forestgreen | fuchsia | gainsboro | ghostwhite | gold | goldenrod | gray | green | greenyellow | grey | honeydew | hotpink | indianred | indigo | ivory | khaki | lavender | lavenderblush | lawngreen | lemonchiffon | lightblue | lightcoral | lightcyan | lightgoldenrodyellow | lightgray | lightgreen | lightgrey | lightpink | lightsalmon | lightseagreen | lightskyblue | lightslategray | lightslategrey | lightsteelblue | lightyellow | lime | limegreen | linen | magenta | maroon | mediumaquamarine | mediumblue | mediumorchid | mediumpurple | mediumseagreen | mediumslateblue | mediumspringgreen | mediumturquoise | mediumvioletred | midnightblue | mintcream | mistyrose | moccasin | navajowhite | navy | oldlace | olive | olivedrab | orange | orangered | orchid | palegoldenrod | palegreen | paleturquoise | palevioletred | papayawhip | peachpuff | peru | pink | plum | powderblue | purple | rebeccapurple | red | rosybrown | royalblue | saddlebrown | salmon | sandybrown | seagreen | seashell | sienna | silver | skyblue | slateblue | slategray | slategrey | snow | springgreen | steelblue | tan | teal | thistle | tomato | turquoise | violet | wheat | white | whitesmoke | yellow | yellowgreen"
+			},
+			"namespace-prefix": {
+				"syntax": "<ident>"
+			},
+			"number-percentage": {
+				"syntax": "<number> | <percentage>"
+			},
+			"numeric-figure-values": {
+				"syntax": "[ lining-nums | oldstyle-nums ]"
+			},
+			"numeric-fraction-values": {
+				"syntax": "[ diagonal-fractions | stacked-fractions ]"
+			},
+			"numeric-spacing-values": {
+				"syntax": "[ proportional-nums | tabular-nums ]"
+			},
+			"nth": {
+				"syntax": "<an-plus-b> | even | odd"
+			},
+			"opacity()": {
+				"syntax": "opacity( [ <number-percentage> ] )"
+			},
+			"page-body": {
+				"syntax": "<declaration>? [ ; <page-body> ]? | <page-margin-box> <page-body>"
+			},
+			"page-margin-box": {
+				"syntax": "<page-margin-box-type> {\n	<declaration-list>\n}"
+			},
+			"page-margin-box-type": {
+				"syntax": "@top-left-corner | @top-left | @top-center | @top-right | @top-right-corner | @bottom-left-corner | @bottom-left | @bottom-center | @bottom-right | @bottom-right-corner | @left-top | @left-middle | @left-bottom | @right-top | @right-middle | @right-bottom"
+			},
+			"page-selector-list": {
+				"syntax": "[ <page-selector># ]?"
+			},
+			"page-selector": {
+				"syntax": "<pseudo-page>+ | <ident> <pseudo-page>*"
+			},
+			"perspective()": {
+				"syntax": "perspective( <length> )"
+			},
+			"polygon()": {
+				"syntax": "polygon( <fill-rule>? , [ <length-percentage> <length-percentage> ]# )"
+			},
+			"position": {
+				"syntax": "[[ left | center | right | top | bottom | <length-percentage> ] | [ left | center | right | <length-percentage> ] [ top | center | bottom | <length-percentage> ] | [ center | [ left | right ] <length-percentage>? ] && [ center | [ top | bottom ] <length-percentage>? ]]"
+			},
+			"pseudo-page": {
+				"syntax": ": [ left | right | first | blank ]"
+			},
+			"quote": {
+				"syntax": "open-quote | close-quote | no-open-quote | no-close-quote"
+			},
+			"radial-gradient()": {
+				"syntax": "radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )"
+			},
+			"relative-size": {
+				"syntax": "larger | smaller"
+			},
+			"repeat-style": {
+				"syntax": "repeat-x | repeat-y | [ repeat | space | round | no-repeat ]{1,2}"
+			},
+			"repeating-linear-gradient()": {
+				"syntax": "repeating-linear-gradient( [ <angle> | to <side-or-corner> ]? , <color-stop-list> )"
+			},
+			"repeating-radial-gradient()": {
+				"syntax": "repeating-radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )"
+			},
+			"rgb()": {
+				"syntax": "rgb( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )"
+			},
+			"rgba()": {
+				"syntax": "rgba( [ [ <percentage>{3} | <number>{3} ] [ / <alpha-value> ]? ] | [ [ <percentage>#{3} | <number>#{3} ] , <alpha-value>? ] )"
+			},
+			"rotate()": {
+				"syntax": "rotate( <angle> )"
+			},
+			"rotate3d()": {
+				"syntax": "rotate3d( <number> , <number> , <number> , <angle> )"
+			},
+			"rotateX()": {
+				"syntax": "rotateX( <angle> )"
+			},
+			"rotateY()": {
+				"syntax": "rotateY( <angle> )"
+			},
+			"rotateZ()": {
+				"syntax": "rotateZ( <angle> )"
+			},
+			"saturate()": {
+				"syntax": "saturate( <number-percentage> )"
+			},
+			"scale()": {
+				"syntax": "scale( <number> [, <number> ]? )"
+			},
+			"scale3d()": {
+				"syntax": "scale3d( <number> , <number> , <number> )"
+			},
+			"scaleX()": {
+				"syntax": "scaleX( <number> )"
+			},
+			"scaleY()": {
+				"syntax": "scaleY( <number> )"
+			},
+			"scaleZ()": {
+				"syntax": "scaleZ( <number> )"
+			},
+			"shape-radius": {
+				"syntax": "<length-percentage> | closest-side | farthest-side"
+			},
+			"skew()": {
+				"syntax": "skew( <angle> [, <angle> ]? )"
+			},
+			"skewX()": {
+				"syntax": "skewX( <angle> )"
+			},
+			"skewY()": {
+				"syntax": "skewY( <angle> )"
+			},
+			"sepia()": {
+				"syntax": "sepia( <number-percentage> )"
+			},
+			"shadow": {
+				"syntax": "inset? && <length>{2,4} && <color>?"
+			},
+			"shadow-t": {
+				"syntax": "[ <length>{2,3} && <color>? ]"
+			},
+			"shape": {
+				"syntax": "rect(<top>, <right>, <bottom>, <left>)"
+			},
+			"shape-box": {
+				"syntax": "<box> | margin-box"
+			},
+			"side-or-corner": {
+				"syntax": "[ left | right ] || [ top | bottom ]"
+			},
+			"single-animation": {
+				"syntax": "<time> || <single-timing-function> || <time> || <single-animation-iteration-count> || <single-animation-direction> || <single-animation-fill-mode> || <single-animation-play-state> || [ none | <keyframes-name> ]"
+			},
+			"single-animation-direction": {
+				"syntax": "normal | reverse | alternate | alternate-reverse"
+			},
+			"single-animation-fill-mode": {
+				"syntax": "none | forwards | backwards | both"
+			},
+			"single-animation-iteration-count": {
+				"syntax": "infinite | <number>"
+			},
+			"single-animation-play-state": {
+				"syntax": "running | paused"
+			},
+			"single-timing-function": {
+				"syntax": "linear | <cubic-bezier-timing-function> | <step-timing-function> | <frames-timing-function>"
+			},
+			"single-transition": {
+				"syntax": "[ none | <single-transition-property> ] || <time> || <single-transition-timing-function> || <time>"
+			},
+			"single-transition-timing-function": {
+				"syntax": "<single-timing-function>"
+			},
+			"single-transition-property": {
+				"syntax": "all | <custom-ident>"
+			},
+			"size": {
+				"syntax": "closest-side | farthest-side | closest-corner | farthest-corner | <length> | <length-percentage>{2}"
+			},
+			"step-timing-function": {
+				"syntax": "step-start | step-end | steps(<integer>[, [ start | end ] ]?)"
+			},
+			"symbol": {
+				"syntax": "<string> | <image> | <ident>"
+			},
+			"target": {
+				"syntax": "<target-counter()> | <target-counters()> | <target-text()>"
+			},
+			"target-counter()": {
+				"syntax": "target-counter( [ <string> | <url> ] , <custom-ident> , <counter-style>? )"
+			},
+			"target-counters()": {
+				"syntax": "target-counters( [ <string> | <url> ] , <custom-ident> , <string> , <counter-style>? )"
+			},
+			"target-text()": {
+				"syntax": "target-text( [ <string> | <url> ] , [ content | before | after | first-letter ]? )"
+			},
+			"time-percentage": {
+				"syntax": "<time> | <percentage>"
+			},
+			"track-breadth": {
+				"syntax": "<length-percentage> | <flex> | min-content | max-content | auto"
+			},
+			"track-list": {
+				"syntax": "[ <line-names>? [ <track-size> | <track-repeat> ] ]+ <line-names>?"
+			},
+			"track-repeat": {
+				"syntax": "repeat( [ <positive-integer> ] , [ <line-names>? <track-size> ]+ <line-names>? )"
+			},
+			"track-size": {
+				"syntax": "<track-breadth> | minmax( <inflexible-breadth> , <track-breadth> ) | fit-content( [ <length> | <percentage> ] )"
+			},
+			"transform-function": {
+				"syntax": "[ <matrix()> || <translate()> || <translateX()> || <translateY()> || <scale()> || <scaleX()> || <scaleY()> || <rotate()> || <skew()> || <skewX()> || <skewY()> || <matrix3d()> || <translate3d()> || <translateZ()> || <scale3d()> || <scaleZ()> || <rotate3d()> || <rotateX()> || <rotateY()> || <rotateZ()> || <perspective()> ]+"
+			},
+			"transform-list": {
+				"syntax": "<transform-function>+"
+			},
+			"translate()": {
+				"syntax": "translate( <length-percentage> [, <length-percentage> ]? )"
+			},
+			"translate3d()": {
+				"syntax": "translate3d( <length-percentage> , <length-percentage> , <length> )"
+			},
+			"translateX()": {
+				"syntax": "translateX( <length-percentage> )"
+			},
+			"translateY()": {
+				"syntax": "translateY( <length-percentage> )"
+			},
+			"translateZ()": {
+				"syntax": "translateZ( <length> )"
+			},
+			"type-or-unit": {
+				"syntax": "string | integer | color | url | integer | number | length | angle | time | frequency | em | ex | px | rem | vw | vh | vmin | vmax | mm | q | cm | in | pt | pc | deg | grad | rad | ms | s | Hz | kHz | %"
+			},
+			"var()": {
+				"syntax": "var( <custom-property-name> [, <declaration-value> ]? )"
+			},
+			"viewport-length": {
+				"syntax": "auto | <length-percentage>"
+			}
 		}
-		;
 
 		return exports;
 	};
@@ -9985,7 +10556,10 @@ var CSSO = (function(){
 	modules['/css-tree/data/patch'] = function () {
 		var exports = {
 			"properties": {
-				"--*": null,
+				"--*": {
+					"comment": "syntax is incorrect and can't be parsed, drop for now",
+					"syntax": null
+				},
 				"-moz-background-clip": {
 					"comment": "deprecated syntax in old Firefox, https://developer.mozilla.org/en/docs/Web/CSS/background-clip",
 					"syntax": "padding | border"
@@ -10100,10 +10674,6 @@ var CSSO = (function(){
 				"-webkit-line-clamp": {
 					"comment": "non-standard and deprecated but may still using by some sites",
 					"syntax": "<positive-integer>"
-				},
-				"-webkit-mask": {
-					"comment": "changing for property references due webkit version of properties can differ from current mask spec; needs for revision",
-					"syntax": "<mask-image> [ <'-webkit-mask-repeat'> || <'-webkit-mask-attachment'> || <'-webkit-mask-position'> || <'-webkit-mask-origin'> || <'-webkit-mask-clip'> ]*"
 				},
 				"-webkit-mask-box-image": {
 					"comment": "missed; https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-mask-box-image",
@@ -10293,13 +10863,6 @@ var CSSO = (function(){
 				"min-width": {
 					"comment": "extend by non-standart width keywords https://developer.mozilla.org/en-US/docs/Web/CSS/width",
 					"syntax": "<length> | <percentage> | auto | max-content | min-content | fit-content | fill-available | <-non-standart-width>"
-				},
-				"offset-position": {
-					"comment": "missed",
-					"references": [
-						"https://drafts.fxtf.org/motion-1/#offset-position-property"
-					],
-					"syntax": "auto | <position>"
 				},
 				"opacity": {
 					"comment": "strict to 0..1 <number> -> <number-zero-one>",
@@ -10583,10 +11146,6 @@ var CSSO = (function(){
 					"comment": "missed; not sure we should add it, but no others except `shape` is using it so it's ok for now; https://drafts.fxtf.org/css-masking-1/#funcdef-clip-rect",
 					"syntax": "<length> | auto"
 				},
-				"color-stop-list": {
-					"comment": "missed #",
-					"syntax": "<color-stop>#{2,}"
-				},
 				"content-list": {
 					"comment": "missed -> https://drafts.csswg.org/css-content/#typedef-content-list (document-url, <target> and leader() is omitted util stabilization)",
 					"syntax": "[ <string> | contents | <url> | <quote> | <attr()> | counter( <ident>, <'list-style-type'>? ) ]+"
@@ -10746,10 +11305,6 @@ var CSSO = (function(){
 					"comment": "syntax is incorrect and can't be parsed, drop for now",
 					"syntax": null
 				},
-				"minmax()": {
-					"comment": "syntax is incorrect and can't be parsed, drop for now",
-					"syntax": null
-				},
 				"media-and": {
 					"comment": "syntax is incorrect and can't be parsed, drop for now",
 					"syntax": null
@@ -10824,45 +11379,54 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/generator
 	modules['/css-tree/generator'] = function () {
+		var createGenerator = require('/css-tree/generator/create');
+		var config = require('/css-tree/syntax/config/parser');
+
+		var exports = createGenerator(config);
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/generator/create
+	modules['/css-tree/generator/create'] = function () {
 		'use strict';
 
+		/*BT-
+		var sourceMapGenerator = require('/css-tree/generator/sourceMap');
+		*/
 		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		var noop = function() {};
 
-		function each(list) {
+		function each(processChunk, node) {
+			var list = node.children;
 			var cursor = list.head;
-			var result = [];
 
 			while (cursor !== null) {
-				result.push(this.generate(cursor.data, cursor, list));
+				this.generate(processChunk, cursor.data, cursor, list);
 				cursor = cursor.next;
 			}
-
-			return result;
 		}
 
-		function eachComma(list) {
+		function eachComma(processChunk, node) {
+			var list = node.children;
 			var cursor = list.head;
-			var result = [];
 
 			while (cursor !== null) {
 				if (cursor.prev) {
-					result.push(',', this.generate(cursor.data));
-				} else {
-					result.push(this.generate(cursor.data));
+					processChunk(',');
 				}
 
+				this.generate(processChunk, cursor.data, cursor, list);
 				cursor = cursor.next;
 			}
-
-			return result;
 		}
 
 		function createGenerator(types) {
 			var context = {
-				generate: function(node, item, list) {
+				generate: function(processChunk, node, item, list) {
 					if (hasOwnProperty.call(types, node.type)) {
-						var ret = types[node.type].call(this, node, item, list);
-						return typeof ret === 'string' ? ret : ret.join('');
+						types[node.type].call(this, processChunk, node, item, list);
 					} else {
 						throw new Error('Unknown node type: ' + node.type);
 					}
@@ -10871,19 +11435,31 @@ var CSSO = (function(){
 				eachComma: eachComma
 			};
 
-			return function(node) {
-				return context.generate(node);
+			return function(node, fn) {
+				if (typeof fn !== 'function') {
+					// default generator concats all chunks in a single string
+					var buffer = [];
+					context.generate(function(chunk) {
+						buffer.push(chunk);
+					}, node);
+					return buffer.join('');
+				}
+				context.generate(fn, node);
 			};
 		}
 
 		function createMarkupGenerator(types) {
 			var context = {
-				generate: function(node, item, list) {
+				generate: function(processChunk, node, item, list) {
 					if (hasOwnProperty.call(types, node.type)) {
-						return {
+						var nodeBuffer = [];
+						types[node.type].call(this, function(chunk) {
+							nodeBuffer.push(chunk);
+						}, node, item, list);
+						processChunk({
 							node: node,
-							value: types[node.type].call(this, node, item, list)
-						};
+							value: nodeBuffer
+						});
 					} else {
 						throw new Error('Unknown node type: ' + node.type);
 					}
@@ -10892,11 +11468,11 @@ var CSSO = (function(){
 				eachComma: eachComma
 			};
 
-			return function(node, before, after) {
+			return function(node, enter, leave) {
 				function walk(node, buffer) {
 					var value = node.value;
 
-					before(node.node, buffer, value);
+					enter(node.node, buffer, value);
 
 					if (typeof value === 'string') {
 						buffer += value;
@@ -10910,28 +11486,60 @@ var CSSO = (function(){
 						}
 					}
 
-					after(node.node, buffer, value);
+					leave(node.node, buffer, value);
 
 					return buffer;
 				}
 
-				if (typeof before !== 'function') {
-					before = function() {};
+				if (typeof enter !== 'function') {
+					enter = noop;
 				}
-				if (typeof after !== 'function') {
-					after = function() {};
+				if (typeof leave !== 'function') {
+					leave = noop;
 				}
 
-				return walk(context.generate(node), '');
+				var buffer = [];
+				context.generate(function() {
+					buffer.push.apply(buffer, arguments);
+				}, node);
+				return walk(buffer[0], '');
 			};
 		}
 
-		var exports = {
-			createGenerator: createGenerator,
-			createMarkupGenerator: createMarkupGenerator/*BT-,
-			sourceMap: require('/css-tree/generator/sourceMap')
-			*/
+		function getTypesFromConfig(config) {
+			var types = {};
+
+			if (config.node) {
+				for (var name in config.node) {
+					var nodeType = config.node[name];
+
+					types[name] = nodeType.generate;
+				}
+			}
+
+			return types;
+		}
+
+		var exports = function(config) {
+			var types = getTypesFromConfig(config);
+			var markupGenerator = createMarkupGenerator(types);
+
+			return {
+				translate: createGenerator(types),
+				/*BT-
+				translateWithSourceMap: function(node) {
+					return sourceMapGenerator(markupGenerator, node);
+				},
+				*/
+				translateMarkup: markupGenerator
+			};
 		};
+
+		exports.createGenerator = createGenerator;
+		exports.createMarkupGenerator = createMarkupGenerator;
+		/*BT-
+		exports.sourceMap = require('/css-tree/generator/sourceMap');
+		*/
 
 		return exports;
 	};
@@ -10953,6 +11561,7 @@ var CSSO = (function(){
 	//#region URL: /css-tree/lexer/grammar
 	modules['/css-tree/lexer/grammar'] = function () {
 		var exports = {
+			SyntaxParseError: require('/css-tree/lexer/grammar/error').SyntaxParseError,
 			parse: require('/css-tree/lexer/grammar/parse'),
 			translate: require('/css-tree/lexer/grammar/translate'),
 			walk: require('/css-tree/lexer/grammar/walk')
@@ -10967,9 +11576,12 @@ var CSSO = (function(){
 		'use strict';
 
 		var SyntaxParseError = function(message, syntaxStr, offset) {
-			var error = new SyntaxError();
+			// some VMs prevent setting line/column otherwise (iOS Safari 10 even throw an exception)
+			var error = Object.create(SyntaxError.prototype);
+
 			error.name = 'SyntaxParseError';
 			error.rawMessage = message;
+			error.stack = (new Error().stack || '').replace(/^.+\n/, error.name + ': ' + message + '\n');
 			error.syntax = syntaxStr;
 			error.offset = offset;
 			error.message = error.rawMessage + '\n' +
@@ -11067,7 +11679,6 @@ var CSSO = (function(){
 			nextCharCode: function() {
 				return this.pos + 1 < this.str.length ? this.str.charCodeAt(this.pos + 1) : 0;
 			},
-
 			substringToPos: function(end) {
 				return this.str.substring(this.pos, this.pos = end);
 			},
@@ -11193,6 +11804,23 @@ var CSSO = (function(){
 			return MULTIPLIER_DEFAULT;
 		}
 
+		function maybeMultiplied(tokenizer, node) {
+			var multiplier = readMultiplier(tokenizer);
+
+			if (multiplier !== MULTIPLIER_DEFAULT) {
+				return {
+					type: 'Group',
+					terms: [node],
+					combinator: '|',  // `|` combinator is simplest in implementation (and therefore faster)
+					disallowEmpty: false,
+					multiplier: multiplier,
+					explicit: false
+				};
+			}
+
+			return node;
+		}
+
 		function readProperty(tokenizer) {
 			var name;
 
@@ -11204,11 +11832,10 @@ var CSSO = (function(){
 			tokenizer.eat(APOSTROPHE);
 			tokenizer.eat(GREATERTHANSIGN);
 
-			return {
+			return maybeMultiplied(tokenizer, {
 				type: 'Property',
-				name: name,
-				multiplier: readMultiplier(tokenizer)
-			};
+				name: name
+			});
 		}
 
 		function readType(tokenizer) {
@@ -11225,45 +11852,45 @@ var CSSO = (function(){
 
 			tokenizer.eat(GREATERTHANSIGN);
 
-			return {
+			return maybeMultiplied(tokenizer, {
 				type: 'Type',
-				name: name,
-				multiplier: readMultiplier(tokenizer)
-			};
+				name: name
+			});
 		}
 
 		function readKeywordOrFunction(tokenizer) {
-			var sequence = null;
+			var children = null;
 			var name;
 
 			name = scanWord(tokenizer);
 
 			if (tokenizer.charCode() === LEFTPARENTHESIS) {
 				tokenizer.pos++;
-				sequence = readSequence(tokenizer);
+				children = readImplicitGroup(tokenizer);
 				tokenizer.eat(RIGHTPARENTHESIS);
 
-				return {
+				return maybeMultiplied(tokenizer, {
 					type: 'Function',
 					name: name,
-					sequence: sequence,
-					multiplier: readMultiplier(tokenizer)
-				};
+					children: children
+				});
 			}
 
-			return {
+			return maybeMultiplied(tokenizer, {
 				type: 'Keyword',
-				name: name,
-				multiplier: readMultiplier(tokenizer)
-			};
+				name: name
+			});
 		}
 
 		function regroupTerms(terms, combinators) {
 			function createGroup(terms, combinator) {
 				return {
-					type: 'Sequence',
+					type: 'Group',
 					terms: terms,
-					combinator: combinator
+					combinator: combinator,
+					disallowEmpty: false,
+					multiplier: MULTIPLIER_DEFAULT,
+					explicit: false
 				};
 			}
 
@@ -11308,7 +11935,7 @@ var CSSO = (function(){
 			return combinator;
 		}
 
-		function readSequence(tokenizer) {
+		function readImplicitGroup(tokenizer) {
 			var terms = [];
 			var combinators = {};
 			var token;
@@ -11344,35 +11971,31 @@ var CSSO = (function(){
 			}
 
 			return {
-				type: 'Sequence',
+				type: 'Group',
 				terms: terms,
-				combinator: regroupTerms(terms, combinators) || ' '
+				combinator: regroupTerms(terms, combinators) || ' ',
+				disallowEmpty: false,
+				multiplier: MULTIPLIER_DEFAULT,
+				explicit: false
 			};
 		}
 
 		function readGroup(tokenizer) {
-			var sequence;
-			var nonEmpty = false;
-			var multiplier;
+			var result;
 
 			tokenizer.eat(LEFTSQUAREBRACKET);
-			sequence = readSequence(tokenizer);
-
+			result = readImplicitGroup(tokenizer);
 			tokenizer.eat(RIGHTSQUAREBRACKET);
-			multiplier = readMultiplier(tokenizer);
+
+			result.explicit = true;
+			result.multiplier = readMultiplier(tokenizer);
 
 			if (tokenizer.charCode() === EXCLAMATIONMARK) {
 				tokenizer.pos++;
-				nonEmpty = true;
+				result.disallowEmpty = true;
 			}
 
-			return {
-				type: 'Group',
-				terms: sequence.terms,
-				combinator: sequence.combinator,
-				nonEmpty: nonEmpty,
-				multiplier: multiplier
-			};
+			return result;
 		}
 
 		function peek(tokenizer) {
@@ -11430,12 +12053,12 @@ var CSSO = (function(){
 
 				case LEFTPARENTHESIS:
 					tokenizer.pos++;
-					var sequence = readSequence(tokenizer);
+					var children = readImplicitGroup(tokenizer);
 					tokenizer.eat(RIGHTPARENTHESIS);
 
 					return {
 						type: 'Parentheses',
-						sequence: sequence
+						children: children
 					};
 
 				case APOSTROPHE:
@@ -11462,16 +12085,16 @@ var CSSO = (function(){
 
 		function parse(str) {
 			var tokenizer = new Tokenizer(str);
-			var result = readSequence(tokenizer);
+			var result = readImplicitGroup(tokenizer);
 
 			if (tokenizer.pos !== str.length) {
 				error(tokenizer, tokenizer.pos);
 			}
 
-			// reduce redundant sequences with single term
-			// if (result.terms.length === 1) {
-			//	 result = result.terms[0];
-			// }
+			// reduce redundant groups with single group term
+			if (result.terms.length === 1 && result.terms[0].type === 'Group') {
+				result = result.terms[0];
+			}
 
 			return result;
 		}
@@ -11488,110 +12111,113 @@ var CSSO = (function(){
 	modules['/css-tree/lexer/grammar/translate'] = function () {
 		'use strict';
 
-		function isTokenType(token/*, type, type*/) {
-			if (token) {
-				for (var i = 1; i < arguments.length; i++) {
-					if (token.type === arguments[i]) {
-						return true;
-					}
-				}
-			}
-
-			return false;
+		function isNodeType(node, type) {
+			return node && node.type === type;
 		}
 
-		function serializeMultiplier(token) {
-			if (token.min === 0 && token.max === 1) {
-				return '?';
-			}
-
-			if (token.min === 1 && token.max === 1) {
-				return '';
-			}
-
-			if (token.min === 0 && token.max === 0) {
+		function serializeMultiplier(multiplier) {
+			if (multiplier.min === 0 && multiplier.max === 0) {
 				return '*';
 			}
 
-			if (token.min === 1 && token.max === 0) {
-				return token.comma ? '#' : '+';
+			if (multiplier.min === 0 && multiplier.max === 1) {
+				return '?';
+			}
+
+			if (multiplier.min === 1 && multiplier.max === 0) {
+				return multiplier.comma ? '#' : '+';
+			}
+
+			if (multiplier.min === 1 && multiplier.max === 1) {
+				return '';
 			}
 
 			return (
-				(token.comma ? '#' : '') +
-				'{' + token.min + (token.min !== token.max ? ',' + (token.max !== 0 ? token.max : '') : '') + '}'
+				(multiplier.comma ? '#' : '') +
+				'{' + multiplier.min + (multiplier.min !== multiplier.max ? ',' + (multiplier.max !== 0 ? multiplier.max : '') : '') + '}'
 			);
 		}
 
-		function translateSequence(token, implicitBraces) {
+		function translateSequence(node, forceBraces, decorate) {
 			var result = '';
 
-			if (token.type === 'Group' || implicitBraces) {
-				result += '[' + (!isTokenType(token.terms[0], 'Comma') ? ' ' : '');
+			if (node.explicit || forceBraces) {
+				result += '[' + (!isNodeType(node.terms[0], 'Comma') ? ' ' : '');
 			}
 
-			result += token.terms.map(function(term) {
-				return translate(term, implicitBraces);
-			}).join(token.combinator === ' ' ? ' ' : ' ' + token.combinator + ' ');
+			result += node.terms.map(function(term) {
+				return translate(term, forceBraces, decorate);
+			}).join(node.combinator === ' ' ? ' ' : ' ' + node.combinator + ' ');
 
-			if (token.type === 'Group' || implicitBraces) {
+			if (node.explicit || forceBraces) {
 				result += ' ]';
 			}
 
 			return result;
 		}
 
-		function translateParentheses(sequence, implicitBraces) {
-			if (!sequence.terms.length) {
+		function translateParentheses(group, forceBraces, decorate) {
+			if (!group.terms.length) {
 				return '()';
 			}
 
-			return '( ' + translateSequence(sequence, implicitBraces) + ' )';
+			return '( ' + translateSequence(group, forceBraces, decorate) + ' )';
 		}
 
-		function translate(token, implicitBraces) {
-			if (Array.isArray(token)) {
-				return token.map(function(item) {
-					return translate(item, implicitBraces);
+		function translate(node, forceBraces, decorate) {
+			if (Array.isArray(node)) {
+				return node.map(function(item) {
+					return translate(item, forceBraces, decorate);
 				}).join('');
 			}
 
-			switch (token.type) {
-				case 'Sequence':
-					return translateSequence(token, implicitBraces);
+			var result;
 
+			switch (node.type) {
 				case 'Group':
-					return (
-						translateSequence(token, implicitBraces) +
-						(token.nonEmpty ? '!' : '') +
-						serializeMultiplier(token.multiplier)
-					);
+					result =
+						translateSequence(node, forceBraces, decorate) +
+						(node.disallowEmpty ? '!' : '') +
+						serializeMultiplier(node.multiplier);
+					break;
 
 				case 'Keyword':
-					return token.name + serializeMultiplier(token.multiplier);
+					result = node.name;
+					break;
 
 				case 'Function':
-					return token.name + translateParentheses(token.sequence, implicitBraces) + serializeMultiplier(token.multiplier);
+					result = node.name + translateParentheses(node.children, forceBraces, decorate);
+					break;
 
-				case 'Parentheses': // replace for seq('(' seq(...token.sequence) ')')
-					return translateParentheses(token.sequence, implicitBraces);
+				case 'Parentheses': // replace for seq('(' seq(...node.children) ')')
+					result = translateParentheses(node.children, forceBraces, decorate);
+					break;
 
 				case 'Type':
-					return '<' + token.name + '>' + serializeMultiplier(token.multiplier);
+					result = '<' + node.name + '>';
+					break;
 
 				case 'Property':
-					return '<\'' + token.name + '\'>' + serializeMultiplier(token.multiplier);
+					result = '<\'' + node.name + '\'>';
+					break;
 
 				case 'Combinator': // remove?
-				case 'Slash':	  // replace for String? '/'
-				case 'Percent':	// replace for String? '%'
+				case 'Slash':      // replace for String? '/'
+				case 'Percent':    // replace for String? '%'
 				case 'String':
 				case 'Comma':
-					return token.value;
+					result = node.value;
+					break;
 
 				default:
-					throw new Error('Unknown type: ' + token.type);
+					throw new Error('Unknown node type: ' + node.type);
 			}
+
+			if (typeof decorate === 'function') {
+				result = decorate(result, node);
+			}
+
+			return result;
 		}
 
 		return translate;
@@ -11604,7 +12230,6 @@ var CSSO = (function(){
 
 		var exports = function walk(node, fn, context) {
 			switch (node.type) {
-				case 'Sequence':
 				case 'Group':
 					node.terms.forEach(function(term) {
 						walk(term, fn, context);
@@ -11613,7 +12238,7 @@ var CSSO = (function(){
 
 				case 'Function':
 				case 'Parentheses':
-					walk(node.sequence, fn, context);
+					walk(node.children, fn, context);
 					break;
 
 				case 'Keyword':
@@ -11653,9 +12278,22 @@ var CSSO = (function(){
 				: null;
 		}
 
+		var SyntaxReferenceError = function(type, referenceName) {
+			// some VMs prevent setting line/column otherwise (iOS Safari 10 even throw an exception)
+			var error = Object.create(SyntaxError.prototype);
+
+			error.name = 'SyntaxReferenceError';
+			error.reference = referenceName;
+			error.message = type + ' `' + referenceName + '`';
+			error.stack = (new Error().stack || '').replace(/^.+\n/, error.name + ': ' + error.message + '\n');
+
+			return error;
+		};
+
 		var MatchError = function(message, lexer, syntax, value, badNode) {
+			// some VMs prevent setting line/column otherwise (iOS Safari 10 even throw an exception)
+			var error = Object.create(SyntaxError.prototype);
 			var errorOffset = -1;
-			var error = new SyntaxError(message);
 			var start = getLocation(badNode, 'start');
 			var end = getLocation(badNode, 'end');
 			var css = lexer.syntax.translateMarkup(value, function(node, buffer) {
@@ -11670,6 +12308,7 @@ var CSSO = (function(){
 
 			error.name = 'SyntaxMatchError';
 			error.rawMessage = message;
+			error.stack = (new Error().stack || '').replace(/^.+\n/, error.name + ': ' + message + '\n');
 			error.syntax = syntax ? translateGrammar(syntax) : '<generic>';
 			error.css = css;
 			error.mismatchOffset = errorOffset;
@@ -11690,6 +12329,7 @@ var CSSO = (function(){
 		};
 
 		var exports = {
+			SyntaxReferenceError: SyntaxReferenceError,
 			MatchError: MatchError
 		};
 
@@ -11745,12 +12385,12 @@ var CSSO = (function(){
 			'khz': true
 		};
 
-		// https://www.w3.org/TR/css-values-3/#resolution
-		// https://www.w3.org/TR/css3-images/#resolution-type
+		// https://www.w3.org/TR/css-values-3/#resolution (https://drafts.csswg.org/css-values/#resolution)
 		var RESOLUTION = {
 			'dpi': true,
 			'dpcm': true,
-			'dppx': true
+			'dppx': true,
+			'x': true      // https://github.com/w3c/csswg-drafts/issues/461
 		};
 
 		// https://drafts.csswg.org/css-grid/#fr-unit
@@ -11867,6 +12507,7 @@ var CSSO = (function(){
 		}
 
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/custom-ident
+		// https://drafts.csswg.org/css-values-4/#identifier-value
 		function customIdent(node) {
 			if (node.data.type !== 'Identifier') {
 				return false;
@@ -11874,8 +12515,14 @@ var CSSO = (function(){
 
 			var name = node.data.name.toLowerCase();
 
-			// can't be a global CSS value
+			// ยง 3.2. Author-defined Identifiers: the <custom-ident> type
+			// The CSS-wide keywords are not valid <custom-ident>s
 			if (name === 'unset' || name === 'initial' || name === 'inherit') {
+				return false;
+			}
+
+			// The default keyword is reserved and is also not a valid <custom-ident>
+			if (name === 'default') {
 				return false;
 			}
 
@@ -11922,6 +12569,7 @@ var CSSO = (function(){
 	modules['/css-tree/lexer/Lexer'] = function () {
 		'use strict';
 
+		var SyntaxReferenceError = require('/css-tree/lexer/error').SyntaxReferenceError;
 		var MatchError = require('/css-tree/lexer/error').MatchError;
 		var names = require('/css-tree/utils/names');
 		var generic = require('/css-tree/lexer/generic');
@@ -11929,6 +12577,9 @@ var CSSO = (function(){
 		var translate = require('/css-tree/lexer/grammar/translate');
 		var walk = require('/css-tree/lexer/grammar/walk');
 		var match = require('/css-tree/lexer/match');
+		var trace = require('/css-tree/lexer/trace');
+		var search = require('/css-tree/lexer/search');
+		var getStructureFromConfig = require('/css-tree/lexer/structure').getStructureFromConfig;
 		var cssWideKeywords = parse('inherit | initial | unset');
 		var cssWideKeywordsWithExpression = parse('inherit | initial | unset | <expression>');
 
@@ -11980,40 +12631,58 @@ var CSSO = (function(){
 			return true;
 		}
 
+		function buildMatchResult(match, error) {
+			return {
+				matched: match,
+				error: error,
+				getTrace: trace.getTrace,
+				isType: trace.isType,
+				isProperty: trace.isProperty,
+				isKeyword: trace.isKeyword
+			};
+		}
+
 		function matchSyntax(lexer, syntax, value) {
 			var result;
 
 			if (!value || value.type !== 'Value') {
-				return {
-					type: 'NoMatch',
-					comment: 'Not a Value node'
-				};
+				return buildMatchResult(null, new Error('Not a Value node'));
 			}
 
 			if (valueHasVar.call(lexer, value)) {
-				return {
-					type: 'NoMatch',
-					comment: 'Due to matching for value with var() is very complex those values are always valid for now'
-				};
+				return buildMatchResult(null, new Error('Matching for a value with var() is not supported'));
 			}
 
 			result = match(lexer, lexer.valueCommonSyntax, value.children.head);
 
 			if (!result.match) {
 				result = syntax.match(value.children.head);
-				if (!result || !result.match) {
-					lexer.lastMatchError = new MatchError('Mismatch', lexer, syntax.syntax, value, result.badNode || unwrapNode(result.next));
-					return null;
+				if (!result.match) {
+					return buildMatchResult(null, new MatchError('Mismatch', lexer, syntax.syntax, value, result.badNode || unwrapNode(result.next)));
 				}
 			}
 
-			if (result.next && !isNextMayToBeIgnored(result.next)) {
-				lexer.lastMatchError = new MatchError('Uncomplete match', lexer, syntax.syntax, value, result.badNode || unwrapNode(result.next));
-				return null;
+			// enhance top-level match wrapper
+			if (result.match.type === 'ASTNode') {
+				result.match = {
+					syntax: {
+						type: syntax.type,
+						name: syntax.name
+					},
+					match: [result.match]
+				};
+			} else if (result.match.syntax.type === 'Group') {
+				result.match.syntax = {
+					type: syntax.type,
+					name: syntax.name
+				};
 			}
 
-			lexer.lastMatchError = null;
-			return result.match;
+			if (result.next && !isNextMayToBeIgnored(result.next)) {
+				return buildMatchResult(null, new MatchError('Uncomplete match', lexer, syntax.syntax, value, result.badNode || unwrapNode(result.next)));
+			}
+
+			return buildMatchResult(result.match, null);
 		}
 
 		var Lexer = function(config, syntax, structure) {
@@ -12022,7 +12691,7 @@ var CSSO = (function(){
 			this.generic = false;
 			this.properties = {};
 			this.types = {};
-			this.structure = structure;
+			this.structure = structure || getStructureFromConfig(config);
 
 			if (config) {
 				if (config.generic) {
@@ -12063,28 +12732,29 @@ var CSSO = (function(){
 				return warns.length ? warns : false;
 			},
 
-			createDescriptor: function(syntax) {
+			createDescriptor: function(syntax, type, name) {
 				var self = this;
 				var descriptor = {
+					type: type,
+					name: name,
 					syntax: null,
 					match: null
 				};
 
 				if (typeof syntax === 'function') {
-					descriptor.match = function(node) {
-						if (node && syntax(node)) {
-							return {
-								badNode: null,
-								lastNode: null,
-								next: node.next,
-								match: [node.data]
-							};
-						}
+					// convert syntax to pseudo syntax node
+					// NOTE: that's not a part of match result tree
+					syntax = {
+						type: 'ASTNode',
+						match: syntax
+					};
 
-						return null;
+					descriptor.match = function(item) {
+						return match(self, syntax, item);
 					};
 				} else {
 					if (typeof syntax === 'string') {
+						// lazy parsing on first access
 						Object.defineProperty(descriptor, 'syntax', {
 							get: function() {
 								Object.defineProperty(descriptor, 'syntax', {
@@ -12098,34 +12768,37 @@ var CSSO = (function(){
 						descriptor.syntax = syntax;
 					}
 
-					descriptor.match = function(ast) {
-						return match(self, descriptor.syntax, ast);
+					descriptor.match = function(item) {
+						return match(self, descriptor.syntax, item);
 					};
 				}
 
 				return descriptor;
 			},
 			addProperty_: function(name, syntax) {
-				this.properties[name] = this.createDescriptor(syntax);
+				this.properties[name] = this.createDescriptor(syntax, 'Property', name);
 			},
 			addType_: function(name, syntax) {
-				this.types[name] = this.createDescriptor(syntax);
+				this.types[name] = this.createDescriptor(syntax, 'Type', name);
 
 				if (syntax === generic.expression) {
 					this.valueCommonSyntax = cssWideKeywordsWithExpression;
 				}
 			},
 
-			lastMatchError: null,
+			matchDeclaration: function(node) {
+				if (node.type !== 'Declaration') {
+					return buildMatchResult(null, new Error('Not a Declaration node'));
+				}
+
+				return this.matchProperty(node.property, node.value);
+			},
 			matchProperty: function(propertyName, value) {
 				var property = names.property(propertyName);
 
 				// don't match syntax for a custom property
-				if (property.variable) {
-					return {
-						type: 'NoMatch',
-						comment: 'Lexer matching doesn\'t applicable for custom properties'
-					};
+				if (property.custom) {
+					return buildMatchResult(null, new Error('Lexer matching doesn\'t applicable for custom properties'));
 				}
 
 				var propertySyntax = property.vendor
@@ -12133,8 +12806,7 @@ var CSSO = (function(){
 					: this.getProperty(property.name);
 
 				if (!propertySyntax) {
-					this.lastMatchError = new Error('Unknown property: ' + propertyName);
-					return null;
+					return buildMatchResult(null, new SyntaxReferenceError('Unknown property', propertyName));
 				}
 
 				return matchSyntax(this, propertySyntax, value);
@@ -12143,11 +12815,26 @@ var CSSO = (function(){
 				var typeSyntax = this.getType(typeName);
 
 				if (!typeSyntax) {
-					this.lastMatchError = new Error('Unknown type: ' + typeName);
-					return null;
+					return buildMatchResult(null, new SyntaxReferenceError('Unknown type', typeName));
 				}
 
 				return matchSyntax(this, typeSyntax, value);
+			},
+
+			findValueFragments: function(propertyName, value, type, name) {
+				return search.matchFragments(this, value, this.matchProperty(propertyName, value), type, name);
+			},
+			findDeclarationValueFragments: function(declaration, type, name) {
+				return search.matchFragments(this, declaration.value, this.matchDeclaration(declaration), type, name);
+			},
+			findAllFragments: function(ast, type, name) {
+				var result = [];
+
+				this.syntax.walkDeclarations(ast, function(declaration) {
+					result.push.apply(result, this.findDeclarationValueFragments(declaration, type, name));
+				}.bind(this));
+
+				return result;
 			},
 
 			getProperty: function(name) {
@@ -12231,8 +12918,7 @@ var CSSO = (function(){
 		var MULTIPLIER_DEFAULT = {
 			comma: false,
 			min: 1,
-			max: 1,
-			value: ''
+			max: 1
 		};
 
 		function skipSpaces(node) {
@@ -12243,377 +12929,27 @@ var CSSO = (function(){
 			return node;
 		}
 
-		var exports = function match(syntax, syntaxNode, node) {
-			var result = [];
-			var multiplier = syntaxNode.multiplier || MULTIPLIER_DEFAULT;
-			var min = multiplier.min;
-			var max = multiplier.max === 0 ? Infinity : multiplier.max;
-			var lastCommaTermCount;
-			var lastComma;
-			var matchCount = 0;
-			var lastNode = null;
-			var badNode = null;
+		function putResult(buffer, match) {
+			var type = match.type || match.syntax.type;
 
-			mismatch:
-			while (matchCount < max) {
-				node = skipSpaces(node);
-				switch (syntaxNode.type) {
-					case 'Sequence':
-					case 'Group':
-						next:
-						switch (syntaxNode.combinator) {
-							case '|':
-								for (var i = 0; i < syntaxNode.terms.length; i++) {
-									var term = syntaxNode.terms[i];
-									var res = match(syntax, term, node);
-
-									if (res.match) {
-										result.push(res.match);
-										node = res.next;
-										break next;  // continue matching
-									} else if (res.badNode) {
-										badNode = res.badNode;
-										break mismatch;
-									}
-								}
-								break mismatch; // nothing found -> stop matching
-
-							case ' ':
-								var beforeMatchNode = node;
-								var lastMatchedTerm = null;
-								var hasTailMatch = false;
-								var commaMissed = false;
-
-								for (var i = 0; i < syntaxNode.terms.length; i++) {
-									var term = syntaxNode.terms[i];
-									var res = match(syntax, term, node);
-
-									if (res.match) {
-										if (term.type === 'Comma' && i !== 0 && !hasTailMatch) {
-											// recover cursor to state before last match and stop matching
-											lastNode = node && node.data;
-											node = beforeMatchNode;
-											break mismatch;
-										}
-
-										// non-empty match
-										if (res.match.match.length) {
-											// match should be preceded by a comma
-											if (commaMissed) {
-												lastNode = node && node.data;
-												node = beforeMatchNode;
-												break mismatch;
-											}
-
-											hasTailMatch = term.type !== 'Comma';
-											lastMatchedTerm = term;
-										}
-
-										result.push(res.match);
-										node = skipSpaces(res.next);
-									} else if (res.badNode) {
-										badNode = res.badNode;
-										break mismatch;
-									} else {
-										// it's ok when comma doesn't match when no matches yet
-										// but only if comma is not first or last term
-										if (term.type === 'Comma' && i !== 0 && i !== syntaxNode.terms.length - 1) {
-											if (hasTailMatch) {
-												commaMissed = true;
-											}
-											continue;
-										}
-
-										// recover cursor to state before last match and stop matching
-										lastNode = res.lastNode || (node && node.data);
-										node = beforeMatchNode;
-										break mismatch;
-									}
-								}
-
-								// don't allow empty match when [ ]!
-								if (!lastMatchedTerm && syntaxNode.nonEmpty) {
-									// empty match but shouldn't
-									// recover cursor to state before last match and stop matching
-									lastNode = node && node.data;
-									node = beforeMatchNode;
-									break mismatch;
-								}
-
-								// don't allow comma at the end but only if last term isn't a comma
-								if (lastMatchedTerm && lastMatchedTerm.type === 'Comma' && term.type !== 'Comma') {
-									lastNode = node && node.data;
-									node = beforeMatchNode;
-									break mismatch;
-								}
-
-								break;
-
-							case '&&':
-								var beforeMatchNode = node;
-								var lastMatchedTerm = null;
-								var terms = syntaxNode.terms.slice();
-
-								while (terms.length) {
-									var wasMatch = false;
-									var emptyMatched = 0;
-
-									for (var i = 0; i < terms.length; i++) {
-										var term = terms[i];
-										var res = match(syntax, term, node);
-
-										if (res.match) {
-											// non-empty match
-											if (res.match.match.length) {
-												lastMatchedTerm = term;
-											} else {
-												emptyMatched++;
-												continue;
-											}
-
-											wasMatch = true;
-											terms.splice(i--, 1);
-											result.push(res.match);
-											node = skipSpaces(res.next);
-											break;
-										} else if (res.badNode) {
-											badNode = res.badNode;
-											break mismatch;
-										}
-									}
-
-									if (!wasMatch) {
-										// terms left, but they all are optional
-										if (emptyMatched === terms.length) {
-											break;
-										}
-
-										// not ok
-										lastNode = node && node.data;
-										node = beforeMatchNode;
-										break mismatch;
-									}
-								}
-
-								if (!lastMatchedTerm && syntaxNode.nonEmpty) { // don't allow empty match when [ ]!
-									// empty match but shouldn't
-									// recover cursor to state before last match and stop matching
-									lastNode = node && node.data;
-									node = beforeMatchNode;
-									break mismatch;
-								}
-
-								break;
-
-							case '||':
-								var beforeMatchNode = node;
-								var lastMatchedTerm = null;
-								var terms = syntaxNode.terms.slice();
-
-								while (terms.length) {
-									var wasMatch = false;
-									var emptyMatched = 0;
-
-									for (var i = 0; i < terms.length; i++) {
-										var term = terms[i];
-										var res = match(syntax, term, node);
-										if (res.match) {
-											// non-empty match
-											if (res.match.match.length) {
-												lastMatchedTerm = term;
-											} else {
-												emptyMatched++;
-												continue;
-											}
-
-											wasMatch = true;
-											terms.splice(i--, 1);
-											result.push(res.match);
-											node = skipSpaces(res.next);
-											break;
-										} else if (res.badNode) {
-											badNode = res.badNode;
-											break mismatch;
-										}
-									}
-
-									if (!wasMatch) {
-										break;
-									}
-								}
-
-								// don't allow empty match
-								if (!lastMatchedTerm && (emptyMatched !== terms.length || syntaxNode.nonEmpty)) {
-									// empty match but shouldn't
-									// recover cursor to state before last match and stop matching
-									lastNode = node && node.data;
-									node = beforeMatchNode;
-									break mismatch;
-								}
-
-								break;
-						}
-
-						break;
-
-					case 'Function':
-						// expect a function node
-						if (!node || node.data.type !== 'Function') {
-							break mismatch;
-						}
-
-						var keyword = names.keyword(node.data.name);
-						var name = syntaxNode.name.toLowerCase();
-
-						// check function name with vendor consideration
-						if (name !== keyword.vendor + keyword.name) {
-							break mismatch;
-						}
-
-						var res = match(syntax, syntaxNode.sequence, node.data.children.head);
-						if (!res.match || res.next) {
-							badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;
-							break mismatch;
-						}
-
-						result.push(res.match);
-						// Use node.next instead of res.next here since syntax is matching
-						// for internal list and it's should be completelly matched (res.next is null at this point).
-						// Therefore function is matched and we going to next node
-						node = node.next;
-						break;
-
-					case 'Parentheses':
-						if (!node || node.data.type !== 'Parentheses') {
-							break mismatch;
-						}
-
-						var res = match(syntax, syntaxNode.sequence, node.data.children.head);
-						if (!res.match || res.next) {
-							badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;  // TODO: case when res.next === null
-							break mismatch;
-						}
-
-						result.push(res.match);
-						node = res.next;
-						break;
-
-					case 'Type':
-						var typeSyntax = syntax.getType(syntaxNode.name);
-						if (!typeSyntax) {
-							throw new Error('Unknown syntax type `' + syntaxNode.name + '`');
-						}
-
-						var res = typeSyntax.match(node);
-						if (!res || !res.match) {
-							badNode = res && res.badNode; // TODO: case when res.next === null
-							lastNode = (res && res.lastNode) || (node && node.data);
-							break mismatch;
-						}
-
-						result.push(res.match);
-						node = res.next;
-						break;
-
-					case 'Property':
-						var propertySyntax = syntax.getProperty(syntaxNode.name);
-						if (!propertySyntax) {
-							throw new Error('Unknown property `' + syntaxNode.name + '`');
-						}
-
-						var res = propertySyntax.match(node);
-						if (!res || !res.match) {
-							badNode = res && res.badNode; // TODO: case when res.next === null
-							lastNode = (res && res.lastNode) || (node && node.data);
-							break mismatch;
-						}
-
-						result.push(res.match);
-						node = res.next;
-						break;
-
-					case 'Keyword':
-						if (!node) {
-							break mismatch;
-						}
-
-						if (node.data.type === 'Identifier') {
-							var keyword = names.keyword(node.data.name);
-							var keywordName = keyword.name;
-							var name = syntaxNode.name.toLowerCase();
-
-							// drop \0 and \9 hack from keyword name
-							if (keywordName.indexOf('\\') !== -1) {
-								keywordName = keywordName.replace(/\\[09].*$/, '');
-							}
-
-							if (name !== keyword.vendor + keywordName) {
-								break mismatch;
-							}
-						} else {
-							// keyword may to be a number (a.e. font-weight: 400 )
-							if (node.data.type !== 'Number' || node.data.value !== syntaxNode.name) {
-								break mismatch;
-							}
-						}
-
-						result.push(node.data);
-						node = node.next;
-						break;
-
-					case 'Slash':
-					case 'Comma':
-						if (!node || node.data.type !== 'Operator' || node.data.value !== syntaxNode.value) {
-							break mismatch;
-						}
-
-						result.push(node.data);
-						node = node.next;
-						break;
-
-					case 'String':
-						if (!node || node.data.type !== 'String') {
-							break mismatch;
-						}
-
-						result.push(node.data);
-						node = node.next;
-						break;
-
-					default:
-						throw new Error('Not implemented yet node type: ' + syntaxNode.type);
-				}
-
-				matchCount++;
-				if (!node) {
-					break;
-				}
-
-				if (multiplier.comma) {
-					if (lastComma && lastCommaTermCount === result.length) {
-						// nothing match after comma
-						break mismatch;
-					}
-
-					node = skipSpaces(node);
-					if (node && node.data.type === 'Operator' && node.data.value === ',') {
-						lastCommaTermCount = result.length;
-						lastComma = node;
-						node = node.next;
-					} else {
-						lastNode = node && node.data;
-						break mismatch;
-					}
-				}
+			// ignore groups
+			if (type === 'Group') {
+				buffer.push.apply(buffer, match.match);
+			} else {
+				buffer.push(match);
 			}
+		}
 
-			// console.log(syntaxNode.type, badNode, lastNode);
+		function matchToJSON() {
+			return {
+				type: this.syntax.type,
+				name: this.syntax.name,
+				match: this.match,
+				node: this.node
+			};
+		}
 
-			if (lastComma && lastCommaTermCount === result.length) {
-				// nothing match after comma
-				node = lastComma;
-			}
-
+		function buildMatchNode(badNode, lastNode, next, match) {
 			if (badNode) {
 				return {
 					badNode: badNode,
@@ -12626,191 +12962,568 @@ var CSSO = (function(){
 			return {
 				badNode: null,
 				lastNode: lastNode,
-				next: node,
-				match: matchCount < min ? null : {
-					type: syntaxNode.type,
-					name: syntaxNode.name,
-					match: result
-				}
+				next: next,
+				match: match
 			};
-		};
+		}
 
-		return exports;
-	};
-	//#endregion
+		function matchGroup(lexer, syntaxNode, node) {
+			var result = [];
+			var buffer;
+			var multiplier = syntaxNode.multiplier || MULTIPLIER_DEFAULT;
+			var min = multiplier.min;
+			var max = multiplier.max === 0 ? Infinity : multiplier.max;
+			var lastCommaTermCount;
+			var lastComma;
+			var matchCount = 0;
+			var lastNode = null;
+			var badNode = null;
 
-	//#region URL: /css-tree/parser
-	modules['/css-tree/parser'] = function () {
-		'use strict';
+			mismatch:
+			while (matchCount < max) {
+				node = skipSpaces(node);
+				buffer = [];
 
-		var Tokenizer = require('/css-tree/tokenizer');
-		var sequence = require('/css-tree/parser/sequence');
+				switch (syntaxNode.combinator) {
+					case '|':
+						for (var i = 0; i < syntaxNode.terms.length; i++) {
+							var term = syntaxNode.terms[i];
+							var res = matchSyntax(lexer, term, node);
 
-		var exports = function createParser(config) {
-			var parser = {
-				scanner: new Tokenizer(),
-				filename: '<unknown>',
-				needPositions: false,
-				parseAtruleExpression: true,
-				parseSelector: true,
-				parseValue: true,
-				parseCustomProperty: false,
-
-				readSequence: sequence,
-
-				getLocation: function(start, end) {
-					if (this.needPositions) {
-						return this.scanner.getLocationRange(
-							start,
-							end,
-							this.filename
-						);
-					}
-
-					return null;
-				},
-				getLocationFromList: function(list) {
-					if (this.needPositions) {
-						return this.scanner.getLocationRange(
-							list.head !== null ? list.first().loc.start.offset - this.scanner.startOffset : this.scanner.tokenStart,
-							list.head !== null ? list.last().loc.end.offset - this.scanner.startOffset : this.scanner.tokenStart,
-							this.filename
-						);
-					}
-
-					return null;
-				},
-
-				parse: function(source, options) {
-					options = options || {};
-
-					var context = options.context || 'default';
-					var ast;
-
-					this.scanner.setSource(source, options.offset, options.line, options.column);
-					this.filename = options.filename || '<unknown>';
-					this.needPositions = Boolean(options.positions);
-					this.parseAtruleExpression = 'parseAtruleExpression' in options ? Boolean(options.parseAtruleExpression) : true;
-					this.parseSelector = 'parseSelector' in options ? Boolean(options.parseSelector) : true;
-					this.parseValue = 'parseValue' in options ? Boolean(options.parseValue) : true;
-					this.parseCustomProperty = 'parseCustomProperty' in options ? Boolean(options.parseCustomProperty) : false;
-
-					if (!this.context.hasOwnProperty(context)) {
-						throw new Error('Unknown context `' + context + '`');
-					}
-
-					ast = this.context[context].call(this, options);
-
-					if (!this.scanner.eof) {
-						this.scanner.error();
-					}
-
-					// console.log(JSON.stringify(ast, null, 4));
-					return ast;
-				}
-			};
-
-			for (var key in config) {
-				parser[key] = config[key];
-			}
-
-			return parser.parse.bind(parser);
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /css-tree/parser/sequence
-	modules['/css-tree/parser/sequence'] = function () {
-		var List = require('/css-tree/utils/list');
-		var TYPE = require('/css-tree/tokenizer').TYPE;
-		var WHITESPACE = TYPE.Whitespace;
-		var COMMENT = TYPE.Comment;
-
-		var exports = function readSequence(recognizer) {
-			var children = new List();
-			var child = null;
-			var context = {
-				recognizer: recognizer,
-				space: null,
-				ignoreWS: false,
-				ignoreWSAfter: false
-			};
-
-			this.scanner.skipSC();
-
-			while (!this.scanner.eof) {
-				switch (this.scanner.tokenType) {
-					case COMMENT:
-						this.scanner.next();
-						continue;
-
-					case WHITESPACE:
-						if (context.ignoreWS) {
-							this.scanner.next();
-						} else {
-							context.space = this.WhiteSpace();
+							if (res.match) {
+								putResult(buffer, res.match);
+								node = res.next;
+								break;  // continue matching
+							} else if (res.badNode) {
+								badNode = res.badNode;
+								break mismatch;
+							} else if (res.lastNode) {
+								lastNode = res.lastNode;
+							}
 						}
-						continue;
+
+						if (buffer.length === 0) {
+							break mismatch; // nothing found -> stop matching
+						}
+
+						break;
+
+					case ' ':
+						var beforeMatchNode = node;
+						var lastMatchedTerm = null;
+						var hasTailMatch = false;
+						var commaMissed = false;
+
+						for (var i = 0; i < syntaxNode.terms.length; i++) {
+							var term = syntaxNode.terms[i];
+							var res = matchSyntax(lexer, term, node);
+
+							if (res.match) {
+								if (term.type === 'Comma' && i !== 0 && !hasTailMatch) {
+									// recover cursor to state before last match and stop matching
+									lastNode = node && node.data;
+									node = beforeMatchNode;
+									break mismatch;
+								}
+
+								// non-empty match (res.next will refer to another node)
+								if (res.next !== node) {
+									// match should be preceded by a comma
+									if (commaMissed) {
+										lastNode = node && node.data;
+										node = beforeMatchNode;
+										break mismatch;
+									}
+
+									hasTailMatch = term.type !== 'Comma';
+									lastMatchedTerm = term;
+								}
+
+								putResult(buffer, res.match);
+								node = skipSpaces(res.next);
+							} else if (res.badNode) {
+								badNode = res.badNode;
+								break mismatch;
+							} else {
+								if (res.lastNode) {
+									lastNode = res.lastNode;
+								}
+
+								// it's ok when comma doesn't match when no matches yet
+								// but only if comma is not first or last term
+								if (term.type === 'Comma' && i !== 0 && i !== syntaxNode.terms.length - 1) {
+									if (hasTailMatch) {
+										commaMissed = true;
+									}
+									continue;
+								}
+
+								// recover cursor to state before last match and stop matching
+								lastNode = res.lastNode || (node && node.data);
+								node = beforeMatchNode;
+								break mismatch;
+							}
+						}
+
+						// don't allow empty match when [ ]!
+						if (!lastMatchedTerm && syntaxNode.disallowEmpty) {
+							// empty match but shouldn't
+							// recover cursor to state before last match and stop matching
+							lastNode = node && node.data;
+							node = beforeMatchNode;
+							break mismatch;
+						}
+
+						// don't allow comma at the end but only if last term isn't a comma
+						if (lastMatchedTerm && lastMatchedTerm.type === 'Comma' && term.type !== 'Comma') {
+							lastNode = node && node.data;
+							node = beforeMatchNode;
+							break mismatch;
+						}
+
+						break;
+
+					case '&&':
+						var beforeMatchNode = node;
+						var lastMatchedTerm = null;
+						var terms = syntaxNode.terms.slice();
+
+						while (terms.length) {
+							var wasMatch = false;
+							var emptyMatched = 0;
+
+							for (var i = 0; i < terms.length; i++) {
+								var term = terms[i];
+								var res = matchSyntax(lexer, term, node);
+
+								if (res.match) {
+									// non-empty match (res.next will refer to another node)
+									if (res.next !== node) {
+										lastMatchedTerm = term;
+									} else {
+										emptyMatched++;
+										continue;
+									}
+
+									wasMatch = true;
+									terms.splice(i--, 1);
+									putResult(buffer, res.match);
+									node = skipSpaces(res.next);
+									break;
+								} else if (res.badNode) {
+									badNode = res.badNode;
+									break mismatch;
+								} else if (res.lastNode) {
+									lastNode = res.lastNode;
+								}
+							}
+
+							if (!wasMatch) {
+								// terms left, but they all are optional
+								if (emptyMatched === terms.length) {
+									break;
+								}
+
+								// not ok
+								lastNode = node && node.data;
+								node = beforeMatchNode;
+								break mismatch;
+							}
+						}
+
+						if (!lastMatchedTerm && syntaxNode.disallowEmpty) { // don't allow empty match when [ ]!
+							// empty match but shouldn't
+							// recover cursor to state before last match and stop matching
+							lastNode = node && node.data;
+							node = beforeMatchNode;
+							break mismatch;
+						}
+
+						break;
+
+					case '||':
+						var beforeMatchNode = node;
+						var lastMatchedTerm = null;
+						var terms = syntaxNode.terms.slice();
+
+						while (terms.length) {
+							var wasMatch = false;
+							var emptyMatched = 0;
+
+							for (var i = 0; i < terms.length; i++) {
+								var term = terms[i];
+								var res = matchSyntax(lexer, term, node);
+
+								if (res.match) {
+									// non-empty match (res.next will refer to another node)
+									if (res.next !== node) {
+										lastMatchedTerm = term;
+									} else {
+										emptyMatched++;
+										continue;
+									}
+
+									wasMatch = true;
+									terms.splice(i--, 1);
+									putResult(buffer, res.match);
+									node = skipSpaces(res.next);
+									break;
+								} else if (res.badNode) {
+									badNode = res.badNode;
+									break mismatch;
+								} else if (res.lastNode) {
+									lastNode = res.lastNode;
+								}
+							}
+
+							if (!wasMatch) {
+								break;
+							}
+						}
+
+						// don't allow empty match
+						if (!lastMatchedTerm && (emptyMatched !== terms.length || syntaxNode.disallowEmpty)) {
+							// empty match but shouldn't
+							// recover cursor to state before last match and stop matching
+							lastNode = node && node.data;
+							node = beforeMatchNode;
+							break mismatch;
+						}
+
+						break;
 				}
 
-				child = recognizer.getNode.call(this, context);
+				// flush buffer
+				result.push.apply(result, buffer);
+				matchCount++;
 
-				if (child === undefined) {
+				if (!node) {
 					break;
 				}
 
-				if (context.space !== null) {
-					children.appendData(context.space);
-					context.space = null;
-				}
+				if (multiplier.comma) {
+					if (lastComma && lastCommaTermCount === result.length) {
+						// nothing match after comma
+						break mismatch;
+					}
 
-				children.appendData(child);
-
-				if (context.ignoreWSAfter) {
-					context.ignoreWSAfter = false;
-					context.ignoreWS = true;
-				} else {
-					context.ignoreWS = false;
+					node = skipSpaces(node);
+					if (node !== null && node.data.type === 'Operator' && node.data.value === ',') {
+						result.push({
+							syntax: syntaxNode,
+							match: [{
+								type: 'ASTNode',
+								node: node.data,
+								childrenMatch: null
+							}]
+						});
+						lastCommaTermCount = result.length;
+						lastComma = node;
+						node = node.next;
+					} else {
+						lastNode = node !== null ? node.data : null;
+						break mismatch;
+					}
 				}
 			}
 
-			return children;
+			// console.log(syntaxNode.type, badNode, lastNode);
+
+			if (lastComma && lastCommaTermCount === result.length) {
+				// nothing match after comma
+				node = lastComma;
+				result.pop();
+			}
+
+			return buildMatchNode(badNode, lastNode, node, matchCount < min ? null : {
+				syntax: syntaxNode,
+				match: result,
+				toJSON: matchToJSON
+			});
+		}
+
+		function matchSyntax(lexer, syntaxNode, node) {
+			var badNode = null;
+			var lastNode = null;
+			var match = null;
+
+			switch (syntaxNode.type) {
+				case 'Group':
+					return matchGroup(lexer, syntaxNode, node);
+
+				case 'Function':
+					// expect a function node
+					if (!node || node.data.type !== 'Function') {
+						break;
+					}
+
+					var keyword = names.keyword(node.data.name);
+					var name = syntaxNode.name.toLowerCase();
+
+					// check function name with vendor consideration
+					if (name !== keyword.vendor + keyword.name) {
+						break;
+					}
+
+					var res = matchSyntax(lexer, syntaxNode.children, node.data.children.head);
+					if (!res.match || res.next) {
+						badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;
+						break;
+					}
+
+					match = [{
+						type: 'ASTNode',
+						node: node.data,
+						childrenMatch: res.match.match
+					}];
+
+					// Use node.next instead of res.next here since syntax is matching
+					// for internal list and it should be completelly matched (res.next is null at this point).
+					// Therefore function is matched and we are going to next node
+					node = node.next;
+					break;
+
+				case 'Parentheses':
+					if (!node || node.data.type !== 'Parentheses') {
+						break;
+					}
+
+					var res = matchSyntax(lexer, syntaxNode.children, node.data.children.head);
+					if (!res.match || res.next) {
+						badNode = res.badNode || res.lastNode || (res.next ? res.next.data : null) || node.data;  // TODO: case when res.next === null
+						break;
+					}
+
+					match = [{
+						type: 'ASTNode',
+						node: node.data,
+						childrenMatch: res.match.match
+					}];
+
+					node = res.next;
+					break;
+
+				case 'Type':
+					var typeSyntax = lexer.getType(syntaxNode.name);
+					if (!typeSyntax) {
+						throw new Error('Unknown syntax type `' + syntaxNode.name + '`');
+					}
+
+					var res = typeSyntax.match(node);
+					if (!res.match) {
+						badNode = res && res.badNode; // TODO: case when res.next === null
+						lastNode = (res && res.lastNode) || (node && node.data);
+						break;
+					}
+
+					node = res.next;
+					putResult(match = [], res.match);
+					if (match.length === 0) {
+						match = null;
+					}
+					break;
+
+				case 'Property':
+					var propertySyntax = lexer.getProperty(syntaxNode.name);
+					if (!propertySyntax) {
+						throw new Error('Unknown property `' + syntaxNode.name + '`');
+					}
+
+					var res = propertySyntax.match(node);
+					if (!res.match) {
+						badNode = res && res.badNode; // TODO: case when res.next === null
+						lastNode = (res && res.lastNode) || (node && node.data);
+						break;
+					}
+
+					node = res.next;
+					putResult(match = [], res.match);
+					if (match.length === 0) {
+						match = null;
+					}
+					break;
+
+				case 'Keyword':
+					if (!node) {
+						break;
+					}
+
+					if (node.data.type === 'Identifier') {
+						var keyword = names.keyword(node.data.name);
+						var keywordName = keyword.name;
+						var name = syntaxNode.name.toLowerCase();
+
+						// drop \0 and \9 hack from keyword name
+						if (keywordName.indexOf('\\') !== -1) {
+							keywordName = keywordName.replace(/\\[09].*$/, '');
+						}
+
+						if (name !== keyword.vendor + keywordName) {
+							break;
+						}
+					} else {
+						// keyword may to be a number (e.g. font-weight: 400 )
+						if (node.data.type !== 'Number' || node.data.value !== syntaxNode.name) {
+							break;
+						}
+					}
+
+					match = [{
+						type: 'ASTNode',
+						node: node.data,
+						childrenMatch: null
+					}];
+					node = node.next;
+					break;
+
+				case 'Slash':
+				case 'Comma':
+					if (!node || node.data.type !== 'Operator' || node.data.value !== syntaxNode.value) {
+						break;
+					}
+
+					match = [{
+						type: 'ASTNode',
+						node: node.data,
+						childrenMatch: null
+					}];
+					node = node.next;
+					break;
+
+				case 'String':
+					if (!node || node.data.type !== 'String') {
+						break;
+					}
+
+					match = [{
+						type: 'ASTNode',
+						node: node.data,
+						childrenMatch: null
+					}];
+					node = node.next;
+					break;
+
+				case 'ASTNode':
+					if (node && syntaxNode.match(node)) {
+						match = {
+							type: 'ASTNode',
+							node: node.data,
+							childrenMatch: null
+						};
+						node = node.next;
+					}
+					return buildMatchNode(badNode, lastNode, node, match);
+
+				default:
+					throw new Error('Not implemented yet node type: ' + syntaxNode.type);
+			}
+
+			return buildMatchNode(badNode, lastNode, node, match === null ? null : {
+				syntax: syntaxNode,
+				match: match,
+				toJSON: matchToJSON
+			});
+
+		};
+
+		return matchSyntax;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/search
+	modules['/css-tree/lexer/search'] = function () {
+		var List = require('/css-tree/utils/list');
+
+		function getFirstMatchNode(matchNode) {
+			if (matchNode.type === 'ASTNode') {
+				return matchNode.node;
+			}
+
+			if (matchNode.match.length !== 0) {
+				return getFirstMatchNode(matchNode.match[0]);
+			}
+
+			return null;
+		}
+
+		function getLastMatchNode(matchNode) {
+			if (matchNode.type === 'ASTNode') {
+				return matchNode.node;
+			}
+
+			if (matchNode.match.length !== 0) {
+				return getLastMatchNode(matchNode.match[matchNode.match.length - 1]);
+			}
+
+			return null;
+		}
+
+		function matchFragments(lexer, ast, match, type, name) {
+			function findFragments(matchNode) {
+				if (matchNode.type === 'ASTNode') {
+					return;
+				}
+
+				if (matchNode.syntax.type === type &&
+					matchNode.syntax.name === name) {
+					var start = getFirstMatchNode(matchNode);
+					var end = getLastMatchNode(matchNode);
+
+					lexer.syntax.walk(ast, function(node, item, list) {
+						if (node === start) {
+							var nodes = new List();
+							var loc = null;
+
+							do {
+								nodes.appendData(item.data);
+
+								if (item.data === end) {
+									break;
+								}
+
+								item = item.next;
+							} while (item !== null);
+
+							if (start.loc !== null && end.loc !== null) {
+								loc = {
+									source: start.loc.source,
+									start: start.loc.start,
+									end: end.loc.end
+								};
+							}
+
+							fragments.push({
+								parent: list,
+								loc: loc,
+								nodes: nodes
+							});
+						}
+					});
+				}
+
+				matchNode.match.forEach(findFragments);
+			}
+
+			var fragments = [];
+
+			if (match.matched !== null) {
+				findFragments(match.matched);
+			}
+
+			return fragments;
+		}
+
+		var exports = {
+			matchFragments: matchFragments
 		};
 
 		return exports;
 	};
 	//#endregion
 
-	//#region URL: /css-tree/syntax
-	modules['/css-tree/syntax'] = function () {
-		var hasOwnProperty = Object.prototype.hasOwnProperty;
+	//#region URL: /css-tree/lexer/structure
+	modules['/css-tree/lexer/structure'] = function () {
 		var List = require('/css-tree/utils/list');
-		var createParser = require('/css-tree/parser');
-		var createGenerator = require('/css-tree/generator').createGenerator;
-		var createMarkupGenerator = require('/css-tree/generator').createMarkupGenerator;
-		/*BT-
-		var sourceMapGenerator = require('/css-tree/generator').sourceMap;
-		*/
-		var createConvertors = require('/css-tree/utils/convert');
-		var createWalker = require('/css-tree/walker');
-		var names = require('/css-tree/utils/names');
-		var mix = require('/css-tree/syntax/mix');
-
-		function assign(dest, src) {
-			for (var key in src) {
-				dest[key] = src[key];
-			}
-
-			return dest;
-		}
-
-		function createParseContext(name) {
-			return function() {
-				return this[name]();
-			};
-		}
 
 		function isValidNumber(value) {
 			// Number.isInteger(value) && value >= 0
@@ -12900,17 +13613,11 @@ var CSSO = (function(){
 				type: String,
 				loc: true
 			};
-			var walkers = [];
 			var docs = {
 				type: '"' + name + '"'
 			};
 
 			for (var key in structure) {
-				var walker = {
-					name: key,
-					type: false,
-					nullable: false
-				};
 				var docsTypes = [];
 				var fieldTypes = fields[key] = Array.isArray(structure[key])
 					? structure[key].slice()
@@ -12921,13 +13628,10 @@ var CSSO = (function(){
 					if (fieldType === String || fieldType === Boolean) {
 						docsTypes.push(fieldType.name);
 					} else if (fieldType === null) {
-						walker.nullable = true;
 						docsTypes.push('null');
 					} else if (typeof fieldType === 'string') {
-						walker.type = 'node';
 						docsTypes.push('<' + fieldType + '>');
 					} else if (Array.isArray(fieldType)) {
-						walker.type = 'list';
 						docsTypes.push('List'); // TODO: use type enum
 					} else {
 						throw new Error('Wrong value in `' + name + '` structure definition');
@@ -12935,37 +13639,163 @@ var CSSO = (function(){
 				}
 
 				docs[key] = docsTypes.join(' | ');
-
-				if (walker.type) {
-					walkers.push(walker);
-				}
 			}
 
 			return {
 				docs: docs,
-				check: createNodeStructureChecker(name, fields),
-				walk: walkers.length ? {
-					context: nodeType.walkContext,
-					fields: walkers
-				} : null
+				check: createNodeStructureChecker(name, fields)
 			};
 		}
 
-		function createSyntax(config) {
-			var parser = { context: {}, scope: {}, atrule: {}, pseudo: {} };
-			var walker = { type: {} };
-			var generator = {};
-			var lexer = { structure: {} };
+		var exports = {
+			getStructureFromConfig: function(config) {
+				var structure = {};
+
+				if (config.node) {
+					for (var name in config.node) {
+						var nodeType = config.node[name];
+
+						if (nodeType.structure) {
+							structure[name] = processStructure(name, nodeType);
+						} else {
+							throw new Error('Missed `structure` field in `' + name + '` node type definition');
+						}
+					}
+				}
+
+				return structure;
+			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/lexer/trace
+	modules['/css-tree/lexer/trace'] = function () {
+		function getTrace(node) {
+			function hasMatch(matchNode) {
+				if (matchNode.type === 'ASTNode') {
+					if (matchNode.node === node) {
+						result = [];
+						return true;
+					}
+
+					if (matchNode.childrenMatch) {
+						// use for-loop for better perfomance
+						for (var i = 0; i < matchNode.childrenMatch.length; i++) {
+							if (hasMatch(matchNode.childrenMatch[i])) {
+								return true;
+							}
+						}
+					}
+				} else {
+					// use for-loop for better perfomance
+					for (var i = 0; i < matchNode.match.length; i++) {
+						if (hasMatch(matchNode.match[i])) {
+							if (matchNode.syntax.type === 'Type' ||
+								matchNode.syntax.type === 'Property' ||
+								matchNode.syntax.type === 'Keyword') {
+								result.unshift(matchNode.syntax);
+							}
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+
+			var result = null;
+
+			if (this.matched !== null) {
+				hasMatch(this.matched);
+			}
+
+			return result;
+		}
+
+		function testNode(match, node, fn) {
+			var trace = getTrace.call(match, node);
+
+			if (trace === null) {
+				return false;
+			}
+
+			return trace.some(fn);
+		}
+
+		function isType(node, type) {
+			return testNode(this, node, function(matchNode) {
+				return matchNode.type === 'Type' && matchNode.name === type;
+			});
+		}
+
+		function isProperty(node, property) {
+			return testNode(this, node, function(matchNode) {
+				return matchNode.type === 'Property' && matchNode.name === property;
+			});
+		}
+
+		function isKeyword(node) {
+			return testNode(this, node, function(matchNode) {
+				return matchNode.type === 'Keyword';
+			});
+		}
+
+		var exports = {
+			getTrace: getTrace,
+			isType: isType,
+			isProperty: isProperty,
+			isKeyword: isKeyword
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/parser
+	modules['/css-tree/parser'] = function () {
+		var createParser = require('/css-tree/parser/create');
+		var config = require('/css-tree/syntax/config/parser');
+
+		var exports = createParser(config);
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/parser/create
+	modules['/css-tree/parser/create'] = function () {
+		'use strict';
+
+		var Tokenizer = require('/css-tree/tokenizer');
+		var sequence = require('/css-tree/parser/sequence');
+		var noop = function() {};
+
+		function createParseContext(name) {
+			return function() {
+				return this[name]();
+			};
+		}
+
+		function processConfig(config) {
+			var parserConfig = {
+				context: {},
+				scope: {},
+				atrule: {},
+				pseudo: {}
+			};
 
 			if (config.parseContext) {
 				for (var name in config.parseContext) {
 					switch (typeof config.parseContext[name]) {
 						case 'function':
-							parser.context[name] = config.parseContext[name];
+							parserConfig.context[name] = config.parseContext[name];
 							break;
 
 						case 'string':
-							parser.context[name] = createParseContext(config.parseContext[name]);
+							parserConfig.context[name] = createParseContext(config.parseContext[name]);
 							break;
 					}
 				}
@@ -12973,7 +13803,7 @@ var CSSO = (function(){
 
 			if (config.scope) {
 				for (var name in config.scope) {
-					parser.scope[name] = config.scope[name];
+					parserConfig.scope[name] = config.scope[name];
 				}
 			}
 
@@ -12982,7 +13812,7 @@ var CSSO = (function(){
 					var atrule = config.atrule[name];
 
 					if (atrule.parse) {
-						parser.atrule[name] = atrule.parse;
+						parserConfig.atrule[name] = atrule.parse;
 					}
 				}
 			}
@@ -12992,98 +13822,210 @@ var CSSO = (function(){
 					var pseudo = config.pseudo[name];
 
 					if (pseudo.parse) {
-						parser.pseudo[name] = pseudo.parse;
+						parserConfig.pseudo[name] = pseudo.parse;
 					}
 				}
 			}
 
 			if (config.node) {
 				for (var name in config.node) {
-					var nodeType = config.node[name];
-
-					parser[name] = nodeType.parse;
-					generator[name] = nodeType.generate;
-
-					if (nodeType.structure) {
-						var structure = processStructure(name, nodeType);
-						lexer.structure[name] = {
-							docs: structure.docs,
-							check: structure.check
-						};
-						if (structure.walk) {
-							walker.type[name] = structure.walk;
-						}
-					} else {
-						throw new Error('Missed `structure` field in `' + name + '` node type definition');
-					}
+					parserConfig[name] = config.node[name].parse;
 				}
 			}
 
-			var parse = createParser(parser);
-			var Lexer = require('/css-tree/lexer/Lexer');
-			var walker = createWalker(walker.type);
-			var convertors = createConvertors(walker);
-			var markupGenerator = createMarkupGenerator(generator);
+			return parserConfig;
+		}
 
-			var syntax = {
-				List: require('/css-tree/utils/list'),
-				Tokenizer: require('/css-tree/tokenizer'),
-				Lexer: require('/css-tree/lexer/Lexer'),
+		var exports = function createParser(config) {
+			var parser = {
+				scanner: new Tokenizer(),
+				filename: '<unknown>',
+				needPositions: false,
+				tolerant: false,
+				onParseError: noop,
+				parseAtrulePrelude: true,
+				parseSelector: true,
+				parseValue: true,
+				parseCustomProperty: false,
 
-				property: names.property,
-				keyword: names.keyword,
+				readSequence: sequence,
 
-				lexer: null,
-				syntax: require('/css-tree/lexer'),
-				createLexer: function(config) {
-					return new Lexer(config, syntax, lexer.structure);
+				tolerantParse: function(consumer, fallback) {
+					if (this.tolerant) {
+						var start = this.scanner.currentToken;
+
+						try {
+							return consumer.call(this);
+						} catch (e) {
+							this.onParseError(e);
+							return fallback.call(this, start);
+						}
+					} else {
+						return consumer.call(this);
+					}
 				},
 
-				parse: parse,
+				getLocation: function(start, end) {
+					if (this.needPositions) {
+						return this.scanner.getLocationRange(
+							start,
+							end,
+							this.filename
+						);
+					}
 
-				walk: walker.all,
-				walkUp: walker.allUp,
-				walkRules: walker.rules,
-				walkRulesRight: walker.rulesRight,
-				walkDeclarations: walker.declarations,
-
-				translate: createGenerator(generator),
-				/*BT-
-				translateWithSourceMap: function(node) {
-					return sourceMapGenerator(markupGenerator, node);
+					return null;
 				},
-				*/
-				translateMarkup: markupGenerator,
+				getLocationFromList: function(list) {
+					if (this.needPositions) {
+						return this.scanner.getLocationRange(
+							list.head !== null ? list.first().loc.start.offset - this.scanner.startOffset : this.scanner.tokenStart,
+							list.head !== null ? list.last().loc.end.offset - this.scanner.startOffset : this.scanner.tokenStart,
+							this.filename
+						);
+					}
 
-				clone: require('/css-tree/utils/clone'),
-				fromPlainObject: convertors.fromPlainObject,
-				toPlainObject: convertors.toPlainObject,
-
-				createSyntax: function(config) {
-					return createSyntax(mix({}, config));
-				},
-				fork: function(extension) {
-					var base = mix({}, config); // copy of config
-					return createSyntax(
-						typeof extension === 'function'
-							? extension(base, assign)
-							: mix(base, extension)
-					);
+					return null;
 				}
 			};
 
-			syntax.lexer = new Lexer({
-				generic: true,
-				types: config.types,
-				properties: config.properties
-			}, syntax, lexer.structure);
+			config = processConfig(config || {});
+			for (var key in config) {
+				parser[key] = config[key];
+			}
 
-			return syntax;
+			return function(source, options) {
+				options = options || {};
+
+				var context = options.context || 'default';
+				var ast;
+
+				parser.scanner.setSource(source, options.offset, options.line, options.column);
+				parser.filename = options.filename || '<unknown>';
+				parser.needPositions = Boolean(options.positions);
+				parser.tolerant = Boolean(options.tolerant);
+				parser.onParseError = typeof options.onParseError === 'function' ? options.onParseError : noop;
+				parser.parseAtrulePrelude = 'parseAtrulePrelude' in options ? Boolean(options.parseAtrulePrelude) : true;
+				parser.parseSelector = 'parseSelector' in options ? Boolean(options.parseSelector) : true;
+				parser.parseValue = 'parseValue' in options ? Boolean(options.parseValue) : true;
+				parser.parseCustomProperty = 'parseCustomProperty' in options ? Boolean(options.parseCustomProperty) : false;
+
+				if (!parser.context.hasOwnProperty(context)) {
+					throw new Error('Unknown context `' + context + '`');
+				}
+
+				ast = parser.context[context].call(parser, options);
+
+				if (!parser.scanner.eof) {
+					parser.scanner.error();
+				}
+
+				// console.log(JSON.stringify(ast, null, 4));
+				return ast;
+			};
 		};
 
-		var exports = {};
-		exports.create = function(config) {
-			return createSyntax(mix({}, config));
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/parser/sequence
+	modules['/css-tree/parser/sequence'] = function () {
+		var List = require('/css-tree/utils/list');
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var WHITESPACE = TYPE.WhiteSpace;
+		var COMMENT = TYPE.Comment;
+
+		var exports = function readSequence(recognizer) {
+			var children = new List();
+			var child = null;
+			var context = {
+				recognizer: recognizer,
+				space: null,
+				ignoreWS: false,
+				ignoreWSAfter: false
+			};
+
+			this.scanner.skipSC();
+
+			while (!this.scanner.eof) {
+				switch (this.scanner.tokenType) {
+					case COMMENT:
+						this.scanner.next();
+						continue;
+
+					case WHITESPACE:
+						if (context.ignoreWS) {
+							this.scanner.next();
+						} else {
+							context.space = this.WhiteSpace();
+						}
+						continue;
+				}
+
+				child = recognizer.getNode.call(this, context);
+
+				if (child === undefined) {
+					break;
+				}
+
+				if (context.space !== null) {
+					children.appendData(context.space);
+					context.space = null;
+				}
+
+				children.appendData(child);
+
+				if (context.ignoreWSAfter) {
+					context.ignoreWSAfter = false;
+					context.ignoreWS = true;
+				} else {
+					context.ignoreWS = false;
+				}
+			}
+
+			return children;
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax
+	modules['/css-tree/syntax'] = function () {
+		function merge() {
+			var dest = {};
+
+			for (var i = 0; i < arguments.length; i++) {
+				var src = arguments[i];
+				for (var key in src) {
+					dest[key] = src[key];
+				}
+			}
+
+			return dest;
+		}
+
+		var exports = require('/css-tree/syntax/create').create(
+			merge(
+				require('/css-tree/syntax/config/lexer'),
+				require('/css-tree/syntax/config/parser'),
+				require('/css-tree/syntax/config/walker')
+			)
+		);
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/atrule
+	modules['/css-tree/syntax/atrule'] = function () {
+		var exports = {
+			'font-face': require('/css-tree/syntax/atrule/font-face'),
+			'import': require('/css-tree/syntax/atrule/import'),
+			'media': require('/css-tree/syntax/atrule/media'),
+			'page': require('/css-tree/syntax/atrule/page'),
+			'supports': require('/css-tree/syntax/atrule/supports')
 		};
 
 		return exports;
@@ -13094,7 +14036,7 @@ var CSSO = (function(){
 	modules['/css-tree/syntax/atrule/font-face'] = function () {
 		var exports = {
 			parse: {
-				expression: null,
+				prelude: null,
 				block: function() {
 					return this.Block(this.Declaration);
 				}
@@ -13112,11 +14054,12 @@ var CSSO = (function(){
 
 		var STRING = TYPE.String;
 		var IDENTIFIER = TYPE.Identifier;
+		var URL = TYPE.Url;
 		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 
 		var exports = {
 			parse: {
-				expression: function() {
+				prelude: function() {
 					var children = new List();
 
 					this.scanner.skipSC();
@@ -13126,7 +14069,7 @@ var CSSO = (function(){
 							children.appendData(this.String());
 							break;
 
-						case IDENTIFIER:
+						case URL:
 							children.appendData(this.Url());
 							break;
 
@@ -13142,7 +14085,7 @@ var CSSO = (function(){
 
 					return children;
 				},
-				block: false
+				block: null
 			}
 		};
 
@@ -13152,10 +14095,14 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/syntax/atrule/media
 	modules['/css-tree/syntax/atrule/media'] = function () {
+		var List = require('/css-tree/utils/list');
+
 		var exports = {
 			parse: {
-				expression: function() {
-					return this.MediaQueryList();
+				prelude: function() {
+					return new List().appendData(
+						this.MediaQueryList()
+					);
 				},
 				block: function() {
 					return this.Block(this.Rule);
@@ -13169,17 +14116,20 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/syntax/atrule/page
 	modules['/css-tree/syntax/atrule/page'] = function () {
+		var List = require('/css-tree/utils/list');
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
 
 		var exports = {
 			parse: {
-				expression: function() {
+				prelude: function() {
 					if (this.scanner.lookupNonWSType(0) === LEFTCURLYBRACKET) {
 						return null;
 					}
 
-					return this.SelectorList();
+					return new List().appendData(
+						this.SelectorList()
+					);
 				},
 				block: function() {
 					return this.Block(this.Declaration);
@@ -13196,17 +14146,17 @@ var CSSO = (function(){
 		var List = require('/css-tree/utils/list');
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var COMMENT = TYPE.Comment;
 		var IDENTIFIER = TYPE.Identifier;
+		var FUNCTION = TYPE.Function;
 		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 		var HYPHENMINUS = TYPE.HyphenMinus;
 		var COLON = TYPE.Colon;
-		var BALANCED = true;
 
-		function readRaw() {
+		function consumeRaw() {
 			return new List().appendData(
-				this.Raw(BALANCED, 0, 0)
+				this.Raw(this.scanner.currentToken, 0, 0, false, false)
 			);
 		}
 
@@ -13250,17 +14200,16 @@ var CSSO = (function(){
 						this.scanner.next();
 						continue;
 
-					case IDENTIFIER:
-						if (this.scanner.lookupType(1) === LEFTPARENTHESIS) {
-							child = this.Function(readRaw, this.scope.AtruleExpression);
-						} else {
-							child = this.Identifier();
-						}
+					case FUNCTION:
+						child = this.Function(consumeRaw, this.scope.AtrulePrelude);
+						break;
 
+					case IDENTIFIER:
+						child = this.Identifier();
 						break;
 
 					case LEFTPARENTHESIS:
-						child = this.Parentheses(parentheses, this.scope.AtruleExpression);
+						child = this.Parentheses(parentheses, this.scope.AtrulePrelude);
 						break;
 
 					default:
@@ -13280,7 +14229,7 @@ var CSSO = (function(){
 
 		var exports = {
 			parse: {
-				expression: function() {
+				prelude: function() {
 					var children = readSequence.call(this);
 
 					if (children.isEmpty()) {
@@ -13293,6 +14242,151 @@ var CSSO = (function(){
 					return this.Block(this.Rule);
 				}
 			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/config/lexer
+	modules['/css-tree/syntax/config/lexer'] = function () {
+		var data = require('/css-tree/data');
+
+		var exports = {
+			generic: true,
+			types: data.types,
+			properties: data.properties,
+			node: require('/css-tree/syntax/node')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/config/mix
+	modules['/css-tree/syntax/config/mix'] = function () {
+		var shape = {
+			generic: true,
+			types: {},
+			properties: {},
+			parseContext: {},
+			scope: {},
+			atrule: ['parse'],
+			pseudo: ['parse'],
+			node: ['name', 'structure', 'parse', 'generate', 'walkContext']
+		};
+
+		function isObject(value) {
+			return value && value.constructor === Object;
+		}
+
+		function copy(value) {
+			if (isObject(value)) {
+				var res = {};
+				for (var key in value) {
+					res[key] = value[key];
+				}
+				return res;
+			} else {
+				return value;
+			}
+		}
+
+		function extend(dest, src) {
+			for (var key in src) {
+				if (isObject(dest[key])) {
+					extend(dest[key], copy(src[key]));
+				} else {
+					dest[key] = copy(src[key]);
+				}
+			}
+		}
+
+		function mix(dest, src, shape) {
+			for (var key in shape) {
+				if (shape[key] === true) {
+					if (key in src) {
+						dest[key] = copy(src[key]);
+					}
+				} else if (shape[key]) {
+					if (isObject(shape[key])) {
+						var res = {};
+						extend(res, dest[key]);
+						extend(res, src[key]);
+						dest[key] = res;
+					} else if (Array.isArray(shape[key])) {
+						var res = {};
+						var innerShape = shape[key].reduce(function(s, k) {
+							s[k] = true;
+							return s;
+						}, {});
+						for (var name in dest[key]) {
+							res[name] = {};
+							if (dest[key] && dest[key][name]) {
+								mix(res[name], dest[key][name], innerShape);
+							}
+						}
+						for (var name in src[key]) {
+							if (!res[name]) {
+								res[name] = {};
+							}
+							if (src[key] && src[key][name]) {
+								mix(res[name], src[key][name], innerShape);
+							}
+						}
+						dest[key] = res;
+					}
+				}
+			}
+			return dest;
+		}
+
+		var exports = function(dest, src) {
+			return mix(dest, src, shape);
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/config/parser
+	modules['/css-tree/syntax/config/parser'] = function () {
+		var exports = {
+			parseContext: {
+				default: 'StyleSheet',
+				stylesheet: 'StyleSheet',
+				atrule: 'Atrule',
+				atrulePrelude: function(options) {
+					return this.AtrulePrelude(options.atrule ? String(options.atrule) : null);
+				},
+				mediaQueryList: 'MediaQueryList',
+				mediaQuery: 'MediaQuery',
+				rule: 'Rule',
+				selectorList: 'SelectorList',
+				selector: 'Selector',
+				block: function() {
+					return this.Block(this.Declaration);
+				},
+				declarationList: 'DeclarationList',
+				declaration: 'Declaration',
+				value: function(options) {
+					return this.Value(options.property ? String(options.property) : null);
+				}
+			},
+			scope: require('/css-tree/syntax/scope'),
+			atrule: require('/css-tree/syntax/atrule'),
+			pseudo: require('/css-tree/syntax/pseudo'),
+			node: require('/css-tree/syntax/node')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/config/walker
+	modules['/css-tree/syntax/config/walker'] = function () {
+		var exports = {
+			node: require('/css-tree/syntax/node')
 		};
 
 		return exports;
@@ -13324,13 +14418,12 @@ var CSSO = (function(){
 	//#region URL: /css-tree/syntax/function/expression
 	modules['/css-tree/syntax/function/expression'] = function () {
 		var List = require('/css-tree/utils/list');
-		var BALANCED = true;
 
 		// legacy IE function
 		// expression '(' raw ')'
 		var exports = function() {
 			return new List().appendData(
-				this.Raw(BALANCED, 0, 0)
+				this.Raw(this.scanner.currentToken, 0, 0, false, false)
 			);
 		};
 
@@ -13345,9 +14438,9 @@ var CSSO = (function(){
 
 		var IDENTIFIER = TYPE.Identifier;
 		var COMMA = TYPE.Comma;
+		var SEMICOLON = TYPE.Semicolon;
 		var HYPHENMINUS = TYPE.HyphenMinus;
 		var EXCLAMATIONMARK = TYPE.ExclamationMark;
-		var BALANCED = true;
 
 		// var '(' ident (',' <value>? )? ')'
 		var exports = function() {
@@ -13375,11 +14468,60 @@ var CSSO = (function(){
 				children.appendData(this.Operator());
 				children.appendData(this.parseCustomProperty
 					? this.Value(null)
-					: this.Raw(BALANCED, HYPHENMINUS, EXCLAMATIONMARK)
+					: this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false)
 				);
 			}
 
 			return children;
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/node
+	modules['/css-tree/syntax/node'] = function () {
+		var exports = {
+			AnPlusB: require('/css-tree/syntax/node/AnPlusB'),
+			Atrule: require('/css-tree/syntax/node/Atrule'),
+			AtrulePrelude: require('/css-tree/syntax/node/AtrulePrelude'),
+			AttributeSelector: require('/css-tree/syntax/node/AttributeSelector'),
+			Block: require('/css-tree/syntax/node/Block'),
+			Brackets: require('/css-tree/syntax/node/Brackets'),
+			CDC: require('/css-tree/syntax/node/CDC'),
+			CDO: require('/css-tree/syntax/node/CDO'),
+			ClassSelector: require('/css-tree/syntax/node/ClassSelector'),
+			Combinator: require('/css-tree/syntax/node/Combinator'),
+			Comment: require('/css-tree/syntax/node/Comment'),
+			Declaration: require('/css-tree/syntax/node/Declaration'),
+			DeclarationList: require('/css-tree/syntax/node/DeclarationList'),
+			Dimension: require('/css-tree/syntax/node/Dimension'),
+			Function: require('/css-tree/syntax/node/Function'),
+			HexColor: require('/css-tree/syntax/node/HexColor'),
+			Identifier: require('/css-tree/syntax/node/Identifier'),
+			IdSelector: require('/css-tree/syntax/node/IdSelector'),
+			MediaFeature: require('/css-tree/syntax/node/MediaFeature'),
+			MediaQuery: require('/css-tree/syntax/node/MediaQuery'),
+			MediaQueryList: require('/css-tree/syntax/node/MediaQueryList'),
+			Nth: require('/css-tree/syntax/node/Nth'),
+			Number: require('/css-tree/syntax/node/Number'),
+			Operator: require('/css-tree/syntax/node/Operator'),
+			Parentheses: require('/css-tree/syntax/node/Parentheses'),
+			Percentage: require('/css-tree/syntax/node/Percentage'),
+			PseudoClassSelector: require('/css-tree/syntax/node/PseudoClassSelector'),
+			PseudoElementSelector: require('/css-tree/syntax/node/PseudoElementSelector'),
+			Ratio: require('/css-tree/syntax/node/Ratio'),
+			Raw: require('/css-tree/syntax/node/Raw'),
+			Rule: require('/css-tree/syntax/node/Rule'),
+			Selector: require('/css-tree/syntax/node/Selector'),
+			SelectorList: require('/css-tree/syntax/node/SelectorList'),
+			String: require('/css-tree/syntax/node/String'),
+			StyleSheet: require('/css-tree/syntax/node/StyleSheet'),
+			TypeSelector: require('/css-tree/syntax/node/TypeSelector'),
+			UnicodeRange: require('/css-tree/syntax/node/UnicodeRange'),
+			Url: require('/css-tree/syntax/node/Url'),
+			Value: require('/css-tree/syntax/node/Value'),
+			WhiteSpace: require('/css-tree/syntax/node/WhiteSpace')
 		};
 
 		return exports;
@@ -13541,30 +14683,31 @@ var CSSO = (function(){
 					b: b
 				};
 			},
-			generate: function(node) {
+			generate: function(processChunk, node) {
 				var a = node.a !== null && node.a !== undefined;
 				var b = node.b !== null && node.b !== undefined;
-				var result;
 
 				if (a) {
-					result =
-						node.a === '+1' || node.a === '1' ? 'n' :
+					processChunk(
+						node.a === '+1' ? '+n' :
+						node.a ===  '1' ?  'n' :
 						node.a === '-1' ? '-n' :
-						node.a + 'n';
+						node.a + 'n'
+					);
 
 					if (b) {
 						b = String(node.b);
 						if (b.charAt(0) === '-' || b.charAt(0) === '+') {
-							result = [result, b.charAt(0), b.substr(1)];
+							processChunk(b.charAt(0));
+							processChunk(b.substr(1));
 						} else {
-							result = [result, '+', b];
+							processChunk('+');
+							processChunk(b);
 						}
 					}
 				} else {
-					result = String(node.b);
+					processChunk(String(node.b));
 				}
-
-				return result;
 			}
 		};
 
@@ -13576,12 +14719,10 @@ var CSSO = (function(){
 	modules['/css-tree/syntax/node/Atrule'] = function () {
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var IDENTIFIER = TYPE.Identifier;
+		var ATRULE = TYPE.Atrule;
 		var SEMICOLON = TYPE.Semicolon;
-		var COMMERCIALAT = TYPE.CommercialAt;
 		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
 		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
-		var BALANCED = true;
 
 		function isBlockAtrule() {
 			for (var offset = 1, type; type = this.scanner.lookupType(offset); offset++) {
@@ -13590,7 +14731,7 @@ var CSSO = (function(){
 				}
 
 				if (type === LEFTCURLYBRACKET ||
-					type === COMMERCIALAT) {
+					type === ATRULE) {
 					return false;
 				}
 			}
@@ -13603,38 +14744,43 @@ var CSSO = (function(){
 			name: 'Atrule',
 			structure: {
 				name: String,
-				expression: ['AtruleExpression', 'MediaQueryList', 'SelectorList', 'Raw', null],
+				prelude: ['AtrulePrelude', null],
 				block: ['Block', null]
 			},
 			parse: function() {
 				var start = this.scanner.tokenStart;
 				var name;
 				var nameLowerCase;
-				var expression = null;
+				var prelude = null;
 				var block = null;
 
-				this.scanner.eat(COMMERCIALAT);
+				this.scanner.eat(ATRULE);
 
-				name = this.scanner.consume(IDENTIFIER);
+				name = this.scanner.substrToCursor(start + 1);
 				nameLowerCase = name.toLowerCase();
 				this.scanner.skipSC();
 
-				if (this.parseAtruleExpression) {
-					expression = this.AtruleExpression(name);
-					this.scanner.skipSC();
-				} else {
-					expression = this.Raw(BALANCED, SEMICOLON, LEFTCURLYBRACKET);
+				prelude = this.AtrulePrelude(name);
+
+				// turn empty AtrulePrelude into null
+				if (prelude.children.head === null) {
+					prelude = null;
 				}
+
+				this.scanner.skipSC();
 
 				if (this.atrule.hasOwnProperty(nameLowerCase)) {
 					if (typeof this.atrule[nameLowerCase].block === 'function') {
 						if (this.scanner.tokenType !== LEFTCURLYBRACKET) {
+							// FIXME: make tolerant
 							this.scanner.error('Curly bracket is expected');
 						}
 
 						block = this.atrule[nameLowerCase].block.call(this);
 					} else {
-						this.scanner.eat(SEMICOLON);
+						if (!this.tolerant || !this.scanner.eof) {
+							this.scanner.eat(SEMICOLON);
+						}
 					}
 				} else {
 					switch (this.scanner.tokenType) {
@@ -13643,11 +14789,14 @@ var CSSO = (function(){
 							break;
 
 						case LEFTCURLYBRACKET:
+							// TODO: should consume block content as Raw?
 							block = this.Block(isBlockAtrule.call(this) ? this.Declaration : this.Rule);
 							break;
 
 						default:
-							this.scanner.error('Semicolon or block is expected');
+							if (!this.tolerant) {
+								this.scanner.error('Semicolon or block is expected');
+							}
 					}
 				}
 
@@ -13655,20 +14804,24 @@ var CSSO = (function(){
 					type: 'Atrule',
 					loc: this.getLocation(start, this.scanner.tokenStart),
 					name: name,
-					expression: expression,
+					prelude: prelude,
 					block: block
 				};
 			},
-			generate: function(node) {
-				var result = ['@', node.name];
+			generate: function(processChunk, node) {
+				processChunk('@');
+				processChunk(node.name);
 
-				if (node.expression !== null) {
-					result.push(' ', this.generate(node.expression));
+				if (node.prelude !== null) {
+					processChunk(' ');
+					this.generate(processChunk, node.prelude);
 				}
 
-				result.push(node.block ? this.generate(node.block) : ';');
-
-				return result;
+				if (node.block) {
+					this.generate(processChunk, node.block);
+				} else {
+					processChunk(';');
+				}
 			},
 			walkContext: 'atrule'
 		};
@@ -13677,51 +14830,72 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /css-tree/syntax/node/AtruleExpression
-	modules['/css-tree/syntax/node/AtruleExpression'] = function () {
+	//#region URL: /css-tree/syntax/node/AtrulePrelude
+	modules['/css-tree/syntax/node/AtrulePrelude'] = function () {
 		var List = require('/css-tree/utils/list');
 
+		var TYPE = require('/css-tree/tokenizer').TYPE;
+		var SEMICOLON = TYPE.Semicolon;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+
+		function consumeRaw(startToken) {
+			return new List().appendData(
+				this.Raw(startToken, SEMICOLON, LEFTCURLYBRACKET, false, true)
+			);
+		}
+
+		function consumeDefaultSequence() {
+			return this.readSequence(this.scope.AtrulePrelude);
+		}
+
 		var exports = {
-			name: 'AtruleExpression',
+			name: 'AtrulePrelude',
 			structure: {
 				children: [[]]
 			},
 			parse: function(name) {
 				var children = null;
+				var startToken = this.scanner.currentToken;
 
 				if (name !== null) {
 					name = name.toLowerCase();
 				}
 
-				// custom consumer
-				if (this.atrule.hasOwnProperty(name)) {
-					if (typeof this.atrule[name].expression === 'function') {
-						children = this.atrule[name].expression.call(this);
+				if (this.parseAtrulePrelude) {
+					// custom consumer
+					if (this.atrule.hasOwnProperty(name)) {
+						if (typeof this.atrule[name].prelude === 'function') {
+							children = this.tolerantParse(this.atrule[name].prelude, consumeRaw);
+						}
+					} else {
+						// default consumer
+						this.scanner.skipSC();
+						children = this.tolerantParse(consumeDefaultSequence, consumeRaw);
+					}
 
-						if (children instanceof List === false) {
-							return children;
+					if (this.tolerant) {
+						if (this.scanner.eof || (this.scanner.tokenType !== SEMICOLON && this.scanner.tokenType !== LEFTCURLYBRACKET)) {
+							children = consumeRaw.call(this, startToken);
 						}
 					}
 				} else {
-					// default consumer
-					this.scanner.skipSC();
-					children = this.readSequence(this.scope.AtruleExpression);
+					children = consumeRaw.call(this, startToken);
 				}
 
-				if (children === null || children.isEmpty()) {
-					return null;
+				if (children === null) {
+					children = new List();
 				}
 
 				return {
-					type: 'AtruleExpression',
+					type: 'AtrulePrelude',
 					loc: this.getLocationFromList(children),
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.each(node.children);
+			generate: function(processChunk, node) {
+				this.each(processChunk, node);
 			},
-			walkContext: 'atruleExpression'
+			walkContext: 'atrulePrelude'
 		};
 
 		return exports;
@@ -13788,12 +14962,12 @@ var CSSO = (function(){
 			var start = this.scanner.tokenStart;
 			var tokenType = this.scanner.tokenType;
 
-			if (tokenType !== EQUALSSIGN &&		// =
-				tokenType !== TILDE &&			 // ~=
+			if (tokenType !== EQUALSSIGN &&        // =
+				tokenType !== TILDE &&             // ~=
 				tokenType !== CIRCUMFLEXACCENT &&  // ^=
-				tokenType !== DOLLARSIGN &&		// $=
-				tokenType !== ASTERISK &&		  // *=
-				tokenType !== VERTICALLINE		 // |=
+				tokenType !== DOLLARSIGN &&        // $=
+				tokenType !== ASTERISK &&          // *=
+				tokenType !== VERTICALLINE         // |=
 			) {
 				this.scanner.error('Attribute selector (=, ~=, ^=, $=, *=, |=) is expected');
 			}
@@ -13809,19 +14983,19 @@ var CSSO = (function(){
 		}
 
 		// '[' S* attrib_name ']'
-		// '[' S* attrib_name S* attrib_match S* [ IDENT | STRING ] S* attrib_flags? S* ']'
+		// '[' S* attrib_name S* attrib_matcher S* [ IDENT | STRING ] S* attrib_flags? S* ']'
 		var exports = {
 			name: 'AttributeSelector',
 			structure: {
 				name: 'Identifier',
-				operator: [String, null],
+				matcher: [String, null],
 				value: ['String', 'Identifier', null],
 				flags: [String, null]
 			},
 			parse: function() {
 				var start = this.scanner.tokenStart;
 				var name;
-				var operator = null;
+				var matcher = null;
 				var value = null;
 				var flags = null;
 
@@ -13834,7 +15008,7 @@ var CSSO = (function(){
 				if (this.scanner.tokenType !== RIGHTSQUAREBRACKET) {
 					// avoid case `[name i]`
 					if (this.scanner.tokenType !== IDENTIFIER) {
-						operator = getOperator.call(this);
+						matcher = getOperator.call(this);
 
 						this.scanner.skipSC();
 
@@ -13860,20 +15034,22 @@ var CSSO = (function(){
 					type: 'AttributeSelector',
 					loc: this.getLocation(start, this.scanner.tokenStart),
 					name: name,
-					operator: operator,
+					matcher: matcher,
 					value: value,
 					flags: flags
 				};
 			},
-			generate: function(node) {
-				var result = ['[', this.generate(node.name)];
+			generate: function(processChunk, node) {
 				var flagsPrefix = ' ';
 
-				if (node.operator !== null) {
-					result.push(node.operator);
+				processChunk('[');
+				this.generate(processChunk, node.name);
+
+				if (node.matcher !== null) {
+					processChunk(node.matcher);
 
 					if (node.value !== null) {
-						result.push(this.generate(node.value));
+						this.generate(processChunk, node.value);
 
 						// space between string and flags is not required
 						if (node.value.type === 'String') {
@@ -13883,12 +15059,11 @@ var CSSO = (function(){
 				}
 
 				if (node.flags !== null) {
-					result.push(flagsPrefix, node.flags);
+					processChunk(flagsPrefix);
+					processChunk(node.flags);
 				}
 
-				result.push(']');
-
-				return result;
+				processChunk(']');
 			}
 		};
 
@@ -13901,12 +15076,16 @@ var CSSO = (function(){
 		var List = require('/css-tree/utils/list');
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var COMMENT = TYPE.Comment;
 		var SEMICOLON = TYPE.Semicolon;
-		var COMMERCIALAT = TYPE.CommercialAt;
+		var ATRULE = TYPE.Atrule;
 		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
 		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+
+		function consumeRaw(startToken) {
+			return this.Raw(startToken, 0, SEMICOLON, true, true);
+		}
 
 		var exports = {
 			name: 'Block',
@@ -13914,7 +15093,9 @@ var CSSO = (function(){
 				children: [['Atrule', 'Rule', 'Declaration']]
 			},
 			parse: function(defaultConsumer) {
-				defaultConsumer = defaultConsumer || this.Declaration;
+				if (!defaultConsumer) {
+					defaultConsumer = this.Declaration;
+				}
 
 				var start = this.scanner.tokenStart;
 				var children = new List();
@@ -13933,16 +15114,18 @@ var CSSO = (function(){
 							this.scanner.next();
 							break;
 
-						case COMMERCIALAT:
-							children.appendData(this.Atrule());
+						case ATRULE:
+							children.appendData(this.tolerantParse(this.Atrule, consumeRaw));
 							break;
 
 						default:
-							children.appendData(defaultConsumer.call(this));
+							children.appendData(this.tolerantParse(defaultConsumer, consumeRaw));
 					}
 				}
 
-				this.scanner.eat(RIGHTCURLYBRACKET);
+				if (!this.tolerant || !this.scanner.eof) {
+					this.scanner.eat(RIGHTCURLYBRACKET);
+				}
 
 				return {
 					type: 'Block',
@@ -13950,8 +15133,10 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return [].concat('{', this.each(node.children), '}');
+			generate: function(processChunk, node) {
+				processChunk('{');
+				this.each(processChunk, node);
+				processChunk('}');
 			},
 			walkContext: 'block'
 		};
@@ -13988,8 +15173,10 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return [].concat('[', this.each(node.children), ']');
+			generate: function(processChunk, node) {
+				processChunk('[');
+				this.each(processChunk, node);
+				processChunk(']');
 			}
 		};
 
@@ -14014,8 +15201,8 @@ var CSSO = (function(){
 					loc: this.getLocation(start, this.scanner.tokenStart)
 				};
 			},
-			generate: function() {
-				return '-->';
+			generate: function(processChunk) {
+				processChunk('-->');
 			}
 		};
 
@@ -14040,8 +15227,8 @@ var CSSO = (function(){
 					loc: this.getLocation(start, this.scanner.tokenStart)
 				};
 			},
-			generate: function() {
-				return '<!--';
+			generate: function(processChunk) {
+				processChunk('<!--');
 			}
 		};
 
@@ -14070,8 +15257,9 @@ var CSSO = (function(){
 					name: this.scanner.consume(IDENTIFIER)
 				};
 			},
-			generate: function(node) {
-				return '.' + node.name;
+			generate: function(processChunk, node) {
+				processChunk('.');
+				processChunk(node.name);
 			}
 		};
 
@@ -14120,8 +15308,8 @@ var CSSO = (function(){
 					name: this.scanner.substrToCursor(start)
 				};
 			},
-			generate: function(node) {
-				return node.name;
+			generate: function(processChunk, node) {
+				processChunk(node.name);
 			}
 		};
 
@@ -14160,8 +15348,10 @@ var CSSO = (function(){
 					value: this.scanner.source.substring(start + 2, end)
 				};
 			},
-			generate: function(node) {
-				return '/*' + node.value + '*/';
+			generate: function(processChunk, node) {
+				processChunk('/*');
+				processChunk(node.value);
+				processChunk('*/');
 			}
 		};
 
@@ -14185,7 +15375,6 @@ var CSSO = (function(){
 		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 		var PLUSSIGN = TYPE.PlusSign;
 		var NUMBERSIGN = TYPE.NumberSign;
-		var BALANCED = true;
 
 		var exports = {
 			name: 'Declaration',
@@ -14206,7 +15395,7 @@ var CSSO = (function(){
 				if (isCustomProperty(property) ? this.parseCustomProperty : this.parseValue) {
 					value = this.Value(property);
 				} else {
-					value = this.Raw(BALANCED, SEMICOLON, EXCLAMATIONMARK);
+					value = this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false);
 				}
 
 				if (this.scanner.tokenType === EXCLAMATIONMARK) {
@@ -14216,7 +15405,7 @@ var CSSO = (function(){
 
 				// TODO: include or not to include semicolon to range?
 				// if (this.scanner.tokenType === SEMICOLON) {
-				//	 this.scanner.next();
+				//     this.scanner.next();
 				// }
 
 				if (!this.scanner.eof &&
@@ -14234,18 +15423,18 @@ var CSSO = (function(){
 					value: value
 				};
 			},
-			generate: function(node, item) {
-				var result = [node.property, ':', this.generate(node.value)];
+			generate: function(processChunk, node, item) {
+				processChunk(node.property);
+				processChunk(':');
+				this.generate(processChunk, node.value);
 
 				if (node.important) {
-					result.push(node.important === true ? '!important' : '!' + node.important);
+					processChunk(node.important === true ? '!important' : '!' + node.important);
 				}
 
 				if (item && item.next) {
-					result.push(';');
+					processChunk(';');
 				}
-
-				return result;
 			},
 			walkContext: 'declaration'
 		};
@@ -14309,9 +15498,13 @@ var CSSO = (function(){
 		var List = require('/css-tree/utils/list');
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var COMMENT = TYPE.Comment;
 		var SEMICOLON = TYPE.Semicolon;
+
+		function consumeRaw(startToken) {
+			return this.Raw(startToken, 0, SEMICOLON, true, true);
+		}
 
 		var exports = {
 			name: 'DeclarationList',
@@ -14331,7 +15524,7 @@ var CSSO = (function(){
 							break;
 
 						default:
-							children.appendData(this.Declaration());
+							children.appendData(this.tolerantParse(this.Declaration, consumeRaw));
 					}
 				}
 
@@ -14341,8 +15534,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.each(node.children);
+			generate: function(processChunk, node) {
+				this.each(processChunk, node);
 			}
 		};
 
@@ -14392,8 +15585,9 @@ var CSSO = (function(){
 					unit: unit
 				};
 			},
-			generate: function(node) {
-				return node.value + node.unit;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
+				processChunk(node.unit);
 			}
 		};
 
@@ -14404,12 +15598,9 @@ var CSSO = (function(){
 	//#region URL: /css-tree/syntax/node/Function
 	modules['/css-tree/syntax/node/Function'] = function () {
 		var TYPE = require('/css-tree/tokenizer').TYPE;
-
-		var IDENTIFIER = TYPE.Identifier;
-		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
 
-		// ident '(' <sequence> ')'
+		// <function-token> <sequence> ')'
 		var exports = {
 			name: 'Function',
 			structure: {
@@ -14418,11 +15609,9 @@ var CSSO = (function(){
 			},
 			parse: function(readSequence, recognizer) {
 				var start = this.scanner.tokenStart;
-				var name = this.scanner.consume(IDENTIFIER);
+				var name = this.scanner.consumeFunctionName();
 				var nameLowerCase = name.toLowerCase();
 				var children;
-
-				this.scanner.eat(LEFTPARENTHESIS);
 
 				children = recognizer.hasOwnProperty(nameLowerCase)
 					? recognizer[nameLowerCase].call(this, recognizer)
@@ -14437,8 +15626,11 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return [].concat(node.name + '(', this.each(node.children), ')');
+			generate: function(processChunk, node) {
+				processChunk(node.name);
+				processChunk('(');
+				this.each(processChunk, node);
+				processChunk(')');
 			},
 			walkContext: 'function'
 		};
@@ -14518,8 +15710,9 @@ var CSSO = (function(){
 					value: this.scanner.substrToCursor(start + 1) // skip #
 				};
 			},
-			generate: function(node) {
-				return '#' + node.value;
+			generate: function(processChunk, node) {
+				processChunk('#');
+				processChunk(node.value);
 			}
 		};
 
@@ -14544,8 +15737,8 @@ var CSSO = (function(){
 					name: this.scanner.consume(IDENTIFIER)
 				};
 			},
-			generate: function(node) {
-				return node.name;
+			generate: function(processChunk, node) {
+				processChunk(node.name);
 			}
 		};
 
@@ -14574,8 +15767,9 @@ var CSSO = (function(){
 					name: this.scanner.consume(IDENTIFIER)
 				};
 			},
-			generate: function(node) {
-				return '#' + node.name;
+			generate: function(processChunk, node) {
+				processChunk('#');
+				processChunk(node.name);
 			}
 		};
 
@@ -14648,10 +15842,14 @@ var CSSO = (function(){
 					value: value
 				};
 			},
-			generate: function(node) {
-				return node.value !== null
-					? ['(', node.name, ':', this.generate(node.value), ')']
-					: ['(', node.name, ')'];
+			generate: function(processChunk, node) {
+				processChunk('(');
+				processChunk(node.name);
+				if (node.value !== null) {
+					processChunk(':');
+					this.generate(processChunk, node.value);
+				}
+				processChunk(')');
 			}
 		};
 
@@ -14664,7 +15862,7 @@ var CSSO = (function(){
 		var List = require('/css-tree/utils/list');
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var COMMENT = TYPE.Comment;
 		var IDENTIFIER = TYPE.Identifier;
 		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
@@ -14722,8 +15920,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.each(node.children);
+			generate: function(processChunk, node) {
+				this.each(processChunk, node);
 			}
 		};
 
@@ -14762,8 +15960,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.eachComma(node.children);
+			generate: function(processChunk, node) {
+				this.eachComma(processChunk, node);
 			}
 		};
 
@@ -14817,10 +16015,12 @@ var CSSO = (function(){
 					selector: selector
 				};
 			},
-			generate: function(node) {
-				return node.selector !== null
-					? [this.generate(node.nth), ' of ', this.generate(node.selector)]
-					: [this.generate(node.nth)];
+			generate: function(processChunk, node) {
+				this.generate(processChunk, node.nth);
+				if (node.selector !== null) {
+					processChunk(' of ');
+					this.generate(processChunk, node.selector);
+				}
 			}
 		};
 
@@ -14844,8 +16044,8 @@ var CSSO = (function(){
 					value: this.scanner.consume(NUMBER)
 				};
 			},
-			generate: function(node) {
-				return node.value;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
 			}
 		};
 
@@ -14872,8 +16072,8 @@ var CSSO = (function(){
 					value: this.scanner.substrToCursor(start)
 				};
 			},
-			generate: function(node) {
-				return node.value;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
 			}
 		};
 
@@ -14906,8 +16106,10 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return [].concat('(', this.each(node.children), ')');
+			generate: function(processChunk, node) {
+				processChunk('(');
+				this.each(processChunk, node);
+				processChunk(')');
 			}
 		};
 
@@ -14939,8 +16141,9 @@ var CSSO = (function(){
 					value: number
 				};
 			},
-			generate: function(node) {
-				return node.value + '%';
+			generate: function(processChunk, node) {
+				processChunk(node.value);
+				processChunk('%');
 			}
 		};
 
@@ -14954,10 +16157,9 @@ var CSSO = (function(){
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
 		var IDENTIFIER = TYPE.Identifier;
+		var FUNCTION = TYPE.Function;
 		var COLON = TYPE.Colon;
-		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
-		var BALANCED = true;
 
 		// : ident [ '(' .. ')' ]?
 		var exports = {
@@ -14968,27 +16170,29 @@ var CSSO = (function(){
 			},
 			parse: function() {
 				var start = this.scanner.tokenStart;
-				var name;
 				var children = null;
+				var name;
+				var nameLowerCase;
 
 				this.scanner.eat(COLON);
 
-				name = this.scanner.consume(IDENTIFIER);
-
-				if (this.scanner.tokenType === LEFTPARENTHESIS) {
-					var nameLowerCase = name.toLowerCase();
-
-					this.scanner.next();
+				if (this.scanner.tokenType === FUNCTION) {
+					name = this.scanner.consumeFunctionName();
+					nameLowerCase = name.toLowerCase();
 
 					if (this.pseudo.hasOwnProperty(nameLowerCase)) {
 						this.scanner.skipSC();
 						children = this.pseudo[nameLowerCase].call(this);
 						this.scanner.skipSC();
 					} else {
-						children = new List().appendData(this.Raw(BALANCED, 0, 0));
+						children = new List().appendData(
+							this.Raw(this.scanner.currentToken, 0, 0, false, false)
+						);
 					}
 
 					this.scanner.eat(RIGHTPARENTHESIS);
+				} else {
+					name = this.scanner.consume(IDENTIFIER);
 				}
 
 				return {
@@ -14998,10 +16202,15 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return node.children !== null
-					? [].concat(':' + node.name + '(', this.each(node.children), ')')
-					: ':' + node.name;
+			generate: function(processChunk, node) {
+				processChunk(':');
+				processChunk(node.name);
+
+				if (node.children !== null) {
+					processChunk('(');
+					this.each(processChunk, node);
+					processChunk(')');
+				}
 			},
 			walkContext: 'function'
 		};
@@ -15016,10 +16225,9 @@ var CSSO = (function(){
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
 		var IDENTIFIER = TYPE.Identifier;
+		var FUNCTION = TYPE.Function;
 		var COLON = TYPE.Colon;
-		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
-		var BALANCED = true;
 
 		// :: ident [ '(' .. ')' ]?
 		var exports = {
@@ -15030,28 +16238,30 @@ var CSSO = (function(){
 			},
 			parse: function() {
 				var start = this.scanner.tokenStart;
-				var name;
 				var children = null;
+				var name;
+				var nameLowerCase;
 
 				this.scanner.eat(COLON);
 				this.scanner.eat(COLON);
 
-				name = this.scanner.consume(IDENTIFIER);
-
-				if (this.scanner.tokenType === LEFTPARENTHESIS) {
-					var nameLowerCase = name.toLowerCase();
-
-					this.scanner.next();
+				if (this.scanner.tokenType === FUNCTION) {
+					name = this.scanner.consumeFunctionName();
+					nameLowerCase = name.toLowerCase();
 
 					if (this.pseudo.hasOwnProperty(nameLowerCase)) {
 						this.scanner.skipSC();
 						children = this.pseudo[nameLowerCase].call(this);
 						this.scanner.skipSC();
 					} else {
-						children = new List().appendData(this.Raw(BALANCED, 0, 0));
+						children = new List().appendData(
+							this.Raw(this.scanner.currentToken, 0, 0, false, false)
+						);
 					}
 
 					this.scanner.eat(RIGHTPARENTHESIS);
+				} else {
+					name = this.scanner.consume(IDENTIFIER);
 				}
 
 				return {
@@ -15061,10 +16271,15 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return node.children !== null
-					? [].concat('::' + node.name + '(', this.each(node.children), ')')
-					: '::' + node.name;
+			generate: function(processChunk, node) {
+				processChunk('::');
+				processChunk(node.name);
+
+				if (node.children !== null) {
+					processChunk('(');
+					this.each(processChunk, node);
+					processChunk(')');
+				}
 			},
 			walkContext: 'function'
 		};
@@ -15126,8 +16341,10 @@ var CSSO = (function(){
 					right: right
 				};
 			},
-			generate: function(node) {
-				return [node.left, '/', node.right];
+			generate: function(processChunk, node) {
+				processChunk(node.left);
+				processChunk('/');
+				processChunk(node.right);
 			}
 		};
 
@@ -15137,91 +16354,38 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/syntax/node/Raw
 	modules['/css-tree/syntax/node/Raw'] = function () {
-		var TYPE = require('/css-tree/tokenizer').TYPE;
-
-		var WHITESPACE = TYPE.Whitespace;
-		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
-		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
-		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
-		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
-		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
-		var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
-
 		var exports = {
 			name: 'Raw',
 			structure: {
 				value: String
 			},
-			parse: function(balanced, endTokenType1, endTokenType2) {
-				var start = this.scanner.tokenStart;
-				var stack = [];
-				var popType = 0;
-				var type = 0;
+			parse: function(startToken, endTokenType1, endTokenType2, includeTokenType2, excludeWhiteSpace) {
+				var startOffset = this.scanner.getTokenStart(startToken);
+				var endOffset;
 
-				if (balanced) {
-					scan:
-					for (var i = 0; type = this.scanner.lookupType(i); i++) {
-						if (popType === 0) {
-							if (type === endTokenType1 ||
-								type === endTokenType2) {
-								break scan;
-							}
-						}
+				this.scanner.skip(
+					this.scanner.getRawLength(
+						startToken,
+						endTokenType1,
+						endTokenType2,
+						includeTokenType2
+					)
+				);
 
-						switch (type) {
-							case popType:
-								popType = stack.pop();
-								break;
-
-							case RIGHTPARENTHESIS:
-							case RIGHTCURLYBRACKET:
-							case RIGHTSQUAREBRACKET:
-								if (popType !== 0) {
-									this.scanner.skip(i);
-									this.scanner.error();
-								}
-								break scan;
-
-							case LEFTPARENTHESIS:
-								stack.push(popType);
-								popType = RIGHTPARENTHESIS;
-								break;
-
-							case LEFTCURLYBRACKET:
-								stack.push(popType);
-								popType = RIGHTCURLYBRACKET;
-								break;
-
-							case LEFTSQUAREBRACKET:
-								stack.push(popType);
-								popType = RIGHTSQUAREBRACKET;
-								break;
-						}
-					}
+				if (excludeWhiteSpace && this.scanner.tokenStart > startOffset) {
+					endOffset = this.scanner.getOffsetExcludeWS();
 				} else {
-					for (var i = 0; type = this.scanner.lookupType(i); i++) {
-						if (type === WHITESPACE ||
-							type === endTokenType1 ||
-							type === endTokenType2) {
-							break;
-						}
-					}
-				}
-
-				this.scanner.skip(i);
-
-				if (popType !== 0) {
-					this.scanner.eat(popType);
+					endOffset = this.scanner.tokenStart;
 				}
 
 				return {
 					type: 'Raw',
-					loc: this.getLocation(start, this.scanner.tokenStart),
-					value: this.scanner.substrToCursor(start)
+					loc: this.getLocation(startOffset, endOffset),
+					value: this.scanner.source.substring(startOffset, endOffset)
 				};
 			},
-			generate: function(node) {
-				return node.value;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
 			}
 		};
 
@@ -15232,8 +16396,12 @@ var CSSO = (function(){
 	//#region URL: /css-tree/syntax/node/Rule
 	modules['/css-tree/syntax/node/Rule'] = function () {
 		var TYPE = require('/css-tree/tokenizer').TYPE;
+
 		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
-		var BALANCED = true;
+
+		function consumeRaw(startToken) {
+			return this.Raw(startToken, LEFTCURLYBRACKET, 0, false, true);
+		}
 
 		var exports = {
 			name: 'Rule',
@@ -15242,22 +16410,23 @@ var CSSO = (function(){
 				block: ['Block']
 			},
 			parse: function() {
-				var start = this.scanner.tokenStart;
-				var selector = this.parseSelector ? this.SelectorList() : this.Raw(BALANCED, LEFTCURLYBRACKET, 0);
+				var startToken = this.scanner.currentToken;
+				var startOffset = this.scanner.tokenStart;
+				var selector = this.parseSelector
+					? this.tolerantParse(this.SelectorList, consumeRaw)
+					: consumeRaw.call(this, startToken);
 				var block = this.Block(this.Declaration);
 
 				return {
 					type: 'Rule',
-					loc: this.getLocation(start, this.scanner.tokenStart),
+					loc: this.getLocation(startOffset, this.scanner.tokenStart),
 					selector: selector,
 					block: block
 				};
 			},
-			generate: function(node) {
-				return [
-					this.generate(node.selector),
-					this.generate(node.block)
-				];
+			generate: function(processChunk, node) {
+				this.generate(processChunk, node.selector);
+				this.generate(processChunk, node.block);
 			},
 			walkContext: 'rule'
 		};
@@ -15296,8 +16465,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.each(node.children);
+			generate: function(processChunk, node) {
+				this.each(processChunk, node);
 			}
 		};
 
@@ -15312,12 +16481,11 @@ var CSSO = (function(){
 
 		var COMMA = TYPE.Comma;
 		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
-		var BALANCED = true;
 
 		var exports = {
 			name: 'SelectorList',
 			structure: {
-				children: [['Selector']]
+				children: [['Selector', 'Raw']]
 			},
 			parse: function() {
 				var children = new List();
@@ -15325,7 +16493,7 @@ var CSSO = (function(){
 				while (!this.scanner.eof) {
 					children.appendData(this.parseSelector
 						? this.Selector()
-						: this.Raw(BALANCED, COMMA, LEFTCURLYBRACKET)
+						: this.Raw(this.scanner.currentToken, COMMA, LEFTCURLYBRACKET, false, false)
 					);
 
 					if (this.scanner.tokenType === COMMA) {
@@ -15342,8 +16510,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.eachComma(node.children);
+			generate: function(processChunk, node) {
+				this.eachComma(processChunk, node);
 			},
 			walkContext: 'selector'
 		};
@@ -15368,8 +16536,8 @@ var CSSO = (function(){
 					value: this.scanner.consume(STRING)
 				};
 			},
-			generate: function(node) {
-				return node.value;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
 			}
 		};
 
@@ -15382,17 +16550,21 @@ var CSSO = (function(){
 		var List = require('/css-tree/utils/list');
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var COMMENT = TYPE.Comment;
 		var EXCLAMATIONMARK = TYPE.ExclamationMark;
-		var COMMERCIALAT = TYPE.CommercialAt;
+		var ATRULE = TYPE.Atrule;
 		var CDO = TYPE.CDO;
 		var CDC = TYPE.CDC;
+
+		function consumeRaw(startToken) {
+			return this.Raw(startToken, 0, 0, false, false);
+		}
 
 		var exports = {
 			name: 'StyleSheet',
 			structure: {
-				children: [['Comment', 'Atrule', 'Rule']]
+				children: [['Comment', 'Atrule', 'Rule', 'Raw']]
 			},
 			parse: function() {
 				var start = this.scanner.tokenStart;
@@ -15416,10 +16588,6 @@ var CSSO = (function(){
 							child = this.Comment();
 							break;
 
-						case COMMERCIALAT:
-							child = this.Atrule();
-							break;
-
 						case CDO: // <!--
 							child = this.CDO();
 							break;
@@ -15428,8 +16596,16 @@ var CSSO = (function(){
 							child = this.CDC();
 							break;
 
+						// CSS Syntax Module Level 3
+						// ยง2.2 Error handling
+						// At the "top level" of a stylesheet, an <at-keyword-token> starts an at-rule.
+						case ATRULE:
+							child = this.Atrule();
+							break;
+
+						// Anything else starts a qualified rule ...
 						default:
-							child = this.Rule();
+							child = this.tolerantParse(this.Rule, consumeRaw);
 					}
 
 					children.appendData(child);
@@ -15441,8 +16617,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.each(node.children);
+			generate: function(processChunk, node) {
+				this.each(processChunk, node);
 			},
 			walkContext: 'stylesheet'
 		};
@@ -15502,8 +16678,8 @@ var CSSO = (function(){
 					name: this.scanner.substrToCursor(start)
 				};
 			},
-			generate: function(node) {
-				return node.name;
+			generate: function(processChunk, node) {
+				processChunk(node.name);
 			}
 		};
 
@@ -15634,8 +16810,8 @@ var CSSO = (function(){
 					value: this.scanner.substrToCursor(start)
 				};
 			},
-			generate: function(node) {
-				return node.value;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
 			}
 		};
 
@@ -15648,9 +16824,9 @@ var CSSO = (function(){
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
 		var STRING = TYPE.String;
-		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var URL = TYPE.Url;
+		var RAW = TYPE.Raw;
 		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
-		var NONBALANCED = false;
 
 		// url '(' S* (string | raw) S* ')'
 		var exports = {
@@ -15662,14 +16838,20 @@ var CSSO = (function(){
 				var start = this.scanner.tokenStart;
 				var value;
 
-				this.scanner.expectIdentifier('url');
-				this.scanner.eat(LEFTPARENTHESIS);
+				this.scanner.eat(URL);
 				this.scanner.skipSC();
 
-				if (this.scanner.tokenType === STRING) {
-					value = this.String();
-				} else {
-					value = this.Raw(NONBALANCED, LEFTPARENTHESIS, RIGHTPARENTHESIS);
+				switch (this.scanner.tokenType) {
+					case STRING:
+						value = this.String();
+						break;
+
+					case RAW:
+						value = this.Raw(this.scanner.currentToken, 0, RAW, true, false);
+						break;
+
+					default:
+						this.scanner.error('String or Raw is expected');
 				}
 
 				this.scanner.skipSC();
@@ -15681,8 +16863,11 @@ var CSSO = (function(){
 					value: value
 				};
 			},
-			generate: function(node) {
-				return ['url(', this.generate(node.value), ')'];
+			generate: function(processChunk, node) {
+				processChunk('url');
+				processChunk('(');
+				this.generate(processChunk, node.value);
+				processChunk(')');
 			}
 		};
 
@@ -15695,13 +16880,12 @@ var CSSO = (function(){
 		var endsWith = require('/css-tree/tokenizer').endsWith;
 		var TYPE = require('/css-tree/tokenizer').TYPE;
 
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var COMMENT = TYPE.Comment;
-		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var FUNCTION = TYPE.Function;
 		var COLON = TYPE.Colon;
 		var SEMICOLON = TYPE.Semicolon;
 		var EXCLAMATIONMARK = TYPE.ExclamationMark;
-		var BALANCED = true;
 
 		// 'progid:' ws* 'DXImageTransform.Microsoft.' ident ws* '(' .* ')'
 		function checkProgid(scanner) {
@@ -15713,10 +16897,10 @@ var CSSO = (function(){
 				}
 			}
 
-			if (scanner.lookupValue(offset, 'alpha') ||
-				scanner.lookupValue(offset, 'chroma') ||
-				scanner.lookupValue(offset, 'dropshadow')) {
-				if (scanner.lookupType(offset + 1) !== LEFTPARENTHESIS) {
+			if (scanner.lookupValue(offset, 'alpha(') ||
+				scanner.lookupValue(offset, 'chroma(') ||
+				scanner.lookupValue(offset, 'dropshadow(')) {
+				if (scanner.lookupType(offset) !== FUNCTION) {
 					return false;
 				}
 			} else {
@@ -15738,7 +16922,7 @@ var CSSO = (function(){
 				// special parser for filter property since it can contains non-standart syntax for old IE
 				if (property !== null && endsWith(property, 'filter') && checkProgid(this.scanner)) {
 					this.scanner.skipSC();
-					return this.Raw(BALANCED, SEMICOLON, EXCLAMATIONMARK);
+					return this.Raw(this.scanner.currentToken, EXCLAMATIONMARK, SEMICOLON, false, false);
 				}
 
 				var start = this.scanner.tokenStart;
@@ -15750,8 +16934,8 @@ var CSSO = (function(){
 					children: children
 				};
 			},
-			generate: function(node) {
-				return this.each(node.children);
+			generate: function(processChunk, node) {
+				this.each(processChunk, node);
 			}
 		};
 
@@ -15761,7 +16945,7 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/syntax/node/WhiteSpace
 	modules['/css-tree/syntax/node/WhiteSpace'] = function () {
-		var WHITESPACE = require('/css-tree/tokenizer').TYPE.Whitespace;
+		var WHITESPACE = require('/css-tree/tokenizer').TYPE.WhiteSpace;
 		var SPACE = Object.freeze({
 			type: 'WhiteSpace',
 			loc: null,
@@ -15778,14 +16962,33 @@ var CSSO = (function(){
 				return SPACE;
 
 				// return {
-				//	 type: 'WhiteSpace',
-				//	 loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
-				//	 value: this.scanner.consume(WHITESPACE)
+				//     type: 'WhiteSpace',
+				//     loc: this.getLocation(this.scanner.tokenStart, this.scanner.tokenEnd),
+				//     value: this.scanner.consume(WHITESPACE)
 				// };
 			},
-			generate: function(node) {
-				return node.value;
+			generate: function(processChunk, node) {
+				processChunk(node.value);
 			}
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/pseudo
+	modules['/css-tree/syntax/pseudo'] = function () {
+		var exports = {
+			'dir': require('/css-tree/syntax/pseudo/dir'),
+			'has': require('/css-tree/syntax/pseudo/has'),
+			'lang': require('/css-tree/syntax/pseudo/lang'),
+			'matches': require('/css-tree/syntax/pseudo/matches'),
+			'not': require('/css-tree/syntax/pseudo/not'),
+			'nth-child': require('/css-tree/syntax/pseudo/nth-child'),
+			'nth-last-child': require('/css-tree/syntax/pseudo/nth-last-child'),
+			'nth-last-of-type': require('/css-tree/syntax/pseudo/nth-last-of-type'),
+			'nth-of-type': require('/css-tree/syntax/pseudo/nth-of-type'),
+			'slotted': require('/css-tree/syntax/pseudo/slotted')
 		};
 
 		return exports;
@@ -15954,8 +17157,20 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /css-tree/syntax/scope/atruleExpression
-	modules['/css-tree/syntax/scope/atruleExpression'] = function () {
+	//#region URL: /css-tree/syntax/scope
+	modules['/css-tree/syntax/scope'] = function () {
+		var exports = {
+			AtrulePrelude: require('/css-tree/syntax/scope/atrulePrelude'),
+			Selector: require('/css-tree/syntax/scope/selector'),
+			Value: require('/css-tree/syntax/scope/value')
+		};
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/syntax/scope/atrulePrelude
+	modules['/css-tree/syntax/scope/atrulePrelude'] = function () {
 		var exports = {
 			getNode: require('/css-tree/syntax/scope/default')
 		};
@@ -15972,6 +17187,8 @@ var CSSO = (function(){
 		var IDENTIFIER = TYPE.Identifier;
 		var STRING = TYPE.String;
 		var NUMBER = TYPE.Number;
+		var FUNCTION = TYPE.Function;
+		var URL = TYPE.Url;
 		var NUMBERSIGN = TYPE.NumberSign;
 		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
 		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
@@ -16026,17 +17243,17 @@ var CSSO = (function(){
 							return this.Number();
 					}
 
+				case FUNCTION:
+					return this.Function(this.readSequence, context.recognizer);
+
+				case URL:
+					return this.Url();
+
 				case IDENTIFIER:
 					// check for unicode range, it should start with u+ or U+
 					if (cmpChar(this.scanner.source, this.scanner.tokenStart, U) &&
 						cmpChar(this.scanner.source, this.scanner.tokenStart + 1, PLUSSIGN)) {
 						return this.UnicodeRange();
-					} else if (this.scanner.lookupType(1) === LEFTPARENTHESIS) {
-						if (this.scanner.lookupValue(0, 'url')) {
-							return this.Url();
-						} else {
-							return this.Function(this.readSequence, context.recognizer);
-						}
 					} else {
 						return this.Identifier();
 					}
@@ -16124,166 +17341,92 @@ var CSSO = (function(){
 	};
 	//#endregion
 
-	//#region URL: /css-tree/syntax/default
-	modules['/css-tree/syntax/default'] = function () {
-		var data = require('/css-tree/data');
+	//#region URL: /css-tree/syntax/create
+	modules['/css-tree/syntax/create'] = function () {
+		var List = require('/css-tree/utils/list');
+		var Tokenizer = require('/css-tree/tokenizer');
+		var Lexer = require('/css-tree/lexer/Lexer');
+		var grammar = require('/css-tree/lexer/grammar');
+		var createParser = require('/css-tree/parser/create');
+		var createGenerator = require('/css-tree/generator/create');
+		var createConvertor = require('/css-tree/convertor/create');
+		var createWalker = require('/css-tree/walker/create');
+		var clone = require('/css-tree/utils/clone');
+		var names = require('/css-tree/utils/names');
+		var mix = require('/css-tree/syntax/config/mix');
 
-		var exports = require('/css-tree/syntax').create({
-			generic: true,
-			types: data.types,
-			properties: data.properties,
-
-			parseContext: {
-				default: 'StyleSheet',
-				stylesheet: 'StyleSheet',
-				atrule: 'Atrule',
-				atruleExpression: function(options) {
-					return this.AtruleExpression(options.atrule ? String(options.atrule) : null);
-				},
-				mediaQueryList: 'MediaQueryList',
-				mediaQuery: 'MediaQuery',
-				rule: 'Rule',
-				selectorList: 'SelectorList',
-				selector: 'Selector',
-				block: function() {
-					return this.Block(this.Declaration);
-				},
-				declarationList: 'DeclarationList',
-				declaration: 'Declaration',
-				value: function(options) {
-					return this.Value(options.property ? String(options.property) : null);
-				}
-			},
-			scope: {
-				AtruleExpression: require('/css-tree/syntax/scope/atruleExpression'),
-				Selector: require('/css-tree/syntax/scope/selector'),
-				Value: require('/css-tree/syntax/scope/value')
-			},
-			atrule: {
-				'font-face': require('/css-tree/syntax/atrule/font-face'),
-				'import': require('/css-tree/syntax/atrule/import'),
-				'media': require('/css-tree/syntax/atrule/media'),
-				'page': require('/css-tree/syntax/atrule/page'),
-				'supports': require('/css-tree/syntax/atrule/supports')
-			},
-			pseudo: {
-				'dir': require('/css-tree/syntax/pseudo/dir'),
-				'has': require('/css-tree/syntax/pseudo/has'),
-				'lang': require('/css-tree/syntax/pseudo/lang'),
-				'matches': require('/css-tree/syntax/pseudo/matches'),
-				'not': require('/css-tree/syntax/pseudo/not'),
-				'nth-child': require('/css-tree/syntax/pseudo/nth-child'),
-				'nth-last-child': require('/css-tree/syntax/pseudo/nth-last-child'),
-				'nth-last-of-type': require('/css-tree/syntax/pseudo/nth-last-of-type'),
-				'nth-of-type': require('/css-tree/syntax/pseudo/nth-of-type'),
-				'slotted': require('/css-tree/syntax/pseudo/slotted')
-			},
-			node: {
-				AnPlusB: require('/css-tree/syntax/node/AnPlusB'),
-				Atrule: require('/css-tree/syntax/node/Atrule'),
-				AtruleExpression: require('/css-tree/syntax/node/AtruleExpression'),
-				AttributeSelector: require('/css-tree/syntax/node/AttributeSelector'),
-				Block: require('/css-tree/syntax/node/Block'),
-				Brackets: require('/css-tree/syntax/node/Brackets'),
-				CDC: require('/css-tree/syntax/node/CDC'),
-				CDO: require('/css-tree/syntax/node/CDO'),
-				ClassSelector: require('/css-tree/syntax/node/ClassSelector'),
-				Combinator: require('/css-tree/syntax/node/Combinator'),
-				Comment: require('/css-tree/syntax/node/Comment'),
-				Declaration: require('/css-tree/syntax/node/Declaration'),
-				DeclarationList: require('/css-tree/syntax/node/DeclarationList'),
-				Dimension: require('/css-tree/syntax/node/Dimension'),
-				Function: require('/css-tree/syntax/node/Function'),
-				HexColor: require('/css-tree/syntax/node/HexColor'),
-				Identifier: require('/css-tree/syntax/node/Identifier'),
-				IdSelector: require('/css-tree/syntax/node/IdSelector'),
-				MediaFeature: require('/css-tree/syntax/node/MediaFeature'),
-				MediaQuery: require('/css-tree/syntax/node/MediaQuery'),
-				MediaQueryList: require('/css-tree/syntax/node/MediaQueryList'),
-				Nth: require('/css-tree/syntax/node/Nth'),
-				Number: require('/css-tree/syntax/node/Number'),
-				Operator: require('/css-tree/syntax/node/Operator'),
-				Parentheses: require('/css-tree/syntax/node/Parentheses'),
-				Percentage: require('/css-tree/syntax/node/Percentage'),
-				PseudoClassSelector: require('/css-tree/syntax/node/PseudoClassSelector'),
-				PseudoElementSelector: require('/css-tree/syntax/node/PseudoElementSelector'),
-				Ratio: require('/css-tree/syntax/node/Ratio'),
-				Raw: require('/css-tree/syntax/node/Raw'),
-				Rule: require('/css-tree/syntax/node/Rule'),
-				Selector: require('/css-tree/syntax/node/Selector'),
-				SelectorList: require('/css-tree/syntax/node/SelectorList'),
-				String: require('/css-tree/syntax/node/String'),
-				StyleSheet: require('/css-tree/syntax/node/StyleSheet'),
-				TypeSelector: require('/css-tree/syntax/node/TypeSelector'),
-				UnicodeRange: require('/css-tree/syntax/node/UnicodeRange'),
-				Url: require('/css-tree/syntax/node/Url'),
-				Value: require('/css-tree/syntax/node/Value'),
-				WhiteSpace: require('/css-tree/syntax/node/WhiteSpace')
+		function assign(dest, src) {
+			for (var key in src) {
+				dest[key] = src[key];
 			}
-		});
 
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /css-tree/syntax/mix
-	modules['/css-tree/syntax/mix'] = function () {
-		var shape = {
-			generic: true,
-			types: {},
-			properties: {},
-			parseContext: {},
-			scope: {},
-			atrule: ['parse'],
-			pseudo: ['parse'],
-			node: ['name', 'structure', 'parse', 'generate', 'walkContext']
-		};
-
-		function mix(dest, src, shape) {
-			for (var key in shape) {
-				if (shape[key] === true) {
-					if (key in src) {
-						dest[key] = src[key];
-					}
-				} else if (shape[key]) {
-					if (shape[key].constructor === Object) {
-						var res = {};
-						for (var name in dest[key]) {
-							res[name] = dest[key][name];
-						}
-						for (var name in src[key]) {
-							res[name] = src[key][name];
-						}
-						dest[key] = res;
-					} else if (Array.isArray(shape[key])) {
-						var res = {};
-						var innerShape = shape[key].reduce(function(s, k) {
-							s[k] = true;
-							return s;
-						}, {});
-						for (var name in dest[key]) {
-							res[name] = {};
-							if (dest[key] && dest[key][name]) {
-								mix(res[name], dest[key][name], innerShape);
-							}
-						}
-						for (var name in src[key]) {
-							if (!res[name]) {
-								res[name] = {};
-							}
-							if (src[key] && src[key][name]) {
-								mix(res[name], src[key][name], innerShape);
-							}
-						}
-						dest[key] = res;
-					}
-				}
-			}
 			return dest;
 		}
 
-		var exports = function(dest, src) {
-			return mix(dest, src, shape);
+		function createSyntax(config) {
+			var parse = createParser(config);
+			var walker = createWalker(config);
+			var generator = createGenerator(config);
+			var convertor = createConvertor(walker);
+
+			var syntax = {
+				List: List,
+				Tokenizer: Tokenizer,
+				Lexer: Lexer,
+
+				property: names.property,
+				keyword: names.keyword,
+
+				grammar: grammar,
+				lexer: null,
+				createLexer: function(config) {
+					return new Lexer(config, syntax, syntax.lexer.structure);
+				},
+
+				parse: parse,
+
+				walk: walker.walk,
+				walkUp: walker.walkUp,
+				walkRules: walker.walkRules,
+				walkRulesRight: walker.walkRulesRight,
+				walkDeclarations: walker.walkDeclarations,
+
+				translate: generator.translate,
+				/*BT-
+				translateWithSourceMap: generator.translateWithSourceMap,
+				*/
+				translateMarkup: generator.translateMarkup,
+
+				clone: clone,
+				fromPlainObject: convertor.fromPlainObject,
+				toPlainObject: convertor.toPlainObject,
+
+				createSyntax: function(config) {
+					return createSyntax(mix({}, config));
+				},
+				fork: function(extension) {
+					var base = mix({}, config); // copy of config
+					return createSyntax(
+						typeof extension === 'function'
+							? extension(base, assign)
+							: mix(base, extension)
+					);
+				}
+			};
+
+			syntax.lexer = new Lexer({
+				generic: true,
+				types: config.types,
+				properties: config.properties,
+				node: config.node
+			}, syntax);
+
+			return syntax;
+		};
+
+		var exports = {};
+		exports.create = function(config) {
+			return createSyntax(mix({}, config));
 		};
 
 		return exports;
@@ -16311,6 +17454,10 @@ var CSSO = (function(){
 		var PUNCTUATOR = 6;
 		var CDO = 7;
 		var CDC = 8;
+		var ATRULE = 14;
+		var FUNCTION = 15;
+		var URL = 16;
+		var RAW = 17;
 
 		var TAB = 9;
 		var N = 10;
@@ -16319,47 +17466,51 @@ var CSSO = (function(){
 		var SPACE = 32;
 
 		var TYPE = {
-			Whitespace:   WHITESPACE,
+			WhiteSpace:   WHITESPACE,
 			Identifier:   IDENTIFIER,
-			Number:		   NUMBER,
-			String:		   STRING,
-			Comment:		 COMMENT,
+			Number:           NUMBER,
+			String:           STRING,
+			Comment:         COMMENT,
 			Punctuator:   PUNCTUATOR,
-			CDO:				 CDO,
-			CDC:				 CDC,
+			CDO:                 CDO,
+			CDC:                 CDC,
+			Atrule:           ATRULE,
+			Function:       FUNCTION,
+			Url:                 URL,
+			Raw:                 RAW,
 
-			ExclamationMark:	  33,  // !
-			QuotationMark:		34,  // "
-			NumberSign:		   35,  // #
-			DollarSign:		   36,  // $
-			PercentSign:		  37,  // %
-			Ampersand:			38,  // &
-			Apostrophe:		   39,  // '
-			LeftParenthesis:	  40,  // (
-			RightParenthesis:	 41,  // )
-			Asterisk:			 42,  // *
-			PlusSign:			 43,  // +
-			Comma:				44,  // ,
-			HyphenMinus:		  45,  // -
-			FullStop:			 46,  // .
-			Solidus:			  47,  // /
-			Colon:				58,  // :
-			Semicolon:			59,  // ;
-			LessThanSign:		 60,  // <
-			EqualsSign:		   61,  // =
-			GreaterThanSign:	  62,  // >
-			QuestionMark:		 63,  // ?
-			CommercialAt:		 64,  // @
-			LeftSquareBracket:	91,  // [
-			Backslash:			92,  // \
+			ExclamationMark:      33,  // !
+			QuotationMark:        34,  // "
+			NumberSign:           35,  // #
+			DollarSign:           36,  // $
+			PercentSign:          37,  // %
+			Ampersand:            38,  // &
+			Apostrophe:           39,  // '
+			LeftParenthesis:      40,  // (
+			RightParenthesis:     41,  // )
+			Asterisk:             42,  // *
+			PlusSign:             43,  // +
+			Comma:                44,  // ,
+			HyphenMinus:          45,  // -
+			FullStop:             46,  // .
+			Solidus:              47,  // /
+			Colon:                58,  // :
+			Semicolon:            59,  // ;
+			LessThanSign:         60,  // <
+			EqualsSign:           61,  // =
+			GreaterThanSign:      62,  // >
+			QuestionMark:         63,  // ?
+			CommercialAt:         64,  // @
+			LeftSquareBracket:    91,  // [
+			Backslash:            92,  // \
 			RightSquareBracket:   93,  // ]
-			CircumflexAccent:	 94,  // ^
-			LowLine:			  95,  // _
-			GraveAccent:		  96,  // `
-			LeftCurlyBracket:	123,  // {
-			VerticalLine:		124,  // |
+			CircumflexAccent:     94,  // ^
+			LowLine:              95,  // _
+			GraveAccent:          96,  // `
+			LeftCurlyBracket:    123,  // {
+			VerticalLine:        124,  // |
 			RightCurlyBracket:   125,  // }
-			Tilde:			   126   // ~
+			Tilde:               126   // ~
 		};
 
 		var NAME = Object.keys(TYPE).reduce(function(result, key) {
@@ -16367,9 +17518,18 @@ var CSSO = (function(){
 			return result;
 		}, {});
 
+		// https://drafts.csswg.org/css-syntax/#tokenizer-definitions
+		// > non-ASCII code point
+		// >   A code point with a value equal to or greater than U+0080 <control>
+		// > name-start code point
+		// >   A letter, a non-ASCII code point, or U+005F LOW LINE (_).
+		// > name code point
+		// >   A name-start code point, a digit, or U+002D HYPHEN-MINUS (-)
+		// That means only ASCII code points has a special meaning and we a maps for 0..127 codes only
 		var SafeUint32Array = typeof Uint32Array !== 'undefined' ? Uint32Array : Array; // fallback on Array when TypedArray is not supported
-		var SYMBOL_TYPE = new SafeUint32Array(Math.max.apply(null, Object.keys(NAME).map(Number)) + 1);
-		var PUNCTUATION = new SafeUint32Array(SYMBOL_TYPE.length);
+		var SYMBOL_TYPE = new SafeUint32Array(0x80);
+		var PUNCTUATION = new SafeUint32Array(0x80);
+		var STOP_URL_RAW = new SafeUint32Array(0x80);
 
 		for (var i = 0; i < SYMBOL_TYPE.length; i++) {
 			SYMBOL_TYPE[i] = IDENTIFIER;
@@ -16377,42 +17537,42 @@ var CSSO = (function(){
 
 		// fill categories
 		[
-			TYPE.ExclamationMark,	// !
-			TYPE.QuotationMark,	  // "
-			TYPE.NumberSign,		 // #
-			TYPE.DollarSign,		 // $
-			TYPE.PercentSign,		// %
-			TYPE.Ampersand,		  // &
-			TYPE.Apostrophe,		 // '
-			TYPE.LeftParenthesis,	// (
+			TYPE.ExclamationMark,    // !
+			TYPE.QuotationMark,      // "
+			TYPE.NumberSign,         // #
+			TYPE.DollarSign,         // $
+			TYPE.PercentSign,        // %
+			TYPE.Ampersand,          // &
+			TYPE.Apostrophe,         // '
+			TYPE.LeftParenthesis,    // (
 			TYPE.RightParenthesis,   // )
-			TYPE.Asterisk,		   // *
-			TYPE.PlusSign,		   // +
-			TYPE.Comma,			  // ,
-			TYPE.HyphenMinus,		// -
-			TYPE.FullStop,		   // .
-			TYPE.Solidus,			// /
-			TYPE.Colon,			  // :
-			TYPE.Semicolon,		  // ;
-			TYPE.LessThanSign,	   // <
-			TYPE.EqualsSign,		 // =
-			TYPE.GreaterThanSign,	// >
-			TYPE.QuestionMark,	   // ?
-			TYPE.CommercialAt,	   // @
+			TYPE.Asterisk,           // *
+			TYPE.PlusSign,           // +
+			TYPE.Comma,              // ,
+			TYPE.HyphenMinus,        // -
+			TYPE.FullStop,           // .
+			TYPE.Solidus,            // /
+			TYPE.Colon,              // :
+			TYPE.Semicolon,          // ;
+			TYPE.LessThanSign,       // <
+			TYPE.EqualsSign,         // =
+			TYPE.GreaterThanSign,    // >
+			TYPE.QuestionMark,       // ?
+			TYPE.CommercialAt,       // @
 			TYPE.LeftSquareBracket,  // [
-			// TYPE.Backslash,		  // \
+			// TYPE.Backslash,          // \
 			TYPE.RightSquareBracket, // ]
 			TYPE.CircumflexAccent,   // ^
-			// TYPE.LowLine,			// _
-			TYPE.GraveAccent,		// `
+			// TYPE.LowLine,            // _
+			TYPE.GraveAccent,        // `
 			TYPE.LeftCurlyBracket,   // {
-			TYPE.VerticalLine,	   // |
+			TYPE.VerticalLine,       // |
 			TYPE.RightCurlyBracket,  // }
-			TYPE.Tilde			   // ~
+			TYPE.Tilde               // ~
 		].forEach(function(key) {
 			SYMBOL_TYPE[Number(key)] = PUNCTUATOR;
 			PUNCTUATION[Number(key)] = PUNCTUATOR;
-		}, SYMBOL_TYPE);
+		});
 
 		for (var i = 48; i <= 57; i++) {
 			SYMBOL_TYPE[i] = NUMBER;
@@ -16426,6 +17586,16 @@ var CSSO = (function(){
 
 		SYMBOL_TYPE[TYPE.Apostrophe] = STRING;
 		SYMBOL_TYPE[TYPE.QuotationMark] = STRING;
+
+		STOP_URL_RAW[SPACE] = 1;
+		STOP_URL_RAW[TAB] = 1;
+		STOP_URL_RAW[N] = 1;
+		STOP_URL_RAW[R] = 1;
+		STOP_URL_RAW[F] = 1;
+		STOP_URL_RAW[TYPE.Apostrophe] = 1;
+		STOP_URL_RAW[TYPE.QuotationMark] = 1;
+		STOP_URL_RAW[TYPE.LeftParenthesis] = 1;
+		STOP_URL_RAW[TYPE.RightParenthesis] = 1;
 
 		// whitespace is punctuation ...
 		PUNCTUATION[SPACE] = PUNCTUATOR;
@@ -16441,7 +17611,8 @@ var CSSO = (function(){
 			NAME: NAME,
 
 			SYMBOL_TYPE: SYMBOL_TYPE,
-			PUNCTUATION: PUNCTUATION
+			PUNCTUATION: PUNCTUATION,
+			STOP_URL_RAW: STOP_URL_RAW
 		};
 
 		return exports;
@@ -16503,9 +17674,12 @@ var CSSO = (function(){
 		}
 
 		var CssSyntaxError = function(message, source, offset, line, column) {
-			var error = new SyntaxError();
+			// some VMs prevent setting line/column otherwise (iOS Safari 10 even throw an exception)
+			var error = Object.create(SyntaxError.prototype);
+
 			error.name = 'CssSyntaxError';
 			error.message = message;
+			error.stack = (new Error().stack || '').replace(/^.+\n/, error.name + ': ' + error.message + '\n');
 			error.source = source;
 			error.offset = offset;
 			error.line = line;
@@ -16533,9 +17707,7 @@ var CSSO = (function(){
 			return error;
 		};
 
-		var exports = CssSyntaxError;
-
-		return exports;
+		return CssSyntaxError;
 	};
 	//#endregion
 
@@ -16549,21 +17721,21 @@ var CSSO = (function(){
 		var TYPE = constants.TYPE;
 		var NAME = constants.NAME;
 		var SYMBOL_TYPE = constants.SYMBOL_TYPE;
-		var SYMBOL_TYPE_LENGTH = SYMBOL_TYPE.length;
 
 		var utils = require('/css-tree/tokenizer/utils');
 		var firstCharOffset = utils.firstCharOffset;
 		var cmpStr = utils.cmpStr;
 		var isNumber = utils.isNumber;
 		var findLastNonSpaceLocation = utils.findLastNonSpaceLocation;
-		var findWhitespaceEnd = utils.findWhitespaceEnd;
+		var findWhiteSpaceEnd = utils.findWhiteSpaceEnd;
 		var findCommentEnd = utils.findCommentEnd;
 		var findStringEnd = utils.findStringEnd;
 		var findNumberEnd = utils.findNumberEnd;
 		var findIdentifierEnd = utils.findIdentifierEnd;
+		var findUrlRawEnd = utils.findUrlRawEnd;
 
 		var NULL = 0;
-		var WHITESPACE = TYPE.Whitespace;
+		var WHITESPACE = TYPE.WhiteSpace;
 		var IDENTIFIER = TYPE.Identifier;
 		var NUMBER = TYPE.Number;
 		var STRING = TYPE.String;
@@ -16571,6 +17743,10 @@ var CSSO = (function(){
 		var PUNCTUATOR = TYPE.Punctuator;
 		var CDO = TYPE.CDO;
 		var CDC = TYPE.CDC;
+		var ATRULE = TYPE.Atrule;
+		var FUNCTION = TYPE.Function;
+		var URL = TYPE.Url;
+		var RAW = TYPE.Raw;
 
 		var N = 10;
 		var F = 12;
@@ -16583,10 +17759,19 @@ var CSSO = (function(){
 		var GREATERTHANSIGN = TYPE.GreaterThanSign;
 		var LESSTHANSIGN = TYPE.LessThanSign;
 		var EXCLAMATIONMARK = TYPE.ExclamationMark;
+		var COMMERCIALAT = TYPE.CommercialAt;
+		var QUOTATIONMARK = TYPE.QuotationMark;
+		var APOSTROPHE = TYPE.Apostrophe;
+		var LEFTPARENTHESIS = TYPE.LeftParenthesis;
+		var RIGHTPARENTHESIS = TYPE.RightParenthesis;
+		var LEFTCURLYBRACKET = TYPE.LeftCurlyBracket;
+		var RIGHTCURLYBRACKET = TYPE.RightCurlyBracket;
+		var LEFTSQUAREBRACKET = TYPE.LeftSquareBracket;
+		var RIGHTSQUAREBRACKET = TYPE.RightSquareBracket;
 
 		var MIN_BUFFER_SIZE = 16 * 1024;
 		var OFFSET_MASK = 0x00FFFFFF;
-		var TYPE_OFFSET = 24;
+		var TYPE_SHIFT = 24;
 		var SafeUint32Array = typeof Uint32Array !== 'undefined' ? Uint32Array : Array; // fallback on Array when TypedArray is not supported
 
 		function computeLinesAndColumns(tokenizer, source) {
@@ -16631,24 +17816,65 @@ var CSSO = (function(){
 		function tokenLayout(tokenizer, source, startPos) {
 			var sourceLength = source.length;
 			var offsetAndType = tokenizer.offsetAndType;
+			var balance = tokenizer.balance;
 			var tokenCount = 0;
 			var prevType = 0;
 			var offset = startPos;
+			var anchor = 0;
+			var balanceCloseCode = 0;
+			var balanceStart = 0;
+			var balancePrev = 0;
 
 			if (offsetAndType === null || offsetAndType.length < sourceLength + 1) {
 				offsetAndType = new SafeUint32Array(sourceLength + 1024);
+				balance = new SafeUint32Array(sourceLength + 1024);
 			}
 
 			while (offset < sourceLength) {
 				var code = source.charCodeAt(offset);
-				var type = code < SYMBOL_TYPE_LENGTH ? SYMBOL_TYPE[code] : IDENTIFIER;
+				var type = code < 0x80 ? SYMBOL_TYPE[code] : IDENTIFIER;
+
+				balance[tokenCount] = sourceLength;
 
 				switch (type) {
 					case WHITESPACE:
-						offset = findWhitespaceEnd(source, offset + 1);
+						offset = findWhiteSpaceEnd(source, offset + 1);
 						break;
 
 					case PUNCTUATOR:
+						switch (code) {
+							case balanceCloseCode:
+								balancePrev = balanceStart & OFFSET_MASK;
+								balanceStart = balance[balancePrev];
+								balanceCloseCode = balanceStart >> TYPE_SHIFT;
+								balance[tokenCount] = balancePrev;
+								balance[balancePrev++] = tokenCount;
+								for (; balancePrev < tokenCount; balancePrev++) {
+									if (balance[balancePrev] === sourceLength) {
+										balance[balancePrev] = tokenCount;
+									}
+								}
+								break;
+
+							case LEFTSQUAREBRACKET:
+								balance[tokenCount] = balanceStart;
+								balanceCloseCode = RIGHTSQUAREBRACKET;
+								balanceStart = (balanceCloseCode << TYPE_SHIFT) | tokenCount;
+								break;
+
+							case LEFTCURLYBRACKET:
+								balance[tokenCount] = balanceStart;
+								balanceCloseCode = RIGHTCURLYBRACKET;
+								balanceStart = (balanceCloseCode << TYPE_SHIFT) | tokenCount;
+								break;
+
+							case LEFTPARENTHESIS:
+								balance[tokenCount] = balanceStart;
+								balanceCloseCode = RIGHTPARENTHESIS;
+								balanceStart = (balanceCloseCode << TYPE_SHIFT) | tokenCount;
+								break;
+						}
+
 						// /*
 						if (code === STAR && prevType === SLASH) {
 							type = COMMENT;
@@ -16689,6 +17915,44 @@ var CSSO = (function(){
 							}
 						}
 
+						// ident(
+						if (code === LEFTPARENTHESIS && prevType === IDENTIFIER) {
+							offset = offset + 1;
+							tokenCount--; // rewrite prev token
+							balance[tokenCount] = balance[tokenCount + 1];
+							balanceStart--;
+
+							// 4 char length identifier and equal to `url(` (case insensitive)
+							if (offset - anchor === 4 && cmpStr(source, anchor, offset, 'url(')) {
+								// special case for url() because it can contain any symbols sequence with few exceptions
+								anchor = findWhiteSpaceEnd(source, offset);
+								code = source.charCodeAt(anchor);
+								if (code !== LEFTPARENTHESIS &&
+									code !== RIGHTPARENTHESIS &&
+									code !== QUOTATIONMARK &&
+									code !== APOSTROPHE) {
+									// url(
+									offsetAndType[tokenCount++] = (URL << TYPE_SHIFT) | offset;
+									balance[tokenCount] = sourceLength;
+
+									// ws*
+									if (anchor !== offset) {
+										offsetAndType[tokenCount++] = (WHITESPACE << TYPE_SHIFT) | anchor;
+										balance[tokenCount] = sourceLength;
+									}
+
+									// raw
+									type = RAW;
+									offset = findUrlRawEnd(source, anchor);
+								} else {
+									type = URL;
+								}
+							} else {
+								type = FUNCTION;
+							}
+							break;
+						}
+
 						type = code;
 						offset = offset + 1;
 						break;
@@ -16710,22 +17974,42 @@ var CSSO = (function(){
 						break;
 
 					default:
+						anchor = offset;
 						offset = findIdentifierEnd(source, offset);
 
 						// merge identifier with a preceding dash
 						if (prevType === HYPHENMINUS) {
-							tokenCount--; // rewrite prev token
+							// rewrite prev token
+							tokenCount--;
+							// restore prev prev token type
+							// for case @-prefix-ident
+							prevType = tokenCount === 0 ? 0 : offsetAndType[tokenCount - 1] >> TYPE_SHIFT;
+						}
+
+						if (prevType === COMMERCIALAT) {
+							// rewrite prev token and change type to <at-keyword-token>
+							tokenCount--;
+							type = ATRULE;
 						}
 				}
 
-				offsetAndType[tokenCount++] = (type << TYPE_OFFSET) | offset;
+				offsetAndType[tokenCount++] = (type << TYPE_SHIFT) | offset;
 				prevType = type;
 			}
 
+			// finalize arrays
 			offsetAndType[tokenCount] = offset;
+			balance[tokenCount] = sourceLength;
+			balance[sourceLength] = sourceLength; // prevents false positive balance match with any token
+			while (balanceStart !== 0) {
+				balancePrev = balanceStart & OFFSET_MASK;
+				balanceStart = balance[balancePrev];
+				balance[balancePrev] = sourceLength;
+			}
 
 			tokenizer.offsetAndType = offsetAndType;
 			tokenizer.tokenCount = tokenCount;
+			tokenizer.balance = balance;
 		}
 
 		//
@@ -16734,6 +18018,7 @@ var CSSO = (function(){
 
 		var Tokenizer = function(source, startOffset, startLine, startColumn) {
 			this.offsetAndType = null;
+			this.balance = null;
 			this.lines = null;
 			this.columns = null;
 
@@ -16746,6 +18031,7 @@ var CSSO = (function(){
 				var start = firstCharOffset(safeSource);
 
 				this.source = safeSource;
+				this.firstCharOffset = start;
 				this.startOffset = typeof startOffset === 'undefined' ? 0 : startOffset;
 				this.startLine = typeof startLine === 'undefined' ? 1 : startLine;
 				this.startColumn = typeof startColumn === 'undefined' ? 1 : startColumn;
@@ -16765,7 +18051,7 @@ var CSSO = (function(){
 				offset += this.currentToken;
 
 				if (offset < this.tokenCount) {
-					return this.offsetAndType[offset] >> TYPE_OFFSET;
+					return this.offsetAndType[offset] >> TYPE_SHIFT;
 				}
 
 				return NULL;
@@ -16774,7 +18060,7 @@ var CSSO = (function(){
 				offset += this.currentToken;
 
 				for (var type; offset < this.tokenCount; offset++) {
-					type = this.offsetAndType[offset] >> TYPE_OFFSET;
+					type = this.offsetAndType[offset] >> TYPE_SHIFT;
 
 					if (type !== WHITESPACE) {
 						return type;
@@ -16797,6 +18083,64 @@ var CSSO = (function(){
 
 				return false;
 			},
+			getTokenStart: function(tokenNum) {
+				if (tokenNum === this.currentToken) {
+					return this.tokenStart;
+				}
+
+				if (tokenNum > 0) {
+					return tokenNum < this.tokenCount
+						? this.offsetAndType[tokenNum - 1] & OFFSET_MASK
+						: this.offsetAndType[this.tokenCount] & OFFSET_MASK;
+				}
+
+				return this.firstCharOffset;
+			},
+			getOffsetExcludeWS: function() {
+				if (this.currentToken > 0) {
+					if ((this.offsetAndType[this.currentToken - 1] >> TYPE_SHIFT) === WHITESPACE) {
+						return this.currentToken > 1
+							? this.offsetAndType[this.currentToken - 2] & OFFSET_MASK
+							: this.firstCharOffset;
+					}
+				}
+				return this.tokenStart;
+			},
+			getRawLength: function(startToken, endTokenType1, endTokenType2, includeTokenType2) {
+				var cursor = startToken;
+				var balanceEnd;
+
+				loop:
+				for (; cursor < this.tokenCount; cursor++) {
+					balanceEnd = this.balance[cursor];
+
+					// belance end points to offset before start
+					if (balanceEnd < startToken) {
+						break loop;
+					}
+
+					// check token is stop type
+					switch (this.offsetAndType[cursor] >> TYPE_SHIFT) {
+						case endTokenType1:
+							break loop;
+
+						case endTokenType2:
+							if (includeTokenType2) {
+								cursor++;
+							}
+							break loop;
+
+						default:
+							// fast forward to the end of balanced block
+							if (this.balance[balanceEnd] === cursor) {
+								cursor = balanceEnd;
+							}
+					}
+
+				}
+
+				return cursor - this.currentToken;
+			},
 
 			getTokenValue: function() {
 				return this.source.substring(this.tokenStart, this.tokenEnd);
@@ -16807,7 +18151,7 @@ var CSSO = (function(){
 
 			skipWS: function() {
 				for (var i = this.currentToken, skipTokenCount = 0; i < this.tokenCount; i++, skipTokenCount++) {
-					if ((this.offsetAndType[i] >> TYPE_OFFSET) !== WHITESPACE) {
+					if ((this.offsetAndType[i] >> TYPE_SHIFT) !== WHITESPACE) {
 						break;
 					}
 				}
@@ -16828,7 +18172,7 @@ var CSSO = (function(){
 					this.currentToken = next;
 					this.tokenStart = this.offsetAndType[next - 1] & OFFSET_MASK;
 					next = this.offsetAndType[next];
-					this.tokenType = next >> TYPE_OFFSET;
+					this.tokenType = next >> TYPE_SHIFT;
 					this.tokenEnd = next & OFFSET_MASK;
 				} else {
 					this.currentToken = this.tokenCount;
@@ -16842,7 +18186,7 @@ var CSSO = (function(){
 					this.currentToken = next;
 					this.tokenStart = this.tokenEnd;
 					next = this.offsetAndType[next];
-					this.tokenType = next >> TYPE_OFFSET;
+					this.tokenType = next >> TYPE_SHIFT;
 					this.tokenEnd = next & OFFSET_MASK;
 				} else {
 					this.currentToken = this.tokenCount;
@@ -16854,12 +18198,25 @@ var CSSO = (function(){
 
 			eat: function(tokenType) {
 				if (this.tokenType !== tokenType) {
-					this.error(
-						NAME[tokenType] + ' is expected',
+					var offset = this.tokenStart;
+					var message = NAME[tokenType] + ' is expected';
+
+					// tweak message and offset
+					if (tokenType === IDENTIFIER) {
+						// when identifier is expected but there is a function or url
+						if (this.tokenType === FUNCTION || this.tokenType === URL) {
+							offset = this.tokenEnd - 1;
+							message += ' but function found';
+						}
+					} else {
 						// when test type is part of another token show error for current position + 1
 						// e.g. eat(HYPHENMINUS) will fail on "-foo", but pointing on "-" is odd
-						this.tokenStart + (this.source.charCodeAt(this.tokenStart) === tokenType ? 1 : 0)
-					);
+						if (this.source.charCodeAt(this.tokenStart) === tokenType) {
+							offset = offset + 1;
+						}
+					}
+
+					this.error(message, offset);
 				}
 
 				this.next();
@@ -16870,11 +18227,18 @@ var CSSO = (function(){
 			},
 
 			consume: function(tokenType) {
-				var start = this.tokenStart;
+				var value = this.getTokenValue();
 
 				this.eat(tokenType);
 
-				return this.substrToCursor(start);
+				return value;
+			},
+			consumeFunctionName: function() {
+				var name = this.source.substring(this.tokenStart, this.tokenEnd - 1);
+
+				this.eat(FUNCTION);
+
+				return name;
 			},
 			consumeNonWS: function(tokenType) {
 				this.skipWS();
@@ -16939,10 +18303,22 @@ var CSSO = (function(){
 				);
 			},
 
-			getTypes: function() {
-				return Array.prototype.slice.call(this.offsetAndType, 0, this.tokenCount).map(function(item) {
-					return NAME[item >> TYPE_OFFSET];
-				});
+			dump: function() {
+				var offset = 0;
+
+				return Array.prototype.slice.call(this.offsetAndType, 0, this.tokenCount).map(function(item, idx) {
+					var start = offset;
+					var end = item & OFFSET_MASK;
+
+					offset = end;
+
+					return {
+						idx: idx,
+						type: NAME[item >> TYPE_SHIFT],
+						chunk: this.source.substring(start, end),
+						balance: this.balance[idx]
+					};
+				}, this);
 			}
 		};
 
@@ -16961,7 +18337,7 @@ var CSSO = (function(){
 
 		// warm up tokenizer to elimitate code branches that never execute
 		// fix soft deoptimizations (insufficient type feedback)
-		new Tokenizer('\n\r\r\n\f<!---->//""\'\'/*\r\n\f*/1a;.\\31\t\+2{url(a);+1.2e3 -.4e-5 .6e+7}').getLocation();
+		new Tokenizer('\n\r\r\n\f<!---->//""\'\'/*\r\n\f*/1a;.\\31\t\+2{url(a);func();+1.2e3 -.4e-5 .6e+7}').getLocation();
 
 		return Tokenizer;
 	};
@@ -16973,8 +18349,7 @@ var CSSO = (function(){
 
 		var constants = require('/css-tree/tokenizer/const');
 		var PUNCTUATION = constants.PUNCTUATION;
-		var SYMBOL_TYPE = constants.SYMBOL_TYPE;
-		var SYMBOL_TYPE_LENGTH = SYMBOL_TYPE.length;
+		var STOP_URL_RAW = constants.STOP_URL_RAW;
 		var TYPE = constants.TYPE;
 		var FULLSTOP = TYPE.FullStop;
 		var PLUSSIGN = TYPE.PlusSign;
@@ -17073,7 +18448,7 @@ var CSSO = (function(){
 			return scanner.getLocation(i + 1);
 		}
 
-		function findWhitespaceEnd(source, offset) {
+		function findWhiteSpaceEnd(source, offset) {
 			for (; offset < source.length; offset++) {
 				var code = source.charCodeAt(offset);
 
@@ -17186,7 +18561,21 @@ var CSSO = (function(){
 
 				if (code === BACK_SLASH) {
 					offset = findEscaseEnd(source, offset + 1);
-				} else if (code < SYMBOL_TYPE_LENGTH && PUNCTUATION[code] === PUNCTUATOR) {
+				} else if (code < 0x80 && PUNCTUATION[code] === PUNCTUATOR) {
+					break;
+				}
+			}
+
+			return offset;
+		}
+
+		function findUrlRawEnd(source, offset) {
+			for (; offset < source.length; offset++) {
+				var code = source.charCodeAt(offset);
+
+				if (code === BACK_SLASH) {
+					offset = findEscaseEnd(source, offset + 1);
+				} else if (code < 0x80 && STOP_URL_RAW[code] === 1) {
 					break;
 				}
 			}
@@ -17206,13 +18595,14 @@ var CSSO = (function(){
 			endsWith: endsWith,
 
 			findLastNonSpaceLocation: findLastNonSpaceLocation,
-			findWhitespaceEnd: findWhitespaceEnd,
+			findWhiteSpaceEnd: findWhiteSpaceEnd,
 			findCommentEnd: findCommentEnd,
 			findStringEnd: findStringEnd,
 			findDecimalNumberEnd: findDecimalNumberEnd,
 			findNumberEnd: findNumberEnd,
 			findEscaseEnd: findEscaseEnd,
-			findIdentifierEnd: findIdentifierEnd
+			findIdentifierEnd: findIdentifierEnd,
+			findUrlRawEnd: findUrlRawEnd
 		};
 
 		return exports;
@@ -17245,40 +18635,6 @@ var CSSO = (function(){
 			}
 
 			return result;
-		};
-
-		return exports;
-	};
-	//#endregion
-
-	//#region URL: /css-tree/utils/convert
-	modules['/css-tree/utils/convert'] = function () {
-		var List = require('/css-tree/utils/list');
-
-		var exports = function createConvertors(walker) {
-			var walk = walker.all;
-			var walkUp = walker.allUp;
-
-			return {
-				fromPlainObject: function(ast) {
-					walk(ast, function(node) {
-						if (node.children && node.children instanceof List === false) {
-							node.children = new List().fromArray(node.children);
-						}
-					});
-
-					return ast;
-				},
-				toPlainObject: function(ast) {
-					walkUp(ast, function(node) {
-						if (node.children && node.children instanceof List) {
-							node.children = node.children.toArray();
-						}
-					});
-
-					return ast;
-				}
-			};
 		};
 
 		return exports;
@@ -17787,9 +19143,10 @@ var CSSO = (function(){
 		var properties = Object.create(null);
 		var HYPHENMINUS = 45; // '-'.charCodeAt()
 
-		function isVariable(str, offset) {
-			return str.charCodeAt(offset) === HYPHENMINUS &&
-					str.charCodeAt(offset + 1) === HYPHENMINUS;
+		function isCustomProperty(str, offset) {
+			return str.length - offset >= 2 &&
+				   str.charCodeAt(offset) === HYPHENMINUS &&
+				   str.charCodeAt(offset + 1) === HYPHENMINUS;
 		}
 
 		function getVendorPrefix(str, offset) {
@@ -17816,7 +19173,7 @@ var CSSO = (function(){
 				return keywords[keyword] = keywords[name];
 			}
 
-			var vendor = !isVariable(name, 0) ? getVendorPrefix(name, 0) : '';
+			var vendor = !isCustomProperty(name, 0) ? getVendorPrefix(name, 0) : '';
 
 			return keywords[keyword] = Object.freeze({
 				vendor: vendor,
@@ -17843,23 +19200,23 @@ var CSSO = (function(){
 				hack = '';
 			}
 
-			var variable = isVariable(name, hack.length);
+			var custom = isCustomProperty(name, hack.length);
 
-			if (!variable) {
+			if (!custom) {
 				name = name.toLowerCase();
 				if (hasOwnProperty.call(properties, name)) {
 					return properties[property] = properties[name];
 				}
 			}
 
-			var vendor = !variable ? getVendorPrefix(name, hack.length) : '';
+			var vendor = !custom ? getVendorPrefix(name, hack.length) : '';
 
 			return properties[property] = Object.freeze({
 				hack: hack,
 				vendor: vendor,
 				prefix: hack + vendor,
 				name: name.substr(hack.length + vendor.length),
-				variable: variable
+				custom: custom
 			});
 		}
 
@@ -17874,6 +19231,17 @@ var CSSO = (function(){
 
 	//#region URL: /css-tree/walker
 	modules['/css-tree/walker'] = function () {
+		var createWalker = require('/css-tree/walker/create');
+		var config = require('/css-tree/syntax/config/walker');
+
+		var exports = createWalker(config);
+
+		return exports;
+	};
+	//#endregion
+
+	//#region URL: /css-tree/walker/create
+	modules['/css-tree/walker/create'] = function () {
 		'use strict';
 
 		function walkRules(node, item, list) {
@@ -18013,13 +19381,77 @@ var CSSO = (function(){
 			}
 		}
 
+		function getWalkersFromStructure(name, nodeType) {
+			var structure = nodeType.structure;
+			var walkers = [];
+
+			for (var key in structure) {
+				var walker = {
+					name: key,
+					type: false,
+					nullable: false
+				};
+
+				var fieldTypes = structure[key];
+
+				if (!Array.isArray(structure[key])) {
+					fieldTypes = [structure[key]];
+				}
+
+				for (var i = 0; i < fieldTypes.length; i++) {
+					var fieldType = fieldTypes[i];
+					if (fieldType === null) {
+						walker.nullable = true;
+					} else if (typeof fieldType === 'string') {
+						walker.type = 'node';
+					} else if (Array.isArray(fieldType)) {
+						walker.type = 'list';
+					}
+				}
+
+				if (walker.type) {
+					walkers.push(walker);
+				}
+			}
+
+			if (walkers.length) {
+				return {
+					context: nodeType.walkContext,
+					fields: walkers
+				};
+			}
+
+			return null;
+		}
+
+		function getTypesFromConfig(config) {
+			var types = {};
+
+			if (config.node) {
+				for (var name in config.node) {
+					var nodeType = config.node[name];
+
+					if (nodeType.structure) {
+						var walkers = getWalkersFromStructure(name, nodeType);
+						if (walkers !== null) {
+							types[name] = walkers;
+						}
+					} else {
+						throw new Error('Missed `structure` field in `' + name + '` node type definition');
+					}
+				}
+			}
+
+			return types;
+		}
+
 		function createContext(root, fn) {
 			var context = {
 				fn: fn,
 				root: root,
 				stylesheet: null,
 				atrule: null,
-				atruleExpression: null,
+				atrulePrelude: null,
 				rule: null,
 				selector: null,
 				block: null,
@@ -18030,7 +19462,8 @@ var CSSO = (function(){
 			return context;
 		}
 
-		var exports = function createWalker(types) {
+		var exports = function createWalker(config) {
+			var types = getTypesFromConfig(config);
 			var walkers = {};
 
 			for (var name in types) {
@@ -18043,7 +19476,7 @@ var CSSO = (function(){
 							: 'walk(node.' + field.name + ');';
 
 						if (field.nullable) {
-							line = 'if (node.' + field.name + ') {\n	' + line + '}';
+							line = 'if (node.' + field.name + ') {\n    ' + line + '}';
 						}
 
 						return line;
@@ -18053,7 +19486,7 @@ var CSSO = (function(){
 			}
 
 			return {
-				all: function(root, fn) {
+				walk: function(root, fn) {
 					function walk(node, item, list) {
 						fn.call(context, node, item, list);
 						if (walkers.hasOwnProperty(node.type)) {
@@ -18065,7 +19498,7 @@ var CSSO = (function(){
 
 					walk(root);
 				},
-				allUp: function(root, fn) {
+				walkUp: function(root, fn) {
 					function walk(node, item, list) {
 						if (walkers.hasOwnProperty(node.type)) {
 							walkers[node.type](node, context, walk);
@@ -18077,13 +19510,13 @@ var CSSO = (function(){
 
 					walk(root);
 				},
-				rules: function(root, fn) {
+				walkRules: function(root, fn) {
 					walkRules.call(createContext(root, fn), root);
 				},
-				rulesRight: function(root, fn) {
+				walkRulesRight: function(root, fn) {
 					walkRulesRight.call(createContext(root, fn), root);
 				},
-				declarations: function(root, fn) {
+				walkDeclarations: function(root, fn) {
 					walkDeclarations.call(createContext(root, fn), root);
 				}
 			};
