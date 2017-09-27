@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.176 - September 27, 2017
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.0.1
+
 ## v1.9.175 - September 24, 2017
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of CSSO CSS minifier
  * In BundleTransformer.Csso:
