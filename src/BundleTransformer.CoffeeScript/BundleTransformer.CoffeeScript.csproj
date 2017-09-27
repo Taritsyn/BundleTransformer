@@ -70,11 +70,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\coffeescript-combined.es6" />
     <Content Include="Resources\coffeescript-combined.js" />
     <Content Include="Resources\cscHelper.js" />
-    <EmbeddedResource Include="Resources\cscHelper.min.js" />
     <Content Include="Resources\LICENSE.txt" />
     <EmbeddedResource Include="Resources\coffeescript-combined.min.js" />
+    <EmbeddedResource Include="Resources\cscHelper.min.js" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\tools\Key.snk">
@@ -85,10 +86,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"
+    <PreBuildEvent>cd "$(ProjectDir)../../node_modules/"
 
-AjaxMinifier.exe "$(ProjectDir)Resources\coffeescript-combined.js" –out "$(ProjectDir)Resources\coffeescript-combined.min.js"
-AjaxMinifier.exe "$(ProjectDir)Resources\cscHelper.js" –out "$(ProjectDir)Resources\cscHelper.min.js"</PreBuildEvent>
+node.exe babel-cli/bin/babel.js --out-file "$(ProjectDir)Resources/coffeescript-combined.js" --presets es2015 "$(ProjectDir)Resources/coffeescript-combined.es6"
+
+cd "$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
+
+AjaxMinifier.exe "$(ProjectDir)Resources/coffeescript-combined.js" –out "$(ProjectDir)Resources/coffeescript-combined.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources/cscHelper.js" –out "$(ProjectDir)Resources/cscHelper.min.js"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
