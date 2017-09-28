@@ -79,3 +79,8 @@ Change log
  * In BundleTransformer.Handlebars added support of Handlebars version 4.0.10
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.1
  * In BundleTransformer.CleanCss added support of Clean-css version 4.1.3
+
+## v1.9.158 - May 17, 2017
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 1.12.6
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1
+ * In BundleTransformer.CleanCss added support of Clean-css version 4.1.2
