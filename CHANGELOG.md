@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.177 - September 28, 2017
+ * In BundleTransformer.TypeScript added support of TypeScript version 2.5.3
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.1.4.1
+
 ## v1.9.176 - September 27, 2017
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.0.1
 
