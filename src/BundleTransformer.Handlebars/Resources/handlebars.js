@@ -1,9 +1,9 @@
 /**!
 
  @license
- handlebars v4.0.10
+ handlebars v4.0.11
 
-Copyright (C) 2011-2016 by Yehuda Katz
+Copyright (C) 2011-2017 by Yehuda Katz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-
-var global = this;
-
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -278,7 +275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _logger2 = _interopRequireDefault(_logger);
 
-	var VERSION = '4.0.10';
+	var VERSION = '4.0.11';
 	exports.VERSION = VERSION;
 	var COMPILER_REVISION = 7;
 
@@ -1451,8 +1448,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports) {
 
 	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-	var global = module.exports = typeof window != 'undefined' && window.Math == Math
-	  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
+	var global = module.exports = /*BT- typeof window != 'undefined' && window.Math == Math
+	  ? window : */typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
 	if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
 
 /***/ }),
@@ -1512,14 +1509,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 34 */
 /***/ (function(module, exports) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {
+	/* WEBPACK VAR INJECTION */(function(global) {//BT- /* global window */
 	'use strict';
 
 	exports.__esModule = true;
 
 	exports['default'] = function (Handlebars) {
 	  /* istanbul ignore next */
-	  var root = global,
+	  var root = /*BT- typeof global !== 'undefined' ? */global/*BT- : window*/,
 	      $Handlebars = root.Handlebars;
 	  /* istanbul ignore next */
 	  Handlebars.noConflict = function () {
