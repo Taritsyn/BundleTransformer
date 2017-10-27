@@ -36,7 +36,7 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * CoffeeScript Compiler v2.0.1
+ * CoffeeScript Compiler v2.0.2
  * http://coffeescript.org
  *
  * Copyright 2009-2017 Jeremy Ashkenas
@@ -1351,7 +1351,7 @@ var CoffeeScript = (function(){
 		// `STRING_START` isn’t on this list because its `locationData` matches that of
 		// the node that becomes `StringWithInterpolations`, and therefore
 		// `addDataToNode` attaches `STRING_START`’s tokens to that node.
-		DISCARDED = ['(', ')', '[', ']', '{', '}', '.', '..', '...', ',', '=', '++', '--', '?', 'AS', 'AWAIT', 'CALL_START', 'CALL_END', 'DEFAULT', 'ELSE', 'EXTENDS', 'EXPORT', 'FORIN', 'FOROF', 'FORFROM', 'IMPORT', 'INDENT', 'INDEX_SOAK', 'LEADING_WHEN', 'OUTDENT', 'PARAM_START', 'PARAM_END', 'REGEX_START', 'REGEX_END', 'RETURN', 'STRING_END', 'THROW', 'UNARY', 'YIELD'].concat(IMPLICIT_UNSPACED_CALL.concat(IMPLICIT_END.concat(CALL_CLOSERS.concat(CONTROL_IN_IMPLICIT))));
+		DISCARDED = ['(', ')', '[', ']', '{', '}', '.', '..', '...', ',', '=', '++', '--', '?', 'AS', 'AWAIT', 'CALL_START', 'CALL_END', 'DEFAULT', 'ELSE', 'EXTENDS', 'EXPORT', 'FORIN', 'FOROF', 'FORFROM', 'IMPORT', 'INDENT', 'INDEX_SOAK', 'LEADING_WHEN', 'OUTDENT', 'PARAM_END', 'REGEX_START', 'REGEX_END', 'RETURN', 'STRING_END', 'THROW', 'UNARY', 'YIELD'].concat(IMPLICIT_UNSPACED_CALL.concat(IMPLICIT_END.concat(CALL_CLOSERS.concat(CONTROL_IN_IMPLICIT))));
 
 		return exports;
 	};
@@ -1471,7 +1471,7 @@ var CoffeeScript = (function(){
 			// referenced as property names here, so you can still do `jQuery.is()` even
 			// though `is` means `===` otherwise.
 			identifierToken() {
-				var alias, colon, colonOffset, colonToken, id, idLength, inCSXTag, input, match, poppedToken, prev, prevprev, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, regExSuper, regex, sup, tag, tagToken;
+				var alias, colon, colonOffset, colonToken, id, idLength, inCSXTag, input, match, poppedToken, prev, prevprev, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, regExSuper, regex, sup, tag, tagToken;
 				inCSXTag = this.atCSXTag();
 				regex = inCSXTag ? CSX_ATTRIBUTE : IDENTIFIER;
 				if (!(match = regex.exec(this.chunk))) {
@@ -1492,19 +1492,28 @@ var CoffeeScript = (function(){
 				if (id === 'as' && this.seenImport) {
 					if (this.value() === '*') {
 						this.tokens[this.tokens.length - 1][0] = 'IMPORT_ALL';
-					} else if (ref = this.value(), indexOf.call(COFFEE_KEYWORDS, ref) >= 0) {
-						this.tokens[this.tokens.length - 1][0] = 'IDENTIFIER';
+					} else if (ref = this.value(true), indexOf.call(COFFEE_KEYWORDS, ref) >= 0) {
+						prev = this.prev();
+						[prev[0], prev[1]] = ['IDENTIFIER', this.value(true)];
 					}
 					if ((ref1 = this.tag()) === 'DEFAULT' || ref1 === 'IMPORT_ALL' || ref1 === 'IDENTIFIER') {
 						this.token('AS', id);
 						return id.length;
 					}
 				}
-				if (id === 'as' && this.seenExport && ((ref2 = this.tag()) === 'IDENTIFIER' || ref2 === 'DEFAULT')) {
-					this.token('AS', id);
-					return id.length;
+				if (id === 'as' && this.seenExport) {
+					if ((ref2 = this.tag()) === 'IDENTIFIER' || ref2 === 'DEFAULT') {
+						this.token('AS', id);
+						return id.length;
+					}
+					if (ref3 = this.value(true), indexOf.call(COFFEE_KEYWORDS, ref3) >= 0) {
+						prev = this.prev();
+						[prev[0], prev[1]] = ['IDENTIFIER', this.value(true)];
+						this.token('AS', id);
+						return id.length;
+					}
 				}
-				if (id === 'default' && this.seenExport && ((ref3 = this.tag()) === 'EXPORT' || ref3 === 'AS')) {
+				if (id === 'default' && this.seenExport && ((ref4 = this.tag()) === 'EXPORT' || ref4 === 'AS')) {
 					this.token('DEFAULT', id);
 					return id.length;
 				}
@@ -1516,10 +1525,10 @@ var CoffeeScript = (function(){
 					return sup.length + 3;
 				}
 				prev = this.prev();
-				tag = colon || (prev != null) && (((ref4 = prev[0]) === '.' || ref4 === '?.' || ref4 === '::' || ref4 === '?::') || !prev.spaced && prev[0] === '@') ? 'PROPERTY' : 'IDENTIFIER';
+				tag = colon || (prev != null) && (((ref5 = prev[0]) === '.' || ref5 === '?.' || ref5 === '::' || ref5 === '?::') || !prev.spaced && prev[0] === '@') ? 'PROPERTY' : 'IDENTIFIER';
 				if (tag === 'IDENTIFIER' && (indexOf.call(JS_KEYWORDS, id) >= 0 || indexOf.call(COFFEE_KEYWORDS, id) >= 0) && !(this.exportSpecifierList && indexOf.call(COFFEE_KEYWORDS, id) >= 0)) {
 					tag = id.toUpperCase();
-					if (tag === 'WHEN' && (ref5 = this.tag(), indexOf.call(LINE_BREAK, ref5) >= 0)) {
+					if (tag === 'WHEN' && (ref6 = this.tag(), indexOf.call(LINE_BREAK, ref6) >= 0)) {
 						tag = 'LEADING_WHEN';
 					} else if (tag === 'FOR') {
 						this.seenFor = true;
@@ -1550,11 +1559,11 @@ var CoffeeScript = (function(){
 				// what CoffeeScript would normally interpret as calls to functions named
 				// `get` or `set`, i.e. `get({foo: function () {}})`.
 				} else if (tag === 'PROPERTY' && prev) {
-					if (prev.spaced && (ref6 = prev[0], indexOf.call(CALLABLE, ref6) >= 0) && /^[gs]et$/.test(prev[1])) {
+					if (prev.spaced && (ref7 = prev[0], indexOf.call(CALLABLE, ref7) >= 0) && /^[gs]et$/.test(prev[1]) && this.tokens[this.tokens.length - 2][0] !== '.') {
 						this.error(`'${prev[1]}' cannot be used as a keyword, or as a function call without parentheses`, prev[2]);
 					} else {
 						prevprev = this.tokens[this.tokens.length - 2];
-						if (((ref7 = prev[0]) === '@' || ref7 === 'THIS') && prevprev && prevprev.spaced && /^[gs]et$/.test(prevprev[1]) && this.tokens[this.tokens.length - 3][0] !== '.') {
+						if (((ref8 = prev[0]) === '@' || ref8 === 'THIS') && prevprev && prevprev.spaced && /^[gs]et$/.test(prevprev[1]) && this.tokens[this.tokens.length - 3][0] !== '.') {
 							this.error(`'${prevprev[1]}' cannot be used as a keyword, or as a function call without parentheses`, prevprev[2]);
 						}
 					}
@@ -1564,7 +1573,7 @@ var CoffeeScript = (function(){
 						length: id.length
 					});
 				}
-				if (tag !== 'PROPERTY') {
+				if (!(tag === 'PROPERTY' || this.exportSpecifierList)) {
 					if (indexOf.call(COFFEE_ALIASES, id) >= 0) {
 						alias = id;
 						id = COFFEE_ALIAS_MAP[id];
@@ -2635,10 +2644,14 @@ var CoffeeScript = (function(){
 			}
 
 			// Peek at the last value in the token stream.
-			value() {
-				var ref, token;
+			value(useOrigin = false) {
+				var ref, ref1, token;
 				ref = this.tokens, token = ref[ref.length - 1];
-				return token != null ? token[1] : void 0;
+				if (useOrigin && ((token != null ? token.origin : void 0) != null)) {
+					return (ref1 = token.origin) != null ? ref1[1] : void 0;
+				} else {
+					return token != null ? token[1] : void 0;
+				}
 			}
 
 			// Get the previous token in the token stream.
@@ -3310,7 +3323,8 @@ var CoffeeScript = (function(){
 		case 86:
 		this.$ = yy.addDataToNode(yy, _$[$0-4], _$[$0])(new yy.Code($$[$0-3],
 					$$[$0],
-					$$[$0-1]));
+					$$[$0-1],
+					yy.addDataToNode(yy, _$[$0-4])(new yy.Literal($$[$0-4]))));
 		break;
 		case 87:
 		this.$ = yy.addDataToNode(yy, _$[$0-1], _$[$0])(new yy.Code([],
@@ -4135,7 +4149,8 @@ var CoffeeScript = (function(){
 			// as well as a reference to the **Block** node it belongs to, which is
 			// where it should declare its variables, a reference to the function that
 			// it belongs to, and a list of variables referenced in the source code
-			// and therefore should be avoided when generating variables.
+			// and therefore should be avoided when generating variables. Also track comments
+			// that should be output as part of variable declarations.
 			constructor(parent, expressions, method, referencedVars) {
 				var ref, ref1;
 				this.parent = parent;
@@ -4148,6 +4163,7 @@ var CoffeeScript = (function(){
 						type: 'arguments'
 					}
 				];
+				this.comments = {};
 				this.positions = {};
 				if (!this.parent) {
 					this.utilities = {};
@@ -4547,6 +4563,9 @@ var CoffeeScript = (function(){
 							// `compileToFragments` method has logic for outputting comments.
 							unshiftCommentFragment(commentFragment);
 						} else {
+							if (fragments.length === 0) {
+								fragments.push(this.makeCode(''));
+							}
 							if (commentFragment.unshift) {
 								if ((base1 = fragments[0]).precedingComments == null) {
 									base1.precedingComments = [];
@@ -5011,17 +5030,18 @@ var CoffeeScript = (function(){
 					ref1 = this.expressions;
 					for (index = j = 0, len1 = ref1.length; j < len1; index = ++j) {
 						node = ref1[index];
-						node = node.unwrapAll();
+						if (node.hoisted) {
+							// This is a hoisted expression.
+							// We want to compile this and ignore the result.
+							node.compileToFragments(o);
+							continue;
+						}
 						node = node.unfoldSoak(o) || node;
 						if (node instanceof Block) {
 							// This is a nested block. We don’t do anything special here like
 							// enclose it in a new scope; we just compile the statements in this
 							// block along with our own.
 							compiledNodes.push(node.compileNode(o));
-						} else if (node.hoisted) {
-							// This is a hoisted expression.
-							// We want to compile this and ignore the result.
-							node.compileToFragments(o);
 						} else if (top) {
 							node.front = true;
 							fragments = node.compileToFragments(o);
@@ -5084,7 +5104,7 @@ var CoffeeScript = (function(){
 				// Compile the expressions body for the contents of a function, with
 				// declarations of all inner variables pushed up to the top.
 				compileWithDeclarations(o) {
-					var assigns, declars, exp, fragments, i, j, len1, post, ref1, rest, scope, spaced;
+					var assigns, declaredVariable, declaredVariables, declaredVariablesIndex, declars, exp, fragments, i, j, k, len1, len2, post, ref1, rest, scope, spaced;
 					fragments = [];
 					post = [];
 					ref1 = this.expressions;
@@ -5115,7 +5135,17 @@ var CoffeeScript = (function(){
 							}
 							fragments.push(this.makeCode(`${this.tab}var `));
 							if (declars) {
-								fragments.push(this.makeCode(scope.declaredVariables().join(', ')));
+								declaredVariables = scope.declaredVariables();
+								for (declaredVariablesIndex = k = 0, len2 = declaredVariables.length; k < len2; declaredVariablesIndex = ++k) {
+									declaredVariable = declaredVariables[declaredVariablesIndex];
+									fragments.push(this.makeCode(declaredVariable));
+									if (Object.prototype.hasOwnProperty.call(o.scope.comments, declaredVariable)) {
+										fragments.push(...o.scope.comments[declaredVariable]);
+									}
+									if (declaredVariablesIndex !== declaredVariables.length - 1) {
+										fragments.push(this.makeCode(', '));
+									}
+								}
 							}
 							if (assigns) {
 								if (declars) {
@@ -5562,6 +5592,8 @@ var CoffeeScript = (function(){
 						this[tag] = true;
 					}
 					this.isDefaultValue = isDefaultValue;
+					// If this is a `@foo =` assignment, if there are comments on `@` move them
+					// to be on `foo`.
 					if (((ref1 = this.base) != null ? ref1.comments : void 0) && this.base instanceof ThisLiteral && (((ref2 = this.properties[0]) != null ? ref2.name : void 0) != null)) {
 						moveComments(this.base, this.properties[0].name);
 					}
@@ -5864,6 +5896,10 @@ var CoffeeScript = (function(){
 						this.variable.error("literal is not a function");
 					}
 					this.csx = this.variable.base instanceof CSXTag;
+					// `@variable` never gets output as a result of this node getting created as
+					// part of `RegexWithInterpolations`, so for that case move any comments to
+					// the `args` property that gets passed into `RegexWithInterpolations` via
+					// the grammar.
 					if (((ref1 = this.variable.base) != null ? ref1.value : void 0) === 'RegExp' && this.args.length !== 0) {
 						moveComments(this.variable, this.args[0]);
 					}
@@ -6811,7 +6847,7 @@ var CoffeeScript = (function(){
 				}
 
 				compileClassDeclaration(o) {
-					var ref1, result;
+					var ref1, ref2, result;
 					if (this.externalCtor || this.boundMethods.length) {
 						if (this.ctor == null) {
 							this.ctor = this.makeDefaultConstructor();
@@ -6827,7 +6863,13 @@ var CoffeeScript = (function(){
 					result = [];
 					result.push(this.makeCode("class "));
 					if (this.name) {
-						result.push(this.makeCode(`${this.name} `));
+						result.push(this.makeCode(this.name));
+					}
+					if (((ref2 = this.variable) != null ? ref2.comments : void 0) != null) {
+						this.compileCommentFragments(o, this.variable, result);
+					}
+					if (this.name) {
+						result.push(this.makeCode(' '));
 					}
 					if (this.parent) {
 						result.push(this.makeCode('extends '), ...this.parent.compileToFragments(o), this.makeCode(' '));
@@ -7511,7 +7553,7 @@ var CoffeeScript = (function(){
 							this.variable.error(`'${this.variable.compile(o)}' can't be assigned`);
 						}
 						varBase.eachName((name) => {
-							var message;
+							var commentFragments, commentsNode, message;
 							if (typeof name.hasProperties === "function" ? name.hasProperties() : void 0) {
 								return;
 							}
@@ -7519,14 +7561,29 @@ var CoffeeScript = (function(){
 							if (message) {
 								name.error(message);
 							}
-							// `moduleDeclaration` can be `'import'` or `'export'`
+							// `moduleDeclaration` can be `'import'` or `'export'`.
 							this.checkAssignability(o, name);
 							if (this.moduleDeclaration) {
 								return o.scope.add(name.value, this.moduleDeclaration);
 							} else if (this.param) {
 								return o.scope.add(name.value, this.param === 'alwaysDeclare' ? 'var' : 'param');
 							} else {
-								return o.scope.find(name.value);
+								o.scope.find(name.value);
+								// If this assignment identifier has one or more herecomments
+								// attached, output them as part of the declarations line (unless
+								// other herecomments are already staged there) for compatibility
+								// with Flow typing. Don’t do this if this assignment is for a
+								// class, e.g. `ClassName = class ClassName {`, as Flow requires
+								// the comment to be between the class name and the `{`.
+								if (name.comments && !o.scope.comments[name.value] && !(this.value instanceof Class) && name.comments.every(function(comment) {
+									return comment.here && !comment.multiline;
+								})) {
+									commentsNode = new IdentifierLiteral(name.value);
+									commentsNode.comments = name.comments;
+									commentFragments = [];
+									this.compileCommentFragments(o, commentsNode, commentFragments);
+									return o.scope.comments[name.value] = commentFragments;
+								}
 							}
 						});
 					}
@@ -7959,10 +8016,11 @@ var CoffeeScript = (function(){
 		// has no *children* -- they're within the inner scope.
 		exports.Code = Code = (function() {
 			class Code extends Base {
-				constructor(params, body, funcGlyph) {
+				constructor(params, body, funcGlyph, paramStart) {
 					var ref1;
 					super();
 					this.funcGlyph = funcGlyph;
+					this.paramStart = paramStart;
 					this.params = params || [];
 					this.body = body || new Block;
 					this.bound = ((ref1 = this.funcGlyph) != null ? ref1.glyph : void 0) === '=>';
@@ -7997,7 +8055,7 @@ var CoffeeScript = (function(){
 				// parameters after the splat, they are declared via expressions in the
 				// function body.
 				compileNode(o) {
-					var answer, body, boundMethodCheck, comment, condition, exprs, generatedVariables, haveBodyParam, haveSplatParam, i, ifTrue, j, k, l, len1, len2, len3, m, methodScope, modifiers, name, param, paramNames, paramToAddToScope, params, paramsAfterSplat, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, scopeVariablesCount, signature, splatParamName, thisAssignments, wasEmpty;
+					var answer, body, boundMethodCheck, comment, condition, exprs, generatedVariables, haveBodyParam, haveSplatParam, i, ifTrue, j, k, l, len1, len2, len3, m, methodScope, modifiers, name, param, paramNames, paramToAddToScope, params, paramsAfterSplat, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, scopeVariablesCount, signature, splatParamName, thisAssignments, wasEmpty;
 					if (this.ctor) {
 						if (this.isAsync) {
 							this.name.error('Class constructor may not be async');
@@ -8182,7 +8240,9 @@ var CoffeeScript = (function(){
 						exprs.unshift(new Assign(new Value(new Arr([
 							new Splat(new IdentifierLiteral(splatParamName)),
 							...((function() {
-								var k, len2, results;
+								var k,
+							len2,
+							results;
 								results = [];
 								for (k = 0, len2 = paramsAfterSplat.length; k < len2; k++) {
 									param = paramsAfterSplat[k];
@@ -8219,6 +8279,11 @@ var CoffeeScript = (function(){
 						modifiers.push('*');
 					}
 					signature = [this.makeCode('(')];
+					// Block comments between a function name and `(` get output between
+					// `function` and `(`.
+					if (((ref6 = this.paramStart) != null ? ref6.comments : void 0) != null) {
+						this.compileCommentFragments(o, this.paramStart, signature);
+					}
 					for (i = k = 0, len2 = params.length; k < len2; i = ++k) {
 						param = params[i];
 						if (i !== 0) {
@@ -8239,10 +8304,10 @@ var CoffeeScript = (function(){
 					}
 					signature.push(this.makeCode(')'));
 					// Block comments between `)` and `->`/`=>` get output between `)` and `{`.
-					if (((ref6 = this.funcGlyph) != null ? ref6.comments : void 0) != null) {
-						ref7 = this.funcGlyph.comments;
-						for (l = 0, len3 = ref7.length; l < len3; l++) {
-							comment = ref7[l];
+					if (((ref7 = this.funcGlyph) != null ? ref7.comments : void 0) != null) {
+						ref8 = this.funcGlyph.comments;
+						for (l = 0, len3 = ref8.length; l < len3; l++) {
+							comment = ref8[l];
 							comment.unshift = false;
 						}
 						this.compileCommentFragments(o, this.funcGlyph, signature);
@@ -8345,13 +8410,23 @@ var CoffeeScript = (function(){
 					return seenSuper;
 				}
 
-				// Find all super calls in the given context node
-				// Returns `true` if `iterator` is called
+				// Find all super calls in the given context node;
+				// returns `true` if `iterator` is called.
 				eachSuperCall(context, iterator) {
 					var seenSuper;
 					seenSuper = false;
 					context.traverseChildren(true, (child) => {
 						if (child instanceof SuperCall) {
+							// `super` in a constructor (the only `super` without an accessor)
+							// cannot be given an argument with a reference to `this`, as that would
+							// be referencing `this` before calling `super`.
+							if (!child.variable.accessor) {
+								Block.wrap(child.args).traverseChildren(true, (node) => {
+									if (node.this) {
+										return node.error("Can't call super with @params in derived class constructors");
+									}
+								});
+							}
 							seenSuper = true;
 							iterator(child);
 						} else if (child instanceof ThisLiteral && this.ctor === 'derived' && !seenSuper) {
@@ -9136,8 +9211,8 @@ var CoffeeScript = (function(){
 					this.expression = expression1;
 					this.comparisonTarget = onlyNotUndefined ? 'undefined' : 'null';
 					salvagedComments = [];
-					this.expression.eachChild(function(child) {
-						var comment, j, k, len1, len2, ref1, ref2, ref3;
+					this.expression.traverseChildren(true, function(child) {
+						var comment, j, len1, ref1;
 						if (child.comments) {
 							ref1 = child.comments;
 							for (j = 0, len1 = ref1.length; j < len1; j++) {
@@ -9146,17 +9221,7 @@ var CoffeeScript = (function(){
 									salvagedComments.push(comment);
 								}
 							}
-							delete child.comments;
-						}
-						if ((ref2 = child.name) != null ? ref2.comments : void 0) {
-							ref3 = child.name.comments;
-							for (k = 0, len2 = ref3.length; k < len2; k++) {
-								comment = ref3[k];
-								if (indexOf.call(salvagedComments, comment) < 0) {
-									salvagedComments.push(comment);
-								}
-							}
-							return delete child.name.comments;
+							return delete child.comments;
 						}
 					});
 					attachCommentsToNode(salvagedComments, this);
@@ -9216,14 +9281,22 @@ var CoffeeScript = (function(){
 				}
 
 				compileNode(o) {
-					var bare, expr, fragments;
+					var bare, expr, fragments, ref1, shouldWrapComment;
 					expr = this.body.unwrap();
-					if (expr instanceof Value && expr.isAtomic() && !this.csxAttribute) {
+					// If these parentheses are wrapping an `IdentifierLiteral` followed by a
+					// block comment, output the parentheses (or put another way, don’t optimize
+					// away these redundant parentheses). This is because Flow requires
+					// parentheses in certain circumstances to distinguish identifiers followed
+					// by comment-based type annotations from JavaScript labels.
+					shouldWrapComment = (ref1 = expr.comments) != null ? ref1.some(function(comment) {
+						return comment.here && !comment.unshift && !comment.newLine;
+					}) : void 0;
+					if (expr instanceof Value && expr.isAtomic() && !this.csxAttribute && !shouldWrapComment) {
 						expr.front = this.front;
 						return expr.compileToFragments(o);
 					}
 					fragments = expr.compileToFragments(o, LEVEL_PAREN);
-					bare = o.level < LEVEL_OP && (expr instanceof Op || expr.unwrap() instanceof Call || (expr instanceof For && expr.returns)) && (o.level < LEVEL_COND || fragments.length <= 3);
+					bare = o.level < LEVEL_OP && !shouldWrapComment && (expr instanceof Op || expr.unwrap() instanceof Call || (expr instanceof For && expr.returns)) && (o.level < LEVEL_COND || fragments.length <= 3);
 					if (this.csxAttribute) {
 						return this.wrapInBraces(fragments);
 					}
