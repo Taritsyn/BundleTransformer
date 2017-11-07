@@ -1,4 +1,4 @@
-Bundle Transformer
+Bundle Transformer [![NuGet version](http://img.shields.io/nuget/v/BundleTransformer.Core.svg)](https://www.nuget.org/packages/BundleTransformer.Core/)  [![Download count](https://img.shields.io/nuget/dt/BundleTransformer.Core.svg)](https://www.nuget.org/packages/BundleTransformer.Core/)
 ==================
 
 <img src="https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/BundleTransformer_Logo.png" width="435" height="128" alt="Bundle Transformer logo" />
