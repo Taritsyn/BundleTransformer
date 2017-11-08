@@ -266,6 +266,16 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict checking of function types
+		/// </summary>
+		[ConfigurationProperty("strictFunctionTypes", DefaultValue = false)]
+		public bool StrictFunctionTypes
+		{
+			get { return (bool)this["strictFunctionTypes"]; }
+			set { this["strictFunctionTypes"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>

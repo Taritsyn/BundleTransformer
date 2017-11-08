@@ -241,6 +241,15 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict checking of function types
+		/// </summary>
+		public bool StrictFunctionTypes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>
@@ -329,6 +338,7 @@ namespace BundleTransformer.TypeScript.Internal
 			SkipDefaultLibCheck = false;
 			SkipLibCheck = false;
 			StrictNullChecks = false;
+			StrictFunctionTypes = false;
 			StripInternal = false;
 			SuppressExcessPropertyErrors = false;
 			SuppressImplicitAnyIndexErrors = false;

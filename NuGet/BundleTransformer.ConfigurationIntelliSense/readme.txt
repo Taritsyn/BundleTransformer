@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of CSSO CSS minifier.
+   Updated definitions for configuration settings of TypeScript translator.
 
    =============
    DOCUMENTATION

@@ -53,6 +53,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			skipDefaultLibCheck: false,
 			skipLibCheck: false,
 			strictNullChecks: false,
+			strictFunctionTypes: false,
 			stripInternal: false,
 			suppressExcessPropertyErrors: false,
 			suppressImplicitAnyIndexErrors: false,

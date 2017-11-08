@@ -680,6 +680,11 @@
 				<xs:documentation>Flag for whether to enable strict null checks</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="strictFunctionTypes" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable strict checking of function types</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="stripInternal" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to do not emit declarations for code that has an `@internal` annotation</xs:documentation>

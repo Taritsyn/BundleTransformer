@@ -2,6 +2,10 @@
 [Bb]in/
 [Oo]bj/
 
+# Node.js tools
+bower_components/
+node_modules/
+
 # NUnit test results
 TestResult.xml
 

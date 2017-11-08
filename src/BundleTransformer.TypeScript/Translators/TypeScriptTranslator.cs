@@ -283,6 +283,15 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict checking of function types
+		/// </summary>
+		public bool StrictFunctionTypes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>
@@ -391,6 +400,7 @@ namespace BundleTransformer.TypeScript.Translators
 			SkipDefaultLibCheck = tsConfig.SkipDefaultLibCheck;
 			SkipLibCheck = tsConfig.SkipLibCheck;
 			StrictNullChecks = tsConfig.StrictNullChecks;
+			StrictFunctionTypes = tsConfig.StrictFunctionTypes;
 			StripInternal = tsConfig.StripInternal;
 			SuppressExcessPropertyErrors = tsConfig.SuppressExcessPropertyErrors;
 			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
@@ -542,6 +552,7 @@ namespace BundleTransformer.TypeScript.Translators
 				SkipDefaultLibCheck = SkipDefaultLibCheck,
 				SkipLibCheck = SkipLibCheck,
 				StrictNullChecks = StrictNullChecks,
+				StrictFunctionTypes = StrictFunctionTypes,
 				StripInternal = StripInternal,
 				SuppressExcessPropertyErrors = SuppressExcessPropertyErrors,
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,

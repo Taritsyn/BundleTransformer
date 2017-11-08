@@ -173,6 +173,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("skipDefaultLibCheck", options.SkipDefaultLibCheck),
 				new JProperty("skipLibCheck", options.SkipLibCheck),
 				new JProperty("strictNullChecks", options.StrictNullChecks),
+				new JProperty("strictFunctionTypes", options.StrictFunctionTypes),
 				new JProperty("stripInternal", options.StripInternal),
 				new JProperty("suppressExcessPropertyErrors", options.SuppressExcessPropertyErrors),
 				new JProperty("suppressImplicitAnyIndexErrors", options.SuppressImplicitAnyIndexErrors),
