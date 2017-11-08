@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.9.181 - November 8, 2017
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support of TypeScript version 2.6 RTM
+   * In configuration settings of TypeScript translator was added one new property - `StrictFunctionTypes` (default `false`)
+
 ## v1.9.180 - October 27, 2017
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.0.2
 
