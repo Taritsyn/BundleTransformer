@@ -152,7 +152,7 @@ var ts;
 var ts;
 (function (ts) {
     ts.versionMajorMinor = "2.6";
-    ts.version = ts.versionMajorMinor + ".1";
+    ts.version = ts.versionMajorMinor + ".2";
 })(ts || (ts = {}));
 (function (ts) {
     function isExternalModuleNameRelative(moduleName) {
@@ -1158,6 +1158,10 @@ var ts;
         return Array.isArray ? Array.isArray(value) : value instanceof Array;
     }
     ts.isArray = isArray;
+    function toArray(value) {
+        return isArray(value) ? value : [value];
+    }
+    ts.toArray = toArray;
     function isString(text) {
         return typeof text === "string";
     }
@@ -2066,6 +2070,11 @@ var ts;
         return (removeFileExtension(path) + newExtension);
     }
     ts.changeExtension = changeExtension;
+    function removeMinAndVersionNumbers(fileName) {
+        var trailingMinOrVersion = /[.-]((min)|(\d+(\.\d+)*))$/;
+        return fileName.replace(trailingMinOrVersion, "").replace(trailingMinOrVersion, "");
+    }
+    ts.removeMinAndVersionNumbers = removeMinAndVersionNumbers;
     function Symbol(flags, name) {
         this.flags = flags;
         this.escapedName = name;
@@ -2434,9 +2443,7 @@ var ts;
         function addOrDeleteFileOrDirectory(fileOrDirectory, fileOrDirectoryPath) {
             var existingResult = getCachedFileSystemEntries(fileOrDirectoryPath);
             if (existingResult) {
-                if (!host.directoryExists(fileOrDirectory)) {
-                    cachedReadDirectoryResult.delete(fileOrDirectoryPath);
-                }
+                clearCache();
             }
             else {
                 var parentResult = getCachedFileSystemEntriesForBaseDir(fileOrDirectoryPath);
@@ -2447,8 +2454,12 @@ var ts;
                             fileExists: host.fileExists(fileOrDirectoryPath),
                             directoryExists: host.directoryExists(fileOrDirectoryPath)
                         };
-                        updateFilesOfFileSystemEntry(parentResult, baseName, fsQueryResult.fileExists);
-                        updateFileSystemEntry(parentResult.directories, baseName, fsQueryResult.directoryExists);
+                        if (fsQueryResult.directoryExists || hasEntry(parentResult.directories, baseName)) {
+                            clearCache();
+                        }
+                        else {
+                            updateFilesOfFileSystemEntry(parentResult, baseName, fsQueryResult.fileExists);
+                        }
                         return fsQueryResult;
                     }
                 }
@@ -3417,6 +3428,9 @@ var ts;
         super_must_be_called_before_accessing_a_property_of_super_in_the_constructor_of_a_derived_class: diag(17011, ts.DiagnosticCategory.Error, "super_must_be_called_before_accessing_a_property_of_super_in_the_constructor_of_a_derived_class_17011", "'super' must be called before accessing a property of 'super' in the constructor of a derived class."),
         _0_is_not_a_valid_meta_property_for_keyword_1_Did_you_mean_2: diag(17012, ts.DiagnosticCategory.Error, "_0_is_not_a_valid_meta_property_for_keyword_1_Did_you_mean_2_17012", "'{0}' is not a valid meta-property for keyword '{1}'. Did you mean '{2}'?"),
         Meta_property_0_is_only_allowed_in_the_body_of_a_function_declaration_function_expression_or_constructor: diag(17013, ts.DiagnosticCategory.Error, "Meta_property_0_is_only_allowed_in_the_body_of_a_function_declaration_function_expression_or_constru_17013", "Meta-property '{0}' is only allowed in the body of a function declaration, function expression, or constructor."),
+        JSX_fragment_has_no_corresponding_closing_tag: diag(17014, ts.DiagnosticCategory.Error, "JSX_fragment_has_no_corresponding_closing_tag_17014", "JSX fragment has no corresponding closing tag."),
+        Expected_corresponding_closing_tag_for_JSX_fragment: diag(17015, ts.DiagnosticCategory.Error, "Expected_corresponding_closing_tag_for_JSX_fragment_17015", "Expected corresponding closing tag for JSX fragment."),
+        JSX_fragment_is_not_supported_when_using_jsxFactory: diag(17016, ts.DiagnosticCategory.Error, "JSX_fragment_is_not_supported_when_using_jsxFactory_17016", "JSX fragment is not supported when using --jsxFactory"),
         Circularity_detected_while_resolving_configuration_Colon_0: diag(18000, ts.DiagnosticCategory.Error, "Circularity_detected_while_resolving_configuration_Colon_0_18000", "Circularity detected while resolving configuration: {0}"),
         A_path_in_an_extends_option_must_be_relative_or_rooted_but_0_is_not: diag(18001, ts.DiagnosticCategory.Error, "A_path_in_an_extends_option_must_be_relative_or_rooted_but_0_is_not_18001", "A path in an 'extends' option must be relative or rooted, but '{0}' is not."),
         The_files_list_in_config_file_0_is_empty: diag(18002, ts.DiagnosticCategory.Error, "The_files_list_in_config_file_0_is_empty_18002", "The 'files' list in config file '{0}' is empty."),
@@ -3466,6 +3480,10 @@ var ts;
         return token >= 71;
     }
     ts.tokenIsIdentifierOrKeyword = tokenIsIdentifierOrKeyword;
+    function tokenIsIdentifierOrKeywordOrGreaterThan(token) {
+        return token === 29 || tokenIsIdentifierOrKeyword(token);
+    }
+    ts.tokenIsIdentifierOrKeywordOrGreaterThan = tokenIsIdentifierOrKeywordOrGreaterThan;
     var textToToken = ts.createMapFromTemplate({
         "abstract": 117,
         "any": 119,
@@ -5182,7 +5200,7 @@ var ts;
         }
     }
     function getSourceFileOfNode(node) {
-        while (node && node.kind !== 265) {
+        while (node && node.kind !== 268) {
             node = node.parent;
         }
         return node;
@@ -5270,7 +5288,7 @@ var ts;
         if (includeJsDoc && ts.hasJSDocNodes(node)) {
             return getTokenPosOfNode(node.jsDoc[0]);
         }
-        if (node.kind === 286 && node._children.length > 0) {
+        if (node.kind === 289 && node._children.length > 0) {
             return getTokenPosOfNode(node._children[0], sourceFile, includeJsDoc);
         }
         return ts.skipTrivia((sourceFile || getSourceFileOfNode(node)).text, node.pos);
@@ -5369,7 +5387,7 @@ var ts;
     ts.isBlockOrCatchScoped = isBlockOrCatchScoped;
     function isCatchClauseVariableDeclarationOrBindingElement(declaration) {
         var node = getRootDeclaration(declaration);
-        return node.kind === 226 && node.parent.kind === 260;
+        return node.kind === 226 && node.parent.kind === 263;
     }
     ts.isCatchClauseVariableDeclarationOrBindingElement = isCatchClauseVariableDeclarationOrBindingElement;
     function isAmbientModule(node) {
@@ -5393,7 +5411,7 @@ var ts;
         return node && node.kind === 233 && (!node.body);
     }
     function isBlockScopedContainerTopLevel(node) {
-        return node.kind === 265 ||
+        return node.kind === 268 ||
             node.kind === 233 ||
             ts.isFunctionLike(node);
     }
@@ -5407,7 +5425,7 @@ var ts;
             return false;
         }
         switch (node.parent.kind) {
-            case 265:
+            case 268:
                 return ts.isExternalModule(node.parent);
             case 234:
                 return isAmbientModule(node.parent.parent) && !ts.isExternalModule(node.parent.parent.parent);
@@ -5421,9 +5439,9 @@ var ts;
     ts.isEffectiveExternalModule = isEffectiveExternalModule;
     function isBlockScope(node, parentNode) {
         switch (node.kind) {
-            case 265:
+            case 268:
             case 235:
-            case 260:
+            case 263:
             case 233:
             case 214:
             case 215:
@@ -5450,12 +5468,12 @@ var ts;
             case 157:
             case 160:
             case 161:
-            case 273:
+            case 276:
             case 229:
             case 199:
             case 230:
             case 231:
-            case 282:
+            case 285:
             case 228:
             case 151:
             case 152:
@@ -5568,7 +5586,7 @@ var ts;
     function getErrorSpanForNode(sourceFile, node) {
         var errorNode = node;
         switch (node.kind) {
-            case 265:
+            case 268:
                 var pos_1 = ts.skipTrivia(sourceFile.text, 0, false);
                 if (pos_1 === sourceFile.text.length) {
                     return ts.createTextSpan(0, 0);
@@ -5581,7 +5599,7 @@ var ts;
             case 230:
             case 233:
             case 232:
-            case 264:
+            case 267:
             case 228:
             case 186:
             case 151:
@@ -5751,11 +5769,11 @@ var ts;
                 case 216:
                 case 220:
                 case 221:
-                case 257:
-                case 258:
+                case 260:
+                case 261:
                 case 222:
                 case 224:
-                case 260:
+                case 263:
                     return ts.forEachChild(node, traverse);
             }
         }
@@ -5810,12 +5828,12 @@ var ts;
         if (node) {
             switch (node.kind) {
                 case 176:
-                case 264:
+                case 267:
                 case 146:
-                case 261:
+                case 264:
                 case 149:
                 case 148:
-                case 262:
+                case 265:
                 case 226:
                     return true;
             }
@@ -5873,7 +5891,7 @@ var ts;
     ts.isThisTypePredicate = isThisTypePredicate;
     function getPropertyAssignment(objectLiteral, key, key2) {
         return ts.filter(objectLiteral.properties, function (property) {
-            if (property.kind === 261) {
+            if (property.kind === 264) {
                 var propName = getTextOfPropertyName(property.name);
                 return key === propName || (key2 && key2 === propName);
             }
@@ -5927,7 +5945,7 @@ var ts;
                 case 156:
                 case 157:
                 case 232:
-                case 265:
+                case 268:
                     return node;
             }
         }
@@ -6111,6 +6129,7 @@ var ts;
             case 200:
             case 249:
             case 250:
+            case 253:
             case 197:
             case 191:
             case 204:
@@ -6140,8 +6159,8 @@ var ts;
             case 146:
             case 149:
             case 148:
+            case 267:
             case 264:
-            case 261:
             case 176:
                 return parent.initializer === node;
             case 210:
@@ -6151,7 +6170,7 @@ var ts;
             case 219:
             case 220:
             case 221:
-            case 257:
+            case 260:
             case 223:
                 return parent.expression === node;
             case 214:
@@ -6172,9 +6191,9 @@ var ts;
             case 144:
                 return node === parent.expression;
             case 147:
-            case 256:
-            case 255:
-            case 263:
+            case 259:
+            case 258:
+            case 266:
                 return true;
             case 201:
                 return parent.expression === node && isExpressionWithTypeArgumentsInClassExtendsClause(parent);
@@ -6340,8 +6359,8 @@ var ts;
                 case 146:
                 case 151:
                 case 150:
-                case 262:
-                case 261:
+                case 265:
+                case 264:
                 case 149:
                 case 148:
                     return node.questionToken !== undefined;
@@ -6351,7 +6370,7 @@ var ts;
     }
     ts.hasQuestionToken = hasQuestionToken;
     function isJSDocConstructSignature(node) {
-        return node.kind === 273 &&
+        return node.kind === 276 &&
             node.parameters.length > 0 &&
             node.parameters[0].name &&
             node.parameters[0].name.escapedText === "new";
@@ -6398,7 +6417,7 @@ var ts;
         return result || ts.emptyArray;
         function getJSDocCommentsAndTagsWorker(node) {
             var parent = node.parent;
-            if (parent && (parent.kind === 261 || getNestedModuleDeclaration(parent))) {
+            if (parent && (parent.kind === 264 || getNestedModuleDeclaration(parent))) {
                 getJSDocCommentsAndTagsWorker(parent);
             }
             if (parent && parent.parent &&
@@ -6441,7 +6460,7 @@ var ts;
     }
     ts.getParameterSymbolFromJSDoc = getParameterSymbolFromJSDoc;
     function getJSDocHost(node) {
-        ts.Debug.assert(node.parent.kind === 275);
+        ts.Debug.assert(node.parent.kind === 278);
         return node.parent.parent;
     }
     ts.getJSDocHost = getJSDocHost;
@@ -6481,13 +6500,13 @@ var ts;
                 case 198:
                     node = parent;
                     break;
-                case 262:
+                case 265:
                     if (parent.name !== node) {
                         return 0;
                     }
                     node = parent.parent;
                     break;
-                case 261:
+                case 264:
                     if (parent.name === node) {
                         return 0;
                     }
@@ -6526,7 +6545,7 @@ var ts;
     ts.isNodeDescendantOf = isNodeDescendantOf;
     function isInAmbientContext(node) {
         while (node) {
-            if (hasModifier(node, 2) || (node.kind === 265 && node.isDeclarationFile)) {
+            if (hasModifier(node, 2) || (node.kind === 268 && node.isDeclarationFile)) {
                 return true;
             }
             node = node.parent;
@@ -6575,8 +6594,8 @@ var ts;
             case 150:
             case 153:
             case 154:
+            case 267:
             case 264:
-            case 261:
             case 179:
                 return parent.name === node;
             case 143:
@@ -6591,7 +6610,7 @@ var ts;
             case 242:
                 return parent.propertyName === node;
             case 246:
-            case 253:
+            case 256:
                 return true;
         }
         return false;
@@ -6691,6 +6710,14 @@ var ts;
         return 72 <= token && token <= 142;
     }
     ts.isKeyword = isKeyword;
+    function isContextualKeyword(token) {
+        return 117 <= token && token <= 142;
+    }
+    ts.isContextualKeyword = isContextualKeyword;
+    function isNonContextualKeyword(token) {
+        return isKeyword(token) && !isContextualKeyword(token);
+    }
+    ts.isNonContextualKeyword = isNonContextualKeyword;
     function isTrivia(token) {
         return 2 <= token && token <= 7;
     }
@@ -6832,7 +6859,7 @@ var ts;
             || kind === 153
             || kind === 154
             || kind === 233
-            || kind === 265;
+            || kind === 268;
     }
     ts.nodeStartsNewLexicalEnvironment = nodeStartsNewLexicalEnvironment;
     function nodeIsSynthesized(range) {
@@ -6919,6 +6946,7 @@ var ts;
             case 199:
             case 249:
             case 250:
+            case 253:
             case 12:
             case 13:
             case 196:
@@ -7005,7 +7033,7 @@ var ts;
                 return 2;
             case 198:
                 return 1;
-            case 289:
+            case 292:
                 return 0;
             default:
                 return -1;
@@ -8387,8 +8415,8 @@ var ts;
             return undefined;
         }
         switch (declaration.kind) {
-            case 284:
-            case 279: {
+            case 287:
+            case 282: {
                 var name = declaration.name;
                 if (name.kind === 143) {
                     return name.right;
@@ -8407,7 +8435,7 @@ var ts;
                         return undefined;
                 }
             }
-            case 283:
+            case 286:
                 return getNameOfJSDocTypedef(declaration);
             case 243: {
                 var expression = declaration.expression;
@@ -8426,27 +8454,27 @@ var ts;
     }
     ts.getJSDocParameterTags = getJSDocParameterTags;
     function hasJSDocParameterTags(node) {
-        return !!getFirstJSDocTag(node, 279);
+        return !!getFirstJSDocTag(node, 282);
     }
     ts.hasJSDocParameterTags = hasJSDocParameterTags;
     function getJSDocAugmentsTag(node) {
-        return getFirstJSDocTag(node, 277);
+        return getFirstJSDocTag(node, 280);
     }
     ts.getJSDocAugmentsTag = getJSDocAugmentsTag;
     function getJSDocClassTag(node) {
-        return getFirstJSDocTag(node, 278);
+        return getFirstJSDocTag(node, 281);
     }
     ts.getJSDocClassTag = getJSDocClassTag;
     function getJSDocReturnTag(node) {
-        return getFirstJSDocTag(node, 280);
+        return getFirstJSDocTag(node, 283);
     }
     ts.getJSDocReturnTag = getJSDocReturnTag;
     function getJSDocTemplateTag(node) {
-        return getFirstJSDocTag(node, 282);
+        return getFirstJSDocTag(node, 285);
     }
     ts.getJSDocTemplateTag = getJSDocTemplateTag;
     function getJSDocTypeTag(node) {
-        var tag = getFirstJSDocTag(node, 281);
+        var tag = getFirstJSDocTag(node, 284);
         if (tag && tag.typeExpression && tag.typeExpression.type) {
             return tag;
         }
@@ -8454,7 +8482,7 @@ var ts;
     }
     ts.getJSDocTypeTag = getJSDocTypeTag;
     function getJSDocType(node) {
-        var tag = getFirstJSDocTag(node, 281);
+        var tag = getFirstJSDocTag(node, 284);
         if (!tag && node.kind === 146) {
             var paramTags = getJSDocParameterTags(node);
             if (paramTags) {
@@ -8697,7 +8725,7 @@ var ts;
     }
     ts.isParenthesizedExpression = isParenthesizedExpression;
     function skipPartiallyEmittedExpressions(node) {
-        while (node.kind === 288) {
+        while (node.kind === 291) {
             node = node.expression;
         }
         return node;
@@ -8971,138 +8999,150 @@ var ts;
         return node.kind === 252;
     }
     ts.isJsxClosingElement = isJsxClosingElement;
-    function isJsxAttribute(node) {
+    function isJsxFragment(node) {
         return node.kind === 253;
+    }
+    ts.isJsxFragment = isJsxFragment;
+    function isJsxOpeningFragment(node) {
+        return node.kind === 254;
+    }
+    ts.isJsxOpeningFragment = isJsxOpeningFragment;
+    function isJsxClosingFragment(node) {
+        return node.kind === 255;
+    }
+    ts.isJsxClosingFragment = isJsxClosingFragment;
+    function isJsxAttribute(node) {
+        return node.kind === 256;
     }
     ts.isJsxAttribute = isJsxAttribute;
     function isJsxAttributes(node) {
-        return node.kind === 254;
+        return node.kind === 257;
     }
     ts.isJsxAttributes = isJsxAttributes;
     function isJsxSpreadAttribute(node) {
-        return node.kind === 255;
+        return node.kind === 258;
     }
     ts.isJsxSpreadAttribute = isJsxSpreadAttribute;
     function isJsxExpression(node) {
-        return node.kind === 256;
+        return node.kind === 259;
     }
     ts.isJsxExpression = isJsxExpression;
     function isCaseClause(node) {
-        return node.kind === 257;
+        return node.kind === 260;
     }
     ts.isCaseClause = isCaseClause;
     function isDefaultClause(node) {
-        return node.kind === 258;
+        return node.kind === 261;
     }
     ts.isDefaultClause = isDefaultClause;
     function isHeritageClause(node) {
-        return node.kind === 259;
+        return node.kind === 262;
     }
     ts.isHeritageClause = isHeritageClause;
     function isCatchClause(node) {
-        return node.kind === 260;
+        return node.kind === 263;
     }
     ts.isCatchClause = isCatchClause;
     function isPropertyAssignment(node) {
-        return node.kind === 261;
+        return node.kind === 264;
     }
     ts.isPropertyAssignment = isPropertyAssignment;
     function isShorthandPropertyAssignment(node) {
-        return node.kind === 262;
+        return node.kind === 265;
     }
     ts.isShorthandPropertyAssignment = isShorthandPropertyAssignment;
     function isSpreadAssignment(node) {
-        return node.kind === 263;
+        return node.kind === 266;
     }
     ts.isSpreadAssignment = isSpreadAssignment;
     function isEnumMember(node) {
-        return node.kind === 264;
+        return node.kind === 267;
     }
     ts.isEnumMember = isEnumMember;
     function isSourceFile(node) {
-        return node.kind === 265;
+        return node.kind === 268;
     }
     ts.isSourceFile = isSourceFile;
     function isBundle(node) {
-        return node.kind === 266;
+        return node.kind === 269;
     }
     ts.isBundle = isBundle;
     function isJSDocTypeExpression(node) {
-        return node.kind === 267;
+        return node.kind === 270;
     }
     ts.isJSDocTypeExpression = isJSDocTypeExpression;
     function isJSDocAllType(node) {
-        return node.kind === 268;
+        return node.kind === 271;
     }
     ts.isJSDocAllType = isJSDocAllType;
     function isJSDocUnknownType(node) {
-        return node.kind === 269;
+        return node.kind === 272;
     }
     ts.isJSDocUnknownType = isJSDocUnknownType;
     function isJSDocNullableType(node) {
-        return node.kind === 270;
+        return node.kind === 273;
     }
     ts.isJSDocNullableType = isJSDocNullableType;
     function isJSDocNonNullableType(node) {
-        return node.kind === 271;
+        return node.kind === 274;
     }
     ts.isJSDocNonNullableType = isJSDocNonNullableType;
     function isJSDocOptionalType(node) {
-        return node.kind === 272;
+        return node.kind === 275;
     }
     ts.isJSDocOptionalType = isJSDocOptionalType;
     function isJSDocFunctionType(node) {
-        return node.kind === 273;
+        return node.kind === 276;
     }
     ts.isJSDocFunctionType = isJSDocFunctionType;
     function isJSDocVariadicType(node) {
-        return node.kind === 274;
+        return node.kind === 277;
     }
     ts.isJSDocVariadicType = isJSDocVariadicType;
     function isJSDoc(node) {
-        return node.kind === 275;
+        return node.kind === 278;
     }
     ts.isJSDoc = isJSDoc;
     function isJSDocAugmentsTag(node) {
-        return node.kind === 277;
+        return node.kind === 280;
     }
     ts.isJSDocAugmentsTag = isJSDocAugmentsTag;
     function isJSDocParameterTag(node) {
-        return node.kind === 279;
+        return node.kind === 282;
     }
     ts.isJSDocParameterTag = isJSDocParameterTag;
     function isJSDocReturnTag(node) {
-        return node.kind === 280;
+        return node.kind === 283;
     }
     ts.isJSDocReturnTag = isJSDocReturnTag;
     function isJSDocTypeTag(node) {
-        return node.kind === 281;
+        return node.kind === 284;
     }
     ts.isJSDocTypeTag = isJSDocTypeTag;
     function isJSDocTemplateTag(node) {
-        return node.kind === 282;
+        return node.kind === 285;
     }
     ts.isJSDocTemplateTag = isJSDocTemplateTag;
     function isJSDocTypedefTag(node) {
-        return node.kind === 283;
+        return node.kind === 286;
     }
     ts.isJSDocTypedefTag = isJSDocTypedefTag;
     function isJSDocPropertyTag(node) {
-        return node.kind === 284;
+        return node.kind === 287;
     }
     ts.isJSDocPropertyTag = isJSDocPropertyTag;
     function isJSDocPropertyLikeTag(node) {
-        return node.kind === 284 || node.kind === 279;
+        return node.kind === 287 || node.kind === 282;
     }
     ts.isJSDocPropertyLikeTag = isJSDocPropertyLikeTag;
     function isJSDocTypeLiteral(node) {
-        return node.kind === 285;
+        return node.kind === 288;
     }
     ts.isJSDocTypeLiteral = isJSDocTypeLiteral;
 })(ts || (ts = {}));
 (function (ts) {
     function isSyntaxList(n) {
-        return n.kind === 286;
+        return n.kind === 289;
     }
     ts.isSyntaxList = isSyntaxList;
     function isNode(node) {
@@ -9228,7 +9268,7 @@ var ts;
             case 156:
             case 157:
             case 160:
-            case 273:
+            case 276:
             case 161:
                 return true;
             default:
@@ -9272,9 +9312,9 @@ var ts;
     ts.isTypeElement = isTypeElement;
     function isObjectLiteralElementLike(node) {
         var kind = node.kind;
-        return kind === 261
-            || kind === 262
-            || kind === 263
+        return kind === 264
+            || kind === 265
+            || kind === 266
             || kind === 151
             || kind === 153
             || kind === 154
@@ -9295,13 +9335,13 @@ var ts;
             || kind === 95
             || kind === 130
             || kind === 201
-            || kind === 268
-            || kind === 269
-            || kind === 270
             || kind === 271
             || kind === 272
             || kind === 273
-            || kind === 274;
+            || kind === 274
+            || kind === 275
+            || kind === 276
+            || kind === 277;
     }
     function isTypeNode(node) {
         return isTypeNodeKind(node.kind);
@@ -9412,6 +9452,7 @@ var ts;
             case 181:
             case 249:
             case 250:
+            case 253:
             case 183:
             case 177:
             case 185:
@@ -9480,8 +9521,8 @@ var ts;
             case 198:
             case 202:
             case 200:
-            case 289:
-            case 288:
+            case 292:
+            case 291:
                 return true;
             default:
                 return isUnaryExpressionKind(kind);
@@ -9494,11 +9535,11 @@ var ts;
     }
     ts.isAssertionExpression = isAssertionExpression;
     function isPartiallyEmittedExpression(node) {
-        return node.kind === 288;
+        return node.kind === 291;
     }
     ts.isPartiallyEmittedExpression = isPartiallyEmittedExpression;
     function isNotEmittedStatement(node) {
-        return node.kind === 287;
+        return node.kind === 290;
     }
     ts.isNotEmittedStatement = isNotEmittedStatement;
     function isNotEmittedOrPartiallyEmittedNode(node) {
@@ -9574,7 +9615,7 @@ var ts;
             || kind === 199
             || kind === 152
             || kind === 232
-            || kind === 264
+            || kind === 267
             || kind === 246
             || kind === 228
             || kind === 186
@@ -9583,22 +9624,22 @@ var ts;
             || kind === 237
             || kind === 242
             || kind === 230
-            || kind === 253
+            || kind === 256
             || kind === 151
             || kind === 150
             || kind === 233
             || kind === 236
             || kind === 240
             || kind === 146
-            || kind === 261
+            || kind === 264
             || kind === 149
             || kind === 148
             || kind === 154
-            || kind === 262
+            || kind === 265
             || kind === 231
             || kind === 145
             || kind === 226
-            || kind === 283;
+            || kind === 286;
     }
     function isDeclarationStatementKind(kind) {
         return kind === 228
@@ -9633,13 +9674,13 @@ var ts;
             || kind === 208
             || kind === 213
             || kind === 220
-            || kind === 287
-            || kind === 291
-            || kind === 290;
+            || kind === 290
+            || kind === 294
+            || kind === 293;
     }
     function isDeclaration(node) {
         if (node.kind === 145) {
-            return node.parent.kind !== 282 || ts.isInJavaScriptFile(node);
+            return node.parent.kind !== 285 || ts.isInJavaScriptFile(node);
         }
         return isDeclarationKind(node.kind);
     }
@@ -9663,7 +9704,7 @@ var ts;
         if (node.kind !== 207)
             return false;
         if (node.parent !== undefined) {
-            if (node.parent.kind === 224 || node.parent.kind === 260) {
+            if (node.parent.kind === 224 || node.parent.kind === 263) {
                 return false;
             }
         }
@@ -9686,21 +9727,22 @@ var ts;
     function isJsxChild(node) {
         var kind = node.kind;
         return kind === 249
-            || kind === 256
+            || kind === 259
             || kind === 250
-            || kind === 10;
+            || kind === 10
+            || kind === 253;
     }
     ts.isJsxChild = isJsxChild;
     function isJsxAttributeLike(node) {
         var kind = node.kind;
-        return kind === 253
-            || kind === 255;
+        return kind === 256
+            || kind === 258;
     }
     ts.isJsxAttributeLike = isJsxAttributeLike;
     function isStringLiteralOrJsxExpression(node) {
         var kind = node.kind;
         return kind === 9
-            || kind === 256;
+            || kind === 259;
     }
     ts.isStringLiteralOrJsxExpression = isStringLiteralOrJsxExpression;
     function isJsxOpeningLikeElement(node) {
@@ -9711,20 +9753,20 @@ var ts;
     ts.isJsxOpeningLikeElement = isJsxOpeningLikeElement;
     function isCaseOrDefaultClause(node) {
         var kind = node.kind;
-        return kind === 257
-            || kind === 258;
+        return kind === 260
+            || kind === 261;
     }
     ts.isCaseOrDefaultClause = isCaseOrDefaultClause;
     function isJSDocNode(node) {
-        return node.kind >= 267 && node.kind <= 285;
+        return node.kind >= 270 && node.kind <= 288;
     }
     ts.isJSDocNode = isJSDocNode;
     function isJSDocCommentContainingNode(node) {
-        return node.kind === 275 || isJSDocTag(node);
+        return node.kind === 278 || isJSDocTag(node);
     }
     ts.isJSDocCommentContainingNode = isJSDocCommentContainingNode;
     function isJSDocTag(node) {
-        return node.kind >= 276 && node.kind <= 285;
+        return node.kind >= 279 && node.kind <= 288;
     }
     ts.isJSDocTag = isJSDocTag;
     function isSetAccessor(node) {
@@ -9747,7 +9789,7 @@ var ts;
     var IdentifierConstructor;
     var SourceFileConstructor;
     function createNode(kind, pos, end) {
-        if (kind === 265) {
+        if (kind === 268) {
             return new (SourceFileConstructor || (SourceFileConstructor = ts.objectAllocator.getSourceFileConstructor()))(kind, pos, end);
         }
         else if (kind === 71) {
@@ -9791,19 +9833,19 @@ var ts;
                     visitNode(cbNode, node.constraint) ||
                     visitNode(cbNode, node.default) ||
                     visitNode(cbNode, node.expression);
-            case 262:
+            case 265:
                 return visitNodes(cbNode, cbNodes, node.decorators) ||
                     visitNodes(cbNode, cbNodes, node.modifiers) ||
                     visitNode(cbNode, node.name) ||
                     visitNode(cbNode, node.questionToken) ||
                     visitNode(cbNode, node.equalsToken) ||
                     visitNode(cbNode, node.objectAssignmentInitializer);
-            case 263:
+            case 266:
                 return visitNode(cbNode, node.expression);
             case 146:
             case 149:
             case 148:
-            case 261:
+            case 264:
             case 226:
             case 176:
                 return visitNodes(cbNode, cbNodes, node.decorators) ||
@@ -9935,7 +9977,7 @@ var ts;
             case 207:
             case 234:
                 return visitNodes(cbNode, cbNodes, node.statements);
-            case 265:
+            case 268:
                 return visitNodes(cbNode, cbNodes, node.statements) ||
                     visitNode(cbNode, node.endOfFileToken);
             case 208:
@@ -9983,10 +10025,10 @@ var ts;
                     visitNode(cbNode, node.caseBlock);
             case 235:
                 return visitNodes(cbNode, cbNodes, node.clauses);
-            case 257:
+            case 260:
                 return visitNode(cbNode, node.expression) ||
                     visitNodes(cbNode, cbNodes, node.statements);
-            case 258:
+            case 261:
                 return visitNodes(cbNode, cbNodes, node.statements);
             case 222:
                 return visitNode(cbNode, node.label) ||
@@ -9997,7 +10039,7 @@ var ts;
                 return visitNode(cbNode, node.tryBlock) ||
                     visitNode(cbNode, node.catchClause) ||
                     visitNode(cbNode, node.finallyBlock);
-            case 260:
+            case 263:
                 return visitNode(cbNode, node.variableDeclaration) ||
                     visitNode(cbNode, node.block);
             case 147:
@@ -10028,7 +10070,7 @@ var ts;
                     visitNodes(cbNode, cbNodes, node.modifiers) ||
                     visitNode(cbNode, node.name) ||
                     visitNodes(cbNode, cbNodes, node.members);
-            case 264:
+            case 267:
                 return visitNode(cbNode, node.name) ||
                     visitNode(cbNode, node.initializer);
             case 233:
@@ -10075,7 +10117,7 @@ var ts;
                 return visitNode(cbNode, node.expression) || visitNode(cbNode, node.literal);
             case 144:
                 return visitNode(cbNode, node.expression);
-            case 259:
+            case 262:
                 return visitNodes(cbNode, cbNodes, node.types);
             case 201:
                 return visitNode(cbNode, node.expression) ||
@@ -10084,45 +10126,49 @@ var ts;
                 return visitNode(cbNode, node.expression);
             case 247:
                 return visitNodes(cbNode, cbNodes, node.decorators);
-            case 289:
+            case 292:
                 return visitNodes(cbNode, cbNodes, node.elements);
             case 249:
                 return visitNode(cbNode, node.openingElement) ||
                     visitNodes(cbNode, cbNodes, node.children) ||
                     visitNode(cbNode, node.closingElement);
+            case 253:
+                return visitNode(cbNode, node.openingFragment) ||
+                    visitNodes(cbNode, cbNodes, node.children) ||
+                    visitNode(cbNode, node.closingFragment);
             case 250:
             case 251:
                 return visitNode(cbNode, node.tagName) ||
                     visitNode(cbNode, node.attributes);
-            case 254:
+            case 257:
                 return visitNodes(cbNode, cbNodes, node.properties);
-            case 253:
+            case 256:
                 return visitNode(cbNode, node.name) ||
                     visitNode(cbNode, node.initializer);
-            case 255:
+            case 258:
                 return visitNode(cbNode, node.expression);
-            case 256:
+            case 259:
                 return visitNode(cbNode, node.dotDotDotToken) ||
                     visitNode(cbNode, node.expression);
             case 252:
                 return visitNode(cbNode, node.tagName);
-            case 267:
-                return visitNode(cbNode, node.type);
-            case 271:
-                return visitNode(cbNode, node.type);
             case 270:
                 return visitNode(cbNode, node.type);
-            case 272:
-                return visitNode(cbNode, node.type);
-            case 273:
-                return visitNodes(cbNode, cbNodes, node.parameters) ||
-                    visitNode(cbNode, node.type);
             case 274:
                 return visitNode(cbNode, node.type);
+            case 273:
+                return visitNode(cbNode, node.type);
             case 275:
+                return visitNode(cbNode, node.type);
+            case 276:
+                return visitNodes(cbNode, cbNodes, node.parameters) ||
+                    visitNode(cbNode, node.type);
+            case 277:
+                return visitNode(cbNode, node.type);
+            case 278:
                 return visitNodes(cbNode, cbNodes, node.tags);
-            case 279:
-            case 284:
+            case 282:
+            case 287:
                 if (node.isNameFirst) {
                     return visitNode(cbNode, node.name) ||
                         visitNode(cbNode, node.typeExpression);
@@ -10131,17 +10177,17 @@ var ts;
                     return visitNode(cbNode, node.typeExpression) ||
                         visitNode(cbNode, node.name);
                 }
-            case 280:
-                return visitNode(cbNode, node.typeExpression);
-            case 281:
-                return visitNode(cbNode, node.typeExpression);
-            case 277:
-                return visitNode(cbNode, node.class);
-            case 282:
-                return visitNodes(cbNode, cbNodes, node.typeParameters);
             case 283:
+                return visitNode(cbNode, node.typeExpression);
+            case 284:
+                return visitNode(cbNode, node.typeExpression);
+            case 280:
+                return visitNode(cbNode, node.class);
+            case 285:
+                return visitNodes(cbNode, cbNodes, node.typeParameters);
+            case 286:
                 if (node.typeExpression &&
-                    node.typeExpression.kind === 267) {
+                    node.typeExpression.kind === 270) {
                     return visitNode(cbNode, node.typeExpression) ||
                         visitNode(cbNode, node.fullName);
                 }
@@ -10149,7 +10195,7 @@ var ts;
                     return visitNode(cbNode, node.fullName) ||
                         visitNode(cbNode, node.typeExpression);
                 }
-            case 285:
+            case 288:
                 if (node.jsDocPropertyTags) {
                     for (var _i = 0, _a = node.jsDocPropertyTags; _i < _a.length; _i++) {
                         var tag = _a[_i];
@@ -10157,7 +10203,7 @@ var ts;
                     }
                 }
                 return;
-            case 288:
+            case 291:
                 return visitNode(cbNode, node.expression);
         }
     }
@@ -10348,7 +10394,7 @@ var ts;
         }
         Parser.fixupParentReferences = fixupParentReferences;
         function createSourceFile(fileName, languageVersion, scriptKind) {
-            var sourceFile = new SourceFileConstructor(265, 0, sourceText.length);
+            var sourceFile = new SourceFileConstructor(268, 0, sourceText.length);
             nodeCount++;
             sourceFile.text = sourceText;
             sourceFile.bindDiagnostics = [];
@@ -10785,6 +10831,10 @@ var ts;
             nextToken();
             return ts.tokenIsIdentifierOrKeyword(token());
         }
+        function nextTokenIsIdentifierOrKeywordOrGreaterThan() {
+            nextToken();
+            return ts.tokenIsIdentifierOrKeywordOrGreaterThan(token());
+        }
         function isHeritageClauseExtendsOrImplementsKeyword() {
             if (token() === 108 ||
                 token() === 85) {
@@ -10969,8 +11019,8 @@ var ts;
         function isReusableSwitchClause(node) {
             if (node) {
                 switch (node.kind) {
-                    case 257:
-                    case 258:
+                    case 260:
+                    case 261:
                         return true;
                 }
             }
@@ -11014,7 +11064,7 @@ var ts;
             return false;
         }
         function isReusableEnumMember(node) {
-            return node.kind === 264;
+            return node.kind === 267;
         }
         function isReusableTypeMember(node) {
             if (node) {
@@ -11235,7 +11285,7 @@ var ts;
             return finishNode(node);
         }
         function parseJSDocAllType() {
-            var result = createNode(268);
+            var result = createNode(271);
             nextToken();
             return finishNode(result);
         }
@@ -11248,18 +11298,18 @@ var ts;
                 token() === 29 ||
                 token() === 58 ||
                 token() === 49) {
-                var result = createNode(269, pos);
+                var result = createNode(272, pos);
                 return finishNode(result);
             }
             else {
-                var result = createNode(270, pos);
+                var result = createNode(273, pos);
                 result.type = parseType();
                 return finishNode(result);
             }
         }
         function parseJSDocFunctionType() {
             if (lookAhead(nextTokenIsOpenParen)) {
-                var result = createNode(273);
+                var result = createNode(276);
                 nextToken();
                 fillSignature(56, 4 | 32, result);
                 return addJSDocComment(finishNode(result));
@@ -11615,9 +11665,9 @@ var ts;
                 case 89:
                     return parseJSDocFunctionType();
                 case 24:
-                    return parseJSDocNodeWithType(274);
+                    return parseJSDocNodeWithType(277);
                 case 51:
-                    return parseJSDocNodeWithType(271);
+                    return parseJSDocNodeWithType(274);
                 case 13:
                 case 9:
                 case 8:
@@ -11699,13 +11749,13 @@ var ts;
                         if (!(contextFlags & 1048576)) {
                             return type;
                         }
-                        type = createJSDocPostfixType(272, type);
+                        type = createJSDocPostfixType(275, type);
                         break;
                     case 51:
-                        type = createJSDocPostfixType(271, type);
+                        type = createJSDocPostfixType(274, type);
                         break;
                     case 55:
-                        type = createJSDocPostfixType(270, type);
+                        type = createJSDocPostfixType(273, type);
                         break;
                     case 21:
                         parseExpected(21);
@@ -12363,8 +12413,8 @@ var ts;
                 node.operand = parseLeftHandSideExpressionOrHigher();
                 return finishNode(node);
             }
-            else if (sourceFile.languageVariant === 1 && token() === 27 && lookAhead(nextTokenIsIdentifierOrKeyword)) {
-                return parseJsxElementOrSelfClosingElement(true);
+            else if (sourceFile.languageVariant === 1 && token() === 27 && lookAhead(nextTokenIsIdentifierOrKeywordOrGreaterThan)) {
+                return parseJsxElementOrSelfClosingElementOrFragment(true);
             }
             var expression = parseLeftHandSideExpressionOrHigher();
             ts.Debug.assert(ts.isLeftHandSideExpression(expression));
@@ -12416,17 +12466,24 @@ var ts;
             return lhs.name.escapedText === rhs.name.escapedText &&
                 tagNamesAreEquivalent(lhs.expression, rhs.expression);
         }
-        function parseJsxElementOrSelfClosingElement(inExpressionContext) {
-            var opening = parseJsxOpeningOrSelfClosingElement(inExpressionContext);
+        function parseJsxElementOrSelfClosingElementOrFragment(inExpressionContext) {
+            var opening = parseJsxOpeningOrSelfClosingElementOrOpeningFragment(inExpressionContext);
             var result;
             if (opening.kind === 251) {
                 var node = createNode(249, opening.pos);
                 node.openingElement = opening;
-                node.children = parseJsxChildren(node.openingElement.tagName);
+                node.children = parseJsxChildren(node.openingElement);
                 node.closingElement = parseJsxClosingElement(inExpressionContext);
                 if (!tagNamesAreEquivalent(node.openingElement.tagName, node.closingElement.tagName)) {
                     parseErrorAtPosition(node.closingElement.pos, node.closingElement.end - node.closingElement.pos, ts.Diagnostics.Expected_corresponding_JSX_closing_tag_for_0, ts.getTextOfNodeFromSourceText(sourceText, node.openingElement.tagName));
                 }
+                result = finishNode(node);
+            }
+            else if (opening.kind === 254) {
+                var node = createNode(253, opening.pos);
+                node.openingFragment = opening;
+                node.children = parseJsxChildren(node.openingFragment);
+                node.closingFragment = parseJsxClosingFragment(inExpressionContext);
                 result = finishNode(node);
             }
             else {
@@ -12434,7 +12491,7 @@ var ts;
                 result = opening;
             }
             if (inExpressionContext && token() === 27) {
-                var invalidElement = tryParse(function () { return parseJsxElementOrSelfClosingElement(true); });
+                var invalidElement = tryParse(function () { return parseJsxElementOrSelfClosingElementOrFragment(true); });
                 if (invalidElement) {
                     parseErrorAtCurrentToken(ts.Diagnostics.JSX_expressions_must_have_one_parent_element);
                     var badNode = createNode(194, result.pos);
@@ -12462,11 +12519,11 @@ var ts;
                 case 17:
                     return parseJsxExpression(false);
                 case 27:
-                    return parseJsxElementOrSelfClosingElement(false);
+                    return parseJsxElementOrSelfClosingElementOrFragment(false);
             }
             ts.Debug.fail("Unknown JSX child kind " + token());
         }
-        function parseJsxChildren(openingTagName) {
+        function parseJsxChildren(openingTag) {
             var list = [];
             var listPos = getNodePos();
             var saveParsingContext = parsingContext;
@@ -12477,7 +12534,13 @@ var ts;
                     break;
                 }
                 else if (token() === 1) {
-                    parseErrorAtPosition(openingTagName.pos, openingTagName.end - openingTagName.pos, ts.Diagnostics.JSX_element_0_has_no_corresponding_closing_tag, ts.getTextOfNodeFromSourceText(sourceText, openingTagName));
+                    if (ts.isJsxOpeningFragment(openingTag)) {
+                        parseErrorAtPosition(openingTag.pos, openingTag.end - openingTag.pos, ts.Diagnostics.JSX_fragment_has_no_corresponding_closing_tag);
+                    }
+                    else {
+                        var openingTagName = openingTag.tagName;
+                        parseErrorAtPosition(openingTagName.pos, openingTagName.end - openingTagName.pos, ts.Diagnostics.JSX_element_0_has_no_corresponding_closing_tag, ts.getTextOfNodeFromSourceText(sourceText, openingTagName));
+                    }
                     break;
                 }
                 else if (token() === 7) {
@@ -12492,13 +12555,18 @@ var ts;
             return createNodeArray(list, listPos);
         }
         function parseJsxAttributes() {
-            var jsxAttributes = createNode(254);
+            var jsxAttributes = createNode(257);
             jsxAttributes.properties = parseList(13, parseJsxAttribute);
             return finishNode(jsxAttributes);
         }
-        function parseJsxOpeningOrSelfClosingElement(inExpressionContext) {
+        function parseJsxOpeningOrSelfClosingElementOrOpeningFragment(inExpressionContext) {
             var fullStart = scanner.getStartPos();
             parseExpected(27);
+            if (token() === 29) {
+                parseExpected(29);
+                var node_1 = createNode(254, fullStart);
+                return finishNode(node_1);
+            }
             var tagName = parseJsxElementName();
             var attributes = parseJsxAttributes();
             var node;
@@ -12534,7 +12602,7 @@ var ts;
             return expression;
         }
         function parseJsxExpression(inExpressionContext) {
-            var node = createNode(256);
+            var node = createNode(259);
             parseExpected(17);
             if (token() !== 18) {
                 node.dotDotDotToken = parseOptionalToken(24);
@@ -12554,7 +12622,7 @@ var ts;
                 return parseJsxSpreadAttribute();
             }
             scanJsxIdentifier();
-            var node = createNode(253);
+            var node = createNode(256);
             node.name = parseIdentifierName();
             if (token() === 58) {
                 switch (scanJsxAttributeValue()) {
@@ -12569,7 +12637,7 @@ var ts;
             return finishNode(node);
         }
         function parseJsxSpreadAttribute() {
-            var node = createNode(255);
+            var node = createNode(258);
             parseExpected(17);
             parseExpected(24);
             node.expression = parseExpression();
@@ -12580,6 +12648,22 @@ var ts;
             var node = createNode(252);
             parseExpected(28);
             node.tagName = parseJsxElementName();
+            if (inExpressionContext) {
+                parseExpected(29);
+            }
+            else {
+                parseExpected(29, undefined, false);
+                scanJsxText();
+            }
+            return finishNode(node);
+        }
+        function parseJsxClosingFragment(inExpressionContext) {
+            var node = createNode(255);
+            parseExpected(28);
+            if (ts.tokenIsIdentifierOrKeyword(token())) {
+                var unexpectedTagName = parseJsxElementName();
+                parseErrorAtPosition(unexpectedTagName.pos, unexpectedTagName.end - unexpectedTagName.pos, ts.Diagnostics.Expected_corresponding_closing_tag_for_JSX_fragment);
+            }
             if (inExpressionContext) {
                 parseExpected(29);
             }
@@ -12794,7 +12878,7 @@ var ts;
             var fullStart = scanner.getStartPos();
             var dotDotDotToken = parseOptionalToken(24);
             if (dotDotDotToken) {
-                var spreadElement = createNode(263, fullStart);
+                var spreadElement = createNode(266, fullStart);
                 spreadElement.expression = parseAssignmentExpressionOrHigher();
                 return addJSDocComment(finishNode(spreadElement));
             }
@@ -12813,7 +12897,7 @@ var ts;
             }
             var isShorthandPropertyAssignment = tokenIsIdentifier && (token() === 26 || token() === 18 || token() === 58);
             if (isShorthandPropertyAssignment) {
-                var shorthandDeclaration = createNode(262, fullStart);
+                var shorthandDeclaration = createNode(265, fullStart);
                 shorthandDeclaration.name = propertyName;
                 shorthandDeclaration.questionToken = questionToken;
                 var equalsToken = parseOptionalToken(58);
@@ -12824,7 +12908,7 @@ var ts;
                 return addJSDocComment(finishNode(shorthandDeclaration));
             }
             else {
-                var propertyAssignment = createNode(261, fullStart);
+                var propertyAssignment = createNode(264, fullStart);
                 propertyAssignment.modifiers = modifiers;
                 propertyAssignment.name = propertyName;
                 propertyAssignment.questionToken = questionToken;
@@ -12873,10 +12957,10 @@ var ts;
             var fullStart = scanner.getStartPos();
             parseExpected(94);
             if (parseOptional(23)) {
-                var node_1 = createNode(204, fullStart);
-                node_1.keywordToken = 94;
-                node_1.name = parseIdentifierName();
-                return finishNode(node_1);
+                var node_2 = createNode(204, fullStart);
+                node_2.keywordToken = 94;
+                node_2.name = parseIdentifierName();
+                return finishNode(node_2);
             }
             var node = createNode(182, fullStart);
             node.expression = parseMemberExpressionOrHigher();
@@ -13027,7 +13111,7 @@ var ts;
             return finishNode(node);
         }
         function parseCaseClause() {
-            var node = createNode(257);
+            var node = createNode(260);
             parseExpected(73);
             node.expression = allowInAnd(parseExpression);
             parseExpected(56);
@@ -13035,7 +13119,7 @@ var ts;
             return finishNode(node);
         }
         function parseDefaultClause() {
-            var node = createNode(258);
+            var node = createNode(261);
             parseExpected(79);
             parseExpected(56);
             node.statements = parseList(3, parseStatement);
@@ -13076,7 +13160,7 @@ var ts;
             return finishNode(node);
         }
         function parseCatchClause() {
-            var result = createNode(260);
+            var result = createNode(263);
             parseExpected(74);
             if (parseOptional(19)) {
                 result.variableDeclaration = parseVariableDeclaration();
@@ -13700,7 +13784,7 @@ var ts;
         function parseHeritageClause() {
             var tok = token();
             if (tok === 85 || tok === 108) {
-                var node = createNode(259);
+                var node = createNode(262);
                 node.token = tok;
                 nextToken();
                 node.types = parseDelimitedList(7, parseExpressionWithTypeArguments);
@@ -13749,7 +13833,7 @@ var ts;
             return addJSDocComment(finishNode(node));
         }
         function parseEnumMember() {
-            var node = createNode(264, scanner.getStartPos());
+            var node = createNode(267, scanner.getStartPos());
             node.name = parsePropertyName();
             node.initializer = allowInAnd(parseNonParameterInitializer);
             return addJSDocComment(finishNode(node));
@@ -14090,7 +14174,7 @@ var ts;
             }
             JSDocParser.parseJSDocTypeExpressionForTests = parseJSDocTypeExpressionForTests;
             function parseJSDocTypeExpression(requireBraces) {
-                var result = createNode(267, scanner.getTokenPos());
+                var result = createNode(270, scanner.getTokenPos());
                 if (!parseExpected(17) && requireBraces) {
                     return undefined;
                 }
@@ -14248,7 +14332,7 @@ var ts;
                         content.charCodeAt(start + 3) !== 42;
                 }
                 function createJSDocComment() {
-                    var result = createNode(275, start);
+                    var result = createNode(278, start);
                     result.tags = tags && createNodeArray(tags, tagsPos, tagsEnd);
                     result.comment = comments.length ? comments.join("") : undefined;
                     return finishNode(result, end);
@@ -14365,7 +14449,7 @@ var ts;
                     return comments;
                 }
                 function parseUnknownTag(atToken, tagName) {
-                    var result = createNode(276, atToken.pos);
+                    var result = createNode(279, atToken.pos);
                     result.atToken = atToken;
                     result.tagName = tagName;
                     return finishNode(result);
@@ -14417,8 +14501,8 @@ var ts;
                         typeExpression = tryParseTypeExpression();
                     }
                     var result = target === 1 ?
-                        createNode(279, atToken.pos) :
-                        createNode(284, atToken.pos);
+                        createNode(282, atToken.pos) :
+                        createNode(287, atToken.pos);
                     var nestedTypeLiteral = parseNestedTypeLiteral(typeExpression, name);
                     if (nestedTypeLiteral) {
                         typeExpression = nestedTypeLiteral;
@@ -14434,7 +14518,7 @@ var ts;
                 }
                 function parseNestedTypeLiteral(typeExpression, name) {
                     if (typeExpression && isObjectOrObjectArrayTypeReference(typeExpression.type)) {
-                        var typeLiteralExpression = createNode(267, scanner.getTokenPos());
+                        var typeLiteralExpression = createNode(270, scanner.getTokenPos());
                         var child = void 0;
                         var jsdocTypeLiteral = void 0;
                         var start_2 = scanner.getStartPos();
@@ -14446,7 +14530,7 @@ var ts;
                             children.push(child);
                         }
                         if (children) {
-                            jsdocTypeLiteral = createNode(285, start_2);
+                            jsdocTypeLiteral = createNode(288, start_2);
                             jsdocTypeLiteral.jsDocPropertyTags = children;
                             if (typeExpression.type.kind === 164) {
                                 jsdocTypeLiteral.isArrayType = true;
@@ -14457,27 +14541,27 @@ var ts;
                     }
                 }
                 function parseReturnTag(atToken, tagName) {
-                    if (ts.forEach(tags, function (t) { return t.kind === 280; })) {
+                    if (ts.forEach(tags, function (t) { return t.kind === 283; })) {
                         parseErrorAtPosition(tagName.pos, scanner.getTokenPos() - tagName.pos, ts.Diagnostics._0_tag_already_specified, tagName.escapedText);
                     }
-                    var result = createNode(280, atToken.pos);
+                    var result = createNode(283, atToken.pos);
                     result.atToken = atToken;
                     result.tagName = tagName;
                     result.typeExpression = tryParseTypeExpression();
                     return finishNode(result);
                 }
                 function parseTypeTag(atToken, tagName) {
-                    if (ts.forEach(tags, function (t) { return t.kind === 281; })) {
+                    if (ts.forEach(tags, function (t) { return t.kind === 284; })) {
                         parseErrorAtPosition(tagName.pos, scanner.getTokenPos() - tagName.pos, ts.Diagnostics._0_tag_already_specified, tagName.escapedText);
                     }
-                    var result = createNode(281, atToken.pos);
+                    var result = createNode(284, atToken.pos);
                     result.atToken = atToken;
                     result.tagName = tagName;
                     result.typeExpression = parseJSDocTypeExpression(true);
                     return finishNode(result);
                 }
                 function parseAugmentsTag(atToken, tagName) {
-                    var result = createNode(277, atToken.pos);
+                    var result = createNode(280, atToken.pos);
                     result.atToken = atToken;
                     result.tagName = tagName;
                     result.class = parseExpressionWithTypeArgumentsForAugments();
@@ -14505,7 +14589,7 @@ var ts;
                     return node;
                 }
                 function parseClassTag(atToken, tagName) {
-                    var tag = createNode(278, atToken.pos);
+                    var tag = createNode(281, atToken.pos);
                     tag.atToken = atToken;
                     tag.tagName = tagName;
                     return finishNode(tag);
@@ -14513,7 +14597,7 @@ var ts;
                 function parseTypedefTag(atToken, tagName) {
                     var typeExpression = tryParseTypeExpression();
                     skipWhitespace();
-                    var typedefTag = createNode(283, atToken.pos);
+                    var typedefTag = createNode(286, atToken.pos);
                     typedefTag.atToken = atToken;
                     typedefTag.tagName = tagName;
                     typedefTag.fullName = parseJSDocTypeNameWithNamespace(0);
@@ -14536,9 +14620,9 @@ var ts;
                         var start_3 = scanner.getStartPos();
                         while (child = tryParse(function () { return parseChildParameterOrPropertyTag(0); })) {
                             if (!jsdocTypeLiteral) {
-                                jsdocTypeLiteral = createNode(285, start_3);
+                                jsdocTypeLiteral = createNode(288, start_3);
                             }
-                            if (child.kind === 281) {
+                            if (child.kind === 284) {
                                 if (childTypeTag) {
                                     break;
                                 }
@@ -14600,7 +14684,7 @@ var ts;
                             case 57:
                                 if (canParseTag) {
                                     var child = tryParseChildTag(target);
-                                    if (child && child.kind === 279 &&
+                                    if (child && child.kind === 282 &&
                                         (ts.isIdentifier(child.name) || !escapedTextsEqual(name, child.name.left))) {
                                         return false;
                                     }
@@ -14650,7 +14734,7 @@ var ts;
                     return false;
                 }
                 function parseTemplateTag(atToken, tagName) {
-                    if (ts.forEach(tags, function (t) { return t.kind === 282; })) {
+                    if (ts.forEach(tags, function (t) { return t.kind === 285; })) {
                         parseErrorAtPosition(tagName.pos, scanner.getTokenPos() - tagName.pos, ts.Diagnostics._0_tag_already_specified, tagName.escapedText);
                     }
                     var typeParameters = [];
@@ -14674,7 +14758,7 @@ var ts;
                             break;
                         }
                     }
-                    var result = createNode(282, atToken.pos);
+                    var result = createNode(285, atToken.pos);
                     result.atToken = atToken;
                     result.tagName = tagName;
                     result.typeParameters = createNodeArray(typeParameters, typeParametersPos);
@@ -15195,14 +15279,14 @@ var ts;
                 case 228:
                 case 229:
                     return (ts.hasModifier(node, 512) ? "default" : undefined);
-                case 273:
+                case 276:
                     return (ts.isJSDocConstructSignature(node) ? "__new" : "__call");
                 case 146:
-                    ts.Debug.assert(node.parent.kind === 273);
+                    ts.Debug.assert(node.parent.kind === 276);
                     var functionType = node.parent;
                     var index = ts.indexOf(functionType.parameters, node);
                     return "arg" + index;
-                case 283:
+                case 286:
                     var name_2 = ts.getNameOfJSDocTypedef(node);
                     return typeof name_2 !== "undefined" ? name_2.escapedText : undefined;
             }
@@ -15276,9 +15360,9 @@ var ts;
                 }
             }
             else {
-                if (node.kind === 283)
+                if (node.kind === 286)
                     ts.Debug.assert(ts.isInJavaScriptFile(node));
-                var isJSDocTypedefInJSDocNamespace = node.kind === 283 &&
+                var isJSDocTypedefInJSDocNamespace = node.kind === 286 &&
                     node.name &&
                     node.name.kind === 71 &&
                     node.name.isInJSDocNamespace;
@@ -15337,7 +15421,7 @@ var ts;
                     if (hasExplicitReturn)
                         node.flags |= 256;
                 }
-                if (node.kind === 265) {
+                if (node.kind === 268) {
                     node.flags |= emitFlags;
                 }
                 if (isIIFE) {
@@ -15457,7 +15541,7 @@ var ts;
                 case 235:
                     bindCaseBlock(node);
                     break;
-                case 257:
+                case 260:
                     bindCaseClause(node);
                     break;
                 case 222:
@@ -15484,10 +15568,10 @@ var ts;
                 case 181:
                     bindCallExpressionFlow(node);
                     break;
-                case 275:
+                case 278:
                     bindJSDocComment(node);
                     break;
-                case 283:
+                case 286:
                     bindJSDocTypedefTag(node);
                     break;
                 default:
@@ -15845,7 +15929,7 @@ var ts;
             preSwitchCaseFlow = currentFlow;
             bind(node.caseBlock);
             addAntecedent(postSwitchLabel, currentFlow);
-            var hasDefault = ts.forEach(node.caseBlock.clauses, function (c) { return c.kind === 258; });
+            var hasDefault = ts.forEach(node.caseBlock.clauses, function (c) { return c.kind === 261; });
             node.possiblyExhaustive = !hasDefault && !postSwitchLabel.antecedents;
             if (!hasDefault) {
                 addAntecedent(postSwitchLabel, createFlowSwitchClause(preSwitchCaseFlow, node, 0, 0));
@@ -15941,13 +16025,13 @@ var ts;
             else if (node.kind === 178) {
                 for (var _b = 0, _c = node.properties; _b < _c.length; _b++) {
                     var p = _c[_b];
-                    if (p.kind === 261) {
+                    if (p.kind === 264) {
                         bindDestructuringTargetFlow(p.initializer);
                     }
-                    else if (p.kind === 262) {
+                    else if (p.kind === 265) {
                         bindAssignmentTargetFlow(p.name);
                     }
-                    else if (p.kind === 263) {
+                    else if (p.kind === 266) {
                         bindAssignmentTargetFlow(p.expression);
                     }
                 }
@@ -16053,7 +16137,7 @@ var ts;
         }
         function bindJSDocComment(node) {
             ts.forEachChild(node, function (n) {
-                if (n.kind !== 283) {
+                if (n.kind !== 286) {
                     bind(n);
                 }
             });
@@ -16093,8 +16177,8 @@ var ts;
                 case 232:
                 case 178:
                 case 163:
-                case 285:
-                case 254:
+                case 288:
+                case 257:
                     return 1;
                 case 230:
                     return 1 | 64;
@@ -16102,7 +16186,7 @@ var ts;
                 case 231:
                 case 172:
                     return 1 | 32;
-                case 265:
+                case 268:
                     return 1 | 4 | 32;
                 case 151:
                     if (ts.isObjectLiteralOrClassExpressionMethod(node)) {
@@ -16114,7 +16198,7 @@ var ts;
                 case 153:
                 case 154:
                 case 155:
-                case 273:
+                case 276:
                 case 160:
                 case 156:
                 case 157:
@@ -16127,7 +16211,7 @@ var ts;
                     return 4;
                 case 149:
                     return node.initializer ? 4 : 0;
-                case 260:
+                case 263:
                 case 214:
                 case 215:
                 case 216:
@@ -16148,7 +16232,7 @@ var ts;
             switch (container.kind) {
                 case 233:
                     return declareModuleMember(node, symbolFlags, symbolExcludes);
-                case 265:
+                case 268:
                     return declareSourceFileMember(node, symbolFlags, symbolExcludes);
                 case 199:
                 case 229:
@@ -16156,10 +16240,10 @@ var ts;
                 case 232:
                     return declareSymbol(container.symbol.exports, container.symbol, node, symbolFlags, symbolExcludes);
                 case 163:
-                case 285:
+                case 288:
                 case 178:
                 case 230:
-                case 254:
+                case 257:
                     return declareSymbol(container.symbol.members, container.symbol, node, symbolFlags, symbolExcludes);
                 case 160:
                 case 161:
@@ -16174,7 +16258,7 @@ var ts;
                 case 228:
                 case 186:
                 case 187:
-                case 273:
+                case 276:
                 case 231:
                 case 172:
                     return declareSymbol(container.locals, undefined, node, symbolFlags, symbolExcludes);
@@ -16191,8 +16275,8 @@ var ts;
                 : declareSymbol(file.locals, undefined, node, symbolFlags, symbolExcludes);
         }
         function hasExportDeclarations(node) {
-            var body = node.kind === 265 ? node : node.body;
-            if (body && (body.kind === 265 || body.kind === 234)) {
+            var body = node.kind === 268 ? node : node.body;
+            if (body && (body.kind === 268 || body.kind === 234)) {
                 for (var _i = 0, _a = body.statements; _i < _a.length; _i++) {
                     var stat = _a[_i];
                     if (stat.kind === 244 || stat.kind === 243) {
@@ -16273,11 +16357,11 @@ var ts;
                 var seen = ts.createUnderscoreEscapedMap();
                 for (var _i = 0, _a = node.properties; _i < _a.length; _i++) {
                     var prop = _a[_i];
-                    if (prop.kind === 263 || prop.name.kind !== 71) {
+                    if (prop.kind === 266 || prop.name.kind !== 71) {
                         continue;
                     }
                     var identifier = prop.name;
-                    var currentKind = prop.kind === 261 || prop.kind === 262 || prop.kind === 151
+                    var currentKind = prop.kind === 264 || prop.kind === 265 || prop.kind === 151
                         ? 1
                         : 2;
                     var existingKind = seen.get(identifier.escapedText);
@@ -16311,7 +16395,7 @@ var ts;
                 case 233:
                     declareModuleMember(node, symbolFlags, symbolExcludes);
                     break;
-                case 265:
+                case 268:
                     if (ts.isExternalModule(container)) {
                         declareModuleMember(node, symbolFlags, symbolExcludes);
                         break;
@@ -16400,7 +16484,7 @@ var ts;
         }
         function checkStrictModeFunctionDeclaration(node) {
             if (languageVersion < 2) {
-                if (blockScopeContainer.kind !== 265 &&
+                if (blockScopeContainer.kind !== 268 &&
                     blockScopeContainer.kind !== 233 &&
                     !ts.isFunctionLike(blockScopeContainer)) {
                     var errorSpan = ts.getErrorSpanForNode(file, node);
@@ -16471,7 +16555,7 @@ var ts;
                 }
                 for (var _b = 0, _c = jsDoc.tags; _b < _c.length; _b++) {
                     var tag = _c[_b];
-                    if (tag.kind === 283) {
+                    if (tag.kind === 286) {
                         var savedParent = parent;
                         parent = jsDoc;
                         bind(tag);
@@ -16503,14 +16587,14 @@ var ts;
                 case 71:
                     if (node.isInJSDocNamespace) {
                         var parentNode = node.parent;
-                        while (parentNode && parentNode.kind !== 283) {
+                        while (parentNode && parentNode.kind !== 286) {
                             parentNode = parentNode.parent;
                         }
                         bindBlockScopedDeclaration(parentNode, 524288, 793064);
                         break;
                     }
                 case 99:
-                    if (currentFlow && (ts.isExpression(node) || parent.kind === 262)) {
+                    if (currentFlow && (ts.isExpression(node) || parent.kind === 265)) {
                         node.flowNode = currentFlow;
                     }
                     return checkStrictModeIdentifier(node);
@@ -16543,7 +16627,7 @@ var ts;
                             ts.Debug.fail("Unknown special property assignment kind");
                     }
                     return checkStrictModeBinaryExpression(node);
-                case 260:
+                case 263:
                     return checkStrictModeCatchClause(node);
                 case 188:
                     return checkStrictModeDeleteExpression(node);
@@ -16572,10 +16656,10 @@ var ts;
                 case 149:
                 case 148:
                     return bindPropertyWorker(node);
-                case 261:
-                case 262:
-                    return bindPropertyOrMethodOrAccessor(node, 4, 0);
                 case 264:
+                case 265:
+                    return bindPropertyOrMethodOrAccessor(node, 4, 0);
+                case 267:
                     return bindPropertyOrMethodOrAccessor(node, 8, 900095);
                 case 155:
                 case 156:
@@ -16593,11 +16677,11 @@ var ts;
                 case 154:
                     return bindPropertyOrMethodOrAccessor(node, 65536, 74687);
                 case 160:
-                case 273:
+                case 276:
                 case 161:
                     return bindFunctionOrConstructorType(node);
                 case 163:
-                case 285:
+                case 288:
                 case 172:
                     return bindAnonymousTypeWorker(node);
                 case 178:
@@ -16622,9 +16706,9 @@ var ts;
                     return bindEnumDeclaration(node);
                 case 233:
                     return bindModuleDeclaration(node);
-                case 254:
+                case 257:
                     return bindJsxAttributes(node);
-                case 253:
+                case 256:
                     return bindJsxAttribute(node, 4, 0);
                 case 237:
                 case 240:
@@ -16639,7 +16723,7 @@ var ts;
                     return bindExportDeclaration(node);
                 case 243:
                     return bindExportAssignment(node);
-                case 265:
+                case 268:
                     updateStrictModeStatementList(node.statements);
                     return bindSourceFileIfExternalModule();
                 case 207:
@@ -16648,17 +16732,17 @@ var ts;
                     }
                 case 234:
                     return updateStrictModeStatementList(node.statements);
-                case 279:
-                    if (node.parent.kind !== 285) {
+                case 282:
+                    if (node.parent.kind !== 288) {
                         break;
                     }
-                case 284:
+                case 287:
                     var propTag = node;
-                    var flags = propTag.isBracketed || propTag.typeExpression && propTag.typeExpression.type.kind === 272 ?
+                    var flags = propTag.isBracketed || propTag.typeExpression && propTag.typeExpression.type.kind === 275 ?
                         4 | 16777216 :
                         4;
                     return declareSymbolAndAddToSymbolTable(propTag, flags, 0);
-                case 283: {
+                case 286: {
                     var fullName = node.fullName;
                     if (!fullName || fullName.kind === 71) {
                         return bindBlockScopedDeclaration(node, 524288, 793064);
@@ -16707,7 +16791,7 @@ var ts;
             if (node.modifiers && node.modifiers.length) {
                 file.bindDiagnostics.push(createDiagnosticForNode(node, ts.Diagnostics.Modifiers_cannot_appear_here));
             }
-            if (node.parent.kind !== 265) {
+            if (node.parent.kind !== 268) {
                 file.bindDiagnostics.push(createDiagnosticForNode(node, ts.Diagnostics.Global_module_exports_may_only_appear_at_top_level));
                 return;
             }
@@ -16998,9 +17082,9 @@ var ts;
                 return computeClassDeclaration(node, subtreeFlags);
             case 199:
                 return computeClassExpression(node, subtreeFlags);
-            case 259:
+            case 262:
                 return computeHeritageClause(node, subtreeFlags);
-            case 260:
+            case 263:
                 return computeCatchClause(node, subtreeFlags);
             case 201:
                 return computeExpressionWithTypeArguments(node, subtreeFlags);
@@ -17408,7 +17492,7 @@ var ts;
             case 124:
             case 76:
             case 232:
-            case 264:
+            case 267:
             case 184:
             case 202:
             case 203:
@@ -17424,6 +17508,9 @@ var ts;
             case 254:
             case 255:
             case 256:
+            case 257:
+            case 258:
+            case 259:
                 transformFlags |= 4;
                 break;
             case 13:
@@ -17432,7 +17519,7 @@ var ts;
             case 16:
             case 196:
             case 183:
-            case 262:
+            case 265:
             case 115:
             case 204:
                 transformFlags |= 192;
@@ -17501,7 +17588,7 @@ var ts;
             case 198:
                 transformFlags |= 192 | 524288;
                 break;
-            case 263:
+            case 266:
                 transformFlags |= 8 | 1048576;
                 break;
             case 97:
@@ -17557,7 +17644,7 @@ var ts;
                     transformFlags |= 192;
                 }
                 break;
-            case 265:
+            case 268:
                 if (subtreeFlags & 32768) {
                     transformFlags |= 192;
                 }
@@ -17619,7 +17706,7 @@ var ts;
                 return -3;
             case 178:
                 return 540087617;
-            case 260:
+            case 263:
                 return 537920833;
             case 174:
             case 175:
@@ -19201,7 +19288,7 @@ var ts;
             return type.flags & 32768 ? type.objectFlags : 0;
         }
         function isGlobalSourceFile(node) {
-            return node.kind === 265 && !ts.isExternalOrCommonJsModule(node);
+            return node.kind === 268 && !ts.isExternalOrCommonJsModule(node);
         }
         function getSymbol(symbols, name, meaning) {
             if (meaning) {
@@ -19325,7 +19412,7 @@ var ts;
                     if (result = lookup(location.locals, name, meaning)) {
                         var useResult = true;
                         if (ts.isFunctionLike(location) && lastLocation && lastLocation !== location.body) {
-                            if (meaning & result.flags & 793064 && lastLocation.kind !== 275) {
+                            if (meaning & result.flags & 793064 && lastLocation.kind !== 278) {
                                 useResult = result.flags & 262144
                                     ? lastLocation === location.type ||
                                         lastLocation.kind === 146 ||
@@ -19348,13 +19435,13 @@ var ts;
                     }
                 }
                 switch (location.kind) {
-                    case 265:
+                    case 268:
                         if (!ts.isExternalOrCommonJsModule(location))
                             break;
                         isInExternalModule = true;
                     case 233:
                         var moduleExports = getSymbolOfNode(location).exports;
-                        if (location.kind === 265 || ts.isAmbientModule(location)) {
+                        if (location.kind === 268 || ts.isAmbientModule(location)) {
                             if (result = moduleExports.get("default")) {
                                 var localSymbol = ts.getLocalSymbolForExportDefault(result);
                                 if (localSymbol && (result.flags & meaning) && localSymbol.escapedName === name) {
@@ -19476,7 +19563,7 @@ var ts;
             }
             if (!result) {
                 if (lastLocation) {
-                    ts.Debug.assert(lastLocation.kind === 265);
+                    ts.Debug.assert(lastLocation.kind === 268);
                     if (lastLocation.commonJsModuleIndicator && name === "exports") {
                         return lastLocation.symbol;
                     }
@@ -20198,7 +20285,7 @@ var ts;
                     }
                 }
                 switch (location.kind) {
-                    case 265:
+                    case 268:
                         if (!ts.isExternalOrCommonJsModule(location)) {
                             break;
                         }
@@ -20346,7 +20433,7 @@ var ts;
             }
         }
         function hasExternalModuleSymbol(declaration) {
-            return ts.isAmbientModule(declaration) || (declaration.kind === 265 && ts.isExternalOrCommonJsModule(declaration));
+            return ts.isAmbientModule(declaration) || (declaration.kind === 268 && ts.isExternalOrCommonJsModule(declaration));
         }
         function hasVisibleDeclarations(symbol, shouldComputeAliasToMakeVisible) {
             var aliasesToMakeVisible;
@@ -20450,18 +20537,21 @@ var ts;
         function createNodeBuilder() {
             return {
                 typeToTypeNode: function (type, enclosingDeclaration, flags) {
+                    ts.Debug.assert(enclosingDeclaration === undefined || (enclosingDeclaration.flags & 8) === 0);
                     var context = createNodeBuilderContext(enclosingDeclaration, flags);
                     var resultingNode = typeToTypeNodeHelper(type, context);
                     var result = context.encounteredError ? undefined : resultingNode;
                     return result;
                 },
                 indexInfoToIndexSignatureDeclaration: function (indexInfo, kind, enclosingDeclaration, flags) {
+                    ts.Debug.assert(enclosingDeclaration === undefined || (enclosingDeclaration.flags & 8) === 0);
                     var context = createNodeBuilderContext(enclosingDeclaration, flags);
                     var resultingNode = indexInfoToIndexSignatureDeclarationHelper(indexInfo, kind, context);
                     var result = context.encounteredError ? undefined : resultingNode;
                     return result;
                 },
                 signatureToSignatureDeclaration: function (signature, kind, enclosingDeclaration, flags) {
+                    ts.Debug.assert(enclosingDeclaration === undefined || (enclosingDeclaration.flags & 8) === 0);
                     var context = createNodeBuilderContext(enclosingDeclaration, flags);
                     var resultingNode = signatureToSignatureDeclarationHelper(signature, kind, context);
                     var result = context.encounteredError ? undefined : resultingNode;
@@ -20629,7 +20719,7 @@ var ts;
                         var isNonLocalFunctionSymbol = !!(symbol.flags & 16) &&
                             (symbol.parent ||
                                 ts.forEach(symbol.declarations, function (declaration) {
-                                    return declaration.parent.kind === 265 || declaration.parent.kind === 234;
+                                    return declaration.parent.kind === 268 || declaration.parent.kind === 234;
                                 }));
                         if (isStaticMethodSymbol || isNonLocalFunctionSymbol) {
                             return ts.contains(context.symbolStack, symbol);
@@ -21316,7 +21406,7 @@ var ts;
                         var isNonLocalFunctionSymbol = !!(symbol.flags & 16) &&
                             (symbol.parent ||
                                 ts.some(symbol.declarations, function (declaration) {
-                                    return declaration.parent.kind === 265 || declaration.parent.kind === 234;
+                                    return declaration.parent.kind === 268 || declaration.parent.kind === 234;
                                 }));
                         if (isStaticMethodSymbol || isNonLocalFunctionSymbol) {
                             return !!(flags & 4) ||
@@ -21717,7 +21807,7 @@ var ts;
                         }
                         var parent = getDeclarationContainer(node);
                         if (!(ts.getCombinedModifierFlags(node) & 1) &&
-                            !(node.kind !== 237 && parent.kind !== 265 && ts.isInAmbientContext(parent))) {
+                            !(node.kind !== 237 && parent.kind !== 268 && ts.isInAmbientContext(parent))) {
                             return isGlobalSourceFile(parent);
                         }
                         return isDeclarationVisible(parent);
@@ -21751,7 +21841,7 @@ var ts;
                     case 242:
                         return false;
                     case 145:
-                    case 265:
+                    case 268:
                     case 236:
                         return true;
                     case 243:
@@ -22045,7 +22135,7 @@ var ts;
             if (ts.isJsxAttribute(declaration)) {
                 return trueType;
             }
-            if (declaration.kind === 262) {
+            if (declaration.kind === 265) {
                 return checkIdentifier(declaration.name);
             }
             if (ts.isBindingPattern(declaration.name)) {
@@ -22159,7 +22249,7 @@ var ts;
                 if (reportErrors) {
                     reportErrorsFromWidening(declaration, type);
                 }
-                if (declaration.kind === 261) {
+                if (declaration.kind === 264) {
                     return type;
                 }
                 return getWidenedType(type);
@@ -22421,13 +22511,13 @@ var ts;
                     case 150:
                     case 160:
                     case 161:
-                    case 273:
+                    case 276:
                     case 228:
                     case 151:
                     case 186:
                     case 187:
                     case 231:
-                    case 282:
+                    case 285:
                     case 172:
                         var outerTypeParameters = getOuterTypeParameters(node, includeThisTypes);
                         if (node.kind === 172) {
@@ -22685,9 +22775,9 @@ var ts;
                     return unknownType;
                 }
                 var declaration = ts.find(symbol.declarations, function (d) {
-                    return d.kind === 283 || d.kind === 231;
+                    return d.kind === 286 || d.kind === 231;
                 });
-                var typeNode = declaration.kind === 283 ? declaration.typeExpression : declaration.type;
+                var typeNode = declaration.kind === 286 ? declaration.typeExpression : declaration.type;
                 var type = typeNode ? getTypeFromTypeNode(typeNode) : unknownType;
                 if (popTypeResolution()) {
                     var typeParameters = getLocalTypeParametersOfClassOrInterfaceOrTypeAlias(symbol);
@@ -23672,7 +23762,7 @@ var ts;
         }
         function isJSDocOptionalParameter(node) {
             if (ts.isInJavaScriptFile(node)) {
-                if (node.type && node.type.kind === 272) {
+                if (node.type && node.type.kind === 275) {
                     return true;
                 }
                 var paramTags = ts.getJSDocParameterTags(node);
@@ -23683,7 +23773,7 @@ var ts;
                             return true;
                         }
                         if (paramTag.typeExpression) {
-                            return paramTag.typeExpression.type.kind === 272;
+                            return paramTag.typeExpression.type.kind === 275;
                         }
                     }
                 }
@@ -23895,7 +23985,7 @@ var ts;
                     case 154:
                     case 186:
                     case 187:
-                    case 273:
+                    case 276:
                         if (i > 0 && node.body) {
                             var previous = symbol.declarations[i - 1];
                             if (node.parent === previous.parent && node.kind === previous.kind && node.pos === previous.end) {
@@ -25089,8 +25179,8 @@ var ts;
         function getTypeFromTypeNode(node) {
             switch (node.kind) {
                 case 119:
-                case 268:
-                case 269:
+                case 271:
+                case 272:
                     return anyType;
                 case 136:
                     return stringType;
@@ -25131,18 +25221,18 @@ var ts;
                     return getTypeFromUnionTypeNode(node);
                 case 167:
                     return getTypeFromIntersectionTypeNode(node);
-                case 270:
+                case 273:
                     return getTypeFromJSDocNullableTypeNode(node);
                 case 168:
-                case 271:
-                case 272:
-                case 267:
+                case 274:
+                case 275:
+                case 270:
                     return getTypeFromTypeNode(node.type);
                 case 160:
                 case 161:
                 case 163:
-                case 285:
-                case 273:
+                case 288:
+                case 276:
                     return getTypeFromTypeLiteralOrFunctionOrConstructorTypeNode(node);
                 case 170:
                     return getTypeFromTypeOperatorNode(node);
@@ -25154,7 +25244,7 @@ var ts;
                 case 143:
                     var symbol = getSymbolAtLocation(node);
                     return symbol && getDeclaredTypeOfSymbol(symbol);
-                case 274:
+                case 277:
                     return getTypeFromJSDocVariadicType(node);
                 default:
                     return unknownType;
@@ -25415,15 +25505,15 @@ var ts;
                 case 194:
                     return node.operatorToken.kind === 54 &&
                         (isContextSensitive(node.left) || isContextSensitive(node.right));
-                case 261:
+                case 264:
                     return isContextSensitive(node.initializer);
                 case 185:
                     return isContextSensitive(node.expression);
-                case 254:
+                case 257:
                     return ts.forEach(node.properties, isContextSensitive);
-                case 253:
-                    return node.initializer && isContextSensitive(node.initializer);
                 case 256:
+                    return node.initializer && isContextSensitive(node.initializer);
+                case 259:
                     return node.expression && isContextSensitive(node.expression);
             }
             return false;
@@ -27791,7 +27881,7 @@ var ts;
         }
         function getAssignedTypeOfBinaryExpression(node) {
             var isDestructuringDefaultAssignment = node.parent.kind === 177 && isDestructuringAssignmentTarget(node.parent) ||
-                node.parent.kind === 261 && isDestructuringAssignmentTarget(node.parent.parent);
+                node.parent.kind === 264 && isDestructuringAssignmentTarget(node.parent.parent);
             return isDestructuringDefaultAssignment ?
                 getTypeWithDefault(getAssignedType(node), node.right) :
                 getTypeOfExpression(node.right);
@@ -27827,9 +27917,9 @@ var ts;
                     return getAssignedTypeOfArrayLiteralElement(parent, node);
                 case 198:
                     return getAssignedTypeOfSpreadExpression(parent);
-                case 261:
+                case 264:
                     return getAssignedTypeOfPropertyAssignment(parent);
-                case 262:
+                case 265:
                     return getAssignedTypeOfShorthandPropertyAssignment(parent);
             }
             return unknownType;
@@ -27898,7 +27988,7 @@ var ts;
                 getReferenceRoot(parent) : node;
         }
         function getTypeOfSwitchClause(clause) {
-            if (clause.kind === 257) {
+            if (clause.kind === 260) {
                 var caseType = getRegularTypeOfLiteralType(getTypeOfExpression(clause.expression));
                 return isUnitType(caseType) ? caseType : undefined;
             }
@@ -28613,7 +28703,7 @@ var ts;
             return ts.findAncestor(node.parent, function (node) {
                 return ts.isFunctionLike(node) && !ts.getImmediatelyInvokedFunctionExpression(node) ||
                     node.kind === 234 ||
-                    node.kind === 265 ||
+                    node.kind === 268 ||
                     node.kind === 149;
             });
         }
@@ -28790,7 +28880,7 @@ var ts;
         function checkNestedBlockScopedBinding(node, symbol) {
             if (languageVersion >= 2 ||
                 (symbol.flags & (2 | 32)) === 0 ||
-                symbol.valueDeclaration.parent.kind === 260) {
+                symbol.valueDeclaration.parent.kind === 263) {
                 return;
             }
             var container = ts.getEnclosingBlockScopeContainer(symbol.valueDeclaration);
@@ -28952,7 +29042,7 @@ var ts;
         }
         function getTypeForThisExpressionFromJSDoc(node) {
             var jsdocType = ts.getJSDocType(node);
-            if (jsdocType && jsdocType.kind === 273) {
+            if (jsdocType && jsdocType.kind === 276) {
                 var jsDocFunctionType = jsdocType;
                 if (jsDocFunctionType.parameters.length > 0 &&
                     jsDocFunctionType.parameters[0].name &&
@@ -29071,7 +29161,7 @@ var ts;
             return (func.kind === 151 ||
                 func.kind === 153 ||
                 func.kind === 154) && func.parent.kind === 178 ? func.parent :
-                func.kind === 186 && func.parent.kind === 261 ? func.parent.parent :
+                func.kind === 186 && func.parent.kind === 264 ? func.parent.parent :
                     undefined;
         }
         function getThisTypeArgument(type) {
@@ -29107,7 +29197,7 @@ var ts;
                         if (thisType) {
                             return instantiateType(thisType, getContextualMapper(containingLiteral));
                         }
-                        if (literal.parent.kind !== 261) {
+                        if (literal.parent.kind !== 264) {
                             break;
                         }
                         literal = literal.parent.parent;
@@ -29352,7 +29442,12 @@ var ts;
         function getContextualTypeForJsxExpression(node) {
             var jsxAttributes = ts.isJsxAttributeLike(node.parent) ?
                 node.parent.parent :
-                node.parent.openingElement.attributes;
+                ts.isJsxElement(node.parent) ?
+                    node.parent.openingElement.attributes :
+                    undefined;
+            if (!jsxAttributes) {
+                return undefined;
+            }
             var attributesType = getContextualType(jsxAttributes);
             if (!attributesType || isTypeAny(attributesType)) {
                 return undefined;
@@ -29412,10 +29507,10 @@ var ts;
                     return getTypeFromTypeNode(parent.type);
                 case 194:
                     return getContextualTypeForBinaryOperand(node);
-                case 261:
-                case 262:
+                case 264:
+                case 265:
                     return getContextualTypeForObjectLiteralElement(parent);
-                case 263:
+                case 266:
                     return getApparentTypeOfContextualType(parent.parent);
                 case 177: {
                     var arrayLiteral = parent;
@@ -29431,10 +29526,10 @@ var ts;
                     var tag = ts.isInJavaScriptFile(parent) ? ts.getJSDocTypeTag(parent) : undefined;
                     return tag ? getTypeFromTypeNode(tag.typeExpression.type) : getContextualType(parent);
                 }
-                case 256:
+                case 259:
                     return getContextualTypeForJsxExpression(parent);
-                case 253:
-                case 255:
+                case 256:
+                case 258:
                     return getContextualTypeForJsxAttribute(parent);
                 case 251:
                 case 250:
@@ -29651,15 +29746,15 @@ var ts;
                 var memberDecl = node.properties[i];
                 var member = memberDecl.symbol;
                 var literalName = void 0;
-                if (memberDecl.kind === 261 ||
-                    memberDecl.kind === 262 ||
+                if (memberDecl.kind === 264 ||
+                    memberDecl.kind === 265 ||
                     ts.isObjectLiteralMethod(memberDecl)) {
                     var jsdocType = void 0;
                     if (isInJSFile) {
                         jsdocType = getTypeForDeclarationFromJSDocComment(memberDecl);
                     }
                     var type = void 0;
-                    if (memberDecl.kind === 261) {
+                    if (memberDecl.kind === 264) {
                         if (memberDecl.name.kind === 144) {
                             var t = checkComputedPropertyName(memberDecl.name);
                             if (t.flags & 224) {
@@ -29672,7 +29767,7 @@ var ts;
                         type = checkObjectLiteralMethod(memberDecl, checkMode);
                     }
                     else {
-                        ts.Debug.assert(memberDecl.kind === 262);
+                        ts.Debug.assert(memberDecl.kind === 265);
                         type = checkExpressionForMutableLocation(memberDecl.name, checkMode);
                     }
                     if (jsdocType) {
@@ -29682,8 +29777,8 @@ var ts;
                     typeFlags |= type.flags;
                     var prop = createSymbol(4 | member.flags, literalName || member.escapedName);
                     if (inDestructuringPattern) {
-                        var isOptional = (memberDecl.kind === 261 && hasDefaultValue(memberDecl.initializer)) ||
-                            (memberDecl.kind === 262 && memberDecl.objectAssignmentInitializer);
+                        var isOptional = (memberDecl.kind === 264 && hasDefaultValue(memberDecl.initializer)) ||
+                            (memberDecl.kind === 265 && memberDecl.objectAssignmentInitializer);
                         if (isOptional) {
                             prop.flags |= 16777216;
                         }
@@ -29709,7 +29804,7 @@ var ts;
                     prop.target = member;
                     member = prop;
                 }
-                else if (memberDecl.kind === 263) {
+                else if (memberDecl.kind === 266) {
                     if (languageVersion < 2) {
                         checkExternalEmitHelpers(memberDecl, 2);
                     }
@@ -29792,16 +29887,23 @@ var ts;
                 type.flags & 196608 && !ts.forEach(type.types, function (t) { return !isValidSpreadType(t); }));
         }
         function checkJsxSelfClosingElement(node) {
-            checkJsxOpeningLikeElement(node);
+            checkJsxOpeningLikeElementOrOpeningFragment(node);
             return getJsxGlobalElementType() || anyType;
         }
         function checkJsxElement(node) {
-            checkJsxOpeningLikeElement(node.openingElement);
+            checkJsxOpeningLikeElementOrOpeningFragment(node.openingElement);
             if (isJsxIntrinsicIdentifier(node.closingElement.tagName)) {
                 getIntrinsicTagSymbol(node.closingElement);
             }
             else {
                 checkExpression(node.closingElement.tagName);
+            }
+            return getJsxGlobalElementType() || anyType;
+        }
+        function checkJsxFragment(node) {
+            checkJsxOpeningLikeElementOrOpeningFragment(node.openingFragment);
+            if (compilerOptions.jsx === 2 && compilerOptions.jsxFactory) {
+                error(node, ts.Diagnostics.JSX_fragment_is_not_supported_when_using_jsxFactory);
             }
             return getJsxGlobalElementType() || anyType;
         }
@@ -29850,7 +29952,7 @@ var ts;
                     }
                 }
                 else {
-                    ts.Debug.assert(attributeDecl.kind === 255);
+                    ts.Debug.assert(attributeDecl.kind === 258);
                     if (attributesArray.length > 0) {
                         spread = getSpreadType(spread, createJsxAttributesType(attributes.symbol, attributesTable), openingLikeElement.symbol, 0);
                         attributesArray = [];
@@ -29885,18 +29987,7 @@ var ts;
             }
             var parent = openingLikeElement.parent.kind === 249 ? openingLikeElement.parent : undefined;
             if (parent && parent.openingElement === openingLikeElement && parent.children.length > 0) {
-                var childrenTypes = [];
-                for (var _c = 0, _d = parent.children; _c < _d.length; _c++) {
-                    var child = _d[_c];
-                    if (child.kind === 10) {
-                        if (!child.containsOnlyWhiteSpaces) {
-                            childrenTypes.push(stringType);
-                        }
-                    }
-                    else {
-                        childrenTypes.push(checkExpression(child, checkMode));
-                    }
-                }
+                var childrenTypes = checkJsxChildren(parent, checkMode);
                 if (!hasSpreadAnyType && jsxChildrenPropertyName && jsxChildrenPropertyName !== "") {
                     if (explicitlySpecifyChildrenAttribute) {
                         error(attributes, ts.Diagnostics._0_are_specified_twice_The_attribute_named_0_will_be_overwritten, ts.unescapeLeadingUnderscores(jsxChildrenPropertyName));
@@ -29920,6 +30011,21 @@ var ts;
                 result.objectFlags |= 128;
                 return result;
             }
+        }
+        function checkJsxChildren(node, checkMode) {
+            var childrenTypes = [];
+            for (var _i = 0, _a = node.children; _i < _a.length; _i++) {
+                var child = _a[_i];
+                if (child.kind === 10) {
+                    if (!child.containsOnlyWhiteSpaces) {
+                        childrenTypes.push(stringType);
+                    }
+                }
+                else {
+                    childrenTypes.push(checkExpression(child, checkMode));
+                }
+            }
+            return childrenTypes;
         }
         function checkJsxAttributes(node, checkMode) {
             return createJsxAttributesTypeFromAttributesProperty(node.parent, undefined, checkMode);
@@ -30257,19 +30363,28 @@ var ts;
                 }
             }
         }
-        function checkJsxOpeningLikeElement(node) {
-            checkGrammarJsxElement(node);
+        function checkJsxOpeningLikeElementOrOpeningFragment(node) {
+            var isNodeOpeningLikeElement = ts.isJsxOpeningLikeElement(node);
+            if (isNodeOpeningLikeElement) {
+                checkGrammarJsxElement(node);
+            }
             checkJsxPreconditions(node);
             var reactRefErr = diagnostics && compilerOptions.jsx === 2 ? ts.Diagnostics.Cannot_find_name_0 : undefined;
             var reactNamespace = getJsxNamespace();
-            var reactSym = resolveName(node.tagName, reactNamespace, 107455, reactRefErr, reactNamespace, true);
+            var reactLocation = isNodeOpeningLikeElement ? node.tagName : node;
+            var reactSym = resolveName(reactLocation, reactNamespace, 107455, reactRefErr, reactNamespace, true);
             if (reactSym) {
                 reactSym.isReferenced = true;
                 if (reactSym.flags & 2097152 && !isConstEnumOrConstEnumOnlyModule(resolveAlias(reactSym))) {
                     markAliasSymbolAsReferenced(reactSym);
                 }
             }
-            checkJsxAttributesAssignableToTagNameAttributes(node);
+            if (isNodeOpeningLikeElement) {
+                checkJsxAttributesAssignableToTagNameAttributes(node);
+            }
+            else {
+                checkJsxChildren(node.parent);
+            }
         }
         function isKnownProperty(targetType, name, isComparingJsxAttributes) {
             if (targetType.flags & 32768) {
@@ -30480,7 +30595,7 @@ var ts;
                 switch (node.kind) {
                     case 149:
                         return true;
-                    case 261:
+                    case 264:
                         return false;
                     default:
                         return ts.isPartOfExpression(node) ? false : "quit";
@@ -32334,7 +32449,7 @@ var ts;
             return sourceType;
         }
         function checkObjectLiteralDestructuringPropertyAssignment(objectLiteralType, property, allProperties) {
-            if (property.kind === 261 || property.kind === 262) {
+            if (property.kind === 264 || property.kind === 265) {
                 var name = property.name;
                 if (name.kind === 144) {
                     checkComputedPropertyName(name);
@@ -32349,7 +32464,7 @@ var ts;
                         isNumericLiteralName(text) && getIndexTypeOfType(objectLiteralType, 1) ||
                         getIndexTypeOfType(objectLiteralType, 0);
                 if (type) {
-                    if (property.kind === 262) {
+                    if (property.kind === 265) {
                         return checkDestructuringAssignment(property, type);
                     }
                     else {
@@ -32360,7 +32475,7 @@ var ts;
                     error(name, ts.Diagnostics.Type_0_has_no_property_1_and_no_string_index_signature, typeToString(objectLiteralType), ts.declarationNameToString(name));
                 }
             }
-            else if (property.kind === 263) {
+            else if (property.kind === 266) {
                 if (languageVersion < 5) {
                     checkExternalEmitHelpers(property, 4);
                 }
@@ -32431,7 +32546,7 @@ var ts;
         }
         function checkDestructuringAssignment(exprOrAssignment, sourceType, checkMode) {
             var target;
-            if (exprOrAssignment.kind === 262) {
+            if (exprOrAssignment.kind === 265) {
                 var prop = exprOrAssignment;
                 if (prop.objectAssignmentInitializer) {
                     if (strictNullChecks &&
@@ -32459,7 +32574,7 @@ var ts;
         }
         function checkReferenceAssignment(target, sourceType, checkMode) {
             var targetType = checkExpression(target, checkMode);
-            var error = target.parent.kind === 263 ?
+            var error = target.parent.kind === 266 ?
                 ts.Diagnostics.The_target_of_an_object_rest_assignment_must_be_a_variable_or_a_property_access :
                 ts.Diagnostics.The_left_hand_side_of_an_assignment_expression_must_be_a_variable_or_a_property_access;
             if (checkReferenceExpression(target, error)) {
@@ -32970,13 +33085,15 @@ var ts;
                     return undefinedWideningType;
                 case 197:
                     return checkYieldExpression(node);
-                case 256:
+                case 259:
                     return checkJsxExpression(node, checkMode);
                 case 249:
                     return checkJsxElement(node);
                 case 250:
                     return checkJsxSelfClosingElement(node);
-                case 254:
+                case 253:
+                    return checkJsxFragment(node);
+                case 257:
                     return checkJsxAttributes(node, checkMode);
                 case 251:
                     ts.Debug.fail("Shouldn't ever directly check a JsxOpeningElement");
@@ -33789,7 +33906,7 @@ var ts;
                 switch (d.kind) {
                     case 230:
                     case 231:
-                    case 283:
+                    case 286:
                         return 2;
                     case 233:
                         return ts.isAmbientModule(d) || ts.getModuleInstanceState(d) !== 0
@@ -34117,7 +34234,7 @@ var ts;
                 error(classLike, ts.Diagnostics.JSDoc_0_is_not_attached_to_a_class, ts.idText(node.tagName));
                 return;
             }
-            var augmentsTags = ts.getAllJSDocTagsOfKind(classLike, 277);
+            var augmentsTags = ts.getAllJSDocTagsOfKind(classLike, 280);
             ts.Debug.assert(augmentsTags.length > 0);
             if (augmentsTags.length > 1) {
                 error(augmentsTags[1], ts.Diagnostics.Class_declarations_cannot_have_more_than_one_augments_or_extends_tag);
@@ -34189,7 +34306,7 @@ var ts;
                 for (var _i = 0, deferredUnusedIdentifierNodes_1 = deferredUnusedIdentifierNodes; _i < deferredUnusedIdentifierNodes_1.length; _i++) {
                     var node = deferredUnusedIdentifierNodes_1[_i];
                     switch (node.kind) {
-                        case 265:
+                        case 268:
                         case 233:
                             checkUnusedModuleMembers(node);
                             break;
@@ -34449,7 +34566,7 @@ var ts;
                 return;
             }
             var parent = getDeclarationContainer(node);
-            if (parent.kind === 265 && ts.isExternalOrCommonJsModule(parent)) {
+            if (parent.kind === 268 && ts.isExternalOrCommonJsModule(parent)) {
                 error(name, ts.Diagnostics.Duplicate_identifier_0_Compiler_reserves_name_1_in_top_level_scope_of_a_module, ts.declarationNameToString(name), ts.declarationNameToString(name));
             }
         }
@@ -34461,7 +34578,7 @@ var ts;
                 return;
             }
             var parent = getDeclarationContainer(node);
-            if (parent.kind === 265 && ts.isExternalOrCommonJsModule(parent) && parent.flags & 1024) {
+            if (parent.kind === 268 && ts.isExternalOrCommonJsModule(parent) && parent.flags & 1024) {
                 error(name, ts.Diagnostics.Duplicate_identifier_0_Compiler_reserves_name_1_in_top_level_scope_of_a_module_containing_async_functions, ts.declarationNameToString(name), ts.declarationNameToString(name));
             }
         }
@@ -34489,7 +34606,7 @@ var ts;
                             (container.kind === 207 && ts.isFunctionLike(container.parent) ||
                                 container.kind === 234 ||
                                 container.kind === 233 ||
-                                container.kind === 265);
+                                container.kind === 268);
                         if (!namesShareScope) {
                             var name = symbolToString(localDeclarationSymbol);
                             error(node, ts.Diagnostics.Cannot_initialize_outer_scoped_variable_0_in_the_same_scope_as_block_scoped_declaration_1, name, name);
@@ -35043,7 +35160,7 @@ var ts;
             var expressionType = checkExpression(node.expression);
             var expressionIsLiteral = isLiteralType(expressionType);
             ts.forEach(node.caseBlock.clauses, function (clause) {
-                if (clause.kind === 258 && !hasDuplicateDefaultClause) {
+                if (clause.kind === 261 && !hasDuplicateDefaultClause) {
                     if (firstDefaultClause === undefined) {
                         firstDefaultClause = clause;
                     }
@@ -35055,7 +35172,7 @@ var ts;
                         hasDuplicateDefaultClause = true;
                     }
                 }
-                if (produceDiagnostics && clause.kind === 257) {
+                if (produceDiagnostics && clause.kind === 260) {
                     var caseClause = clause;
                     var caseType = checkExpression(caseClause.expression);
                     var caseIsLiteral = isLiteralType(caseType);
@@ -35653,7 +35770,7 @@ var ts;
                     var declaration = memberSymbol.valueDeclaration;
                     if (declaration !== member) {
                         if (isBlockScopedNameDeclaredBeforeUse(declaration, member)) {
-                            return getNodeLinks(declaration).enumMemberValue;
+                            return getEnumMemberValue(declaration);
                         }
                         error(expr, ts.Diagnostics.A_member_initializer_in_a_enum_declaration_cannot_reference_members_declared_after_it_including_members_defined_in_other_enums);
                         return 0;
@@ -35888,7 +36005,7 @@ var ts;
                 return false;
             }
             var inAmbientExternalModule = node.parent.kind === 234 && ts.isAmbientModule(node.parent.parent);
-            if (node.parent.kind !== 265 && !inAmbientExternalModule) {
+            if (node.parent.kind !== 268 && !inAmbientExternalModule) {
                 error(moduleName, node.kind === 244 ?
                     ts.Diagnostics.Export_declarations_are_not_permitted_in_a_namespace :
                     ts.Diagnostics.Import_declarations_in_a_namespace_cannot_reference_a_module);
@@ -35997,7 +36114,7 @@ var ts;
                     var inAmbientExternalModule = node.parent.kind === 234 && ts.isAmbientModule(node.parent.parent);
                     var inAmbientNamespaceDeclaration = !inAmbientExternalModule && node.parent.kind === 234 &&
                         !node.moduleSpecifier && ts.isInAmbientContext(node);
-                    if (node.parent.kind !== 265 && !inAmbientExternalModule && !inAmbientNamespaceDeclaration) {
+                    if (node.parent.kind !== 268 && !inAmbientExternalModule && !inAmbientNamespaceDeclaration) {
                         error(node, ts.Diagnostics.Export_declarations_are_not_permitted_in_a_namespace);
                     }
                 }
@@ -36013,7 +36130,7 @@ var ts;
             }
         }
         function checkGrammarModuleElementContext(node, errorMessage) {
-            var isInAppropriateContext = node.parent.kind === 265 || node.parent.kind === 234 || node.parent.kind === 233;
+            var isInAppropriateContext = node.parent.kind === 268 || node.parent.kind === 234 || node.parent.kind === 233;
             if (!isInAppropriateContext) {
                 grammarErrorOnFirstToken(node, errorMessage);
             }
@@ -36036,7 +36153,7 @@ var ts;
             if (checkGrammarModuleElementContext(node, ts.Diagnostics.An_export_assignment_can_only_be_used_in_a_module)) {
                 return;
             }
-            var container = node.parent.kind === 265 ? node.parent : node.parent.parent;
+            var container = node.parent.kind === 268 ? node.parent : node.parent.parent;
             if (container.kind === 233 && !ts.isAmbientModule(container)) {
                 if (node.isExportEquals) {
                     error(node, ts.Diagnostics.An_export_assignment_cannot_be_used_in_a_namespace);
@@ -36175,24 +36292,24 @@ var ts;
                 case 168:
                 case 170:
                     return checkSourceElement(node.type);
-                case 277:
+                case 280:
                     return checkJSDocAugmentsTag(node);
-                case 283:
+                case 286:
                     return checkJSDocTypedefTag(node);
-                case 279:
+                case 282:
                     return checkJSDocParameterTag(node);
-                case 273:
+                case 276:
                     checkSignatureDeclaration(node);
+                case 277:
                 case 274:
+                case 273:
                 case 271:
-                case 270:
-                case 268:
-                case 269:
+                case 272:
                     if (!ts.isInJavaScriptFile(node) && !ts.isInJSDoc(node)) {
                         grammarErrorOnNode(node, ts.Diagnostics.JSDoc_types_can_only_be_used_inside_documentation_comments);
                     }
                     return;
-                case 267:
+                case 270:
                     return checkSourceElement(node.type);
                 case 171:
                     return checkIndexedAccessType(node);
@@ -36554,10 +36671,10 @@ var ts;
                     return entityNameSymbol;
                 }
             }
-            if (entityName.parent.kind === 279) {
+            if (entityName.parent.kind === 282) {
                 return ts.getParameterSymbolFromJSDoc(entityName.parent);
             }
-            if (entityName.parent.kind === 145 && entityName.parent.parent.kind === 282) {
+            if (entityName.parent.kind === 145 && entityName.parent.parent.kind === 285) {
                 ts.Debug.assert(!ts.isInJavaScriptFile(entityName));
                 var typeParameter = ts.getTypeParameterFromJsDoc(entityName.parent);
                 return typeParameter && typeParameter.symbol;
@@ -36590,7 +36707,7 @@ var ts;
                 var meaning = entityName.parent.kind === 159 ? 793064 : 1920;
                 return resolveEntityName(entityName, meaning, false, true);
             }
-            else if (entityName.parent.kind === 253) {
+            else if (entityName.parent.kind === 256) {
                 return getJsxAttributePropertySymbol(entityName.parent);
             }
             if (entityName.parent.kind === 158) {
@@ -36599,7 +36716,7 @@ var ts;
             return undefined;
         }
         function getSymbolAtLocation(node) {
-            if (node.kind === 265) {
+            if (node.kind === 268) {
                 return ts.isExternalModule(node) ? getMergedSymbol(node.symbol) : undefined;
             }
             if (isInsideWithStatementBody(node)) {
@@ -36671,7 +36788,7 @@ var ts;
             }
         }
         function getShorthandAssignmentValueSymbol(location) {
-            if (location && location.kind === 262) {
+            if (location && location.kind === 265) {
                 return resolveEntityName(location.name, 107455 | 2097152);
             }
             return undefined;
@@ -36739,7 +36856,7 @@ var ts;
                 var iteratedType = getTypeOfExpression(expr.parent.right);
                 return checkDestructuringAssignment(expr, iteratedType || unknownType);
             }
-            if (expr.parent.kind === 261) {
+            if (expr.parent.kind === 264) {
                 var typeOfParentObjectLiteral = getTypeOfArrayLiteralOrObjectLiteralDestructuringAssignment(expr.parent.parent);
                 return checkObjectLiteralDestructuringPropertyAssignment(typeOfParentObjectLiteral || unknownType, expr.parent);
             }
@@ -36854,7 +36971,7 @@ var ts;
                     }
                     var parentSymbol_1 = getParentOfSymbol(symbol);
                     if (parentSymbol_1) {
-                        if (parentSymbol_1.flags & 512 && parentSymbol_1.valueDeclaration.kind === 265) {
+                        if (parentSymbol_1.flags & 512 && parentSymbol_1.valueDeclaration.kind === 268) {
                             var symbolFile = parentSymbol_1.valueDeclaration;
                             var referenceFile = ts.getSourceFileOfNode(node);
                             var symbolIsUmdExport = symbolFile !== referenceFile;
@@ -36943,7 +37060,7 @@ var ts;
         }
         function isTopLevelValueImportEqualsWithEntityName(node) {
             node = ts.getParseTreeNode(node, ts.isImportEqualsDeclaration);
-            if (node === undefined || node.parent.kind !== 265 || !ts.isInternalModuleImportEqualsDeclaration(node)) {
+            if (node === undefined || node.parent.kind !== 268 || !ts.isInternalModuleImportEqualsDeclaration(node)) {
                 return false;
             }
             var isValue = isAliasResolvedToValue(getSymbolOfNode(node));
@@ -37002,7 +37119,7 @@ var ts;
         }
         function canHaveConstantValue(node) {
             switch (node.kind) {
-                case 264:
+                case 267:
                 case 179:
                 case 180:
                     return true;
@@ -37010,7 +37127,7 @@ var ts;
             return false;
         }
         function getConstantValue(node) {
-            if (node.kind === 264) {
+            if (node.kind === 267) {
                 return getEnumMemberValue(node);
             }
             var symbol = getNodeLinks(node).resolvedSymbol;
@@ -37246,7 +37363,7 @@ var ts;
                         break;
                     }
                 }
-                if (current.valueDeclaration && current.valueDeclaration.kind === 265 && current.flags & 512) {
+                if (current.valueDeclaration && current.valueDeclaration.kind === 268 && current.flags & 512) {
                     return false;
                 }
                 for (var _i = 0, _a = symbol.declarations; _i < _a.length; _i++) {
@@ -37265,7 +37382,7 @@ var ts;
             if (!moduleSymbol) {
                 return undefined;
             }
-            return ts.getDeclarationOfKind(moduleSymbol, 265);
+            return ts.getDeclarationOfKind(moduleSymbol, 268);
         }
         function initializeTypeChecker() {
             for (var _i = 0, _a = host.getSourceFiles(); _i < _a.length; _i++) {
@@ -37427,7 +37544,7 @@ var ts;
                         else if (flags & 256) {
                             return grammarErrorOnNode(modifier, ts.Diagnostics._0_modifier_must_precede_1_modifier, text, "async");
                         }
-                        else if (node.parent.kind === 234 || node.parent.kind === 265) {
+                        else if (node.parent.kind === 234 || node.parent.kind === 268) {
                             return grammarErrorOnNode(modifier, ts.Diagnostics._0_modifier_cannot_appear_on_a_module_or_namespace_element, text);
                         }
                         else if (flags & 128) {
@@ -37450,7 +37567,7 @@ var ts;
                         else if (flags & 256) {
                             return grammarErrorOnNode(modifier, ts.Diagnostics._0_modifier_must_precede_1_modifier, "static", "async");
                         }
-                        else if (node.parent.kind === 234 || node.parent.kind === 265) {
+                        else if (node.parent.kind === 234 || node.parent.kind === 268) {
                             return grammarErrorOnNode(modifier, ts.Diagnostics._0_modifier_cannot_appear_on_a_module_or_namespace_element, "static");
                         }
                         else if (node.kind === 146) {
@@ -37494,7 +37611,7 @@ var ts;
                         flags |= 1;
                         break;
                     case 79:
-                        var container = node.parent.kind === 265 ? node.parent : node.parent.parent;
+                        var container = node.parent.kind === 268 ? node.parent : node.parent.parent;
                         if (container.kind === 233 && !ts.isAmbientModule(container)) {
                             return grammarErrorOnNode(modifier, ts.Diagnostics.A_default_export_can_only_be_used_in_an_ECMAScript_style_module);
                         }
@@ -37612,7 +37729,7 @@ var ts;
                 case 146:
                     return false;
                 default:
-                    if (node.parent.kind === 234 || node.parent.kind === 265) {
+                    if (node.parent.kind === 234 || node.parent.kind === 268) {
                         return false;
                     }
                     switch (node.kind) {
@@ -37870,14 +37987,14 @@ var ts;
             var GetOrSetAccessor = GetAccessor | SetAccessor;
             for (var _i = 0, _a = node.properties; _i < _a.length; _i++) {
                 var prop = _a[_i];
-                if (prop.kind === 263) {
+                if (prop.kind === 266) {
                     continue;
                 }
                 var name = prop.name;
                 if (name.kind === 144) {
                     checkGrammarComputedPropertyName(name);
                 }
-                if (prop.kind === 262 && !inDestructuring && prop.objectAssignmentInitializer) {
+                if (prop.kind === 265 && !inDestructuring && prop.objectAssignmentInitializer) {
                     return grammarErrorOnNode(prop.equalsToken, ts.Diagnostics.can_only_be_used_in_an_object_literal_property_inside_a_destructuring_assignment);
                 }
                 if (prop.modifiers) {
@@ -37889,7 +38006,7 @@ var ts;
                     }
                 }
                 var currentKind = void 0;
-                if (prop.kind === 261 || prop.kind === 262) {
+                if (prop.kind === 264 || prop.kind === 265) {
                     checkGrammarForInvalidQuestionMark(prop.questionToken, ts.Diagnostics.An_object_member_cannot_be_declared_optional);
                     if (name.kind === 8) {
                         checkGrammarNumericLiteral(name);
@@ -37938,7 +38055,7 @@ var ts;
             var seen = ts.createUnderscoreEscapedMap();
             for (var _i = 0, _a = node.attributes.properties; _i < _a.length; _i++) {
                 var attr = _a[_i];
-                if (attr.kind === 255) {
+                if (attr.kind === 258) {
                     continue;
                 }
                 var jsxAttr = attr;
@@ -37950,7 +38067,7 @@ var ts;
                     return grammarErrorOnNode(name, ts.Diagnostics.JSX_elements_cannot_have_multiple_attributes_with_the_same_name);
                 }
                 var initializer = jsxAttr.initializer;
-                if (initializer && initializer.kind === 256 && !initializer.expression) {
+                if (initializer && initializer.kind === 259 && !initializer.expression) {
                     return grammarErrorOnNode(jsxAttr.initializer, ts.Diagnostics.JSX_attributes_must_only_be_assigned_a_non_empty_expression);
                 }
             }
@@ -38342,7 +38459,7 @@ var ts;
                 if (!links.hasReportedStatementInAmbientContext && ts.isFunctionLike(node.parent)) {
                     return getNodeLinks(node).hasReportedStatementInAmbientContext = grammarErrorOnFirstToken(node, ts.Diagnostics.An_implementation_cannot_be_declared_in_ambient_contexts);
                 }
-                if (node.parent.kind === 207 || node.parent.kind === 234 || node.parent.kind === 265) {
+                if (node.parent.kind === 207 || node.parent.kind === 234 || node.parent.kind === 268) {
                     var links_1 = getNodeLinks(node.parent);
                     if (!links_1.hasReportedStatementInAmbientContext) {
                         return links_1.hasReportedStatementInAmbientContext = grammarErrorOnFirstToken(node, ts.Diagnostics.Statements_are_not_allowed_in_ambient_contexts);
@@ -38361,7 +38478,7 @@ var ts;
                 else if (ts.isChildOfNodeWithKind(node, 173)) {
                     diagnosticMessage = ts.Diagnostics.Octal_literal_types_must_use_ES2015_syntax_Use_the_syntax_0;
                 }
-                else if (ts.isChildOfNodeWithKind(node, 264)) {
+                else if (ts.isChildOfNodeWithKind(node, 267)) {
                     diagnosticMessage = ts.Diagnostics.Octal_literals_are_not_allowed_in_enums_members_initializer_Use_the_syntax_0;
                 }
                 if (diagnosticMessage) {
@@ -40232,8 +40349,24 @@ var ts;
             : node;
     }
     ts.updateJsxClosingElement = updateJsxClosingElement;
-    function createJsxAttribute(name, initializer) {
+    function createJsxFragment(openingFragment, children, closingFragment) {
         var node = createSynthesizedNode(253);
+        node.openingFragment = openingFragment;
+        node.children = createNodeArray(children);
+        node.closingFragment = closingFragment;
+        return node;
+    }
+    ts.createJsxFragment = createJsxFragment;
+    function updateJsxFragment(node, openingFragment, children, closingFragment) {
+        return node.openingFragment !== openingFragment
+            || node.children !== children
+            || node.closingFragment !== closingFragment
+            ? updateNode(createJsxFragment(openingFragment, children, closingFragment), node)
+            : node;
+    }
+    ts.updateJsxFragment = updateJsxFragment;
+    function createJsxAttribute(name, initializer) {
+        var node = createSynthesizedNode(256);
         node.name = name;
         node.initializer = initializer;
         return node;
@@ -40247,7 +40380,7 @@ var ts;
     }
     ts.updateJsxAttribute = updateJsxAttribute;
     function createJsxAttributes(properties) {
-        var node = createSynthesizedNode(254);
+        var node = createSynthesizedNode(257);
         node.properties = createNodeArray(properties);
         return node;
     }
@@ -40259,7 +40392,7 @@ var ts;
     }
     ts.updateJsxAttributes = updateJsxAttributes;
     function createJsxSpreadAttribute(expression) {
-        var node = createSynthesizedNode(255);
+        var node = createSynthesizedNode(258);
         node.expression = expression;
         return node;
     }
@@ -40271,7 +40404,7 @@ var ts;
     }
     ts.updateJsxSpreadAttribute = updateJsxSpreadAttribute;
     function createJsxExpression(dotDotDotToken, expression) {
-        var node = createSynthesizedNode(256);
+        var node = createSynthesizedNode(259);
         node.dotDotDotToken = dotDotDotToken;
         node.expression = expression;
         return node;
@@ -40284,7 +40417,7 @@ var ts;
     }
     ts.updateJsxExpression = updateJsxExpression;
     function createCaseClause(expression, statements) {
-        var node = createSynthesizedNode(257);
+        var node = createSynthesizedNode(260);
         node.expression = ts.parenthesizeExpressionForList(expression);
         node.statements = createNodeArray(statements);
         return node;
@@ -40298,7 +40431,7 @@ var ts;
     }
     ts.updateCaseClause = updateCaseClause;
     function createDefaultClause(statements) {
-        var node = createSynthesizedNode(258);
+        var node = createSynthesizedNode(261);
         node.statements = createNodeArray(statements);
         return node;
     }
@@ -40310,7 +40443,7 @@ var ts;
     }
     ts.updateDefaultClause = updateDefaultClause;
     function createHeritageClause(token, types) {
-        var node = createSynthesizedNode(259);
+        var node = createSynthesizedNode(262);
         node.token = token;
         node.types = createNodeArray(types);
         return node;
@@ -40323,7 +40456,7 @@ var ts;
     }
     ts.updateHeritageClause = updateHeritageClause;
     function createCatchClause(variableDeclaration, block) {
-        var node = createSynthesizedNode(260);
+        var node = createSynthesizedNode(263);
         node.variableDeclaration = ts.isString(variableDeclaration) ? createVariableDeclaration(variableDeclaration) : variableDeclaration;
         node.block = block;
         return node;
@@ -40337,7 +40470,7 @@ var ts;
     }
     ts.updateCatchClause = updateCatchClause;
     function createPropertyAssignment(name, initializer) {
-        var node = createSynthesizedNode(261);
+        var node = createSynthesizedNode(264);
         node.name = asName(name);
         node.questionToken = undefined;
         node.initializer = initializer !== undefined ? ts.parenthesizeExpressionForList(initializer) : undefined;
@@ -40352,7 +40485,7 @@ var ts;
     }
     ts.updatePropertyAssignment = updatePropertyAssignment;
     function createShorthandPropertyAssignment(name, objectAssignmentInitializer) {
-        var node = createSynthesizedNode(262);
+        var node = createSynthesizedNode(265);
         node.name = asName(name);
         node.objectAssignmentInitializer = objectAssignmentInitializer !== undefined ? ts.parenthesizeExpressionForList(objectAssignmentInitializer) : undefined;
         return node;
@@ -40366,7 +40499,7 @@ var ts;
     }
     ts.updateShorthandPropertyAssignment = updateShorthandPropertyAssignment;
     function createSpreadAssignment(expression) {
-        var node = createSynthesizedNode(263);
+        var node = createSynthesizedNode(266);
         node.expression = expression !== undefined ? ts.parenthesizeExpressionForList(expression) : undefined;
         return node;
     }
@@ -40378,7 +40511,7 @@ var ts;
     }
     ts.updateSpreadAssignment = updateSpreadAssignment;
     function createEnumMember(name, initializer) {
-        var node = createSynthesizedNode(264);
+        var node = createSynthesizedNode(267);
         node.name = asName(name);
         node.initializer = initializer && ts.parenthesizeExpressionForList(initializer);
         return node;
@@ -40393,7 +40526,7 @@ var ts;
     ts.updateEnumMember = updateEnumMember;
     function updateSourceFileNode(node, statements) {
         if (node.statements !== statements) {
-            var updated = createSynthesizedNode(265);
+            var updated = createSynthesizedNode(268);
             updated.flags |= node.flags;
             updated.statements = createNodeArray(statements);
             updated.endOfFileToken = node.endOfFileToken;
@@ -40462,28 +40595,28 @@ var ts;
     }
     ts.getMutableClone = getMutableClone;
     function createNotEmittedStatement(original) {
-        var node = createSynthesizedNode(287);
+        var node = createSynthesizedNode(290);
         node.original = original;
         setTextRange(node, original);
         return node;
     }
     ts.createNotEmittedStatement = createNotEmittedStatement;
     function createEndOfDeclarationMarker(original) {
-        var node = createSynthesizedNode(291);
+        var node = createSynthesizedNode(294);
         node.emitNode = {};
         node.original = original;
         return node;
     }
     ts.createEndOfDeclarationMarker = createEndOfDeclarationMarker;
     function createMergeDeclarationMarker(original) {
-        var node = createSynthesizedNode(290);
+        var node = createSynthesizedNode(293);
         node.emitNode = {};
         node.original = original;
         return node;
     }
     ts.createMergeDeclarationMarker = createMergeDeclarationMarker;
     function createPartiallyEmittedExpression(expression, original) {
-        var node = createSynthesizedNode(288);
+        var node = createSynthesizedNode(291);
         node.expression = expression;
         node.original = original;
         setTextRange(node, original);
@@ -40499,7 +40632,7 @@ var ts;
     ts.updatePartiallyEmittedExpression = updatePartiallyEmittedExpression;
     function flattenCommaElements(node) {
         if (ts.nodeIsSynthesized(node) && !ts.isParseTreeNode(node) && !node.original && !node.emitNode && !node.id) {
-            if (node.kind === 289) {
+            if (node.kind === 292) {
                 return node.elements;
             }
             if (ts.isBinaryExpression(node) && node.operatorToken.kind === 26) {
@@ -40509,7 +40642,7 @@ var ts;
         return node;
     }
     function createCommaList(elements) {
-        var node = createSynthesizedNode(289);
+        var node = createSynthesizedNode(292);
         node.elements = createNodeArray(ts.sameFlatMap(elements, flattenCommaElements));
         return node;
     }
@@ -40521,7 +40654,7 @@ var ts;
     }
     ts.updateCommaList = updateCommaList;
     function createBundle(sourceFiles) {
-        var node = ts.createNode(266);
+        var node = ts.createNode(269);
         node.sourceFiles = sourceFiles;
         return node;
     }
@@ -40624,7 +40757,7 @@ var ts;
     function getOrCreateEmitNode(node) {
         if (!node.emitNode) {
             if (ts.isParseTreeNode(node)) {
-                if (node.kind === 265) {
+                if (node.kind === 268) {
                     return node.emitNode = { annotatedNodes: [node] };
                 }
                 var sourceFile = ts.getSourceFileOfNode(node);
@@ -40952,6 +41085,25 @@ var ts;
         return ts.setTextRange(ts.createCall(createJsxFactoryExpression(jsxFactoryEntity, reactNamespace, parentElement), undefined, argumentsList), location);
     }
     ts.createExpressionForJsxElement = createExpressionForJsxElement;
+    function createExpressionForJsxFragment(jsxFactoryEntity, reactNamespace, children, parentElement, location) {
+        var tagName = ts.createPropertyAccess(createReactNamespace(reactNamespace, parentElement), "Fragment");
+        var argumentsList = [tagName];
+        argumentsList.push(ts.createNull());
+        if (children && children.length > 0) {
+            if (children.length > 1) {
+                for (var _i = 0, children_2 = children; _i < children_2.length; _i++) {
+                    var child = children_2[_i];
+                    child.startsOnNewLine = true;
+                    argumentsList.push(child);
+                }
+            }
+            else {
+                argumentsList.push(children[0]);
+            }
+        }
+        return ts.setTextRange(ts.createCall(createJsxFactoryExpression(jsxFactoryEntity, reactNamespace, parentElement), undefined, argumentsList), location);
+    }
+    ts.createExpressionForJsxFragment = createExpressionForJsxFragment;
     function getHelperName(name) {
         return ts.setEmitFlags(ts.createIdentifier(name), 4096 | 2);
     }
@@ -41132,9 +41284,9 @@ var ts;
             case 153:
             case 154:
                 return createExpressionForAccessorDeclaration(node.properties, property, receiver, node.multiLine);
-            case 261:
+            case 264:
                 return createExpressionForPropertyAssignment(property, receiver);
-            case 262:
+            case 265:
                 return createExpressionForShorthandPropertyAssignment(property, receiver);
             case 151:
                 return createExpressionForMethodDeclaration(property, receiver);
@@ -41557,7 +41709,7 @@ var ts;
                 case 179:
                     node = node.expression;
                     continue;
-                case 288:
+                case 291:
                     node = node.expression;
                     continue;
             }
@@ -41580,7 +41732,7 @@ var ts;
             case 202:
             case 203:
                 return (kinds & 2) !== 0;
-            case 288:
+            case 291:
                 return (kinds & 4) !== 0;
         }
         return false;
@@ -41624,7 +41776,7 @@ var ts;
             case 184: return ts.updateTypeAssertion(outerExpression, outerExpression.type, expression);
             case 202: return ts.updateAsExpression(outerExpression, expression, outerExpression.type);
             case 203: return ts.updateNonNullExpression(outerExpression, expression);
-            case 288: return ts.updatePartiallyEmittedExpression(outerExpression, expression);
+            case 291: return ts.updatePartiallyEmittedExpression(outerExpression, expression);
         }
     }
     function isIgnorableParen(node) {
@@ -41756,11 +41908,11 @@ var ts;
         }
         if (ts.isObjectLiteralElementLike(bindingElement)) {
             switch (bindingElement.kind) {
-                case 261:
+                case 264:
                     return getTargetOfBindingOrAssignmentElement(bindingElement.initializer);
-                case 262:
+                case 265:
                     return bindingElement.name;
-                case 263:
+                case 266:
                     return getTargetOfBindingOrAssignmentElement(bindingElement.expression);
             }
             return undefined;
@@ -41780,7 +41932,7 @@ var ts;
             case 176:
                 return bindingElement.dotDotDotToken;
             case 198:
-            case 263:
+            case 266:
                 return bindingElement;
         }
         return undefined;
@@ -41796,7 +41948,7 @@ var ts;
                         : propertyName;
                 }
                 break;
-            case 261:
+            case 264:
                 if (bindingElement.name) {
                     var propertyName = bindingElement.name;
                     return ts.isComputedPropertyName(propertyName) && ts.isStringOrNumericLiteral(propertyName.expression)
@@ -41804,7 +41956,7 @@ var ts;
                         : propertyName;
                 }
                 break;
-            case 263:
+            case 266:
                 return bindingElement.name;
         }
         var target = getTargetOfBindingOrAssignmentElement(bindingElement);
@@ -42216,34 +42368,36 @@ var ts;
             case 252:
                 return ts.updateJsxClosingElement(node, visitNode(node.tagName, visitor, ts.isJsxTagNameExpression));
             case 253:
-                return ts.updateJsxAttribute(node, visitNode(node.name, visitor, ts.isIdentifier), visitNode(node.initializer, visitor, ts.isStringLiteralOrJsxExpression));
-            case 254:
-                return ts.updateJsxAttributes(node, nodesVisitor(node.properties, visitor, ts.isJsxAttributeLike));
-            case 255:
-                return ts.updateJsxSpreadAttribute(node, visitNode(node.expression, visitor, ts.isExpression));
+                return ts.updateJsxFragment(node, visitNode(node.openingFragment, visitor, ts.isJsxOpeningFragment), nodesVisitor(node.children, visitor, ts.isJsxChild), visitNode(node.closingFragment, visitor, ts.isJsxClosingFragment));
             case 256:
-                return ts.updateJsxExpression(node, visitNode(node.expression, visitor, ts.isExpression));
+                return ts.updateJsxAttribute(node, visitNode(node.name, visitor, ts.isIdentifier), visitNode(node.initializer, visitor, ts.isStringLiteralOrJsxExpression));
             case 257:
-                return ts.updateCaseClause(node, visitNode(node.expression, visitor, ts.isExpression), nodesVisitor(node.statements, visitor, ts.isStatement));
+                return ts.updateJsxAttributes(node, nodesVisitor(node.properties, visitor, ts.isJsxAttributeLike));
             case 258:
-                return ts.updateDefaultClause(node, nodesVisitor(node.statements, visitor, ts.isStatement));
+                return ts.updateJsxSpreadAttribute(node, visitNode(node.expression, visitor, ts.isExpression));
             case 259:
-                return ts.updateHeritageClause(node, nodesVisitor(node.types, visitor, ts.isExpressionWithTypeArguments));
+                return ts.updateJsxExpression(node, visitNode(node.expression, visitor, ts.isExpression));
             case 260:
-                return ts.updateCatchClause(node, visitNode(node.variableDeclaration, visitor, ts.isVariableDeclaration), visitNode(node.block, visitor, ts.isBlock));
+                return ts.updateCaseClause(node, visitNode(node.expression, visitor, ts.isExpression), nodesVisitor(node.statements, visitor, ts.isStatement));
             case 261:
-                return ts.updatePropertyAssignment(node, visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.initializer, visitor, ts.isExpression));
+                return ts.updateDefaultClause(node, nodesVisitor(node.statements, visitor, ts.isStatement));
             case 262:
-                return ts.updateShorthandPropertyAssignment(node, visitNode(node.name, visitor, ts.isIdentifier), visitNode(node.objectAssignmentInitializer, visitor, ts.isExpression));
+                return ts.updateHeritageClause(node, nodesVisitor(node.types, visitor, ts.isExpressionWithTypeArguments));
             case 263:
-                return ts.updateSpreadAssignment(node, visitNode(node.expression, visitor, ts.isExpression));
+                return ts.updateCatchClause(node, visitNode(node.variableDeclaration, visitor, ts.isVariableDeclaration), visitNode(node.block, visitor, ts.isBlock));
             case 264:
-                return ts.updateEnumMember(node, visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.initializer, visitor, ts.isExpression));
+                return ts.updatePropertyAssignment(node, visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.initializer, visitor, ts.isExpression));
             case 265:
+                return ts.updateShorthandPropertyAssignment(node, visitNode(node.name, visitor, ts.isIdentifier), visitNode(node.objectAssignmentInitializer, visitor, ts.isExpression));
+            case 266:
+                return ts.updateSpreadAssignment(node, visitNode(node.expression, visitor, ts.isExpression));
+            case 267:
+                return ts.updateEnumMember(node, visitNode(node.name, visitor, ts.isPropertyName), visitNode(node.initializer, visitor, ts.isExpression));
+            case 268:
                 return ts.updateSourceFileNode(node, visitLexicalEnvironment(node.statements, visitor, context));
-            case 288:
+            case 291:
                 return ts.updatePartiallyEmittedExpression(node, visitNode(node.expression, visitor, ts.isExpression));
-            case 289:
+            case 292:
                 return ts.updateCommaList(node, nodesVisitor(node.elements, visitor, ts.isExpression));
             default:
                 return node;
@@ -42281,7 +42435,7 @@ var ts;
             case 209:
             case 200:
             case 225:
-            case 287:
+            case 290:
                 break;
             case 143:
                 result = reduceNode(node.left, cbNode, result);
@@ -42588,61 +42742,66 @@ var ts;
                 result = ts.reduceLeft(node.children, cbNode, result);
                 result = reduceNode(node.closingElement, cbNode, result);
                 break;
+            case 253:
+                result = reduceNode(node.openingFragment, cbNode, result);
+                result = ts.reduceLeft(node.children, cbNode, result);
+                result = reduceNode(node.closingFragment, cbNode, result);
+                break;
             case 250:
             case 251:
                 result = reduceNode(node.tagName, cbNode, result);
                 result = reduceNode(node.attributes, cbNode, result);
                 break;
-            case 254:
+            case 257:
                 result = reduceNodes(node.properties, cbNodes, result);
                 break;
             case 252:
                 result = reduceNode(node.tagName, cbNode, result);
                 break;
-            case 253:
+            case 256:
                 result = reduceNode(node.name, cbNode, result);
                 result = reduceNode(node.initializer, cbNode, result);
                 break;
-            case 255:
-                result = reduceNode(node.expression, cbNode, result);
-                break;
-            case 256:
-                result = reduceNode(node.expression, cbNode, result);
-                break;
-            case 257:
-                result = reduceNode(node.expression, cbNode, result);
             case 258:
-                result = reduceNodes(node.statements, cbNodes, result);
+                result = reduceNode(node.expression, cbNode, result);
                 break;
             case 259:
-                result = reduceNodes(node.types, cbNodes, result);
+                result = reduceNode(node.expression, cbNode, result);
                 break;
             case 260:
-                result = reduceNode(node.variableDeclaration, cbNode, result);
-                result = reduceNode(node.block, cbNode, result);
-                break;
+                result = reduceNode(node.expression, cbNode, result);
             case 261:
-                result = reduceNode(node.name, cbNode, result);
-                result = reduceNode(node.initializer, cbNode, result);
+                result = reduceNodes(node.statements, cbNodes, result);
                 break;
             case 262:
-                result = reduceNode(node.name, cbNode, result);
-                result = reduceNode(node.objectAssignmentInitializer, cbNode, result);
+                result = reduceNodes(node.types, cbNodes, result);
                 break;
             case 263:
-                result = reduceNode(node.expression, cbNode, result);
+                result = reduceNode(node.variableDeclaration, cbNode, result);
+                result = reduceNode(node.block, cbNode, result);
                 break;
             case 264:
                 result = reduceNode(node.name, cbNode, result);
                 result = reduceNode(node.initializer, cbNode, result);
                 break;
             case 265:
-                result = reduceNodes(node.statements, cbNodes, result);
+                result = reduceNode(node.name, cbNode, result);
+                result = reduceNode(node.objectAssignmentInitializer, cbNode, result);
                 break;
-            case 288:
+            case 266:
                 result = reduceNode(node.expression, cbNode, result);
                 break;
-            case 289:
+            case 267:
+                result = reduceNode(node.name, cbNode, result);
+                result = reduceNode(node.initializer, cbNode, result);
+                break;
+            case 268:
+                result = reduceNodes(node.statements, cbNodes, result);
+                break;
+            case 291:
+                result = reduceNode(node.expression, cbNode, result);
+                break;
+            case 292:
                 result = reduceNodes(node.elements, cbNodes, result);
                 break;
             default:
@@ -43286,7 +43445,7 @@ var ts;
         }
         function onBeforeVisitNode(node) {
             switch (node.kind) {
-                case 265:
+                case 268:
                 case 235:
                 case 234:
                 case 207:
@@ -43452,7 +43611,7 @@ var ts;
                     return visitClassDeclaration(node);
                 case 199:
                     return visitClassExpression(node);
-                case 259:
+                case 262:
                     return visitHeritageClause(node);
                 case 201:
                     return visitExpressionWithTypeArguments(node);
@@ -44473,7 +44632,7 @@ var ts;
         function addVarForEnumOrModuleDeclaration(statements, node) {
             var statement = ts.createVariableStatement(ts.visitNodes(node.modifiers, modifierVisitor, ts.isModifier), ts.createVariableDeclarationList([
                 ts.createVariableDeclaration(ts.getLocalName(node, false, true))
-            ], currentScope.kind === 265 ? 0 : 1));
+            ], currentScope.kind === 268 ? 0 : 1));
             ts.setOriginalNode(statement, node);
             recordEmittedDeclarationInScope(node);
             if (isFirstEmittedDeclarationInScope(node)) {
@@ -44723,7 +44882,7 @@ var ts;
             if ((enabledSubstitutions & 2) === 0) {
                 enabledSubstitutions |= 2;
                 context.enableSubstitution(71);
-                context.enableSubstitution(262);
+                context.enableSubstitution(265);
                 context.enableEmitNotification(233);
             }
         }
@@ -44809,7 +44968,7 @@ var ts;
         function trySubstituteNamespaceExportedName(node) {
             if (enabledSubstitutions & applicableSubstitutions && !ts.isGeneratedIdentifier(node) && !ts.isLocalName(node)) {
                 var container = resolver.getReferencedExportContainer(node, false);
-                if (container && container.kind !== 265) {
+                if (container && container.kind !== 268) {
                     var substitute = (applicableSubstitutions & 2 && container.kind === 233) ||
                         (applicableSubstitutions & 8 && container.kind === 232);
                     if (substitute) {
@@ -45212,7 +45371,7 @@ var ts;
                     return visitExpressionStatement(node);
                 case 185:
                     return visitParenthesizedExpression(node, noDestructuringValue);
-                case 260:
+                case 263:
                     return visitCatchClause(node);
                 default:
                     return ts.visitEachChild(node, visitor, context);
@@ -45246,7 +45405,7 @@ var ts;
             var objects = [];
             for (var _i = 0, elements_3 = elements; _i < elements_3.length; _i++) {
                 var e = elements_3[_i];
-                if (e.kind === 263) {
+                if (e.kind === 266) {
                     if (chunkObject) {
                         objects.push(ts.createObjectLiteral(chunkObject));
                         chunkObject = undefined;
@@ -45258,7 +45417,7 @@ var ts;
                     if (!chunkObject) {
                         chunkObject = [];
                     }
-                    if (e.kind === 261) {
+                    if (e.kind === 264) {
                         var p = e;
                         chunkObject.push(ts.createPropertyAssignment(p.name, ts.visitNode(p.initializer, visitor, ts.isExpression)));
                     }
@@ -45694,7 +45853,9 @@ var ts;
                     return visitJsxElement(node, false);
                 case 250:
                     return visitJsxSelfClosingElement(node, false);
-                case 256:
+                case 253:
+                    return visitJsxFragment(node, false);
+                case 259:
                     return visitJsxExpression(node);
                 default:
                     return ts.visitEachChild(node, visitor, context);
@@ -45704,12 +45865,14 @@ var ts;
             switch (node.kind) {
                 case 10:
                     return visitJsxText(node);
-                case 256:
+                case 259:
                     return visitJsxExpression(node);
                 case 249:
                     return visitJsxElement(node, true);
                 case 250:
                     return visitJsxSelfClosingElement(node, true);
+                case 253:
+                    return visitJsxFragment(node, true);
                 default:
                     ts.Debug.failBadSyntaxKind(node);
                     return undefined;
@@ -45720,6 +45883,9 @@ var ts;
         }
         function visitJsxSelfClosingElement(node, isChild) {
             return visitJsxOpeningLikeElement(node, undefined, isChild, node);
+        }
+        function visitJsxFragment(node, isChild) {
+            return visitJsxOpeningFragment(node.openingFragment, node.children, isChild, node);
         }
         function visitJsxOpeningLikeElement(node, children, isChild, location) {
             var tagName = getTagName(node);
@@ -45746,6 +45912,13 @@ var ts;
             }
             return element;
         }
+        function visitJsxOpeningFragment(node, children, isChild, location) {
+            var element = ts.createExpressionForJsxFragment(context.getEmitResolver().getJsxFactoryEntity(), compilerOptions.reactNamespace, ts.mapDefined(children, transformJsxChildToExpression), node, location);
+            if (isChild) {
+                ts.startOnNewLine(element);
+            }
+            return element;
+        }
         function transformJsxSpreadAttributeToExpression(node) {
             return ts.visitNode(node.expression, visitor, ts.isExpression);
         }
@@ -45762,7 +45935,7 @@ var ts;
                 var decoded = tryDecodeEntities(node.text);
                 return decoded ? ts.setTextRange(ts.createLiteral(decoded), node) : node;
             }
-            else if (node.kind === 256) {
+            else if (node.kind === 259) {
                 if (node.expression === undefined) {
                     return ts.createTrue();
                 }
@@ -46288,9 +46461,9 @@ var ts;
                     return visitExpressionStatement(node);
                 case 178:
                     return visitObjectLiteralExpression(node);
-                case 260:
+                case 263:
                     return visitCatchClause(node);
-                case 262:
+                case 265:
                     return visitShorthandPropertyAssignment(node);
                 case 144:
                     return visitComputedPropertyName(node);
@@ -47593,10 +47766,10 @@ var ts;
                     case 151:
                         expressions.push(transformObjectLiteralMethodDeclarationToExpression(property, receiver, node, node.multiLine));
                         break;
-                    case 261:
+                    case 264:
                         expressions.push(transformPropertyAssignmentToExpression(property, receiver, node.multiLine));
                         break;
-                    case 262:
+                    case 265:
                         expressions.push(transformShorthandPropertyAssignmentToExpression(property, receiver, node.multiLine));
                         break;
                     default:
@@ -48103,7 +48276,7 @@ var ts;
         var previousOnSubstituteNode = context.onSubstituteNode;
         context.onSubstituteNode = onSubstituteNode;
         context.enableSubstitution(179);
-        context.enableSubstitution(261);
+        context.enableSubstitution(264);
         return transformSourceFile;
         function transformSourceFile(node) {
             return node;
@@ -48982,7 +49155,7 @@ var ts;
                 for (var i = 0; i < numClauses; i++) {
                     var clause = caseBlock.clauses[i];
                     clauseLabels.push(defineLabel());
-                    if (clause.kind === 258 && defaultClauseIndex === -1) {
+                    if (clause.kind === 261 && defaultClauseIndex === -1) {
                         defaultClauseIndex = i;
                     }
                 }
@@ -48992,7 +49165,7 @@ var ts;
                     var defaultClausesSkipped = 0;
                     for (var i = clausesWritten; i < numClauses; i++) {
                         var clause = caseBlock.clauses[i];
-                        if (clause.kind === 257) {
+                        if (clause.kind === 260) {
                             var caseClause = clause;
                             if (containsYield(caseClause.expression) && pendingClauses.length > 0) {
                                 break;
@@ -49812,8 +49985,8 @@ var ts;
         context.enableSubstitution(194);
         context.enableSubstitution(192);
         context.enableSubstitution(193);
-        context.enableSubstitution(262);
-        context.enableEmitNotification(265);
+        context.enableSubstitution(265);
+        context.enableEmitNotification(268);
         var moduleInfoMap = [];
         var deferredExports = [];
         var currentSourceFile;
@@ -49994,9 +50167,9 @@ var ts;
                     return visitFunctionDeclaration(node);
                 case 229:
                     return visitClassDeclaration(node);
-                case 290:
+                case 293:
                     return visitMergeDeclarationMarker(node);
-                case 291:
+                case 294:
                     return visitEndOfDeclarationMarker(node);
                 default:
                     return ts.visitEachChild(node, importCallExpressionVisitor, context);
@@ -50405,7 +50578,7 @@ var ts;
             return node;
         }
         function onEmitNode(hint, node, emitCallback) {
-            if (node.kind === 265) {
+            if (node.kind === 268) {
                 currentSourceFile = node;
                 currentModuleInfo = moduleInfoMap[ts.getOriginalNodeId(currentSourceFile)];
                 noSubstitution = [];
@@ -50465,7 +50638,7 @@ var ts;
             }
             if (!ts.isGeneratedIdentifier(node) && !ts.isLocalName(node)) {
                 var exportContainer = resolver.getReferencedExportContainer(node, ts.isExportName(node));
-                if (exportContainer && exportContainer.kind === 265) {
+                if (exportContainer && exportContainer.kind === 268) {
                     return ts.setTextRange(ts.createPropertyAccess(ts.createIdentifier("exports"), ts.getSynthesizedClone(node)), node);
                 }
                 var importDeclaration = resolver.getReferencedImportDeclaration(node);
@@ -50565,7 +50738,7 @@ var ts;
         context.enableSubstitution(194);
         context.enableSubstitution(192);
         context.enableSubstitution(193);
-        context.enableEmitNotification(265);
+        context.enableEmitNotification(268);
         var moduleInfoMap = [];
         var deferredExports = [];
         var exportFunctionsMap = [];
@@ -50901,7 +51074,7 @@ var ts;
         }
         function shouldHoistVariableDeclarationList(node) {
             return (ts.getEmitFlags(node) & 2097152) === 0
-                && (enclosingBlockScopedContainer.kind === 265
+                && (enclosingBlockScopedContainer.kind === 268
                     || (ts.getOriginalNode(node).flags & 3) === 0);
         }
         function transformInitializedVariable(node, isExportedDeclaration) {
@@ -51083,19 +51256,19 @@ var ts;
                     return visitSwitchStatement(node);
                 case 235:
                     return visitCaseBlock(node);
-                case 257:
+                case 260:
                     return visitCaseClause(node);
-                case 258:
+                case 261:
                     return visitDefaultClause(node);
                 case 224:
                     return visitTryStatement(node);
-                case 260:
+                case 263:
                     return visitCatchClause(node);
                 case 207:
                     return visitBlock(node);
-                case 290:
+                case 293:
                     return visitMergeDeclarationMarker(node);
-                case 291:
+                case 294:
                     return visitEndOfDeclarationMarker(node);
                 default:
                     return destructuringAndImportCallVisitor(node);
@@ -51235,7 +51408,7 @@ var ts;
             }
             else if (ts.isIdentifier(node)) {
                 var container = resolver.getReferencedExportContainer(node);
-                return container !== undefined && container.kind === 265;
+                return container !== undefined && container.kind === 268;
             }
             else {
                 return false;
@@ -51250,7 +51423,7 @@ var ts;
             return node;
         }
         function onEmitNode(hint, node, emitCallback) {
-            if (node.kind === 265) {
+            if (node.kind === 268) {
                 var id = ts.getOriginalNodeId(node);
                 currentSourceFile = node;
                 moduleInfo = moduleInfoMap[id];
@@ -51362,7 +51535,7 @@ var ts;
                     || resolver.getReferencedValueDeclaration(name);
                 if (valueDeclaration) {
                     var exportContainer = resolver.getReferencedExportContainer(name, false);
-                    if (exportContainer && exportContainer.kind === 265) {
+                    if (exportContainer && exportContainer.kind === 268) {
                         exportedNames = ts.append(exportedNames, ts.getDeclarationName(valueDeclaration));
                     }
                     exportedNames = ts.addRange(exportedNames, moduleInfo && moduleInfo.exportedBindings[ts.getOriginalNodeId(valueDeclaration)]);
@@ -51390,7 +51563,7 @@ var ts;
         var previousOnSubstituteNode = context.onSubstituteNode;
         context.onEmitNode = onEmitNode;
         context.onSubstituteNode = onSubstituteNode;
-        context.enableEmitNotification(265);
+        context.enableEmitNotification(268);
         context.enableSubstitution(71);
         var currentSourceFile;
         return transformSourceFile;
@@ -51499,7 +51672,7 @@ var ts;
     }
     ts.getTransformers = getTransformers;
     function transformNodes(resolver, host, options, nodes, transformers, allowDtsFiles) {
-        var enabledSyntaxKindFeatures = new Array(292);
+        var enabledSyntaxKindFeatures = new Array(295);
         var lexicalEnvironmentVariableDeclarations;
         var lexicalEnvironmentFunctionDeclarations;
         var lexicalEnvironmentVariableDeclarationsStack = [];
@@ -51759,7 +51932,7 @@ var ts;
             }
             if (compilerOptions.mapRoot) {
                 sourceMapDir = ts.normalizeSlashes(compilerOptions.mapRoot);
-                if (sourceFileOrBundle.kind === 265) {
+                if (sourceFileOrBundle.kind === 268) {
                     sourceMapDir = ts.getDirectoryPath(ts.getSourceFilePathInNewDir(sourceFileOrBundle, host, sourceMapDir));
                 }
                 if (!ts.isRootedDiskPath(sourceMapDir) && !ts.isUrl(sourceMapDir)) {
@@ -51866,7 +52039,7 @@ var ts;
                     source = undefined;
                 if (source)
                     setSourceFile(source);
-                if (node.kind !== 287
+                if (node.kind !== 290
                     && (emitFlags & 16) === 0
                     && pos >= 0) {
                     emitPos(skipSourceTrivia(pos));
@@ -51883,7 +52056,7 @@ var ts;
                 }
                 if (source)
                     setSourceFile(source);
-                if (node.kind !== 287
+                if (node.kind !== 290
                     && (emitFlags & 32) === 0
                     && end >= 0) {
                     emitPos(end);
@@ -52025,7 +52198,7 @@ var ts;
                     if (extendedDiagnostics) {
                         ts.performance.mark("preEmitNodeWithComment");
                     }
-                    var isEmittedNode = node.kind !== 287;
+                    var isEmittedNode = node.kind !== 290;
                     var skipLeadingComments = pos < 0 || (emitFlags & 512) !== 0 || node.kind === 10;
                     var skipTrailingComments = end < 0 || (emitFlags & 1024) !== 0 || node.kind === 10;
                     if (!skipLeadingComments) {
@@ -52319,8 +52492,8 @@ var ts;
     }
     ts.getDeclarationDiagnostics = getDeclarationDiagnostics;
     function emitDeclarations(host, resolver, emitterDiagnostics, declarationFilePath, sourceFileOrBundle, emitOnlyDtsFiles) {
-        var sourceFiles = sourceFileOrBundle.kind === 266 ? sourceFileOrBundle.sourceFiles : [sourceFileOrBundle];
-        var isBundledEmit = sourceFileOrBundle.kind === 266;
+        var sourceFiles = sourceFileOrBundle.kind === 269 ? sourceFileOrBundle.sourceFiles : [sourceFileOrBundle];
+        var isBundledEmit = sourceFileOrBundle.kind === 269;
         var newLine = host.getNewLine();
         var compilerOptions = host.getCompilerOptions();
         var write;
@@ -52830,9 +53003,9 @@ var ts;
                 writeModuleElement(node);
             }
             else if (node.kind === 237 ||
-                (node.parent.kind === 265 && isCurrentFileExternalModule)) {
+                (node.parent.kind === 268 && isCurrentFileExternalModule)) {
                 var isVisible = void 0;
-                if (asynchronousSubModuleDeclarationEmitInfo && node.parent.kind !== 265) {
+                if (asynchronousSubModuleDeclarationEmitInfo && node.parent.kind !== 268) {
                     asynchronousSubModuleDeclarationEmitInfo.push({
                         node: node,
                         outputPos: writer.getTextPos(),
@@ -52882,7 +53055,7 @@ var ts;
             }
         }
         function emitModuleElementDeclarationFlags(node) {
-            if (node.parent.kind === 265) {
+            if (node.parent.kind === 268) {
                 var modifiers = ts.getModifierFlags(node);
                 if (modifiers & 1) {
                     write("export ");
@@ -53822,11 +53995,11 @@ var ts;
                 case 149:
                 case 148:
                     return emitPropertyDeclaration(node);
-                case 264:
+                case 267:
                     return emitEnumMemberDeclaration(node);
                 case 243:
                     return emitExportAssignment(node);
-                case 265:
+                case 268:
                     return emitSourceFile(node);
             }
         }
@@ -53845,7 +54018,7 @@ var ts;
             }
             return addedBundledEmitReference;
             function getDeclFileName(emitFileNames, sourceFileOrBundle) {
-                var isBundledEmit = sourceFileOrBundle.kind === 266;
+                var isBundledEmit = sourceFileOrBundle.kind === 269;
                 if (isBundledEmit && !addBundledFileReference) {
                     return;
                 }
@@ -53859,7 +54032,7 @@ var ts;
         var emitDeclarationResult = emitDeclarations(host, resolver, emitterDiagnostics, declarationFilePath, sourceFileOrBundle, emitOnlyDtsFiles);
         var emitSkipped = emitDeclarationResult.reportedDeclarationError || host.isEmitBlocked(declarationFilePath) || host.getCompilerOptions().noEmit;
         if (!emitSkipped) {
-            var sourceFiles = sourceFileOrBundle.kind === 266 ? sourceFileOrBundle.sourceFiles : [sourceFileOrBundle];
+            var sourceFiles = sourceFileOrBundle.kind === 269 ? sourceFileOrBundle.sourceFiles : [sourceFileOrBundle];
             var declarationOutput = emitDeclarationResult.referencesOutput
                 + getDeclarationOutput(emitDeclarationResult.synchronousDeclarationOutput, emitDeclarationResult.moduleElementDeclarationEmitInfo);
             ts.writeFile(host, emitterDiagnostics, declarationFilePath, declarationOutput, host.getCompilerOptions().emitBOM, sourceFiles);
@@ -53924,7 +54097,7 @@ var ts;
         return ".js";
     }
     function getOriginalSourceFileOrBundle(sourceFileOrBundle) {
-        if (sourceFileOrBundle.kind === 266) {
+        if (sourceFileOrBundle.kind === 269) {
             return ts.updateBundle(sourceFileOrBundle, ts.sameMap(sourceFileOrBundle.sourceFiles, ts.getOriginalSourceFile));
         }
         return ts.getOriginalSourceFile(sourceFileOrBundle);
@@ -53990,8 +54163,8 @@ var ts;
             }
         }
         function printSourceFileOrBundle(jsFilePath, sourceMapFilePath, sourceFileOrBundle) {
-            var bundle = sourceFileOrBundle.kind === 266 ? sourceFileOrBundle : undefined;
-            var sourceFile = sourceFileOrBundle.kind === 265 ? sourceFileOrBundle : undefined;
+            var bundle = sourceFileOrBundle.kind === 269 ? sourceFileOrBundle : undefined;
+            var sourceFile = sourceFileOrBundle.kind === 268 ? sourceFileOrBundle : undefined;
             var sourceFiles = bundle ? bundle.sourceFiles : [sourceFile];
             sourceMap.initialize(jsFilePath, sourceMapFilePath, sourceFileOrBundle);
             if (bundle) {
@@ -54027,7 +54200,7 @@ var ts;
         }
         function emitHelpers(node, writeLines) {
             var helpersEmitted = false;
-            var bundle = node.kind === 266 ? node : undefined;
+            var bundle = node.kind === 269 ? node : undefined;
             if (bundle && moduleKind === ts.ModuleKind.None) {
                 return;
             }
@@ -54100,8 +54273,8 @@ var ts;
                     break;
             }
             switch (node.kind) {
-                case 265: return printFile(node);
-                case 266: return printBundle(node);
+                case 268: return printFile(node);
+                case 269: return printBundle(node);
             }
             writeNode(hint, node, sourceFile, beginPrint());
             return endPrint();
@@ -54286,7 +54459,7 @@ var ts;
                     return emitTypeReference(node);
                 case 160:
                     return emitFunctionType(node);
-                case 273:
+                case 276:
                     return emitJSDocFunctionType(node);
                 case 161:
                     return emitConstructorType(node);
@@ -54316,19 +54489,19 @@ var ts;
                     return emitMappedType(node);
                 case 173:
                     return emitLiteralType(node);
-                case 268:
+                case 271:
                     write("*");
                     return;
-                case 269:
+                case 272:
                     write("?");
                     return;
-                case 270:
+                case 273:
                     return emitJSDocNullableType(node);
-                case 271:
-                    return emitJSDocNonNullableType(node);
-                case 272:
-                    return emitJSDocOptionalType(node);
                 case 274:
+                    return emitJSDocNonNullableType(node);
+                case 275:
+                    return emitJSDocOptionalType(node);
+                case 277:
                     return emitJSDocVariadicType(node);
                 case 174:
                     return emitObjectBindingPattern(node);
@@ -54427,32 +54600,34 @@ var ts;
                 case 10:
                     return emitJsxText(node);
                 case 251:
-                    return emitJsxOpeningElement(node);
-                case 252:
-                    return emitJsxClosingElement(node);
-                case 253:
-                    return emitJsxAttribute(node);
                 case 254:
-                    return emitJsxAttributes(node);
+                    return emitJsxOpeningElementOrFragment(node);
+                case 252:
                 case 255:
-                    return emitJsxSpreadAttribute(node);
+                    return emitJsxClosingElementOrFragment(node);
                 case 256:
-                    return emitJsxExpression(node);
+                    return emitJsxAttribute(node);
                 case 257:
-                    return emitCaseClause(node);
+                    return emitJsxAttributes(node);
                 case 258:
-                    return emitDefaultClause(node);
+                    return emitJsxSpreadAttribute(node);
                 case 259:
-                    return emitHeritageClause(node);
+                    return emitJsxExpression(node);
                 case 260:
-                    return emitCatchClause(node);
+                    return emitCaseClause(node);
                 case 261:
-                    return emitPropertyAssignment(node);
+                    return emitDefaultClause(node);
                 case 262:
-                    return emitShorthandPropertyAssignment(node);
+                    return emitHeritageClause(node);
                 case 263:
-                    return emitSpreadAssignment(node);
+                    return emitCatchClause(node);
                 case 264:
+                    return emitPropertyAssignment(node);
+                case 265:
+                    return emitShorthandPropertyAssignment(node);
+                case 266:
+                    return emitSpreadAssignment(node);
+                case 267:
                     return emitEnumMember(node);
             }
             if (ts.isExpression(node)) {
@@ -54540,9 +54715,11 @@ var ts;
                     return emitJsxElement(node);
                 case 250:
                     return emitJsxSelfClosingElement(node);
-                case 288:
+                case 253:
+                    return emitJsxFragment(node);
+                case 291:
                     return emitPartiallyEmittedExpression(node);
-                case 289:
+                case 292:
                     return emitCommaList(node);
             }
         }
@@ -54602,7 +54779,7 @@ var ts;
                 emit(node.name);
             }
             emitIfPresent(node.questionToken);
-            if (node.parent && node.parent.kind === 273 && !node.name) {
+            if (node.parent && node.parent.kind === 276 && !node.name) {
                 emit(node.type);
             }
             else {
@@ -55524,21 +55701,30 @@ var ts;
             }
             write("/>");
         }
-        function emitJsxOpeningElement(node) {
+        function emitJsxFragment(node) {
+            emit(node.openingFragment);
+            emitList(node, node.children, 131072);
+            emit(node.closingFragment);
+        }
+        function emitJsxOpeningElementOrFragment(node) {
             write("<");
-            emitJsxTagName(node.tagName);
-            writeIfAny(node.attributes.properties, " ");
-            if (node.attributes.properties && node.attributes.properties.length > 0) {
-                emit(node.attributes);
+            if (ts.isJsxOpeningElement(node)) {
+                emitJsxTagName(node.tagName);
+                if (node.attributes.properties && node.attributes.properties.length > 0) {
+                    write(" ");
+                    emit(node.attributes);
+                }
             }
             write(">");
         }
         function emitJsxText(node) {
             writer.writeLiteral(getTextOfNode(node, true));
         }
-        function emitJsxClosingElement(node) {
+        function emitJsxClosingElementOrFragment(node) {
             write("</");
-            emitJsxTagName(node.tagName);
+            if (ts.isJsxClosingElement(node)) {
+                emitJsxTagName(node.tagName);
+            }
             write(">");
         }
         function emitJsxAttributes(node) {
@@ -55918,11 +56104,6 @@ var ts;
         function decreaseIndent() {
             writer.decreaseIndent();
         }
-        function writeIfAny(nodes, text) {
-            if (ts.some(nodes)) {
-                write(text);
-            }
-        }
         function writeToken(token, pos, contextNode) {
             return onEmitSourceMapOfToken
                 ? onEmitSourceMapOfToken(contextNode, token, pos, writeTokenText)
@@ -56294,6 +56475,12 @@ var ts;
 })(ts || (ts = {}));
 var ts;
 (function (ts) {
+    var ConfigFileProgramReloadLevel;
+    (function (ConfigFileProgramReloadLevel) {
+        ConfigFileProgramReloadLevel[ConfigFileProgramReloadLevel["None"] = 0] = "None";
+        ConfigFileProgramReloadLevel[ConfigFileProgramReloadLevel["Partial"] = 1] = "Partial";
+        ConfigFileProgramReloadLevel[ConfigFileProgramReloadLevel["Full"] = 2] = "Full";
+    })(ConfigFileProgramReloadLevel = ts.ConfigFileProgramReloadLevel || (ts.ConfigFileProgramReloadLevel = {}));
     function updateMissingFilePathsWatch(program, missingFileWatches, createMissingFileWatch) {
         var missingFilePaths = program.getMissingFilePaths();
         var newMissingFilePathMap = ts.arrayToSet(missingFilePaths);
@@ -57592,7 +57779,7 @@ var ts;
                                 return;
                             }
                             break;
-                        case 259:
+                        case 262:
                             var heritageClause = node;
                             if (heritageClause.token === 108) {
                                 diagnostics.push(createDiagnosticForNode(node, ts.Diagnostics.implements_clauses_can_only_be_used_in_a_ts_file));
@@ -58587,6 +58774,9 @@ var ts;
         function isNodeModulesDirectory(dirPath) {
             return ts.endsWith(dirPath, "/node_modules");
         }
+        function isNodeModulesAtTypesDirectory(dirPath) {
+            return ts.endsWith(dirPath, "/node_modules/@types");
+        }
         function isDirectoryAtleastAtLevelFromFSRoot(dirPath, minLevels) {
             for (var searchIndex = ts.getRootLength(dirPath); minLevels > 0; minLevels--) {
                 searchIndex = dirPath.indexOf(ts.directorySeparator, searchIndex) + 1;
@@ -58768,10 +58958,19 @@ var ts;
                 isChangedFailedLookupLocation = function (location) { return isInDirectoryPath(fileOrDirectoryPath, resolutionHost.toPath(location)); };
             }
             else {
-                if (!isPathWithDefaultFailedLookupExtension(fileOrDirectoryPath) && !customFailedLookupPaths.has(fileOrDirectoryPath)) {
-                    return false;
+                var dirOfFileOrDirectory = ts.getDirectoryPath(fileOrDirectoryPath);
+                if (isNodeModulesAtTypesDirectory(dirOfFileOrDirectory) || isNodeModulesDirectory(dirOfFileOrDirectory)) {
+                    isChangedFailedLookupLocation = function (location) {
+                        var locationPath = resolutionHost.toPath(location);
+                        return locationPath === fileOrDirectoryPath || ts.startsWith(resolutionHost.toPath(location), fileOrDirectoryPath);
+                    };
                 }
-                isChangedFailedLookupLocation = function (location) { return resolutionHost.toPath(location) === fileOrDirectoryPath; };
+                else {
+                    if (!isPathWithDefaultFailedLookupExtension(fileOrDirectoryPath) && !customFailedLookupPaths.has(fileOrDirectoryPath)) {
+                        return false;
+                    }
+                    isChangedFailedLookupLocation = function (location) { return resolutionHost.toPath(location) === fileOrDirectoryPath; };
+                }
             }
             var hasChangedFailedLookupLocation = function (resolution) { return ts.some(resolution.failedLookupLocations, isChangedFailedLookupLocation); };
             var invalidatedFilesCount = filesWithInvalidatedResolutions && filesWithInvalidatedResolutions.size;
@@ -58994,7 +59193,7 @@ var ts;
     ts.createWatchModeWithoutConfigFile = createWatchModeWithoutConfigFile;
     function createWatchMode(rootFileNames, compilerOptions, watchingHost, configFileName, configFileSpecs, configFileWildCardDirectories, optionsToExtendForConfigFile) {
         var program;
-        var needsReload;
+        var reloadLevel;
         var missingFilesMap;
         var watchedWildcardDirectories;
         var timerToUpdateProgram;
@@ -59198,22 +59397,32 @@ var ts;
         }
         function scheduleProgramReload() {
             ts.Debug.assert(!!configFileName);
-            needsReload = true;
+            reloadLevel = ts.ConfigFileProgramReloadLevel.Full;
             scheduleProgramUpdate();
         }
         function updateProgram() {
             timerToUpdateProgram = undefined;
             reportWatchDiagnostic(ts.createCompilerDiagnostic(ts.Diagnostics.File_change_detected_Starting_incremental_compilation));
-            if (needsReload) {
-                reloadConfigFile();
+            switch (reloadLevel) {
+                case ts.ConfigFileProgramReloadLevel.Partial:
+                    return reloadFileNamesFromConfigFile();
+                case ts.ConfigFileProgramReloadLevel.Full:
+                    return reloadConfigFile();
+                default:
+                    return synchronizeProgram();
             }
-            else {
-                synchronizeProgram();
+        }
+        function reloadFileNamesFromConfigFile() {
+            var result = ts.getFileNamesFromConfigSpecs(configFileSpecs, ts.getDirectoryPath(configFileName), compilerOptions, directoryStructureHost);
+            if (!configFileSpecs.filesSpecs && result.fileNames.length === 0) {
+                reportDiagnostic(ts.getErrorForNoInputFiles(configFileSpecs, configFileName));
             }
+            rootFileNames = result.fileNames;
+            synchronizeProgram();
         }
         function reloadConfigFile() {
             writeLog("Reloading config file: " + configFileName);
-            needsReload = false;
+            reloadLevel = ts.ConfigFileProgramReloadLevel.None;
             var cachedHost = directoryStructureHost;
             cachedHost.clearCache();
             var configParseResult = parseConfigFile(configFileName, optionsToExtendForConfigFile, cachedHost, reportDiagnostic, reportWatchDiagnostic);
@@ -59282,16 +59491,12 @@ var ts;
                 else {
                     removeSourceFile(fileOrDirectoryPath);
                 }
-                if (fileOrDirectoryPath !== directory && !ts.isSupportedSourceFileName(fileOrDirectory, compilerOptions)) {
+                if (fileOrDirectoryPath !== directory && ts.hasExtension(fileOrDirectoryPath) && !ts.isSupportedSourceFileName(fileOrDirectory, compilerOptions)) {
                     writeLog("Project: " + configFileName + " Detected file add/remove of non supported extension: " + fileOrDirectory);
                     return;
                 }
-                if (!needsReload) {
-                    var result_6 = ts.getFileNamesFromConfigSpecs(configFileSpecs, ts.getDirectoryPath(configFileName), compilerOptions, directoryStructureHost);
-                    if (!configFileSpecs.filesSpecs && result_6.fileNames.length === 0) {
-                        reportDiagnostic(ts.getErrorForNoInputFiles(configFileSpecs, configFileName));
-                    }
-                    rootFileNames = result_6.fileNames;
+                if (reloadLevel !== ts.ConfigFileProgramReloadLevel.Full) {
+                    reloadLevel = ts.ConfigFileProgramReloadLevel.Partial;
                     scheduleProgramUpdate();
                 }
             }, flags);
