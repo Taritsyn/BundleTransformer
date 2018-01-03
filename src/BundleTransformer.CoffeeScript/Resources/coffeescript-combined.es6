@@ -36,7 +36,7 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * CoffeeScript Compiler v2.1.0
+ * CoffeeScript Compiler v2.1.1
  * http://coffeescript.org
  *
  * Copyright 2009-2017 Jeremy Ashkenas
@@ -1293,7 +1293,7 @@ var CoffeeScript = (function(){
 
 			return Rewriter;
 
-		})();
+		}).call(this);
 
 		// Constants
 		// ---------
@@ -4904,7 +4904,7 @@ var CoffeeScript = (function(){
 
 			return Base;
 
-		})();
+		}).call(this);
 
 		//### HoistTarget
 
@@ -5358,7 +5358,7 @@ var CoffeeScript = (function(){
 
 			return Block;
 
-		})();
+		}).call(this);
 
 		//### Literal
 
@@ -5391,7 +5391,7 @@ var CoffeeScript = (function(){
 
 			return Literal;
 
-		})();
+		}).call(this);
 
 		exports.NumberLiteral = NumberLiteral = class NumberLiteral extends Literal {};
 
@@ -5455,7 +5455,7 @@ var CoffeeScript = (function(){
 
 			return IdentifierLiteral;
 
-		})();
+		}).call(this);
 
 		exports.CSXTag = CSXTag = class CSXTag extends IdentifierLiteral {};
 
@@ -5466,7 +5466,7 @@ var CoffeeScript = (function(){
 
 			return PropertyName;
 
-		})();
+		}).call(this);
 
 		exports.ComputedPropertyName = ComputedPropertyName = class ComputedPropertyName extends PropertyName {
 			compileNode(o) {
@@ -5498,7 +5498,7 @@ var CoffeeScript = (function(){
 
 			return StatementLiteral;
 
-		})();
+		}).call(this);
 
 		exports.ThisLiteral = ThisLiteral = class ThisLiteral extends Literal {
 			constructor() {
@@ -5592,7 +5592,7 @@ var CoffeeScript = (function(){
 
 			return Return;
 
-		})();
+		}).call(this);
 
 		// `yield return` works exactly like `return`, except that it turns the function
 		// into a generator.
@@ -5851,7 +5851,7 @@ var CoffeeScript = (function(){
 
 			return Value;
 
-		})();
+		}).call(this);
 
 		//### HereComment
 
@@ -6112,7 +6112,7 @@ var CoffeeScript = (function(){
 
 			return Call;
 
-		})();
+		}).call(this);
 
 		//### Super
 
@@ -6150,7 +6150,7 @@ var CoffeeScript = (function(){
 
 			return SuperCall;
 
-		})();
+		}).call(this);
 
 		exports.Super = Super = (function() {
 			class Super extends Base {
@@ -6198,7 +6198,7 @@ var CoffeeScript = (function(){
 
 			return Super;
 
-		})();
+		}).call(this);
 
 		//### RegexWithInterpolations
 
@@ -6250,7 +6250,7 @@ var CoffeeScript = (function(){
 
 			return Extends;
 
-		})();
+		}).call(this);
 
 		//### Access
 
@@ -6283,7 +6283,7 @@ var CoffeeScript = (function(){
 
 			return Access;
 
-		})();
+		}).call(this);
 
 		//### Index
 
@@ -6309,7 +6309,7 @@ var CoffeeScript = (function(){
 
 			return Index;
 
-		})();
+		}).call(this);
 
 		//### Range
 
@@ -6426,7 +6426,7 @@ var CoffeeScript = (function(){
 
 			return Range;
 
-		})();
+		}).call(this);
 
 		//### Slice
 
@@ -6464,7 +6464,7 @@ var CoffeeScript = (function(){
 
 			return Slice;
 
-		})();
+		}).call(this);
 
 		//### Obj
 
@@ -6709,7 +6709,7 @@ var CoffeeScript = (function(){
 
 			return Obj;
 
-		})();
+		}).call(this);
 
 		//### Arr
 
@@ -6878,7 +6878,7 @@ var CoffeeScript = (function(){
 
 			return Arr;
 
-		})();
+		}).call(this);
 
 		//### Class
 
@@ -7164,7 +7164,7 @@ var CoffeeScript = (function(){
 
 			return Class;
 
-		})();
+		}).call(this);
 
 		exports.ExecutableClassBody = ExecutableClassBody = (function() {
 			class ExecutableClassBody extends Base {
@@ -7182,16 +7182,16 @@ var CoffeeScript = (function(){
 					if (argumentsNode = this.body.contains(isLiteralArguments)) {
 						argumentsNode.error("Class bodies shouldn't reference arguments");
 					}
-					this.name = (ref1 = this.class.name) != null ? ref1 : this.defaultClassVariableName;
-					directives = this.walkBody();
-					this.setContext();
-					ident = new IdentifierLiteral(this.name);
 					params = [];
-					args = [];
+					args = [new ThisLiteral];
 					wrapper = new Code(params, this.body);
-					klass = new Parens(new Call(wrapper, args));
+					klass = new Parens(new Call(new Value(wrapper, [new Access(new PropertyName('call'))]), args));
 					this.body.spaced = true;
 					o.classScope = wrapper.makeScope(o.scope);
+					this.name = (ref1 = this.class.name) != null ? ref1 : o.classScope.freeVariable(this.defaultClassVariableName);
+					ident = new IdentifierLiteral(this.name);
+					directives = this.walkBody();
+					this.setContext();
 					if (this.class.hasNameClash) {
 						parent = new IdentifierLiteral(o.classScope.freeVariable('superClass'));
 						wrapper.params.push(new Param(parent));
@@ -7308,7 +7308,7 @@ var CoffeeScript = (function(){
 
 			return ExecutableClassBody;
 
-		})();
+		}).call(this);
 
 		//### Import and Export
 		exports.ModuleDeclaration = ModuleDeclaration = (function() {
@@ -7344,7 +7344,7 @@ var CoffeeScript = (function(){
 
 			return ModuleDeclaration;
 
-		})();
+		}).call(this);
 
 		exports.ImportDeclaration = ImportDeclaration = class ImportDeclaration extends ModuleDeclaration {
 			compileNode(o) {
@@ -7397,7 +7397,7 @@ var CoffeeScript = (function(){
 
 			return ImportClause;
 
-		})();
+		}).call(this);
 
 		exports.ExportDeclaration = ExportDeclaration = class ExportDeclaration extends ModuleDeclaration {
 			compileNode(o) {
@@ -7479,7 +7479,7 @@ var CoffeeScript = (function(){
 
 			return ModuleSpecifierList;
 
-		})();
+		}).call(this);
 
 		exports.ImportSpecifierList = ImportSpecifierList = class ImportSpecifierList extends ModuleSpecifierList {};
 
@@ -7523,7 +7523,7 @@ var CoffeeScript = (function(){
 
 			return ModuleSpecifier;
 
-		})();
+		}).call(this);
 
 		exports.ImportSpecifier = ImportSpecifier = class ImportSpecifier extends ModuleSpecifier {
 			constructor(imported, local) {
@@ -8091,7 +8091,7 @@ var CoffeeScript = (function(){
 
 			return Assign;
 
-		})();
+		}).call(this);
 
 		//### FuncGlyph
 		exports.FuncGlyph = FuncGlyph = class FuncGlyph extends Base {
@@ -8547,7 +8547,7 @@ var CoffeeScript = (function(){
 
 			return Code;
 
-		})();
+		}).call(this);
 
 		//### Param
 
@@ -8690,7 +8690,7 @@ var CoffeeScript = (function(){
 
 			return Param;
 
-		})();
+		}).call(this);
 
 		//### Splat
 
@@ -8725,7 +8725,7 @@ var CoffeeScript = (function(){
 
 			return Splat;
 
-		})();
+		}).call(this);
 
 		//### Expansion
 
@@ -8749,7 +8749,7 @@ var CoffeeScript = (function(){
 
 			return Expansion;
 
-		})();
+		}).call(this);
 
 		//### Elision
 
@@ -8781,7 +8781,7 @@ var CoffeeScript = (function(){
 
 			return Elision;
 
-		})();
+		}).call(this);
 
 		//### While
 
@@ -8868,7 +8868,7 @@ var CoffeeScript = (function(){
 
 			return While;
 
-		})();
+		}).call(this);
 
 		//### Op
 
@@ -9166,7 +9166,7 @@ var CoffeeScript = (function(){
 
 			return Op;
 
-		})();
+		}).call(this);
 
 		//### In
 		exports.In = In = (function() {
@@ -9244,7 +9244,7 @@ var CoffeeScript = (function(){
 
 			return In;
 
-		})();
+		}).call(this);
 
 		//### Try
 
@@ -9297,7 +9297,7 @@ var CoffeeScript = (function(){
 
 			return Try;
 
-		})();
+		}).call(this);
 
 		//### Throw
 
@@ -9331,7 +9331,7 @@ var CoffeeScript = (function(){
 
 			return Throw;
 
-		})();
+		}).call(this);
 
 		//### Existence
 
@@ -9391,7 +9391,7 @@ var CoffeeScript = (function(){
 
 			return Existence;
 
-		})();
+		}).call(this);
 
 		//### Parens
 
@@ -9448,7 +9448,7 @@ var CoffeeScript = (function(){
 
 			return Parens;
 
-		})();
+		}).call(this);
 
 		//### StringWithInterpolations
 		exports.StringWithInterpolations = StringWithInterpolations = (function() {
@@ -9574,7 +9574,7 @@ var CoffeeScript = (function(){
 
 			return StringWithInterpolations;
 
-		})();
+		}).call(this);
 
 		//### For
 
@@ -9822,7 +9822,7 @@ var CoffeeScript = (function(){
 
 			return For;
 
-		})();
+		}).call(this);
 
 		//### Switch
 
@@ -9909,7 +9909,7 @@ var CoffeeScript = (function(){
 
 			return Switch;
 
-		})();
+		}).call(this);
 
 		//### If
 
@@ -10046,7 +10046,7 @@ var CoffeeScript = (function(){
 
 			return If;
 
-		})();
+		}).call(this);
 
 		// Constants
 		// ---------
