@@ -11,6 +11,7 @@
 		EcmaScript2015 = 2,
 		EcmaScript2016 = 3,
 		EcmaScript2017 = 4,
-		EcmaScriptNext = 5
+		EcmaScript2018 = 5,
+		EcmaScriptNext = 6
 	}
 }

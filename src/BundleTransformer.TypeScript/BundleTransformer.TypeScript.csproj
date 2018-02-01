@@ -131,6 +131,21 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.intl.d.ts" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2017.typedarrays.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2018.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2018.full.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.esnext.array.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.esnext.promise.d.ts" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"

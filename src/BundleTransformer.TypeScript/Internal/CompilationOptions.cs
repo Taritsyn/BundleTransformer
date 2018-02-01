@@ -250,6 +250,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict checking of property
+		/// initialization in classes
+		/// </summary>
+		public bool StrictPropertyInitialization
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>
@@ -289,7 +299,7 @@ namespace BundleTransformer.TypeScript.Internal
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, or `EcmaScriptNext`
+		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018` or `EcmaScriptNext`
 		/// </summary>
 		public TargetMode Target
 		{
@@ -339,6 +349,7 @@ namespace BundleTransformer.TypeScript.Internal
 			SkipLibCheck = false;
 			StrictNullChecks = false;
 			StrictFunctionTypes = false;
+			StrictPropertyInitialization = false;
 			StripInternal = false;
 			SuppressExcessPropertyErrors = false;
 			SuppressImplicitAnyIndexErrors = false;

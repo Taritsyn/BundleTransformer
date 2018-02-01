@@ -276,6 +276,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict checking of property
+		/// initialization in classes
+		/// </summary>
+		[ConfigurationProperty("strictPropertyInitialization", DefaultValue = false)]
+		public bool StrictPropertyInitialization
+		{
+			get { return (bool)this["strictPropertyInitialization"]; }
+			set { this["strictPropertyInitialization"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not emit declarations for code that has an
 		/// <code>@internal</code> annotation
 		/// </summary>
@@ -319,7 +330,7 @@ namespace BundleTransformer.TypeScript.Configuration
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, or `EcmaScriptNext`
+		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018` or `EcmaScriptNext`
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
 		public TargetMode Target
