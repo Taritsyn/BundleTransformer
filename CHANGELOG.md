@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.9.187 - February 2, 2018
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.0
+ * In BundleTransformer.TypeScript:
+   * Added support of TypeScript version 2.7 RTM
+   * In configuration settings of TypeScript translator was added one new property - `StrictPropertyInitialization` (default `false`)
+
 ## v1.9.186 - January 14, 2018
  * In BundleTransformer.SassAndScss added support of LibSass version 3.4.8
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.2.5
