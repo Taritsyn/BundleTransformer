@@ -36,7 +36,7 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * CoffeeScript Compiler v2.2.0
+ * CoffeeScript Compiler v2.2.1
  * http://coffeescript.org
  *
  * Copyright 2009-2017 Jeremy Ashkenas
@@ -6485,7 +6485,7 @@ var CoffeeScript = (function(){
 					idx = del(o, 'index');
 					idxName = del(o, 'name');
 					namedIndex = idxName && idxName !== idx;
-					varPart = `${idx} = ${this.fromC}`;
+					varPart = known && !namedIndex ? `var ${idx} = ${this.fromC}` : `${idx} = ${this.fromC}`;
 					if (this.toC !== this.toVar) {
 						varPart += `, ${this.toC}`;
 					}
@@ -8017,8 +8017,8 @@ var CoffeeScript = (function(){
 						// Sort 'splatsAndExpans' so we can show error at first disallowed token.
 						objects[splatsAndExpans.sort()[1]].error("multiple splats/expansions are disallowed in an assignment");
 					}
-					isSplat = splats.length;
-					isExpans = expans.length;
+					isSplat = (splats != null ? splats.length : void 0) > 0;
+					isExpans = (expans != null ? expans.length : void 0) > 0;
 					isObject = this.variable.isObject();
 					isArray = this.variable.isArray();
 					vvar = value.compileToFragments(o, LEVEL_LIST);
@@ -8090,7 +8090,7 @@ var CoffeeScript = (function(){
 					};
 					// "Complex" `objects` are processed in a loop.
 					// Examples: [a, b, {c, r...}, d], [a, ..., {b, r...}, c, d]
-					loopObjects = (objs, vvarTxt) => {
+					loopObjects = (objs, vvar, vvarTxt) => {
 						var acc, idx, j, len1, message, objSpreads, results, vval;
 						objSpreads = hasObjSpreads(objs);
 						results = [];
@@ -8149,7 +8149,7 @@ var CoffeeScript = (function(){
 						return results;
 					};
 					// "Simple" `objects` can be split and compiled to arrays, [a, b, c] = arr, [a, b, c...] = arr
-					assignObjects = (objs, vvarTxt) => {
+					assignObjects = (objs, vvar, vvarTxt) => {
 						var vval;
 						vvar = new Value(new Arr(objs, true));
 						vval = vvarTxt instanceof Value ? vvarTxt : new Value(new Literal(vvarTxt));
@@ -8158,11 +8158,11 @@ var CoffeeScript = (function(){
 							subpattern: true
 						}).compileToFragments(o, LEVEL_LIST));
 					};
-					processObjects = function(objs, vvarTxt) {
+					processObjects = function(objs, vvar, vvarTxt) {
 						if (complexObjects(objs)) {
-							return loopObjects(objs, vvarTxt);
+							return loopObjects(objs, vvar, vvarTxt);
 						} else {
-							return assignObjects(objs, vvarTxt);
+							return assignObjects(objs, vvar, vvarTxt);
 						}
 					};
 					// In case there is `Splat` or `Expansion` in `objects`,
@@ -8181,7 +8181,7 @@ var CoffeeScript = (function(){
 						leftObjs = objects.slice(0, expIdx + (isSplat ? 1 : 0));
 						rightObjs = objects.slice(expIdx + 1);
 						if (leftObjs.length !== 0) {
-							processObjects(leftObjs, vvarText);
+							processObjects(leftObjs, vvar, vvarText);
 						}
 						if (rightObjs.length !== 0) {
 							// Slice or splice `objects`.
@@ -8198,11 +8198,11 @@ var CoffeeScript = (function(){
 								refExp = o.scope.freeVariable('ref');
 								assigns.push([this.makeCode(refExp + ' = '), ...restVar.compileToFragments(o, LEVEL_LIST)]);
 							}
-							processObjects(rightObjs, refExp);
+							processObjects(rightObjs, vvar, refExp);
 						}
 					} else {
 						// There is no `Splat` or `Expansion` in `objects`.
-						processObjects(objects, vvarText);
+						processObjects(objects, vvar, vvarText);
 					}
 					if (!(top || this.subpattern)) {
 						assigns.push(vvar);
