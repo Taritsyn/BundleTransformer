@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: CoffeeScript v1.9.187
+               README file for Bundle Transformer: CoffeeScript v1.9.188
 
    --------------------------------------------------------------------------------
 

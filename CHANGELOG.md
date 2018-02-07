@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.188 - February 7, 2018
+ * In BundleTransformer.SassAndScss added support of LibSass version 3.4.9
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.1
+
 ## v1.9.187 - February 2, 2018
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.0
