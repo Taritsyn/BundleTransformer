@@ -1,4 +1,6 @@
-﻿namespace BundleTransformer.Less.Internal
+﻿using System.Collections.Generic;
+
+namespace BundleTransformer.Less.Internal
 {
 	/// <summary>
 	/// LESS compilation options
@@ -9,6 +11,15 @@
 		/// Gets or sets a flag for whether to enable native minification
 		/// </summary>
 		public bool EnableNativeMinification
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a list of include paths
+		/// </summary>
+		public IList<string> IncludePaths
 		{
 			get;
 			set;
@@ -97,6 +108,7 @@
 		public CompilationOptions()
 		{
 			EnableNativeMinification = false;
+			IncludePaths = new List<string>();
 			IeCompat = true;
 			StrictMath = false;
 			StrictUnits = false;

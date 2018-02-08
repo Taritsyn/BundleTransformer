@@ -199,6 +199,7 @@ namespace BundleTransformer.Less.Internal
 		{
 			var optionsJson = new JObject(
 				new JProperty("compress", options.EnableNativeMinification),
+				new JProperty("paths", new JArray(options.IncludePaths)),
 				new JProperty("ieCompat", options.IeCompat),
 				new JProperty("strictMath", options.StrictMath),
 				new JProperty("strictUnits", options.StrictUnits),

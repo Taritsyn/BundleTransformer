@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -21,6 +21,12 @@
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
+
+   =============
+   RELEASE NOTES
+   =============
+   In configuration settings of LESS translator was added one new property -
+   `IncludePaths` (default empty list).
 
    ====================
    POST-INSTALL ACTIONS

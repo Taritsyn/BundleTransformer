@@ -97,6 +97,56 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			this._includedFilePaths = [];
 		}
 
+		function normalizePath(path) {
+			var result,
+				segments,
+				segmentCount,
+				segmentIndex,
+				segment,
+				resultSegments,
+				resultSegmentCount
+				;
+
+			segments = path.replace(/\\/g, "/").split("/");
+			segmentCount = segments.length;
+
+			if (segmentCount === 0) {
+				return path;
+			}
+
+			resultSegments = [];
+
+			for (segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++) {
+				segment = segments[segmentIndex];
+
+				switch (segment) {
+				case "..":
+					resultSegmentCount = resultSegments.length;
+					if (resultSegmentCount === 0 || resultSegments[resultSegmentCount - 1] === "..") {
+						resultSegments.push(segment);
+					}
+					else {
+						resultSegments.pop();
+					}
+					break;
+				case ".":
+					break;
+				case "":
+					if (segmentIndex === 0) {
+						resultSegments.push(segment);
+					}
+					break;
+				default:
+					resultSegments.push(segment);
+					break;
+				}
+			}
+
+			result = resultSegments.join("/");
+
+			return result;
+		}
+
 		BtFileManager.prototype = new AbstractFileManager();
 
 		BtFileManager.prototype.supports = function () {
@@ -115,9 +165,12 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 		BtFileManager.prototype.loadFileSync = function (filename, currentDirectory, options, environment, encoding) {
 			var result,
 				processedFilename,
-				processedCurrentDirectory,
 				fullFilename,
-				isAbsoluteFilename,
+				filenamesTried = [],
+				paths,
+				pathCount,
+				pathIndex,
+				includedPath,
 				isFileExists,
 				data,
 				err,
@@ -129,15 +182,39 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				processedFilename = virtualFileManager.ToAbsolutePath(filename);
 			}
 
-			processedCurrentDirectory = currentDirectory;
-			if (utils.isAppRelativePath(currentDirectory)) {
-				processedCurrentDirectory = virtualFileManager.ToAbsolutePath(currentDirectory);
-			}
+			if (this.isPathAbsolute(processedFilename)) {
+				fullFilename = processedFilename;
+				filenamesTried.push(fullFilename);
 
-			isAbsoluteFilename = this.isPathAbsolute(processedFilename);
-			fullFilename = isAbsoluteFilename ?
-				processedFilename : this.extractUrlParts(this.join(processedCurrentDirectory, processedFilename)).fileUrl;
-			isFileExists = virtualFileManager.FileExists(fullFilename);
+				isFileExists = virtualFileManager.FileExists(fullFilename);
+			}
+			else {
+				fullFilename = processedFilename;
+				paths = [currentDirectory];
+				if (options.paths) {
+					paths.push.apply(paths, options.paths);
+				}
+				pathCount = paths.length;
+
+				for (pathIndex = 0; pathIndex < pathCount; pathIndex++) {
+					includedPath = paths[pathIndex];
+					if (includedPath) {
+						if (utils.isAppRelativePath(includedPath)) {
+							includedPath = virtualFileManager.ToAbsolutePath(includedPath);
+						}
+						fullFilename = normalizePath(includedPath + "/" + processedFilename);
+					}
+					filenamesTried.push(fullFilename);
+
+					isFileExists = virtualFileManager.FileExists(fullFilename);
+					if (isFileExists) {
+						break;
+					}
+					else {
+						continue;
+					}
+				}
+			}
 
 			if (isFileExists) {
 				if (encoding) {
@@ -150,7 +227,10 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				result = { contents: data, filename: fullFilename };
 			}
 			else {
-				err = { type: 'File', message: "'" + fullFilename + "' wasn't found." };
+				err = {
+					type: 'File',
+					message: "'" + fullFilename + "' wasn't found. Tried - " + filenamesTried.join(", ")
+				};
 				result = { error: err };
 			}
 

@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of TypeScript translator.
+   Updated definitions for configuration settings of LESS translator.
 
    =============
    DOCUMENTATION

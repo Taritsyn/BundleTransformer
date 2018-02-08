@@ -20,6 +20,15 @@ namespace BundleTransformer.Less.Configuration
 		}
 
 		/// <summary>
+		/// Gets a list of include paths
+		/// </summary>
+		[ConfigurationProperty("includePaths", IsRequired = false)]
+		public IncludedPathRegistrationCollection IncludePaths
+		{
+			get { return (IncludedPathRegistrationCollection)this["includePaths"]; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enforce IE compatibility (IE8 data-uri)
 		/// </summary>
 		[ConfigurationProperty("ieCompat", DefaultValue = true)]

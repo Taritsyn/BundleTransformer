@@ -43,6 +43,15 @@ namespace BundleTransformer.Less.Translators
 		private readonly VirtualFileManager _virtualFileManager;
 
 		/// <summary>
+		/// Gets or sets a list of include paths
+		/// </summary>
+		public IList<string> IncludePaths
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enforce IE compatibility (IE8 data-uri)
 		/// </summary>
 		public bool IeCompat
@@ -141,6 +150,11 @@ namespace BundleTransformer.Less.Translators
 			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
 
 			UseNativeMinification = lessConfig.UseNativeMinification;
+			IncludePaths = lessConfig.IncludePaths
+				.Cast<IncludedPathRegistration>()
+				.Select(p => p.Path)
+				.ToList()
+				;
 			IeCompat = lessConfig.IeCompat;
 			StrictMath = lessConfig.StrictMath;
 			StrictUnits = lessConfig.StrictUnits;
@@ -277,6 +291,7 @@ namespace BundleTransformer.Less.Translators
 			var options = new CompilationOptions
 			{
 				EnableNativeMinification = enableNativeMinification,
+				IncludePaths = IncludePaths,
 				IeCompat = IeCompat,
 				StrictMath = StrictMath,
 				StrictUnits = StrictUnits,
