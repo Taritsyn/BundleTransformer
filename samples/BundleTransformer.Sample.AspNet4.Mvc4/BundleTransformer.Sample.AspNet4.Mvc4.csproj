@@ -103,7 +103,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="AlternativeContent\images\icons\locale.png" />
+    <Content Include="AlternativeContent\images\icons\mac-os.png" />
     <Content Include="AlternativeContent\less\LessIcons.less" />
+    <Content Include="AlternativeContent\scss\MacOsIcon.scss" />
+    <Content Include="AlternativeContent\less\LocaleIcon.less" />
     <None Include="BundleTransformer.Configuration.xsc">
       <DependentUpon>BundleTransformer.Configuration.xsd</DependentUpon>
     </None>

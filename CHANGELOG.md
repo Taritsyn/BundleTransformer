@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.189 - February 9, 2018
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of LESS translator
+ * In BundleTransformer.Less in configuration settings of LESS translator was added one new property - `IncludePaths` (default empty list)
+
 ## v1.9.188 - February 7, 2018
  * In BundleTransformer.SassAndScss added support of LibSass version 3.4.9
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.1

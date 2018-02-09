@@ -101,6 +101,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			var result,
 				segments,
 				segmentCount,
+				lastSegmentIndex,
 				segmentIndex,
 				segment,
 				resultSegments,
@@ -114,6 +115,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				return path;
 			}
 
+			lastSegmentIndex = segmentCount - 1;
 			resultSegments = [];
 
 			for (segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++) {
@@ -132,7 +134,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				case ".":
 					break;
 				case "":
-					if (segmentIndex === 0) {
+					if (segmentIndex === 0 || segmentIndex === lastSegmentIndex) {
 						resultSegments.push(segment);
 					}
 					break;
@@ -229,7 +231,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			else {
 				err = {
 					type: 'File',
-					message: "'" + fullFilename + "' wasn't found. Tried - " + filenamesTried.join(", ")
+					message: "'" + filename + "' wasn't found. Tried - " + filenamesTried.join(", ")
 				};
 				result = { error: err };
 			}

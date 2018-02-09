@@ -266,9 +266,14 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// <returns>Compilation options</returns>
 		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)
 		{
+			IList<string> processedIncludePaths = IncludePaths
+					.Select(p => SassCompiler.FileManager.ToAbsolutePath(p))
+					.ToList()
+					;
+
 			var options = new CompilationOptions
 			{
-				IncludePaths = IncludePaths,
+				IncludePaths = processedIncludePaths,
 				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, LshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
 				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, LshLineFeedType>(LineFeedType),

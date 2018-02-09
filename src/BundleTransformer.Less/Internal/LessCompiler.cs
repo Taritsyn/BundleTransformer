@@ -195,11 +195,16 @@ namespace BundleTransformer.Less.Internal
 		/// </summary>
 		/// <param name="options">Compilation options</param>
 		/// <returns>Compilation options in JSON format</returns>
-		private static JObject ConvertCompilationOptionsToJson(CompilationOptions options)
+		private JObject ConvertCompilationOptionsToJson(CompilationOptions options)
 		{
+			IList<string> processedIncludePaths = options.IncludePaths
+				.Select(p => _virtualFileManager.ToAbsolutePath(p))
+				.ToList()
+				;
+
 			var optionsJson = new JObject(
 				new JProperty("compress", options.EnableNativeMinification),
-				new JProperty("paths", new JArray(options.IncludePaths)),
+				new JProperty("paths", new JArray(processedIncludePaths)),
 				new JProperty("ieCompat", options.IeCompat),
 				new JProperty("strictMath", options.StrictMath),
 				new JProperty("strictUnits", options.StrictUnits),

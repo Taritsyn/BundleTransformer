@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 
 using BundleTransformer.Core.FileSystem;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
@@ -11,11 +10,6 @@ namespace BundleTransformer.Less.Internal
 	/// </summary>
 	public sealed class VirtualFileManager
 	{
-		/// <summary>
-		/// Regular expression for working with the application relative paths
-		/// </summary>
-		private static readonly Regex _appRelativePathRegex = new Regex(@"^\s*~[/\\]");
-
 		/// <summary>
 		/// Virtual file system wrapper
 		/// </summary>
@@ -33,6 +27,24 @@ namespace BundleTransformer.Less.Internal
 
 
 		/// <summary>
+		/// Determines whether the beginning of specified path matches the '~/'
+		/// </summary>
+		/// <param name="path">The path</param>
+		/// <returns>true if path starts with the '~/'; otherwise, false</returns>
+		private static bool IsAppRelativePath(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException("path",
+					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+			}
+
+			bool result = path.Length >= 2 && path[0] == '~' && (path[1] == '/' || path[1] == '\\');
+
+			return result;
+		}
+
+		/// <summary>
 		/// Converts a relative path to an application absolute path
 		/// </summary>
 		/// <param name="path">The relative path</param>
@@ -45,7 +57,7 @@ namespace BundleTransformer.Less.Internal
 					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
 			}
 
-			if (!_appRelativePathRegex.IsMatch(path))
+			if (!IsAppRelativePath(path))
 			{
 				return path;
 			}
