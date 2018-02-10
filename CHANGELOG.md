@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.190 - February 10, 2018
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 7.2.6
+
 ## v1.9.189 - February 9, 2018
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of LESS translator
  * In BundleTransformer.Less in configuration settings of LESS translator was added one new property - `IncludePaths` (default empty list)
