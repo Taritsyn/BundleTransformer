@@ -3113,13 +3113,14 @@ var Less = (function(virtualFileManager /*BT+*/){
 					//     @plugin (args) "lib";
 					//
 					plugin: function () {
-						error("BundleTransformer.Less does not support `@plugin` directive."); //BT+
-						/*BT-
 						var path, args, options,
 							index = parserInput.i,
 							dir   = parserInput.$re(/^@plugin?\s+/);
 
 						if (dir) {
+							error("BundleTransformer.Less does not support `@plugin` directive."); //BT+
+
+							/*BT-
 							args = this.pluginArgs();
 
 							if (args) {
@@ -3144,8 +3145,8 @@ var Less = (function(virtualFileManager /*BT+*/){
 								parserInput.i = index;
 								error("malformed @plugin statement");
 							}
+							*/
 						}
-						*/
 					},
 
 					pluginArgs: function() {
@@ -9012,9 +9013,6 @@ var Less = (function(virtualFileManager /*BT+*/){
 				logger: require('/logger')*/
 			};
 
-			// provide image-size functionality
-			require("/image-size")(less.environment); //BT+
-
 			// Create a public API
 
 			var ctor = function(t) {
@@ -9039,6 +9037,9 @@ var Less = (function(virtualFileManager /*BT+*/){
 					}
 				}
 			}
+
+			// provide image-size functionality
+			require("/image-size")(api.environment); //BT+
 
 			return api;
 		};

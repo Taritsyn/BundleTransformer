@@ -179,7 +179,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				utils = less.utils
 				;
 
-			processedFilename = filename;
+			processedFilename = options.ext ? this.tryAppendExtension(filename, options.ext) : filename;
 			if (utils.isAppRelativePath(filename)) {
 				processedFilename = virtualFileManager.ToAbsolutePath(filename);
 			}

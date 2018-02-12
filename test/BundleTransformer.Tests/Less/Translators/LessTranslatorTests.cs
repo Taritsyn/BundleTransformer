@@ -38,7 +38,7 @@ namespace BundleTransformer.Tests.Less.Translators
 				.Setup(fs => fs.GetFileTextContent(testLessLessAssetVirtualPath))
 				.Returns(@"@import (once) ""Mixins.less"";
 @import (reference) ""Variables.less"";
-@import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
+//@import url(""data:text/css;base64,Ym9keSB7IGJhY2tncm91bmQtY29sb3I6IGxpbWUgIWltcG9ydGFudDsgfQ=="");
 
 .translators #less
 {
@@ -188,7 +188,7 @@ namespace BundleTransformer.Tests.Less.Translators
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(testLessImportSub1LessAssetVirtualPath))
-				.Returns(@"@import url(http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext);
+				.Returns(@"//@import url(http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext);
 
 @border-color: #143352;
 
@@ -253,7 +253,7 @@ namespace BundleTransformer.Tests.Less.Translators
 				;
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(testLessImportSub2LessAssetVirtualPath))
-				.Returns(@"@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext';
+				.Returns(@"//@import 'http://fonts.googleapis.com/css?family=Limelight&subset=latin,latin-ext';
 @import (css) ""UsbFlashDriveIcon.css"";
 @import (less) ""ValidationIcon.css"";
 @import (inline) ""MicroformatsIcon.css"";
