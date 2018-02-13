@@ -93,61 +93,65 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 
 	//#region BtFileManager class
 	BtFileManager = (function (AbstractFileManager) {
+		var isUrlRe = /^(?:https?:)?\/\//i,
+			normalizePath = function (path) {
+				var result,
+					segments,
+					segmentCount,
+					lastSegmentIndex,
+					segmentIndex,
+					segment,
+					resultSegments,
+					resultSegmentCount
+					;
+
+				segments = path.replace(/\\/g, "/").split("/");
+				segmentCount = segments.length;
+
+				if (segmentCount === 0) {
+					return path;
+				}
+
+				lastSegmentIndex = segmentCount - 1;
+				resultSegments = [];
+
+				for (segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++) {
+					segment = segments[segmentIndex];
+
+					switch (segment) {
+					case "..":
+						resultSegmentCount = resultSegments.length;
+						if (resultSegmentCount === 0 || resultSegments[resultSegmentCount - 1] === "..") {
+							resultSegments.push(segment);
+						}
+						else {
+							resultSegments.pop();
+						}
+						break;
+					case ".":
+						break;
+					case "":
+						if (segmentIndex === 0 || segmentIndex === lastSegmentIndex) {
+							resultSegments.push(segment);
+						}
+						break;
+					default:
+						resultSegments.push(segment);
+						break;
+					}
+				}
+
+				result = resultSegments.join("/");
+
+				return result;
+			}
+			;
+
+
 		function BtFileManager() {
 			this._includedFilePaths = [];
 		}
 
-		function normalizePath(path) {
-			var result,
-				segments,
-				segmentCount,
-				lastSegmentIndex,
-				segmentIndex,
-				segment,
-				resultSegments,
-				resultSegmentCount
-				;
-
-			segments = path.replace(/\\/g, "/").split("/");
-			segmentCount = segments.length;
-
-			if (segmentCount === 0) {
-				return path;
-			}
-
-			lastSegmentIndex = segmentCount - 1;
-			resultSegments = [];
-
-			for (segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++) {
-				segment = segments[segmentIndex];
-
-				switch (segment) {
-				case "..":
-					resultSegmentCount = resultSegments.length;
-					if (resultSegmentCount === 0 || resultSegments[resultSegmentCount - 1] === "..") {
-						resultSegments.push(segment);
-					}
-					else {
-						resultSegments.pop();
-					}
-					break;
-				case ".":
-					break;
-				case "":
-					if (segmentIndex === 0 || segmentIndex === lastSegmentIndex) {
-						resultSegments.push(segment);
-					}
-					break;
-				default:
-					resultSegments.push(segment);
-					break;
-				}
-			}
-
-			result = resultSegments.join("/");
-
-			return result;
-		}
 
 		BtFileManager.prototype = new AbstractFileManager();
 
@@ -178,6 +182,16 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 				err,
 				utils = less.utils
 				;
+
+			if (isUrlRe.test(filename)) {
+				err = {
+					type: 'File',
+					message: "You cannot import a style sheet located at '" + filename +
+						"', because the BundleTransformer.Less doesn't support loading content from remote sources."
+				};
+
+				return { error: err };
+			}
 
 			processedFilename = options.ext ? this.tryAppendExtension(filename, options.ext) : filename;
 			if (utils.isAppRelativePath(filename)) {
