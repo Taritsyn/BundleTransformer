@@ -12,7 +12,7 @@
    DESCRIPTION
    ===========
    BundleTransformer.Less contains one translator-adapter - `LessTranslator`
-   (supports the LESS (http://lesscss.org) version 3.0.0). This adapter makes
+   (supports the LESS (http://lesscss.org) version 3.0.1). This adapter makes
    translation of LESS code to CSS code. Also contains the `LessAssetHandler`
    debugging HTTP handler, which is responsible for text output of translated LESS
    asset.
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 3.0.0.
+   Added support of LESS version 3.0.1.
 
    ====================
    POST-INSTALL ACTIONS

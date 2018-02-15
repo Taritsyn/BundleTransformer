@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v3.0.0
+ * Less - Leaner CSS v3.0.1
  * http://lesscss.org
  *
  * Copyright (c) 2009-2018, Alexis Sellier <self@cloudhead.net>
@@ -360,8 +360,13 @@ var Less = (function(virtualFileManager /*BT+*/){
 
 	//#region URL: /environment/environment
 	modules['/environment/environment'] = function () {
+		/**
+		 * @todo Document why this abstraction exists, and the relationship between
+		 *       environment, file managers, and plugin manager
+		 */
+
 		/*BT-
-		var logger = require('/logger');
+		var logger = require("/logger");
 		*/
 		var environment = function(externalEnvironment, fileManagers) {
 			this.fileManagers = fileManagers || [];
@@ -8985,7 +8990,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			var /*BT- SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var initial = {
-				version: [3, 0, 0],
+				version: [3, 0, 1],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require("/environment/environment")),
@@ -9399,10 +9404,10 @@ var Less = (function(virtualFileManager /*BT+*/){
 		 * @prop {string[]} extract
 		 *
 		 * @param {Object} e              - An error object to wrap around or just a descriptive object
-		 * @param {Object} importManager  - An instance of ImportManager (see import-manager.js)
+		 * @param {Object} fileContentMap - An object with file contents in 'contents' property (like importManager) @todo - move to fileManager?
 		 * @param {string} [currentFilename]
 		 */
-		var LessError = function LessError(e, importManager, currentFilename) {
+		var LessError = function LessError(e, fileContentMap, currentFilename) {
 			Error.call(this);
 
 			var filename = e.filename || currentFilename;
@@ -9410,13 +9415,13 @@ var Less = (function(virtualFileManager /*BT+*/){
 			this.message = e.message;
 			this.stack = e.stack;
 
-			if (importManager && filename) {
-				var input = importManager.contents[filename],
+			if (fileContentMap && filename) {
+				var input = fileContentMap.contents[filename],
 					loc = utils.getLocation(e.index, input),
 					line = loc.line,
 					col  = loc.column,
 					callLine = e.call && utils.getLocation(e.call, input).line,
-					lines = input.split('\n');
+					lines = input ? input.split('\n') : '';
 
 				this.type = e.type || 'Syntax';
 				this.filename = filename;
@@ -9439,7 +9444,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 
 				this.callLine = callLine + 1;
 				this.callExtract = lines[callLine];
-				
+
 				this.extract = [
 					lines[this.line - 2],
 					lines[this.line - 1],
@@ -9564,7 +9569,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 				*/
 					var context,
 						rootFileInfo/*BT- ,
-						pluginManager = new PluginManager(this, true)*/;
+						pluginManager = new PluginManager(this, !options.reUsePluginManager)*/;
 
 					/*BT-
 					options.pluginManager = pluginManager;

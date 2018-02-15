@@ -150,6 +150,8 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 
 		function BtFileManager() {
 			this._includedFilePaths = [];
+
+			this.contents = {};
 		}
 
 
@@ -170,6 +172,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 
 		BtFileManager.prototype.loadFileSync = function (filename, currentDirectory, options, environment, encoding) {
 			var result,
+				self = this,
 				processedFilename,
 				fullFilename,
 				filenamesTried = [],
@@ -194,15 +197,15 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			}
 
 			processedFilename = options.ext ? this.tryAppendExtension(filename, options.ext) : filename;
-			if (utils.isAppRelativePath(filename)) {
-				processedFilename = virtualFileManager.ToAbsolutePath(filename);
+			if (utils.isAppRelativePath(processedFilename)) {
+				processedFilename = virtualFileManager.ToAbsolutePath(processedFilename);
 			}
 
 			if (this.isPathAbsolute(processedFilename)) {
 				fullFilename = processedFilename;
 				filenamesTried.push(fullFilename);
 
-				isFileExists = virtualFileManager.FileExists(fullFilename);
+				isFileExists = self.fileExists(fullFilename);
 			}
 			else {
 				fullFilename = processedFilename;
@@ -222,7 +225,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 					}
 					filenamesTried.push(fullFilename);
 
-					isFileExists = virtualFileManager.FileExists(fullFilename);
+					isFileExists = self.fileExists(fullFilename);
 					if (isFileExists) {
 						break;
 					}
@@ -233,13 +236,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			}
 
 			if (isFileExists) {
-				if (encoding) {
-					data = virtualFileManager.ReadTextFile(fullFilename);
-				}
-				else {
-					data = virtualFileManager.ReadBinaryFile(fullFilename);
-				}
-
+				data = self.readFile(fullFilename, encoding);
 				result = { contents: data, filename: fullFilename };
 			}
 			else {
@@ -259,8 +256,39 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			return this._includedFilePaths;
 		};
 
+		BtFileManager.prototype.fileExists = function (filename) {
+			var result = typeof this.contents[filename] !== 'undefined'
+				|| virtualFileManager.FileExists(filename);
+
+			return result;
+		};
+
+		BtFileManager.prototype.readFile = function (filename, encoding) {
+			var data,
+				self = this
+				;
+
+			if (typeof self.contents[filename] !== 'undefined') {
+				data = self.contents[filename];
+			}
+			else {
+				if (encoding) {
+					data = virtualFileManager.ReadTextFile(filename);
+				}
+				else {
+					data = virtualFileManager.ReadBinaryFile(filename);
+				}
+
+				self.contents[filename] = data;
+			}
+
+			return data;
+		};
+
 		BtFileManager.prototype.dispose = function () {
 			this._includedFilePaths = null;
+
+			this.contents = null;
 		};
 
 		return BtFileManager;
