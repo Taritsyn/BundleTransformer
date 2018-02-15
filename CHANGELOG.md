@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.192 - February 15, 2018
+ * In BundleTransformer.Less added support of LESS version 3.0.1
+
 ## v1.9.191 - February 13, 2018
  * In BundleTransformer.Less added support of LESS version 3.0.0
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.0
