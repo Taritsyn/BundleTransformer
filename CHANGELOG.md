@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.193 - February 22, 2018
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.2
+ * In BundleTransformer.TypeScript added support of TypeScript version 2.7.2
+
 ## v1.9.192 - February 15, 2018
  * In BundleTransformer.Less added support of LESS version 3.0.1
 
