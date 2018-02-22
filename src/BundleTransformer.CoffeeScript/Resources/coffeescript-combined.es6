@@ -36,7 +36,7 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * CoffeeScript Compiler v2.2.1
+ * CoffeeScript Compiler v2.2.2
  * http://coffeescript.org
  *
  * Copyright 2009-2017 Jeremy Ashkenas
@@ -625,7 +625,7 @@ var CoffeeScript = (function(){
 				indexOfTag(i, ...pattern) {
 					var fuzz, j, k, ref, ref1;
 					fuzz = 0;
-					for (j = k = 0, ref = pattern.length; undefined !== 0 && (0 <= ref ? 0 <= k && k < ref : 0 >= k && k > ref); j = 0 <= ref ? ++k : --k) {
+					for (j = k = 0, ref = pattern.length; (0 <= ref ? k < ref : k > ref); j = 0 <= ref ? ++k : --k) {
 						if (pattern[j] == null) {
 							continue;
 						}
@@ -2018,14 +2018,14 @@ var CoffeeScript = (function(){
 				}
 				indent = match[0];
 				prev = this.prev();
-				backslash = (prev != null) && prev[0] === '\\';
+				backslash = (prev != null ? prev[0] : void 0) === '\\';
 				if (!(backslash && this.seenFor)) {
 					this.seenFor = false;
 				}
-				if (!this.importSpecifierList) {
+				if (!((backslash && this.seenImport) || this.importSpecifierList)) {
 					this.seenImport = false;
 				}
-				if (!this.exportSpecifierList) {
+				if (!((backslash && this.seenExport) || this.exportSpecifierList)) {
 					this.seenExport = false;
 				}
 				size = indent.length - 1 - indent.lastIndexOf('\n');
@@ -2054,7 +2054,9 @@ var CoffeeScript = (function(){
 				}
 				if (size > this.indent) {
 					if (noNewlines) {
-						this.indebt = size - this.indent;
+						if (!backslash) {
+							this.indebt = size - this.indent;
+						}
 						this.suppressNewlines();
 						return indent.length;
 					}
@@ -6473,7 +6475,7 @@ var CoffeeScript = (function(){
 				// When compiled normally, the range returns the contents of the *for loop*
 				// needed to iterate over the values in the range. Used by comprehensions.
 				compileNode(o) {
-					var cond, condPart, from, gt, idx, idxName, known, lowerBound, lt, namedIndex, stepCond, stepPart, to, upperBound, varPart;
+					var cond, condPart, from, gt, idx, idxName, known, lowerBound, lt, namedIndex, ref1, ref2, stepCond, stepNotZero, stepPart, to, upperBound, varPart;
 					if (!this.fromVar) {
 						this.compileVariables(o);
 					}
@@ -6496,12 +6498,11 @@ var CoffeeScript = (function(){
 					// Generate the condition.
 					[from, to] = [this.fromNum, this.toNum];
 					// Always check if the `step` isn't zero to avoid the infinite loop.
-					stepCond = this.stepNum ? `${this.stepNum} !== 0` : `${this.stepVar} !== 0`;
-					condPart = known ? this.step == null ? from <= to ? `${lt} ${to}` : `${gt} ${        // from < to
-	to}` : (lowerBound = `${from} <= ${idx} && ${lt} ${// from > to
-	to}`, upperBound = `${from} >= ${idx} && ${gt} ${to}`, from <= to ? `${stepCond} && ${lowerBound}` : `${stepCond} && ${// from < to
-	upperBound}`) : (lowerBound = `${this.fromVar} <= ${idx} && ${lt} ${// from > to
-	this.toVar}`, upperBound = `${this.fromVar} >= ${idx} && ${gt} ${this.toVar}`, `${stepCond} && (${this.fromVar} <= ${this.toVar} ? ${lowerBound} : ${upperBound})`);
+					stepNotZero = `${(ref1 = this.stepNum) != null ? ref1 : this.stepVar} !== 0`;
+					stepCond = `${(ref2 = this.stepNum) != null ? ref2 : this.stepVar} > 0`;
+					lowerBound = `${lt} ${(known ? to : this.toVar)}`;
+					upperBound = `${gt} ${(known ? to : this.toVar)}`;
+					condPart = this.step != null ? `${stepNotZero} && (${stepCond} ? ${lowerBound} : ${upperBound})` : known ? `${(from <= to ? lt : gt)} ${to}` : `(${this.fromVar} <= ${this.toVar} ? ${lowerBound} : ${upperBound})`;
 					cond = this.stepVar ? `${this.stepVar} > 0` : `${this.fromVar} <= ${this.toVar}`;
 					// Generate the step.
 					stepPart = this.stepVar ? `${idx} += ${this.stepVar}` : known ? namedIndex ? from <= to ? `++${idx}` : `--${idx}` : from <= to ? `${idx}++` : `${idx}--` : namedIndex ? `${cond} ? ++${idx} : --${idx}` : `${cond} ? ${idx}++ : ${idx}--`;
@@ -10442,7 +10443,7 @@ var CoffeeScript = (function(){
 		*/
 
 		// The current CoffeeScript version number.
-		exports.VERSION = /*BT- packageJson.version*/'2.2.0';
+		exports.VERSION = /*BT- packageJson.version*/'2.2.2';
 
 		/*BT-
 		exports.FILE_EXTENSIONS = FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
