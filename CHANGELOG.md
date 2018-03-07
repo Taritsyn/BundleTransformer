@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.195 - March 7, 2018
+ * In BundleTransformer.SassAndScss added support of LibSass version 3.5.0
+ * In BundleTransformer.CleanCss added support of Clean-css version 4.1.11
+
 ## v1.9.194 - March 4, 2018
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.1
 
