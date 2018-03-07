@@ -47,7 +47,7 @@ if (!String.prototype.hasOwnProperty('repeat')) {
 }
 
 /*!
- * Clean-css v4.1.9
+ * Clean-css v4.1.11
  * https://github.com/jakubpawlowicz/clean-css
  *
  * Copyright (C) 2017 JakubPawlowicz.com
@@ -2876,6 +2876,10 @@ var CleanCss = (function(){
 			return components;
 		  }
 
+		  if (values.length < 2 || !_anyIsFontSize(values, validator) || !_anyIsFontFamily(values, validator)) {
+			throw new InvalidPropertyError('Invalid font values at ' + formatPosition(property.all[property.position][1][2][0]) + '. Ignoring.');
+		  }
+
 		  if (values.length > 1 && _anyIsInherit(values)) {
 			throw new InvalidPropertyError('Invalid font values at ' + formatPosition(values[0][2][0]) + '. Ignoring.');
 		  }
@@ -2952,6 +2956,36 @@ var CleanCss = (function(){
 		  }
 
 		  return components;
+		}
+
+		function _anyIsFontSize(values, validator) {
+		  var value;
+		  var i, l;
+
+		  for (i = 0, l = values.length; i < l; i++) {
+			value = values[i];
+
+			if (validator.isFontSizeKeyword(value[1]) || validator.isUnit(value[1]) && !validator.isDynamicUnit(value[1]) || validator.isFunction(value[1])) {
+			  return true;
+			}
+		  }
+
+		  return false;
+		}
+
+		function _anyIsFontFamily(values, validator) {
+		  var value;
+		  var i, l;
+
+		  for (i = 0, l = values.length; i < l; i++) {
+			value = values[i];
+
+			if (validator.isIdentifier(value[1])) {
+			  return true;
+			}
+		  }
+
+		  return false;
 		}
 
 		function fourValues(property, compactable) {
@@ -3337,6 +3371,24 @@ var CleanCss = (function(){
 		  };
 		}
 
+		function unitOrNumber(validator, value1, value2) {
+		  if (!understandable(validator, value1, value2, 0, true) && !(validator.isUnit(value2) || validator.isNumber(value2))) {
+			return false;
+		  } else if (validator.isVariable(value1) && validator.isVariable(value2)) {
+			return true;
+		  } else if ((validator.isUnit(value1) || validator.isNumber(value1)) && !(validator.isUnit(value2) || validator.isNumber(value2))) {
+			return false;
+		  } else if (validator.isUnit(value2) || validator.isNumber(value2)) {
+			return true;
+		  } else if (validator.isUnit(value1) || validator.isNumber(value1)) {
+			return false;
+		  } else if (validator.isFunction(value1) && !validator.isPrefixed(value1) && validator.isFunction(value2) && !validator.isPrefixed(value2)) {
+			return true;
+		  }
+
+		  return sameFunctionOrValue(validator, value1, value2);
+		}
+
 		function zIndex(validator, value1, value2) {
 		  if (!understandable(validator, value1, value2, 0, true) && !validator.isZIndex(value2)) {
 			return false;
@@ -3353,7 +3405,8 @@ var CleanCss = (function(){
 			components: components,
 			image: image,
 			time: time,
-			unit: unit
+			unit: unit,
+			unitOrNumber: unitOrNumber
 		  },
 		  property: {
 			animationDirection: keywordWithGlobal('animation-direction'),
@@ -3547,6 +3600,7 @@ var CleanCss = (function(){
 			],
 			defaultValue: '0s',
 			intoMultiplexMode: 'real',
+			keepUnlessDefault: 'animation-delay',
 			vendorPrefixes: [
 			  '-moz-',
 			  '-o-',
@@ -4128,7 +4182,7 @@ var CleanCss = (function(){
 			defaultValue: 'auto'
 		  },
 		  'line-height': {
-			canOverride: canOverride.generic.unit,
+			canOverride: canOverride.generic.unitOrNumber,
 			defaultValue: 'normal',
 			shortestValue: '0'
 		  },
@@ -4401,6 +4455,10 @@ var CleanCss = (function(){
 			clonedDescriptor.components = clonedDescriptor.components.map(function (longhandName) {
 			  return prefix + longhandName;
 			});
+		  }
+
+		  if ('keepUnlessDefault' in clonedDescriptor) {
+			clonedDescriptor.keepUnlessDefault = prefix + clonedDescriptor.keepUnlessDefault;
 		  }
 
 		  return clonedDescriptor;
@@ -5573,10 +5631,13 @@ var CleanCss = (function(){
 		var animationNameRegex = /^(\-moz\-|\-o\-|\-webkit\-)?animation-name$/;
 		var animationRegex = /^(\-moz\-|\-o\-|\-webkit\-)?animation$/;
 		var keyframeRegex = /^@(\-moz\-|\-o\-|\-webkit\-)?keyframes /;
+		var importantRegex = /\s{0,31}!important$/;
 		var optionalMatchingQuotesRegex = /^(['"]?)(.*)\1$/;
 
-		function removeQuotes(value) {
-		  return value.replace(optionalMatchingQuotesRegex, '$2');
+		function normalize(value) {
+		  return value
+			.replace(optionalMatchingQuotesRegex, '$2')
+			.replace(importantRegex, '');
 		}
 
 		function removeUnusedAtRules(tokens, context) {
@@ -5677,7 +5738,7 @@ var CleanCss = (function(){
 			  property = token[2][i];
 
 			  if (property[1][1] == 'font-family') {
-				match = removeQuotes(property[2][1].toLowerCase());
+				match = normalize(property[2][1].toLowerCase());
 				atRules[match] = atRules[match] || [];
 				atRules[match].push(token);
 				break;
@@ -5704,7 +5765,7 @@ var CleanCss = (function(){
 				component = wrappedProperty.components[6];
 
 				for (j = 0, m = component.value.length; j < m; j++) {
-				  normalizedMatch = removeQuotes(component.value[j][1].toLowerCase());
+				  normalizedMatch = normalize(component.value[j][1].toLowerCase());
 
 				  if (normalizedMatch in atRules) {
 					delete atRules[normalizedMatch];
@@ -5716,7 +5777,7 @@ var CleanCss = (function(){
 
 			  if (property[1][1] == 'font-family') {
 				for (j = 2, m = property.length; j < m; j++) {
-				  normalizedMatch = removeQuotes(property[j][1].toLowerCase());
+				  normalizedMatch = normalize(property[j][1].toLowerCase());
 
 				  if (normalizedMatch in atRules) {
 					delete atRules[normalizedMatch];
@@ -6180,8 +6241,9 @@ var CleanCss = (function(){
 			var component = components[i];
 			var descriptor = compactable[component.name];
 
-			if (component.value[0][1] != descriptor.defaultValue)
+			if (component.value[0][1] != descriptor.defaultValue || ('keepUnlessDefault' in descriptor) && !isDefault(components, compactable, descriptor.keepUnlessDefault)) {
 			  restored.unshift(component.value[0]);
+			}
 		  }
 
 		  if (restored.length === 0)
@@ -6191,6 +6253,21 @@ var CleanCss = (function(){
 			return [restored[0]];
 
 		  return restored;
+		}
+
+		function isDefault(components, compactable, propertyName) {
+		  var component;
+		  var i, l;
+
+		  for (i = 0, l = components.length; i < l; i++) {
+			component = components[i];
+
+			if (component.name == propertyName && component.value[0][1] == compactable[propertyName].defaultValue) {
+			  return true;
+			}
+		  }
+
+		  return false;
 		}
 
 		var exports = {
@@ -6914,17 +6991,22 @@ var CleanCss = (function(){
 
 		var animationTimingFunctionRegex = /^(cubic\-bezier|steps)\([^\)]+\)$/;
 		var calcRegex = new RegExp('^(\\-moz\\-|\\-webkit\\-)?calc\\([^\\)]+\\)$', 'i');
+		var decimalRegex = /[0-9]/;
 		var functionAnyRegex = new RegExp('^' + functionAnyRegexStr + '$', 'i');
-		var hslColorRegex = /^hsl\(\s*[\-\.\d]+\s*,\s*[\.\d]+%\s*,\s*[\.\d]+%\s*\)|hsla\(\s*[\-\.\d]+\s*,\s*[\.\d]+%\s*,\s*[\.\d]+%\s*,\s*[\.\d]+\s*\)$/;
+		var hslColorRegex = /^hsl\(\s{0,31}[\-\.]?\d+\s{0,31},\s{0,31}\.?\d+%\s{0,31},\s{0,31}\.?\d+%\s{0,31}\)|hsla\(\s{0,31}[\-\.]?\d+\s{0,31},\s{0,31}\.?\d+%\s{0,31},\s{0,31}\.?\d+%\s{0,31},\s{0,31}\.?\d+\s{0,31}\)$/;
 		var identifierRegex = /^(\-[a-z0-9_][a-z0-9\-_]*|[a-z][a-z0-9\-_]*)$/i;
 		var longHexColorRegex = /^#[0-9a-f]{6}$/i;
 		var namedEntityRegex = /^[a-z]+$/i;
 		var prefixRegex = /^-([a-z0-9]|-)*$/i;
-		var rgbColorRegex = /^rgb\(\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*\)|rgba\(\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*,\s*[\d]{1,3}\s*,\s*[\.\d]+\s*\)$/;
+		var rgbColorRegex = /^rgb\(\s{0,31}[\d]{1,3}\s{0,31},\s{0,31}[\d]{1,3}\s{0,31},\s{0,31}[\d]{1,3}\s{0,31}\)|rgba\(\s{0,31}[\d]{1,3}\s{0,31},\s{0,31}[\d]{1,3}\s{0,31},\s{0,31}[\d]{1,3}\s{0,31},\s{0,31}[\.\d]+\s{0,31}\)$/;
 		var shortHexColorRegex = /^#[0-9a-f]{3}$/i;
-		var timeRegex = new RegExp('^(\\-?\\+?\\.?\\d+\\.?\\d*(s|ms))$');
+		var validTimeUnits = ['ms', 's'];
 		var urlRegex = /^url\([\s\S]+\)$/i;
 		var variableRegex = new RegExp('^' + variableRegexStr + '$', 'i');
+
+		var DECIMAL_DOT = '.';
+		var MINUS_SIGN = '-';
+		var PLUS_SIGN = '+';
 
 		var Keywords = {
 		  '^': [
@@ -7303,7 +7385,7 @@ var CleanCss = (function(){
 		}
 
 		function isNumber(value) {
-		  return value.length > 0 && ('' + parseFloat(value)) === value;
+		  return scanForNumber(value) == value.length;
 		}
 
 		function isRgbColor(value) {
@@ -7324,11 +7406,19 @@ var CleanCss = (function(){
 		}
 
 		function isTime(value) {
-		  return timeRegex.test(value);
+		  var numberUpTo = scanForNumber(value);
+
+		  return numberUpTo == value.length && parseInt(value) === 0 ||
+			numberUpTo > -1 && validTimeUnits.indexOf(value.slice(numberUpTo + 1)) > -1;
 		}
 
-		function isUnit(compatibleCssUnitRegex, value) {
-		  return compatibleCssUnitRegex.test(value);
+		function isUnit(validUnits, value) {
+		  var numberUpTo = scanForNumber(value);
+
+		  return numberUpTo == value.length && parseInt(value) === 0 ||
+			numberUpTo > -1 && validUnits.indexOf(value.slice(numberUpTo + 1)) > -1 ||
+			value == 'auto' ||
+			value == 'inherit';
 		}
 
 		function isUrl(value) {
@@ -7341,12 +7431,37 @@ var CleanCss = (function(){
 			isKeyword('^')(value);
 		}
 
+		function scanForNumber(value) {
+		  var hasDot = false;
+		  var hasSign = false;
+		  var character;
+		  var i, l;
+
+		  for (i = 0, l = value.length; i < l; i++) {
+			character = value[i];
+
+			if (i === 0 && (character == PLUS_SIGN || character == MINUS_SIGN)) {
+			  hasSign = true;
+			} else if (i > 0 && hasSign && (character == PLUS_SIGN || character == MINUS_SIGN)) {
+			  return i - 1;
+			} else if (character == DECIMAL_DOT && !hasDot) {
+			  hasDot = true;
+			} else if (character == DECIMAL_DOT && hasDot) {
+			  return i - 1;
+			} else if (decimalRegex.test(character)) {
+			  continue;
+			} else {
+			  return i - 1;
+			}
+		  }
+
+		  return i;
+		}
+
 		function validator(compatibility) {
 		  var validUnits = Units.slice(0).filter(function (value) {
 			return !(value in compatibility.units) || compatibility.units[value] === true;
 		  });
-
-		  var compatibleCssUnitRegex = new RegExp('^(\\-?\\.?\\d+\\.?\\d*(' + validUnits.join('|') + '|)|auto|inherit)$', 'i');
 
 		  return {
 			colorOpacity: compatibility.colors.opacity,
@@ -7380,12 +7495,13 @@ var CleanCss = (function(){
 			isLineHeightKeyword: isKeyword('line-height'),
 			isListStylePositionKeyword: isKeyword('list-style-position'),
 			isListStyleTypeKeyword: isKeyword('list-style-type'),
+			isNumber: isNumber,
 			isPrefixed: isPrefixed,
 			isPositiveNumber: isPositiveNumber,
 			isRgbColor: isRgbColor,
 			isStyleKeyword: isKeyword('*-style'),
 			isTime: isTime,
-			isUnit: isUnit.bind(null, compatibleCssUnitRegex),
+			isUnit: isUnit.bind(null, validUnits),
 			isUrl: isUrl,
 			isVariable: isVariable,
 			isWidth: isKeyword('width'),
@@ -8776,7 +8892,7 @@ var CleanCss = (function(){
 		  '@right'
 		];
 
-		var REPEAT_PATTERN = /^\[\s*\d+\s*\]$/;
+		var REPEAT_PATTERN = /^\[\s{0,31}\d+\s{0,31}\]$/;
 		var RULE_WORD_SEPARATOR_PATTERN = /[\s\(]/;
 		var TAIL_BROKEN_VALUE_PATTERN = /[\s|\}]*$/;
 
@@ -8834,6 +8950,7 @@ var CleanCss = (function(){
 			isCommentStart = !wasCommentEnd && level != Level.COMMENT && !isQuoted && character == Marker.ASTERISK && source[position.index - 1] == Marker.FORWARD_SLASH;
 			isCommentEndMarker = !wasCommentStart && !isQuoted && character == Marker.FORWARD_SLASH && source[position.index - 1] == Marker.ASTERISK;
 			isCommentEnd = level == Level.COMMENT && isCommentEndMarker;
+			roundBracketLevel = Math.max(roundBracketLevel, 0);
 
 			metadata = buffer.length === 0 ?
 			  [position.line, position.column, position.source] :
