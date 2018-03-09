@@ -9280,7 +9280,7 @@ module.exports = {
     }
   },
 
-  loadCountry: function loadCountry() {
+  loadCountry: function loadCountry(browserslistUsage, country /*BT+*/) {
     /*BT-
     throw new BrowserslistError('Country statistics is not supported ' + 'in client-side build of Browserslist');
     */
