@@ -36,10 +36,10 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * CoffeeScript Compiler v2.2.2
+ * CoffeeScript Compiler v2.2.3
  * http://coffeescript.org
  *
- * Copyright 2009-2017 Jeremy Ashkenas
+ * Copyright 2009-2018 Jeremy Ashkenas
  * Released under the MIT License
  */
 var CoffeeScript = (function(){
@@ -6623,7 +6623,7 @@ var CoffeeScript = (function(){
 				}
 
 				isAssignable() {
-					var j, len1, message, prop, ref1;
+					var j, len1, message, prop, ref1, ref2;
 					ref1 = this.properties;
 					for (j = 0, len1 = ref1.length; j < len1; j++) {
 						prop = ref1[j];
@@ -6632,7 +6632,7 @@ var CoffeeScript = (function(){
 						if (message) {
 							prop.error(message);
 						}
-						if (prop instanceof Assign && prop.context === 'object') {
+						if (prop instanceof Assign && prop.context === 'object' && !(((ref2 = prop.value) != null ? ref2.base : void 0) instanceof Arr)) {
 							prop = prop.value;
 						}
 						if (!prop.isAssignable()) {
@@ -8037,7 +8037,10 @@ var CoffeeScript = (function(){
 					slicer = function(type) {
 						return function(vvar, start, end = false) {
 							var args, slice;
-							args = [new IdentifierLiteral(vvar), new NumberLiteral(start)];
+							if (!(vvar instanceof Value)) {
+								vvar = new IdentifierLiteral(vvar);
+							}
+							args = [vvar, new NumberLiteral(start)];
 							if (end) {
 								args.push(new NumberLiteral(end));
 							}
@@ -8189,7 +8192,7 @@ var CoffeeScript = (function(){
 							refExp = (function() {
 								switch (false) {
 									case !isSplat:
-										return compSplice(objects[expIdx].unwrapAll().value, rightObjs.length * -1);
+										return compSplice(new Value(objects[expIdx].name), rightObjs.length * -1);
 									case !isExpans:
 										return compSlice(vvarText, rightObjs.length * -1);
 								}
