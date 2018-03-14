@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.197 - March 14, 2018
+ * In BundleTransformer.SassAndScss added support of LibSass version 3.5.1
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.3
+
 ## v1.9.196 - March 9, 2018
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.1.0.1
 
