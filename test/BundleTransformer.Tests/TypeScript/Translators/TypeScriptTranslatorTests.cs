@@ -101,9 +101,6 @@ TranslatorBadges.createTsTranslatorBadge();")
 			virtualFileSystemMock
 				.Setup(fs => fs.GetFileTextContent(translatorBadgeTsAssetVirtualPath))
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
-/*
-/// <reference path=""typings/knockout/knockout.d.ts"" />
-*/
 /// <reference path=""ITranslatorBadge.d.ts"" />
 
 module TranslatorBadges {

@@ -144,7 +144,10 @@
     <EmbeddedResource Include="Resources\DefaultLibraries\lib.esnext.array.d.ts" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\DefaultLibraries\lib.esnext.promise.d.ts" />
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2018.promise.d.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\DefaultLibraries\lib.es2018.regexp.d.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
