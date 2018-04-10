@@ -36,7 +36,7 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * CoffeeScript Compiler v2.2.3
+ * CoffeeScript Compiler v2.2.4
  * http://coffeescript.org
  *
  * Copyright 2009-2018 Jeremy Ashkenas
@@ -5711,15 +5711,6 @@ var CoffeeScript = (function(){
 					if (!props && base instanceof Value) {
 						return base;
 					}
-					if (base instanceof Parens && base.contains(function(n) {
-						return n instanceof StatementLiteral;
-					})) {
-						// When `Parens` block includes a `StatementLiteral` (e.g. `(b; break) for a in arr`),
-						// it won't compile since `Parens` (`(b; break)`) is compiled as `Value` and
-						// pure statement (`break`) can't be used in an expression.
-						// For this reasons, we return `Block` instead of `Parens`.
-						return base.unwrap();
-					}
 					this.base = base;
 					this.properties = props || [];
 					if (tag) {
@@ -6502,7 +6493,7 @@ var CoffeeScript = (function(){
 					stepCond = `${(ref2 = this.stepNum) != null ? ref2 : this.stepVar} > 0`;
 					lowerBound = `${lt} ${(known ? to : this.toVar)}`;
 					upperBound = `${gt} ${(known ? to : this.toVar)}`;
-					condPart = this.step != null ? `${stepNotZero} && (${stepCond} ? ${lowerBound} : ${upperBound})` : known ? `${(from <= to ? lt : gt)} ${to}` : `(${this.fromVar} <= ${this.toVar} ? ${lowerBound} : ${upperBound})`;
+					condPart = this.step != null ? (this.stepNum != null) && this.stepNum !== 0 ? this.stepNum > 0 ? `${lowerBound}` : `${upperBound}` : `${stepNotZero} && (${stepCond} ? ${lowerBound} : ${upperBound})` : known ? `${(from <= to ? lt : gt)} ${to}` : `(${this.fromVar} <= ${this.toVar} ? ${lowerBound} : ${upperBound})`;
 					cond = this.stepVar ? `${this.stepVar} > 0` : `${this.fromVar} <= ${this.toVar}`;
 					// Generate the step.
 					stepPart = this.stepVar ? `${idx} += ${this.stepVar}` : known ? namedIndex ? from <= to ? `++${idx}` : `--${idx}` : from <= to ? `${idx}++` : `${idx}--` : namedIndex ? `${cond} ? ++${idx} : --${idx}` : `${cond} ? ${idx}++ : ${idx}--`;
@@ -10446,7 +10437,7 @@ var CoffeeScript = (function(){
 		*/
 
 		// The current CoffeeScript version number.
-		exports.VERSION = /*BT- packageJson.version*/'2.2.2';
+		exports.VERSION = /*BT- packageJson.version*/'2.2.4';
 
 		/*BT-
 		exports.FILE_EXTENSIONS = FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
