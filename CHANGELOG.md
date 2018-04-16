@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.200 - April 16, 2018
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.3
+
 ## v1.9.199 - April 10, 2018
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.2.4
  * In BundleTransformer.TypeScript added support of TypeScript version 2.8 RTM (please note: The 2.8 RTM release is also called '2.8.1')
