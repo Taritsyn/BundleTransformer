@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.202 - April 26, 2018
+ * In BundleTransformer.SassAndScss added support of LibSass version 3.5.4
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.3.0.1
+
 ## v1.9.201 - April 22, 2018
  * In BundleTransformer.Less added support of LESS version 3.0.2
  * In BundleTransformer.TypeScript added support of TypeScript version 2.8.3
