@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.203 - April 28, 2018
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.4.1
+
 ## v1.9.202 - April 26, 2018
  * In BundleTransformer.SassAndScss added support of LibSass version 3.5.4
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.3.0.1
