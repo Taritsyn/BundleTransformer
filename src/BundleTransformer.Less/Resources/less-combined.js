@@ -1,5 +1,5 @@
 /*!
- * Less - Leaner CSS v3.0.2
+ * Less - Leaner CSS v3.0.4
  * http://lesscss.org
  *
  * Copyright (c) 2009-2018, Alexis Sellier <self@cloudhead.net>
@@ -7346,7 +7346,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			return this.toString().toUpperCase() === unitString.toUpperCase();
 		};
 		Unit.prototype.isLength = function () {
-			return Boolean(this.toCSS().match(/px|em|%|in|cm|mm|pc|pt|ex/));
+			return RegExp('^(px|em|ex|ch|rem|in|cm|mm|pc|pt|ex|vw|vh|vmin|vmax)$', 'gi').test(this.toCSS());
 		};
 		Unit.prototype.isEmpty = function () {
 			return this.numerator.length === 0 && this.denominator.length === 0;
@@ -8990,7 +8990,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			var /*BT- SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var initial = {
-				version: [3, 0, 2],
+				version: [3, 0, 4],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require("/environment/environment")),
