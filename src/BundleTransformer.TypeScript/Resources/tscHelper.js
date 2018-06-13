@@ -11,7 +11,9 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			alwaysStrict: false,
 			baseUrl: '',
 			charset: '',
+			composite: false,
 			declarationDir: '',
+			declarationMap: false,
 			disableSizeLimit: false,
 			downlevelIteration: false,
 			emitBOM: false,
@@ -23,6 +25,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			inlineSourceMap: false,
 			inlineSources: false,
 			jsxFactory: false,
+			keyofStringsOnly: false,
 			lib: null,
 			mapRoot: '',
 			module: ts.ModuleKind.None,
@@ -47,6 +50,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			preserveSymlinks: false,
 			reactNamespace: '',
 			removeComments: false,
+			resolveJsonModule: false,
 			rootDir: '',
 			isolatedModules: false,
 			sourceMap: false,
@@ -292,7 +296,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			directoryExists: directoryExists,
 			getEnvironmentVariable: getEnvironmentVariable,
 			getDirectories: null,
-			realpath: null
+			realpath: null,
+			readDirectory: null
 		};
 	}
 	//#endregion

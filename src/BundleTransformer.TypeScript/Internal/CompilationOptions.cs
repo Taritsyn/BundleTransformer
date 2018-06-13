@@ -55,6 +55,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to resolve <code>keyof</code> to string valued property names
+		/// only (no numbers or symbols)
+		/// </summary>
+		public bool KeyofStringsOnly
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets a list of library file names to be included in the compilation
 		/// </summary>
 		public IList<string> Libs
@@ -328,6 +338,7 @@ namespace BundleTransformer.TypeScript.Internal
 			AlwaysStrict = false;
 			DownlevelIteration = false;
 			ForceConsistentCasingInFileNames = false;
+			KeyofStringsOnly = false;
 			Libs = new List<string>();
 			NewLine = NewLineMode.CrLf;
 			NoEmit = false;

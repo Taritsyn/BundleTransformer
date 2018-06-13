@@ -62,6 +62,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to resolve <code>keyof</code> to string valued property names
+		/// only (no numbers or symbols)
+		/// </summary>
+		[ConfigurationProperty("keyofStringsOnly", DefaultValue = false)]
+		public bool KeyofStringsOnly
+		{
+			get { return (bool)this["keyofStringsOnly"]; }
+			set { this["keyofStringsOnly"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a list of library files to be included in the compilation
 		/// </summary>
 		[ConfigurationProperty("libs", IsRequired = false)]

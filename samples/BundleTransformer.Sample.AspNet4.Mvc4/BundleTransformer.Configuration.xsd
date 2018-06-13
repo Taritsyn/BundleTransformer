@@ -582,6 +582,11 @@
 				<xs:documentation>Flag for whether to disallow inconsistently-cased references to the same file</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="keyofStringsOnly" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to resolve `keyof` to string valued property names only (no numbers or symbols)</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="newLine" use="optional" default="CrLf">
 			<xs:annotation>
 				<xs:documentation>End of line sequence, that used when emitting files: 'CRLF' (dos) or 'LF' (unix)</xs:documentation>

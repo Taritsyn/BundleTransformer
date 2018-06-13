@@ -153,6 +153,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("alwaysStrict", options.AlwaysStrict),
 				new JProperty("downlevelIteration", options.DownlevelIteration),
 				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
+				new JProperty("keyofStringsOnly", options.KeyofStringsOnly),
 				new JProperty("lib", options.Libs.Count > 0 ? new JArray(options.Libs) : null),
 				new JProperty("newLine", options.NewLine),
 				new JProperty("noEmit", options.NoEmit),

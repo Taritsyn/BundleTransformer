@@ -98,6 +98,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to resolve <code>keyof</code> to string valued property names
+		/// only (no numbers or symbols)
+		/// </summary>
+		public bool KeyofStringsOnly
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets a list of library file names to be included in the compilation
 		/// </summary>
 		public IList<string> Libs
@@ -386,6 +396,7 @@ namespace BundleTransformer.TypeScript.Translators
 			AlwaysStrict = tsConfig.AlwaysStrict;
 			DownlevelIteration = tsConfig.DownlevelIteration;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
+			KeyofStringsOnly = tsConfig.KeyofStringsOnly;
 			Libs = tsConfig.Libs
 				.Cast<LibraryFileRegistration>()
 				.Select(l => l.LibraryFileName)
@@ -543,6 +554,7 @@ namespace BundleTransformer.TypeScript.Translators
 				AlwaysStrict = AlwaysStrict,
 				DownlevelIteration = DownlevelIteration,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
+				KeyofStringsOnly = KeyofStringsOnly,
 				Libs = Libs,
 				NewLine = NewLine,
 				NoEmit = NoEmit,
