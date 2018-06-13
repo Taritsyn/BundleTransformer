@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.9.208 - June 13, 2018
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support of TypeScript version 2.9 RTM
+   * In configuration settings of TypeScript translator was added one new property - `KeyofStringsOnly` (default `false`)
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.6.2
+
 ## v1.9.207 - May 30, 2018
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.3.1
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.5.2
