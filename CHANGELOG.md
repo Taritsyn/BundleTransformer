@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.9.209 - June 21, 2018
+ * In BundleTransformer.TypeScript added support of TypeScript version 2.9.2
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.6.3
+
 ## v1.9.208 - June 13, 2018
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.TypeScript:
