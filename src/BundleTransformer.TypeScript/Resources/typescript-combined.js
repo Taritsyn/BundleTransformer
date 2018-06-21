@@ -174,7 +174,7 @@ var ts;
 var ts;
 (function (ts) {
     ts.versionMajorMinor = "2.9";
-    ts.version = ts.versionMajorMinor + ".1";
+    ts.version = ts.versionMajorMinor + ".2";
 })(ts || (ts = {}));
 (function (ts) {
     function isExternalModuleNameRelative(moduleName) {
@@ -2124,6 +2124,23 @@ var ts;
         return startsWith(str, prefix) ? str.substr(prefix.length) : str;
     }
     ts.removePrefix = removePrefix;
+    function tryRemovePrefix(str, prefix) {
+        return startsWith(str, prefix) ? str.substring(prefix.length) : undefined;
+    }
+    ts.tryRemovePrefix = tryRemovePrefix;
+    function tryRemoveDirectoryPrefix(path, dirPath) {
+        var a = tryRemovePrefix(path, dirPath);
+        if (a === undefined)
+            return undefined;
+        switch (a.charCodeAt(0)) {
+            case 47:
+            case 92:
+                return a.slice(1);
+            default:
+                return undefined;
+        }
+    }
+    ts.tryRemoveDirectoryPrefix = tryRemoveDirectoryPrefix;
     function endsWith(str, suffix) {
         var expectedPos = str.length - suffix.length;
         return expectedPos >= 0 && str.indexOf(suffix, expectedPos) === expectedPos;
@@ -2133,6 +2150,10 @@ var ts;
         return endsWith(str, suffix) ? str.slice(0, str.length - suffix.length) : str;
     }
     ts.removeSuffix = removeSuffix;
+    function tryRemoveSuffix(str, suffix) {
+        return endsWith(str, suffix) ? str.slice(0, str.length - suffix.length) : undefined;
+    }
+    ts.tryRemoveSuffix = tryRemoveSuffix;
     function stringContains(str, substring) {
         return str.indexOf(substring) !== -1;
     }
@@ -2272,14 +2293,17 @@ var ts;
         };
     }
     ts.getFileMatcherPatterns = getFileMatcherPatterns;
+    function getRegexFromPattern(pattern, useCaseSensitiveFileNames) {
+        return new RegExp(pattern, useCaseSensitiveFileNames ? "" : "i");
+    }
+    ts.getRegexFromPattern = getRegexFromPattern;
     function matchFiles(path, extensions, excludes, includes, useCaseSensitiveFileNames, currentDirectory, depth, getFileSystemEntries) {
         path = normalizePath(path);
         currentDirectory = normalizePath(currentDirectory);
         var patterns = getFileMatcherPatterns(path, excludes, includes, useCaseSensitiveFileNames, currentDirectory);
-        var regexFlag = useCaseSensitiveFileNames ? "" : "i";
-        var includeFileRegexes = patterns.includeFilePatterns && patterns.includeFilePatterns.map(function (pattern) { return new RegExp(pattern, regexFlag); });
-        var includeDirectoryRegex = patterns.includeDirectoryPattern && new RegExp(patterns.includeDirectoryPattern, regexFlag);
-        var excludeRegex = patterns.excludePattern && new RegExp(patterns.excludePattern, regexFlag);
+        var includeFileRegexes = patterns.includeFilePatterns && patterns.includeFilePatterns.map(function (pattern) { return getRegexFromPattern(pattern, useCaseSensitiveFileNames); });
+        var includeDirectoryRegex = patterns.includeDirectoryPattern && getRegexFromPattern(patterns.includeDirectoryPattern, useCaseSensitiveFileNames);
+        var excludeRegex = patterns.excludePattern && getRegexFromPattern(patterns.excludePattern, useCaseSensitiveFileNames);
         var results = includeFileRegexes ? includeFileRegexes.map(function () { return []; }) : [[]];
         for (var _i = 0, _a = patterns.basePaths; _i < _a.length; _i++) {
             var basePath = _a[_i];
@@ -6428,11 +6452,6 @@ var ts;
         return ts.createFileDiagnostic(sourceFile, span.start, span.length, message, arg0, arg1, arg2, arg3);
     }
     ts.createDiagnosticForNodeInSourceFile = createDiagnosticForNodeInSourceFile;
-    function createDiagnosticForNodeSpan(sourceFile, startNode, endNode, message, arg0, arg1, arg2, arg3) {
-        var start = ts.skipTrivia(sourceFile.text, startNode.pos);
-        return ts.createFileDiagnostic(sourceFile, start, endNode.end - start, message, arg0, arg1, arg2, arg3);
-    }
-    ts.createDiagnosticForNodeSpan = createDiagnosticForNodeSpan;
     function createDiagnosticForNodeFromMessageChain(node, messageChain) {
         var sourceFile = getSourceFileOfNode(node);
         var span = getErrorSpanForNode(sourceFile, node);
@@ -6823,7 +6842,7 @@ var ts;
     }
     ts.isThisTypePredicate = isThisTypePredicate;
     function getPropertyAssignment(objectLiteral, key, key2) {
-        return ts.filter(objectLiteral.properties, function (property) {
+        return objectLiteral.properties.filter(function (property) {
             if (property.kind === 269) {
                 var propName = getTextOfPropertyName(property.name);
                 return key === propName || (key2 && key2 === propName);
@@ -6839,15 +6858,18 @@ var ts;
     }
     ts.getTsConfigObjectLiteralExpression = getTsConfigObjectLiteralExpression;
     function getTsConfigPropArrayElementValue(tsConfigSourceFile, propKey, elementValue) {
-        var jsonObjectLiteral = getTsConfigObjectLiteralExpression(tsConfigSourceFile);
-        return jsonObjectLiteral &&
-            ts.firstDefined(getPropertyAssignment(jsonObjectLiteral, propKey), function (property) {
-                return ts.isArrayLiteralExpression(property.initializer) ?
-                    ts.find(property.initializer.elements, function (element) { return ts.isStringLiteral(element) && element.text === elementValue; }) :
-                    undefined;
-            });
+        return ts.firstDefined(getTsConfigPropArray(tsConfigSourceFile, propKey), function (property) {
+            return ts.isArrayLiteralExpression(property.initializer) ?
+                ts.find(property.initializer.elements, function (element) { return ts.isStringLiteral(element) && element.text === elementValue; }) :
+                undefined;
+        });
     }
     ts.getTsConfigPropArrayElementValue = getTsConfigPropArrayElementValue;
+    function getTsConfigPropArray(tsConfigSourceFile, propKey) {
+        var jsonObjectLiteral = getTsConfigObjectLiteralExpression(tsConfigSourceFile);
+        return jsonObjectLiteral ? getPropertyAssignment(jsonObjectLiteral, propKey) : ts.emptyArray;
+    }
+    ts.getTsConfigPropArray = getTsConfigPropArray;
     function getContainingFunction(node) {
         return ts.findAncestor(node.parent, ts.isFunctionLike);
     }
@@ -11790,6 +11812,7 @@ var ts;
             if (languageVersion === void 0) { languageVersion = 2; }
             initializeState(sourceText, languageVersion, syntaxCursor, 6);
             sourceFile = createSourceFile(fileName, 2, 6, false);
+            sourceFile.flags = contextFlags;
             nextToken();
             var pos = getNodePos();
             if (token() === 1) {
@@ -12170,8 +12193,8 @@ var ts;
                 kind === 71 ? new IdentifierConstructor(kind, p, p) :
                     new TokenConstructor(kind, p, p);
         }
-        function createNodeWithJSDoc(kind) {
-            var node = createNode(kind);
+        function createNodeWithJSDoc(kind, pos) {
+            var node = createNode(kind, pos);
             if (scanner.getTokenFlags() & 2) {
                 addJSDocComment(node);
             }
@@ -12838,6 +12861,21 @@ var ts;
             }
             return finishNode(node);
         }
+        function typeHasArrowFunctionBlockingParseError(node) {
+            switch (node.kind) {
+                case 161:
+                    return ts.nodeIsMissing(node.typeName);
+                case 162:
+                case 163: {
+                    var _a = node, parameters = _a.parameters, type = _a.type;
+                    return parameters.pos === parameters.end || typeHasArrowFunctionBlockingParseError(type);
+                }
+                case 172:
+                    return typeHasArrowFunctionBlockingParseError(node.type);
+                default:
+                    return false;
+            }
+        }
         function parseThisTypePredicate(lhs) {
             nextToken();
             var node = createNode(160, lhs.pos);
@@ -12980,12 +13018,13 @@ var ts;
             if (!(flags & 32)) {
                 signature.typeParameters = parseTypeParameters();
             }
-            signature.parameters = parseParameterList(flags);
+            var parametersParsedSuccessfully = parseParameterList(signature, flags);
             if (shouldParseReturnType(returnToken, !!(flags & 4))) {
                 signature.type = parseTypeOrTypePredicate();
-                return signature.type !== undefined;
+                if (typeHasArrowFunctionBlockingParseError(signature.type))
+                    return false;
             }
-            return true;
+            return parametersParsedSuccessfully;
         }
         function shouldParseReturnType(returnToken, isType) {
             if (returnToken === 36) {
@@ -13002,21 +13041,19 @@ var ts;
             }
             return false;
         }
-        function parseParameterList(flags) {
-            if (parseExpected(19)) {
-                var savedYieldContext = inYieldContext();
-                var savedAwaitContext = inAwaitContext();
-                setYieldContext(!!(flags & 1));
-                setAwaitContext(!!(flags & 2));
-                var result = parseDelimitedList(16, flags & 32 ? parseJSDocParameter : parseParameter);
-                setYieldContext(savedYieldContext);
-                setAwaitContext(savedAwaitContext);
-                if (!parseExpected(20) && (flags & 8)) {
-                    return undefined;
-                }
-                return result;
+        function parseParameterList(signature, flags) {
+            if (!parseExpected(19)) {
+                signature.parameters = createMissingList();
+                return false;
             }
-            return (flags & 8) ? undefined : createMissingList();
+            var savedYieldContext = inYieldContext();
+            var savedAwaitContext = inAwaitContext();
+            setYieldContext(!!(flags & 1));
+            setAwaitContext(!!(flags & 2));
+            signature.parameters = parseDelimitedList(16, flags & 32 ? parseJSDocParameter : parseParameter);
+            setYieldContext(savedYieldContext);
+            setAwaitContext(savedAwaitContext);
+            return parseExpected(20);
         }
         function parseTypeMemberSemicolon() {
             if (parseOptional(26)) {
@@ -13207,23 +13244,14 @@ var ts;
             var node = createNode(172);
             parseExpected(19);
             node.type = parseType();
-            if (!node.type) {
-                return undefined;
-            }
             parseExpected(20);
             return finishNode(node);
         }
-        function parseFunctionOrConstructorType(kind) {
-            var node = createNodeWithJSDoc(kind);
-            if (kind === 163) {
-                parseExpected(94);
-            }
-            if (!fillSignature(36, 4 | (sourceFile.languageVariant === 1 ? 8 : 0), node)) {
-                return undefined;
-            }
-            if (!node.parameters) {
-                return undefined;
-            }
+        function parseFunctionOrConstructorType() {
+            var pos = getNodePos();
+            var kind = parseOptional(94) ? 163 : 162;
+            var node = createNodeWithJSDoc(kind, pos);
+            fillSignature(36, 4, node);
             return finishNode(node);
         }
         function parseKeywordAndNoDot() {
@@ -13522,11 +13550,8 @@ var ts;
             return doOutsideOfContext(20480, parseTypeWorker);
         }
         function parseTypeWorker(noConditionalTypes) {
-            if (isStartOfFunctionType()) {
-                return parseFunctionOrConstructorType(162);
-            }
-            if (token() === 94) {
-                return parseFunctionOrConstructorType(163);
+            if (isStartOfFunctionType() || token() === 94) {
+                return parseFunctionOrConstructorType();
             }
             var type = parseUnionTypeOrHigher();
             if (!noConditionalTypes && !scanner.hasPrecedingLineBreak() && parseOptional(85)) {
@@ -13823,10 +13848,7 @@ var ts;
             var node = createNodeWithJSDoc(192);
             node.modifiers = parseModifiersForArrowFunction();
             var isAsync = ts.hasModifier(node, 256) ? 2 : 0;
-            if (!fillSignature(56, isAsync | (allowAmbiguity ? 0 : 8), node)) {
-                return undefined;
-            }
-            if (!node.parameters) {
+            if (!fillSignature(56, isAsync, node) && !allowAmbiguity) {
                 return undefined;
             }
             if (!allowAmbiguity && token() !== 36 && token() !== 17) {
@@ -19671,6 +19693,8 @@ var ts;
                 }
                 break;
             case 224:
+                transformFlags |= 33554432 | 8;
+                break;
             case 222:
             case 223:
                 transformFlags |= 33554432;
@@ -21859,7 +21883,12 @@ var ts;
                             }
                         }
                         if (name !== "default" && (result = lookup(moduleExports, name, meaning & 2623475))) {
-                            break loop;
+                            if (ts.isSourceFile(location) && location.commonJsModuleIndicator && !result.declarations.some(ts.isJSDocTypeAlias)) {
+                                result = undefined;
+                            }
+                            else {
+                                break loop;
+                            }
                         }
                         break;
                     case 237:
@@ -21955,9 +21984,8 @@ var ts;
                         break;
                     case 296:
                     case 291:
-                        lastLocation = location;
-                        location = ts.getJSDocHost(location).parent;
-                        continue;
+                        location = ts.getJSDocHost(location);
+                        break;
                 }
                 if (isSelfReferenceLocation(location)) {
                     lastSelfReferenceLocation = location;
@@ -22215,7 +22243,7 @@ var ts;
                 : resolveSymbol(moduleSymbol.exports.get(name), dontResolveAlias);
         }
         function isSyntacticDefault(node) {
-            return ((ts.isExportAssignment(node) && !node.isExportEquals) || ts.hasModifier(node, 512));
+            return ((ts.isExportAssignment(node) && !node.isExportEquals) || ts.hasModifier(node, 512) || ts.isExportSpecifier(node));
         }
         function canHaveSyntheticDefault(file, moduleSymbol, dontResolveAlias) {
             if (!allowSyntheticDefaultImports) {
@@ -22801,6 +22829,38 @@ var ts;
         function getParentOfSymbol(symbol) {
             return getMergedSymbol(symbol.parent && getLateBoundSymbol(symbol.parent));
         }
+        function getContainerOfSymbol(symbol) {
+            var container = getParentOfSymbol(symbol);
+            if (container) {
+                return container;
+            }
+            var candidate = ts.forEach(symbol.declarations, function (d) { return !ts.isAmbientModule(d) && d.parent && hasNonGlobalAugmentationExternalModuleSymbol(d.parent) ? getSymbolOfNode(d.parent) : undefined; });
+            if (!candidate) {
+                return undefined;
+            }
+            var alias = getAliasForSymbolInContainer(candidate, symbol);
+            return alias ? candidate : undefined;
+        }
+        function getAliasForSymbolInContainer(container, symbol) {
+            if (container === getParentOfSymbol(symbol)) {
+                return symbol;
+            }
+            var exports = getExportsOfSymbol(container);
+            var quick = exports.get(symbol.escapedName);
+            if (quick && symbolRefersToTarget(quick)) {
+                return quick;
+            }
+            return ts.forEachEntry(exports, function (exported) {
+                if (symbolRefersToTarget(exported)) {
+                    return exported;
+                }
+            });
+            function symbolRefersToTarget(s) {
+                if (s === symbol || resolveSymbol(s) === symbol || resolveSymbol(s) === resolveSymbol(symbol)) {
+                    return s;
+                }
+            }
+        }
         function getExportSymbolOfValueSymbolIfExported(symbol) {
             return symbol && (symbol.flags & 1048576) !== 0
                 ? getMergedSymbol(symbol.exportSymbol)
@@ -23028,7 +23088,7 @@ var ts;
                         }
                     }
                     meaningToLook = getQualifiedLeftMeaning(meaning);
-                    symbol = getParentOfSymbol(symbol);
+                    symbol = getContainerOfSymbol(symbol);
                 }
                 var symbolExternalModule = ts.forEach(initialSymbol.declarations, getExternalModuleContainer);
                 if (symbolExternalModule) {
@@ -23625,9 +23685,12 @@ var ts;
                         context.enclosingDeclaration = undefined;
                         if (ts.getCheckFlags(propertySymbol) & 1024) {
                             var decl = ts.firstOrUndefined(propertySymbol.declarations);
-                            var name = hasLateBindableName(decl) && resolveEntityName(decl.name.expression, 67216319);
-                            if (name && context.tracker.trackSymbol) {
-                                context.tracker.trackSymbol(name, saveEnclosingDeclaration, 67216319);
+                            if (context.tracker.trackSymbol && hasLateBindableName(decl)) {
+                                var firstIdentifier = getFirstIdentifier(decl.name.expression);
+                                var name = resolveName(firstIdentifier, firstIdentifier.escapedText, 67216319 | 1048576, undefined, undefined, true);
+                                if (name) {
+                                    context.tracker.trackSymbol(name, saveEnclosingDeclaration, 67216319);
+                                }
                             }
                         }
                         var propertyName = symbolToName(propertySymbol, context, 67216319, true);
@@ -23797,12 +23860,12 @@ var ts;
                     var parentSymbol;
                     if (!accessibleSymbolChain ||
                         needsQualification(accessibleSymbolChain[0], context.enclosingDeclaration, accessibleSymbolChain.length === 1 ? meaning : getQualifiedLeftMeaning(meaning))) {
-                        var parent = getParentOfSymbol(accessibleSymbolChain ? accessibleSymbolChain[0] : symbol);
+                        var parent = getContainerOfSymbol(accessibleSymbolChain ? accessibleSymbolChain[0] : symbol);
                         if (parent) {
                             var parentChain = getSymbolChain(parent, getQualifiedLeftMeaning(meaning), false);
                             if (parentChain) {
                                 parentSymbol = parent;
-                                accessibleSymbolChain = parentChain.concat(accessibleSymbolChain || [symbol]);
+                                accessibleSymbolChain = parentChain.concat(accessibleSymbolChain || [getAliasForSymbolInContainer(parent, symbol) || symbol]);
                             }
                         }
                     }
@@ -24066,7 +24129,8 @@ var ts;
                         }
                     }
                     else {
-                        return "\"" + ts.getResolvedExternalModuleName(context.tracker.moduleResolverHost, file_3, ts.getSourceFileOfNode(ts.getOriginalNode(context.enclosingDeclaration))) + "\"";
+                        var contextFile = ts.getSourceFileOfNode(ts.getOriginalNode(context.enclosingDeclaration));
+                        return "\"" + (file_3.moduleName || ts.moduleSpecifiers.getModuleSpecifiers(symbol, compilerOptions, contextFile, context.tracker.moduleResolverHost, context.tracker.moduleResolverHost.getSourceFiles(), { importModuleSpecifierPreference: "non-relative" })[0]) + "\"";
                     }
                 }
                 var declaration = symbol.declarations[0];
@@ -28183,12 +28247,13 @@ var ts;
             return links.resolvedType;
         }
         function resolveImportSymbolType(node, links, symbol, meaning) {
-            links.resolvedSymbol = symbol;
+            var resolvedSymbol = resolveSymbol(symbol);
+            links.resolvedSymbol = resolvedSymbol;
             if (meaning === 67216319) {
                 return links.resolvedType = getTypeOfSymbol(symbol);
             }
             else {
-                return links.resolvedType = getTypeReferenceType(node, symbol);
+                return links.resolvedType = getTypeReferenceType(node, resolvedSymbol);
             }
         }
         function getTypeFromTypeLiteralOrFunctionOrConstructorTypeNode(node) {
@@ -34832,7 +34897,7 @@ var ts;
             }
             if (node.kind === 188) {
                 argCount = args.length;
-                typeArguments = undefined;
+                typeArguments = node.typeArguments;
                 if (node.template.kind === 201) {
                     var lastSpan = ts.lastOrUndefined(node.template.templateSpans);
                     ts.Debug.assert(lastSpan !== undefined);
@@ -35394,6 +35459,7 @@ var ts;
             if (node.expression.kind === 97) {
                 var superType = checkSuperExpression(node.expression);
                 if (isTypeAny(superType)) {
+                    ts.forEach(node.arguments, checkExpresionNoReturn);
                     return anySignature;
                 }
                 if (superType !== unknownType) {
@@ -37055,6 +37121,9 @@ var ts;
             node.contextualType = saveContextualType;
             return type;
         }
+        function checkExpresionNoReturn(node) {
+            checkExpression(node);
+        }
         function checkExpression(node, checkMode) {
             var type;
             if (node.kind === 145) {
@@ -38485,7 +38554,7 @@ var ts;
         function errorUnusedLocal(declaration, name, addDiagnostic) {
             var node = ts.getNameOfDeclaration(declaration) || declaration;
             var message = isTypeDeclaration(declaration) ? ts.Diagnostics._0_is_declared_but_never_used : ts.Diagnostics._0_is_declared_but_its_value_is_never_read;
-            addDiagnostic(0, ts.createDiagnosticForNodeSpan(ts.getSourceFileOfNode(declaration), declaration, node, message, name));
+            addDiagnostic(0, ts.createDiagnosticForNode(node, message, name));
         }
         function parameterNameStartsWithUnderscore(parameterName) {
             return parameterName && isIdentifierThatStartsWithUnderScore(parameterName);
@@ -47537,7 +47606,7 @@ var ts;
             return statements;
         }
         return ts.isNodeArray(statements)
-            ? ts.setTextRange(ts.createNodeArray(ts.concatenate(declarations, statements)), statements)
+            ? ts.setTextRange(ts.createNodeArray(ts.prependStatements(statements.slice(), declarations)), statements)
             : ts.prependStatements(statements, declarations);
     }
     ts.mergeLexicalEnvironment = mergeLexicalEnvironment;
@@ -48493,7 +48562,8 @@ var ts;
         }
         function visitSourceFile(node) {
             var alwaysStrict = ts.getStrictOptionValue(compilerOptions, "alwaysStrict") &&
-                !(ts.isExternalModule(node) && moduleKind >= ts.ModuleKind.ES2015);
+                !(ts.isExternalModule(node) && moduleKind >= ts.ModuleKind.ES2015) &&
+                !ts.isJsonSourceFile(node);
             return ts.updateSourceFileNode(node, ts.visitLexicalEnvironment(node.statements, sourceElementVisitor, context, 0, alwaysStrict));
         }
         function shouldEmitDecorateCallForClass(node) {
@@ -49116,6 +49186,7 @@ var ts;
                 case 165:
                 case 119:
                 case 173:
+                case 178:
                     break;
                 default:
                     return ts.Debug.failBadSyntaxKind(node);
@@ -50368,6 +50439,8 @@ var ts;
                     return visitAwaitExpression(node);
                 case 202:
                     return visitYieldExpression(node);
+                case 224:
+                    return visitReturnStatement(node);
                 case 227:
                     return visitLabeledStatement(node);
                 case 183:
@@ -50423,6 +50496,12 @@ var ts;
                 return ts.setOriginalNode(ts.setTextRange(ts.createYield(createDownlevelAwait(node.expression
                     ? ts.visitNode(node.expression, visitor, ts.isExpression)
                     : ts.createVoidZero())), node), node);
+            }
+            return ts.visitEachChild(node, visitor, context);
+        }
+        function visitReturnStatement(node) {
+            if (enclosingFunctionFlags & 2 && enclosingFunctionFlags & 1) {
+                return ts.updateReturn(node, createDownlevelAwait(node.expression ? ts.visitNode(node.expression, visitor, ts.isExpression) : ts.createVoidZero()));
             }
             return ts.visitEachChild(node, visitor, context);
         }
@@ -50575,7 +50654,7 @@ var ts;
             var forStatement = ts.setEmitFlags(ts.setTextRange(ts.createFor(ts.setEmitFlags(ts.setTextRange(ts.createVariableDeclarationList([
                 ts.setTextRange(ts.createVariableDeclaration(iterator, undefined, callValues), node.expression),
                 ts.createVariableDeclaration(result)
-            ]), node.expression), 2097152), ts.createComma(ts.createAssignment(result, createDownlevelAwait(callNext)), ts.createLogicalNot(getDone)), undefined, convertForOfStatementHead(node, createDownlevelAwait(getValue))), node), 256);
+            ]), node.expression), 2097152), ts.createComma(ts.createAssignment(result, createDownlevelAwait(callNext)), ts.createLogicalNot(getDone)), undefined, convertForOfStatementHead(node, getValue)), node), 256);
             return ts.createTry(ts.createBlock([
                 ts.restoreEnclosingLabel(forStatement, outermostLabeledStatement)
             ]), ts.createCatchClause(ts.createVariableDeclaration(catchVariable), ts.setEmitFlags(ts.createBlock([
@@ -52152,21 +52231,19 @@ var ts;
             var singleLine = false;
             var statementsLocation;
             var closeBraceLocation;
+            var leadingStatements = [];
             var statements = [];
             var body = node.body;
             var statementOffset;
             resumeLexicalEnvironment();
             if (ts.isBlock(body)) {
-                statementOffset = ts.addStandardPrologue(statements, body.statements, false);
+                statementOffset = ts.addStandardPrologue(leadingStatements, body.statements, false);
             }
-            addCaptureThisForNodeIfNeeded(statements, node);
-            addDefaultValueAssignmentsIfNeeded(statements, node);
-            addRestParameterIfNeeded(statements, node, false);
-            if (!multiLine && statements.length > 0) {
-                multiLine = true;
-            }
+            addCaptureThisForNodeIfNeeded(leadingStatements, node);
+            addDefaultValueAssignmentsIfNeeded(leadingStatements, node);
+            addRestParameterIfNeeded(leadingStatements, node, false);
             if (ts.isBlock(body)) {
-                statementOffset = ts.addCustomPrologue(statements, body.statements, statementOffset, visitor);
+                statementOffset = ts.addCustomPrologue(leadingStatements, body.statements, statementOffset, visitor);
                 statementsLocation = body.statements;
                 ts.addRange(statements, ts.visitNodes(body.statements, visitor, ts.isStatement, statementOffset));
                 if (!multiLine && body.multiLine) {
@@ -52196,10 +52273,10 @@ var ts;
             var lexicalEnvironment = context.endLexicalEnvironment();
             ts.prependStatements(statements, lexicalEnvironment);
             prependCaptureNewTargetIfNeeded(statements, node, false);
-            if (!multiLine && lexicalEnvironment && lexicalEnvironment.length) {
+            if (ts.some(leadingStatements) || ts.some(lexicalEnvironment)) {
                 multiLine = true;
             }
-            var block = ts.createBlock(ts.setTextRange(ts.createNodeArray(statements), statementsLocation), multiLine);
+            var block = ts.createBlock(ts.setTextRange(ts.createNodeArray(leadingStatements.concat(statements)), statementsLocation), multiLine);
             ts.setTextRange(block, node.body);
             if (!multiLine && singleLine) {
                 ts.setEmitFlags(block, 1);
@@ -54992,7 +55069,7 @@ var ts;
         name: "typescript:generator",
         scoped: false,
         priority: 6,
-        text: "\n            var __generator = (this && this.__generator) || function (thisArg, body) {\n                var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;\n                return g = { next: verb(0), \"throw\": verb(1), \"return\": verb(2) }, typeof Symbol === \"function\" && (g[Symbol.iterator] = function() { return this; }), g;\n                function verb(n) { return function (v) { return step([n, v]); }; }\n                function step(op) {\n                    if (f) throw new TypeError(\"Generator is already executing.\");\n                    while (_) try {\n                        if (f = 1, y && (t = y[op[0] & 2 ? \"return\" : op[0] ? \"throw\" : \"next\"]) && !(t = t.call(y, op[1])).done) return t;\n                        if (y = 0, t) op = [0, t.value];\n                        switch (op[0]) {\n                            case 0: case 1: t = op; break;\n                            case 4: _.label++; return { value: op[1], done: false };\n                            case 5: _.label++; y = op[1]; op = [0]; continue;\n                            case 7: op = _.ops.pop(); _.trys.pop(); continue;\n                            default:\n                                if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }\n                                if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }\n                                if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }\n                                if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }\n                                if (t[2]) _.ops.pop();\n                                _.trys.pop(); continue;\n                        }\n                        op = body.call(thisArg, _);\n                    } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }\n                    if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };\n                }\n            };"
+        text: "\n            var __generator = (this && this.__generator) || function (thisArg, body) {\n                var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;\n                return g = { next: verb(0), \"throw\": verb(1), \"return\": verb(2) }, typeof Symbol === \"function\" && (g[Symbol.iterator] = function() { return this; }), g;\n                function verb(n) { return function (v) { return step([n, v]); }; }\n                function step(op) {\n                    if (f) throw new TypeError(\"Generator is already executing.\");\n                    while (_) try {\n                        if (f = 1, y && (t = op[0] & 2 ? y[\"return\"] : op[0] ? y[\"throw\"] || ((t = y[\"return\"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;\n                        if (y = 0, t) op = [op[0] & 2, t.value];\n                        switch (op[0]) {\n                            case 0: case 1: t = op; break;\n                            case 4: _.label++; return { value: op[1], done: false };\n                            case 5: _.label++; y = op[1]; op = [0]; continue;\n                            case 7: op = _.ops.pop(); _.trys.pop(); continue;\n                            default:\n                                if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }\n                                if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }\n                                if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }\n                                if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }\n                                if (t[2]) _.ops.pop();\n                                _.trys.pop(); continue;\n                        }\n                        op = body.call(thisArg, _);\n                    } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }\n                    if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };\n                }\n            };"
     };
 })(ts || (ts = {}));
 var ts;
@@ -58468,7 +58545,7 @@ var ts;
             return currentSource.skipTrivia ? currentSource.skipTrivia(pos) : ts.skipTrivia(currentSourceText, pos);
         }
         function initialize(filePath, sourceMapFilePath, sourceFileOrBundle, outputSourceMapDataList) {
-            if (disabled) {
+            if (disabled || ts.fileExtensionIs(filePath, ".json")) {
                 return;
             }
             if (sourceMapData) {
@@ -58559,7 +58636,7 @@ var ts;
             sourceMapData.sourceMapDecodedMappings.push(lastEncodedSourceMapSpan);
         }
         function emitPos(pos) {
-            if (disabled || ts.positionIsSynthesized(pos)) {
+            if (disabled || ts.positionIsSynthesized(pos) || isJsonSourceMapSource(currentSource)) {
                 return;
             }
             if (extendedDiagnostics) {
@@ -58596,7 +58673,7 @@ var ts;
             }
         }
         function emitNodeWithSourceMap(hint, node, emitCallback) {
-            if (disabled) {
+            if (disabled || ts.isInJsonFile(node)) {
                 return emitCallback(hint, node);
             }
             if (node) {
@@ -58637,7 +58714,7 @@ var ts;
             }
         }
         function emitTokenWithSourceMap(node, token, writer, tokenPos, emitCallback) {
-            if (disabled) {
+            if (disabled || ts.isInJsonFile(node)) {
                 return emitCallback(token, writer, tokenPos);
             }
             var emitNode = node && node.emitNode;
@@ -58655,12 +58732,18 @@ var ts;
             }
             return tokenPos;
         }
+        function isJsonSourceMapSource(sourceFile) {
+            return ts.fileExtensionIs(sourceFile.fileName, ".json");
+        }
         function setSourceFile(sourceFile) {
             if (disabled) {
                 return;
             }
             currentSource = sourceFile;
             currentSourceText = currentSource.text;
+            if (isJsonSourceMapSource(sourceFile)) {
+                return;
+            }
             var sourcesDirectoryPath = compilerOptions.sourceRoot ? host.getCommonSourceDirectory() : sourceMapDir;
             var source = ts.getRelativePathToDirectoryOrUrl(sourcesDirectoryPath, currentSource.fileName, host.getCurrentDirectory(), host.getCanonicalFileName, true);
             sourceMapSourceIndex = sourceMapData.sourceMapSources.indexOf(source);
@@ -58674,7 +58757,7 @@ var ts;
             }
         }
         function getText() {
-            if (disabled) {
+            if (disabled || isJsonSourceMapSource(currentSource)) {
                 return;
             }
             encodeLastRecordedSourceMapSpan();
@@ -58689,7 +58772,7 @@ var ts;
             });
         }
         function getSourceMappingURL() {
-            if (disabled) {
+            if (disabled || isJsonSourceMapSource(currentSource)) {
                 return;
             }
             if (compilerOptions.inlineSourceMap) {
@@ -59101,7 +59184,7 @@ var ts;
         }
         else {
             var jsFilePath = ts.getOwnEmitOutputFilePath(sourceFile, host, getOutputExtension(sourceFile, options));
-            var sourceMapFilePath = getSourceMapFilePath(jsFilePath, options);
+            var sourceMapFilePath = ts.isJsonSourceFile(sourceFile) ? undefined : getSourceMapFilePath(jsFilePath, options);
             var isJs = ts.isSourceFileJavaScript(sourceFile);
             var declarationFilePath = ((forceDtsPaths || options.declaration) && !isJs) ? ts.getDeclarationEmitOutputFilePath(sourceFile, host) : undefined;
             var declarationMapPath = ts.getAreDeclarationMapsEnabled(options) ? declarationFilePath + ".map" : undefined;
@@ -60238,7 +60321,7 @@ var ts;
                 increaseIndent();
             }
             var preferNewLine = node.multiLine ? 32768 : 0;
-            var allowTrailingComma = currentSourceFile.languageVersion >= 1 ? 32 : 0;
+            var allowTrailingComma = currentSourceFile.languageVersion >= 1 && !ts.isJsonSourceFile(currentSourceFile) ? 32 : 0;
             emitList(node, node.properties, 263122 | allowTrailingComma | preferNewLine);
             if (indentedFlag) {
                 decreaseIndent();
@@ -63033,20 +63116,8 @@ var ts;
             return oldProgram.structureIsReused = 2;
         }
         function getEmitHost(writeFileCallback) {
-            return {
-                getPrependNodes: getPrependNodes,
-                getCanonicalFileName: getCanonicalFileName,
-                getCommonSourceDirectory: program.getCommonSourceDirectory,
-                getCompilerOptions: program.getCompilerOptions,
-                getCurrentDirectory: function () { return currentDirectory; },
-                getNewLine: function () { return host.getNewLine(); },
-                getSourceFile: program.getSourceFile,
-                getSourceFileByPath: program.getSourceFileByPath,
-                getSourceFiles: program.getSourceFiles,
-                isSourceFileFromExternalLibrary: isSourceFileFromExternalLibrary,
-                writeFile: writeFileCallback || (function (fileName, data, writeByteOrderMark, onError, sourceFiles) { return host.writeFile(fileName, data, writeByteOrderMark, onError, sourceFiles); }),
-                isEmitBlocked: isEmitBlocked,
-            };
+            return __assign({ getPrependNodes: getPrependNodes,
+                getCanonicalFileName: getCanonicalFileName, getCommonSourceDirectory: program.getCommonSourceDirectory, getCompilerOptions: program.getCompilerOptions, getCurrentDirectory: function () { return currentDirectory; }, getNewLine: function () { return host.getNewLine(); }, getSourceFile: program.getSourceFile, getSourceFileByPath: program.getSourceFileByPath, getSourceFiles: program.getSourceFiles, isSourceFileFromExternalLibrary: isSourceFileFromExternalLibrary, writeFile: writeFileCallback || (function (fileName, data, writeByteOrderMark, onError, sourceFiles) { return host.writeFile(fileName, data, writeByteOrderMark, onError, sourceFiles); }), isEmitBlocked: isEmitBlocked, readFile: function (f) { return host.readFile(f); }, fileExists: function (f) { return host.fileExists(f); } }, (host.directoryExists ? { directoryExists: function (f) { return host.directoryExists(f); } } : {}));
         }
         function getProjectReferences() {
             if (!resolvedProjectReferences)
@@ -63519,11 +63590,9 @@ var ts;
                 else if (ts.isLiteralImportTypeNode(node)) {
                     imports = ts.append(imports, node.argument.literal);
                 }
-                else {
-                    collectDynamicImportOrRequireCallsForEachChild(node);
-                    if (ts.hasJSDocNodes(node)) {
-                        ts.forEach(node.jsDoc, collectDynamicImportOrRequireCallsForEachChild);
-                    }
+                collectDynamicImportOrRequireCallsForEachChild(node);
+                if (ts.hasJSDocNodes(node)) {
+                    ts.forEach(node.jsDoc, collectDynamicImportOrRequireCallsForEachChild);
                 }
             }
             function collectDynamicImportOrRequireCallsForEachChild(node) {
@@ -65008,17 +65077,26 @@ var ts;
         function isNodeModulesAtTypesDirectory(dirPath) {
             return ts.endsWith(dirPath, "/node_modules/@types");
         }
-        function isDirectoryAtleastAtLevelFromFSRoot(dirPath, minLevels) {
-            for (var searchIndex = ts.getRootLength(dirPath); minLevels > 0; minLevels--) {
+        function canWatchDirectory(dirPath) {
+            var rootLength = ts.getRootLength(dirPath);
+            if (dirPath.length === rootLength) {
+                return false;
+            }
+            var nextDirectorySeparator = dirPath.indexOf(ts.directorySeparator, rootLength);
+            if (nextDirectorySeparator === -1) {
+                return false;
+            }
+            if (dirPath.charCodeAt(0) !== 47 &&
+                dirPath.substr(rootLength, nextDirectorySeparator).search(/users/i) === -1) {
+                return true;
+            }
+            for (var searchIndex = nextDirectorySeparator + 1, searchLevels = 2; searchLevels > 0; searchLevels--) {
                 searchIndex = dirPath.indexOf(ts.directorySeparator, searchIndex) + 1;
                 if (searchIndex === 0) {
                     return false;
                 }
             }
             return true;
-        }
-        function canWatchDirectory(dirPath) {
-            return isDirectoryAtleastAtLevelFromFSRoot(dirPath, dirPath.charCodeAt(0) === 47 ? 3 : 1);
         }
         function filterFSRootDirectoriesToWatch(watchPath, dirPath) {
             if (!canWatchDirectory(dirPath)) {
@@ -65314,6 +65392,312 @@ var ts;
 })(ts || (ts = {}));
 var ts;
 (function (ts) {
+    var moduleSpecifiers;
+    (function (moduleSpecifiers) {
+        function getModuleSpecifier(compilerOptions, fromSourceFile, fromSourceFileName, toFileName, host, preferences) {
+            if (preferences === void 0) { preferences = {}; }
+            var info = getInfo(compilerOptions, fromSourceFile, fromSourceFileName, host);
+            return getGlobalModuleSpecifier(toFileName, info, host, compilerOptions) ||
+                ts.first(getLocalModuleSpecifiers(toFileName, info, compilerOptions, preferences));
+        }
+        moduleSpecifiers.getModuleSpecifier = getModuleSpecifier;
+        function getModuleSpecifiers(moduleSymbol, compilerOptions, importingSourceFile, host, files, preferences) {
+            var ambient = tryGetModuleNameFromAmbientModule(moduleSymbol);
+            if (ambient)
+                return [[ambient]];
+            var info = getInfo(compilerOptions, importingSourceFile, importingSourceFile.path, host);
+            if (!files) {
+                return ts.Debug.fail("Files list must be present to resolve symlinks in specifier resolution");
+            }
+            var modulePaths = getAllModulePaths(files, ts.getSourceFileOfNode(moduleSymbol.valueDeclaration), info.getCanonicalFileName, host);
+            var global = ts.mapDefined(modulePaths, function (moduleFileName) { return getGlobalModuleSpecifier(moduleFileName, info, host, compilerOptions); });
+            return global.length ? global.map(function (g) { return [g]; }) : modulePaths.map(function (moduleFileName) {
+                return getLocalModuleSpecifiers(moduleFileName, info, compilerOptions, preferences);
+            });
+        }
+        moduleSpecifiers.getModuleSpecifiers = getModuleSpecifiers;
+        function getInfo(compilerOptions, importingSourceFile, importingSourceFileName, host) {
+            var moduleResolutionKind = ts.getEmitModuleResolutionKind(compilerOptions);
+            var addJsExtension = usesJsExtensionOnImports(importingSourceFile);
+            var getCanonicalFileName = ts.createGetCanonicalFileName(host.useCaseSensitiveFileNames ? host.useCaseSensitiveFileNames() : true);
+            var sourceDirectory = ts.getDirectoryPath(importingSourceFileName);
+            return { moduleResolutionKind: moduleResolutionKind, addJsExtension: addJsExtension, getCanonicalFileName: getCanonicalFileName, sourceDirectory: sourceDirectory };
+        }
+        function getGlobalModuleSpecifier(moduleFileName, _a, host, compilerOptions) {
+            var addJsExtension = _a.addJsExtension, getCanonicalFileName = _a.getCanonicalFileName, sourceDirectory = _a.sourceDirectory;
+            return tryGetModuleNameFromTypeRoots(compilerOptions, host, getCanonicalFileName, moduleFileName, addJsExtension)
+                || tryGetModuleNameAsNodeModule(compilerOptions, moduleFileName, host, getCanonicalFileName, sourceDirectory)
+                || compilerOptions.rootDirs && tryGetModuleNameFromRootDirs(compilerOptions.rootDirs, moduleFileName, sourceDirectory, getCanonicalFileName);
+        }
+        function getLocalModuleSpecifiers(moduleFileName, _a, compilerOptions, preferences) {
+            var moduleResolutionKind = _a.moduleResolutionKind, addJsExtension = _a.addJsExtension, getCanonicalFileName = _a.getCanonicalFileName, sourceDirectory = _a.sourceDirectory;
+            var baseUrl = compilerOptions.baseUrl, paths = compilerOptions.paths;
+            var relativePath = removeExtensionAndIndexPostFix(ts.ensurePathIsNonModuleName(ts.getRelativePathFromDirectory(sourceDirectory, moduleFileName, getCanonicalFileName)), moduleResolutionKind, addJsExtension);
+            if (!baseUrl || preferences.importModuleSpecifierPreference === "relative") {
+                return [relativePath];
+            }
+            var relativeToBaseUrl = getRelativePathIfInDirectory(moduleFileName, baseUrl, getCanonicalFileName);
+            if (!relativeToBaseUrl) {
+                return [relativePath];
+            }
+            var importRelativeToBaseUrl = removeExtensionAndIndexPostFix(relativeToBaseUrl, moduleResolutionKind, addJsExtension);
+            if (paths) {
+                var fromPaths = tryGetModuleNameFromPaths(ts.removeFileExtension(relativeToBaseUrl), importRelativeToBaseUrl, paths);
+                if (fromPaths) {
+                    return [fromPaths];
+                }
+            }
+            if (preferences.importModuleSpecifierPreference === "non-relative") {
+                return [importRelativeToBaseUrl];
+            }
+            if (preferences.importModuleSpecifierPreference !== undefined)
+                ts.Debug.assertNever(preferences.importModuleSpecifierPreference);
+            if (isPathRelativeToParent(relativeToBaseUrl)) {
+                return [relativePath];
+            }
+            var pathFromSourceToBaseUrl = ts.ensurePathIsNonModuleName(ts.getRelativePathFromDirectory(sourceDirectory, baseUrl, getCanonicalFileName));
+            var relativeFirst = getRelativePathNParents(relativePath) < getRelativePathNParents(pathFromSourceToBaseUrl);
+            return relativeFirst ? [relativePath, importRelativeToBaseUrl] : [importRelativeToBaseUrl, relativePath];
+        }
+        function usesJsExtensionOnImports(_a) {
+            var imports = _a.imports;
+            return ts.firstDefined(imports, function (_a) {
+                var text = _a.text;
+                return ts.pathIsRelative(text) ? ts.fileExtensionIs(text, ".js") : undefined;
+            }) || false;
+        }
+        function discoverProbableSymlinks(files) {
+            var symlinks = ts.mapDefined(files, function (sf) {
+                return sf.resolvedModules && ts.firstDefinedIterator(sf.resolvedModules.values(), function (res) {
+                    return res && res.originalPath && res.resolvedFileName !== res.originalPath ? [res.resolvedFileName, res.originalPath] : undefined;
+                });
+            });
+            var result = ts.createMap();
+            if (symlinks) {
+                for (var _i = 0, symlinks_1 = symlinks; _i < symlinks_1.length; _i++) {
+                    var _a = symlinks_1[_i], resolvedPath = _a[0], originalPath = _a[1];
+                    var resolvedParts = ts.getPathComponents(resolvedPath);
+                    var originalParts = ts.getPathComponents(originalPath);
+                    while (resolvedParts[resolvedParts.length - 1] === originalParts[originalParts.length - 1]) {
+                        resolvedParts.pop();
+                        originalParts.pop();
+                    }
+                    result.set(ts.getPathFromPathComponents(originalParts), ts.getPathFromPathComponents(resolvedParts));
+                }
+            }
+            return result;
+        }
+        function getAllModulePathsUsingIndirectSymlinks(files, target, getCanonicalFileName, host) {
+            var links = discoverProbableSymlinks(files);
+            var paths = ts.arrayFrom(links.keys());
+            var options;
+            for (var _i = 0, paths_2 = paths; _i < paths_2.length; _i++) {
+                var path = paths_2[_i];
+                var resolved = links.get(path);
+                if (ts.startsWith(target, resolved + "/")) {
+                    var relative = ts.getRelativePathFromDirectory(resolved, target, getCanonicalFileName);
+                    var option = ts.resolvePath(path, relative);
+                    if (!host.fileExists || host.fileExists(option)) {
+                        if (!options)
+                            options = [];
+                        options.push(option);
+                    }
+                }
+            }
+            var resolvedtarget = host.getCurrentDirectory ? ts.resolvePath(host.getCurrentDirectory(), target) : target;
+            if (options) {
+                options.push(resolvedtarget);
+                return options;
+            }
+            return [resolvedtarget];
+        }
+        function getAllModulePaths(files, _a, getCanonicalFileName, host) {
+            var fileName = _a.fileName;
+            var symlinks = ts.mapDefined(files, function (sf) {
+                return sf.resolvedModules && ts.firstDefinedIterator(sf.resolvedModules.values(), function (res) {
+                    return res && res.resolvedFileName === fileName ? res.originalPath : undefined;
+                });
+            });
+            return symlinks.length === 0 ? getAllModulePathsUsingIndirectSymlinks(files, fileName, getCanonicalFileName, host) : symlinks;
+        }
+        function getRelativePathNParents(relativePath) {
+            var components = ts.getPathComponents(relativePath);
+            if (components[0] || components.length === 1)
+                return 0;
+            for (var i = 1; i < components.length; i++) {
+                if (components[i] !== "..")
+                    return i - 1;
+            }
+            return components.length - 1;
+        }
+        function tryGetModuleNameFromAmbientModule(moduleSymbol) {
+            var decl = moduleSymbol.valueDeclaration;
+            if (ts.isModuleDeclaration(decl) && ts.isStringLiteral(decl.name)) {
+                return decl.name.text;
+            }
+        }
+        function tryGetModuleNameFromPaths(relativeToBaseUrlWithIndex, relativeToBaseUrl, paths) {
+            for (var key in paths) {
+                for (var _i = 0, _a = paths[key]; _i < _a.length; _i++) {
+                    var patternText_1 = _a[_i];
+                    var pattern = ts.removeFileExtension(ts.normalizePath(patternText_1));
+                    var indexOfStar = pattern.indexOf("*");
+                    if (indexOfStar === 0 && pattern.length === 1) {
+                        continue;
+                    }
+                    else if (indexOfStar !== -1) {
+                        var prefix = pattern.substr(0, indexOfStar);
+                        var suffix = pattern.substr(indexOfStar + 1);
+                        if (relativeToBaseUrl.length >= prefix.length + suffix.length &&
+                            ts.startsWith(relativeToBaseUrl, prefix) &&
+                            ts.endsWith(relativeToBaseUrl, suffix)) {
+                            var matchedStar = relativeToBaseUrl.substr(prefix.length, relativeToBaseUrl.length - suffix.length);
+                            return key.replace("*", matchedStar);
+                        }
+                    }
+                    else if (pattern === relativeToBaseUrl || pattern === relativeToBaseUrlWithIndex) {
+                        return key;
+                    }
+                }
+            }
+        }
+        function tryGetModuleNameFromRootDirs(rootDirs, moduleFileName, sourceDirectory, getCanonicalFileName) {
+            var normalizedTargetPath = getPathRelativeToRootDirs(moduleFileName, rootDirs, getCanonicalFileName);
+            if (normalizedTargetPath === undefined) {
+                return undefined;
+            }
+            var normalizedSourcePath = getPathRelativeToRootDirs(sourceDirectory, rootDirs, getCanonicalFileName);
+            var relativePath = normalizedSourcePath !== undefined ? ts.ensurePathIsNonModuleName(ts.getRelativePathFromDirectory(normalizedSourcePath, normalizedTargetPath, getCanonicalFileName)) : normalizedTargetPath;
+            return ts.removeFileExtension(relativePath);
+        }
+        function tryGetModuleNameFromTypeRoots(options, host, getCanonicalFileName, moduleFileName, addJsExtension) {
+            var roots = ts.getEffectiveTypeRoots(options, host);
+            return ts.firstDefined(roots, function (unNormalizedTypeRoot) {
+                var typeRoot = ts.toPath(unNormalizedTypeRoot, undefined, getCanonicalFileName);
+                if (ts.startsWith(moduleFileName, typeRoot)) {
+                    return removeExtensionAndIndexPostFix(moduleFileName.substring(typeRoot.length + 1), ts.ModuleResolutionKind.NodeJs, addJsExtension);
+                }
+            });
+        }
+        function tryGetModuleNameAsNodeModule(options, moduleFileName, host, getCanonicalFileName, sourceDirectory) {
+            if (ts.getEmitModuleResolutionKind(options) !== ts.ModuleResolutionKind.NodeJs) {
+                return undefined;
+            }
+            var parts = getNodeModulePathParts(moduleFileName);
+            if (!parts) {
+                return undefined;
+            }
+            var moduleSpecifier = getDirectoryOrExtensionlessFileName(moduleFileName);
+            moduleSpecifier = getNodeResolvablePath(moduleSpecifier);
+            return ts.getPackageNameFromAtTypesDirectory(moduleSpecifier);
+            function getDirectoryOrExtensionlessFileName(path) {
+                var packageRootPath = path.substring(0, parts.packageRootIndex);
+                var packageJsonPath = ts.combinePaths(packageRootPath, "package.json");
+                if (host.fileExists(packageJsonPath)) {
+                    var packageJsonContent = JSON.parse(host.readFile(packageJsonPath));
+                    if (packageJsonContent) {
+                        var mainFileRelative = packageJsonContent.typings || packageJsonContent.types || packageJsonContent.main;
+                        if (mainFileRelative) {
+                            var mainExportFile = ts.toPath(mainFileRelative, packageRootPath, getCanonicalFileName);
+                            if (mainExportFile === getCanonicalFileName(path)) {
+                                return packageRootPath;
+                            }
+                        }
+                    }
+                }
+                var fullModulePathWithoutExtension = ts.removeFileExtension(path);
+                if (getCanonicalFileName(fullModulePathWithoutExtension.substring(parts.fileNameIndex)) === "/index" && !tryGetAnyFileFromPath(host, fullModulePathWithoutExtension.substring(0, parts.fileNameIndex))) {
+                    return fullModulePathWithoutExtension.substring(0, parts.fileNameIndex);
+                }
+                return fullModulePathWithoutExtension;
+            }
+            function getNodeResolvablePath(path) {
+                var basePath = path.substring(0, parts.topLevelNodeModulesIndex);
+                if (sourceDirectory.indexOf(basePath) === 0) {
+                    return path.substring(parts.topLevelPackageNameIndex + 1);
+                }
+                else {
+                    return ts.ensurePathIsNonModuleName(ts.getRelativePathFromDirectory(sourceDirectory, path, getCanonicalFileName));
+                }
+            }
+        }
+        function tryGetAnyFileFromPath(host, path) {
+            var extensions = ts.getSupportedExtensions({ allowJs: true }, [{ extension: "node", isMixedContent: false }, { extension: "json", isMixedContent: false, scriptKind: 6 }]);
+            for (var _i = 0, extensions_3 = extensions; _i < extensions_3.length; _i++) {
+                var e = extensions_3[_i];
+                var fullPath = path + e;
+                if (host.fileExists(fullPath)) {
+                    return fullPath;
+                }
+            }
+        }
+        function getNodeModulePathParts(fullPath) {
+            var topLevelNodeModulesIndex = 0;
+            var topLevelPackageNameIndex = 0;
+            var packageRootIndex = 0;
+            var fileNameIndex = 0;
+            var partStart = 0;
+            var partEnd = 0;
+            var state = 0;
+            while (partEnd >= 0) {
+                partStart = partEnd;
+                partEnd = fullPath.indexOf("/", partStart + 1);
+                switch (state) {
+                    case 0:
+                        if (fullPath.indexOf("/node_modules/", partStart) === partStart) {
+                            topLevelNodeModulesIndex = partStart;
+                            topLevelPackageNameIndex = partEnd;
+                            state = 1;
+                        }
+                        break;
+                    case 1:
+                    case 2:
+                        if (state === 1 && fullPath.charAt(partStart + 1) === "@") {
+                            state = 2;
+                        }
+                        else {
+                            packageRootIndex = partEnd;
+                            state = 3;
+                        }
+                        break;
+                    case 3:
+                        if (fullPath.indexOf("/node_modules/", partStart) === partStart) {
+                            state = 1;
+                        }
+                        else {
+                            state = 3;
+                        }
+                        break;
+                }
+            }
+            fileNameIndex = partStart;
+            return state > 1 ? { topLevelNodeModulesIndex: topLevelNodeModulesIndex, topLevelPackageNameIndex: topLevelPackageNameIndex, packageRootIndex: packageRootIndex, fileNameIndex: fileNameIndex } : undefined;
+        }
+        function getPathRelativeToRootDirs(path, rootDirs, getCanonicalFileName) {
+            return ts.firstDefined(rootDirs, function (rootDir) {
+                var relativePath = getRelativePathIfInDirectory(path, rootDir, getCanonicalFileName);
+                return isPathRelativeToParent(relativePath) ? undefined : relativePath;
+            });
+        }
+        function removeExtensionAndIndexPostFix(fileName, moduleResolutionKind, addJsExtension) {
+            var noExtension = ts.removeFileExtension(fileName);
+            return addJsExtension
+                ? noExtension + ".js"
+                : moduleResolutionKind === ts.ModuleResolutionKind.NodeJs
+                    ? ts.removeSuffix(noExtension, "/index")
+                    : noExtension;
+        }
+        function getRelativePathIfInDirectory(path, directoryPath, getCanonicalFileName) {
+            var relativePath = ts.getRelativePathToDirectoryOrUrl(directoryPath, path, directoryPath, getCanonicalFileName, false);
+            return ts.isRootedDiskPath(relativePath) ? undefined : relativePath;
+        }
+        function isPathRelativeToParent(path) {
+            return ts.startsWith(path, "..");
+        }
+    })(moduleSpecifiers = ts.moduleSpecifiers || (ts.moduleSpecifiers = {}));
+})(ts || (ts = {}));
+var ts;
+(function (ts) {
     var sysFormatDiagnosticsHost = ts.sys ? {
         getCurrentDirectory: function () { return ts.sys.getCurrentDirectory(); },
         getNewLine: function () { return ts.sys.newLine; },
@@ -65455,11 +65839,11 @@ var ts;
             watchFile: system.watchFile ? (function (path, callback, pollingInterval) { return system.watchFile(path, callback, pollingInterval); }) : function () { return noopFileWatcher; },
             watchDirectory: system.watchDirectory ? (function (path, callback, recursive) { return system.watchDirectory(path, callback, recursive); }) : function () { return noopFileWatcher; },
             setTimeout: system.setTimeout ? (function (callback, ms) {
-                var _a;
                 var args = [];
                 for (var _i = 2; _i < arguments.length; _i++) {
                     args[_i - 2] = arguments[_i];
                 }
+                var _a;
                 return (_a = system.setTimeout).call.apply(_a, [system, callback, ms].concat(args));
             }) : ts.noop,
             clearTimeout: system.clearTimeout ? (function (timeoutId) { return system.clearTimeout(timeoutId); }) : ts.noop,
