@@ -30,13 +30,21 @@ namespace BundleTransformer.NUglify
 		/// <returns>Asset with minified js content.</returns>
 		public IAsset Minify(IAsset asset)
 		{
-			var uglifyResult = Uglify.Js(asset.Content);
+			UglifyResult uglifyResult;
+			try
+			{
+				uglifyResult = Uglify.Js(asset.Content);
+			}
+			catch (Exception e)
+			{
+				throw new AssetMinificationException(string.Format(Strings.Minifiers_MinificationSyntaxError, CODE_TYPE,
+					asset.Url, MINIFIER_NAME, e.Message));
+			}
 
 			if (uglifyResult.HasErrors)
 			{
-				throw new AssetMinificationException(
-					string.Format(Strings.Minifiers_MinificationSyntaxError, CODE_TYPE, asset.Url, MINIFIER_NAME,
-						string.Join(Environment.NewLine, uglifyResult.Errors.Select(x => x.ToString()))));
+				throw new AssetMinificationException(string.Format(Strings.Minifiers_MinificationSyntaxError, CODE_TYPE,
+					asset.Url, MINIFIER_NAME, string.Join(Environment.NewLine, uglifyResult.Errors.Select(x => x.ToString()))));
 			}
 
 			asset.Content = uglifyResult.Code;
