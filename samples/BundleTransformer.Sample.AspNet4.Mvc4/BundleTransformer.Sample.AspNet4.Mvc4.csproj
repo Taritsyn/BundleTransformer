@@ -281,6 +281,7 @@
     <Content Include="Global.asax" />
     <Content Include="Images\twitter.png" />
     <None Include="Scripts\coffee\TestCoffeeScriptMarkdown.coffee.md" />
+    <Content Include="Scripts\es6\es6-sample.js" />
     <Content Include="Scripts\externs\common.js" />
     <Content Include="Scripts\externs\handlebars\handlebars.runtime.js" />
     <Content Include="Scripts\externs\handlebars\TestHandlebars.js" />
@@ -397,6 +398,10 @@
     <ProjectReference Include="..\..\src\BundleTransformer.MicrosoftAjax\BundleTransformer.MicrosoftAjax.csproj">
       <Project>{72a5e68c-6919-4dd7-9d30-e07a857806d4}</Project>
       <Name>BundleTransformer.MicrosoftAjax</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\BundleTransformer.NUglify\BundleTransformer.NUglify.csproj">
+      <Project>{1412d1ed-bc22-4502-a76f-60bd682bec81}</Project>
+      <Name>BundleTransformer.NUglify</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Packer\BundleTransformer.Packer.csproj">
       <Project>{3f489276-a9c9-4bf4-a3e1-5fb187e5017c}</Project>
