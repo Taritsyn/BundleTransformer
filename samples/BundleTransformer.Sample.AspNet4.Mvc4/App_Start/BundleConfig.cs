@@ -5,6 +5,7 @@ using BundleTransformer.Core.Bundles;
 using BundleTransformer.Core.Orderers;
 using BundleTransformer.Core.Resolvers;
 using BundleTransformer.Core.Transformers;
+using BundleTransformer.NUglify;
 
 namespace BundleTransformer.Sample.AspNet4.Mvc4
 {
@@ -99,6 +100,13 @@ namespace BundleTransformer.Sample.AspNet4.Mvc4
 			scriptsDirectoryBundle.Transforms.Add(new ScriptTransformer(
 				new[] { "*.all.js", "_references.js" }));
 			bundles.Add(scriptsDirectoryBundle);
+
+			var es6Bundle = new CustomScriptBundle("~/Bundles/es6-sample")
+				.Include("~/Scripts/es6/es6-sample.js");
+
+			es6Bundle.Transforms.Clear();
+			es6Bundle.Transforms.Add(new ScriptTransformer(new NUglifyMinifier()));
+			bundles.Add(es6Bundle);
 		}
 	}
 }

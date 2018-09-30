@@ -59,6 +59,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.Sample.AspNet4.Mvc4", "samples\BundleTransformer.Sample.AspNet4.Mvc4\BundleTransformer.Sample.AspNet4.Mvc4.csproj", "{22433A9D-93D7-4C11-8540-A79A05BDCF63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BundleTransformer.NUglify", "src\BundleTransformer.NUglify\BundleTransformer.NUglify.csproj", "{1412D1ED-BC22-4502-A76F-60BD682BEC81}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -229,6 +231,18 @@ Global
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63}.Release|x64.ActiveCfg = Release|Any CPU
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63}.Release|x86.ActiveCfg = Release|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Debug|x64.Build.0 = Debug|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Debug|x86.Build.0 = Debug|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Release|x64.ActiveCfg = Release|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Release|x64.Build.0 = Release|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Release|x86.ActiveCfg = Release|Any CPU
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -253,5 +267,6 @@ Global
 		{AF409D45-61D1-4906-B7CA-92AB133F3044} = {300F3D87-99D4-4DD7-BC4F-AC1144D1E7B2}
 		{30920DFA-8814-4413-AF0E-5C38601F6682} = {6776745D-5712-4210-9180-43BCE7895075}
 		{22433A9D-93D7-4C11-8540-A79A05BDCF63} = {1556868B-01ED-4001-8BD3-07AB2AF47169}
+		{1412D1ED-BC22-4502-A76F-60BD682BEC81} = {300F3D87-99D4-4DD7-BC4F-AC1144D1E7B2}
 	EndGlobalSection
 EndGlobal
