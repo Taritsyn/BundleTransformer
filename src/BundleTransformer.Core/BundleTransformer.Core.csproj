@@ -145,6 +145,7 @@
     <Compile Include="PostProcessors\PostProcessorBase.cs" />
     <Compile Include="PostProcessors\PostProcessorNotFoundException.cs" />
     <Compile Include="Resolvers\CustomBundleResolver.cs" />
+    <Compile Include="Utilities\StringBuilderPool.cs" />
     <Compile Include="Utilities\StringExtensions.cs" />
     <Compile Include="AssetNodeMatchBase.cs" />
     <Compile Include="Assets\StyleContext.cs" />

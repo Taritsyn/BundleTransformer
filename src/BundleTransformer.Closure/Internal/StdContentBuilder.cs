@@ -1,17 +1,20 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text;
+
+using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Closure.Internal
 {
 	/// <summary>
 	/// Builds a text content from standard streams
 	/// </summary>
-	internal sealed class StdContentBuilder
+	internal sealed class StdContentBuilder : IDisposable
 	{
 		/// <summary>
 		/// Text content builder
 		/// </summary>
-		private readonly StringBuilder _result = new StringBuilder();
+		private StringBuilder _result = StringBuilderPool.GetBuilder();
 
 		/// <summary>
 		/// Synchronizer
@@ -51,6 +54,15 @@ namespace BundleTransformer.Closure.Internal
 					_result.AppendLine(e.Data);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Destroys a content builder
+		/// </summary>
+		public void Dispose()
+		{
+			StringBuilderPool.ReleaseBuilder(_result);
+			_result = null;
 		}
 	}
 }

@@ -43,7 +43,7 @@ namespace BundleTransformer.Core.Combiners
 
 		protected override string CombineAssetContent(IList<IAsset> assets)
 		{
-			var contentBuilder = new StringBuilder();
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 			string topCharset = string.Empty;
 			var imports = new List<string>();
 
@@ -85,7 +85,10 @@ namespace BundleTransformer.Core.Combiners
 				contentBuilder.Insert(0, topCharset + Environment.NewLine);
 			}
 
-			return contentBuilder.ToString();
+			string content = contentBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(contentBuilder);
+
+			return content;
 		}
 
 		/// <summary>
@@ -149,7 +152,7 @@ namespace BundleTransformer.Core.Combiners
 				.ToList()
 				;
 
-			var contentBuilder = new StringBuilder();
+			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
@@ -168,12 +171,12 @@ namespace BundleTransformer.Core.Combiners
 				{
 					int nextPosition = nodePosition + match.Length;
 
-					ProcessOtherContent(contentBuilder, content,
+					ProcessOtherContent(resultBuilder, content,
 						ref currentPosition, nextPosition);
 				}
 				else if (nodeType == CssNodeType.CharsetRule || nodeType == CssNodeType.ImportRule)
 				{
-					ProcessOtherContent(contentBuilder, content,
+					ProcessOtherContent(resultBuilder, content,
 						ref currentPosition, nodePosition);
 
 					if (nodeType == CssNodeType.CharsetRule)
@@ -207,11 +210,14 @@ namespace BundleTransformer.Core.Combiners
 
 			if (currentPosition > 0 && currentPosition <= endPosition)
 			{
-				ProcessOtherContent(contentBuilder, content,
+				ProcessOtherContent(resultBuilder, content,
 					ref currentPosition, endPosition + 1);
 			}
 
-			return contentBuilder.ToString();
+			string result = resultBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(resultBuilder);
+
+			return result;
 		}
 
 		/// <summary>

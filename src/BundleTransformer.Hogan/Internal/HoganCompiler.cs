@@ -161,7 +161,7 @@ namespace BundleTransformer.Hogan.Internal
 		private static string WrapCompiledTemplateCode(string compiledCode, string variableName,
 			string templateName, bool enableNativeMinification)
 		{
-			var contentBuilder = new StringBuilder();
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 			if (!enableNativeMinification)
 			{
 				contentBuilder.AppendFormatLine("if (!!!{0}) var {0} = {{}};", variableName);
@@ -175,7 +175,10 @@ namespace BundleTransformer.Hogan.Internal
 					variableName, templateName, compiledCode);
 			}
 
-			return contentBuilder.ToString();
+			string content = contentBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(contentBuilder);
+
+			return content;
 		}
 
 		/// <summary>
@@ -221,14 +224,17 @@ namespace BundleTransformer.Hogan.Internal
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(string message, string currentFilePath)
 		{
-			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(currentFilePath))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, currentFilePath);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, currentFilePath);
 			}
 
-			return errorMessage.ToString();
+			string errorMessage = errorMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+			return errorMessage;
 		}
 
 		/// <summary>

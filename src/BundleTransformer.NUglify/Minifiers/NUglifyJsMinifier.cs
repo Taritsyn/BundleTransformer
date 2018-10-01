@@ -708,6 +708,7 @@ namespace BundleTransformer.NUglify.Minifiers
 			string newContent;
 			string assetUrl = asset.Url;
 
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 			var documentContext = new DocumentContext(asset.Content)
 			{
 				FileContext = assetUrl
@@ -717,9 +718,7 @@ namespace BundleTransformer.NUglify.Minifiers
 
 			try
 			{
-				var stringBuilder = new StringBuilder();
-
-				using (var stringWriter = new StringWriter(stringBuilder, CultureInfo.InvariantCulture))
+				using (var stringWriter = new StringWriter(contentBuilder, CultureInfo.InvariantCulture))
 				{
 					BlockStatement block = jsParser.Parse(documentContext);
 					if (block != null)
@@ -740,7 +739,7 @@ namespace BundleTransformer.NUglify.Minifiers
 					}
 				}
 
-				newContent = stringBuilder.ToString();
+				newContent = contentBuilder.ToString();
 			}
 			catch (NUglifyParsingException e)
 			{
@@ -757,6 +756,7 @@ namespace BundleTransformer.NUglify.Minifiers
 			finally
 			{
 				jsParser.CompilerError -= ParserErrorHandler;
+				StringBuilderPool.ReleaseBuilder(contentBuilder);
 			}
 
 			asset.Content = newContent;

@@ -354,16 +354,19 @@ namespace BundleTransformer.CleanCss.Internal
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(string message, bool isError, string currentFilePath)
 		{
-			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
+			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 				isError ? CoreStrings.ErrorType_Error : CoreStrings.ErrorType_Warning);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(currentFilePath))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, currentFilePath);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, currentFilePath);
 			}
 
-			return errorMessage.ToString();
+			string errorMessage = errorMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+			return errorMessage;
 		}
 
 		/// <summary>

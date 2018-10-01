@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -41,8 +41,7 @@
    =============
    RELEASE NOTES
    =============
-   For compatibility with Mono was changed a implementation of the `ToAbsolutePath`
-   method of `VirtualFileSystemWrapper` class.
+   Optimized a memory usage.
 
    ====================
    POST-INSTALL ACTIONS

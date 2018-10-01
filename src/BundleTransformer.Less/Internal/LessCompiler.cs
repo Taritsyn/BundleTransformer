@@ -135,7 +135,7 @@ namespace BundleTransformer.Less.Internal
 			if (!string.IsNullOrWhiteSpace(globalVariables)
 				|| !string.IsNullOrWhiteSpace(modifyVariables))
 			{
-				var contentBuilder = new StringBuilder();
+				StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 				if (!string.IsNullOrWhiteSpace(globalVariables))
 				{
 					contentBuilder.AppendLine(ParseVariables(globalVariables, "GlobalVariables"));
@@ -148,6 +148,7 @@ namespace BundleTransformer.Less.Internal
 				}
 
 				processedContent = contentBuilder.ToString();
+				StringBuilderPool.ReleaseBuilder(contentBuilder);
 			}
 
 			try
@@ -260,7 +261,7 @@ namespace BundleTransformer.Less.Internal
 
 			if (nameValueList.Length > 0)
 			{
-				var variablesBuilder = new StringBuilder();
+				StringBuilder variablesBuilder = StringBuilderPool.GetBuilder();
 
 				foreach (string nameValue in nameValueList)
 				{
@@ -291,6 +292,7 @@ namespace BundleTransformer.Less.Internal
 				}
 
 				variables = variablesBuilder.ToString();
+				StringBuilderPool.ReleaseBuilder(variablesBuilder);
 			}
 
 			return variables;
@@ -328,33 +330,36 @@ namespace BundleTransformer.Less.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(newSourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			var errorMessage = new StringBuilder();
+			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
 			if (!string.IsNullOrWhiteSpace(type))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType, type);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType, type);
 			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(filePath))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
 			}
 			if (lineNumber > 0)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
 					lineNumber.ToString(CultureInfo.InvariantCulture));
 			}
 			if (columnNumber > 0)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
 					columnNumber.ToString(CultureInfo.InvariantCulture));
 			}
 			if (!string.IsNullOrWhiteSpace(sourceFragment))
 			{
-				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+				errorMessageBuilder.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
 					CoreStrings.ErrorDetails_SourceError, sourceFragment);
 			}
 
-			return errorMessage.ToString();
+			string errorMessage = errorMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+			return errorMessage;
 		}
 
 		/// <summary>
@@ -364,18 +369,21 @@ namespace BundleTransformer.Less.Internal
 		/// <returns>Warning message</returns>
 		private string FormatWarningList(JArray warningList)
 		{
-			var warningMessage = new StringBuilder();
+			StringBuilder warningMessageBuilder = StringBuilderPool.GetBuilder();
 
-			warningMessage.AppendLine(Strings.WarningList_Header);
-			warningMessage.AppendLine();
+			warningMessageBuilder.AppendLine(Strings.WarningList_Header);
+			warningMessageBuilder.AppendLine();
 
 			foreach (string warning in warningList)
 			{
-				warningMessage.AppendFormatLine(" * {0}", warning);
-				warningMessage.AppendLine();
+				warningMessageBuilder.AppendFormatLine(" * {0}", warning);
+				warningMessageBuilder.AppendLine();
 			}
 
-			return warningMessage.ToString();
+			string warningMessage = warningMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(warningMessageBuilder);
+
+			return warningMessage;
 		}
 
 		/// <summary>

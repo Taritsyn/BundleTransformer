@@ -34,27 +34,31 @@ namespace BundleTransformer.Core.FileSystem
 		public string GetFileTextContent(string virtualPath)
 		{
 			string content;
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 
 			try
 			{
 				VirtualFile virtualFile = BundleTable.VirtualPathProvider.GetFile(virtualPath);
-				var stringBuilder = new StringBuilder();
 
 				using (var streamReader = new StreamReader(virtualFile.Open()))
 				{
 					// Fixes a single CR/LF
 					while (streamReader.Peek() >= 0)
 					{
-						stringBuilder.AppendLine(streamReader.ReadLine());
+						contentBuilder.AppendLine(streamReader.ReadLine());
 					}
 				}
 
-				content = stringBuilder.ToString();
+				content = contentBuilder.ToString();
 			}
 			catch (FileNotFoundException e)
 			{
 				throw new FileNotFoundException(
 					string.Format(Strings.Common_FileNotExist, virtualPath), virtualPath, e);
+			}
+			finally
+			{
+				StringBuilderPool.ReleaseBuilder(contentBuilder);
 			}
 
 			return content;

@@ -270,7 +270,7 @@ namespace BundleTransformer.WG.Minifiers
 				.ToList()
 				;
 
-			var contentBuilder = new StringBuilder();
+			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
@@ -289,12 +289,12 @@ namespace BundleTransformer.WG.Minifiers
 				{
 					int nextPosition = nodePosition + match.Length;
 
-					ProcessOtherContent(contentBuilder, content,
+					ProcessOtherContent(resultBuilder, content,
 						ref currentPosition, nextPosition);
 				}
 				else if (nodeType == CssNodeType.CharsetRule)
 				{
-					ProcessOtherContent(contentBuilder, content,
+					ProcessOtherContent(resultBuilder, content,
 						ref currentPosition, nodePosition);
 
 					string charset = match.Groups["charset"].Value;
@@ -311,11 +311,14 @@ namespace BundleTransformer.WG.Minifiers
 
 			if (currentPosition > 0 && currentPosition <= endPosition)
 			{
-				ProcessOtherContent(contentBuilder, content,
+				ProcessOtherContent(resultBuilder, content,
 					ref currentPosition, endPosition + 1);
 			}
 
-			return contentBuilder.ToString();
+			string result = resultBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(resultBuilder);
+
+			return result;
 		}
 
 		/// <summary>
@@ -364,7 +367,7 @@ namespace BundleTransformer.WG.Minifiers
 				string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 					new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-				var errorMessageBuilder = new StringBuilder();
+				StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
 					message);
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode,
@@ -394,6 +397,7 @@ namespace BundleTransformer.WG.Minifiers
 				}
 
 				errorMessage = errorMessageBuilder.ToString();
+				StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
 			}
 			else
 			{

@@ -248,16 +248,19 @@ namespace BundleTransformer.Yui.Minifiers
 				var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
 				if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
 				{
-					var errorMessage = new StringBuilder();
+					StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
 					foreach (var errorDetail in errorReporter.ErrorMessages)
 					{
-						errorMessage.AppendLine(errorDetail);
-						errorMessage.AppendLine();
+						errorMessageBuilder.AppendLine(errorDetail);
+						errorMessageBuilder.AppendLine();
 					}
 
 					errorReporter.ErrorMessages.Clear();
 
-					throw new YuiCompressingException(errorMessage.ToString());
+					string errorMessage = errorMessageBuilder.ToString();
+					StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+					throw new YuiCompressingException(errorMessage);
 				}
 			}
 			catch (EcmaScriptRuntimeException e)

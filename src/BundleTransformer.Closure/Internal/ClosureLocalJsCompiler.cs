@@ -121,8 +121,8 @@ namespace BundleTransformer.Closure.Internal
 			string assetExternsTempDirectoryPath = Path.Combine(_tempDirectoryPath, Guid.NewGuid().ToString());
 			bool assetExternsTempDirectoryCreated = false;
 
-			var args = new StringBuilder();
-			args.AppendFormat(@"-jar ""{0}"" ", _closureCompilerAppPath);
+			StringBuilder argsBuilder = StringBuilderPool.GetBuilder();
+			argsBuilder.AppendFormat(@"-jar ""{0}"" ", _closureCompilerAppPath);
 			if (_options.CompilationLevel == CompilationLevel.Advanced
 				&& (commonExternsDependencyCount > 0 || externsDependencies.Count > 0))
 			{
@@ -164,15 +164,18 @@ namespace BundleTransformer.Closure.Internal
 
 				foreach (string externsTempFilePath in allExternsTempFilePaths)
 				{
-					args.AppendFormat(@"--externs ""{0}"" ", externsTempFilePath);
+					argsBuilder.AppendFormat(@"--externs ""{0}"" ", externsTempFilePath);
 				}
 			}
-			args.Append(_optionsString);
+			argsBuilder.Append(_optionsString);
+
+			string args = argsBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(argsBuilder);
 
 			var processInfo = new ProcessStartInfo
 			{
 				FileName = _javaVmPath,
-				Arguments = args.ToString(),
+				Arguments = args,
 				CreateNoWindow = true,
 				WindowStyle = ProcessWindowStyle.Hidden,
 				UseShellExecute = false,
@@ -241,6 +244,9 @@ namespace BundleTransformer.Closure.Internal
 					process.Dispose();
 				}
 
+				stdErrorBuilder.Dispose();
+				stdOutputBuilder.Dispose();
+
 				if (assetExternsTempDirectoryCreated && Directory.Exists(assetExternsTempDirectoryPath))
 				{
 					Directory.Delete(assetExternsTempDirectoryPath, true);
@@ -292,29 +298,29 @@ namespace BundleTransformer.Closure.Internal
 		/// <returns>Command line arguments</returns>
 		private static string ConvertCompilationOptionsToArgs(LocalJsCompilationOptions options)
 		{
-			var args = new StringBuilder();
+			StringBuilder argsBuilder = StringBuilderPool.GetBuilder();
 
 			if (options.AcceptConstKeyword)
 			{
-				args.Append("--accept_const_keyword ");
+				argsBuilder.Append("--accept_const_keyword ");
 			}
 
 			if (options.AllowEs6Output)
 			{
-				args.Append("--allow_es6_out ");
+				argsBuilder.Append("--allow_es6_out ");
 			}
 
 			if (options.AngularPass)
 			{
-				args.Append("--angular_pass ");
+				argsBuilder.Append("--angular_pass ");
 			}
 
 			if (!string.IsNullOrWhiteSpace(options.Charset))
 			{
-				args.AppendFormat("--charset {0} ", options.Charset);
+				argsBuilder.AppendFormat("--charset {0} ", options.Charset);
 			}
 
-			args.AppendFormat("--compilation_level {0} ", ConvertCompilationLevelEnumValueToCode(options.CompilationLevel));
+			argsBuilder.AppendFormat("--compilation_level {0} ", ConvertCompilationLevelEnumValueToCode(options.CompilationLevel));
 
 			IDictionary<string, string> defs = ParseDefinitions(options.DefinitionList);
 			if (defs.Count > 0)
@@ -324,13 +330,13 @@ namespace BundleTransformer.Closure.Internal
 					string variableName = def.Key;
 					string variableValue = def.Value;
 
-					args.Append("--define ");
-					args.Append(variableName);
+					argsBuilder.Append("--define ");
+					argsBuilder.Append(variableName);
 					if (variableValue != null)
 					{
-						args.AppendFormat("={0}", variableValue);
+						argsBuilder.AppendFormat("={0}", variableValue);
 					}
-					args.Append(" ");
+					argsBuilder.Append(" ");
 				}
 			}
 
@@ -340,13 +346,13 @@ namespace BundleTransformer.Closure.Internal
 			{
 				foreach (string warningClassName in errors)
 				{
-					args.AppendFormat("--jscomp_error {0} ", warningClassName);
+					argsBuilder.AppendFormat("--jscomp_error {0} ", warningClassName);
 				}
 			}
 
 			if (options.ExportLocalPropertyDefinitions)
 			{
-				args.Append("--export_local_property_definitions ");
+				argsBuilder.Append("--export_local_property_definitions ");
 			}
 
 			string[] extraAnnotationNames = Utils.ConvertToStringCollection(options.ExtraAnnotationNameList, ',',
@@ -355,56 +361,56 @@ namespace BundleTransformer.Closure.Internal
 			{
 				foreach (string extraAnnotationName in extraAnnotationNames)
 				{
-					args.AppendFormat("--extra_annotation_name {0} ", extraAnnotationName);
+					argsBuilder.AppendFormat("--extra_annotation_name {0} ", extraAnnotationName);
 				}
 			}
 
 			if (options.GenerateExports)
 			{
-				args.Append("--generate_exports ");
+				argsBuilder.Append("--generate_exports ");
 			}
 
 			ExperimentalLanguageSpec languageInput = options.LanguageInput;
 			if (languageInput != ExperimentalLanguageSpec.None)
 			{
-				args.AppendFormat("--language_in {0} ", ConvertLanguageSpecEnumValueToCode(languageInput));
+				argsBuilder.AppendFormat("--language_in {0} ", ConvertLanguageSpecEnumValueToCode(languageInput));
 			}
 
 			ExperimentalLanguageSpec languageOutput = (options.LanguageOutput != ExperimentalLanguageSpec.None) ?
 				options.LanguageOutput : languageInput;
 			if (languageOutput != ExperimentalLanguageSpec.None)
 			{
-				args.AppendFormat("--language_out {0} ", ConvertLanguageSpecEnumValueToCode(languageOutput));
+				argsBuilder.AppendFormat("--language_out {0} ", ConvertLanguageSpecEnumValueToCode(languageOutput));
 			}
 
 			if (options.PrettyPrint)
 			{
-				args.Append("--formatting PRETTY_PRINT ");
+				argsBuilder.Append("--formatting PRETTY_PRINT ");
 			}
 
 			if (options.ProcessClosurePrimitives)
 			{
-				args.Append("--process_closure_primitives ");
+				argsBuilder.Append("--process_closure_primitives ");
 			}
 
 			if (options.ProcessJqueryPrimitives)
 			{
-				args.Append("--process_jquery_primitives ");
+				argsBuilder.Append("--process_jquery_primitives ");
 			}
 
 			if (options.SingleQuotes)
 			{
-				args.Append("--formatting SINGLE_QUOTES ");
+				argsBuilder.Append("--formatting SINGLE_QUOTES ");
 			}
 
 			if (options.ThirdParty)
 			{
-				args.Append("--third_party ");
+				argsBuilder.Append("--third_party ");
 			}
 
 			if (options.TranspileOnly)
 			{
-				args.Append("--transpile_only ");
+				argsBuilder.Append("--transpile_only ");
 			}
 
 			string[] turnOffWarningClasses = Utils.ConvertToStringCollection(options.TurnOffWarningClassList, ',',
@@ -413,18 +419,18 @@ namespace BundleTransformer.Closure.Internal
 			{
 				foreach (string warningClassName in turnOffWarningClasses)
 				{
-					args.AppendFormat("--jscomp_off {0} ", warningClassName);
+					argsBuilder.AppendFormat("--jscomp_off {0} ", warningClassName);
 				}
 			}
 
 			if (options.UseOnlyCustomExterns)
 			{
-				args.Append("--use_only_custom_externs ");
+				argsBuilder.Append("--use_only_custom_externs ");
 			}
 
 			if (options.UseTypesForOptimization)
 			{
-				args.Append("--use_types_for_optimization ");
+				argsBuilder.Append("--use_types_for_optimization ");
 			}
 
 			string[] warnings = Utils.ConvertToStringCollection(options.WarningList, ',',
@@ -433,31 +439,34 @@ namespace BundleTransformer.Closure.Internal
 			{
 				foreach (string warningClassName in warnings)
 				{
-					args.AppendFormat("--jscomp_warning {0} ", warningClassName);
+					argsBuilder.AppendFormat("--jscomp_warning {0} ", warningClassName);
 				}
 			}
 
 			int severity = options.Severity;
 			if (severity >= 0 && severity <= 3)
 			{
-				args.Append("--warning_level ");
+				argsBuilder.Append("--warning_level ");
 
 				switch (severity)
 				{
 					case 0:
 					case 1:
-						args.Append("QUIET ");
+						argsBuilder.Append("QUIET ");
 						break;
 					case 2:
-						args.Append("DEFAULT ");
+						argsBuilder.Append("DEFAULT ");
 						break;
 					case 3:
-						args.Append("VERBOSE ");
+						argsBuilder.Append("VERBOSE ");
 						break;
 				}
 			}
 
-			return args.ToString();
+			string args = argsBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(argsBuilder);
+
+			return args;
 		}
 
 		/// <summary>
@@ -596,7 +605,7 @@ namespace BundleTransformer.Closure.Internal
 						? errorStringGroups["sourceFragment"].Value.Trim()
 						: string.Empty;
 
-					var errorMessageBuilder = new StringBuilder();
+					StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
 					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 						errorType.ToLowerInvariant());
@@ -613,6 +622,7 @@ namespace BundleTransformer.Closure.Internal
 					}
 
 					string errorMessage = errorMessageBuilder.ToString();
+					StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
 
 					if (string.Equals(errorType, "ERROR", StringComparison.OrdinalIgnoreCase))
 					{

@@ -27,7 +27,7 @@ namespace BundleTransformer.Core.Combiners
 
 		protected override string CombineAssetContent(IList<IAsset> assets)
 		{
-			var contentBuilder = new StringBuilder();
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 			int assetCount = assets.Count;
 			int lastAssetIndex = assetCount - 1;
 
@@ -57,7 +57,10 @@ namespace BundleTransformer.Core.Combiners
 				}
 			}
 
-			return contentBuilder.ToString();
+			string content = contentBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(contentBuilder);
+
+			return content;
 		}
 	}
 }

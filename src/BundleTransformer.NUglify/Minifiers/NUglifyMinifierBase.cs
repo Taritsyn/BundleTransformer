@@ -108,25 +108,28 @@ namespace BundleTransformer.NUglify.Minifiers
 		/// <returns>Detailed error message</returns>
 		internal static string FormatContextError(UglifyError error)
 		{
-			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, error.Message);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, error.ErrorCode);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, error.Severity);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, error.Subcategory);
+			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, error.Message);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, error.ErrorCode);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, error.Severity);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Subcategory, error.Subcategory);
 			if (!string.IsNullOrWhiteSpace(error.HelpKeyword))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword, error.HelpKeyword);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_HelpKeyword, error.HelpKeyword);
 			}
 			if (!string.IsNullOrWhiteSpace(error.File))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, error.File);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, error.File);
 			}
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartLine, error.StartLine);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn, error.StartColumn);
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndLine, error.EndLine);
-			errorMessage.AppendFormat("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, error.EndColumn);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartLine, error.StartLine);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_StartColumn, error.StartColumn);
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_EndLine, error.EndLine);
+			errorMessageBuilder.AppendFormat("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, error.EndColumn);
 
-			return errorMessage.ToString();
+			string errorMessage = errorMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+			return errorMessage;
 		}
 
 		/// <summary>

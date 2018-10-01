@@ -6,8 +6,9 @@ using System.Text.RegularExpressions;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
-using BundleTransformer.Core.Resources;
 using BundleTransformer.Core.Helpers;
+using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Core.PostProcessors
 {
@@ -163,7 +164,7 @@ namespace BundleTransformer.Core.PostProcessors
 				.ToList()
 				;
 
-			var contentBuilder = new StringBuilder();
+			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
@@ -180,7 +181,7 @@ namespace BundleTransformer.Core.PostProcessors
 
 				if (nodeType == CssNodeType.UrlRule || nodeType == CssNodeType.ImportRule)
 				{
-					ProcessOtherContent(contentBuilder, content,
+					ProcessOtherContent(resultBuilder, content,
 						ref currentPosition, nodePosition);
 
 					if (nodeType == CssNodeType.UrlRule)
@@ -194,7 +195,7 @@ namespace BundleTransformer.Core.PostProcessors
 						string urlRule = match.Value;
 						string processedUrlRule = ProcessUrlRule(path, url, quote);
 
-						contentBuilder.Append(processedUrlRule);
+						resultBuilder.Append(processedUrlRule);
 						currentPosition += urlRule.Length;
 					}
 					else if (nodeType == CssNodeType.ImportRule)
@@ -206,7 +207,7 @@ namespace BundleTransformer.Core.PostProcessors
 						string importRule = match.Value;
 						string processedImportRule = ProcessImportRule(path, url);
 
-						contentBuilder.Append(processedImportRule);
+						resultBuilder.Append(processedImportRule);
 						currentPosition += importRule.Length;
 					}
 				}
@@ -214,18 +215,21 @@ namespace BundleTransformer.Core.PostProcessors
 				{
 					int nextPosition = nodePosition + match.Length;
 
-					ProcessOtherContent(contentBuilder, content,
+					ProcessOtherContent(resultBuilder, content,
 						ref currentPosition, nextPosition);
 				}
 			}
 
 			if (currentPosition > 0 && currentPosition <= endPosition)
 			{
-				ProcessOtherContent(contentBuilder, content,
+				ProcessOtherContent(resultBuilder, content,
 					ref currentPosition, endPosition + 1);
 			}
 
-			return contentBuilder.ToString();
+			string result = resultBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(resultBuilder);
+
+			return result;
 		}
 
 		/// <summary>

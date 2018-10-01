@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using BundleTransformer.Core.Resources;
+using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Core.Helpers
 {
@@ -334,7 +335,7 @@ namespace BundleTransformer.Core.Helpers
 				return result;
 			}
 
-			var stringBuilder = new StringBuilder();
+			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
 			int chunkCount = length / chunkSize;
 
 			for (int chunkIndex = 0; chunkIndex <= chunkCount; chunkIndex++)
@@ -343,10 +344,11 @@ namespace BundleTransformer.Core.Helpers
 				string chunk = (chunkIndex < chunkCount) ?
 					stringToEscape.Substring(startIndex, chunkSize) : stringToEscape.Substring(startIndex);
 
-				stringBuilder.Append(Uri.EscapeDataString(chunk));
+				resultBuilder.Append(Uri.EscapeDataString(chunk));
 			}
 
-			result = stringBuilder.ToString();
+			result = resultBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(resultBuilder);
 
 			return result;
 		}

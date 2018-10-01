@@ -287,7 +287,7 @@ namespace BundleTransformer.Closure.Internal
 		private static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string currentFilePath,
 			DependencyCollection externsDependencies)
 		{
-			var errorMessageBuilder = new StringBuilder();
+			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
 			if (errorType == ErrorType.ServerError || errorType == ErrorType.Error)
 			{
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
@@ -364,7 +364,10 @@ namespace BundleTransformer.Closure.Internal
 					errorDetails.Value<string>("line"));
 			}
 
-			return errorMessageBuilder.ToString();
+			string errorMessage = errorMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+			return errorMessage;
 		}
 	}
 }

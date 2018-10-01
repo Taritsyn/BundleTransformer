@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 
 using BundleTransformer.Core.Helpers;
+using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Closure.Internal
 {
@@ -35,20 +36,23 @@ namespace BundleTransformer.Closure.Internal
 				throw new ArgumentNullException("nameValueCollection");
 			}
 
-			var stringBuilder = new StringBuilder();
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 
 			foreach (KeyValuePair<string, string> keyValuePair in nameValueCollection)
 			{
-				if (stringBuilder.Length > 0)
+				if (contentBuilder.Length > 0)
 				{
-					stringBuilder.Append("&");
+					contentBuilder.Append("&");
 				}
-				stringBuilder.Append(Encode(keyValuePair.Key));
-				stringBuilder.Append("=");
-				stringBuilder.Append(Encode(keyValuePair.Value));
+				contentBuilder.Append(Encode(keyValuePair.Key));
+				contentBuilder.Append("=");
+				contentBuilder.Append(Encode(keyValuePair.Value));
 			}
 
-			return _defaultHttpEncoding.GetBytes(stringBuilder.ToString());
+			string content = contentBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(contentBuilder);
+
+			return _defaultHttpEncoding.GetBytes(content);
 		}
 
 		private static string Encode(string data)

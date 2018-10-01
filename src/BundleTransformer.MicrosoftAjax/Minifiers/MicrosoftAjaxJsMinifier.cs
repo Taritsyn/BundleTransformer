@@ -16,6 +16,7 @@ using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Minifiers;
 using BundleTransformer.Core.Utilities;
+using BtStringBuilderPool = BundleTransformer.Core.Utilities.StringBuilderPool;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.MicrosoftAjax.Configuration;
@@ -705,6 +706,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			string newContent;
 			string assetUrl = asset.Url;
 
+			StringBuilder contentBuilder = BtStringBuilderPool.GetBuilder();
 			var documentContext = new DocumentContext(asset.Content)
 			{
 				FileContext = assetUrl
@@ -714,9 +716,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 
 			try
 			{
-				var stringBuilder = new StringBuilder();
-
-				using (var stringWriter = new StringWriter(stringBuilder, CultureInfo.InvariantCulture))
+				using (var stringWriter = new StringWriter(contentBuilder, CultureInfo.InvariantCulture))
 				{
 					Block block = jsParser.Parse(documentContext);
 					if (block != null)
@@ -737,7 +737,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 					}
 				}
 
-				newContent = stringBuilder.ToString();
+				newContent = contentBuilder.ToString();
 			}
 			catch (MicrosoftAjaxParsingException e)
 			{
@@ -754,6 +754,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			finally
 			{
 				jsParser.CompilerError -= ParserErrorHandler;
+				BtStringBuilderPool.ReleaseBuilder(contentBuilder);
 			}
 
 			asset.Content = newContent;

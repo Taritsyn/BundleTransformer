@@ -18,39 +18,42 @@ namespace BundleTransformer.Core.Transformers
 		/// <param name="response">Object BundleResponse</param>
 		public void Process(BundleContext context, BundleResponse response)
 		{
-			var content = new StringBuilder();
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 
-			content.AppendLine("*************************************************************************************");
-			content.AppendLine("* BUNDLE RESPONSE                                                                   *");
-			content.AppendLine("*************************************************************************************");
+			contentBuilder.AppendLine("*************************************************************************************");
+			contentBuilder.AppendLine("* BUNDLE RESPONSE                                                                   *");
+			contentBuilder.AppendLine("*************************************************************************************");
 
 			IEnumerable<BundleFile> responseFiles = response.Files;
 			foreach (var responseFile in responseFiles)
 			{
-				content.AppendLine("  " + responseFile.IncludedVirtualPath);
+				contentBuilder.AppendLine("  " + responseFile.IncludedVirtualPath);
 			}
 
-			content.AppendLine();
+			contentBuilder.AppendLine();
 
-			content.AppendLine("*************************************************************************************");
-			content.AppendLine("* BUNDLE COLLECTION                                                                 *");
-			content.AppendLine("*************************************************************************************");
+			contentBuilder.AppendLine("*************************************************************************************");
+			contentBuilder.AppendLine("* BUNDLE COLLECTION                                                                 *");
+			contentBuilder.AppendLine("*************************************************************************************");
 			BundleCollection bundles = context.BundleCollection;
 			foreach (var bundle in bundles)
 			{
-				content.AppendFormatLine("-= {0} =-", bundle.Path);
+				contentBuilder.AppendFormatLine("-= {0} =-", bundle.Path);
 
 				IEnumerable<BundleFile> bundleFiles = bundle.EnumerateFiles(context);
 				foreach (var bundleFile in bundleFiles)
 				{
-					content.AppendLine("  " + bundleFile.IncludedVirtualPath);
+					contentBuilder.AppendLine("  " + bundleFile.IncludedVirtualPath);
 				}
 
-				content.AppendLine();
+				contentBuilder.AppendLine();
 			}
 
+			string content = contentBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(contentBuilder);
+
 			response.ContentType = "text/plain";
-			response.Content = content.ToString();
+			response.Content = content;
 		}
 	}
 }

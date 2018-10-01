@@ -228,7 +228,7 @@ namespace BundleTransformer.Handlebars.Internal
 		private static string WrapCompiledTemplateCode(string compiledCode, string templateNamespace,
 			string templateName, bool isPartial)
 		{
-			var contentBuilder = new StringBuilder();
+			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
 			if (!isPartial)
 			{
 				contentBuilder.AppendLine("(function(handlebars, templates) {");
@@ -244,7 +244,10 @@ namespace BundleTransformer.Handlebars.Internal
 				contentBuilder.AppendLine("})(Handlebars);");
 			}
 
-			return contentBuilder.ToString();
+			string content = contentBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(contentBuilder);
+
+			return content;
 		}
 
 		/// <summary>
@@ -264,29 +267,32 @@ namespace BundleTransformer.Handlebars.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			var errorMessage = new StringBuilder();
-			errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
+			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(file))
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, file);
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, file);
 			}
 			if (lineNumber > 0)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber,
 					lineNumber.ToString(CultureInfo.InvariantCulture));
 			}
 			if (columnNumber > 0)
 			{
-				errorMessage.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
+				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber,
 					columnNumber.ToString(CultureInfo.InvariantCulture));
 			}
 			if (!string.IsNullOrWhiteSpace(sourceFragment))
 			{
-				errorMessage.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+				errorMessageBuilder.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
 					CoreStrings.ErrorDetails_SourceError, sourceFragment);
 			}
 
-			return errorMessage.ToString();
+			string errorMessage = errorMessageBuilder.ToString();
+			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
+			return errorMessage;
 		}
 
 		/// <summary>
