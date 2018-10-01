@@ -398,6 +398,10 @@
       <Project>{72a5e68c-6919-4dd7-9d30-e07a857806d4}</Project>
       <Name>BundleTransformer.MicrosoftAjax</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\BundleTransformer.NUglify\BundleTransformer.NUglify.csproj">
+      <Project>{13b3c31e-be89-4bfc-b516-eb8e8d972dc5}</Project>
+      <Name>BundleTransformer.NUglify</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Packer\BundleTransformer.Packer.csproj">
       <Project>{3f489276-a9c9-4bf4-a3e1-5fb187e5017c}</Project>
       <Name>BundleTransformer.Packer</Name>

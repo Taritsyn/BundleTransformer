@@ -1,0 +1,21 @@
+﻿<configuration>
+	<configSections>
+		<sectionGroup name="bundleTransformer">
+			<section name="nuglify" type="BundleTransformer.NUglify.Configuration.NUglifySettings, BundleTransformer.NUglify" />
+		</sectionGroup>
+	</configSections>
+	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+		<core>
+			<css>
+				<minifiers>
+					<add name="NUglifyCssMinifier" type="BundleTransformer.NUglify.Minifiers.NUglifyCssMinifier, BundleTransformer.NUglify" />
+				</minifiers>
+			</css>
+			<js>
+				<minifiers>
+					<add name="NUglifyJsMinifier" type="BundleTransformer.NUglify.Minifiers.NUglifyJsMinifier, BundleTransformer.NUglify" />
+				</minifiers>
+			</js>
+		</core>
+	</bundleTransformer>
+</configuration>

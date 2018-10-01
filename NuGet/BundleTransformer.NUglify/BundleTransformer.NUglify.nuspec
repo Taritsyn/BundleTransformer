@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+	<metadata>
+		<id>BundleTransformer.NUglify</id>
+		<version>1.9.213</version>
+		<title>Bundle Transformer: NUglify</title>
+		<authors>Andrey Taritsyn</authors>
+		<owners>Andrey Taritsyn</owners>
+		<licenseUrl>https://github.com/Taritsyn/BundleTransformer/blob/master/LICENSE.txt</licenseUrl>
+		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
+		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</iconUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>BundleTransformer.NUglify contains two minifier-adapters: `NUglifyCssMinifier` (for minification of CSS code) and `NUglifyJsMinifier` (for minification of JS code). These adapters perform minification by using the NUglify (https://github.com/xoofx/NUglify).</description>
+		<summary>BundleTransformer.NUglify contains two minifier-adapters: `NUglifyCssMinifier` (for minification of CSS code) and `NUglifyJsMinifier` (for minification of JS code). These adapters perform minification by using the NUglify.</summary>
+		<copyright>Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
+		<language>en-US</language>
+		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation NUglify</tags>
+		<dependencies>
+			<dependency id="BundleTransformer.Core" version="1.9.171" />
+			<dependency id="NUglify" version="1.5.12" />
+		</dependencies>
+		<references>
+			<reference file="BundleTransformer.NUglify.dll" />
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\src\BundleTransformer.NUglify\bin\Release\BundleTransformer.NUglify.dll" target="lib\net40" />
+		<file src="..\..\src\BundleTransformer.NUglify\bin\Release\**\BundleTransformer.NUglify.resources.dll" target="lib\net40" />
+		<file src="content\web.config.transform" target="content" />
+		<file src="readme.txt" />
+		<file src="..\..\Licenses\nuglify-license.txt" />
+	</files>
+</package>
