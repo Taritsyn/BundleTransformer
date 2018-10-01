@@ -269,6 +269,17 @@ namespace BundleTransformer.MicrosoftAjax.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets an enumeration that gives the parser a hint as to which version
+		/// of EcmaScript standards to parse the source as
+		/// </summary>
+		[ConfigurationProperty("scriptVersion", DefaultValue = ScriptVersion.None)]
+		public ScriptVersion ScriptVersion
+		{
+			get { return (ScriptVersion)this["scriptVersion"]; }
+			set { this["scriptVersion"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a boolean value indicating whether or not to force
 		/// the input code into strict mode (can still specify strict-mode in
 		/// the sources if this value is false)

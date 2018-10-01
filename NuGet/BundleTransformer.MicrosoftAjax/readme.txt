@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -15,6 +15,12 @@
    `MicrosoftAjaxCssMinifier` (for minification of CSS code) and
    `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform
    minification by using the Microsoft Ajax Minifier (http://ajaxmin.codeplex.com).
+
+   =============
+   RELEASE NOTES
+   =============
+   In configuration settings of Microsoft Ajax JS minifier was added one new
+   property - `ScriptVersion` (default `None`).
 
    ====================
    POST-INSTALL ACTIONS

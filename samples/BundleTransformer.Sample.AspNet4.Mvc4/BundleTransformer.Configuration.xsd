@@ -1212,6 +1212,18 @@ Disregard potential Mac Safari bugs (false).</xs:documentation>
 						<xs:documentation>Value indicating whether or not to reorder function and variable declarations within scopes (true), or to leave the order as specified in the original source</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
+				<xs:attribute name="scriptVersion" use="optional" default="None">
+					<xs:annotation>
+						<xs:documentation>Enumeration that gives the parser a hint as to which version of EcmaScript standards to parse the source as</xs:documentation>
+					</xs:annotation>
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="None" />
+							<xs:enumeration value="EcmaScript5" />
+							<xs:enumeration value="EcmaScript6" />
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
 				<xs:attribute name="strictMode" type="Boolean_SchemaType" use="optional" default="false">
 					<xs:annotation>
 						<xs:documentation>Boolean value indicating whether or not to force the input code into strict mode (can still specify strict-mode in the sources if this value is false)</xs:documentation>

@@ -1,4 +1,4 @@
-﻿namespace BundleTransformer.NUglify
+﻿namespace BundleTransformer.MicrosoftAjax
 {
 	public enum ScriptVersion
 	{

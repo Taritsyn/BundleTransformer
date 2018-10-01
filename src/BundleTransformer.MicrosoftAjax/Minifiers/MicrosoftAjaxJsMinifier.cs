@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 
 using Microsoft.Ajax.Utilities;
-using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
+using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
 using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
 using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
-using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
+using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
+using MsScriptVersion = Microsoft.Ajax.Utilities.ScriptVersion;
 
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
@@ -19,10 +20,11 @@ using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.MicrosoftAjax.Configuration;
 using BundleTransformer.MicrosoftAjax.Resources;
-using BtOutputMode = BundleTransformer.MicrosoftAjax.OutputMode;
+using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
 using BtEvalTreatment = BundleTransformer.MicrosoftAjax.EvalTreatment;
 using BtLocalRenaming = BundleTransformer.MicrosoftAjax.LocalRenaming;
-using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
+using BtOutputMode = BundleTransformer.MicrosoftAjax.OutputMode;
+using BtScriptVersion = BundleTransformer.MicrosoftAjax.ScriptVersion;
 
 namespace BundleTransformer.MicrosoftAjax.Minifiers
 {
@@ -540,6 +542,22 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 		}
 
 		/// <summary>
+		/// Gets or sets an enumeration that gives the parser a hint as to which version
+		/// of EcmaScript standards to parse the source as
+		/// </summary>
+		public BtScriptVersion ScriptVersion
+		{
+			get
+			{
+				return Utils.GetEnumFromOtherEnum<MsScriptVersion, BtScriptVersion>(_jsParserConfiguration.ScriptVersion);
+			}
+			set
+			{
+				_jsParserConfiguration.ScriptVersion = Utils.GetEnumFromOtherEnum<BtScriptVersion, MsScriptVersion>(value);
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets a boolean value indicating whether or not to force
 		/// the input code into strict mode (can still specify strict-mode in
 		/// the sources if this value is false)
@@ -613,6 +631,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			RemoveUnneededCode = jsMinifierConfiguration.RemoveUnneededCode;
 			RenamePairs = jsMinifierConfiguration.RenamePairs;
 			ReorderScopeDeclarations = jsMinifierConfiguration.ReorderScopeDeclarations;
+			ScriptVersion = jsMinifierConfiguration.ScriptVersion;
 			StrictMode = jsMinifierConfiguration.StrictMode;
 			StripDebugStatements = jsMinifierConfiguration.StripDebugStatements;
 		}
