@@ -344,6 +344,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 
 			try
 			{
+				// Parse the input
 				newContent = cssParser.Parse(asset.Content);
 			}
 			catch (MicrosoftAjaxParsingException e)

@@ -357,6 +357,7 @@ namespace BundleTransformer.NUglify.Minifiers
 
 			try
 			{
+				// Parse the input
 				newContent = cssParser.Parse(asset.Content);
 			}
 			catch (NUglifyParsingException e)

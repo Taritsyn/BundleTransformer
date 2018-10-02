@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                   README file for Bundle Transformer: Core v1.9.171
+                   README file for Bundle Transformer: Core v1.9.213
 
    --------------------------------------------------------------------------------
 
@@ -24,19 +24,19 @@
    code (by using the `UrlRewritingCssPostProcessor`), etc. These classes do not
    produce the minification of code in runtime, but this feature can be added by
    installing of minifier-modules (now available modules based on Microsoft Ajax
-   Minifier, YUI Compressor for .NET, Google Closure Compiler, Douglas Crockford's
-   JSMin, Dean Edwards' Packer, Mihai Bazon's UglifyJS, Sergey Kryzhanovsky's CSSO
-   (CSS Optimizer), WebGrease and Clean-css). In addition, you can also install
-   translator-modules, that implement the translation of code on intermediate
-   languages (LESS, Sass, SCSS, CoffeeScript, TypeScript, Mustache (by using Hogan)
-   and Handlebars). Apart from this, in the Bundle Transformer there is a third
-   type of modules - postprocessors. Postprocessors runs after translators and
-   before minifiers. Now available following postprocessors: URL rewriting
-   CSS postprocessor (included in core) and postprocessor-module based on the
-   Andrey Sitnik's Autoprefixer.
+   Minifier, YUI Compressor for .NET, NUglify, Google Closure Compiler, Douglas
+   Crockford's JSMin, Dean Edwards' Packer, Mihai Bazon's UglifyJS, Sergey
+   Kryzhanovsky's CSSO (CSS Optimizer), WebGrease and Clean-css). In addition, you
+   can also install translator-modules, that implement the translation of code on
+   intermediate languages (LESS, Sass, SCSS, CoffeeScript, TypeScript, Mustache (by
+   using Hogan) and Handlebars). Apart from this, in the Bundle Transformer there
+   is a third type of modules - postprocessors. Postprocessors runs after
+   translators and before minifiers. Now available following postprocessors: URL
+   rewriting CSS postprocessor (included in core) and postprocessor-module based on
+   the Andrey Sitnik's Autoprefixer.
 
    This extension will help your web applications successfully pass a most part of
-   the tests in YSlow.
+   the tests in Google PageSpeed.
 
    =============
    RELEASE NOTES

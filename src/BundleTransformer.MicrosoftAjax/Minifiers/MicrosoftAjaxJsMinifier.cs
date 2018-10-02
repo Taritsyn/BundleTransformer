@@ -20,7 +20,6 @@ using BtStringBuilderPool = BundleTransformer.Core.Utilities.StringBuilderPool;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.MicrosoftAjax.Configuration;
-using BundleTransformer.MicrosoftAjax.Resources;
 using BtBlockStart = BundleTransformer.MicrosoftAjax.BlockStart;
 using BtEvalTreatment = BundleTransformer.MicrosoftAjax.EvalTreatment;
 using BtLocalRenaming = BundleTransformer.MicrosoftAjax.LocalRenaming;
@@ -718,22 +717,12 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			{
 				using (var stringWriter = new StringWriter(contentBuilder, CultureInfo.InvariantCulture))
 				{
-					Block block = jsParser.Parse(documentContext);
-					if (block != null)
+					// Parse the input
+					Block scriptBlock = jsParser.Parse(documentContext);
+					if (scriptBlock != null)
 					{
-						if (_jsParserConfiguration.Format == JavaScriptFormat.JSON)
-						{
-							// Use a JSON output visitor
-							if (!JSONOutputVisitor.Apply(stringWriter, block, _jsParserConfiguration))
-							{
-								throw new MicrosoftAjaxParsingException(Strings.Minifiers_InvalidJsonOutput);
-							}
-						}
-						else
-						{
-							// Use normal output visitor
-							OutputVisitor.Apply(stringWriter, block, _jsParserConfiguration);
-						}
+						// Use normal output visitor
+						OutputVisitor.Apply(stringWriter, scriptBlock, _jsParserConfiguration);
 					}
 				}
 

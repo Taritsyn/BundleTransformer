@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: IntelliSense v1.9.208
+               README file for Bundle Transformer: IntelliSense v1.9.213
 
    --------------------------------------------------------------------------------
 
@@ -18,7 +18,9 @@
    =============
    RELEASE NOTES
    =============
-   Added definitions for NUglify minifiers.
+   1. Added a definitions for configuration settings of NUglify minifiers;
+   2. Updated a definitions for configuration settings of Microsoft Ajax JS
+      minifier.
 
    =============
    DOCUMENTATION

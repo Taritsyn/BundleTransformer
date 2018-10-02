@@ -24,7 +24,7 @@ For correct working of the LibSass Host under Windows requires the Microsoft Vis
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Sass SCSS Translation Translator Compilation Compiler</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.171" />
+			<dependency id="BundleTransformer.Core" version="1.9.213" />
 			<dependency id="LibSassHost" version="1.1.9" />
 		</dependencies>
 		<references>

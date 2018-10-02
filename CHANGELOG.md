@@ -1,6 +1,14 @@
 Change log
 ==========
 
+## v1.9.213 - October 2, 2018
+ * Added module based on the [NUglify](https://github.com/xoofx/NUglify)
+ * In BundleTransformer.Core optimized a memory usage
+ * In BundleTransformer.ConfigurationIntelliSense:
+   * Added a definitions for configuration settings of NUglify minifiers
+   * Updated a definitions for configuration settings of Microsoft Ajax JS minifier
+ * In BundleTransformer.MicrosoftAjax in configuration settings of JS minifier was added one new property - `ScriptVersion` (default `None`)
+
 ## v1.9.212 - September 9, 2018
  * In BundleTransformer.Handlebars added support of Handlebars version 4.0.12
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.1.4
@@ -46,7 +54,7 @@ Change log
  * In BundleTransformer.Less added support of LESS version 3.0.2
  * In BundleTransformer.TypeScript added support of TypeScript version 2.8.3
 
-## v1.9.200 - April 16, 2018
+ ## v1.9.200 - April 16, 2018
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 8.3
 
 ## v1.9.199 - April 10, 2018

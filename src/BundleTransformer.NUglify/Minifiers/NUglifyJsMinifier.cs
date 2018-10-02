@@ -22,7 +22,6 @@ using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.NUglify.Configuration;
-using BundleTransformer.NUglify.Resources;
 using BtBlockStart = BundleTransformer.NUglify.BlockStart;
 using BtEvalTreatment = BundleTransformer.NUglify.EvalTreatment;
 using BtLocalRenaming = BundleTransformer.NUglify.LocalRenaming;
@@ -720,22 +719,12 @@ namespace BundleTransformer.NUglify.Minifiers
 			{
 				using (var stringWriter = new StringWriter(contentBuilder, CultureInfo.InvariantCulture))
 				{
-					BlockStatement block = jsParser.Parse(documentContext);
-					if (block != null)
+					// Parse the input
+					BlockStatement scriptBlock = jsParser.Parse(documentContext);
+					if (scriptBlock != null)
 					{
-						if (_jsParserConfiguration.Format == JavaScriptFormat.JSON)
-						{
-							// Use a JSON output visitor
-							if (!JsonOutputVisitor.Apply(stringWriter, block, _jsParserConfiguration))
-							{
-								throw new NUglifyParsingException(Strings.Minifiers_InvalidJsonOutput);
-							}
-						}
-						else
-						{
-							// Use normal output visitor
-							OutputVisitor.Apply(stringWriter, block, _jsParserConfiguration);
-						}
+						// Use normal output visitor
+						OutputVisitor.Apply(stringWriter, scriptBlock, _jsParserConfiguration);
 					}
 				}
 

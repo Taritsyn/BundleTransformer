@@ -10,13 +10,13 @@
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Yui_Logo_128x128.png</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>BundleTransformer.Yui contains two minifier-adapters: `YuiCssMinifier` (for minification of CSS code) and `YuiJsMinifier` (for minification of JS code). These adapters perform minification by using the YUI Compressor for .NET (https://github.com/PureKrome/YUICompressor.NET).</description>
+		<description>BundleTransformer.Yui contains two minifier-adapters: `YuiCssMinifier` (for minification of CSS code) and `YuiJsMinifier` (for minification of JS code). These adapters perform minification by using the YUI Compressor for .NET (https://github.com/YUICompressor-NET/YUICompressor.NET).</description>
 		<summary>BundleTransformer.Yui contains two minifier-adapters: `YuiCssMinifier` (for minification of CSS code) and `YuiJsMinifier` (for minification of JS code). These adapters perform minification by using the YUI Compressor for .NET.</summary>
 		<copyright>Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation YUICompressor</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.160" />
+			<dependency id="BundleTransformer.Core" version="1.9.213" />
 			<dependency id="YUICompressor.NET" version="2.7.0.0" />
 		</dependencies>
 		<references>

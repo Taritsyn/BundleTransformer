@@ -20,7 +20,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS Bundling Minification Minifier Minify Optimizer Sergey Kryzhanovsky CSSO</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.171" />
+			<dependency id="BundleTransformer.Core" version="1.9.213" />
 			<dependency id="JavaScriptEngineSwitcher.Core" version="2.0.0" />
 			<dependency id="Newtonsoft.Json" version="8.0.2" />
 		</dependencies>

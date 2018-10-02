@@ -16,7 +16,7 @@
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET CSS JavaScript JS Bundling Minification Minifier Minify Obfuscation NUglify</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.171" />
+			<dependency id="BundleTransformer.Core" version="1.9.213" />
 			<dependency id="NUglify" version="1.5.12" />
 		</dependencies>
 		<references>

@@ -16,7 +16,7 @@
 		<language>en-US</language>
 		<tags>BundleTransformer System.Web.Optimization IBundleTransform ASP.NET JavaScript JS Bundling Minification Minifier Minify Google Closure Compiler</tags>
 		<dependencies>
-			<dependency id="BundleTransformer.Core" version="1.9.160" />
+			<dependency id="BundleTransformer.Core" version="1.9.213" />
 			<dependency id="Microsoft.Net.Http" version="2.2.29" />
 			<dependency id="Newtonsoft.Json" version="8.0.2" />
 		</dependencies>
