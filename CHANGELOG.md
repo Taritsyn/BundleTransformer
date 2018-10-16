@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.9.214 - October 16, 2018
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.2
+
 ## v1.9.213 - October 2, 2018
  * Added module based on the [NUglify](https://github.com/xoofx/NUglify)
  * In BundleTransformer.Core optimized a memory usage
