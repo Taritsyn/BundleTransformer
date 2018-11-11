@@ -1,4 +1,41 @@
 /*!
+ * Object.assign polyfill
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+ */
+if (!Object.hasOwnProperty('assign')) {
+	Object.assign = function (target) {
+		var result,
+			argIndex,
+			argCount,
+			nextSource,
+			propName,
+			methodName = 'Object.assign'
+			;
+
+		if (typeof target === 'undefined' || target === null) {
+			throw new TypeError(methodName + ': argument is not an Object.');
+		}
+
+		result = Object(target);
+		argCount = arguments.length;
+
+		for (argIndex = 1; argIndex < argCount; argIndex++) {
+			nextSource = arguments[argIndex];
+
+			if (typeof nextSource !== 'undefined' && nextSource !== null) {
+				for (propName in nextSource) {
+					if (Object.prototype.hasOwnProperty.call(nextSource, propName)) {
+						result[propName] = nextSource[propName];
+					}
+				}
+			}
+		}
+
+		return result;
+	};
+}
+
+/*!
  * Less - Leaner CSS v3.8.1
  * http://lesscss.org
  *

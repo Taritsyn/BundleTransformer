@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: Autoprefixer v1.9.214
+               README file for Bundle Transformer: Autoprefixer v1.9.215
 
    --------------------------------------------------------------------------------
 
@@ -28,8 +28,8 @@
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module, you need to install one of the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or
-   JavaScriptEngineSwitcher.ChakraCore.
+   NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes),
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
    After package is installed and JS engine is registered
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JS engine (for example, `MsieJsEngine`) to the `name`

@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.9.215 - November 11, 2018
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of LESS translator
+ * In BundleTransformer.Less:
+   * Added support of LESS version 3.8.1
+   * In configuration settings of LESS translator the `StrictMath` property has been replaced by the `Math` property (default `Always`)
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.3.1
+
 ## v1.9.214 - October 16, 2018
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.2
 
