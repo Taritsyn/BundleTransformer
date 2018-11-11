@@ -39,13 +39,13 @@ namespace BundleTransformer.Less.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether math has to be within parenthesis
+		/// Gets or sets a math mode
 		/// </summary>
-		[ConfigurationProperty("strictMath", DefaultValue = false)]
-		public bool StrictMath
+		[ConfigurationProperty("math", DefaultValue = MathMode.Always)]
+		public MathMode Math
 		{
-			get { return (bool)this["strictMath"]; }
-			set { this["strictMath"] = value; }
+			get { return (MathMode)this["math"]; }
+			set { this["math"] = value; }
 		}
 
 		/// <summary>

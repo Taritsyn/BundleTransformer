@@ -18,9 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added a definitions for configuration settings of NUglify minifiers;
-   2. Updated a definitions for configuration settings of Microsoft Ajax JS
-      minifier.
+   Updated definitions for configuration settings of LESS translator.
 
    =============
    DOCUMENTATION

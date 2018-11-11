@@ -207,7 +207,7 @@ namespace BundleTransformer.Less.Internal
 				new JProperty("compress", options.EnableNativeMinification),
 				new JProperty("paths", new JArray(processedIncludePaths)),
 				new JProperty("ieCompat", options.IeCompat),
-				new JProperty("strictMath", options.StrictMath),
+				new JProperty("math", (int)options.Math),
 				new JProperty("strictUnits", options.StrictUnits),
 				new JProperty("dumpLineNumbers", ConvertLineNumbersModeEnumValueToCode(options.DumpLineNumbers)),
 				new JProperty("javascriptEnabled", options.JavascriptEnabled)

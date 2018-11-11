@@ -61,9 +61,9 @@ namespace BundleTransformer.Less.Translators
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether math has to be within parenthesis
+		/// Gets or sets a math mode
 		/// </summary>
-		public bool StrictMath
+		public MathMode Math
 		{
 			get;
 			set;
@@ -156,7 +156,7 @@ namespace BundleTransformer.Less.Translators
 				.ToList()
 				;
 			IeCompat = lessConfig.IeCompat;
-			StrictMath = lessConfig.StrictMath;
+			Math = lessConfig.Math;
 			StrictUnits = lessConfig.StrictUnits;
 			DumpLineNumbers = lessConfig.DumpLineNumbers;
 			JavascriptEnabled = lessConfig.JavascriptEnabled;
@@ -293,7 +293,7 @@ namespace BundleTransformer.Less.Translators
 				EnableNativeMinification = enableNativeMinification,
 				IncludePaths = IncludePaths,
 				IeCompat = IeCompat,
-				StrictMath = StrictMath,
+				Math = Math,
 				StrictUnits = StrictUnits,
 				DumpLineNumbers = DumpLineNumbers,
 				JavascriptEnabled = JavascriptEnabled,

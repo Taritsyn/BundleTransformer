@@ -394,10 +394,34 @@
 				<xs:documentation>Flag for whether to enforce IE compatibility (IE8 data-uri)</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="strictMath" type="Boolean_SchemaType" use="optional" default="false">
+		<xs:attribute name="math" use="optional" default="Always">
 			<xs:annotation>
-				<xs:documentation>Flag for whether math has to be within parenthesis</xs:documentation>
+				<xs:documentation>Math mode</xs:documentation>
 			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="Always">
+						<xs:annotation>
+							<xs:documentation>Eagerly try to solve all operations</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="ParensDivision">
+						<xs:annotation>
+							<xs:documentation>Require parens for division `/`</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="Parens">
+						<xs:annotation>
+							<xs:documentation>Require parens for all operations</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="StrictLegacy">
+						<xs:annotation>
+							<xs:documentation>Legacy strict behavior (super-strict)</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
 		<xs:attribute name="strictUnits" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>

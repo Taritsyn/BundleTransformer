@@ -10,9 +10,9 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 			insecure: false,
 			filename: '',
 			rootpath: '',
-			relativeUrls: false,
+			rewriteUrls: 0 /* OFF */,
 			ieCompat: true,
-			strictMath: false,
+			math: 0 /* ALWAYS */,
 			strictUnits: false,
 			urlArgs: '',
 			plugins: [],
@@ -357,7 +357,7 @@ var lessHelper = (function (less, lessEnvironment, virtualFileManager, undefined
 		compilationOptions = mix(mix({}, defaultOptions), options);
 		compilationOptions.filename = path;
 		compilationOptions.rootpath = '';
-		compilationOptions.relativeUrls = true;
+		compilationOptions.rewriteUrls = 2 /* ALL */;
 
 		lessCompiler = less.createFromEnvironment(btEnvironment, [fileManager]);
 		less.logger = logger;

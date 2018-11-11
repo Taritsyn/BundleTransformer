@@ -35,9 +35,9 @@ namespace BundleTransformer.Less.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether math has to be within parenthesis
+		/// Gets or sets a math mode
 		/// </summary>
-		public bool StrictMath
+		public MathMode Math
 		{
 			get;
 			set;
@@ -110,7 +110,7 @@ namespace BundleTransformer.Less.Internal
 			EnableNativeMinification = false;
 			IncludePaths = new List<string>();
 			IeCompat = true;
-			StrictMath = false;
+			Math = MathMode.Always;
 			StrictUnits = false;
 			DumpLineNumbers = LineNumbersMode.None;
 			JavascriptEnabled = true;
