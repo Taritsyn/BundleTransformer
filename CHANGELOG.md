@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.9.216 - November 19, 2018
+ * In BundleTransformer.SassAndScss:
+   * Added support of the LibSass version 3.5.5
+   * Now the LibSass for Windows requires the Microsoft Visual C++ Redistributable for Visual Studio 2017
+
 ## v1.9.215 - November 11, 2018
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of LESS translator
  * In BundleTransformer.Less:
