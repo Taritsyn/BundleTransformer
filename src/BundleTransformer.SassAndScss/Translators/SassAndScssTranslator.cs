@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using LibSassHost;
 using LibSassHost.Helpers;
@@ -242,9 +243,17 @@ namespace BundleTransformer.SassAndScss.Translators
 			}
 			catch (SassСompilationException e)
 			{
+				StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+				errorMessageBuilder.AppendLine(e.Message);
+				errorMessageBuilder.AppendLine();
+				errorMessageBuilder.Append(SassErrorHelpers.GenerateErrorDetails(e, true));
+
+				string errorMessage = errorMessageBuilder.ToString();
+				StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
-						assetTypeName, OUTPUT_CODE_TYPE, assetUrl, SassErrorHelpers.Format(e)));
+						assetTypeName, OUTPUT_CODE_TYPE, assetUrl, errorMessage));
 			}
 			catch (Exception e)
 			{
