@@ -22,6 +22,8 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>feddc59c</NuGetPackageImportStamp>
+    <Use64BitIISExpress />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -355,27 +357,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj">
-      <Project>{05911325-5bf6-4845-98af-4aef698993ae}</Project>
+      <Project>{1f22385f-ea29-4ff5-ba56-871328c0552b}</Project>
       <Name>BundleTransformer.Autoprefixer</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.CleanCss\BundleTransformer.CleanCss.csproj">
-      <Project>{af409d45-61d1-4906-b7ca-92ab133f3044}</Project>
+      <Project>{04ff5325-e592-4933-8448-f64bfbd70f06}</Project>
       <Name>BundleTransformer.CleanCss</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Closure\BundleTransformer.Closure.csproj">
-      <Project>{c0ca5ee5-832e-4090-a749-cdc0479a35c7}</Project>
+      <Project>{5f003904-8324-441a-91e4-f0ff9efc3157}</Project>
       <Name>BundleTransformer.Closure</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.CoffeeScript\BundleTransformer.CoffeeScript.csproj">
-      <Project>{0648ffe9-2a1a-4e17-af5d-ae0048378617}</Project>
+      <Project>{96b20278-f72d-4ed5-8c9d-508a0d01f422}</Project>
       <Name>BundleTransformer.CoffeeScript</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1bab3b8f-9a16-4632-bfb5-47a441dd9aff}</Project>
+      <Project>{7c375231-2815-47f0-a90d-d5a05d06b515}</Project>
       <Name>BundleTransformer.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Csso\BundleTransformer.Csso.csproj">
-      <Project>{e70f938e-7498-4904-8e89-445de42d974b}</Project>
+      <Project>{1d3621f1-bd56-4e77-bd56-47ebca4deff9}</Project>
       <Name>BundleTransformer.Csso</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Handlebars\BundleTransformer.Handlebars.csproj">
@@ -383,47 +385,47 @@
       <Name>BundleTransformer.Handlebars</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Hogan\BundleTransformer.Hogan.csproj">
-      <Project>{19a1a37d-14af-487f-a968-45ccadc78768}</Project>
+      <Project>{81b772f1-0645-4eea-83c9-b2e89f1e9944}</Project>
       <Name>BundleTransformer.Hogan</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.JsMin\BundleTransformer.JsMin.csproj">
-      <Project>{141fcb8b-27e9-459f-9057-f411107d6e48}</Project>
+      <Project>{404a49cf-2df0-4bc8-a36d-676230c9d9d8}</Project>
       <Name>BundleTransformer.JsMin</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Less\BundleTransformer.Less.csproj">
-      <Project>{8b1e4598-9e2e-4c62-abcf-e8d6107301c9}</Project>
+      <Project>{751c4b4e-62f2-4799-8efb-c414ef924589}</Project>
       <Name>BundleTransformer.Less</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.MicrosoftAjax\BundleTransformer.MicrosoftAjax.csproj">
-      <Project>{72a5e68c-6919-4dd7-9d30-e07a857806d4}</Project>
+      <Project>{7e6421c5-2b45-49aa-b44f-af721bf3e91c}</Project>
       <Name>BundleTransformer.MicrosoftAjax</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.NUglify\BundleTransformer.NUglify.csproj">
-      <Project>{13b3c31e-be89-4bfc-b516-eb8e8d972dc5}</Project>
+      <Project>{a708cdbb-6881-4a21-b1c9-709fa90e05ac}</Project>
       <Name>BundleTransformer.NUglify</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Packer\BundleTransformer.Packer.csproj">
-      <Project>{3f489276-a9c9-4bf4-a3e1-5fb187e5017c}</Project>
+      <Project>{cb549389-57d9-4c6e-9840-a6f191ad662e}</Project>
       <Name>BundleTransformer.Packer</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.SassAndScss\BundleTransformer.SassAndScss.csproj">
-      <Project>{e708475f-094d-4065-b432-473d76b739e0}</Project>
+      <Project>{5a05ade5-8d18-47d9-b94b-9e48fc2eeb9a}</Project>
       <Name>BundleTransformer.SassAndScss</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.TypeScript\BundleTransformer.TypeScript.csproj">
-      <Project>{0866be97-464c-4a68-b26e-1e73484a2c98}</Project>
+      <Project>{e1c8dfea-47f5-4d68-8ce6-f874490b6383}</Project>
       <Name>BundleTransformer.TypeScript</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.UglifyJS\BundleTransformer.UglifyJs.csproj">
-      <Project>{b8c2b00a-5703-475e-8d80-f353673b60a6}</Project>
+      <Project>{8e9b570d-bc29-4dd4-83bd-955e304532eb}</Project>
       <Name>BundleTransformer.UglifyJs</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.WG\BundleTransformer.WG.csproj">
-      <Project>{43801a25-27d6-42c6-b56c-bad8172226f6}</Project>
+      <Project>{8c746b76-d9c4-457b-b4aa-68f30ea394be}</Project>
       <Name>BundleTransformer.WG</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\BundleTransformer.Yui\BundleTransformer.Yui.csproj">
-      <Project>{760c2730-48d6-4dc9-a08e-b0e47322155a}</Project>
+      <Project>{fd89f556-47f8-4ecc-925a-54adba3aaaf4}</Project>
       <Name>BundleTransformer.Yui</Name>
     </ProjectReference>
   </ItemGroup>

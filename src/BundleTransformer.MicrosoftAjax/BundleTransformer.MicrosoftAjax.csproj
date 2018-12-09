@@ -1,88 +1,58 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{72A5E68C-6919-4DD7-9D30-E07A857806D4}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BundleTransformer.MicrosoftAjax</RootNamespace>
-    <AssemblyName>BundleTransformer.MicrosoftAjax</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\tools\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="AjaxMin, Version=5.14.5506.26196, Culture=neutral, PublicKeyToken=21ef50ce11b5d80f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\AjaxMin.5.14.5506.26202\lib\net40\AjaxMin.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="BlockStart.cs" />
-    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="Configuration\CssMinifierSettings.cs" />
-    <Compile Include="Configuration\JsMinifierSettings.cs" />
-    <Compile Include="Configuration\MicrosoftAjaxSettings.cs" />
-    <Compile Include="Configuration\MinifierSettingsBase.cs" />
-    <Compile Include="CssColor.cs" />
-    <Compile Include="CssComment.cs" />
-    <Compile Include="EvalTreatment.cs" />
-    <Compile Include="LocalRenaming.cs" />
-    <Compile Include="MicrosoftAjaxParsingException.cs" />
-    <Compile Include="Minifiers\MicrosoftAjaxCssMinifier.cs" />
-    <Compile Include="Minifiers\MicrosoftAjaxJsMinifier.cs" />
-    <Compile Include="Minifiers\MicrosoftAjaxMinifierBase.cs" />
-    <Compile Include="OutputMode.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScriptVersion.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
-      <Name>BundleTransformer.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\tools\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Product>Bundle Transformer: Microsoft Ajax</Product>
+		<VersionPrefix>1.9.213</VersionPrefix>
+		<TargetFramework>net40</TargetFramework>
+		<OutputType>Library</OutputType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Description>BundleTransformer.MicrosoftAjax contains two minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS code) and `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform minification by using the Microsoft Ajax Minifier (https://ajaxmin.codeplex.com).</Description>
+		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_MicrosoftAjax_Logo_128x128.png</PackageIconUrl>
+		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;Microsoft;AjaxMin</PackageTags>
+		<PackageReleaseNotes>In configuration settings of Microsoft Ajax JS minifier was added one new property - `ScriptVersion` (default `None`).</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<Import Project="../../build/common.props" />
+	<Import Project="../../build/strong-name-signing.props" />
+	<Import Project="../../build/nuget-metadata.props" />
+
+	<ItemGroup>
+		<Reference Include="System.configuration" Pack="false" />
+
+		<PackageReference Include="AjaxMin" Version="5.14.5506.26202" Alias="ajaxmin" />
+
+		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="web.config.transform">
+			<PackagePath>content/web.config.transform</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="readme.txt">
+			<PackagePath>readme.txt</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="../../Licenses/microsoft-ajax-minifier-license.txt">
+			<PackagePath>microsoft-ajax-minifier-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="AddPackageAliases" BeforeTargets="ResolveReferences" Outputs="%(PackageReference.Identity)">
+		<PropertyGroup>
+			<AliasPackageReference>@(PackageReference -> '%(Identity)')</AliasPackageReference>
+			<AliasName>@(PackageReference -> '%(Alias)')</AliasName>
+		</PropertyGroup>
+
+		<ItemGroup>
+			<ReferencePath Condition=" '%(FileName)' == '$(AliasPackageReference)' ">
+				<Aliases>$(AliasName)</Aliases>
+			</ReferencePath>
+		</ItemGroup>
+	</Target>
+
 </Project>

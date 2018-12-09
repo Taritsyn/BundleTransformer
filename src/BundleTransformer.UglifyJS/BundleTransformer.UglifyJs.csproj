@@ -1,126 +1,87 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B8C2B00A-5703-475E-8D80-F353673B60A6}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BundleTransformer.UglifyJs</RootNamespace>
-    <AssemblyName>BundleTransformer.UglifyJs</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\tools\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="JavaScriptEngineSwitcher.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\JavaScriptEngineSwitcher.Core.2.0.0\lib\net40-client\JavaScriptEngineSwitcher.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CodeGenerationOptions.cs" />
-    <Compile Include="CompressionOptions.cs" />
-    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="Configuration\CodeGenerationSettings.cs" />
-    <Compile Include="Configuration\CompressionSettings.cs" />
-    <Compile Include="Configuration\JsMinifierSettings.cs" />
-    <Compile Include="Configuration\ManglingSettings.cs" />
-    <Compile Include="Configuration\ParsingSettings.cs" />
-    <Compile Include="Configuration\UglifySettings.cs" />
-    <Compile Include="Internal\JsUglificationException.cs" />
-    <Compile Include="Internal\JsUglifier.cs" />
-    <Compile Include="Internal\UglificationOptions.cs" />
-    <Compile Include="ManglingOptions.cs" />
-    <Compile Include="Minifiers\UglifyJsMinifier.cs" />
-    <Compile Include="ParsingOptions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuoteStyle.cs" />
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Resources\Strings.ru-ru.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.ru-ru.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\tools\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
-      <Name>BundleTransformer.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.ru-ru.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\uglify-combined.min.js" />
-    <EmbeddedResource Include="Resources\uglifyJsHelper.min.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\LICENSE.txt" />
-    <Content Include="Resources\uglify-combined.js" />
-    <Content Include="Resources\uglifyJsHelper.js" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-AjaxMinifier.exe "$(ProjectDir)Resources\uglify-combined.js" –out "$(ProjectDir)Resources\uglify-combined.min.js" -ignore:JS1019
-AjaxMinifier.exe "$(ProjectDir)Resources\uglifyJsHelper.js" –out "$(ProjectDir)Resources\uglifyJsHelper.min.js"</PreBuildEvent>
-  </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
+	<PropertyGroup>
+		<Product>Bundle Transformer: UglifyJS</Product>
+		<VersionPrefix>1.9.162</VersionPrefix>
+		<TargetFramework>net40</TargetFramework>
+		<OutputType>Library</OutputType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Description>BundleTransformer.UglifyJs contains one minifier-adapter for minification of JS code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's UglifyJS (https://github.com/mishoo/UglifyJS2) version 2.8.29.
+
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_UglifyJs_Logo_128x128.png</PackageIconUrl>
+		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Minification;Minifier;Minify;UglifyJS</PackageTags>
+		<PackageReleaseNotes>1. Added support of UglifyJS version 2.8.29;
+2. In code generation settings was changed a default value of `InlineScript` property from `false` to `true`;
+3. In compression settings was changed a default value of `CollapseVars` property from `false` to `true`;
+4. In compression settings was added 7 new properties: `KeepInfinity` (default `false`), `ReduceVars` (default `true`), `TopLevel` (default `false`), `TopRetain` (default empty string), `UnsafeMath` (default `false`), `UnsafeProto` (default `false`) and `UnsafeRegExp` (default `false`).</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<Import Project="../../build/common.props" />
+	<Import Project="../../build/strong-name-signing.props" />
+	<Import Project="../../build/nuget-metadata.props" />
+
+	<ItemGroup>
+		<Reference Include="System.configuration" Pack="false" />
+
+		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="2.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
+
+		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources/uglify-combined.min.js" />
+		<EmbeddedResource Include="Resources/uglifyJsHelper.min.js" />
+
+		<EmbeddedResource Update="Resources/Strings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources/Strings.ru-ru.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+
+		<Compile Update="Resources/Strings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Strings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="web.config.transform">
+			<PackagePath>content/web.config.transform</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="readme.txt">
+			<PackagePath>readme.txt</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="../../Licenses/uglify-js-license.txt">
+			<PackagePath>uglify-js-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/js-engine-switcher-license.txt">
+			<PackagePath>js-engine-switcher-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/newtonsoft-json-license.txt">
+			<PackagePath>newtonsoft-json-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="JsMinification" AfterTargets="BeforeBuild">
+		<Exec Command='AjaxMinifier.exe "$(ProjectDir)Resources/uglify-combined.js" –out "$(ProjectDir)Resources/uglify-combined.min.js" -ignore:JS1019
+AjaxMinifier.exe "$(ProjectDir)Resources/uglifyJsHelper.js" –out "$(ProjectDir)Resources/uglifyJsHelper.min.js"'
+			WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
+			ConsoleToMsBuild="true" />
+	</Target>
+
 </Project>

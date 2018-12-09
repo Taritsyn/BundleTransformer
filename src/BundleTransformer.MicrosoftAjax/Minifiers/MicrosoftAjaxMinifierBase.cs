@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿extern alias ajaxmin;
+
+using System.Collections.Generic;
 using System.Text;
 
-using Microsoft.Ajax.Utilities;
+using ajaxmin::Microsoft.Ajax.Utilities;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Minifiers;

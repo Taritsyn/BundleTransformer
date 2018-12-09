@@ -19,10 +19,10 @@ namespace BundleTransformer.Less.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Strings {
+    internal class Strings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace BundleTransformer.Less.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BundleTransformer.Less.Resources.Strings", typeof(Strings).Assembly);
@@ -51,7 +51,7 @@ namespace BundleTransformer.Less.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace BundleTransformer.Less.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The value &apos;{1}&apos; of LESS translator property `{0}` does not correspond to the format of `VAR=VALUE`..
         /// </summary>
-        public static string VariablesParsing_InvalidNameValueFormat {
+        internal static string VariablesParsing_InvalidNameValueFormat {
             get {
                 return ResourceManager.GetString("VariablesParsing_InvalidNameValueFormat", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace BundleTransformer.Less.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Issued the following warnings:.
         /// </summary>
-        public static string WarningList_Header {
+        internal static string WarningList_Header {
             get {
                 return ResourceManager.GetString("WarningList_Header", resourceCulture);
             }

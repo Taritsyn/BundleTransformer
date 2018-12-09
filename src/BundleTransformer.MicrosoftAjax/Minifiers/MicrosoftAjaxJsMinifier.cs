@@ -1,16 +1,18 @@
-﻿using System;
+﻿extern alias ajaxmin;
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-using Microsoft.Ajax.Utilities;
-using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
-using MsEvalTreatment = Microsoft.Ajax.Utilities.EvalTreatment;
-using MsLocalRenaming = Microsoft.Ajax.Utilities.LocalRenaming;
-using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
-using MsScriptVersion = Microsoft.Ajax.Utilities.ScriptVersion;
+using ajaxmin::Microsoft.Ajax.Utilities;
+using MsBlockStart = ajaxmin::Microsoft.Ajax.Utilities.BlockStart;
+using MsEvalTreatment = ajaxmin::Microsoft.Ajax.Utilities.EvalTreatment;
+using MsLocalRenaming = ajaxmin::Microsoft.Ajax.Utilities.LocalRenaming;
+using MsOutputMode = ajaxmin::Microsoft.Ajax.Utilities.OutputMode;
+using MsScriptVersion = ajaxmin::Microsoft.Ajax.Utilities.ScriptVersion;
 
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;

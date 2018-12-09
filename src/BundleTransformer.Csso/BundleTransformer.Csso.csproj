@@ -1,128 +1,86 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E70F938E-7498-4904-8E89-445DE42D974B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BundleTransformer.Csso</RootNamespace>
-    <AssemblyName>BundleTransformer.Csso</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>bin\x86\Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputPath>bin\x64\Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\tools\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="JavaScriptEngineSwitcher.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\JavaScriptEngineSwitcher.Core.2.0.0\lib\net40-client\JavaScriptEngineSwitcher.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CommentsMode.cs" />
-    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="Configuration\CssMinifierSettings.cs" />
-    <Compile Include="Configuration\CssoSettings.cs" />
-    <Compile Include="Internal\CssOptimizationException.cs" />
-    <Compile Include="Internal\CssOptimizer.cs" />
-    <Compile Include="Internal\OptimizationOptions.cs" />
-    <Compile Include="Minifiers\KryzhanovskyCssMinifier.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\csso-combined.js" />
-    <Content Include="Resources\LICENSE.txt" />
-    <EmbeddedResource Include="Resources\csso-combined.min.js" />
-    <Content Include="Resources\cssoHelper.js" />
-    <EmbeddedResource Include="Resources\cssoHelper.min.js" />
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Strings.ru-ru.resx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
-      <Name>BundleTransformer.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\tools\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-AjaxMinifier.exe "$(ProjectDir)Resources\csso-combined.js" –out "$(ProjectDir)Resources\csso-combined.min.js" -ignore:JS1019
-AjaxMinifier.exe "$(ProjectDir)Resources\cssoHelper.js" –out "$(ProjectDir)Resources\cssoHelper.min.js"</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
+	<PropertyGroup>
+		<Product>Bundle Transformer: CSSO</Product>
+		<VersionPrefix>1.9.175</VersionPrefix>
+		<TargetFramework>net40</TargetFramework>
+		<OutputType>Library</OutputType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Description>BundleTransformer.Csso contains one minifier-adapter for minification of CSS code - `KryzhanovskyCssMinifier`. `KryzhanovskyCssMinifier` is based on the Sergey Kryzhanovsky's CSSO (https://github.com/css/csso) version 3.2.0.
+
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Csso_Logo_128x128.png</PackageIconUrl>
+		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Minification;Minifier;Minify;Optimizer;Sergey;Kryzhanovsky;CSSO</PackageTags>
+		<PackageReleaseNotes>1. Added support of CSSO version 3.2.0;
+2. In configuration settings of CSS minifier was added one new property - `ForceMediaMerge` (default `false`).</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<Import Project="../../build/common.props" />
+	<Import Project="../../build/strong-name-signing.props" />
+	<Import Project="../../build/nuget-metadata.props" />
+
+	<ItemGroup>
+		<Reference Include="System.configuration" Pack="false" />
+
+		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="2.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
+
+		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources/csso-combined.min.js" />
+		<EmbeddedResource Include="Resources/cssoHelper.min.js" />
+
+		<EmbeddedResource Update="Resources/Strings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources/Strings.ru-ru.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+
+		<Compile Update="Resources/Strings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Strings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="web.config.transform">
+			<PackagePath>content/web.config.transform</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="readme.txt">
+			<PackagePath>readme.txt</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="../../Licenses/csso-license.txt">
+			<PackagePath>csso-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/js-engine-switcher-license.txt">
+			<PackagePath>js-engine-switcher-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/newtonsoft-json-license.txt">
+			<PackagePath>newtonsoft-json-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="JsMinification" AfterTargets="BeforeBuild">
+		<Exec
+			Command='AjaxMinifier.exe "$(ProjectDir)Resources/csso-combined.js" –out "$(ProjectDir)Resources/csso-combined.min.js" -ignore:JS1019
+AjaxMinifier.exe "$(ProjectDir)Resources/cssoHelper.js" –out "$(ProjectDir)Resources/cssoHelper.min.js"'
+			WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
+			ConsoleToMsBuild="true" />
+	</Target>
+
 </Project>

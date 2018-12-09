@@ -1,117 +1,85 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E8AF8BF7-1455-4AEB-81CB-0F708B8E4C4A}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BundleTransformer.Handlebars</RootNamespace>
-    <AssemblyName>BundleTransformer.Handlebars</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\tools\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="JavaScriptEngineSwitcher.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\JavaScriptEngineSwitcher.Core.2.0.0\lib\net40-client\JavaScriptEngineSwitcher.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="Configuration\HandlebarsSettings.cs" />
-    <Compile Include="Constants\AssetTypeCode.cs" />
-    <Compile Include="Constants\TranslatorName.cs" />
-    <Compile Include="HttpHandlers\HandlebarsAssetHandler.cs" />
-    <Compile Include="Internal\CompilationOptions.cs" />
-    <Compile Include="Internal\HandlebarsCompilationException.cs" />
-    <Compile Include="Internal\HandlebarsCompiler.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Resources\Strings.ru-ru.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.ru-ru.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Translators\HandlebarsTranslator.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
-      <Name>BundleTransformer.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\handlebars.js" />
-    <Content Include="Resources\hbsHelper.js" />
-    <EmbeddedResource Include="Resources\hbsHelper.min.js" />
-    <EmbeddedResource Include="Resources\handlebars.min.js" />
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.ru-ru.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Include="..\..\tools\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <Content Include="Resources\LICENSE.txt" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-AjaxMinifier.exe "$(ProjectDir)Resources\handlebars.js" –out "$(ProjectDir)Resources\handlebars.min.js"
-AjaxMinifier.exe "$(ProjectDir)Resources\hbsHelper.js" –out "$(ProjectDir)Resources\hbsHelper.min.js"</PreBuildEvent>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Product>Bundle Transformer: Handlebars</Product>
+		<VersionPrefix>1.9.212</VersionPrefix>
+		<TargetFramework>net40</TargetFramework>
+		<OutputType>Library</OutputType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Description>BundleTransformer.Handlebars contains one translator-adapter - `HandlebarsTranslator` (supports the Handlebars (http://handlebarsjs.com) version 4.0.12). This adapter makes translation of Handlebars templates to JS code. Also contains the `HandlebarsAssetHandler` debugging HTTP handler, which is responsible for text output of translated Handlebars asset.
+
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Handlebars_Logo_128x128.png</PackageIconUrl>
+		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Handlebars;Translation;Translator;Compilation;Compiler</PackageTags>
+		<PackageReleaseNotes>Added support of Handlebars version 4.0.12.</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<Import Project="../../build/common.props" />
+	<Import Project="../../build/strong-name-signing.props" />
+	<Import Project="../../build/nuget-metadata.props" />
+
+	<ItemGroup>
+		<Reference Include="System.configuration" Pack="false" />
+		<Reference Include="System.Web" Pack="false" />
+
+		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="2.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
+
+		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources/handlebars.min.js" />
+		<EmbeddedResource Include="Resources/hbsHelper.min.js" />
+
+		<EmbeddedResource Update="Resources/Strings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources/Strings.ru-ru.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+
+		<Compile Update="Resources/Strings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Strings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="web.config.transform">
+			<PackagePath>content/web.config.transform</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="readme.txt">
+			<PackagePath>readme.txt</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="../../Licenses/handlebars-license.txt">
+			<PackagePath>handlebars-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/js-engine-switcher-license.txt">
+			<PackagePath>js-engine-switcher-license.txtjs-engine-switcher-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/newtonsoft-json-license.txt">
+			<PackagePath>newtonsoft-json-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="JsMinification" AfterTargets="BeforeBuild">
+		<Exec Command='AjaxMinifier.exe "$(ProjectDir)Resources/handlebars.js" –out "$(ProjectDir)Resources/handlebars.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources/hbsHelper.js" –out "$(ProjectDir)Resources/hbsHelper.min.js"'
+			WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
+			ConsoleToMsBuild="true" />
+	</Target>
+
 </Project>

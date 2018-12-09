@@ -79,7 +79,7 @@ namespace BundleTransformer.Tests.Core.Filters
 			// Assert
 			Assert.NotNull(currentException);
 			Assert.IsType<ArgumentException>(currentException);
-			Assert.Equal(((ArgumentException)currentException).ParamName, "ignorePatterns");
+			Assert.Equal("ignorePatterns", ((ArgumentException)currentException).ParamName);
 		}
 
 		[Fact]
@@ -101,7 +101,7 @@ namespace BundleTransformer.Tests.Core.Filters
 			// Assert
 			Assert.NotNull(currentException);
 			Assert.IsType<ArgumentException>(currentException);
-			Assert.Equal(((ArgumentException)currentException).ParamName, "ignorePatterns");
+			Assert.Equal("ignorePatterns", ((ArgumentException)currentException).ParamName);
 		}
 	}
 }

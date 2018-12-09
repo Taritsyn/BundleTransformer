@@ -1,353 +1,85 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{05911325-5BF6-4845-98AF-4AEF698993AE}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BundleTransformer.Autoprefixer</RootNamespace>
-    <AssemblyName>BundleTransformer.Autoprefixer</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\tools\Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="JavaScriptEngineSwitcher.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\JavaScriptEngineSwitcher.Core.2.0.0\lib\net40-client\JavaScriptEngineSwitcher.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Configuration\ConfigurationContextExtensions.cs" />
-    <Compile Include="Configuration\AutoprefixerSettings.cs" />
-    <Compile Include="Configuration\BrowserConditionalExpression.cs" />
-    <Compile Include="Configuration\BrowserConditionalExpressionCollection.cs" />
-    <Compile Include="Internal\AutoprefixingOptions.cs" />
-    <Compile Include="Internal\AutoprefixingResult.cs" />
-    <Compile Include="Internal\CountryStatisticsService.cs" />
-    <Compile Include="Internal\CssAutoprefixer.cs" />
-    <Compile Include="Internal\CssAutoprefixingException.cs" />
-    <Compile Include="Internal\ResourceHelpers.cs" />
-    <Compile Include="PostProcessors\AutoprefixCssPostProcessor.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Resources\Strings.ru-ru.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.ru-ru.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\Strings.ru-ru.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.ru-ru.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Include="..\..\tools\Key.snk">
-      <Link>Key.snk</Link>
-    </None>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AX.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\AZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BB.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BJ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\BZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CV.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CX.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\CZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\DE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\DJ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\DK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\DM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\DO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\DZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\EC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\EE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\EG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ER.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ES.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ET.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\FI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\FJ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\FK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\FM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\FO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\FR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GB.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GP.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GQ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\GY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\HK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\HN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\HR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\HT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\HU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ID.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IQ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\IT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\JE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\JM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\JO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\JP.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KP.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\KZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LB.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LV.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\LY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ME.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ML.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MP.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MQ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MV.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MX.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\MZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NP.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\NZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\OM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\PY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\QA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\RE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\RO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\RS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\RU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\RW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SB.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ST.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SV.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\SZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TD.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TH.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TJ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TK.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TL.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TO.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TR.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TV.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TW.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\TZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\UA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\UG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\US.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\UY.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\UZ.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VC.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VG.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VI.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VN.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\VU.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\WF.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\WS.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\YE.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\YT.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ZA.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ZM.js" />
-    <EmbeddedResource Include="Resources\CountryStatistics\ZW.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\autoprefixer-combined.js" />
-    <EmbeddedResource Include="Resources\autoprefixer-combined.min.js" />
-    <Content Include="Resources\autoprefixerHelper.js" />
-    <EmbeddedResource Include="Resources\autoprefixerHelper.min.js" />
-    <Content Include="Resources\LICENSE.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BundleTransformer.Core\BundleTransformer.Core.csproj">
-      <Project>{1BAB3B8F-9A16-4632-BFB5-47A441DD9AFF}</Project>
-      <Name>BundleTransformer.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>cd "$(ProjectDir)..\..\tools\Microsoft Ajax Minifier\"
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-AjaxMinifier.exe -ignore:JS1300 "$(ProjectDir)Resources\autoprefixer-combined.js" –out "$(ProjectDir)Resources\autoprefixer-combined.min.js"
-AjaxMinifier.exe "$(ProjectDir)Resources\autoprefixerHelper.js" –out "$(ProjectDir)Resources\autoprefixerHelper.min.js"</PreBuildEvent>
-  </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
+	<PropertyGroup>
+		<Product>Bundle Transformer: Autoprefixer</Product>
+		<VersionPrefix>1.9.215</VersionPrefix>
+		<TargetFramework>net40</TargetFramework>
+		<OutputType>Library</OutputType>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 9.3.1.
+
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
+		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
+		<PackageReleaseNotes>Added support of Autoprefixer version 9.3.1.</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<Import Project="../../build/common.props" />
+	<Import Project="../../build/strong-name-signing.props" />
+	<Import Project="../../build/nuget-metadata.props" />
+
+	<ItemGroup>
+		<Reference Include="System.configuration" Pack="false" />
+
+		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="2.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
+
+		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources/autoprefixer-combined.min.js" />
+		<EmbeddedResource Include="Resources/autoprefixerHelper.min.js" />
+		<EmbeddedResource Include="Resources/CountryStatistics/*.js" />
+
+		<EmbeddedResource Update="Resources/Strings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources/Strings.ru-ru.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+
+		<Compile Update="Resources/Strings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Strings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="web.config.transform">
+			<PackagePath>content/web.config.transform</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="readme.txt">
+			<PackagePath>readme.txt</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+		<Content Include="../../Licenses/autoprefixer-license.txt">
+			<PackagePath>autoprefixer-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/js-engine-switcher-license.txt">
+			<PackagePath>js-engine-switcher-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+		<Content Include="../../Licenses/newtonsoft-json-license.txt">
+			<PackagePath>newtonsoft-json-license.txt</PackagePath>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="JsMinification" AfterTargets="BeforeBuild">
+		<Exec Command='AjaxMinifier.exe -ignore:JS1300 "$(ProjectDir)Resources/autoprefixer-combined.js" –out "$(ProjectDir)Resources/autoprefixer-combined.min.js"
+AjaxMinifier.exe "$(ProjectDir)Resources/autoprefixerHelper.js" –out "$(ProjectDir)Resources/autoprefixerHelper.min.js"'
+			WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
+			ConsoleToMsBuild="true" />
+	</Target>
+
 </Project>

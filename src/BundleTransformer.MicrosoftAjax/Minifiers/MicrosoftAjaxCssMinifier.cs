@@ -1,12 +1,14 @@
-﻿using System;
+﻿extern alias ajaxmin;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Microsoft.Ajax.Utilities;
-using MsCssColor = Microsoft.Ajax.Utilities.CssColor;
-using MsCssComment = Microsoft.Ajax.Utilities.CssComment;
-using MsOutputMode = Microsoft.Ajax.Utilities.OutputMode;
-using MsBlockStart = Microsoft.Ajax.Utilities.BlockStart;
+using ajaxmin::Microsoft.Ajax.Utilities;
+using MsCssColor = ajaxmin::Microsoft.Ajax.Utilities.CssColor;
+using MsCssComment = ajaxmin::Microsoft.Ajax.Utilities.CssComment;
+using MsOutputMode = ajaxmin::Microsoft.Ajax.Utilities.OutputMode;
+using MsBlockStart = ajaxmin::Microsoft.Ajax.Utilities.BlockStart;
 
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;

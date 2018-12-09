@@ -1,2 +1,0 @@
-\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe ..\..\src\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.csproj /p:Configuration=Release
-..\..\.nuget\nuget.exe pack ..\BundleTransformer.Autoprefixer\BundleTransformer.Autoprefixer.nuspec
