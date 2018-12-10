@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using System.Text.RegularExpressions;
 
 using AdvancedStringBuilder;
 
@@ -13,14 +12,14 @@ namespace BundleTransformer.Core.Utilities
 		private const int DEFAULT_MAX_FRAGMENT_LENGTH = 95;
 
 		/// <summary>
-		/// Regular expression for working with a next line break
+		/// Array of characters used to find the next line break
 		/// </summary>
-		private static readonly Regex _nextLineBreakRegex = new Regex("\r\n|\n|\r");
+		private static readonly char[] _nextLineBreakChars = new char[] { '\r', '\n' };
 
 		/// <summary>
-		/// Regular expression for working with a previous line break
+		/// Array of characters used to find the previous line break
 		/// </summary>
-		private static readonly Regex _previousLineBreakRegex = new Regex("\r\n|\n|\r", RegexOptions.RightToLeft);
+		private static readonly char[] _previousLineBreakChars = new char[] { '\n', '\r' };
 
 
 		/// <summary>
@@ -52,15 +51,26 @@ namespace BundleTransformer.Core.Utilities
 		private static void FindNextLineBreak(string sourceCode, int startPosition, int length,
 			out int lineBreakPosition, out int lineBreakLength)
 		{
-			Match lineBreakMatch = _nextLineBreakRegex.Match(sourceCode, startPosition, length);
-			if (lineBreakMatch.Success)
+			lineBreakPosition = sourceCode.IndexOfAny(_nextLineBreakChars, startPosition, length);
+			if (lineBreakPosition != -1)
 			{
-				lineBreakPosition = lineBreakMatch.Index;
-				lineBreakLength = lineBreakMatch.Length;
+				lineBreakLength = 1;
+				char currentCharacter = sourceCode[lineBreakPosition];
+
+				if (currentCharacter == '\r')
+				{
+					int nextCharacterPosition = lineBreakPosition + 1;
+					char nextCharacter;
+
+					if (sourceCode.TryGetChar(nextCharacterPosition, out nextCharacter)
+						&& nextCharacter == '\n')
+					{
+						lineBreakLength = 2;
+					}
+				}
 			}
 			else
 			{
-				lineBreakPosition = -1;
 				lineBreakLength = 0;
 			}
 		}
@@ -76,15 +86,27 @@ namespace BundleTransformer.Core.Utilities
 		private static void FindPreviousLineBreak(string sourceCode, int startPosition,
 			out int lineBreakPosition, out int lineBreakLength)
 		{
-			Match lineBreakMatch = _previousLineBreakRegex.Match(sourceCode, startPosition);
-			if (lineBreakMatch.Success)
+			lineBreakPosition = sourceCode.LastIndexOfAny(_previousLineBreakChars, startPosition);
+			if (lineBreakPosition != -1)
 			{
-				lineBreakPosition = lineBreakMatch.Index;
-				lineBreakLength = lineBreakMatch.Length;
+				lineBreakLength = 1;
+				char currentCharacter = sourceCode[lineBreakPosition];
+
+				if (currentCharacter == '\n')
+				{
+					int previousCharacterPosition = lineBreakPosition - 1;
+					char previousCharacter;
+
+					if (sourceCode.TryGetChar(previousCharacterPosition, out previousCharacter)
+						&& previousCharacter == '\r')
+					{
+						lineBreakPosition = previousCharacterPosition;
+						lineBreakLength = 2;
+					}
+				}
 			}
 			else
 			{
-				lineBreakPosition = -1;
 				lineBreakLength = 0;
 			}
 		}
@@ -138,12 +160,12 @@ namespace BundleTransformer.Core.Utilities
 
 			if (fragmentStartPosition < 0)
 			{
-				throw new ArgumentException("", "fragmentStartPosition");
+				throw new ArgumentException("", nameof(fragmentStartPosition));
 			}
 
 			if (fragmentLength > sourceCodeLength - fragmentStartPosition)
 			{
-				throw new ArgumentException("", "fragmentLength");
+				throw new ArgumentException("", nameof(fragmentLength));
 			}
 
 			int fragmentEndPosition = fragmentStartPosition + fragmentLength - 1;
@@ -593,11 +615,11 @@ namespace BundleTransformer.Core.Utilities
 			int sourceCodeLength = sourceCode.Length;
 			if (currentPosition >= sourceCodeLength)
 			{
-				throw new ArgumentException("", "currentPosition");
+				throw new ArgumentException("", nameof(currentPosition));
 			}
 
-			string currentChar = sourceCode.Substring(currentPosition, 1);
-			if (_nextLineBreakRegex.IsMatch(currentChar))
+			char currentChar = sourceCode[currentPosition];
+			if (currentChar == '\n' || currentChar == '\r')
 			{
 				return string.Empty;
 			}
