@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-                 README file for Bundle Transformer: UglifyJS v1.9.162
+              README file for Bundle Transformer: UglifyJS v1.10.0 Beta 1
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2017 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

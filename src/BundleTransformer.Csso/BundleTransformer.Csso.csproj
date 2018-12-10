@@ -2,7 +2,8 @@
 
 	<PropertyGroup>
 		<Product>Bundle Transformer: CSSO</Product>
-		<VersionPrefix>1.9.175</VersionPrefix>
+		<VersionPrefix>1.10.0</VersionPrefix>
+		<VersionSuffix>beta1</VersionSuffix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>

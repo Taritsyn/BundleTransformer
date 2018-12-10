@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-              README file for Bundle Transformer: Sass and SCSS v1.9.216
+           README file for Bundle Transformer: Sass and SCSS v1.10.0 Beta 1
 
    --------------------------------------------------------------------------------
 
@@ -28,13 +28,6 @@
 
    For correct working of the LibSass Host under Windows requires the Microsoft
    Visual C++ Redistributable for Visual Studio 2017.
-
-   =============
-   RELEASE NOTES
-   =============
-   1. Added support of the LibSass version 3.5.5;
-   2. Now the LibSass for Windows requires the Microsoft Visual C++ Redistributable
-      for Visual Studio 2017.
 
    ====================
    POST-INSTALL ACTIONS
