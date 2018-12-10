@@ -26,7 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 2.9.2.
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

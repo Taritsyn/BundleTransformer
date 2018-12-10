@@ -99,7 +99,7 @@ namespace BundleTransformer.Csso.Minifiers
 					);
 				}
 
-				createJsEngineInstance = () => JsEngineSwitcher.Instance.CreateEngine(jsEngineName);
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateEngine(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}

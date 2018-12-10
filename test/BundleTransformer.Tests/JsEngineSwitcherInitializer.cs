@@ -17,7 +17,7 @@ namespace BundleTransformer.Tests
 				{
 					if (!_initialized)
 					{
-						JsEngineSwitcher engineSwitcher = JsEngineSwitcher.Instance;
+						IJsEngineSwitcher engineSwitcher = JsEngineSwitcher.Current;
 						engineSwitcher.EngineFactories
 							.AddMsie()
 							;

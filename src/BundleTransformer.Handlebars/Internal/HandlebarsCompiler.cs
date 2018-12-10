@@ -127,9 +127,20 @@ namespace BundleTransformer.Handlebars.Internal
 				newContent = WrapCompiledTemplateCode(compiledCode, _options.Namespace,
 					templateName, isPartial);
 			}
-			catch (JsRuntimeException e)
+			catch (JsScriptException e)
 			{
-				throw new HandlebarsCompilationException(JsErrorHelpers.Format(e));
+				string errorDetails = JsErrorHelpers.GenerateErrorDetails(e, true);
+
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
+				errorMessageBuilder.AppendLine(e.Message);
+				errorMessageBuilder.AppendLine();
+				errorMessageBuilder.Append(errorDetails);
+
+				string errorMessage = errorMessageBuilder.ToString();
+				stringBuilderPool.Return(errorMessageBuilder);
+
+				throw new HandlebarsCompilationException(errorMessage);
 			}
 
 			return newContent;

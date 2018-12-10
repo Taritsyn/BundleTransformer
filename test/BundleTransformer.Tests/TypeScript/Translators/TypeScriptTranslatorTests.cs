@@ -192,7 +192,7 @@ module TranslatorBadges {
 				;
 
 			Func<IJsEngine> createJsEngineInstance =
-				() => JsEngineSwitcher.Instance.CreateDefaultEngine();
+				() => JsEngineSwitcher.Current.CreateDefaultEngine();
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			var tsConfig = new TypeScriptSettings();
 

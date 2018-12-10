@@ -437,7 +437,7 @@ namespace BundleTransformer.Tests.Less.Translators
 				;
 
 			Func<IJsEngine> createJsEngineInstance =
-				() => JsEngineSwitcher.Instance.CreateDefaultEngine();
+				() => JsEngineSwitcher.Current.CreateDefaultEngine();
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			var lessConfig = new LessSettings();
 

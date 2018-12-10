@@ -22,7 +22,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 9.3.1.
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

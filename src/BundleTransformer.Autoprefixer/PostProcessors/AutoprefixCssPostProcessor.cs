@@ -167,7 +167,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 					);
 				}
 
-				createJsEngineInstance = () => JsEngineSwitcher.Instance.CreateEngine(jsEngineName);
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateEngine(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}

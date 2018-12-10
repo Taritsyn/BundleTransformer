@@ -68,7 +68,7 @@ namespace BundleTransformer.Tests.Autoprefixer.PostProcessors
 				;
 
 			Func<IJsEngine> createJsEngineInstance =
-				() => JsEngineSwitcher.Instance.CreateDefaultEngine();
+				() => JsEngineSwitcher.Current.CreateDefaultEngine();
 			IVirtualFileSystemWrapper virtualFileSystemWrapper = virtualFileSystemMock.Object;
 			var autoprefixerConfig = new AutoprefixerSettings
 			{

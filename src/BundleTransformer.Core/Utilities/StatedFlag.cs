@@ -1,4 +1,4 @@
-﻿namespace BundleTransformer.Core
+﻿namespace BundleTransformer.Core.Utilities
 {
 	public struct StatedFlag
 	{

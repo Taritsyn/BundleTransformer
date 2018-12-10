@@ -244,11 +244,13 @@ namespace BundleTransformer.SassAndScss.Translators
 			}
 			catch (SassСompilationException e)
 			{
+				string errorDetails = SassErrorHelpers.GenerateErrorDetails(e, true);
+
 				var stringBuilderPool = StringBuilderPool.Shared;
 				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 				errorMessageBuilder.AppendLine(e.Message);
 				errorMessageBuilder.AppendLine();
-				errorMessageBuilder.Append(SassErrorHelpers.GenerateErrorDetails(e, true));
+				errorMessageBuilder.Append(errorDetails);
 
 				string errorMessage = errorMessageBuilder.ToString();
 				stringBuilderPool.Return(errorMessageBuilder);

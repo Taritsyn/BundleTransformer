@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 
+using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 namespace BundleTransformer.Packer.Internal
@@ -93,9 +96,20 @@ namespace BundleTransformer.Packer.Internal
 				newContent = _jsEngine.CallFunction<string>(PACKING_FUNCTION_NAME,
 					content, _options.Base62Encode, _options.ShrinkVariables);
 			}
-			catch (JsRuntimeException e)
+			catch (JsScriptException e)
 			{
-				throw new JsPackingException(JsErrorHelpers.Format(e));
+				string errorDetails = JsErrorHelpers.GenerateErrorDetails(e, true);
+
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
+				errorMessageBuilder.AppendLine(e.Message);
+				errorMessageBuilder.AppendLine();
+				errorMessageBuilder.Append(errorDetails);
+
+				string errorMessage = errorMessageBuilder.ToString();
+				stringBuilderPool.Return(errorMessageBuilder);
+
+				throw new JsPackingException(errorMessage);
 			}
 
 			return newContent;

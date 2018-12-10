@@ -131,9 +131,20 @@ namespace BundleTransformer.CleanCss.Internal
 
 				newContent = json.Value<string>("minifiedCode");
 			}
-			catch (JsRuntimeException e)
+			catch (JsScriptException e)
 			{
-				throw new CssCleaningException(JsErrorHelpers.Format(e));
+				string errorDetails = JsErrorHelpers.GenerateErrorDetails(e, true);
+
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
+				errorMessageBuilder.AppendLine(e.Message);
+				errorMessageBuilder.AppendLine();
+				errorMessageBuilder.Append(errorDetails);
+
+				string errorMessage = errorMessageBuilder.ToString();
+				stringBuilderPool.Return(errorMessageBuilder);
+
+				throw new CssCleaningException(errorMessage);
 			}
 
 			return newContent;

@@ -5,7 +5,7 @@ namespace BundleTransformer.Sample.AspNet4.Mvc4
 {
 	public class JsEngineSwitcherConfig
 	{
-		public static void Configure(JsEngineSwitcher engineSwitcher)
+		public static void Configure(IJsEngineSwitcher engineSwitcher)
 		{
 			engineSwitcher.EngineFactories
 				.AddMsie()

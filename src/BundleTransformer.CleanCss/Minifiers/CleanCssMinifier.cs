@@ -203,7 +203,7 @@ namespace BundleTransformer.CleanCss.Minifiers
 					);
 				}
 
-				createJsEngineInstance = () => JsEngineSwitcher.Instance.CreateEngine(jsEngineName);
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateEngine(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}

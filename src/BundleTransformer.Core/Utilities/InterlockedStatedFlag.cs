@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace BundleTransformer.Core
+namespace BundleTransformer.Core.Utilities
 {
 	public struct InterlockedStatedFlag
 	{

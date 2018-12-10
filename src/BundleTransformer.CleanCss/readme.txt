@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Clean-css version 4.1.11.
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

@@ -10,6 +10,7 @@ using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 namespace BundleTransformer.Hogan.Internal
@@ -124,9 +125,20 @@ namespace BundleTransformer.Hogan.Internal
 				newContent = WrapCompiledTemplateCode(compiledCode, _options.Variable, templateName,
 					_options.EnableNativeMinification);
 			}
-			catch (JsRuntimeException e)
+			catch (JsScriptException e)
 			{
-				throw new HoganCompilationException(JsErrorHelpers.Format(e));
+				string errorDetails = JsErrorHelpers.GenerateErrorDetails(e, true);
+
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
+				errorMessageBuilder.AppendLine(e.Message);
+				errorMessageBuilder.AppendLine();
+				errorMessageBuilder.Append(errorDetails);
+
+				string errorMessage = errorMessageBuilder.ToString();
+				stringBuilderPool.Return(errorMessageBuilder);
+
+				throw new HoganCompilationException(errorMessage);
 			}
 
 			return newContent;

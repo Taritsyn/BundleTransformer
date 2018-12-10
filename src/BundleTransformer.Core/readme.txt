@@ -41,8 +41,8 @@
    =============
    RELEASE NOTES
    =============
-   1. Part of the auxiliary code was replaced by the AdvancedStringBuilder library;
-   2. Improved a performance of the `SourceCodeNavigator` class.
+   `InterlockedStatedFlag` and `StatedFlag` classes have been moved to the
+   `BundleTransformer.Core.Utilities` namespace.
 
    ====================
    POST-INSTALL ACTIONS

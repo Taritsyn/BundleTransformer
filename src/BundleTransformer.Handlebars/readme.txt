@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Handlebars version 4.0.12.
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

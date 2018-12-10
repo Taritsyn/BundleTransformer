@@ -135,7 +135,7 @@ namespace BundleTransformer.Handlebars.Translators
 					);
 				}
 
-				createJsEngineInstance = () => JsEngineSwitcher.Instance.CreateEngine(jsEngineName);
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateEngine(jsEngineName);
 			}
 			_createJsEngineInstance = createJsEngineInstance;
 		}

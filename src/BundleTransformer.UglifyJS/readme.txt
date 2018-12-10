@@ -21,15 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of UglifyJS version 2.8.29;
-   2. In code generation settings was changed a default value of `InlineScript`
-      property from `false` to `true`;
-   3. In compression settings was changed a default value of `CollapseVars`
-      property from `false` to `true`;
-   4. In compression settings was added 7 new properties: `KeepInfinity` (default
-      `false`), `ReduceVars` (default `true`), `TopLevel` (default `false`),
-      `TopRetain` (default empty string), `UnsafeMath` (default `false`),
-      `UnsafeProto` (default `false`) and `UnsafeRegExp` (default `false`).
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

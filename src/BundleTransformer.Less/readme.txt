@@ -25,9 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of LESS version 3.8.1;
-   2. In configuration settings of LESS translator the `StrictMath` property has
-      been replaced by the `Math` property (default `Always`).
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

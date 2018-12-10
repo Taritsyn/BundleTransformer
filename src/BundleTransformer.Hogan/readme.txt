@@ -20,6 +20,11 @@
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
 
+   =============
+   RELEASE NOTES
+   =============
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
+
    ====================
    POST-INSTALL ACTIONS
    ====================

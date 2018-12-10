@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CoffeeScript version 2.3.1.
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS

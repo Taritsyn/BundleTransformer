@@ -21,9 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of CSSO version 3.2.0;
-   2. In configuration settings of CSS minifier was added one new property -
-      `ForceMediaMerge` (default `false`).
+   JavaScript Engine Switcher was updated to version 3.0.0 RC 2.
 
    ====================
    POST-INSTALL ACTIONS
