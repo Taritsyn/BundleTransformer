@@ -15,7 +15,7 @@ The main differences of the `StyleTransformer` and `ScriptTransformer` classes f
 This extension will help your web applications successfully pass a most part of the tests in Google PageSpeed.</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Core_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;JavaScript;JS;Bundling;Performance;Optimization;YSlow;Speed;Pre-minified;Combine;Compression</PackageTags>
-		<PackageReleaseNotes>Optimized a memory usage.</PackageReleaseNotes>
+		<PackageReleaseNotes>Part of the auxiliary code was replaced by the AdvancedStringBuilder library.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />
@@ -26,6 +26,7 @@ This extension will help your web applications successfully pass a most part of 
 		<Reference Include="System.configuration" Pack="false" />
 		<Reference Include="System.Web" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="Microsoft.AspNet.Web.Optimization" Version="1.1.3" />
 	</ItemGroup>
 

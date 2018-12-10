@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<Reference Include="System.configuration" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="WebGrease" Version="1.6.0" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />

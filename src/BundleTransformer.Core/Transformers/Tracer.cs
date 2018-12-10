@@ -2,6 +2,8 @@
 using System.Text;
 using System.Web.Optimization;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Core.Transformers
@@ -18,7 +20,8 @@ namespace BundleTransformer.Core.Transformers
 		/// <param name="response">Object BundleResponse</param>
 		public void Process(BundleContext context, BundleResponse response)
 		{
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 
 			contentBuilder.AppendLine("*************************************************************************************");
 			contentBuilder.AppendLine("* BUNDLE RESPONSE                                                                   *");
@@ -50,7 +53,7 @@ namespace BundleTransformer.Core.Transformers
 			}
 
 			string content = contentBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(contentBuilder);
+			stringBuilderPool.Return(contentBuilder);
 
 			response.ContentType = "text/plain";
 			response.Content = content;

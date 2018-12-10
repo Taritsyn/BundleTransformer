@@ -41,7 +41,7 @@
    =============
    RELEASE NOTES
    =============
-   Optimized a memory usage.
+   Part of the auxiliary code was replaced by the AdvancedStringBuilder library.
 
    ====================
    POST-INSTALL ACTIONS

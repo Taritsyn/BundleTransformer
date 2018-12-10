@@ -3,12 +3,13 @@
 using System.Collections.Generic;
 using System.Text;
 
+using AdvancedStringBuilder;
+using AdvancedStringBuilderPool = AdvancedStringBuilder.StringBuilderPool;
 using ajaxmin::Microsoft.Ajax.Utilities;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Minifiers;
 using BundleTransformer.Core.Utilities;
-using BtStringBuilderPool = BundleTransformer.Core.Utilities.StringBuilderPool;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.MicrosoftAjax.Configuration;
@@ -111,7 +112,8 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 		/// <returns>Detailed error message</returns>
 		internal static string FormatContextError(ContextError error)
 		{
-			StringBuilder errorMessageBuilder = BtStringBuilderPool.GetBuilder();
+			var stringBuilderPool = AdvancedStringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, error.Message);
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, error.ErrorCode);
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, error.Severity);
@@ -130,7 +132,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			errorMessageBuilder.AppendFormat("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, error.EndColumn);
 
 			string errorMessage = errorMessageBuilder.ToString();
-			BtStringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

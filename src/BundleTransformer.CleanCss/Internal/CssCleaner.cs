@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
@@ -354,7 +355,8 @@ namespace BundleTransformer.CleanCss.Internal
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(string message, bool isError, string currentFilePath)
 		{
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 				isError ? CoreStrings.ErrorType_Error : CoreStrings.ErrorType_Warning);
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
@@ -364,7 +366,7 @@ namespace BundleTransformer.CleanCss.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

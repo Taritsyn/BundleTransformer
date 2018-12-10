@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 
-using BundleTransformer.Core.Utilities;
+using AdvancedStringBuilder;
 
 namespace BundleTransformer.Closure.Internal
 {
@@ -14,7 +14,7 @@ namespace BundleTransformer.Closure.Internal
 		/// <summary>
 		/// Text content builder
 		/// </summary>
-		private StringBuilder _result = StringBuilderPool.GetBuilder();
+		private StringBuilder _result = StringBuilderPool.Shared.Rent();
 
 		/// <summary>
 		/// Synchronizer
@@ -61,7 +61,7 @@ namespace BundleTransformer.Closure.Internal
 		/// </summary>
 		public void Dispose()
 		{
-			StringBuilderPool.ReleaseBuilder(_result);
+			StringBuilderPool.Shared.Return(_result);
 			_result = null;
 		}
 	}

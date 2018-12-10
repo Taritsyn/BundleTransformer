@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
+using AdvancedStringBuilder;
 using NUglify;
 
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Minifiers;
-using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.NUglify.Configuration;
@@ -108,7 +108,8 @@ namespace BundleTransformer.NUglify.Minifiers
 		/// <returns>Detailed error message</returns>
 		internal static string FormatContextError(UglifyError error)
 		{
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, error.Message);
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode, error.ErrorCode);
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Severity, error.Severity);
@@ -127,7 +128,7 @@ namespace BundleTransformer.NUglify.Minifiers
 			errorMessageBuilder.AppendFormat("{0}: {1}", CoreStrings.ErrorDetails_EndColumn, error.EndColumn);
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

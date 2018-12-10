@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
@@ -228,7 +229,8 @@ namespace BundleTransformer.Handlebars.Internal
 		private static string WrapCompiledTemplateCode(string compiledCode, string templateNamespace,
 			string templateName, bool isPartial)
 		{
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 			if (!isPartial)
 			{
 				contentBuilder.AppendLine("(function(handlebars, templates) {");
@@ -245,7 +247,7 @@ namespace BundleTransformer.Handlebars.Internal
 			}
 
 			string content = contentBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(contentBuilder);
+			stringBuilderPool.Return(contentBuilder);
 
 			return content;
 		}
@@ -267,7 +269,8 @@ namespace BundleTransformer.Handlebars.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(file))
 			{
@@ -290,7 +293,7 @@ namespace BundleTransformer.Handlebars.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

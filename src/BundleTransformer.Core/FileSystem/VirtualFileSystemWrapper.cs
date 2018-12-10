@@ -6,6 +6,8 @@ using System.Web.Caching;
 using System.Web.Hosting;
 using System.Web.Optimization;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core.Resources;
 using BundleTransformer.Core.Utilities;
 
@@ -34,7 +36,8 @@ namespace BundleTransformer.Core.FileSystem
 		public string GetFileTextContent(string virtualPath)
 		{
 			string content;
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 
 			try
 			{
@@ -58,7 +61,7 @@ namespace BundleTransformer.Core.FileSystem
 			}
 			finally
 			{
-				StringBuilderPool.ReleaseBuilder(contentBuilder);
+				stringBuilderPool.Return(contentBuilder);
 			}
 
 			return content;

@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FormItem = System.Collections.Generic.KeyValuePair<string, string>;
 
+using AdvancedStringBuilder;
 using Newtonsoft.Json.Linq;
 
 using BundleTransformer.Core.Assets;
@@ -287,7 +288,8 @@ namespace BundleTransformer.Closure.Internal
 		private static string FormatErrorDetails(JToken errorDetails, ErrorType errorType, string currentFilePath,
 			DependencyCollection externsDependencies)
 		{
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			if (errorType == ErrorType.ServerError || errorType == ErrorType.Error)
 			{
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
@@ -365,7 +367,7 @@ namespace BundleTransformer.Closure.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

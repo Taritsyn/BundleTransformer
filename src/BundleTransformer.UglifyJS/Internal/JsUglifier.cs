@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
@@ -447,7 +448,8 @@ namespace BundleTransformer.UglifyJs.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 				isError ? CoreStrings.ErrorType_Error : CoreStrings.ErrorType_Warning);
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
@@ -472,7 +474,7 @@ namespace BundleTransformer.UglifyJs.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

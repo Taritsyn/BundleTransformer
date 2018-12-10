@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using AdvancedStringBuilderPool = AdvancedStringBuilder.StringBuilderPool;
 using ajaxmin::Microsoft.Ajax.Utilities;
 using MsBlockStart = ajaxmin::Microsoft.Ajax.Utilities.BlockStart;
 using MsEvalTreatment = ajaxmin::Microsoft.Ajax.Utilities.EvalTreatment;
@@ -18,7 +19,6 @@ using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Minifiers;
 using BundleTransformer.Core.Utilities;
-using BtStringBuilderPool = BundleTransformer.Core.Utilities.StringBuilderPool;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.MicrosoftAjax.Configuration;
@@ -707,7 +707,8 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			string newContent;
 			string assetUrl = asset.Url;
 
-			StringBuilder contentBuilder = BtStringBuilderPool.GetBuilder();
+			var stringBuilderPool = AdvancedStringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 			var documentContext = new DocumentContext(asset.Content)
 			{
 				FileContext = assetUrl
@@ -745,7 +746,7 @@ namespace BundleTransformer.MicrosoftAjax.Minifiers
 			finally
 			{
 				jsParser.CompilerError -= ParserErrorHandler;
-				BtStringBuilderPool.ReleaseBuilder(contentBuilder);
+				stringBuilderPool.Return(contentBuilder);
 			}
 
 			asset.Content = newContent;

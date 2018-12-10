@@ -26,6 +26,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
 	<ItemGroup>
 		<Reference Include="System.configuration" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="2.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
 

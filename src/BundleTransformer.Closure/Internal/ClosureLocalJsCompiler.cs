@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Utilities;
@@ -121,7 +123,8 @@ namespace BundleTransformer.Closure.Internal
 			string assetExternsTempDirectoryPath = Path.Combine(_tempDirectoryPath, Guid.NewGuid().ToString());
 			bool assetExternsTempDirectoryCreated = false;
 
-			StringBuilder argsBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder argsBuilder = stringBuilderPool.Rent();
 			argsBuilder.AppendFormat(@"-jar ""{0}"" ", _closureCompilerAppPath);
 			if (_options.CompilationLevel == CompilationLevel.Advanced
 				&& (commonExternsDependencyCount > 0 || externsDependencies.Count > 0))
@@ -170,7 +173,7 @@ namespace BundleTransformer.Closure.Internal
 			argsBuilder.Append(_optionsString);
 
 			string args = argsBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(argsBuilder);
+			stringBuilderPool.Return(argsBuilder);
 
 			var processInfo = new ProcessStartInfo
 			{
@@ -298,7 +301,8 @@ namespace BundleTransformer.Closure.Internal
 		/// <returns>Command line arguments</returns>
 		private static string ConvertCompilationOptionsToArgs(LocalJsCompilationOptions options)
 		{
-			StringBuilder argsBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder argsBuilder = stringBuilderPool.Rent();
 
 			if (options.AcceptConstKeyword)
 			{
@@ -464,7 +468,7 @@ namespace BundleTransformer.Closure.Internal
 			}
 
 			string args = argsBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(argsBuilder);
+			stringBuilderPool.Return(argsBuilder);
 
 			return args;
 		}
@@ -605,7 +609,8 @@ namespace BundleTransformer.Closure.Internal
 						? errorStringGroups["sourceFragment"].Value.Trim()
 						: string.Empty;
 
-					StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+					var stringBuilderPool = StringBuilderPool.Shared;
+					StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 					errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType,
 						errorType.ToLowerInvariant());
@@ -622,7 +627,7 @@ namespace BundleTransformer.Closure.Internal
 					}
 
 					string errorMessage = errorMessageBuilder.ToString();
-					StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+					stringBuilderPool.Return(errorMessageBuilder);
 
 					if (string.Equals(errorType, "ERROR", StringComparison.OrdinalIgnoreCase))
 					{

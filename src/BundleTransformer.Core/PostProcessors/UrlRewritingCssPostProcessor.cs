@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
 using BundleTransformer.Core.Helpers;
 using BundleTransformer.Core.Resources;
-using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Core.PostProcessors
 {
@@ -164,7 +165,8 @@ namespace BundleTransformer.Core.PostProcessors
 				.ToList()
 				;
 
-			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder resultBuilder = stringBuilderPool.Rent();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
@@ -227,7 +229,7 @@ namespace BundleTransformer.Core.PostProcessors
 			}
 
 			string result = resultBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(resultBuilder);
+			stringBuilderPool.Return(resultBuilder);
 
 			return result;
 		}

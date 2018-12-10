@@ -3,6 +3,8 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
+
 namespace BundleTransformer.Core.Utilities
 {
 	public static class SourceCodeNavigator
@@ -291,7 +293,8 @@ namespace BundleTransformer.Core.Utilities
 				CalculateCutPositions(currentLine, columnNumber, maxFragmentLength,
 					out fragmentStartPosition, out fragmentLength);
 
-				StringBuilder sourceFragmentBuilder = StringBuilderPool.GetBuilder();
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder sourceFragmentBuilder = stringBuilderPool.Rent();
 
 				if (currentLine.Length > 0)
 				{
@@ -315,7 +318,7 @@ namespace BundleTransformer.Core.Utilities
 				}
 
 				sourceFragment = sourceFragmentBuilder.ToString();
-				StringBuilderPool.ReleaseBuilder(sourceFragmentBuilder);
+				stringBuilderPool.Return(sourceFragmentBuilder);
 			}
 
 			return sourceFragment;

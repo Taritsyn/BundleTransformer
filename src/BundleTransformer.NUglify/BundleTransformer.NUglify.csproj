@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<Reference Include="System.configuration" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="NUglify" Version="1.5.12" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />

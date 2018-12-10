@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
@@ -135,7 +136,8 @@ namespace BundleTransformer.Less.Internal
 			if (!string.IsNullOrWhiteSpace(globalVariables)
 				|| !string.IsNullOrWhiteSpace(modifyVariables))
 			{
-				StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder contentBuilder = stringBuilderPool.Rent();
 				if (!string.IsNullOrWhiteSpace(globalVariables))
 				{
 					contentBuilder.AppendLine(ParseVariables(globalVariables, "GlobalVariables"));
@@ -148,7 +150,7 @@ namespace BundleTransformer.Less.Internal
 				}
 
 				processedContent = contentBuilder.ToString();
-				StringBuilderPool.ReleaseBuilder(contentBuilder);
+				stringBuilderPool.Return(contentBuilder);
 			}
 
 			try
@@ -261,7 +263,8 @@ namespace BundleTransformer.Less.Internal
 
 			if (nameValueList.Length > 0)
 			{
-				StringBuilder variablesBuilder = StringBuilderPool.GetBuilder();
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder variablesBuilder = stringBuilderPool.Rent();
 
 				foreach (string nameValue in nameValueList)
 				{
@@ -292,7 +295,7 @@ namespace BundleTransformer.Less.Internal
 				}
 
 				variables = variablesBuilder.ToString();
-				StringBuilderPool.ReleaseBuilder(variablesBuilder);
+				stringBuilderPool.Return(variablesBuilder);
 			}
 
 			return variables;
@@ -330,7 +333,8 @@ namespace BundleTransformer.Less.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(newSourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			if (!string.IsNullOrWhiteSpace(type))
 			{
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType, type);
@@ -357,7 +361,7 @@ namespace BundleTransformer.Less.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}
@@ -369,7 +373,8 @@ namespace BundleTransformer.Less.Internal
 		/// <returns>Warning message</returns>
 		private string FormatWarningList(JArray warningList)
 		{
-			StringBuilder warningMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder warningMessageBuilder = stringBuilderPool.Rent();
 
 			warningMessageBuilder.AppendLine(Strings.WarningList_Header);
 			warningMessageBuilder.AppendLine();
@@ -381,7 +386,7 @@ namespace BundleTransformer.Less.Internal
 			}
 
 			string warningMessage = warningMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(warningMessageBuilder);
+			stringBuilderPool.Return(warningMessageBuilder);
 
 			return warningMessage;
 		}

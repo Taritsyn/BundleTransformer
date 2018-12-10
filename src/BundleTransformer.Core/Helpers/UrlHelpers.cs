@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core.Resources;
-using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Core.Helpers
 {
@@ -335,7 +336,8 @@ namespace BundleTransformer.Core.Helpers
 				return result;
 			}
 
-			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder resultBuilder = stringBuilderPool.Rent();
 			int chunkCount = length / chunkSize;
 
 			for (int chunkIndex = 0; chunkIndex <= chunkCount; chunkIndex++)
@@ -348,7 +350,7 @@ namespace BundleTransformer.Core.Helpers
 			}
 
 			result = resultBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(resultBuilder);
+			stringBuilderPool.Return(resultBuilder);
 
 			return result;
 		}

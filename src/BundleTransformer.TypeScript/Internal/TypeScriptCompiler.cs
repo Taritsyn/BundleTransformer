@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
@@ -207,7 +208,8 @@ namespace BundleTransformer.TypeScript.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(newSourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(filePath))
 			{
@@ -230,7 +232,7 @@ namespace BundleTransformer.TypeScript.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

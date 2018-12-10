@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.Utilities;
 
@@ -43,7 +45,8 @@ namespace BundleTransformer.Core.Combiners
 
 		protected override string CombineAssetContent(IList<IAsset> assets)
 		{
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 			string topCharset = string.Empty;
 			var imports = new List<string>();
 
@@ -86,7 +89,7 @@ namespace BundleTransformer.Core.Combiners
 			}
 
 			string content = contentBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(contentBuilder);
+			stringBuilderPool.Return(contentBuilder);
 
 			return content;
 		}
@@ -152,7 +155,8 @@ namespace BundleTransformer.Core.Combiners
 				.ToList()
 				;
 
-			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder resultBuilder = stringBuilderPool.Rent();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
@@ -215,7 +219,7 @@ namespace BundleTransformer.Core.Combiners
 			}
 
 			string result = resultBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(resultBuilder);
+			stringBuilderPool.Return(resultBuilder);
 
 			return result;
 		}

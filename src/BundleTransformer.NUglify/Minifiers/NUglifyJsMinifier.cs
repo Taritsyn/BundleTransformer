@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using AdvancedStringBuilder;
 using NUglify;
 using NUglify.JavaScript;
 using NUglify.JavaScript.Syntax;
@@ -707,7 +708,8 @@ namespace BundleTransformer.NUglify.Minifiers
 			string newContent;
 			string assetUrl = asset.Url;
 
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 			var documentContext = new DocumentContext(asset.Content)
 			{
 				FileContext = assetUrl
@@ -745,7 +747,7 @@ namespace BundleTransformer.NUglify.Minifiers
 			finally
 			{
 				jsParser.CompilerError -= ParserErrorHandler;
-				StringBuilderPool.ReleaseBuilder(contentBuilder);
+				stringBuilderPool.Return(contentBuilder);
 			}
 
 			asset.Content = newContent;

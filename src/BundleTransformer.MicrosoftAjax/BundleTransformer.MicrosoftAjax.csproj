@@ -21,6 +21,7 @@
 	<ItemGroup>
 		<Reference Include="System.configuration" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="AjaxMin" Version="5.14.5506.26202" Alias="ajaxmin" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />

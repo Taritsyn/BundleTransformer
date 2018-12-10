@@ -4,12 +4,12 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 namespace BundleTransformer.Hogan.Internal
@@ -161,7 +161,8 @@ namespace BundleTransformer.Hogan.Internal
 		private static string WrapCompiledTemplateCode(string compiledCode, string variableName,
 			string templateName, bool enableNativeMinification)
 		{
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 			if (!enableNativeMinification)
 			{
 				contentBuilder.AppendFormatLine("if (!!!{0}) var {0} = {{}};", variableName);
@@ -176,7 +177,7 @@ namespace BundleTransformer.Hogan.Internal
 			}
 
 			string content = contentBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(contentBuilder);
+			stringBuilderPool.Return(contentBuilder);
 
 			return content;
 		}
@@ -224,7 +225,8 @@ namespace BundleTransformer.Hogan.Internal
 		/// <returns>Detailed error message</returns>
 		private static string FormatErrorDetails(string message, string currentFilePath)
 		{
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message, message);
 			if (!string.IsNullOrWhiteSpace(currentFilePath))
 			{
@@ -232,7 +234,7 @@ namespace BundleTransformer.Hogan.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

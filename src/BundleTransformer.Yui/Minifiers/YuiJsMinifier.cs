@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
+using AdvancedStringBuilder;
 using EcmaScript.NET;
 using Yahoo.Yui.Compressor;
 using YuiCompressionType = Yahoo.Yui.Compressor.CompressionType;
@@ -248,7 +249,8 @@ namespace BundleTransformer.Yui.Minifiers
 				var errorReporter = _jsCompressor.ErrorReporter as CustomErrorReporter;
 				if (errorReporter != null && errorReporter.ErrorMessages.Count > 0)
 				{
-					StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+					var stringBuilderPool = StringBuilderPool.Shared;
+					StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 					foreach (var errorDetail in errorReporter.ErrorMessages)
 					{
 						errorMessageBuilder.AppendLine(errorDetail);
@@ -258,7 +260,7 @@ namespace BundleTransformer.Yui.Minifiers
 					errorReporter.ErrorMessages.Clear();
 
 					string errorMessage = errorMessageBuilder.ToString();
-					StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+					stringBuilderPool.Return(errorMessageBuilder);
 
 					throw new YuiCompressingException(errorMessage);
 				}

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using AdvancedStringBuilder;
 using WebGrease;
 using WebGrease.Configuration;
 
@@ -270,7 +271,8 @@ namespace BundleTransformer.WG.Minifiers
 				.ToList()
 				;
 
-			StringBuilder resultBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder resultBuilder = stringBuilderPool.Rent();
 			int endPosition = contentLength - 1;
 			int currentPosition = 0;
 
@@ -316,7 +318,7 @@ namespace BundleTransformer.WG.Minifiers
 			}
 
 			string result = resultBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(resultBuilder);
+			stringBuilderPool.Return(resultBuilder);
 
 			return result;
 		}
@@ -367,7 +369,8 @@ namespace BundleTransformer.WG.Minifiers
 				string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 					new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-				StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Message,
 					message);
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorCode,
@@ -397,7 +400,7 @@ namespace BundleTransformer.WG.Minifiers
 				}
 
 				errorMessage = errorMessageBuilder.ToString();
-				StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+				stringBuilderPool.Return(errorMessageBuilder);
 			}
 			else
 			{

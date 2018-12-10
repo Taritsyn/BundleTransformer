@@ -19,6 +19,7 @@
 	<ItemGroup>
 		<Reference Include="System.configuration" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="YUICompressor.NET" Version="2.7.0.0" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 
+using AdvancedStringBuilder;
 using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
@@ -10,8 +11,6 @@ using Newtonsoft.Json.Linq;
 
 using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
-
-using CssoStrings = BundleTransformer.Csso.Resources.Strings;
 
 namespace BundleTransformer.Csso.Internal
 {
@@ -186,7 +185,8 @@ namespace BundleTransformer.Csso.Internal
 			string sourceFragment = SourceCodeNavigator.GetSourceFragment(sourceCode,
 				new SourceCodeNodeCoordinates(lineNumber, columnNumber));
 
-			StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 			if (!string.IsNullOrWhiteSpace(name))
 			{
 				errorMessageBuilder.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_Name, name);
@@ -213,7 +213,7 @@ namespace BundleTransformer.Csso.Internal
 			}
 
 			string errorMessage = errorMessageBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+			stringBuilderPool.Return(errorMessageBuilder);
 
 			return errorMessage;
 		}

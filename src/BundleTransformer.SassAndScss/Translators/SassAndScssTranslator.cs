@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using AdvancedStringBuilder;
 using LibSassHost;
 using LibSassHost.Helpers;
 using LshIndentType = LibSassHost.IndentType;
@@ -243,13 +244,14 @@ namespace BundleTransformer.SassAndScss.Translators
 			}
 			catch (SassСompilationException e)
 			{
-				StringBuilder errorMessageBuilder = StringBuilderPool.GetBuilder();
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
 				errorMessageBuilder.AppendLine(e.Message);
 				errorMessageBuilder.AppendLine();
 				errorMessageBuilder.Append(SassErrorHelpers.GenerateErrorDetails(e, true));
 
 				string errorMessage = errorMessageBuilder.ToString();
-				StringBuilderPool.ReleaseBuilder(errorMessageBuilder);
+				stringBuilderPool.Return(errorMessageBuilder);
 
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,

@@ -4,8 +4,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
+using AdvancedStringBuilder;
+
 using BundleTransformer.Core.Helpers;
-using BundleTransformer.Core.Utilities;
 
 namespace BundleTransformer.Closure.Internal
 {
@@ -36,7 +37,8 @@ namespace BundleTransformer.Closure.Internal
 				throw new ArgumentNullException("nameValueCollection");
 			}
 
-			StringBuilder contentBuilder = StringBuilderPool.GetBuilder();
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder contentBuilder = stringBuilderPool.Rent();
 
 			foreach (KeyValuePair<string, string> keyValuePair in nameValueCollection)
 			{
@@ -50,7 +52,7 @@ namespace BundleTransformer.Closure.Internal
 			}
 
 			string content = contentBuilder.ToString();
-			StringBuilderPool.ReleaseBuilder(contentBuilder);
+			stringBuilderPool.Return(contentBuilder);
 
 			return _defaultHttpEncoding.GetBytes(content);
 		}

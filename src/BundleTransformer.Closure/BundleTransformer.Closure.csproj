@@ -21,6 +21,7 @@
 		<Reference Include="System.configuration" Pack="false" />
 		<Reference Include="System.Web" Pack="false" />
 
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
 		<PackageReference Include="Microsoft.Net.Http" Version="2.2.29" />
 		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
 
