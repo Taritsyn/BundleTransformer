@@ -14,7 +14,7 @@
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Handlebars_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Handlebars;Translation;Translator;Compilation;Compiler</PackageTags>
-		<PackageReleaseNotes>JavaScript Engine Switcher was updated to version 3.0.0 RC 2.</PackageReleaseNotes>
+		<PackageReleaseNotes>JavaScript Engine Switcher was updated to version 3.0.0.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />
@@ -26,7 +26,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
 		<Reference Include="System.Web" Pack="false" />
 
 		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.0.0-rc2" />
+		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="8.0.2" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
