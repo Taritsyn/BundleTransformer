@@ -276,7 +276,7 @@ namespace BundleTransformer.Core.Resources {
         ///
         ///If you have not installed JS engine, then for correct working of this module is recommended to install one of the following NuGet packages: {1}
         ///
-        ///After package is installed, need set a name of JS engine (for example, `{2}`) to the `name` attribute of `/configuration/bundleTransformer/{0}/jsEngine` configuration element..
+        ///After package is installed and JS engine is registered (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines), need set a name of JS engine (for example, `{2}`) to the `name` attribute of `/configur [rest of string was truncated]&quot;;.
         /// </summary>
         public static string Configuration_JsEngineNotSpecified {
             get {

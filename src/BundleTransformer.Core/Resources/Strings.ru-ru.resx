@@ -195,7 +195,7 @@
 
 Если у вас еще не установлен ни один JS-движок, то для нормальной работы данного модуля рекомендуется установить один из следующих NuGet-пакетов: {1}
 
-После установки пакета присвойте название JS-движка (например, `{2}`) атрибуту `name` конфигурационного элемента `/configuration/bundleTransformer/{0}/jsEngine`.</value>
+После установки пакета и регистрации JS-движка (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines), присвойте название JS-движка (например, `{2}`) атрибуту `name` конфигурационного элемента `/configuration/bundleTransformer/{0}/jsEngine`.</value>
   </data>
   <data name="Configuration_MinifierNotRegistered" xml:space="preserve">
     <value>Минимизатор {0}-кода с именем `{1}` не зарегистрирован в конфигурационном файле!</value>
