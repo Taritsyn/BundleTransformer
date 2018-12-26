@@ -43,7 +43,9 @@ namespace BundleTransformer.Core.Combiners
 			if (assetCount == 0)
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assets"), "assets");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(assets)),
+					nameof(assets)
+				);
 			}
 
 			bool isMinified;

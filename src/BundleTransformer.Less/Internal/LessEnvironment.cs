@@ -226,8 +226,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "value"));
+				throw new ArgumentNullException(
+					nameof(value),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(value))
+				);
 			}
 
 			byte[] bytes = Encoding.UTF8.GetBytes(value);
@@ -245,8 +247,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "value"));
+				throw new ArgumentNullException(
+					nameof(value),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(value))
+				);
 			}
 
 			string encodedValue = Convert.ToBase64String(value);
@@ -263,14 +267,18 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (fileName == null)
 			{
-				throw new ArgumentNullException("fileName",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "fileName"));
+				throw new ArgumentNullException(
+					nameof(fileName),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(fileName))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(fileName))
 			{
 				throw new ArgumentException(
-					string.Format(CoreStrings.Common_ArgumentIsEmpty, "fileName"), "fileName");
+					string.Format(CoreStrings.Common_ArgumentIsEmpty, nameof(fileName)),
+					nameof(fileName)
+				);
 			}
 
 			string fileExtension = Path.GetExtension(fileName);

@@ -154,7 +154,10 @@ namespace BundleTransformer.Hogan.Internal
 		{
 			if (string.IsNullOrWhiteSpace(path))
 			{
-				throw new ArgumentException(string.Format(CoreStrings.Common_ArgumentIsEmpty, "path"), "path");
+				throw new ArgumentException(
+					string.Format(CoreStrings.Common_ArgumentIsEmpty, nameof(path)),
+					nameof(path)
+				);
 			}
 
 			string templateName = (templateNamespace ?? string.Empty) + Path.GetFileNameWithoutExtension(path);

@@ -217,7 +217,10 @@ namespace BundleTransformer.CleanCss.Minifiers
 		{
 			if (asset == null)
 			{
-				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+				throw new ArgumentNullException(
+					nameof(asset),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(asset))
+				);
 			}
 
 			if (asset.Minified)
@@ -244,7 +247,10 @@ namespace BundleTransformer.CleanCss.Minifiers
 		{
 			if (assets == null)
 			{
-				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "assets");
+				throw new ArgumentNullException(
+					nameof(assets),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(assets))
+				);
 			}
 
 			if (assets.Count == 0)

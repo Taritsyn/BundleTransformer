@@ -57,8 +57,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(url))
@@ -80,8 +82,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(url))
@@ -108,8 +112,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(url))
@@ -137,8 +143,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			int lastDirectorySeparatorPosition;
@@ -170,8 +178,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			int lastDirectorySeparatorPosition = FindLastDirectorySeparator(url);
@@ -190,8 +200,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			int lastDirectorySeparatorPosition = FindLastDirectorySeparator(url);
@@ -210,8 +222,10 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (url == null)
 			{
-				throw new ArgumentNullException("url",
-					string.Format(Strings.Common_ArgumentIsNull, "url"));
+				throw new ArgumentNullException(
+					nameof(url),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(url))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(url))
@@ -279,14 +293,18 @@ namespace BundleTransformer.Core.Helpers
 		{
 			if (baseUrl == null)
 			{
-				throw new ArgumentNullException("baseUrl",
-					string.Format(Strings.Common_ArgumentIsNull, "baseUrl"));
+				throw new ArgumentNullException(
+					nameof(baseUrl),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(baseUrl))
+				);
 			}
 
 			if (relativeUrl == null)
 			{
-				throw new ArgumentNullException("relativeUrl",
-					string.Format(Strings.Common_ArgumentIsNull, "relativeUrl"));
+				throw new ArgumentNullException(
+					nameof(relativeUrl),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(relativeUrl))
+				);
 			}
 
 			// Convert backslashes to forward slashes

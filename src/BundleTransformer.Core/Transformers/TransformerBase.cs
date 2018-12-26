@@ -134,12 +134,18 @@ namespace BundleTransformer.Core.Transformers
 		{
 			if (bundleContext == null)
 			{
-				throw new ArgumentNullException("bundleContext", Strings.Common_ValueIsNull);
+				throw new ArgumentNullException(
+					nameof(bundleContext),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(bundleContext))
+				);
 			}
 
 			if (bundleResponse == null)
 			{
-				throw new ArgumentNullException("bundleResponse", Strings.Common_ValueIsNull);
+				throw new ArgumentNullException(
+					nameof(bundleResponse),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(bundleResponse))
+				);
 			}
 
 			if (!bundleContext.EnableInstrumentation)

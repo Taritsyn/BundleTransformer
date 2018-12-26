@@ -53,7 +53,10 @@ namespace BundleTransformer.Core.Filters
 		{
 			if (assets == null)
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "assets");
+				throw new ArgumentNullException(
+					nameof(assets),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(assets))
+				);
 			}
 
 			if (assets.Count == 0)

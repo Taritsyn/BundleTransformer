@@ -42,7 +42,7 @@ namespace BundleTransformer.Core.Filters
 					string processedIgnorePattern = ignorePattern.Trim();
 					if (processedIgnorePattern == "*" || processedIgnorePattern == "*.*")
 					{
-						throw new ArgumentException(Strings.Assets_InvalidIgnorePattern, "ignorePatterns");
+						throw new ArgumentException(Strings.Assets_InvalidIgnorePattern, nameof(ignorePatterns));
 					}
 
 					string newIgnorePattern = Regex.Escape(processedIgnorePattern);

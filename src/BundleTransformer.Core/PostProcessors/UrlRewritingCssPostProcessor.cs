@@ -58,7 +58,10 @@ namespace BundleTransformer.Core.PostProcessors
 		{
 			if (asset == null)
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+				throw new ArgumentNullException(
+					nameof(asset),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(asset))
+				);
 			}
 
 			InnerPostProcess(asset);
@@ -75,7 +78,10 @@ namespace BundleTransformer.Core.PostProcessors
 		{
 			if (assets == null)
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "assets");
+				throw new ArgumentNullException(
+					nameof(assets),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(assets))
+				);
 			}
 
 			if (assets.Count == 0)

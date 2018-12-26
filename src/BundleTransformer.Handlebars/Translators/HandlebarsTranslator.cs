@@ -149,7 +149,10 @@ namespace BundleTransformer.Handlebars.Translators
 		{
 			if (asset == null)
 			{
-				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "asset");
+				throw new ArgumentNullException(
+					nameof(asset),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(asset))
+				);
 			}
 
 			CompilationOptions options = CreateCompilationOptions();
@@ -171,7 +174,10 @@ namespace BundleTransformer.Handlebars.Translators
 		{
 			if (assets == null)
 			{
-				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "assets");
+				throw new ArgumentNullException(
+					nameof(assets),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(assets))
+				);
 			}
 
 			if (assets.Count == 0)

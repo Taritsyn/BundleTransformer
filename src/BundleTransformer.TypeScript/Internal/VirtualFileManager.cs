@@ -137,8 +137,10 @@ namespace BundleTransformer.TypeScript.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			if (DefaultLibraryExists(path))
@@ -160,8 +162,10 @@ namespace BundleTransformer.TypeScript.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			if (DefaultLibraryExists(path))

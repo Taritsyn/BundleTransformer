@@ -38,8 +38,10 @@ namespace BundleTransformer.SassAndScss.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			bool result = path.Length >= 2 && path[0] == '~' && (path[1] == '/' || path[1] == '\\');
@@ -66,8 +68,10 @@ namespace BundleTransformer.SassAndScss.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			bool result = _virtualFileSystemWrapper.FileExists(path);
@@ -79,8 +83,10 @@ namespace BundleTransformer.SassAndScss.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			bool result = false;
@@ -118,8 +124,10 @@ namespace BundleTransformer.SassAndScss.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			if (!IsAppRelativePath(path))
@@ -136,8 +144,10 @@ namespace BundleTransformer.SassAndScss.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			string content = _virtualFileSystemWrapper.GetFileTextContent(path);

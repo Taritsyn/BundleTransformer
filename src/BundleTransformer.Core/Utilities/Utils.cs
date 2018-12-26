@@ -70,7 +70,10 @@ namespace BundleTransformer.Core.Utilities
 		{
 			if (string.IsNullOrWhiteSpace(fullTypeName))
 			{
-				throw new ArgumentNullException(Strings.Common_ValueIsEmpty);
+				throw new ArgumentException(
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(fullTypeName)),
+					nameof(fullTypeName)
+				);
 			}
 
 			string typeName;
@@ -150,19 +153,25 @@ namespace BundleTransformer.Core.Utilities
 			if (resourceName == null)
 			{
 				throw new ArgumentNullException(
-					"resourceName", string.Format(Strings.Common_ArgumentIsNull, "resourceName"));
+					nameof(resourceName),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(resourceName))
+				);
 			}
 
 			if (type == null)
 			{
 				throw new ArgumentNullException(
-					"type", string.Format(Strings.Common_ArgumentIsNull, "type"));
+					nameof(type),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(type))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(resourceName))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "resourceName"), "resourceName");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(resourceName)),
+					nameof(resourceName)
+				);
 			}
 
 			Assembly assembly = type.Assembly;
@@ -183,19 +192,25 @@ namespace BundleTransformer.Core.Utilities
 			if (resourceName == null)
 			{
 				throw new ArgumentNullException(
-					"resourceName", string.Format(Strings.Common_ArgumentIsNull, "resourceName"));
+					nameof(resourceName),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(resourceName))
+				);
 			}
 
 			if (assembly == null)
 			{
 				throw new ArgumentNullException(
-					"assembly", string.Format(Strings.Common_ArgumentIsNull, "assembly"));
+					nameof(assembly),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(assembly))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(resourceName))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "resourceName"), "resourceName");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(resourceName)),
+					nameof(resourceName)
+				);
 			}
 
 			return InnerGetResourceAsString(resourceName, assembly);

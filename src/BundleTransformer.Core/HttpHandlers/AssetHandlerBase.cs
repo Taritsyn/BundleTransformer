@@ -263,7 +263,9 @@ namespace BundleTransformer.Core.HttpHandlers
 			if (string.IsNullOrWhiteSpace(assetVirtualPath))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assetVirtualPath"), "assetVirtualPath");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(assetVirtualPath)),
+					nameof(assetVirtualPath)
+				);
 			}
 
 			string processedAssetVirtualPath = UrlHelpers.ProcessBackSlashes(assetVirtualPath);
@@ -291,7 +293,9 @@ namespace BundleTransformer.Core.HttpHandlers
 			if (string.IsNullOrWhiteSpace(assetVirtualPath))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assetVirtualPath"), "assetVirtualPath");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(assetVirtualPath)),
+					nameof(assetVirtualPath)
+				);
 			}
 
 			string content;

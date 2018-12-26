@@ -7,6 +7,7 @@ using System.Text;
 using AdvancedStringBuilder;
 
 using BundleTransformer.Core.Helpers;
+using BundleTransformer.Core.Resources;
 
 namespace BundleTransformer.Closure.Internal
 {
@@ -34,7 +35,10 @@ namespace BundleTransformer.Closure.Internal
 		{
 			if (nameValueCollection == null)
 			{
-				throw new ArgumentNullException("nameValueCollection");
+				throw new ArgumentNullException(
+					nameof(nameValueCollection),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(nameValueCollection))
+				);
 			}
 
 			var stringBuilderPool = StringBuilderPool.Shared;

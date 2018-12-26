@@ -135,8 +135,10 @@ namespace BundleTransformer.SassAndScss.Translators
 		{
 			if (virtualFileSystemWrapper == null)
 			{
-				throw new ArgumentNullException("virtualFileSystemWrapper",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "virtualFileSystemWrapper"));
+				throw new ArgumentNullException(
+					nameof(virtualFileSystemWrapper),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(virtualFileSystemWrapper))
+				);
 			}
 
 			IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
@@ -179,7 +181,10 @@ namespace BundleTransformer.SassAndScss.Translators
 		{
 			if (asset == null)
 			{
-				throw new ArgumentException(Strings.Common_ValueIsEmpty, "asset");
+				throw new ArgumentNullException(
+					nameof(asset),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(asset))
+				);
 			}
 
 			Initialize();
@@ -201,7 +206,10 @@ namespace BundleTransformer.SassAndScss.Translators
 		{
 			if (assets == null)
 			{
-				throw new ArgumentException(CoreStrings.Common_ValueIsEmpty, "assets");
+				throw new ArgumentNullException(
+					nameof(assets),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(assets))
+				);
 			}
 
 			if (assets.Count == 0)

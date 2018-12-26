@@ -42,14 +42,18 @@ namespace BundleTransformer.Core.FileSystem
 		{
 			if (basePath == null)
 			{
-				throw new ArgumentNullException("basePath",
-					string.Format(Strings.Common_ArgumentIsNull, "basePath"));
+				throw new ArgumentNullException(
+					nameof(basePath),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(basePath))
+				);
 			}
 
 			if (relativePath == null)
 			{
-				throw new ArgumentNullException("relativePath",
-					string.Format(Strings.Common_ArgumentIsNull, "relativePath"));
+				throw new ArgumentNullException(
+					nameof(relativePath),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(relativePath))
+				);
 			}
 
 			// Convert backslashes to forward slashes

@@ -35,8 +35,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			bool result = path.Length >= 2 && path[0] == '~' && (path[1] == '/' || path[1] == '\\');
@@ -53,8 +55,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			if (!IsAppRelativePath(path))
@@ -77,8 +81,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			bool result = _virtualFileSystemWrapper.FileExists(path);
@@ -96,8 +102,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			string content = _virtualFileSystemWrapper.GetFileTextContent(path);
@@ -114,8 +122,10 @@ namespace BundleTransformer.Less.Internal
 		{
 			if (path == null)
 			{
-				throw new ArgumentNullException("path",
-					string.Format(CoreStrings.Common_ArgumentIsNull, "path"));
+				throw new ArgumentNullException(
+					nameof(path),
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(path))
+				);
 			}
 
 			byte[] bytes = _virtualFileSystemWrapper.GetFileBinaryContent(path);

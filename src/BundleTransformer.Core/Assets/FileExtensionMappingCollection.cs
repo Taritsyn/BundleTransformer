@@ -30,7 +30,9 @@ namespace BundleTransformer.Core.Assets
 				if (string.IsNullOrWhiteSpace(fileExtension))
 				{
 					throw new ArgumentException(
-						string.Format(Strings.Common_ArgumentIsEmpty, "fileExtension"), "fileExtension");
+						string.Format(Strings.Common_ArgumentIsEmpty, nameof(fileExtension)),
+						nameof(fileExtension)
+					);
 				}
 
 				string processedFileExtension = ProcessFileExtension(fileExtension);
@@ -42,13 +44,17 @@ namespace BundleTransformer.Core.Assets
 				if (string.IsNullOrWhiteSpace(fileExtension))
 				{
 					throw new ArgumentException(
-						string.Format(Strings.Common_ArgumentIsEmpty, "fileExtension"), "fileExtension");
+						string.Format(Strings.Common_ArgumentIsEmpty, nameof(fileExtension)),
+						nameof(fileExtension)
+					);
 				}
 
 				if (string.IsNullOrWhiteSpace(value))
 				{
 					throw new ArgumentException(
-						string.Format(Strings.Common_ArgumentIsEmpty, "value"), "value");
+						string.Format(Strings.Common_ArgumentIsEmpty, nameof(value)),
+						nameof(value)
+					);
 				}
 
 				string processedFileExtension = ProcessFileExtension(fileExtension);
@@ -58,7 +64,8 @@ namespace BundleTransformer.Core.Assets
 				{
 					throw new ArgumentException(
 						string.Format(Strings.FileExtensionMapping_DuplicateFileExtension, processedFileExtension),
-						"fileExtension");
+						nameof(fileExtension)
+					);
 				}
 
 				_entries[processedFileExtension] = processedAssetTypeCode;
@@ -113,7 +120,9 @@ namespace BundleTransformer.Core.Assets
 			if (string.IsNullOrWhiteSpace(fileExtension))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "fileExtension"), "fileExtension");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(fileExtension)),
+					nameof(fileExtension)
+				);
 			}
 
 			return InnerContainsFileExtension(fileExtension);
@@ -129,7 +138,9 @@ namespace BundleTransformer.Core.Assets
 			if (string.IsNullOrWhiteSpace(assetTypeCode))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assetTypeCode"), "assetTypeCode");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(assetTypeCode)),
+					nameof(assetTypeCode)
+				);
 			}
 
 			return _entries.ContainsValue(assetTypeCode);
@@ -145,7 +156,9 @@ namespace BundleTransformer.Core.Assets
 			if (mapping == null)
 			{
 				throw new ArgumentNullException(
-					"mapping", string.Format(Strings.Common_ArgumentIsNull, "mapping"));
+					nameof(mapping),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(mapping))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(mapping.FileExtension))
@@ -173,7 +186,9 @@ namespace BundleTransformer.Core.Assets
 			if (string.IsNullOrWhiteSpace(filePath))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "filePath"), "filePath");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(filePath)),
+					nameof(filePath)
+				);
 			}
 
 			string processedAssetPath = filePath.TrimEnd().ToLowerInvariant();
@@ -228,13 +243,17 @@ namespace BundleTransformer.Core.Assets
 			if (string.IsNullOrWhiteSpace(fileExtension))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "fileExtension"), "fileExtension");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(fileExtension)),
+					nameof(fileExtension)
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(assetTypeCode))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "assetTypeCode"), "assetTypeCode");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(assetTypeCode)),
+					nameof(assetTypeCode)
+				);
 			}
 
 			InnerAdd(fileExtension, assetTypeCode);
@@ -249,7 +268,9 @@ namespace BundleTransformer.Core.Assets
 			if (mapping == null)
 			{
 				throw new ArgumentNullException(
-					"mapping", string.Format(Strings.Common_ArgumentIsNull, "mapping"));
+					nameof(mapping),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(mapping))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(mapping.FileExtension))
@@ -274,7 +295,8 @@ namespace BundleTransformer.Core.Assets
 			{
 				throw new ArgumentException(
 					string.Format(Strings.FileExtensionMapping_DuplicateFileExtension, processedFileExtension),
-					"fileExtension");
+					nameof(fileExtension)
+				);
 			}
 
 			_entries.Add(processedFileExtension, processedAssetTypeCode);
@@ -291,7 +313,9 @@ namespace BundleTransformer.Core.Assets
 			if (string.IsNullOrWhiteSpace(fileExtension))
 			{
 				throw new ArgumentException(
-					string.Format(Strings.Common_ArgumentIsEmpty, "fileExtension"), "fileExtension");
+					string.Format(Strings.Common_ArgumentIsEmpty, nameof(fileExtension)),
+					nameof(fileExtension)
+				);
 			}
 
 			return InnerRemove(fileExtension);
@@ -308,7 +332,9 @@ namespace BundleTransformer.Core.Assets
 			if (mapping == null)
 			{
 				throw new ArgumentNullException(
-					"mapping", string.Format(Strings.Common_ArgumentIsNull, "mapping"));
+					nameof(mapping),
+					string.Format(Strings.Common_ArgumentIsNull, nameof(mapping))
+				);
 			}
 
 			if (string.IsNullOrWhiteSpace(mapping.FileExtension))
