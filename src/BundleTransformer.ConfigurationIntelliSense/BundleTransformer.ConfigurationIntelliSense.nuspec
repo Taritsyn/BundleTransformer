@@ -6,7 +6,7 @@
 		<title>Bundle Transformer: IntelliSense</title>
 		<authors>Andrey Taritsyn</authors>
 		<owners>Andrey Taritsyn</owners>
-		<licenseUrl>https://github.com/Taritsyn/BundleTransformer/blob/master/LICENSE.txt</licenseUrl>
+		<license type="file">LICENSE.txt</license>
 		<projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
 		<iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</iconUrl>
 		<repository type="git" url="https://github.com/Taritsyn/BundleTransformer" />
@@ -19,5 +19,6 @@
 	<files>
 		<file src="../../samples/BundleTransformer.Sample.AspNet4.Mvc4/BundleTransformer.Configuration.xsd" target="content" />
 		<file src="readme.txt" />
+		<file src="../../LICENSE.txt" target="LICENSE.txt" />
 	</files>
 </package>
