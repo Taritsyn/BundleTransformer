@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<Product>Bundle Transformer: Handlebars</Product>
 		<VersionPrefix>1.10.0</VersionPrefix>
-		<VersionSuffix>beta1</VersionSuffix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>

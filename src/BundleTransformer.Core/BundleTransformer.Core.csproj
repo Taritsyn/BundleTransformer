@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<Product>Bundle Transformer: Core</Product>
 		<VersionPrefix>1.10.0</VersionPrefix>
-		<VersionSuffix>beta1</VersionSuffix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -16,7 +15,9 @@ The main differences of the `StyleTransformer` and `ScriptTransformer` classes f
 This extension will help your web applications successfully pass a most part of the tests in Google PageSpeed.</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Core_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;JavaScript;JS;Bundling;Performance;Optimization;YSlow;Speed;Pre-minified;Combine;Compression</PackageTags>
-		<PackageReleaseNotes>`InterlockedStatedFlag` and `StatedFlag` classes have been moved to the `BundleTransformer.Core.Utilities` namespace.</PackageReleaseNotes>
+		<PackageReleaseNotes>1. Part of the auxiliary code was replaced by the AdvancedStringBuilder;
+2. Improved a performance of the `SourceCodeNavigator` class;
+3. `InterlockedStatedFlag` and `StatedFlag` classes have been moved to the `BundleTransformer.Core.Utilities` namespace.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />

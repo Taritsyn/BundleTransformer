@@ -1,6 +1,14 @@
 Change log
 ==========
 
+## v1.10.0 - December 26, 2018
+ * Part of the auxiliary code was replaced by the [AdvancedStringBuilder](https://github.com/Taritsyn/AdvancedStringBuilder) library
+ * Improved a performance of the `SourceCodeNavigator` class
+ * `InterlockedStatedFlag` and `StatedFlag` classes have been moved to the `BundleTransformer.Core.Utilities` namespace
+ * In BundleTransformer.Less, BundleTransformer.CoffeeScript, BundleTransformer.TypeScript, BundleTransformer.Hogan, BundleTransformer.Handlebars, BundleTransformer.Autoprefixer, BundleTransformer.Packer, BundleTransformer.UglifyJS, BundleTransformer.Csso and BundleTransformer.CleanCss was updated the JavaScript Engine Switcher to [version 3.0.0](https://github.com/Taritsyn/JavaScriptEngineSwitcher/releases/tag/v3.0.0)
+ * In BundleTransformer.SassAndScss was updated the LibSass Host to version 1.2.2
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.4.3
+
 ## v1.10.0 Beta 1 - December 10, 2018
  * Part of the auxiliary code was replaced by the [AdvancedStringBuilder](https://github.com/Taritsyn/AdvancedStringBuilder) library
  * Improved a performance of the `SourceCodeNavigator` class

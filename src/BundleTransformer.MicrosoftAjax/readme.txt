@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-           README file for Bundle Transformer: Microsoft Ajax v1.10.0 Beta 1
+              README file for Bundle Transformer: Microsoft Ajax v1.10.0
 
    --------------------------------------------------------------------------------
 
