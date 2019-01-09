@@ -59,18 +59,17 @@ If you use Bundle Transformer in some project, please send me a message so I can
  * [bootlessmvc](http://bitbucket.org/jdubrownik/bootlessmvc-seed) by Jarek Dubrownik
  * [Bundle Transformer LESS Theme Builders](http://bundletransformer-theme-builder.azurewebsites.net/) by Ben Embery
  * [Dynamic Bundles for ASP.NET MVC](http://getdynamicbundles.com/) by Matt Perdeck
- * [ProteanCMS](https://github.com/Eonic/ProteanCMS) by Trevor Spink
  * [Equ Umbraco Bootstrap](http://nuget.org/packages/Equ.Umbraco.Bootstrap)
  * [LearnAngular](http://github.com/LeviBotelho/LearnAngular) by Levi Botelho
  * [ModernSkins](http://github.com/samsalisbury/modern-skins) by Sam Salisbury
  * [Open Government Data Initiative v6](http://github.com/openlab/OGDI-DataLab)
  * [Optimus](http://our.umbraco.org/projects/developer-tools/optimus) by Tim Geyssens
+ * [ProteanCMS](https://github.com/Eonic/ProteanCMS) by Trevor Spink
  * [Sassy](http://our.umbraco.org/projects/backoffice-extensions/sassy) by Warren Buckley
  * [SmartStore.NET](http://www.smartstore.com)
  * [Vault MVC Library](http://nuget.org/packages/Vault.MVC.V) by Admir Tuzovic, Josip Dusper, Mirza Dervisevic and Fedja Omeragic
  * [VMware AirWatch MDM Server 8.0](http://www.air-watch.com/)
  * [Web Performance Helpers for ASP.NET MVC](http://github.com/benembery/dotnet-mvc-web-optimisation-helpers) by Ben Embery
- 
 
 ### Websites
  * [Customer's Canvas](http://customerscanvas.com/)
