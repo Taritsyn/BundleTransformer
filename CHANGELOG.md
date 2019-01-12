@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.10.1 - January 12, 2019
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.4.4
+
 ## v1.10.0 - December 26, 2018
  * Part of the auxiliary code was replaced by the [AdvancedStringBuilder](https://github.com/Taritsyn/AdvancedStringBuilder) library
  * Improved a performance of the `SourceCodeNavigator` class
