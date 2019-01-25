@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.10.2 - January 25, 2019
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.4.6
+
 ## v1.10.1 - January 12, 2019
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.4.4
 
