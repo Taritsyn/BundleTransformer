@@ -76,5 +76,6 @@ If you use Bundle Transformer in some project, please send me a message so I can
  * [Latvia Dance Sport Federation (LSDF)](http://www.lsdf.lv/)
  * [NextGear Capital](https://nextgearcapital.co.uk/)
  * [TIKSN Development](http://www.tiksn.com/en-US/Home)
+ * [Member.buzz](https://www.member.buzz)
 
 Bundle Transformer was created and is maintained by Andrey Taritsyn.
