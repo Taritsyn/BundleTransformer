@@ -9,7 +9,7 @@ module TranslatorBadges {
 	* @class
 	* @export
 	*/
-    export class TranslatorBadge implements ITranslatorBadge {
+	export class TranslatorBadge implements ITranslatorBadge {
 		$badgeElem: JQuery;
 		$linkElem: JQuery;
 
@@ -19,13 +19,13 @@ module TranslatorBadges {
 		* @param {String} elementId - Id of badge DOM-element
 		* @constructor
 		*/
-        constructor (public elementId: string) {
+		constructor (public elementId: string) {
 			/**
 			* @protected
 			* @type {jQuery}
 			* @expose
 			*/
-            this.$badgeElem = jQuery("#" + elementId);
+			this.$badgeElem = jQuery("#" + elementId);
 
 			/**
 			* @protected
@@ -33,7 +33,7 @@ module TranslatorBadges {
 			* @expose
 			*/
 			this.$linkElem = this.$badgeElem.find("A:first");
-        }
+		}
 
 		/**
 		* Gets a text of badge
@@ -41,9 +41,9 @@ module TranslatorBadges {
 		* @returns {String} - Text of badge
 		* @expose
 		*/
-        public getText(): string {
-            return this.$linkElem.text();
-        }
+		public getText(): string {
+			return this.$linkElem.text();
+		}
 
 		/**
 		* Sets a text of badge
@@ -51,9 +51,9 @@ module TranslatorBadges {
 		* @param {string} text - Text of badge
 		* @expose
 		*/
-        public setText(text: string): void {
-            this.$linkElem.text(text);
-        }
+		public setText(text: string): void {
+			this.$linkElem.text(text);
+		}
 
 		/**
 		* Shows badge
@@ -61,9 +61,9 @@ module TranslatorBadges {
 		* @returns {void}
 		* @expose
 		*/
-        public show(): void {
-            this.$badgeElem.show(0);
-        }
+		public show(): void {
+			this.$badgeElem.show(0);
+		}
 
 		/**
 		* Hides badge
@@ -71,9 +71,9 @@ module TranslatorBadges {
 		* @returns {void}
 		* @expose
 		*/
-        public hide(): void {
-            this.$badgeElem.hide(0);
-        }
+		public hide(): void {
+			this.$badgeElem.hide(0);
+		}
 
 		/**
 		* Checks whether the badge is visible
@@ -84,5 +84,5 @@ module TranslatorBadges {
 		public isVisible() : boolean {
 			return this.$badgeElem.is(":visible");
 		}
-    }
+	}
 }

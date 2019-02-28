@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -14,6 +14,11 @@
    BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during
    editing of the `bundleTransformer` configuration section in the `Web.config`
    file.
+
+   =============
+   RELEASE NOTES
+   =============
+   Updated definitions for configuration settings of TypeScript translator.
 
    =============
    DOCUMENTATION

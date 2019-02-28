@@ -708,6 +708,11 @@
 				<xs:documentation>Flag for whether to skip type checking of declaration files</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="strictBindCallApply" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to enable strict `bind`, `call` and `apply` methods on functions</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="strictNullChecks" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to enable strict null checks</xs:documentation>

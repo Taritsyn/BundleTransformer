@@ -284,6 +284,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict <code>bind</code>, <code>call</code>
+		/// and <code>apply</code> methods on functions
+		/// </summary>
+		public bool StrictBindCallApply
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable strict null checks
 		/// </summary>
 		public bool StrictNullChecks
@@ -420,6 +430,7 @@ namespace BundleTransformer.TypeScript.Translators
 			RemoveComments = tsConfig.RemoveComments;
 			SkipDefaultLibCheck = tsConfig.SkipDefaultLibCheck;
 			SkipLibCheck = tsConfig.SkipLibCheck;
+			StrictBindCallApply = tsConfig.StrictBindCallApply;
 			StrictNullChecks = tsConfig.StrictNullChecks;
 			StrictFunctionTypes = tsConfig.StrictFunctionTypes;
 			StrictPropertyInitialization = tsConfig.StrictPropertyInitialization;
@@ -580,6 +591,7 @@ namespace BundleTransformer.TypeScript.Translators
 				RemoveComments = RemoveComments,
 				SkipDefaultLibCheck = SkipDefaultLibCheck,
 				SkipLibCheck = SkipLibCheck,
+				StrictBindCallApply = StrictBindCallApply,
 				StrictNullChecks = StrictNullChecks,
 				StrictFunctionTypes = StrictFunctionTypes,
 				StrictPropertyInitialization = StrictPropertyInitialization,

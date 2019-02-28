@@ -242,6 +242,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict <code>bind</code>, <code>call</code>
+		/// and <code>apply</code> methods on functions
+		/// </summary>
+		public bool StrictBindCallApply
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable strict null checks
 		/// </summary>
 		public bool StrictNullChecks
@@ -358,6 +368,7 @@ namespace BundleTransformer.TypeScript.Internal
 			RemoveComments = false;
 			SkipDefaultLibCheck = false;
 			SkipLibCheck = false;
+			StrictBindCallApply = false;
 			StrictNullChecks = false;
 			StrictFunctionTypes = false;
 			StrictPropertyInitialization = false;

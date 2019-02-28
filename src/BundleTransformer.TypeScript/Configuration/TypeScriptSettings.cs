@@ -267,6 +267,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to enable strict <code>bind</code>, <code>call</code>
+		/// and <code>apply</code> methods on functions
+		/// </summary>
+		[ConfigurationProperty("strictBindCallApply", DefaultValue = false)]
+		public bool StrictBindCallApply
+		{
+			get { return (bool)this["strictBindCallApply"]; }
+			set { this["strictBindCallApply"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to enable strict null checks
 		/// </summary>
 		[ConfigurationProperty("strictNullChecks", DefaultValue = false)]

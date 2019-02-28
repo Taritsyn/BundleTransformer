@@ -57,6 +57,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			sourceRoot: '',
 			skipDefaultLibCheck: false,
 			skipLibCheck: false,
+			strictBindCallApply: false,
 			strictNullChecks: false,
 			strictFunctionTypes: false,
 			strictPropertyInitialization: false,
@@ -67,8 +68,49 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			target: 0 /* ES3 */,
 			transpileOnly: false
 		},
+		libEntries = [
+			['es5', 'lib.es5.d.ts'],
+			['es6', 'lib.es2015.d.ts'],
+			['es2015', 'lib.es2015.d.ts'],
+			['es7', 'lib.es2016.d.ts'],
+			['es2016', 'lib.es2016.d.ts'],
+			['es2017', 'lib.es2017.d.ts'],
+			['es2018', 'lib.es2018.d.ts'],
+			['esnext', 'lib.esnext.d.ts'],
+			['dom', 'lib.dom.d.ts'],
+			['dom.iterable', 'lib.dom.iterable.d.ts'],
+			['webworker', 'lib.webworker.d.ts'],
+			['webworker.importscripts', 'lib.webworker.importscripts.d.ts'],
+			['scripthost', 'lib.scripthost.d.ts'],
+			['es2015.core', 'lib.es2015.core.d.ts'],
+			['es2015.collection', 'lib.es2015.collection.d.ts'],
+			['es2015.generator', 'lib.es2015.generator.d.ts'],
+			['es2015.iterable', 'lib.es2015.iterable.d.ts'],
+			['es2015.promise', 'lib.es2015.promise.d.ts'],
+			['es2015.proxy', 'lib.es2015.proxy.d.ts'],
+			['es2015.reflect', 'lib.es2015.reflect.d.ts'],
+			['es2015.symbol', 'lib.es2015.symbol.d.ts'],
+			['es2015.symbol.wellknown', 'lib.es2015.symbol.wellknown.d.ts'],
+			['es2016.array.include', 'lib.es2016.array.include.d.ts'],
+			['es2017.object', 'lib.es2017.object.d.ts'],
+			['es2017.sharedmemory', 'lib.es2017.sharedmemory.d.ts'],
+			['es2017.string', 'lib.es2017.string.d.ts'],
+			['es2017.intl', 'lib.es2017.intl.d.ts'],
+			['es2017.typedarrays', 'lib.es2017.typedarrays.d.ts'],
+			['es2018.intl', 'lib.es2018.intl.d.ts'],
+			['es2018.promise', 'lib.es2018.promise.d.ts'],
+			['es2018.regexp', 'lib.es2018.regexp.d.ts'],
+			['esnext.array', 'lib.esnext.array.d.ts'],
+			['esnext.symbol', 'lib.esnext.symbol.d.ts'],
+			['esnext.asynciterable', 'lib.esnext.asynciterable.d.ts'],
+			['esnext.intl', 'lib.esnext.intl.d.ts'],
+			['esnext.bigint', 'lib.esnext.bigint.d.ts']
+		],
 		BtSystem
 		;
+
+	ts.libs = libEntries.map(function (entry) { return entry[0]; });
+	ts.libMap = ts.createMapFromEntries(libEntries);
 
 	function mix(destination, source) {
 		var propertyName;
@@ -105,7 +147,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 	//#region BtSystem class
 	BtSystem = (function () {
-		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = "Method 'ts.sys.{0}' is not implemented.";
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = 'Method \'ts.sys.{0}\' is not implemented.';
 
 		function BtSystem(defaultLibFileName) {
 			this.args = [];
@@ -122,9 +164,9 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		};
 
 		BtSystem.prototype.readFile = function (fileName) {
-			var canonicalPath = this.getCanonicalPath(fileName);
-			if (typeof this._outputFiles[canonicalPath] !== 'undefined') {
-				return this._outputFiles[canonicalPath];
+			var canonicalFileName = this.getCanonicalFileName(fileName);
+			if (typeof this._outputFiles[canonicalFileName] !== 'undefined') {
+				return this._outputFiles[canonicalFileName];
 			}
 
 			var content = virtualFileManager.ReadFile(fileName);
@@ -138,37 +180,35 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		};
 
 		BtSystem.prototype.writeFile = function (fileName, data) {
-			var canonicalPath = this.getCanonicalPath(fileName);
-			this._outputFiles[canonicalPath] = data;
-		};
-
-		BtSystem.prototype.getCanonicalPath = function(path) {
-			return path.toLowerCase();
-		};
-
-		BtSystem.prototype.getDirectories = null;
-
-		BtSystem.prototype.getEnvironmentVariable = function() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getEnvironmentVariable'));
-		};
-
-		BtSystem.prototype.readDirectory = function() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'readDirectory'));
+			var canonicalFileName = this.getCanonicalFileName(fileName);
+			this._outputFiles[canonicalFileName] = data;
 		};
 
 		BtSystem.prototype.resolvePath = function(path) {
 			return path;
 		};
 
-		BtSystem.prototype.fileExists = function (path) {
-			var canonicalPath = this.getCanonicalPath(path);
-			if (typeof this._outputFiles[canonicalPath] !== 'undefined') {
+		BtSystem.prototype.fileExists = function (fileName) {
+			var canonicalFileName = this.getCanonicalFileName(fileName);
+			if (typeof this._outputFiles[canonicalFileName] !== 'undefined') {
 				return true;
 			}
 
-			var isFileExists = virtualFileManager.FileExists(path);
+			var isFileExists = virtualFileManager.FileExists(fileName);
 
 			return isFileExists;
+		};
+
+		BtSystem.prototype.deleteFile = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'deleteFile'));
+		};
+
+		BtSystem.prototype.getModifiedTime = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getModifiedTime'));
+		};
+
+		BtSystem.prototype.setModifiedTime = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'setModifiedTime'));
 		};
 
 		BtSystem.prototype.directoryExists = function() {
@@ -189,8 +229,26 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			return directoryName;
 		};
 
+		BtSystem.prototype.getDirectories = null;
+
+		BtSystem.prototype.getEnvironmentVariable = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'getEnvironmentVariable'));
+		};
+
+		BtSystem.prototype.readDirectory = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'readDirectory'));
+		};
+
 		BtSystem.prototype.exit = function() {
 			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'exit'));
+		};
+
+		BtSystem.prototype.realpath = function() {
+			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'realpath'));
+		};
+
+		BtSystem.prototype.getCanonicalFileName = function(fileName) {
+			return this.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
 		};
 
 		BtSystem.prototype.getIncludedFilePaths = function () {
@@ -206,15 +264,21 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 	})();
 	//#endregion
 
-	//#region createBtCompilerHost function
-	function createBtCompilerHost(options) {
-		var newLine = ts.getNewLineCharacter(options);
+	//#region createBtCompilerHostWorker function
+	function createBtCompilerHostWorker(options, setParentNodes, system) {
+		if (system === void 0){
+			system = ts.sys;
+		}
+
+		var compilerHost,
+			newLine = ts.getNewLineCharacter(options, function () { return system.newLine; })
+			;
 
 		function getSourceFile(fileName, languageVersion, onError) {
 			var text;
 
 			try {
-				text = ts.sys.readFile(fileName);
+				text = system.readFile(fileName);
 			}
 			catch (e) {
 				if (onError) {
@@ -229,7 +293,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		}
 
 		function getDefaultLibLocation() {
-			return "";
+			return '';
 		}
 
 		function getDefaultLibFileName(options) {
@@ -238,7 +302,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 		function writeFile(fileName, data, writeByteOrderMark, onError) {
 			try {
-				ts.sys.writeFile(fileName, data, writeByteOrderMark);
+				system.writeFile(fileName, data, writeByteOrderMark);
 			}
 			catch (e) {
 				if (onError) {
@@ -248,15 +312,15 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		}
 
 		function getCurrentDirectory() {
-			return ts.sys.getCurrentDirectory();
+			return system.getCurrentDirectory();
 		}
 
 		function useCaseSensitiveFileNames() {
-			return ts.sys.useCaseSensitiveFileNames;
+			return system.useCaseSensitiveFileNames;
 		}
 
 		function getCanonicalFileName(fileName) {
-			return ts.sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
+			return system.getCanonicalFileName(fileName);
 		}
 
 		function getNewLine() {
@@ -264,24 +328,24 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		}
 
 		function fileExists(fileName) {
-			return ts.sys.fileExists(fileName);
+			return system.fileExists(fileName);
 		}
 
 		function readFile(fileName) {
-			return ts.sys.readFile(fileName);
+			return system.readFile(fileName);
 		}
 
 		function trace() { }
 
 		function directoryExists(directoryName) {
-			return ts.sys.directoryExists(directoryName);
+			return system.directoryExists(directoryName);
 		}
 
 		function getEnvironmentVariable(name) {
-			return ts.sys.getEnvironmentVariable ? ts.sys.getEnvironmentVariable(name) : "";
+			return system.getEnvironmentVariable ? system.getEnvironmentVariable(name) : '';
 		}
 
-		return {
+		compilerHost = {
 			getSourceFile: getSourceFile,
 			getDefaultLibLocation: getDefaultLibLocation,
 			getDefaultLibFileName: getDefaultLibFileName,
@@ -297,8 +361,11 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			getEnvironmentVariable: getEnvironmentVariable,
 			getDirectories: null,
 			realpath: null,
-			readDirectory: null
+			readDirectory: null,
+			createDirectory: null
 		};
+
+		return compilerHost;
 	}
 	//#endregion
 
@@ -377,7 +444,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		var result = {
 				compiledCode: '',
 				includedFilePaths: []
-		    },
+			},
 			compilationErrors,
 			compilationOptions,
 			inputFilePath = path,
@@ -397,7 +464,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 		// Compile code
 		ts.sys = new BtSystem(defaultLibFileName);
-		defaultCompilerHost = createBtCompilerHost(compilationOptions);
+		defaultCompilerHost = createBtCompilerHostWorker(compilationOptions, null, ts.sys);
 
 		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors || [];
 		if (compilationErrors.length === 0) {

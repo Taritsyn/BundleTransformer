@@ -18,8 +18,9 @@ and limitations under the License.
 /// <reference no-default-lib="true"/>
 
 
-/// <reference lib="es2018" />
-/// <reference lib="dom" />
-/// <reference lib="webworker.importscripts" />
-/// <reference lib="scripthost" />
-/// <reference lib="dom.iterable" />
+
+/////////////////////////////
+/// WorkerGlobalScope APIs
+/////////////////////////////
+// These are only available in a Web Worker
+declare function importScripts(...urls: string[]): void;
