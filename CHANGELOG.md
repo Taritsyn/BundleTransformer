@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.10.3 - February 28, 2019
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support of TypeScript version 3.3.3333
+   * In configuration settings of TypeScript translator was added one new property - `StrictBindCallApply` (default `false`)
+
 ## v1.10.2 - January 25, 2019
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.4.6
 
