@@ -5,14 +5,14 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.Less contains one translator-adapter - `LessTranslator`
-   (supports the LESS (http://lesscss.org) version 3.8.1). This adapter makes
+   (supports the LESS (http://lesscss.org) version 3.9.0). This adapter makes
    translation of LESS code to CSS code. Also contains the `LessAssetHandler`
    debugging HTTP handler, which is responsible for text output of translated LESS
    asset.
@@ -25,7 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 3.0.0.
+   Added support of LESS version 3.9.0.
 
    ====================
    POST-INSTALL ACTIONS

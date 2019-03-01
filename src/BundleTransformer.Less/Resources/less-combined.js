@@ -36,7 +36,7 @@ if (!Object.hasOwnProperty('assign')) {
 }
 
 /*!
- * Less - Leaner CSS v3.8.1
+ * Less - Leaner CSS v3.9.0
  * http://lesscss.org
  *
  * Copyright (c) 2009-2018, Alexis Sellier <self@cloudhead.net>
@@ -80,7 +80,6 @@ var Less = (function(virtualFileManager /*BT+*/){
 	* Released under the MIT License
 	*/
 	modules['clone'] = function () {
-		var clone = (function() {
 		'use strict';
 
 		function _instanceof(obj, type) {
@@ -330,9 +329,6 @@ var Less = (function(virtualFileManager /*BT+*/){
 			return flags;
 		}
 		clone.__getRegExpFlags = __getRegExpFlags;
-
-		return clone;
-		})();
 
 		return clone;
 	};
@@ -1488,8 +1484,10 @@ var Less = (function(virtualFileManager /*BT+*/){
 
 	//#region URL: /functions/list
 	modules['/functions/list'] = function () {
-		var Dimension = require('/tree/dimension'),
+		var Comment = require('/tree/comment'),
+			Dimension = require('/tree/dimension'),
 			Declaration = require('/tree/declaration'),
+			Expression = require('/tree/expression'),
 			Ruleset = require('/tree/ruleset'),
 			Selector = require('/tree/selector'),
 			Element = require('/tree/element'),
@@ -1516,8 +1514,36 @@ var Less = (function(virtualFileManager /*BT+*/){
 			length: function(values) {
 				return new Dimension(getItemsFromNode(values).length);
 			},
+			/**
+			 * Creates a Less list of incremental values.
+			 * Modeled after Lodash's range function, also exists natively in PHP
+			 * 
+			 * @param {Dimension} [start=1]
+			 * @param {Dimension} end  - e.g. 10 or 10px - unit is added to output
+			 * @param {Dimension} [step=1] 
+			 */
+			range: function(start, end, step) {
+				var from, to, stepValue = 1, list = [];
+				if (end) {
+					to = end;
+					from = start.value;
+					if (step) {
+						stepValue = step.value;
+					}
+				}
+				else {
+					from = 1;
+					to = start;
+				}
+
+				for (var i = from; i <= to.value; i += stepValue) {
+					list.push(new Dimension(i, to.unit));
+				}
+
+				return new Expression(list);
+			},
 			each: function(list, rs) {
-				var i = 0, rules = [], newRules, iterator;
+				var rules = [], newRules, iterator;
 
 				if (list.value) {
 					if (Array.isArray(list.value)) {
@@ -1527,6 +1553,8 @@ var Less = (function(virtualFileManager /*BT+*/){
 					}
 				} else if (list.ruleset) {
 					iterator = list.ruleset.rules;
+				} else if (list.rules) {
+					iterator = list.rules;
 				} else if (Array.isArray(list)) {
 					iterator = list;
 				} else {
@@ -1545,16 +1573,19 @@ var Less = (function(virtualFileManager /*BT+*/){
 				} else {
 					rs = rs.ruleset;
 				}
-				
-				iterator.forEach(function(item) {
-					i = i + 1;
-					var key, value;
+
+				for (var i = 0; i < iterator.length; i++) {
+					var key, value, item = iterator[i];
 					if (item instanceof Declaration) {
 						key = typeof item.name === 'string' ? item.name : item.name[0].value;
 						value = item.value;
 					} else {
-						key = new Dimension(i);
+						key = new Dimension(i + 1);
 						value = item;
+					}
+					
+					if (item instanceof Comment) {
+						continue;
 					}
 
 					newRules = rs.rules.slice(0);
@@ -1565,7 +1596,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 					}
 					if (indexName) {
 						newRules.push(new Declaration(indexName,
-							new Dimension(i),
+							new Dimension(i + 1),
 							false, false, this.index, this.currentFileInfo));
 					}
 					if (keyName) {
@@ -1579,7 +1610,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 						rs.strictImports,
 						rs.visibilityInfo()
 					));
-				});
+				}
 
 				return new Ruleset([ new(Selector)([ new Element("", '&') ]) ],
 						rules,
@@ -8690,16 +8721,19 @@ var Less = (function(virtualFileManager /*BT+*/){
 				error = new LessError({message: 'Could not evaluate variable call ' + this.variable});
 
 			if (!detachedRuleset.ruleset) {
-				if (Array.isArray(detachedRuleset)) {
+				if (detachedRuleset.rules) {
 					rules = detachedRuleset;
 				}
+				else if (Array.isArray(detachedRuleset)) {
+					rules = new Ruleset('', detachedRuleset);
+				}
 				else if (Array.isArray(detachedRuleset.value)) {
-					rules = detachedRuleset.value;
+					rules = new Ruleset('', detachedRuleset.value);
 				}
 				else {
 					throw error;
 				}
-				detachedRuleset = new DetachedRuleset(new Ruleset('', rules));
+				detachedRuleset = new DetachedRuleset(rules);
 			}
 			if (detachedRuleset.ruleset) {
 				return detachedRuleset.callEval(context);
@@ -10082,7 +10116,7 @@ var Less = (function(virtualFileManager /*BT+*/){
 			var /*BT- SourceMapOutput, SourceMapBuilder, */ParseTree, ImportManager, Environment;
 
 			var initial = {
-				version: [3, 8, 1],
+				version: [3, 9, 0],
 				data: require('/data'),
 				tree: require('/tree'),
 				Environment: (Environment = require('/environment/environment')),
