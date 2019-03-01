@@ -1,5 +1,5 @@
 {
-	"name": "bundletransformer",
+	"name": "bundletransformer.coffeescript",
 	"version": "1.10.2",
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
