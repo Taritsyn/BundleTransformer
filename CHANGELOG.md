@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.10.4 - March 1, 2019
+ * In BundleTransformer.Less added support of LESS version 3.9.0
+ * In BundleTransformer.SassAndScss was updated the LibSass Host to version 1.2.3
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.3.2
+ * In BundleTransformer.Handlebars added support of Handlebars version 4.1.0
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.4.9
+
 ## v1.10.3 - February 28, 2019
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.TypeScript:

@@ -1,6 +1,6 @@
 {
 	"name": "bundletransformer.coffeescript",
-	"version": "1.10.2",
+	"version": "1.10.4",
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
 		"babel-preset-es2015": "^6.24.1"
