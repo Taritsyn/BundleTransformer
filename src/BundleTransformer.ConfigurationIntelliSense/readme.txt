@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: IntelliSense v1.10.3
+               README file for Bundle Transformer: IntelliSense v1.11.0
 
    --------------------------------------------------------------------------------
 

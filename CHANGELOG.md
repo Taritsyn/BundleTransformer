@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.11.0 - March 15, 2019
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Autoprefixer postprocessor
+ * In BundleTransformer.Autoprefixer:
+   * Added support of Autoprefixer version 9.5
+   * In configuration settings was changed type of `Grid` property from boolean to `GridMode` enumeration (default `None`), and added one new property - `IgnoreUnknownVersions` (default `false`)
+
 ## v1.10.4 - March 1, 2019
  * In BundleTransformer.Less added support of LESS version 3.9.0
  * In BundleTransformer.SassAndScss was updated the LibSass Host to version 1.2.3
