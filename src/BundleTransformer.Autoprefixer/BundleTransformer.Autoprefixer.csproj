@@ -8,12 +8,13 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 9.4.9.
+		<Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 9.5.
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
-		<PackageReleaseNotes>In configuration settings of Autoprefixer postprocessor was changed type of `Grid` property from boolean to `GridMode` enumeration (default `None`), and added one new property - `IgnoreUnknownVersions` (default `false`).</PackageReleaseNotes>
+		<PackageReleaseNotes>1. Added support of Autoprefixer version 9.5;
+2. In configuration settings was changed type of `Grid` property from boolean to `GridMode` enumeration (default `None`), and added one new property - `IgnoreUnknownVersions` (default `false`).</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />
