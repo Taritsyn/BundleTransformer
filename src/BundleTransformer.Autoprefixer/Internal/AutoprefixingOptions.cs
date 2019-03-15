@@ -63,9 +63,19 @@ namespace BundleTransformer.Autoprefixer.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add IE prefixes for Grid Layout properties
+		/// Gets or sets a mode that defines should Autoprefixer add IE 10-11 prefixes for Grid Layout properties
 		/// </summary>
-		public bool Grid
+		public GridMode Grid
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not raise error on unknown browser version in
+		/// the <code>Browsers</code> property
+		/// </summary>
+		public bool IgnoreUnknownVersions
 		{
 			get;
 			set;
@@ -93,7 +103,8 @@ namespace BundleTransformer.Autoprefixer.Internal
 			Remove = true;
 			Supports = true;
 			Flexbox = true;
-			Grid = true;
+			Grid = GridMode.None;
+			IgnoreUnknownVersions = false;
 			Stats = string.Empty;
 		}
 	}

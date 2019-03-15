@@ -943,9 +943,33 @@
 				<xs:documentation>Flag for whether to add prefixes for flexbox properties. With 'no-2009' value Autoprefixer will add prefixes only for final and IE versions of specification.</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="grid" type="Boolean_SchemaType" use="optional" default="true">
+		<xs:attribute name="grid" use="optional" default="None">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to add IE prefixes for Grid Layout properties</xs:documentation>
+				<xs:documentation>Mode that defines should Autoprefixer add IE 10-11 prefixes for Grid Layout properties</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="None">
+						<xs:annotation>
+							<xs:documentation>Prevent Autoprefixer from outputting CSS Grid translations</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="Autoplace">
+						<xs:annotation>
+							<xs:documentation>Enable Autoprefixer grid translations and include autoplacement support</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="NoAutoplace">
+						<xs:annotation>
+							<xs:documentation>Enable Autoprefixer grid translations but exclude autoplacement support</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="ignoreUnknownVersions" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to do not raise error on unknown browser version in the `browsers` attribute</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="stats" type="xs:string" use="optional" default="">

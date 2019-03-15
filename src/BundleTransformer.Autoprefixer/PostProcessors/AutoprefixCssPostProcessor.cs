@@ -98,9 +98,19 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add IE prefixes for Grid Layout properties
+		/// Gets or sets a mode that defines should Autoprefixer add IE 10-11 prefixes for Grid Layout properties
 		/// </summary>
-		public bool Grid
+		public GridMode Grid
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not raise error on unknown browser version in
+		/// the <code>Browsers</code> property
+		/// </summary>
+		public bool IgnoreUnknownVersions
 		{
 			get;
 			set;
@@ -149,6 +159,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 			Supports = autoprefixerConfig.Supports;
 			Flexbox = ParseFlexboxProperty(autoprefixerConfig.Flexbox);
 			Grid = autoprefixerConfig.Grid;
+			IgnoreUnknownVersions = autoprefixerConfig.IgnoreUnknownVersions;
 			Stats = autoprefixerConfig.Stats;
 
 			if (createJsEngineInstance == null)
@@ -299,6 +310,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 				Supports = Supports,
 				Flexbox = Flexbox,
 				Grid = Grid,
+				IgnoreUnknownVersions = IgnoreUnknownVersions,
 				Stats = Stats
 			};
 

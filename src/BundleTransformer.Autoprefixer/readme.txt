@@ -22,7 +22,9 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 9.4.9.
+   In configuration settings of Autoprefixer postprocessor was changed type of
+   `Grid` property from boolean to `GridMode` enumeration (default `None`), and
+   added one new property - `IgnoreUnknownVersions` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

@@ -70,13 +70,24 @@ namespace BundleTransformer.Autoprefixer.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add IE prefixes for Grid Layout properties
+		/// Gets or sets a mode that defines should Autoprefixer add IE 10-11 prefixes for Grid Layout properties
 		/// </summary>
-		[ConfigurationProperty("grid", DefaultValue = true)]
-		public bool Grid
+		[ConfigurationProperty("grid", DefaultValue = GridMode.None)]
+		public GridMode Grid
 		{
-			get { return (bool)this["grid"]; }
+			get { return (GridMode)this["grid"]; }
 			set { this["grid"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to do not raise error on unknown browser version in
+		/// the <code>Browsers</code> property
+		/// </summary>
+		[ConfigurationProperty("ignoreUnknownVersions", DefaultValue = false)]
+		public bool IgnoreUnknownVersions
+		{
+			get { return (bool)this["ignoreUnknownVersions"]; }
+			set { this["ignoreUnknownVersions"] = value; }
 		}
 
 		/// <summary>

@@ -171,11 +171,40 @@ namespace BundleTransformer.Autoprefixer.Internal
 				new JProperty("remove", options.Remove),
 				new JProperty("supports", options.Supports),
 				new JProperty("flexbox", options.Flexbox),
-				new JProperty("grid", options.Grid),
+				new JProperty("grid", ConvertGridModeEnumValueToJson(options.Grid)),
+				new JProperty("ignoreUnknownVersions", options.IgnoreUnknownVersions),
 				new JProperty("stats", GetCustomStatisticsFromFile(options.Stats))
 			);
 
 			return optionsJson;
+		}
+
+		/// <summary>
+		/// Converts a grid mode enum value to JSON
+		/// </summary>
+		/// <param name="mode">Grid mode enum value</param>
+		/// <returns>Grid mode in JSON format</returns>
+		private static JValue ConvertGridModeEnumValueToJson(GridMode mode)
+		{
+			JValue value;
+
+			switch (mode)
+			{
+				case GridMode.None:
+					value = new JValue(false);
+					break;
+				case GridMode.Autoplace:
+					value = new JValue("autoplace");
+					break;
+				case GridMode.NoAutoplace:
+					value = new JValue("no-autoplace");
+					break;
+				default:
+					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
+						mode.ToString(), typeof(GridMode)));
+			}
+
+			return value;
 		}
 
 		/// <summary>

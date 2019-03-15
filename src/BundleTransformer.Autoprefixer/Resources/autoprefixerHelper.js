@@ -11,8 +11,9 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 			supports: true,
 			flexbox: true,
 			grid: true,
-			stats: null,
-			map: false
+			ignoreUnknownVersions: false,
+			map: false,
+			stats: null
 		}
 		;
 
