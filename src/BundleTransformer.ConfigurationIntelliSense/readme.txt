@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of Autoprefixer postprocessor.
+   Updated definitions for configuration settings of TypeScript translator.
 
    =============
    DOCUMENTATION

@@ -18,8 +18,16 @@ and limitations under the License.
 /// <reference no-default-lib="true"/>
 
 
-/// <reference lib="es2017" />
-/// <reference lib="es2018.asynciterable" />
-/// <reference lib="es2018.promise" />
-/// <reference lib="es2018.regexp" />
-/// <reference lib="es2018.intl" />
+interface String {
+  /** Removes the trailing white space and line terminator characters from a string. */
+  trimEnd(): string;
+
+  /** Removes the leading white space and line terminator characters from a string. */
+  trimStart(): string;
+
+  /** Removes the trailing white space and line terminator characters from a string. */
+  trimLeft(): string;
+
+  /** Removes the leading white space and line terminator characters from a string. */
+  trimRight(): string;
+}

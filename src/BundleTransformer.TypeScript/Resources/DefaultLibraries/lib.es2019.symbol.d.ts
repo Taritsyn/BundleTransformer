@@ -18,8 +18,9 @@ and limitations under the License.
 /// <reference no-default-lib="true"/>
 
 
-/// <reference lib="es2017" />
-/// <reference lib="es2018.asynciterable" />
-/// <reference lib="es2018.promise" />
-/// <reference lib="es2018.regexp" />
-/// <reference lib="es2018.intl" />
+interface Symbol {
+    /**
+     * expose the [[Description]] internal slot of a symbol directly
+     */
+    readonly description: string;
+}

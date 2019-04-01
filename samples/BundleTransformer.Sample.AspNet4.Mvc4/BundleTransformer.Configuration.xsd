@@ -750,7 +750,7 @@
 		</xs:attribute>
 		<xs:attribute name="target" use="optional" default="EcmaScript3">
 			<xs:annotation>
-				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018` or `EcmaScriptNext`</xs:documentation>
+				<xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019` or `EcmaScriptNext`</xs:documentation>
 			</xs:annotation>
 			<xs:simpleType>
 				<xs:restriction base="xs:NMTOKEN">
@@ -761,6 +761,7 @@
 					<xs:enumeration value="EcmaScript2016" />
 					<xs:enumeration value="EcmaScript2017" />
 					<xs:enumeration value="EcmaScript2018" />
+					<xs:enumeration value="EcmaScript2019" />
 					<xs:enumeration value="EcmaScriptNext" />
 				</xs:restriction>
 			</xs:simpleType>
