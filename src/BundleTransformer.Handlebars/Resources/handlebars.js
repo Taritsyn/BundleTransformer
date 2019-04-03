@@ -1,7 +1,7 @@
 /**!
 
  @license
- handlebars v4.1.0
+ handlebars v4.1.1
 
 Copyright (C) 2011-2017 by Yehuda Katz
 
@@ -275,7 +275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _logger2 = _interopRequireDefault(_logger);
 
-	var VERSION = '4.1.0';
+	var VERSION = '4.1.1';
 	exports.VERSION = VERSION;
 	var COMPILER_REVISION = 7;
 
@@ -2169,7 +2169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        lexer.performAction = function anonymous(yy, yy_, $avoiding_name_collisions, YY_START) {
 
 	            function strip(start, end) {
-	                return yy_.yytext = yy_.yytext.substr(start, yy_.yyleng - end);
+	                return yy_.yytext = yy_.yytext.substring(start, yy_.yyleng - end + start);
 	            }
 
 	            var YYSTATE = YY_START;
@@ -2206,7 +2206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (this.conditionStack[this.conditionStack.length - 1] === 'raw') {
 	                        return 15;
 	                    } else {
-	                        yy_.yytext = yy_.yytext.substr(5, yy_.yyleng - 9);
+	                        strip(5, 9);
 	                        return 'END_RAW_BLOCK';
 	                    }
 
@@ -2770,7 +2770,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function id(token) {
 	  if (/^\[.*\]$/.test(token)) {
-	    return token.substr(1, token.length - 2);
+	    return token.substring(1, token.length - 1);
 	  } else {
 	    return token;
 	  }
