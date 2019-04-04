@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.11.1 - April 4, 2019
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.4.0
+ * In BundleTransformer.TypeScript added support of TypeScript version 3.4 RTM
+ * In BundleTransformer.Handlebars added support of Handlebars version 4.1.1
+ * In BundleTransformer.JsMin was updated the JSMin for .NET to version 2.0.0
+
 ## v1.11.0 - March 15, 2019
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Autoprefixer postprocessor
  * In BundleTransformer.Autoprefixer:
