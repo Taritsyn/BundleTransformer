@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
+using AdvancedStringBuilder;
 using DouglasCrockford.JsMin;
 
 using BundleTransformer.Core.Assets;
@@ -94,12 +96,18 @@ namespace BundleTransformer.JsMin.Minifiers
 
 		private void InnerMinify(IAsset asset, JsMinifier jsMin)
 		{
+			string content = asset.Content;
 			string newContent;
 			string assetUrl = asset.Url;
 
+			var stringBuilderPool = StringBuilderPool.Shared;
+			int estimatedCapacity = JsMinifier.GetEstimatedOutputLength(content);
+			StringBuilder contentBuilder = stringBuilderPool.Rent(estimatedCapacity);
+
 			try
 			{
-				newContent = jsMin.Minify(asset.Content);
+				jsMin.Minify(content, contentBuilder);
+				newContent = contentBuilder.ToString();
 			}
 			catch (JsMinificationException e)
 			{
@@ -112,6 +120,10 @@ namespace BundleTransformer.JsMin.Minifiers
 				throw new AssetMinificationException(
 					string.Format(CoreStrings.Minifiers_MinificationFailed,
 						CODE_TYPE, assetUrl, MINIFIER_NAME, e.Message));
+			}
+			finally
+			{
+				stringBuilderPool.Return(contentBuilder);
 			}
 
 			asset.Content = newContent;

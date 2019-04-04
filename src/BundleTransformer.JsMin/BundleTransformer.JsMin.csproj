@@ -11,6 +11,7 @@
 		<Description>BundleTransformer.JsMin contains one minifier-adapter for minification of JS code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port of Douglas Crockford's JSMin (https://github.com/douglascrockford/JSMin) version of March 29, 2013.</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Minification;Minifier;Minify;Douglas;Crockford;JSMin</PackageTags>
+		<PackageReleaseNotes>JSMin for .NET was updated to version 2.0.0.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />
@@ -18,7 +19,8 @@
 	<Import Project="../../build/nuget-metadata.props" />
 
 	<ItemGroup>
-		<PackageReference Include="DouglasCrockford.JsMin" Version="1.1.3" />
+		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
+		<PackageReference Include="DouglasCrockford.JsMin" Version="2.0.0" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
 	</ItemGroup>

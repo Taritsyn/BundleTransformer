@@ -16,6 +16,11 @@
    of Douglas Crockford's JSMin (https://github.com/douglascrockford/JSMin) version
    of March 29, 2013.
 
+   =============
+   RELEASE NOTES
+   =============
+   JSMin for .NET was updated to version 2.0.0.
+
    ====================
    POST-INSTALL ACTIONS
    ====================
