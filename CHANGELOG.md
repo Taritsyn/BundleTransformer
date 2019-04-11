@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.11.2 - April 11, 2019
+ * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.5.1
+
 ## v1.11.1 - April 4, 2019
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.CoffeeScript added support of CoffeeScript version 2.4.0
