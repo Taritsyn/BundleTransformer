@@ -14,7 +14,7 @@
    BundleTransformer.Autoprefixer contains one postprocessor-adapter for
    postprocessing of CSS code - `AutoprefixCssPostProcessor`.
    `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer
-   (https://github.com/postcss/autoprefixer) version 9.5.
+   (https://github.com/postcss/autoprefixer) version 9.5.1.
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
@@ -22,10 +22,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of Autoprefixer version 9.5;
-   2. In configuration settings was changed type of `Grid` property from boolean to
-      `GridMode` enumeration (default `None`), and added one new property -
-      `IgnoreUnknownVersions` (default `false`).
+   Added support of Autoprefixer version 9.5.1.
 
    ====================
    POST-INSTALL ACTIONS
