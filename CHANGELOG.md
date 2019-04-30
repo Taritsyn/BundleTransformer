@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.11.3 - April 30, 2019
+ * In BundleTransformer.TypeScript added support of TypeScript version 3.4.5
+ * In BundleTransformer.Handlebars added support of Handlebars version 4.1.2
+
 ## v1.11.2 - April 11, 2019
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.5.1
 
