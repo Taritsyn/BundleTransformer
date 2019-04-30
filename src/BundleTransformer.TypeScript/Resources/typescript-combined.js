@@ -60,7 +60,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 var ts;
 (function (ts) {
     ts.versionMajorMinor = "3.4";
-    ts.version = ts.versionMajorMinor + ".1";
+    ts.version = ts.versionMajorMinor + ".5";
 })(ts || (ts = {}));
 (function (ts) {
     ts.emptyArray = [];
@@ -9384,7 +9384,7 @@ var ts;
     }
     ts.getClassLikeDeclarationOfSymbol = getClassLikeDeclarationOfSymbol;
     function getObjectFlags(type) {
-        return type.flags & 3768320 ? type.objectFlags : 0;
+        return type.flags & 3899392 ? type.objectFlags : 0;
     }
     ts.getObjectFlags = getObjectFlags;
     function typeHasCallOrConstructSignatures(type, checker) {
@@ -23098,10 +23098,10 @@ var ts;
         var wildcardType = createIntrinsicType(1, "any");
         var errorType = createIntrinsicType(1, "error");
         var unknownType = createIntrinsicType(2, "unknown");
-        var undefinedType = createNullableType(32768, "undefined", 0);
-        var undefinedWideningType = strictNullChecks ? undefinedType : createNullableType(32768, "undefined", 131072);
-        var nullType = createNullableType(65536, "null", 0);
-        var nullWideningType = strictNullChecks ? nullType : createNullableType(65536, "null", 131072);
+        var undefinedType = createIntrinsicType(32768, "undefined");
+        var undefinedWideningType = strictNullChecks ? undefinedType : createIntrinsicType(32768, "undefined", 131072);
+        var nullType = createIntrinsicType(65536, "null");
+        var nullWideningType = strictNullChecks ? nullType : createIntrinsicType(65536, "null", 131072);
         var stringType = createIntrinsicType(4, "string");
         var numberType = createIntrinsicType(8, "number");
         var bigintType = createIntrinsicType(64, "bigint");
@@ -23125,6 +23125,7 @@ var ts;
         var voidType = createIntrinsicType(16384, "void");
         var neverType = createIntrinsicType(131072, "never");
         var silentNeverType = createIntrinsicType(131072, "never");
+        var nonInferrableType = createIntrinsicType(131072, "never", 524288);
         var implicitNeverType = createIntrinsicType(131072, "never");
         var nonPrimitiveType = createIntrinsicType(67108864, "object");
         var stringNumberSymbolType = getUnionType([stringType, numberType, esSymbolType]);
@@ -24852,13 +24853,10 @@ var ts;
             result.id = typeCount;
             return result;
         }
-        function createIntrinsicType(kind, intrinsicName) {
+        function createIntrinsicType(kind, intrinsicName, objectFlags) {
+            if (objectFlags === void 0) { objectFlags = 0; }
             var type = createType(kind);
             type.intrinsicName = intrinsicName;
-            return type;
-        }
-        function createNullableType(kind, intrinsicName, objectFlags) {
-            var type = createIntrinsicType(kind, intrinsicName);
             type.objectFlags = objectFlags;
             return type;
         }
@@ -30908,7 +30906,7 @@ var ts;
             return newResult;
         }
         function getConditionalTypeWorker(root, mapper, checkType, extendsType, trueType, falseType) {
-            if (falseType.flags & 131072 && isTypeIdenticalTo(getActualTypeVariable(trueType), getActualTypeVariable(checkType))) {
+            if (falseType.flags & 131072 && getActualTypeVariable(trueType) === getActualTypeVariable(checkType)) {
                 if (checkType.flags & 1 || isTypeAssignableTo(getRestrictiveInstantiation(checkType), getRestrictiveInstantiation(extendsType))) {
                     return trueType;
                 }
@@ -30916,7 +30914,7 @@ var ts;
                     return neverType;
                 }
             }
-            else if (trueType.flags & 131072 && isTypeIdenticalTo(getActualTypeVariable(falseType), getActualTypeVariable(checkType))) {
+            else if (trueType.flags & 131072 && getActualTypeVariable(falseType) === getActualTypeVariable(checkType)) {
                 if (!(checkType.flags & 1) && isTypeAssignableTo(getRestrictiveInstantiation(checkType), getRestrictiveInstantiation(extendsType))) {
                     return neverType;
                 }
@@ -34208,7 +34206,7 @@ var ts;
             var stringIndexInfo = getIndexInfoOfType(type, 0);
             var numberIndexInfo = getIndexInfoOfType(type, 1);
             var result = createAnonymousType(type.symbol, members, ts.emptyArray, ts.emptyArray, stringIndexInfo && createIndexInfo(getWidenedType(stringIndexInfo.type), stringIndexInfo.isReadonly), numberIndexInfo && createIndexInfo(getWidenedType(numberIndexInfo.type), numberIndexInfo.isReadonly));
-            result.objectFlags |= (ts.getObjectFlags(type) & 16384);
+            result.objectFlags |= (ts.getObjectFlags(type) & (16384 | 524288));
             return result;
         }
         function getWidenedType(type) {
@@ -34482,15 +34480,8 @@ var ts;
             return type;
         }
         function createReverseMappedType(source, target, constraint) {
-            var properties = getPropertiesOfType(source);
-            if (properties.length === 0 && !getIndexInfoOfType(source, 0)) {
+            if (ts.getObjectFlags(source) & 524288 || getPropertiesOfType(source).length === 0 && !getIndexInfoOfType(source, 0)) {
                 return undefined;
-            }
-            for (var _i = 0, properties_3 = properties; _i < properties_3.length; _i++) {
-                var prop = properties_3[_i];
-                if (ts.getObjectFlags(getTypeOfSymbol(prop)) & 524288) {
-                    return undefined;
-                }
             }
             if (isArrayType(source)) {
                 return createArrayType(inferReverseMappedType(source.typeArguments[0], target, constraint), isReadonlyArrayType(source));
@@ -34518,16 +34509,16 @@ var ts;
             return getTypeFromInference(inference);
         }
         function getUnmatchedProperties(source, target, requireOptionalProperties, matchDiscriminantProperties) {
-            var properties, _i, properties_4, targetProp, sourceProp, targetType, sourceType;
+            var properties, _i, properties_3, targetProp, sourceProp, targetType, sourceType;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         properties = target.flags & 2097152 ? getPropertiesOfUnionOrIntersectionType(target) : getPropertiesOfObjectType(target);
-                        _i = 0, properties_4 = properties;
+                        _i = 0, properties_3 = properties;
                         _a.label = 1;
                     case 1:
-                        if (!(_i < properties_4.length)) return [3, 6];
-                        targetProp = properties_4[_i];
+                        if (!(_i < properties_3.length)) return [3, 6];
+                        targetProp = properties_3[_i];
                         if (!(requireOptionalProperties || !(targetProp.flags & 16777216))) return [3, 5];
                         sourceProp = getPropertyOfType(source, targetProp.escapedName);
                         if (!!sourceProp) return [3, 3];
@@ -34720,20 +34711,32 @@ var ts;
                     inferFromTypes(source, target.falseType);
                 }
                 else if (target.flags & 3145728) {
+                    var typeVariableCount = 0;
                     for (var _d = 0, _e = target.types; _d < _e.length; _d++) {
                         var t = _e[_d];
-                        var savePriority = priority;
                         if (getInferenceInfoForType(t)) {
-                            priority |= 1;
+                            typeVariableCount++;
                         }
-                        inferFromTypes(source, t);
+                        else {
+                            inferFromTypes(source, t);
+                        }
+                    }
+                    if (target.flags & 1048576 ? typeVariableCount !== 0 : typeVariableCount === 1) {
+                        var savePriority = priority;
+                        priority |= 1;
+                        for (var _f = 0, _g = target.types; _f < _g.length; _f++) {
+                            var t = _g[_f];
+                            if (getInferenceInfoForType(t)) {
+                                inferFromTypes(source, t);
+                            }
+                        }
                         priority = savePriority;
                     }
                 }
                 else if (source.flags & 1048576) {
                     var sourceTypes = source.types;
-                    for (var _f = 0, sourceTypes_3 = sourceTypes; _f < sourceTypes_3.length; _f++) {
-                        var sourceType = sourceTypes_3[_f];
+                    for (var _h = 0, sourceTypes_3 = sourceTypes; _h < sourceTypes_3.length; _h++) {
+                        var sourceType = sourceTypes_3[_h];
                         inferFromTypes(sourceType, target);
                     }
                 }
@@ -34883,8 +34886,8 @@ var ts;
                     }
                 }
                 var properties = getPropertiesOfObjectType(target);
-                for (var _i = 0, properties_5 = properties; _i < properties_5.length; _i++) {
-                    var targetProp = properties_5[_i];
+                for (var _i = 0, properties_4 = properties; _i < properties_4.length; _i++) {
+                    var targetProp = properties_4[_i];
                     var sourceProp = getPropertyOfType(source, targetProp.escapedName);
                     if (sourceProp) {
                         inferFromTypes(getTypeOfSymbol(sourceProp), getTypeOfSymbol(targetProp));
@@ -39234,7 +39237,7 @@ var ts;
                 spanArray = ts.createNodeArray(args);
                 if (hasSpreadArgument && argCount) {
                     var nextArg = ts.elementAt(args, getSpreadArgumentIndex(args) + 1) || undefined;
-                    spanArray = ts.createNodeArray(args.slice(max > argCount && nextArg ? args.indexOf(nextArg) : max));
+                    spanArray = ts.createNodeArray(args.slice(max > argCount && nextArg ? args.indexOf(nextArg) : Math.min(max, args.length - 1)));
                 }
             }
             else {
@@ -39891,7 +39894,7 @@ var ts;
                 checkGrammarArguments(node.arguments);
             var signature = getResolvedSignature(node, undefined, checkMode);
             if (signature === resolvingSignature) {
-                return silentNeverType;
+                return nonInferrableType;
             }
             if (node.expression.kind === 98) {
                 return voidType;
@@ -40880,8 +40883,8 @@ var ts;
             if (strictNullChecks && properties.length === 0) {
                 return checkNonNullType(sourceType, node);
             }
-            for (var _i = 0, properties_6 = properties; _i < properties_6.length; _i++) {
-                var p = properties_6[_i];
+            for (var _i = 0, properties_5 = properties; _i < properties_5.length; _i++) {
+                var p = properties_5[_i];
                 checkObjectLiteralDestructuringPropertyAssignment(sourceType, p, properties, rightIsThis);
             }
             return sourceType;
@@ -44524,8 +44527,8 @@ var ts;
             for (var _i = 0, baseTypes_2 = baseTypes; _i < baseTypes_2.length; _i++) {
                 var base = baseTypes_2[_i];
                 var properties = getPropertiesOfType(getTypeWithThisArgument(base, type.thisType));
-                for (var _a = 0, properties_7 = properties; _a < properties_7.length; _a++) {
-                    var prop = properties_7[_a];
+                for (var _a = 0, properties_6 = properties; _a < properties_6.length; _a++) {
+                    var prop = properties_6[_a];
                     var existing = seen.get(prop.escapedName);
                     if (!existing) {
                         seen.set(prop.escapedName, { prop: prop, containingType: base });
@@ -46690,7 +46693,7 @@ var ts;
             if (autoArrayType === emptyObjectType) {
                 autoArrayType = createAnonymousType(undefined, emptySymbols, ts.emptyArray, ts.emptyArray, undefined, undefined);
             }
-            globalReadonlyArrayType = getGlobalTypeOrUndefined("ReadonlyArray", 1);
+            globalReadonlyArrayType = getGlobalTypeOrUndefined("ReadonlyArray", 1) || globalArrayType;
             anyReadonlyArrayType = globalReadonlyArrayType ? createTypeFromGenericGlobalType(globalReadonlyArrayType, [anyType]) : anyArrayType;
             globalThisType = getGlobalTypeOrUndefined("ThisType", 1);
             if (augmentations) {
@@ -51225,27 +51228,27 @@ var ts;
     function createExpressionForAccessorDeclaration(properties, property, receiver, multiLine) {
         var _a = ts.getAllAccessorDeclarations(properties, property), firstAccessor = _a.firstAccessor, getAccessor = _a.getAccessor, setAccessor = _a.setAccessor;
         if (property === firstAccessor) {
-            var properties_8 = [];
+            var properties_7 = [];
             if (getAccessor) {
                 var getterFunction = ts.createFunctionExpression(getAccessor.modifiers, undefined, undefined, undefined, getAccessor.parameters, undefined, getAccessor.body);
                 ts.setTextRange(getterFunction, getAccessor);
                 ts.setOriginalNode(getterFunction, getAccessor);
                 var getter = ts.createPropertyAssignment("get", getterFunction);
-                properties_8.push(getter);
+                properties_7.push(getter);
             }
             if (setAccessor) {
                 var setterFunction = ts.createFunctionExpression(setAccessor.modifiers, undefined, undefined, undefined, setAccessor.parameters, undefined, setAccessor.body);
                 ts.setTextRange(setterFunction, setAccessor);
                 ts.setOriginalNode(setterFunction, setAccessor);
                 var setter = ts.createPropertyAssignment("set", setterFunction);
-                properties_8.push(setter);
+                properties_7.push(setter);
             }
-            properties_8.push(ts.createPropertyAssignment("enumerable", ts.createTrue()));
-            properties_8.push(ts.createPropertyAssignment("configurable", ts.createTrue()));
+            properties_7.push(ts.createPropertyAssignment("enumerable", ts.createTrue()));
+            properties_7.push(ts.createPropertyAssignment("configurable", ts.createTrue()));
             var expression = ts.setTextRange(ts.createCall(ts.createPropertyAccess(ts.createIdentifier("Object"), "defineProperty"), undefined, [
                 receiver,
                 createExpressionForPropertyName(property.name),
-                ts.createObjectLiteral(properties_8, multiLine)
+                ts.createObjectLiteral(properties_7, multiLine)
             ]), firstAccessor);
             return ts.aggregateTransformFlags(expression);
         }
@@ -54611,8 +54614,8 @@ var ts;
                 && member.initializer !== undefined;
         }
         function addInitializedPropertyStatements(statements, properties, receiver) {
-            for (var _i = 0, properties_9 = properties; _i < properties_9.length; _i++) {
-                var property = properties_9[_i];
+            for (var _i = 0, properties_8 = properties; _i < properties_8.length; _i++) {
+                var property = properties_8[_i];
                 var statement = ts.createExpressionStatement(transformInitializedProperty(property, receiver));
                 ts.setSourceMapRange(statement, ts.moveRangePastModifiers(property));
                 ts.setCommentRange(statement, property);
@@ -54622,8 +54625,8 @@ var ts;
         }
         function generateInitializedPropertyExpressions(properties, receiver) {
             var expressions = [];
-            for (var _i = 0, properties_10 = properties; _i < properties_10.length; _i++) {
-                var property = properties_10[_i];
+            for (var _i = 0, properties_9 = properties; _i < properties_9.length; _i++) {
+                var property = properties_9[_i];
                 var expression = transformInitializedProperty(property, receiver);
                 ts.startOnNewLine(expression);
                 ts.setSourceMapRange(expression, ts.moveRangePastModifiers(property));
