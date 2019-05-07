@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Product>Bundle Transformer: Autoprefixer</Product>
-		<VersionPrefix>1.11.2</VersionPrefix>
+		<VersionPrefix>1.11.4</VersionPrefix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
