@@ -6,6 +6,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		defaultOptions = {
 			allowJs: false,
 			allowSyntheticDefaultImports: false,
+			allowUmdGlobalAccess: false,
 			allowUnreachableCode: false,
 			allowUnusedLabels: false,
 			alwaysStrict: false,
@@ -321,7 +322,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			getDirectories: null,
 			realpath: null,
 			readDirectory: null,
-			createDirectory: null
+			createDirectory: null,
+			createHash: null
 		};
 
 		return compilerHost;
