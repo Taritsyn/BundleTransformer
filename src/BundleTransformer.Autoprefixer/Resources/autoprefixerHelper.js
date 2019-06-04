@@ -4,7 +4,7 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 
 	var exports = {},
 		defaultOptions = {
-			browsers: null,
+			overrideBrowserslist: null,
 			cascade: true,
 			add: true,
 			remove: true,
@@ -46,7 +46,7 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 
 		autoprefixOptions = mix(mix({}, defaultOptions), options);
 
-		browsers = autoprefixOptions.browsers;
+		browsers = autoprefixOptions.overrideBrowserslist;
 		if (browsers && browsers.length > 0) {
 			if (browsers[0].toLowerCase() === 'none') {
 				browsers = [];
@@ -56,7 +56,7 @@ var autoprefixerHelper = (function (autoprefixer, undefined) {
 			browsers = null;
 		}
 
-		autoprefixOptions.browsers = browsers;
+		autoprefixOptions.overrideBrowserslist = browsers;
 
 		try {
 			processedCode = autoprefixer.process(code, undefined, autoprefixOptions).css;

@@ -165,7 +165,7 @@ namespace BundleTransformer.Autoprefixer.Internal
 		private JObject ConvertAutoprefixingOptionsToJson(AutoprefixingOptions options)
 		{
 			var optionsJson = new JObject(
-				new JProperty("browsers", new JArray(options.Browsers)),
+				new JProperty("overrideBrowserslist", new JArray(options.Browsers)),
 				new JProperty("cascade", options.Cascade),
 				new JProperty("add", options.Add),
 				new JProperty("remove", options.Remove),

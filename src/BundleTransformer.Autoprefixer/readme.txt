@@ -22,7 +22,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of Autoprefixer version 9.5.1.1.
+   Added support of the Autoprefixer version 9.6.
 
    ====================
    POST-INSTALL ACTIONS
