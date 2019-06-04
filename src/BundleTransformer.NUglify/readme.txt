@@ -16,6 +16,11 @@
    code). These adapters perform minification by using the NUglify
    (https://github.com/xoofx/NUglify).
 
+   =============
+   RELEASE NOTES
+   =============
+   Added support of the NUglify version 1.5.13.
+
    ====================
    POST-INSTALL ACTIONS
    ====================
