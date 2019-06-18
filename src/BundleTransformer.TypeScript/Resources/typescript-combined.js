@@ -60,7 +60,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 var ts;
 (function (ts) {
     ts.versionMajorMinor = "3.5";
-    ts.version = ts.versionMajorMinor + ".1";
+    ts.version = ts.versionMajorMinor + ".2";
 })(ts || (ts = {}));
 (function (ts) {
     ts.emptyArray = [];
@@ -33385,6 +33385,17 @@ var ts;
                 }
                 return result;
             }
+            function propagateSidebandVarianceFlags(typeArguments, variances) {
+                for (var i = 0; i < variances.length; i++) {
+                    var v = variances[i];
+                    if (v & 8) {
+                        instantiateType(typeArguments[i], reportUnmeasurableMarkers);
+                    }
+                    if (v & 16) {
+                        instantiateType(typeArguments[i], reportUnreliableMarkers);
+                    }
+                }
+            }
             function recursiveTypeRelatedTo(source, target, reportErrors, isIntersectionConstituent) {
                 if (overflow) {
                     return 0;
@@ -33395,6 +33406,15 @@ var ts;
                     if (reportErrors && related === 2) {
                     }
                     else {
+                        if (outofbandVarianceMarkerHandler) {
+                            if (source.flags & (524288 | 16777216) && source.aliasSymbol &&
+                                source.aliasTypeArguments && source.aliasSymbol === target.aliasSymbol) {
+                                propagateSidebandVarianceFlags(source.aliasTypeArguments, getAliasVariances(source.aliasSymbol));
+                            }
+                            if (ts.getObjectFlags(source) & 4 && ts.getObjectFlags(target) & 4 && source.target === target.target && ts.length(source.typeArguments)) {
+                                propagateSidebandVarianceFlags(source.typeArguments, getVariances(source.target));
+                            }
+                        }
                         return related === 1 ? -1 : 0;
                     }
                 }
@@ -34291,10 +34311,6 @@ var ts;
                         if (unreliable) {
                             variance |= 16;
                         }
-                        var covariantID = getRelationKey(typeWithSub, typeWithSuper, assignableRelation);
-                        var contravariantID = getRelationKey(typeWithSuper, typeWithSub, assignableRelation);
-                        assignableRelation.delete(covariantID);
-                        assignableRelation.delete(contravariantID);
                     }
                     variances.push(variance);
                 };
@@ -73634,6 +73650,9 @@ var ts;
             else {
                 if (isPathIgnored(fileOrDirectoryPath))
                     return false;
+                if (resolutionHost.fileIsOpen(fileOrDirectoryPath)) {
+                    return false;
+                }
                 var dirOfFileOrDirectory = ts.getDirectoryPath(fileOrDirectoryPath);
                 if (isNodeModulesAtTypesDirectory(fileOrDirectoryPath) || isNodeModulesDirectory(fileOrDirectoryPath) ||
                     isNodeModulesAtTypesDirectory(dirOfFileOrDirectory) || isNodeModulesDirectory(dirOfFileOrDirectory)) {
