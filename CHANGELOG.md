@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.11.8 - July 6, 2019
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.6.1
+
 ## v1.11.7 - June 18, 2019
  * In BundleTransformer.TypeScript added support of TypeScript version 3.5.2
 
