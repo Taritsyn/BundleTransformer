@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Product>Bundle Transformer: Autoprefixer</Product>
-		<VersionPrefix>1.11.8</VersionPrefix>
+		<VersionPrefix>1.12.0</VersionPrefix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -26,7 +26,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
 		<Reference Include="System.configuration" Pack="false" />
 
 		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-		<PackageReference Include="AutoprefixerHost" Version="1.0.0" />
+		<PackageReference Include="AutoprefixerHost" Version="1.0.1" />
 		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
