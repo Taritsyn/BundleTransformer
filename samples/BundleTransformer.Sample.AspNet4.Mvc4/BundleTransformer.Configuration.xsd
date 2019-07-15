@@ -939,10 +939,29 @@
 				<xs:documentation>Flag for whether to add prefixes for `@supports` parameters</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="flexbox" type="xs:string" use="optional" default="true">
+		<xs:attribute name="flexbox" use="optional" default="All">
 			<xs:annotation>
-				<xs:documentation>Flag for whether to add prefixes for flexbox properties. With 'no-2009' value Autoprefixer will add prefixes only for final and IE versions of specification.</xs:documentation>
+				<xs:documentation>Mode that defines should Autoprefixer add prefixes for flexbox properties</xs:documentation>
 			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="All">
+						<xs:annotation>
+							<xs:documentation>Add prefixes for flexbox properties for all browsers</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="None">
+						<xs:annotation>
+							<xs:documentation>Prevent adding prefixes for flexbox properties</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="No2009">
+						<xs:annotation>
+							<xs:documentation>Add prefixes for flexbox properties only for final and IE 10 versions of specification</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
 		<xs:attribute name="grid" use="optional" default="None">
 			<xs:annotation>

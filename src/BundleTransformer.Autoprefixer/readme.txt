@@ -13,8 +13,10 @@
    ===========
    BundleTransformer.Autoprefixer contains one postprocessor-adapter for
    postprocessing of CSS code - `AutoprefixCssPostProcessor`.
-   `AutoprefixCssPostProcessor` is based on the Andrey Sitnik's Autoprefixer
-   (https://github.com/postcss/autoprefixer) version 9.6.1.
+   This adapter makes actualization of vendor prefixes in CSS code by using the
+   Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost)
+   version 1.0.0 (supports the Andrey Sitnik's Autoprefixer
+   (https://github.com/postcss/autoprefixer) version 9.6.1).
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
@@ -22,14 +24,19 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Autoprefixer version 9.6.1.
+   1. Main functionality of this module was moved to external library -
+      Autoprefixer Host for .NET;
+   2. In configuration settings was changed type of `Flexbox` property from string
+      to `FlexboxMode` enumeration (default `All`);
+   3. JavaScript Engine Switcher was updated to version 3.1.0.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module, you need to install one of the following
    NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes),
-   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore (while it is
+   recommended to use version 3.1.1).
    After package is installed and JS engine is registered
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JS engine (for example, `MsieJsEngine`) to the `name`

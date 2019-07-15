@@ -59,13 +59,12 @@ namespace BundleTransformer.Autoprefixer.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add prefixes for flexbox properties.
-		/// With "no-2009" value Autoprefixer will add prefixes only for final and IE versions of specification.
+		/// Gets or sets a mode that defines should Autoprefixer add prefixes for flexbox properties
 		/// </summary>
-		[ConfigurationProperty("flexbox", DefaultValue = "true")]
-		public string Flexbox
+		[ConfigurationProperty("flexbox", DefaultValue = "All")]
+		public FlexboxMode Flexbox
 		{
-			get { return (string)this["flexbox"]; }
+			get { return (FlexboxMode)this["flexbox"]; }
 			set { this["flexbox"] = value; }
 		}
 

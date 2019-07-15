@@ -1,18 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
+using System.Text;
 
+using AdvancedStringBuilder;
+using AutoprefixerHost;
+using AutoprefixerHost.Helpers;
+using CssAutoprefixer = AutoprefixerHost.Autoprefixer;
+using AhFlexboxMode = AutoprefixerHost.FlexboxMode;
+using AhGridMode = AutoprefixerHost.GridMode;
 using JavaScriptEngineSwitcher.Core;
 
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
 using BundleTransformer.Core.PostProcessors;
+using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.Autoprefixer.Configuration;
-using BundleTransformer.Autoprefixer.Internal;
+using BtFlexboxMode = BundleTransformer.Autoprefixer.FlexboxMode;
+using BtGridMode = BundleTransformer.Autoprefixer.GridMode;
 
 namespace BundleTransformer.Autoprefixer.PostProcessors
 {
@@ -88,10 +98,9 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to add prefixes for flexbox properties.
-		/// With "no-2009" value Autoprefixer will add prefixes only for final and IE versions of specification.
+		/// Gets or sets a mode that defines should Autoprefixer add prefixes for flexbox properties
 		/// </summary>
-		public object Flexbox
+		public FlexboxMode Flexbox
 		{
 			get;
 			set;
@@ -157,7 +166,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 			Add = autoprefixerConfig.Add;
 			Remove = autoprefixerConfig.Remove;
 			Supports = autoprefixerConfig.Supports;
-			Flexbox = ParseFlexboxProperty(autoprefixerConfig.Flexbox);
+			Flexbox = autoprefixerConfig.Flexbox;
 			Grid = autoprefixerConfig.Grid;
 			IgnoreUnknownVersions = autoprefixerConfig.IgnoreUnknownVersions;
 			Stats = autoprefixerConfig.Stats;
@@ -173,7 +182,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 							@"
   * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
   * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.ChakraCore (while it is recommended to use version 3.1.1)",
 							"MsieJsEngine")
 					);
 				}
@@ -183,24 +192,6 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 			_createJsEngineInstance = createJsEngineInstance;
 		}
 
-
-		/// <summary>
-		/// Parses a string representation of the <code>Flexbox</code> property
-		/// </summary>
-		/// <param name="flexboxString">String representation of the <code>Flexbox</code> property</param>
-		/// <returns>Parsed value of the <code>Flexbox</code> property</returns>
-		private static object ParseFlexboxProperty(string flexboxString)
-		{
-			object result = flexboxString;
-			bool flexboxBoolean;
-
-			if (bool.TryParse(flexboxString, out flexboxBoolean))
-			{
-				result = flexboxBoolean;
-			}
-
-			return result;
-		}
 
 		/// <summary>
 		/// Actualizes a vendor prefixes in CSS asset by using Andrey Sitnik's Autoprefixer
@@ -217,9 +208,9 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 				);
 			}
 
-			AutoprefixingOptions options = CreateAutoprefixingOptions();
+			ProcessingOptions options = CreateProcessingOptions();
 
-			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, _virtualFileSystemWrapper, options))
+			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, options))
 			{
 				InnerPostProcess(asset, cssAutoprefixer);
 			}
@@ -253,9 +244,9 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 				return assets;
 			}
 
-			AutoprefixingOptions options = CreateAutoprefixingOptions();
+			ProcessingOptions options = CreateProcessingOptions();
 
-			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, _virtualFileSystemWrapper, options))
+			using (var cssAutoprefixer = new CssAutoprefixer(_createJsEngineInstance, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
@@ -274,15 +265,26 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 
 			try
 			{
-				AutoprefixingResult result = cssAutoprefixer.Process(asset.Content, asset.Url);
+				ProcessingResult result = cssAutoprefixer.Process(asset.Content, asset.Url);
 				newContent = result.ProcessedContent;
-				dependencies = result.IncludedFilePaths;
+				dependencies = GetIncludedFilePaths(Stats);
 			}
-			catch (CssAutoprefixingException e)
+			catch (AutoprefixerProcessingException e)
 			{
+				string errorDetails = AutoprefixerErrorHelpers.GenerateErrorDetails(e, true);
+
+				var stringBuilderPool = StringBuilderPool.Shared;
+				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
+				errorMessageBuilder.AppendLine(e.Message);
+				errorMessageBuilder.AppendLine();
+				errorMessageBuilder.Append(errorDetails);
+
+				string errorMessage = errorMessageBuilder.ToString();
+				stringBuilderPool.Return(errorMessageBuilder);
+
 				throw new AssetPostProcessingException(
 					string.Format(CoreStrings.PostProcessors_PostprocessingSyntaxError,
-						CODE_TYPE, assetUrl, POSTPROCESSOR_NAME, e.Message));
+						CODE_TYPE, assetUrl, POSTPROCESSOR_NAME, errorMessage));
 			}
 			catch (Exception e)
 			{
@@ -296,25 +298,86 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 		}
 
 		/// <summary>
-		/// Creates a autoprefixing options
+		/// Creates a processing options
 		/// </summary>
-		/// <returns>Autoprefixing options</returns>
-		private AutoprefixingOptions CreateAutoprefixingOptions()
+		/// <returns>Processing options</returns>
+		private ProcessingOptions CreateProcessingOptions()
 		{
-			var options = new AutoprefixingOptions
+			var options = new ProcessingOptions
 			{
-				Browsers = Browsers,
+				Browsers = PrepareBrowsers(Browsers),
 				Cascade = Cascade,
 				Add = Add,
 				Remove = Remove,
 				Supports = Supports,
-				Flexbox = Flexbox,
-				Grid = Grid,
+				Flexbox = Utils.GetEnumFromOtherEnum<BtFlexboxMode, AhFlexboxMode>(Flexbox),
+				Grid = Utils.GetEnumFromOtherEnum<BtGridMode, AhGridMode>(Grid),
 				IgnoreUnknownVersions = IgnoreUnknownVersions,
-				Stats = Stats
+				Stats = GetCustomStatisticsFromFile(Stats)
 			};
 
 			return options;
+		}
+
+		/// <summary>
+		/// Prepares a list of browser conditional expressions for using by the Autoprefixer Host library
+		/// </summary>
+		/// <param name="browsers">List of browser conditional expressions</param>
+		/// <returns>Prepared list of browser conditional expressions</returns>
+		private IList<string> PrepareBrowsers(IList<string> browsers)
+		{
+			IList<string> processedBrowsers = browsers;
+			if (processedBrowsers.Count > 0)
+			{
+				if (processedBrowsers[0].Equals("none", StringComparison.OrdinalIgnoreCase))
+				{
+					processedBrowsers = new List<string>();
+				}
+			}
+			else
+			{
+				processedBrowsers = null;
+			}
+
+			return processedBrowsers;
+		}
+
+		/// <summary>
+		/// Gets a custom statistics from specified file
+		/// </summary>
+		/// <param name="path">Virtual path to file, that contains custom statistics</param>
+		/// <returns>Custom statistics in JSON format</returns>
+		private string GetCustomStatisticsFromFile(string path)
+		{
+			if (string.IsNullOrWhiteSpace(path))
+			{
+				return null;
+			}
+
+			if (!_virtualFileSystemWrapper.FileExists(path))
+			{
+				throw new FileNotFoundException(string.Format(CoreStrings.Common_FileNotExist, path));
+			}
+
+			string statistics = _virtualFileSystemWrapper.GetFileTextContent(path);
+
+			return statistics;
+		}
+
+		/// <summary>
+		/// Gets a list of included files
+		/// </summary>
+		/// <param name="path">Virtual path to file, that contains custom statistics</param>
+		/// <returns>List of included files</returns>
+		private IList<string> GetIncludedFilePaths(string path)
+		{
+			var includedFilePaths = new List<string>();
+			if (!string.IsNullOrWhiteSpace(path))
+			{
+				includedFilePaths.Add(_virtualFileSystemWrapper.ToAbsolutePath(path));
+			}
+
+			return includedFilePaths;
 		}
 	}
 }
