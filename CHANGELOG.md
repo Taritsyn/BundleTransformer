@@ -1,6 +1,14 @@
 Change log
 ==========
 
+## v1.12.0 - July 15, 2019
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Autoprefixer postprocessor
+ * In BundleTransformer.Autoprefixer:
+   * Main functionality of this module was moved to external library - [Autoprefixer Host for .NET](https://github.com/Taritsyn/AutoprefixerHost)
+   * In configuration settings was changed type of `Flexbox` property from string to `FlexboxMode` enumeration (default `All`)
+ * JavaScript Engine Switcher was updated to version 3.1.0
+ * Json.NET was updated to version 12.0.2
+
 ## v1.11.9 - July 12, 2019
  * In BundleTransformer.TypeScript added support of TypeScript version 3.5.3
 
