@@ -23,7 +23,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CoffeeScript version 2.4.0.
+   1. JavaScript Engine Switcher was updated to version 3.1.0;
+   2. Json.NET was updated to version 12.0.2.
 
    ====================
    POST-INSTALL ACTIONS

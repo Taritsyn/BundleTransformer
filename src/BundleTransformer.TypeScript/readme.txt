@@ -26,7 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 3.5.3.
+   1. JavaScript Engine Switcher was updated to version 3.1.0;
+   2. Json.NET was updated to version 12.0.2.
 
    ====================
    POST-INSTALL ACTIONS

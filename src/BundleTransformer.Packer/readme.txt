@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2018 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 3.0.0.
+   JavaScript Engine Switcher was updated to version 3.1.0.
 
    ====================
    POST-INSTALL ACTIONS

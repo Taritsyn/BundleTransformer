@@ -25,7 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of LESS version 3.9.0.
+   1. JavaScript Engine Switcher was updated to version 3.1.0;
+   2. Json.NET was updated to version 12.0.2.
 
    ====================
    POST-INSTALL ACTIONS
