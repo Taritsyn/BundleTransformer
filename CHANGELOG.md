@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.12.1 - August 23, 2019
+ * In BundleTransformer.SassAndScss:
+   * Added support of the LibSass version 3.6.1
+   * MSVC runtime was embedded into the LibSass native assemblies for Windows. Now you do not need to install the Microsoft Visual C++ Redistributable for Visual Studio 2017.
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.6.1.1
+
 ## v1.12.0 - July 15, 2019
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Autoprefixer postprocessor
  * In BundleTransformer.Autoprefixer:
