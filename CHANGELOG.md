@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.2 - August 30, 2019
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript added support of TypeScript version 3.6 RTM
+
 ## v1.12.1 - August 23, 2019
  * In BundleTransformer.SassAndScss:
    * Added support of the LibSass version 3.6.1
