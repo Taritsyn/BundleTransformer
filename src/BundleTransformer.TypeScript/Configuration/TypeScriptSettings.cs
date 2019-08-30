@@ -352,8 +352,8 @@ namespace BundleTransformer.TypeScript.Configuration
 
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`
-		/// or `EcmaScriptNext`
+		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`,
+		/// `EcmaScript2020` or `EcmaScriptNext`
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
 		public TargetMode Target

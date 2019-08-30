@@ -13,6 +13,7 @@
 		EcmaScript2017 = 4,
 		EcmaScript2018 = 5,
 		EcmaScript2019 = 6,
-		EcmaScriptNext = 7
+		EcmaScript2020 = 7,
+		EcmaScriptNext = 99
 	}
 }

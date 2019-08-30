@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains one translator-adapter -
    `TypeScriptTranslator` (supports the TypeScript (http://www.typescriptlang.org)
-   version 3.5.3). This adapter makes translation of TypeScript code to JS code.
+   version 3.6 RTM). This adapter makes translation of TypeScript code to JS code.
    Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated TypeScript asset.
 
@@ -26,8 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   1. JavaScript Engine Switcher was updated to version 3.1.0;
-   2. Json.NET was updated to version 12.0.2.
+   Added support of TypeScript version 3.6 RTM (please note: The 3.6 RTM release is
+   also called '3.6.2').
 
    ====================
    POST-INSTALL ACTIONS
