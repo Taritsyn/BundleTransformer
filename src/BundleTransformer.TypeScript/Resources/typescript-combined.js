@@ -67,7 +67,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 var ts;
 (function (ts) {
     ts.versionMajorMinor = "3.6";
-    ts.version = ts.versionMajorMinor + ".2";
+    ts.version = ts.versionMajorMinor + ".3";
 })(ts || (ts = {}));
 (function (ts) {
     ts.emptyArray = [];
@@ -2058,8 +2058,9 @@ var ts;
     catch (e) {
         etwModule = undefined;
     }*/
-    ts.perfLogger = /*BT- etwModule ? etwModule : */nullLogger;/*BT-
-    ts.perfLogger.logInfoEvent("Starting TypeScript v" + ts.versionMajorMinor + " with command line: " + JSON.stringify(process.argv));*/
+    ts.perfLogger = /*BT- etwModule && etwModule.logEvent ? etwModule : */nullLogger;/*BT-
+    var args = typeof process === "undefined" ? [] : process.argv;
+    ts.perfLogger.logInfoEvent("Starting TypeScript v" + ts.versionMajorMinor + " with command line: " + JSON.stringify(args));*/
 })(ts || (ts = {}));
 var ts;
 (function (ts) {
@@ -21561,7 +21562,23 @@ var ts;
                     if (isTopLevel) {
                         bindPotentiallyMissingNamespaces(file.symbol, declName.parent, isTopLevel, !!ts.findAncestor(declName, function (d) { return ts.isPropertyAccessExpression(d) && d.name.escapedText === "prototype"; }));
                         var oldContainer = container;
-                        container = ts.isPropertyAccessExpression(declName.parent.expression) ? declName.parent.expression.name : declName.parent.expression;
+                        switch (ts.getAssignmentDeclarationPropertyAccessKind(declName.parent)) {
+                            case 1:
+                            case 2:
+                                container = file;
+                                break;
+                            case 4:
+                                container = declName.parent.expression;
+                                break;
+                            case 3:
+                                container = declName.parent.expression.name;
+                                break;
+                            case 5:
+                                container = ts.isPropertyAccessExpression(declName.parent.expression) ? declName.parent.expression.name : declName.parent.expression;
+                                break;
+                            case 0:
+                                return ts.Debug.fail("Shouldn't have detected typedef or enum on non-assignment declaration");
+                        }
                         declareModuleMember(typeAlias, 524288, 788968);
                         container = oldContainer;
                     }
@@ -31283,6 +31300,15 @@ var ts;
             }
             return true;
         }
+        function extractIrreducible(types, flag) {
+            if (ts.every(types, function (t) { return !!(t.flags & 1048576) && ts.some(t.types, function (tt) { return !!(tt.flags & flag); }); })) {
+                for (var i = 0; i < types.length; i++) {
+                    types[i] = filterType(types[i], function (t) { return !(t.flags & flag); });
+                }
+                return true;
+            }
+            return false;
+        }
         function intersectUnionsOfPrimitiveTypes(types) {
             var unionTypes;
             var index = ts.findIndex(types, function (t) { return !!(ts.getObjectFlags(t) & 131072); });
@@ -31368,6 +31394,12 @@ var ts;
                 if (includes & 1048576) {
                     if (intersectUnionsOfPrimitiveTypes(typeSet)) {
                         result = getIntersectionType(typeSet, aliasSymbol, aliasTypeArguments);
+                    }
+                    else if (extractIrreducible(typeSet, 32768)) {
+                        result = getUnionType([getIntersectionType(typeSet), undefinedType], 1, aliasSymbol, aliasTypeArguments);
+                    }
+                    else if (extractIrreducible(typeSet, 65536)) {
+                        result = getUnionType([getIntersectionType(typeSet), nullType], 1, aliasSymbol, aliasTypeArguments);
                     }
                     else {
                         var size = ts.reduceLeft(typeSet, function (n, t) { return n * (t.flags & 1048576 ? t.types.length : 1); }, 1);
@@ -33620,7 +33652,7 @@ var ts;
                 var isIntersectionConstituent = !!isApparentIntersectionConstituent;
                 if (source.flags & 1048576) {
                     result = relation === comparableRelation ?
-                        someTypeRelatedToType(source, target, reportErrors && !(source.flags & 131068)) :
+                        someTypeRelatedToType(source, target, reportErrors && !(source.flags & 131068), isIntersectionConstituent) :
                         eachTypeRelatedToType(source, target, reportErrors && !(source.flags & 131068));
                 }
                 else {
@@ -33643,7 +33675,7 @@ var ts;
                         }
                     }
                     else if (source.flags & 2097152) {
-                        result = someTypeRelatedToType(source, target, false);
+                        result = someTypeRelatedToType(source, target, false, true);
                     }
                     if (!result && (source.flags & 66846720 || target.flags & 66846720)) {
                         if (result = recursiveTypeRelatedTo(source, target, reportErrors, isIntersectionConstituent)) {
@@ -33886,14 +33918,14 @@ var ts;
                 }
                 return result;
             }
-            function someTypeRelatedToType(source, target, reportErrors) {
+            function someTypeRelatedToType(source, target, reportErrors, isIntersectionConstituent) {
                 var sourceTypes = source.types;
                 if (source.flags & 1048576 && containsType(sourceTypes, target)) {
                     return -1;
                 }
                 var len = sourceTypes.length;
                 for (var i = 0; i < len; i++) {
-                    var related = isRelatedTo(sourceTypes[i], target, reportErrors && i === len - 1);
+                    var related = isRelatedTo(sourceTypes[i], target, reportErrors && i === len - 1, undefined, isIntersectionConstituent);
                     if (related) {
                         return related;
                     }
@@ -35005,7 +35037,26 @@ var ts;
                     }
                 }
             }
+            if (depth >= 5 && type.flags & 8388608) {
+                var root = getRootObjectTypeFromIndexedAccessChain(type);
+                var count = 0;
+                for (var i = 0; i < depth; i++) {
+                    var t = stack[i];
+                    if (getRootObjectTypeFromIndexedAccessChain(t) === root) {
+                        count++;
+                        if (count >= 5)
+                            return true;
+                    }
+                }
+            }
             return false;
+        }
+        function getRootObjectTypeFromIndexedAccessChain(type) {
+            var t = type;
+            while (t.flags & 8388608) {
+                t = t.objectType;
+            }
+            return t;
         }
         function isPropertyIdenticalTo(sourceProp, targetProp) {
             return compareProperties(sourceProp, targetProp, compareTypesIdentical) !== 0;
@@ -35839,34 +35890,29 @@ var ts;
                     return;
                 }
                 if (target.flags & 1048576) {
-                    if (source.flags & 1048576) {
-                        var _b = inferFromMatchingTypes(source.types, target.types, isTypeOrBaseIdenticalTo), tempSources = _b[0], tempTargets = _b[1];
-                        var _c = inferFromMatchingTypes(tempSources, tempTargets, isTypeCloselyMatchedBy), sources = _c[0], targets = _c[1];
-                        if (sources.length === 0 || targets.length === 0) {
-                            return;
-                        }
-                        source = getUnionType(sources);
-                        target = getUnionType(targets);
+                    var _b = inferFromMatchingTypes(source.flags & 1048576 ? source.types : [source], target.types, isTypeOrBaseIdenticalTo), tempSources = _b[0], tempTargets = _b[1];
+                    var _c = inferFromMatchingTypes(tempSources, tempTargets, isTypeCloselyMatchedBy), sources = _c[0], targets = _c[1];
+                    if (targets.length === 0) {
+                        return;
                     }
-                    else {
-                        if (inferFromMatchingType(source, target.types, isTypeOrBaseIdenticalTo))
-                            return;
-                        if (inferFromMatchingType(source, target.types, isTypeCloselyMatchedBy))
-                            return;
+                    target = getUnionType(targets);
+                    if (sources.length === 0) {
+                        var savePriority = priority;
+                        priority |= 1;
+                        inferFromTypes(source, target);
+                        priority = savePriority;
+                        return;
                     }
+                    source = getUnionType(sources);
                 }
-                else if (target.flags & 2097152 && ts.some(target.types, function (t) { return !!getInferenceInfoForType(t); })) {
-                    if (source.flags & 2097152) {
-                        var _d = inferFromMatchingTypes(source.types, target.types, isTypeIdenticalTo), sources = _d[0], targets = _d[1];
+                else if (target.flags & 2097152 && ts.some(target.types, function (t) { return !!getInferenceInfoForType(t) || (isGenericMappedType(t) && !!getInferenceInfoForType(getHomomorphicTypeVariable(t) || neverType)); })) {
+                    if (!(source.flags & 1048576)) {
+                        var _d = inferFromMatchingTypes(source.flags & 2097152 ? source.types : [source], target.types, isTypeIdenticalTo), sources = _d[0], targets = _d[1];
                         if (sources.length === 0 || targets.length === 0) {
                             return;
                         }
                         source = getIntersectionType(sources);
                         target = getIntersectionType(targets);
-                    }
-                    else if (!(source.flags & 1048576)) {
-                        if (inferFromMatchingType(source, target.types, isTypeIdenticalTo))
-                            return;
                     }
                 }
                 else if (target.flags & (8388608 | 33554432)) {
@@ -35991,22 +36037,11 @@ var ts;
                 visited.set(key, inferencePriority);
                 inferencePriority = Math.min(inferencePriority, saveInferencePriority);
             }
-            function inferFromMatchingType(source, targets, matches) {
-                var matched = false;
-                for (var _i = 0, targets_1 = targets; _i < targets_1.length; _i++) {
-                    var t = targets_1[_i];
-                    if (matches(source, t)) {
-                        inferFromTypes(source, t);
-                        matched = true;
-                    }
-                }
-                return matched;
-            }
             function inferFromMatchingTypes(sources, targets, matches) {
                 var matchedSources;
                 var matchedTargets;
-                for (var _i = 0, targets_2 = targets; _i < targets_2.length; _i++) {
-                    var t = targets_2[_i];
+                for (var _i = 0, targets_1 = targets; _i < targets_1.length; _i++) {
+                    var t = targets_1[_i];
                     for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
                         var s = sources_1[_a];
                         if (matches(s, t)) {
@@ -36060,8 +36095,8 @@ var ts;
                     var sources = source.flags & 1048576 ? source.types : [source];
                     var matched_1 = new Array(sources.length);
                     var inferenceCircularity = false;
-                    for (var _i = 0, targets_3 = targets; _i < targets_3.length; _i++) {
-                        var t = targets_3[_i];
+                    for (var _i = 0, targets_2 = targets; _i < targets_2.length; _i++) {
+                        var t = targets_2[_i];
                         if (getInferenceInfoForType(t)) {
                             nakedTypeVariable = t;
                             typeVariableCount++;
@@ -36087,8 +36122,8 @@ var ts;
                     }
                 }
                 else {
-                    for (var _a = 0, targets_4 = targets; _a < targets_4.length; _a++) {
-                        var t = targets_4[_a];
+                    for (var _a = 0, targets_3 = targets; _a < targets_3.length; _a++) {
+                        var t = targets_3[_a];
                         if (getInferenceInfoForType(t)) {
                             typeVariableCount++;
                         }
@@ -36100,8 +36135,8 @@ var ts;
                 if (targetFlags & 2097152 ? typeVariableCount === 1 : typeVariableCount > 0) {
                     var savePriority = priority;
                     priority |= 1;
-                    for (var _b = 0, targets_5 = targets; _b < targets_5.length; _b++) {
-                        var t = targets_5[_b];
+                    for (var _b = 0, targets_4 = targets; _b < targets_4.length; _b++) {
+                        var t = targets_4[_b];
                         if (getInferenceInfoForType(t)) {
                             inferFromTypes(source, t);
                         }
@@ -40480,7 +40515,7 @@ var ts;
             if (ts.isJsxOpeningLikeElement(node)) {
                 if (!checkApplicableSignatureForJsxOpeningLikeElement(node, signature, relation, checkMode, reportErrors, containingMessageChain, errorOutputContainer)) {
                     ts.Debug.assert(!reportErrors || !!errorOutputContainer.errors, "jsx should have errors when reporting errors");
-                    return errorOutputContainer.errors || [];
+                    return errorOutputContainer.errors || ts.emptyArray;
                 }
                 return undefined;
             }
@@ -40492,7 +40527,7 @@ var ts;
                 var headMessage_1 = ts.Diagnostics.The_this_context_of_type_0_is_not_assignable_to_method_s_this_of_type_1;
                 if (!checkTypeRelatedTo(thisArgumentType, thisType, relation, errorNode, headMessage_1, containingMessageChain, errorOutputContainer)) {
                     ts.Debug.assert(!reportErrors || !!errorOutputContainer.errors, "this parameter should have errors when reporting errors");
-                    return errorOutputContainer.errors || [];
+                    return errorOutputContainer.errors || ts.emptyArray;
                 }
             }
             var headMessage = ts.Diagnostics.Argument_of_type_0_is_not_assignable_to_parameter_of_type_1;
@@ -40507,7 +40542,7 @@ var ts;
                     if (!checkTypeRelatedToAndOptionallyElaborate(checkArgType, paramType, relation, reportErrors ? arg : undefined, arg, headMessage, containingMessageChain, errorOutputContainer)) {
                         ts.Debug.assert(!reportErrors || !!errorOutputContainer.errors, "parameter should have errors when reporting errors");
                         maybeAddMissingAwaitInfo(arg, checkArgType, paramType);
-                        return errorOutputContainer.errors || [];
+                        return errorOutputContainer.errors || ts.emptyArray;
                     }
                 }
             }
@@ -40517,7 +40552,7 @@ var ts;
                 if (!checkTypeRelatedTo(spreadType, restType, relation, errorNode, headMessage, undefined, errorOutputContainer)) {
                     ts.Debug.assert(!reportErrors || !!errorOutputContainer.errors, "rest parameter should have errors when reporting errors");
                     maybeAddMissingAwaitInfo(errorNode, spreadType, restType);
-                    return errorOutputContainer.errors || [];
+                    return errorOutputContainer.errors || ts.emptyArray;
                 }
             }
             return undefined;
@@ -54223,11 +54258,9 @@ var ts;
     function visitLexicalEnvironment(statements, visitor, context, start, ensureUseStrict) {
         context.startLexicalEnvironment();
         statements = visitNodes(statements, visitor, ts.isStatement, start);
-        if (ensureUseStrict && !ts.startsWithUseStrict(statements)) {
-            statements = ts.setTextRange(ts.createNodeArray(__spreadArrays([ts.createExpressionStatement(ts.createLiteral("use strict"))], statements)), statements);
-        }
-        var declarations = context.endLexicalEnvironment();
-        return ts.setTextRange(ts.createNodeArray(ts.concatenate(declarations, statements)), statements);
+        if (ensureUseStrict)
+            statements = ts.ensureUseStrict(statements);
+        return ts.mergeLexicalEnvironment(statements, context.endLexicalEnvironment());
     }
     ts.visitLexicalEnvironment = visitLexicalEnvironment;
     function visitParameterList(nodes, visitor, context, nodesVisitor) {
@@ -67374,6 +67407,8 @@ var ts;
     }
     ts.getOutputDeclarationFileName = getOutputDeclarationFileName;
     function getOutputJSFileName(inputFileName, configFile, ignoreCase) {
+        if (configFile.options.emitDeclarationOnly)
+            return undefined;
         var isJsonFile = ts.fileExtensionIs(inputFileName, ".json");
         var outputFileName = ts.changeExtension(getOutputPathWithoutChangingExt(inputFileName, configFile, ignoreCase, configFile.options.outDir), isJsonFile ?
             ".json" :
@@ -67404,7 +67439,7 @@ var ts;
                 addOutput(js);
                 if (ts.fileExtensionIs(inputFileName, ".json"))
                     continue;
-                if (configFile.options.sourceMap) {
+                if (js && configFile.options.sourceMap) {
                     addOutput(js + ".map");
                 }
                 if (ts.getEmitDeclarations(configFile.options) && ts.hasTSFileExtension(inputFileName)) {
@@ -67432,6 +67467,11 @@ var ts;
             var jsFilePath = getOutputJSFileName(inputFileName, configFile, ignoreCase);
             if (jsFilePath)
                 return jsFilePath;
+            if (ts.fileExtensionIs(inputFileName, ".json"))
+                continue;
+            if (ts.getEmitDeclarations(configFile.options) && ts.hasTSFileExtension(inputFileName)) {
+                return getOutputDeclarationFileName(inputFileName, configFile, ignoreCase);
+            }
         }
         var buildInfoPath = getOutputPathForBuildInfo(configFile.options);
         if (buildInfoPath)
@@ -74229,11 +74269,16 @@ var ts;
                 }
             }
             else {
-                var emitOutput = ts.getFileEmitOutput(programOfThisState, sourceFile, true, cancellationToken);
-                if (emitOutput.outputFiles && emitOutput.outputFiles.length > 0) {
-                    latestSignature = computeHash(emitOutput.outputFiles[0].text);
+                var emitOutput_1 = ts.getFileEmitOutput(programOfThisState, sourceFile, true, cancellationToken);
+                var firstDts_1 = emitOutput_1.outputFiles &&
+                    programOfThisState.getCompilerOptions().declarationMap ?
+                    emitOutput_1.outputFiles.length > 1 ? emitOutput_1.outputFiles[1] : undefined :
+                    emitOutput_1.outputFiles.length > 0 ? emitOutput_1.outputFiles[0] : undefined;
+                if (firstDts_1) {
+                    ts.Debug.assert(ts.fileExtensionIs(firstDts_1.name, ".d.ts"), "File extension for signature expected to be dts", function () { return "Found: " + ts.getAnyExtensionFromPath(firstDts_1.name) + " for " + firstDts_1.name + ":: All output files: " + JSON.stringify(emitOutput_1.outputFiles.map(function (f) { return f.name; })); });
+                    latestSignature = computeHash(firstDts_1.text);
                     if (exportedModulesMapCache && latestSignature !== prevSignature) {
-                        updateExportedModules(sourceFile, emitOutput.exportedModulesFromDeclarationEmit, exportedModulesMapCache);
+                        updateExportedModules(sourceFile, emitOutput_1.exportedModulesFromDeclarationEmit, exportedModulesMapCache);
                     }
                 }
                 else {
@@ -74523,7 +74568,6 @@ var ts;
                         handleDtsMayChangeOfAffectedFile(state, affectedFile, cancellationToken, computeHash);
                         return affectedFile;
                     }
-                    seenAffectedFiles.set(affectedFile.path, true);
                     affectedFilesIndex++;
                 }
                 state.changedFilesSet.delete(state.currentChangedFilePath);
@@ -74660,7 +74704,7 @@ var ts;
                 fn(state, referencingFilePath);
         });
     }
-    function doneWithAffectedFile(state, affected, isPendingEmit, isBuildInfoEmit) {
+    function doneWithAffectedFile(state, affected, isPendingEmit, isBuildInfoEmit, isEmitResult) {
         if (isBuildInfoEmit) {
             state.emittedBuildInfo = true;
         }
@@ -74670,6 +74714,9 @@ var ts;
         }
         else {
             state.seenAffectedFiles.set(affected.path, true);
+            if (isEmitResult) {
+                (state.seenEmittedFiles || (state.seenEmittedFiles = ts.createMap())).set(affected.path, true);
+            }
             if (isPendingEmit) {
                 state.affectedFilesPendingEmitIndex++;
             }
@@ -74680,6 +74727,10 @@ var ts;
     }
     function toAffectedFileResult(state, result, affected, isPendingEmit, isBuildInfoEmit) {
         doneWithAffectedFile(state, affected, isPendingEmit, isBuildInfoEmit);
+        return { result: result, affected: affected };
+    }
+    function toAffectedFileEmitResult(state, result, affected, isPendingEmit, isBuildInfoEmit) {
+        doneWithAffectedFile(state, affected, isPendingEmit, isBuildInfoEmit, true);
         return { result: result, affected: affected };
     }
     function getSemanticDiagnosticsOfFile(state, sourceFile, cancellationToken) {
@@ -74886,7 +74937,7 @@ var ts;
                             return undefined;
                         }
                         var affected_1 = ts.Debug.assertDefined(state.program);
-                        return toAffectedFileResult(state, affected_1.emitBuildInfo(writeFile || ts.maybeBind(host, host.writeFile), cancellationToken), affected_1, false, true);
+                        return toAffectedFileEmitResult(state, affected_1.emitBuildInfo(writeFile || ts.maybeBind(host, host.writeFile), cancellationToken), affected_1, false, true);
                     }
                     isPendingEmitFile = true;
                 }
@@ -74899,7 +74950,7 @@ var ts;
                     affected = program;
                 }
             }
-            return toAffectedFileResult(state, ts.Debug.assertDefined(state.program).emit(affected === state.program ? undefined : affected, writeFile || ts.maybeBind(host, host.writeFile), cancellationToken, emitOnlyDtsFiles, customTransformers), affected, isPendingEmitFile);
+            return toAffectedFileEmitResult(state, ts.Debug.assertDefined(state.program).emit(affected === state.program ? undefined : affected, writeFile || ts.maybeBind(host, host.writeFile), cancellationToken, emitOnlyDtsFiles, customTransformers), affected, isPendingEmitFile);
         }
         function emit(targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers) {
             if (kind === BuilderProgramKind.EmitAndSemanticDiagnosticsBuilderProgram) {
@@ -74997,7 +75048,7 @@ var ts;
             compilerOptions: convertFromReusableCompilerOptions(program.options, toAbsolutePath),
             referencedMap: getMapOfReferencedSet(program.referencedMap, toPath),
             exportedModulesMap: getMapOfReferencedSet(program.exportedModulesMap, toPath),
-            semanticDiagnosticsPerFile: program.semanticDiagnosticsPerFile && ts.arrayToMap(program.semanticDiagnosticsPerFile, function (value) { return ts.isString(value) ? value : value[0]; }, function (value) { return ts.isString(value) ? ts.emptyArray : value[1]; }),
+            semanticDiagnosticsPerFile: program.semanticDiagnosticsPerFile && ts.arrayToMap(program.semanticDiagnosticsPerFile, function (value) { return toPath(ts.isString(value) ? value : value[0]); }, function (value) { return ts.isString(value) ? ts.emptyArray : value[1]; }),
             hasReusableDiagnostic: true
         };
         return {
