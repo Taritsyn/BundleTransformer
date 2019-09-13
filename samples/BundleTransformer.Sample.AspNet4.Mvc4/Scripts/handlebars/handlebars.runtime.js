@@ -1,7 +1,7 @@
 /**!
 
  @license
- handlebars v4.1.1
+ handlebars v4.2.0
 
 Copyright (C) 2011-2017 by Yehuda Katz
 
@@ -207,7 +207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _logger2 = _interopRequireDefault(_logger);
 
-	var VERSION = '4.1.1';
+	var VERSION = '4.2.0';
 	exports.VERSION = VERSION;
 	var COMPILER_REVISION = 7;
 
@@ -800,7 +800,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports['default'] = function (instance) {
 	  instance.registerHelper('lookup', function (obj, field) {
-	    return obj && obj[field];
+	    if (!obj) {
+	      return obj;
+	    }
+	    if (field === 'constructor' && !obj.propertyIsEnumerable(field)) {
+	      return undefined;
+	    }
+	    return obj[field];
 	  });
 	};
 
@@ -1198,6 +1204,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  prog.blockParams = declaredBlockParams || 0;
 	  return prog;
 	}
+
+	/**
+	 * This is currently part of the official API, therefore implementation details should not be changed.
+	 */
 
 	function resolvePartial(partial, context, options) {
 	  if (!partial) {
