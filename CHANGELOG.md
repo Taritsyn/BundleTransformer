@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.12.4 - October 8, 2019
+ * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.2
+ * In BundleTransformer.Handlebars added support of the Handlebars version 4.4.2
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.6.4
+
 ## v1.12.3 - September 13, 2019
  * In BundleTransformer.TypeScript added support of TypeScript version 3.6.3
  * In BundleTransformer.Handlebars added support of Handlebars version 4.2.0

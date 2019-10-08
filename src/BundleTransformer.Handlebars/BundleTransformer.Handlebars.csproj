@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Product>Bundle Transformer: Handlebars</Product>
-		<VersionPrefix>1.12.3</VersionPrefix>
+		<VersionPrefix>1.12.4</VersionPrefix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>

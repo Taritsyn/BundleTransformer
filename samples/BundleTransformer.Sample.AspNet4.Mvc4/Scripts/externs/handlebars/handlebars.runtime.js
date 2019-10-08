@@ -76,3 +76,8 @@
 	"registerDecorator": function(){},
 	"unregisterDecorator": function(){}
 };
+
+var container = {
+	program: function() {},
+	noop: function() {}
+};
