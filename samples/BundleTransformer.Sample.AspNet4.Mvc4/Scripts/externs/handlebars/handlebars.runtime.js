@@ -13,9 +13,11 @@
 	"decorators": {
 		"inline": function(){}
 	},
+	"__esModule": {},
 	"HandlebarsEnvironment": function(){},
 	"VERSION": {},
 	"COMPILER_REVISION": {},
+	"LAST_COMPATIBLE_COMPILER_REVISION": {},
 	"REVISION_CHANGES": {
 		"1": {},
 		"2": {},
@@ -23,7 +25,8 @@
 		"4": {},
 		"5": {},
 		"6": {},
-		"7": {}
+		"7": {},
+		"8": {}
 	},
 	"log": function(){},
 	"createFrame": function(){},
@@ -41,6 +44,7 @@
 	"SafeString": function(){},
 	"Exception": function(){},
 	"Utils": {
+		"__esModule": {},
 		"extend": function(){},
 		"indexOf": function(){},
 		"escapeExpression": function(){},
@@ -53,6 +57,7 @@
 	},
 	"escapeExpression": function(){},
 	"VM": {
+		"__esModule": {},
 		"checkRevision": function(){},
 		"template": function(){},
 		"wrapProgram": function(){},
@@ -70,9 +75,4 @@
 	"unregisterPartial": function(){},
 	"registerDecorator": function(){},
 	"unregisterDecorator": function(){}
-};
-
-var container = {
-	program: function() {},
-	noop: function() {}
 };
