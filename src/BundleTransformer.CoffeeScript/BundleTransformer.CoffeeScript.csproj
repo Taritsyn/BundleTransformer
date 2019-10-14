@@ -70,7 +70,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
 	</Target>
 
 	<Target Name="Es6Translation" AfterTargets="NodePackageInstallation">
-		<Exec Command='node.exe babel-cli/bin/babel.js --out-file "$(ProjectDir)Resources/coffeescript-combined.js" --presets es2015 "$(ProjectDir)Resources/coffeescript-combined.es6"'
+		<Exec Command='node.exe babel-cli/bin/babel.js --out-file "$(ProjectDir)Resources/coffeescript-combined.js" --presets es2015 --compact false "$(ProjectDir)Resources/coffeescript-combined.es6"'
 			WorkingDirectory="$(ProjectDir)node_modules/"
 			ConsoleToMsBuild="true" />
 	</Target>
