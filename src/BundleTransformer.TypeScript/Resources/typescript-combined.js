@@ -67,7 +67,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 var ts;
 (function (ts) {
     ts.versionMajorMinor = "3.6";
-    ts.version = ts.versionMajorMinor + ".3";
+    ts.version = ts.versionMajorMinor + ".4";
 })(ts || (ts = {}));
 (function (ts) {
     ts.emptyArray = [];
@@ -6737,7 +6737,7 @@ var ts;
     }
     ts.isEnumConst = isEnumConst;
     function isDeclarationReadonly(declaration) {
-        return !!(ts.getCombinedModifierFlags(declaration) & 64 && !ts.isParameterPropertyDeclaration(declaration));
+        return !!(ts.getCombinedModifierFlags(declaration) & 64 && !ts.isParameterPropertyDeclaration(declaration, declaration.parent));
     }
     ts.isDeclarationReadonly = isDeclarationReadonly;
     function isVarConst(node) {
@@ -9980,8 +9980,8 @@ var ts;
         }
     }
     ts.getTypeParameterOwner = getTypeParameterOwner;
-    function isParameterPropertyDeclaration(node) {
-        return ts.hasModifier(node, 92) && node.parent.kind === 158;
+    function isParameterPropertyDeclaration(node, parent) {
+        return ts.hasModifier(node, 92) && parent.kind === 158;
     }
     ts.isParameterPropertyDeclaration = isParameterPropertyDeclaration;
     function isEmptyBindingPattern(node) {
@@ -22354,7 +22354,7 @@ var ts;
             else {
                 declareSymbolAndAddToSymbolTable(node, 1, 111551);
             }
-            if (ts.isParameterPropertyDeclaration(node)) {
+            if (ts.isParameterPropertyDeclaration(node, node.parent)) {
                 var classDeclaration = node.parent.parent;
                 declareSymbol(classDeclaration.symbol.members, classDeclaration.symbol, node, 4 | (node.questionToken ? 16777216 : 0), 0);
             }
@@ -30451,8 +30451,7 @@ var ts;
             return undefined;
         }
         function getConstraintDeclaration(type) {
-            var decl = type.symbol && ts.getDeclarationOfKind(type.symbol, 151);
-            return decl && ts.getEffectiveConstraintOfTypeParameter(decl);
+            return ts.mapDefined(ts.filter(type.symbol && type.symbol.declarations, ts.isTypeParameterDeclaration), ts.getEffectiveConstraintOfTypeParameter)[0];
         }
         function getInferredTypeParameterConstraint(typeParameter) {
             var inferences;
@@ -30628,11 +30627,11 @@ var ts;
             }
             return undefined;
         }
-        function resolveTypeReferenceName(typeReferenceName, meaning) {
+        function resolveTypeReferenceName(typeReferenceName, meaning, ignoreErrors) {
             if (!typeReferenceName) {
                 return unknownSymbol;
             }
-            return resolveEntityName(typeReferenceName, meaning) || unknownSymbol;
+            return resolveEntityName(typeReferenceName, meaning, ignoreErrors) || unknownSymbol;
         }
         function getTypeReferenceType(node, symbol) {
             var typeArguments = typeArgumentsFromTypeReferenceNode(node);
@@ -30796,7 +30795,16 @@ var ts;
                 var meaning = 788968;
                 if (isJSDocTypeReference(node)) {
                     type = getIntendedTypeFromJSDocTypeReference(node);
-                    meaning |= 111551;
+                    if (!type) {
+                        symbol = resolveTypeReferenceName(getTypeReferenceName(node), meaning, true);
+                        if (symbol === unknownSymbol) {
+                            symbol = resolveTypeReferenceName(getTypeReferenceName(node), meaning | 111551);
+                        }
+                        else {
+                            resolveTypeReferenceName(getTypeReferenceName(node), meaning);
+                        }
+                        type = getTypeReferenceType(node, symbol);
+                    }
                 }
                 if (!type) {
                     symbol = resolveTypeReferenceName(getTypeReferenceName(node), meaning);
@@ -43714,7 +43722,7 @@ var ts;
                 if (member.kind === 158) {
                     for (var _b = 0, _c = member.parameters; _b < _c.length; _b++) {
                         var param = _c[_b];
-                        if (ts.isParameterPropertyDeclaration(param) && !ts.isBindingPattern(param.name)) {
+                        if (ts.isParameterPropertyDeclaration(param, member) && !ts.isBindingPattern(param.name)) {
                             addName(instanceNames, param.name, param.name.escapedText, 3);
                         }
                     }
@@ -45020,7 +45028,7 @@ var ts;
                         var parameter = local.valueDeclaration && tryGetRootParameterDeclaration(local.valueDeclaration);
                         var name = local.valueDeclaration && ts.getNameOfDeclaration(local.valueDeclaration);
                         if (parameter && name) {
-                            if (!ts.isParameterPropertyDeclaration(parameter) && !ts.parameterIsThisKeyword(parameter) && !isIdentifierThatStartsWithUnderscore(name)) {
+                            if (!ts.isParameterPropertyDeclaration(parameter, parameter.parent) && !ts.parameterIsThisKeyword(parameter) && !isIdentifierThatStartsWithUnderscore(name)) {
                                 addDiagnostic(parameter, 1, ts.createDiagnosticForNode(name, ts.Diagnostics._0_is_declared_but_its_value_is_never_read, ts.symbolName(local)));
                             }
                         }
@@ -46254,10 +46262,8 @@ var ts;
                     var constraint = ts.getEffectiveConstraintOfTypeParameter(source);
                     var sourceConstraint = constraint && getTypeFromTypeNode(constraint);
                     var targetConstraint = getConstraintOfTypeParameter(target);
-                    if (sourceConstraint) {
-                        if (!targetConstraint || !isTypeIdenticalTo(sourceConstraint, targetConstraint)) {
-                            return false;
-                        }
+                    if (sourceConstraint && targetConstraint && !isTypeIdenticalTo(sourceConstraint, targetConstraint)) {
+                        return false;
                     }
                     var sourceDefault = source.default && getTypeFromTypeNode(source.default);
                     var targetDefault = getDefaultFromTypeParameter(target);
@@ -56649,7 +56655,7 @@ var ts;
             var members = [];
             var constructor = ts.getFirstConstructorWithBody(node);
             var parametersWithPropertyAssignments = constructor &&
-                ts.filter(constructor.parameters, ts.isParameterPropertyDeclaration);
+                ts.filter(constructor.parameters, function (p) { return ts.isParameterPropertyDeclaration(p, constructor); });
             if (parametersWithPropertyAssignments) {
                 for (var _i = 0, parametersWithPropertyAssignments_1 = parametersWithPropertyAssignments; _i < parametersWithPropertyAssignments_1.length; _i++) {
                     var parameter = parametersWithPropertyAssignments_1[_i];
@@ -57193,7 +57199,7 @@ var ts;
         }
         function transformConstructorBody(body, constructor) {
             var parametersWithPropertyAssignments = constructor &&
-                ts.filter(constructor.parameters, ts.isParameterPropertyDeclaration);
+                ts.filter(constructor.parameters, function (p) { return ts.isParameterPropertyDeclaration(p, constructor); });
             if (!ts.some(parametersWithPropertyAssignments)) {
                 return ts.visitFunctionBody(body, visitor, context);
             }
@@ -58063,7 +58069,7 @@ var ts;
             if (constructor && constructor.body) {
                 var parameterPropertyDeclarationCount = 0;
                 for (var i = indexOfFirstStatement; i < constructor.body.statements.length; i++) {
-                    if (ts.isParameterPropertyDeclaration(ts.getOriginalNode(constructor.body.statements[i]))) {
+                    if (ts.isParameterPropertyDeclaration(ts.getOriginalNode(constructor.body.statements[i]), constructor)) {
                         parameterPropertyDeclarationCount++;
                     }
                     else {
@@ -65518,7 +65524,7 @@ var ts;
             return getReturnTypeVisibilityError;
         }
         else if (ts.isParameter(node)) {
-            if (ts.isParameterPropertyDeclaration(node) && ts.hasModifier(node.parent, 8)) {
+            if (ts.isParameterPropertyDeclaration(node, node.parent) && ts.hasModifier(node.parent, 8)) {
                 return getVariableDeclarationTypeVisibilityError;
             }
             return getParameterDeclarationTypeVisibilityError;
