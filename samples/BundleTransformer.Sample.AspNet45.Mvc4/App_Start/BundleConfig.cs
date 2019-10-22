@@ -6,7 +6,7 @@ using BundleTransformer.Core.Orderers;
 using BundleTransformer.Core.Resolvers;
 using BundleTransformer.Core.Transformers;
 
-namespace BundleTransformer.Sample.AspNet4.Mvc4
+namespace BundleTransformer.Sample.AspNet45.Mvc4
 {
 	public class BundleConfig
 	{

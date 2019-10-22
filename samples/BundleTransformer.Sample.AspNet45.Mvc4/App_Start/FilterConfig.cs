@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace BundleTransformer.Sample.AspNet4.Mvc4
+namespace BundleTransformer.Sample.AspNet45.Mvc4
 {
 	public class FilterConfig
 	{
