@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.12.3
+                README file for Bundle Transformer: TypeScript v1.12.5
 
    --------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of TypeScript version 3.6.4.
+   Added support of the TypeScript version 3.6.4.
 
    ====================
    POST-INSTALL ACTIONS
