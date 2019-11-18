@@ -101,8 +101,7 @@ namespace BundleTransformer.JsMin.Minifiers
 			string assetUrl = asset.Url;
 
 			var stringBuilderPool = StringBuilderPool.Shared;
-			int estimatedCapacity = JsMinifier.GetEstimatedOutputLength(content);
-			StringBuilder contentBuilder = stringBuilderPool.Rent(estimatedCapacity);
+			StringBuilder contentBuilder = stringBuilderPool.Rent(content.Length);
 
 			try
 			{

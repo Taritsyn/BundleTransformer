@@ -14,12 +14,12 @@
    BundleTransformer.JsMin contains one minifier-adapter for minification of
    JS code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port
    of Douglas Crockford's JSMin (https://github.com/douglascrockford/JSMin) version
-   of March 29, 2013.
+   of October 30, 2019.
 
    =============
    RELEASE NOTES
    =============
-   JSMin for .NET was updated to version 2.0.0.
+   Added support of the JSMin version of October 30, 2019.
 
    ====================
    POST-INSTALL ACTIONS
