@@ -194,7 +194,8 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("suppressImplicitAnyIndexErrors", options.SuppressImplicitAnyIndexErrors),
 				new JProperty("suppressTypeCheckingErrors", options.SuppressTypeCheckingErrors),
 				new JProperty("target", options.Target),
-				new JProperty("transpileOnly", options.TranspileOnly)
+				new JProperty("transpileOnly", options.TranspileOnly),
+				new JProperty("useDefineForClassFields", options.UseDefineForClassFields)
 			);
 
 			return optionsJson;

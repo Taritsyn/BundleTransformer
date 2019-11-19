@@ -374,6 +374,16 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to emit class fields with <code>Define</code> instead of <code>Set</code>
+		/// </summary>
+		[ConfigurationProperty("useDefineForClassFields", DefaultValue = false)]
+		public bool UseDefineForClassFields
+		{
+			get { return (bool)this["useDefineForClassFields"]; }
+			set { this["useDefineForClassFields"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a configuration settings of JS engine
 		/// </summary>
 		[ConfigurationProperty("jsEngine")]

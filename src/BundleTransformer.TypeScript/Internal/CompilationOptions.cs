@@ -338,6 +338,15 @@ namespace BundleTransformer.TypeScript.Internal
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to emit class fields with <code>Define</code> instead of <code>Set</code>
+		/// </summary>
+		public bool UseDefineForClassFields
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the TypeScript compilation options
@@ -379,6 +388,7 @@ namespace BundleTransformer.TypeScript.Internal
 			SuppressTypeCheckingErrors = false;
 			Target = TargetMode.EcmaScript3;
 			TranspileOnly = false;
+			UseDefineForClassFields = false;
 		}
 	}
 }

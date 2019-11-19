@@ -67,7 +67,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			suppressImplicitAnyIndexErrors: false,
 			suppressTypeCheckingErrors: false,
 			target: 0 /* ES3 */,
-			transpileOnly: false
+			transpileOnly: false,
+			useDefineForClassFields: false
 		},
 		BtSystem
 		;

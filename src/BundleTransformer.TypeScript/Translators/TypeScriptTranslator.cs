@@ -380,6 +380,15 @@ namespace BundleTransformer.TypeScript.Translators
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to emit class fields with <code>Define</code> instead of <code>Set</code>
+		/// </summary>
+		public bool UseDefineForClassFields
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of TypeScript translator
@@ -441,6 +450,7 @@ namespace BundleTransformer.TypeScript.Translators
 			SuppressTypeCheckingErrors = tsConfig.SuppressTypeCheckingErrors;
 			Target = tsConfig.Target;
 			TranspileOnly = tsConfig.TranspileOnly;
+			UseDefineForClassFields = tsConfig.UseDefineForClassFields;
 
 			if (createJsEngineInstance == null)
 			{
@@ -601,7 +611,8 @@ namespace BundleTransformer.TypeScript.Translators
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
 				SuppressTypeCheckingErrors = SuppressTypeCheckingErrors,
 				Target = Target,
-				TranspileOnly = TranspileOnly
+				TranspileOnly = TranspileOnly,
+				UseDefineForClassFields = UseDefineForClassFields
 			};
 
 			return options;
