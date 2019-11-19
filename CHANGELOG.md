@@ -1,6 +1,16 @@
 Change log
 ==========
 
+## v1.12.6 - November 19, 2019
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.3
+ * In BundleTransformer.TypeScript:
+   * Added support of the TypeScript version 3.7 RTM
+   * In configuration settings of TypeScript translator was added one new property - `UseDefineForClassFields` (default `false`)
+ * In BundleTransformer.Handlebars added support of the Handlebars version 4.5.3
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.2
+ * In BundleTransformer.JsMin added support of the JSMin version of October 30, 2019
+
 ## v1.12.5 - October 22, 2019
  * In BundleTransformer.TypeScript added support of the TypeScript version 3.6.4
  * In BundleTransformer.Handlebars added support of the Handlebars version 4.4.5

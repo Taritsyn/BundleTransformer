@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: Autoprefixer v1.12.5
+               README file for Bundle Transformer: Autoprefixer v1.12.6
 
    --------------------------------------------------------------------------------
 
