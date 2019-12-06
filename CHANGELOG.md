@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.7 - December 6, 2019
+ * In BundleTransformer.TypeScript added support of the TypeScript version 3.7.3
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.3
+
 ## v1.12.6 - November 19, 2019
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.3
