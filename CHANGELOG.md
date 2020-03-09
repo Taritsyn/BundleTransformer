@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.12.8 - March 9, 2020
+ * In BundleTransformer.CoffeeScript added support of the CoffeeScript version 2.5.1
+ * In BundleTransformer.TypeScript added support of the TypeScript version 3.8.3
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.4
+ * In BundleTransformer.Handlebars added support of the Handlebars version 4.7.3
+
 ## v1.12.7 - December 6, 2019
  * In BundleTransformer.TypeScript added support of the TypeScript version 3.7.3
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.3
