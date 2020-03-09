@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2020 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.CoffeeScript contains one translator-adapter -
    `CoffeeScriptTranslator` (supports the CoffeeScript (http://coffeescript.org)
-   version 2.4.0). This adapter makes translation of CoffeeScript code to JS code.
+   version 2.5.1). This adapter makes translation of CoffeeScript code to JS code.
    Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated CoffeeScript asset.
 
@@ -23,8 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   1. JavaScript Engine Switcher was updated to version 3.1.0;
-   2. Json.NET was updated to version 12.0.2.
+   Added support of CoffeeScript version 2.5.1.
 
    ====================
    POST-INSTALL ACTIONS
