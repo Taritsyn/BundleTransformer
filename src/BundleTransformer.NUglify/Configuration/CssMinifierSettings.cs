@@ -8,7 +8,7 @@ namespace BundleTransformer.NUglify.Configuration
 	public sealed class CssMinifierSettings : MinifierSettingsBase
 	{
 		/// <summary>
-		/// Gets or sets ColorNames setting
+		/// Gets or sets a <see cref="CssColor"/> setting
 		/// </summary>
 		[ConfigurationProperty("colorNames", DefaultValue = CssColor.Hex)]
 		public CssColor ColorNames
@@ -18,13 +18,24 @@ namespace BundleTransformer.NUglify.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets CommentMode setting
+		/// Gets or sets a <see cref="CssComment"/> setting
 		/// </summary>
 		[ConfigurationProperty("commentMode", DefaultValue = CssComment.Important)]
 		public CssComment CommentMode
 		{
 			get { return (CssComment) this["commentMode"]; }
 			set { this["commentMode"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether unicode escape strings (e.g. <code>\ff0e</code>)
+		/// would be replaced by it's actual character or not
+		/// </summary>
+		[ConfigurationProperty("decodeEscapes", DefaultValue = true)]
+		public bool DecodeEscapes
+		{
+			get { return (bool)this["decodeEscapes"]; }
+			set { this["decodeEscapes"] = value; }
 		}
 
 		/// <summary>

@@ -192,7 +192,7 @@ namespace BundleTransformer.NUglify.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets ColorNames setting
+		/// Gets or sets a <see cref="CssColor"/> setting
 		/// </summary>
 		public BtCssColor ColorNames
 		{
@@ -207,7 +207,7 @@ namespace BundleTransformer.NUglify.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets CommentMode setting
+		/// Gets or sets a <see cref="CssComment"/> setting
 		/// </summary>
 		public BtCssComment CommentMode
 		{
@@ -219,6 +219,16 @@ namespace BundleTransformer.NUglify.Minifiers
 			{
 				_cssParserConfiguration.CommentMode = Utils.GetEnumFromOtherEnum<BtCssComment, NuCssComment>(value);
 			}
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether unicode escape strings (e.g. <code>\ff0e</code>)
+		/// would be replaced by it's actual character or not
+		/// </summary>
+		public bool DecodeEscapes
+		{
+			get { return _cssParserConfiguration.DecodeEscapes; }
+			set { _cssParserConfiguration.DecodeEscapes = value; }
 		}
 
 		/// <summary>
@@ -278,6 +288,7 @@ namespace BundleTransformer.NUglify.Minifiers
 			MapCommonSettings(this, cssMinifierConfig);
 			ColorNames = cssMinifierConfig.ColorNames;
 			CommentMode = cssMinifierConfig.CommentMode;
+			DecodeEscapes = cssMinifierConfig.DecodeEscapes;
 			FixIE8Fonts = cssMinifierConfig.FixIE8Fonts;
 			MinifyExpressions = cssMinifierConfig.MinifyExpressions;
 			RemoveEmptyBlocks = cssMinifierConfig.RemoveEmptyBlocks;

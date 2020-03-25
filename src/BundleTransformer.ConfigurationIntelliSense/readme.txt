@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2020 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of TypeScript translator.
+   Updated definitions for configuration settings of NUglify CSS minifier.
 
    =============
    DOCUMENTATION

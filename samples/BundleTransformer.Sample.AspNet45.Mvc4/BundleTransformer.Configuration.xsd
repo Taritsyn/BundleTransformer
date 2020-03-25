@@ -1614,6 +1614,11 @@ Leave all other color names or hex values as-specified.</xs:documentation>
 						</xs:restriction>
 					</xs:simpleType>
 				</xs:attribute>
+				<xs:attribute name="decodeEscapes" type="Boolean_SchemaType" use="optional" default="true">
+					<xs:annotation>
+						<xs:documentation>Value indicating whether unicode escape strings (e.g. `\ff0e`) would be replaced by it's actual character or not</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
 				<xs:attribute name="fixIE8Fonts" type="Boolean_SchemaType" use="optional" default="true">
 					<xs:annotation>
 						<xs:documentation>Value indicating whether IE8 .EOT fonts should get a question-mark appended to the URL (if not there already) to prevent the browser from generating invalid HTTP requests to the server</xs:documentation>
