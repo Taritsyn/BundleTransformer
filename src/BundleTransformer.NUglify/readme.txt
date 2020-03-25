@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2020 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the NUglify version 1.5.13.
+   Added support of the NUglify version 1.5.14.
 
    ====================
    POST-INSTALL ACTIONS
