@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.12.10 - April 8, 2020
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.6
+
 ## v1.12.9 - March 25, 2020
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of NUglify CSS minifier
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.5
