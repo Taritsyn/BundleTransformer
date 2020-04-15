@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.12.11 - April 15, 2020
+ * In BundleTransformer.SassAndScss was updated the LibSass Host to version 1.3.0
+
 ## v1.12.10 - April 8, 2020
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.7.6
 
