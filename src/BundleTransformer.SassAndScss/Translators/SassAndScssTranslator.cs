@@ -250,7 +250,7 @@ namespace BundleTransformer.SassAndScss.Translators
 				newContent = result.CompiledContent;
 				dependencies = result.IncludedFilePaths;
 			}
-			catch (SassСompilationException e)
+			catch (SassCompilationException e)
 			{
 				string errorDetails = SassErrorHelpers.GenerateErrorDetails(e, true);
 
