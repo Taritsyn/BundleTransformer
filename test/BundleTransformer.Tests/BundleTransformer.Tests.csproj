@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Product>Bundle Transformer: Tests</Product>
-		<VersionPrefix>1.12.11</VersionPrefix>
+		<VersionPrefix>1.12.12</VersionPrefix>
 		<TargetFramework>net452</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -18,7 +18,7 @@
 		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.3.0" />
 		<PackageReference Include="JavaScriptEngineSwitcher.Msie" Version="3.4.3" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-		<PackageReference Include="Moq" Version="4.13.1" />
+		<PackageReference Include="Moq" Version="4.14.1" />
 		<PackageReference Include="xunit" Version="2.4.1" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
 

@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.12 - May 14, 2020
+ * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.4
+ * In BundleTransformer.TypeScript added support of the TypeScript version 3.9 RTM
+
 ## v1.12.11 - April 15, 2020
  * In BundleTransformer.SassAndScss was updated the LibSass Host to version 1.3.0
 
