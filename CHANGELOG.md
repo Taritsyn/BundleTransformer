@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.13 - May 20, 2020
+ * In BundleTransformer.TypeScript added support of the TypeScript version 3.9.3
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 9.8
+
 ## v1.12.12 - May 14, 2020
  * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.4
  * In BundleTransformer.TypeScript added support of the TypeScript version 3.9 RTM
