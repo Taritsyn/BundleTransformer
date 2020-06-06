@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<Product>Bundle Transformer: TypeScript</Product>
-		<VersionPrefix>1.12.13</VersionPrefix>
+		<VersionPrefix>1.12.14</VersionPrefix>
 		<TargetFramework>net40</TargetFramework>
 		<OutputType>Library</OutputType>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
