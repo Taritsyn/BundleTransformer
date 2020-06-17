@@ -14,14 +14,12 @@
    BundleTransformer.NUglify contains two minifier-adapters: `NUglifyCssMinifier`
    (for minification of CSS code) and `NUglifyJsMinifier` (for minification of JS
    code). These adapters perform minification by using the NUglify
-   (https://github.com/xoofx/NUglify).
+   (https://github.com/trullock/NUglify).
 
    =============
    RELEASE NOTES
    =============
-   1. Added support of the NUglify version 1.5.14;
-   2. In configuration settings of CSS minifier was added one new property -
-      `DecodeEscapes` (default `true`).
+   Added support of the NUglify version 1.6.3.
 
    ====================
    POST-INSTALL ACTIONS

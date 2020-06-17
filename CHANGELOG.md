@@ -165,7 +165,7 @@ Change log
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.2
 
 ## v1.9.213 - October 2, 2018
- * Added module based on the [NUglify](https://github.com/xoofx/NUglify)
+ * Added module based on the [NUglify](https://github.com/trullock/NUglify)
  * In BundleTransformer.Core optimized a memory usage
  * In BundleTransformer.ConfigurationIntelliSense:
    * Added a definitions for configuration settings of NUglify minifiers
