@@ -26,6 +26,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			inlineSourceMap: false,
 			inlineSources: false,
 			jsxFactory: false,
+			jsxFragmentFactory: '',
 			keyofStringsOnly: false,
 			lib: null,
 			mapRoot: '',
