@@ -180,9 +180,9 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"autoprefixer",
 							@"
-  * JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT mode)
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
   * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore (while it is recommended to use version 3.1.1)",
+  * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")
 					);
 				}
