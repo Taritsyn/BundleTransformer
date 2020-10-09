@@ -14,7 +14,7 @@
    BundleTransformer.SassAndScss contains one translator-adapter -
    `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to
    CSS code by using the LibSass Host for .NET 
-   (https://github.com/Taritsyn/LibSassHost) version 1.3.1 (supports the LibSass
+   (https://github.com/Taritsyn/LibSassHost) version 1.3.2 (supports the LibSass
    (http://sass-lang.com/libsass) version 3.6.4). Also contains the
    `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text
    output of translated Sass or SCSS asset.
@@ -29,7 +29,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the LibSass version 3.6.4.
+   LibSass Host was updated to version 1.3.2.
 
    ====================
    POST-INSTALL ACTIONS
