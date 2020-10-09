@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.22 - October 9, 2020
+ * In BundleTransformer.SassAndScss was updated the LibSass Host to version 1.3.2
+ * In BundleTransformer.NUglify added support of the NUglify version 1.9.7
+
 ## v1.12.21 - October 2, 2020
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.0.1.0
  * In BundleTransformer.NUglify added support of the NUglify version 1.9.6
