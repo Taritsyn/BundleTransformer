@@ -12,7 +12,7 @@
 		<repository type="git" url="https://github.com/Taritsyn/BundleTransformer" />
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</description>
-		<releaseNotes>Updated definitions for configuration settings of NUglify CSS minifier.</releaseNotes>
+		<releaseNotes>Updated definitions for configuration settings of NUglify minifiers.</releaseNotes>
 		<copyright>Copyright © 2012-2020 Andrey Taritsyn</copyright>
 		<language>en-US</language>
 		<tags>BundleTransformer Web.config IntelliSense</tags>

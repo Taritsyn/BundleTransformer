@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of NUglify CSS minifier.
+   Updated definitions for configuration settings of NUglify minifiers.
 
    =============
    DOCUMENTATION

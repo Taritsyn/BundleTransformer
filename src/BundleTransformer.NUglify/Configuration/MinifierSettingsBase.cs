@@ -53,7 +53,7 @@ namespace BundleTransformer.NUglify.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a number of spaces per indent level when in
+		/// Gets or sets a number of spaces or tabs per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		[ConfigurationProperty("indentSize", DefaultValue = 4)]
@@ -61,6 +61,16 @@ namespace BundleTransformer.NUglify.Configuration
 		{
 			get { return (int)this["indentSize"]; }
 			set { this["indentSize"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a indent type when in <code>MultipleLines</code> output mode
+		/// </summary>
+		[ConfigurationProperty("indentType", DefaultValue = IndentType.Space)]
+		public IndentType IndentType
+		{
+			get { return (IndentType)this["indentType"]; }
+			set { this["indentType"] = value; }
 		}
 
 		/// <summary>

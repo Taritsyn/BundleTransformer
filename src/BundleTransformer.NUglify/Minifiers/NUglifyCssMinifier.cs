@@ -111,18 +111,35 @@ namespace BundleTransformer.NUglify.Minifiers
 		}
 
 		/// <summary>
-		/// Gets or sets number of spaces per indent level when in
+		/// Gets or sets number of spaces or tabs per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		public override int IndentSize
 		{
 			get
 			{
-				return _cssParserConfiguration.IndentSize;
+				return _cssParserConfiguration.Indent.Length;
 			}
 			set
 			{
-				_cssParserConfiguration.IndentSize = value;
+				_cssParserConfiguration.Indent = GenerateIndentString(
+					GetIndentType(_cssParserConfiguration.Indent), value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets a indent type when in <code>MultipleLines</code> output mode
+		/// </summary>
+		public override IndentType IndentType
+		{
+			get
+			{
+				return GetIndentType(_cssParserConfiguration.Indent);
+			}
+			set
+			{
+				_cssParserConfiguration.Indent = GenerateIndentString(
+					value, _cssParserConfiguration.Indent.Length);
 			}
 		}
 

@@ -46,10 +46,15 @@ namespace BundleTransformer.NUglify.Minifiers
 		public abstract string IgnoreErrorList { get; set; }
 
 		/// <summary>
-		/// Gets or sets a number of spaces per indent level when in
+		/// Gets or sets a number of spaces or tabs per indent level when in
 		/// <code>MultipleLines</code> output mode
 		/// </summary>
 		public abstract int IndentSize { get; set; }
+
+		/// <summary>
+		/// Gets or sets a indent type when in <code>MultipleLines</code> output mode
+		/// </summary>
+		public abstract IndentType IndentType { get; set; }
 
 		/// <summary>
 		/// Gets or sets the column position at which the line
@@ -133,6 +138,27 @@ namespace BundleTransformer.NUglify.Minifiers
 			return errorMessage;
 		}
 
+		protected static IndentType GetIndentType(string indent)
+		{
+			IndentType indentType = IndentType.Space;
+
+			if (!string.IsNullOrEmpty(indent))
+			{
+				char firstCharacter = indent[0];
+				indentType = firstCharacter == '\t' ? IndentType.Tab : IndentType.Space;
+			}
+
+			return indentType;
+		}
+
+		protected static string GenerateIndentString(IndentType type, int width)
+		{
+			char character = type == IndentType.Tab ? '\t' : ' ';
+			string indent = new string(character, width);
+
+			return indent;
+		}
+
 		/// <summary>
 		/// Maps a common settings
 		/// </summary>
@@ -146,6 +172,7 @@ namespace BundleTransformer.NUglify.Minifiers
 			minifier.IgnoreAllErrors = commonMinifierSettings.IgnoreAllErrors;
 			minifier.IgnoreErrorList = commonMinifierSettings.IgnoreErrorList;
 			minifier.IndentSize = commonMinifierSettings.IndentSize;
+			minifier.IndentType = commonMinifierSettings.IndentType;
 			minifier.LineBreakThreshold = commonMinifierSettings.LineBreakThreshold;
 			minifier.OutputMode = commonMinifierSettings.OutputMode;
 			minifier.PreprocessorDefineList = commonMinifierSettings.PreprocessorDefineList;
