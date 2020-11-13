@@ -142,7 +142,7 @@ namespace BundleTransformer.NUglify.Minifiers
 		{
 			IndentType indentType = IndentType.Space;
 
-			if (!string.IsNullOrEmpty(indent))
+			if (indent.Length > 0)
 			{
 				char firstCharacter = indent[0];
 				indentType = firstCharacter == '\t' ? IndentType.Tab : IndentType.Space;

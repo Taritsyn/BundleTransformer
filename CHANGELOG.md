@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.12.24 - November 13, 2020
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of NUglify minifiers
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.0.2.0
+ * In BundleTransformer.NUglify:
+   * Added support of the NUglify version 1.10.0
+   * In configuration settings of minifiers was added one new property - `IndentType` (default `Space`)
+
 ## v1.12.23 - November 2, 2020
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.0.5
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.0.1.1
