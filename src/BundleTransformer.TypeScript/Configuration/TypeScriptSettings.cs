@@ -207,6 +207,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to include <code>undefined</code> in index signature
+		/// results
+		/// </summary>
+		[ConfigurationProperty("noUncheckedIndexedAccess", DefaultValue = false)]
+		public bool NoUncheckedIndexedAccess
+		{
+			get { return (bool)this["noUncheckedIndexedAccess"]; }
+			set { this["noUncheckedIndexedAccess"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		[ConfigurationProperty("noUnusedLocals", DefaultValue = false)]

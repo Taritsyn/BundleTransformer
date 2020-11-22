@@ -678,6 +678,11 @@
 				<xs:documentation>Flag for whether to disable strict checking of generic signatures</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="noUncheckedIndexedAccess" type="Boolean_SchemaType" use="optional" default="false">
+			<xs:annotation>
+				<xs:documentation>Flag for whether to include `undefined` in index signature results</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="noUnusedLocals" type="Boolean_SchemaType" use="optional" default="false">
 			<xs:annotation>
 				<xs:documentation>Flag for whether to report errors on unused locals</xs:documentation>
@@ -1370,17 +1375,6 @@ if (condition) {
 				<xs:documentation>Number of spaces or tabs per indent level when in `MultipleLines` output mode</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
-    <xs:attribute name="indentType" use="optional" default="Space">
-      <xs:annotation>
-        <xs:documentation>Indent type when in `MultipleLines` output mode</xs:documentation>
-      </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:NMTOKEN">
-          <xs:enumeration value="Space" />
-          <xs:enumeration value="Tab" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
 		<xs:attribute name="lineBreakThreshold" type="xs:int" use="optional" default="2147482647">
 			<xs:annotation>
 				<xs:documentation>Column position at which the line will be broken at the next available opportunity</xs:documentation>
@@ -1893,6 +1887,17 @@ if (condition) {
 			<xs:annotation>
 				<xs:documentation>Number of spaces per indent level when in MultipleLines output mode</xs:documentation>
 			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="indentType" use="optional" default="Space">
+			<xs:annotation>
+				<xs:documentation>Indent type when in `MultipleLines` output mode</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKEN">
+					<xs:enumeration value="Space" />
+					<xs:enumeration value="Tab" />
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
 		<xs:attribute name="lineBreakThreshold" type="xs:int" use="optional" default="2147482647">
 			<xs:annotation>

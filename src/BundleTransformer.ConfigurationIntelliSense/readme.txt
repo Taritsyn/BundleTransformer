@@ -18,7 +18,8 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of NUglify minifiers.
+   Updated definitions for configuration settings of TypeScript translator and
+   NUglify minifiers.
 
    =============
    DOCUMENTATION

@@ -188,6 +188,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to include <code>undefined</code> in index signature
+		/// results
+		/// </summary>
+		public bool NoUncheckedIndexedAccess
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		public bool NoUnusedLocals
@@ -372,6 +382,7 @@ namespace BundleTransformer.TypeScript.Internal
 			NoLib = false;
 			NoResolve = false;
 			NoStrictGenericChecks = false;
+			NoUncheckedIndexedAccess = false;
 			NoUnusedLocals = false;
 			NoUnusedParameters = false;
 			PreserveConstEnums = false;

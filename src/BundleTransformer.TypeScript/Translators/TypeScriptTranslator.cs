@@ -230,6 +230,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to include <code>undefined</code> in index signature
+		/// results
+		/// </summary>
+		public bool NoUncheckedIndexedAccess
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report errors on unused locals
 		/// </summary>
 		public bool NoUnusedLocals
@@ -434,6 +444,7 @@ namespace BundleTransformer.TypeScript.Translators
 			NoLib = tsConfig.NoLib;
 			NoResolve = tsConfig.NoResolve;
 			NoStrictGenericChecks = tsConfig.NoStrictGenericChecks;
+			NoUncheckedIndexedAccess = tsConfig.NoUncheckedIndexedAccess;
 			NoUnusedLocals = tsConfig.NoUnusedLocals;
 			NoUnusedParameters = tsConfig.NoUnusedParameters;
 			PreserveConstEnums = tsConfig.PreserveConstEnums;
@@ -596,6 +607,7 @@ namespace BundleTransformer.TypeScript.Translators
 				NoLib = NoLib,
 				NoResolve = NoResolve,
 				NoStrictGenericChecks = NoStrictGenericChecks,
+				NoUncheckedIndexedAccess = NoUncheckedIndexedAccess,
 				NoUnusedLocals = NoUnusedLocals,
 				NoUnusedParameters = NoUnusedParameters,
 				PreserveConstEnums = PreserveConstEnums,
