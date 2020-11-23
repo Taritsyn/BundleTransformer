@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.12.25 - November 23, 2020
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator and NUglify minifiers
+ * In BundleTransformer.TypeScript:
+   * Added support of the TypeScript version 4.1 RTM (please note: The 4.1 RTM release is also called '4.1.2')
+   * In configuration settings of TypeScript translator was added one new property - `NoUncheckedIndexedAccess` (default `false`)
+
 ## v1.12.24 - November 13, 2020
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of NUglify minifiers
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.0.2.0
