@@ -11,8 +11,7 @@
 		<Description>BundleTransformer.NUglify contains two minifier-adapters: `NUglifyCssMinifier` (for minification of CSS code) and `NUglifyJsMinifier` (for minification of JS code). These adapters perform minification by using the NUglify (https://github.com/trullock/NUglify).</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;NUglify</PackageTags>
-		<PackageReleaseNotes>1. Added support of the NUglify version 1.10.0;
-2. In configuration settings of minifiers was added one new property - `IndentType` (default `Space`).</PackageReleaseNotes>
+		<PackageReleaseNotes>Added support of the NUglify version 1.11.1.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />
@@ -23,7 +22,7 @@
 		<Reference Include="System.configuration" Pack="false" />
 
 		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-		<PackageReference Include="NUglify" Version="1.10.0" />
+		<PackageReference Include="NUglify" Version="1.11.1" />
 
 		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
 	</ItemGroup>
