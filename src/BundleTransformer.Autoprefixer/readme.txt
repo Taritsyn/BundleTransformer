@@ -15,7 +15,7 @@
    postprocessing of CSS code - `AutoprefixCssPostProcessor`.
    This adapter makes actualization of vendor prefixes in CSS code by using the
    Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost)
-   version 2.0.3 (supports the Andrey Sitnik's Autoprefixer
+   version 3.0.0 (supports the Andrey Sitnik's Autoprefixer
    (https://github.com/postcss/autoprefixer) version 10.0.2.0).
 
    As a JS engine is used the JavaScript Engine Switcher library
@@ -24,7 +24,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Autoprefixer version 10.0.2.0.
+   Autoprefixer Host was updated to version 3.0.0.
 
    ====================
    POST-INSTALL ACTIONS
