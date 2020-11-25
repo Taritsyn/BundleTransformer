@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.26 - November 25, 2020
+ * In BundleTransformer.Autoprefixer was updated the Autoprefixer Host to version 3.0.0
+ * In BundleTransformer.NUglify added support of the NUglify version 1.11.1
+
 ## v1.12.25 - November 23, 2020
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator and NUglify minifiers
  * In BundleTransformer.TypeScript:
