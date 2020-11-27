@@ -259,15 +259,24 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 
 		private void InnerPostProcess(IAsset asset, CssAutoprefixer cssAutoprefixer)
 		{
+			string content = asset.Content;
 			string newContent;
 			string assetUrl = asset.Url;
 			IList<string> dependencies;
 
 			try
 			{
-				ProcessingResult result = cssAutoprefixer.Process(asset.Content, asset.Url);
-				newContent = result.ProcessedContent;
-				dependencies = GetIncludedFilePaths(Stats);
+				if (!string.IsNullOrEmpty(content))
+				{
+					ProcessingResult result = cssAutoprefixer.Process(content, assetUrl);
+					newContent = result.ProcessedContent;
+					dependencies = GetIncludedFilePaths(Stats);
+				}
+				else
+				{
+					newContent = content ?? string.Empty;
+					dependencies = new List<string>();
+				}
 			}
 			catch (AutoprefixerProcessingException e)
 			{
