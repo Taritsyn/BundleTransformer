@@ -266,17 +266,12 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 
 			try
 			{
-				if (!string.IsNullOrEmpty(content))
-				{
-					ProcessingResult result = cssAutoprefixer.Process(content, assetUrl);
-					newContent = result.ProcessedContent;
-					dependencies = GetIncludedFilePaths(Stats);
-				}
-				else
-				{
-					newContent = content ?? string.Empty;
-					dependencies = new List<string>();
-				}
+				newContent = !string.IsNullOrWhiteSpace(content) ?
+					cssAutoprefixer.Process(content, assetUrl).ProcessedContent
+					:
+					content ?? string.Empty
+					;
+				dependencies = GetIncludedFilePaths(Stats);
 			}
 			catch (AutoprefixerProcessingException e)
 			{
