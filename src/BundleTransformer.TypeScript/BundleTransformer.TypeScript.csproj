@@ -8,15 +8,14 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (http://www.typescriptlang.org) version 4.1 RTM). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
+		<Description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (http://www.typescriptlang.org) version 4.1.3). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
 
 BundleTransformer.TypeScript does not support external modules (CommonJS, AMD, SystemJS, UMD and ES6 modules).
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT mode), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconUrl>
 		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;TypeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-		<PackageReleaseNotes>1. Added support of the TypeScript version 4.1 RTM (please note: The 4.1 RTM release is also called '4.1.2');
-2. In configuration settings of TypeScript translator was added one new property - `NoUncheckedIndexedAccess` (default `false`).</PackageReleaseNotes>
+		<PackageReleaseNotes>Added support of the TypeScript version 4.1.3.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<Import Project="../../build/common.props" />
