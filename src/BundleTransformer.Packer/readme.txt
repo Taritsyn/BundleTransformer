@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2019 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2021 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

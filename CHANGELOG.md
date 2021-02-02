@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.30 - February 2, 2021
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.2.4.0
+ * In BundleTransformer.NUglify added support of the NUglify version 1.13.2
+
 ## v1.12.29 - December 15, 2020
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.1.3
 
