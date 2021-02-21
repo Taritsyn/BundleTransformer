@@ -1,38 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<Product>Bundle Transformer: Tests</Product>
-		<VersionPrefix>1.12.30</VersionPrefix>
-		<TargetFramework>net452</TargetFramework>
-		<OutputType>Library</OutputType>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<IsTestProject>true</IsTestProject>
-		<IsPackable>false</IsPackable>
-	</PropertyGroup>
+  <PropertyGroup>
+    <Product>Bundle Transformer: Tests</Product>
+    <VersionPrefix>1.12.30</VersionPrefix>
+    <TargetFramework>net452</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 
-	<Import Project="../../build/common.props" />
+  <Import Project="../../build/common.props" />
 
-	<ItemGroup>
-		<Reference Include="System.Web" Pack="false" />
+  <ItemGroup>
+    <Reference Include="System.Web" Pack="false" />
 
-		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.3.0" />
-		<PackageReference Include="JavaScriptEngineSwitcher.Msie" Version="3.4.3" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-		<PackageReference Include="Moq" Version="4.14.6" />
-		<PackageReference Include="xunit" Version="2.4.1" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.3.0" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Msie" Version="3.4.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="Moq" Version="4.14.6" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
 
-		<ProjectReference Include="../../src/BundleTransformer.Autoprefixer/BundleTransformer.Autoprefixer.csproj" />
-		<ProjectReference Include="../../src/BundleTransformer.CoffeeScript/BundleTransformer.CoffeeScript.csproj" />
-		<ProjectReference Include="../../src/BundleTransformer.Core/BundleTransformer.Core.csproj" />
-		<ProjectReference Include="../../src/BundleTransformer.Handlebars/BundleTransformer.Handlebars.csproj" />
-		<ProjectReference Include="../../src/BundleTransformer.Less/BundleTransformer.Less.csproj" />
-		<ProjectReference Include="../../src/BundleTransformer.SassAndScss/BundleTransformer.SassAndScss.csproj" />
-		<ProjectReference Include="../../src/BundleTransformer.TypeScript/BundleTransformer.TypeScript.csproj" />
-	</ItemGroup>
+    <ProjectReference Include="../../src/BundleTransformer.Autoprefixer/BundleTransformer.Autoprefixer.csproj" />
+    <ProjectReference Include="../../src/BundleTransformer.CoffeeScript/BundleTransformer.CoffeeScript.csproj" />
+    <ProjectReference Include="../../src/BundleTransformer.Core/BundleTransformer.Core.csproj" />
+    <ProjectReference Include="../../src/BundleTransformer.Handlebars/BundleTransformer.Handlebars.csproj" />
+    <ProjectReference Include="../../src/BundleTransformer.Less/BundleTransformer.Less.csproj" />
+    <ProjectReference Include="../../src/BundleTransformer.SassAndScss/BundleTransformer.SassAndScss.csproj" />
+    <ProjectReference Include="../../src/BundleTransformer.TypeScript/BundleTransformer.TypeScript.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<EmbeddedResource Include="Resources/jquery.d.ts" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/jquery.d.ts" />
+  </ItemGroup>
 
 </Project>

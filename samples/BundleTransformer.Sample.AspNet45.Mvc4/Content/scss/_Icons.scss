@@ -1,7 +1,7 @@
 ﻿.icon-plug
 {
-	display: inline;
-	background-image: url("#{$icons-path}$plug.png");
+  display: inline;
+  background-image: url("#{$icons-path}$plug.png");
 }
 
 @import "folder/GitIcon", 'folder/HourglassIcon', "folder/ImageIcon", url(folder/JsonIcon.css);
@@ -12,18 +12,18 @@
 
 .icon-equalizer
 {
-	display: inline;
-	background-image: url(#{$alternative-icons-path}equalizer.png) !important;
+  display: inline;
+  background-image: url(#{$alternative-icons-path}equalizer.png) !important;
 }
 
 .icon-film
 {
-	display: inline;
-	background-image: url("~/Content/sass/folder/film.png") !important;
+  display: inline;
+  background-image: url("~/Content/sass/folder/film.png") !important;
 }
 
 .icon-geolocation
 {
-	display: inline;
-	background-image: url("#{$alternative-icons-path}geolocation.png") !important;
+  display: inline;
+  background-image: url("#{$alternative-icons-path}geolocation.png") !important;
 }

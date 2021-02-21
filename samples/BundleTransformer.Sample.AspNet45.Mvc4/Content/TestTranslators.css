@@ -1,13 +1,13 @@
 ﻿.translators
 {
-	margin-bottom: 1.0em;
-	overflow: hidden;
+  margin-bottom: 1.0em;
+  overflow: hidden;
 }
 
 .translators DIV
 {
-	display: none;
-	margin: 0 5px 0 0;
+  display: none;
+  margin: 0 5px 0 0;
 }
 
 .translators DIV A,
@@ -16,10 +16,10 @@
 .translators DIV A:hover,
 .translators DIV A:active
 {
-	display: block;
-	background-color: transparent;
-	color: #fff;
-	text-decoration: none;
+  display: block;
+  background-color: transparent;
+  color: #fff;
+  text-decoration: none;
 }
 
 .translators #coffee {
@@ -35,8 +35,8 @@
 
 .translators #coffee.enabled
 {
-	background-color: #fff;
-	border: 1px dashed #888;
+  background-color: #fff;
+  border: 1px dashed #888;
 }
 
 .translators #coffee.enabled A,
@@ -45,19 +45,19 @@
 .translators #coffee.enabled A:hover,
 .translators #coffee.enabled A:active
 {
-	color: #0f0f1e;
+  color: #0f0f1e;
 }
 
 .translators #ts {
-	float: left;
-	display: none;
-	padding: 0.2em 0.5em 0.2em 0.5em;
-	border : 1px solid #808080;
-	background-color: #ffffff;
-	font-weight: bold;
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
+  float: left;
+  display: none;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  border : 1px solid #808080;
+  background-color: #ffffff;
+  font-weight: bold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
 }
 
 .translators #ts A,
@@ -66,19 +66,19 @@
 .translators #ts A:hover,
 .translators #ts A:active
 {
-	color: #000;
+  color: #000;
 }
 
 .translators #hogan {
-	float: left;
-	display: none;
-	padding: 0.2em 0.5em 0.2em 0.5em;
-	border : 1px solid #dfd52e;
-	background-color: #dfd52e;
-	font-weight: bold;
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
+  float: left;
+  display: none;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  border : 1px solid #dfd52e;
+  background-color: #dfd52e;
+  font-weight: bold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
 }
 
 .translators #hogan A,
@@ -87,19 +87,19 @@
 .translators #hogan A:hover,
 .translators #hogan A:active
 {
-	color: black;
+  color: black;
 }
 
 .translators #handlebars {
-	float: left;
-	display: none;
-	padding: 0.2em 0.5em 0.2em 0.5em;
-	border : 1px solid #f38709;
-	background-color: #f38709;
-	font-weight: bold;
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
+  float: left;
+  display: none;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  border : 1px solid #f38709;
+  background-color: #f38709;
+  font-weight: bold;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
 }
 
 .translators #handlebars A,
@@ -108,5 +108,5 @@
 .translators #handlebars A:hover,
 .translators #handlebars A:active
 {
-	color: white;
+  color: white;
 }

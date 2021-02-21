@@ -1,64 +1,64 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<Product>Bundle Transformer: Autoprefixer</Product>
-		<VersionPrefix>1.12.30</VersionPrefix>
-		<TargetFramework>net40</TargetFramework>
-		<OutputType>Library</OutputType>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.5 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.2.4.0).
+  <PropertyGroup>
+    <Product>Bundle Transformer: Autoprefixer</Product>
+    <VersionPrefix>1.12.30</VersionPrefix>
+    <TargetFramework>net40</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.5 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.2.4.0).
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
-		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
-		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
-		<PackageReleaseNotes>Added support of the Autoprefixer version 10.2.4.0.</PackageReleaseNotes>
-	</PropertyGroup>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
+    <PackageReleaseNotes>Added support of the Autoprefixer version 10.2.4.0.</PackageReleaseNotes>
+  </PropertyGroup>
 
-	<Import Project="../../build/common.props" />
-	<Import Project="../../build/strong-name-signing.props" />
-	<Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/common.props" />
+  <Import Project="../../build/strong-name-signing.props" />
+  <Import Project="../../build/nuget-metadata.props" />
 
-	<ItemGroup>
-		<Reference Include="System.configuration" Pack="false" />
+  <ItemGroup>
+    <Reference Include="System.configuration" Pack="false" />
 
-		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-		<PackageReference Include="AutoprefixerHost" Version="3.0.5" />
-		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
+    <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
+    <PackageReference Include="AutoprefixerHost" Version="3.0.5" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
 
-		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
-	</ItemGroup>
+    <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Content Include="web.config.transform">
-			<PackagePath>content/web.config.transform</PackagePath>
-			<Pack>true</Pack>
-		</Content>
-		<Content Include="readme.txt">
-			<PackagePath>readme.txt</PackagePath>
-			<Pack>true</Pack>
-		</Content>
-		<Content Include="../../Licenses/autoprefixer-license.txt">
-			<PackagePath>autoprefixer-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-		<Content Include="../../Licenses/autoprefixer-host-license.txt">
-			<PackagePath>autoprefixer-host-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-		<Content Include="../../Licenses/js-engine-switcher-license.txt">
-			<PackagePath>js-engine-switcher-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-		<Content Include="../../Licenses/newtonsoft-json-license.txt">
-			<PackagePath>newtonsoft-json-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-	</ItemGroup>
+  <ItemGroup>
+    <Content Include="web.config.transform">
+      <PackagePath>content/web.config.transform</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="readme.txt">
+      <PackagePath>readme.txt</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="../../Licenses/autoprefixer-license.txt">
+      <PackagePath>autoprefixer-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="../../Licenses/autoprefixer-host-license.txt">
+      <PackagePath>autoprefixer-host-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="../../Licenses/js-engine-switcher-license.txt">
+      <PackagePath>js-engine-switcher-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="../../Licenses/newtonsoft-json-license.txt">
+      <PackagePath>newtonsoft-json-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
 
 </Project>

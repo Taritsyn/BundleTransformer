@@ -1,24 +1,24 @@
 <configuration>
-	<configSections>
-		<sectionGroup name="bundleTransformer">
-			<section name="typeScript" type="BundleTransformer.TypeScript.Configuration.TypeScriptSettings, BundleTransformer.TypeScript" />
-		</sectionGroup>
-	</configSections>
-	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
-		<core>
-			<js>
-				<translators>
-					<add name="TypeScriptTranslator" type="BundleTransformer.TypeScript.Translators.TypeScriptTranslator, BundleTransformer.TypeScript" enabled="true" />
-				</translators>
-				<fileExtensions>
-					<add fileExtension=".ts" assetTypeCode="TypeScript" />
-				</fileExtensions>
-			</js>
-		</core>
-	</bundleTransformer>
-	<system.webServer>
-		<handlers>
-			<add name="TypeScriptAssetHandler" path="*.ts" verb="GET" type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" resourceType="File" preCondition="" />
-		</handlers>
-	</system.webServer>
+  <configSections>
+    <sectionGroup name="bundleTransformer">
+      <section name="typeScript" type="BundleTransformer.TypeScript.Configuration.TypeScriptSettings, BundleTransformer.TypeScript" />
+    </sectionGroup>
+  </configSections>
+  <bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+    <core>
+      <js>
+        <translators>
+          <add name="TypeScriptTranslator" type="BundleTransformer.TypeScript.Translators.TypeScriptTranslator, BundleTransformer.TypeScript" enabled="true" />
+        </translators>
+        <fileExtensions>
+          <add fileExtension=".ts" assetTypeCode="TypeScript" />
+        </fileExtensions>
+      </js>
+    </core>
+  </bundleTransformer>
+  <system.webServer>
+    <handlers>
+      <add name="TypeScriptAssetHandler" path="*.ts" verb="GET" type="BundleTransformer.TypeScript.HttpHandlers.TypeScriptAssetHandler, BundleTransformer.TypeScript" resourceType="File" preCondition="" />
+    </handlers>
+  </system.webServer>
 </configuration>

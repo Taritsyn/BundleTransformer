@@ -2,11 +2,11 @@
 
 .translators #scss
 {
-	background-color: $alt-bg-color;
+  background-color: $alt-bg-color;
 
-	&.right-side:after {
-		content: "‽";
-	}
+  &.right-side:after {
+    content: "‽";
+  }
 }
 
 @import "MacOsIcon.scss";

@@ -1,49 +1,49 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<Product>Bundle Transformer: JSMin</Product>
-		<VersionPrefix>1.12.6</VersionPrefix>
-		<TargetFramework>net40</TargetFramework>
-		<OutputType>Library</OutputType>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Description>BundleTransformer.JsMin contains one minifier-adapter for minification of JS code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port of Douglas Crockford's JSMin (https://github.com/douglascrockford/JSMin) version of October 30, 2019.</Description>
-		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconUrl>
-		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Minification;Minifier;Minify;Douglas;Crockford;JSMin</PackageTags>
-		<PackageReleaseNotes>Added support of the JSMin version of October 30, 2019.</PackageReleaseNotes>
-	</PropertyGroup>
+  <PropertyGroup>
+    <Product>Bundle Transformer: JSMin</Product>
+    <VersionPrefix>1.12.6</VersionPrefix>
+    <TargetFramework>net40</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>BundleTransformer.JsMin contains one minifier-adapter for minification of JS code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port of Douglas Crockford's JSMin (https://github.com/douglascrockford/JSMin) version of October 30, 2019.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Minification;Minifier;Minify;Douglas;Crockford;JSMin</PackageTags>
+    <PackageReleaseNotes>Added support of the JSMin version of October 30, 2019.</PackageReleaseNotes>
+  </PropertyGroup>
 
-	<Import Project="../../build/common.props" />
-	<Import Project="../../build/strong-name-signing.props" />
-	<Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/common.props" />
+  <Import Project="../../build/strong-name-signing.props" />
+  <Import Project="../../build/nuget-metadata.props" />
 
-	<ItemGroup>
-		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-		<PackageReference Include="DouglasCrockford.JsMin" Version="2.1.0" />
+  <ItemGroup>
+    <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
+    <PackageReference Include="DouglasCrockford.JsMin" Version="2.1.0" />
 
-		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
-	</ItemGroup>
+    <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Content Include="web.config.transform">
-			<PackagePath>content/web.config.transform</PackagePath>
-			<Pack>true</Pack>
-		</Content>
-		<Content Include="readme.txt">
-			<PackagePath>readme.txt</PackagePath>
-			<Pack>true</Pack>
-		</Content>
-		<Content Include="../../Licenses/jsmin-license.txt">
-			<PackagePath>jsmin-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-		<Content Include="../../Licenses/jsmin-net-license.txt">
-			<PackagePath>jsmin-net-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-	</ItemGroup>
+  <ItemGroup>
+    <Content Include="web.config.transform">
+      <PackagePath>content/web.config.transform</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="readme.txt">
+      <PackagePath>readme.txt</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="../../Licenses/jsmin-license.txt">
+      <PackagePath>jsmin-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="../../Licenses/jsmin-net-license.txt">
+      <PackagePath>jsmin-net-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
 
 </Project>

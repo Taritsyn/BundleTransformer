@@ -1,36 +1,36 @@
 ﻿<configuration>
-	<configSections>
-		<sectionGroup name="bundleTransformer">
-			<section name="core" type="BundleTransformer.Core.Configuration.CoreSettings, BundleTransformer.Core" />
-		</sectionGroup>
-	</configSections>
-	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
-		<core>
-			<css>
-				<translators>
-					<add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
-				</translators>
-				<postProcessors>
-					<add name="UrlRewritingCssPostProcessor" type="BundleTransformer.Core.PostProcessors.UrlRewritingCssPostProcessor, BundleTransformer.Core" useInDebugMode="false" />
-				</postProcessors>
-				<minifiers>
-					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
-				</minifiers>
-				<fileExtensions>
-					<add fileExtension=".css" assetTypeCode="Css" />
-				</fileExtensions>
-			</css>
-			<js>
-				<translators>
-					<add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
-				</translators>
-				<minifiers>
-					<add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
-				</minifiers>
-				<fileExtensions>
-					<add fileExtension=".js" assetTypeCode="JavaScript" />
-				</fileExtensions>
-			</js>
-		</core>
-	</bundleTransformer>
+  <configSections>
+    <sectionGroup name="bundleTransformer">
+      <section name="core" type="BundleTransformer.Core.Configuration.CoreSettings, BundleTransformer.Core" />
+    </sectionGroup>
+  </configSections>
+  <bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+    <core>
+      <css>
+        <translators>
+          <add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
+        </translators>
+        <postProcessors>
+          <add name="UrlRewritingCssPostProcessor" type="BundleTransformer.Core.PostProcessors.UrlRewritingCssPostProcessor, BundleTransformer.Core" useInDebugMode="false" />
+        </postProcessors>
+        <minifiers>
+          <add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
+        </minifiers>
+        <fileExtensions>
+          <add fileExtension=".css" assetTypeCode="Css" />
+        </fileExtensions>
+      </css>
+      <js>
+        <translators>
+          <add name="NullTranslator" type="BundleTransformer.Core.Translators.NullTranslator, BundleTransformer.Core" enabled="false" />
+        </translators>
+        <minifiers>
+          <add name="NullMinifier" type="BundleTransformer.Core.Minifiers.NullMinifier, BundleTransformer.Core" />
+        </minifiers>
+        <fileExtensions>
+          <add fileExtension=".js" assetTypeCode="JavaScript" />
+        </fileExtensions>
+      </js>
+    </core>
+  </bundleTransformer>
 </configuration>

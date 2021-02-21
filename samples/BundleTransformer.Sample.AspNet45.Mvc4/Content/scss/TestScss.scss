@@ -4,18 +4,18 @@
 
 .translators #scss
 {
-	float: left;
-	@include visible;
-	padding: 0.2em 0.5em 0.2em 0.5em;
-	background-color: $bg-color;
-	color: $caption-color;
-	font-weight: bold;
-	border: 1px solid $bg-color;
-	@include border-radius(5px);
+  float: left;
+  @include visible;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  background-color: $bg-color;
+  color: $caption-color;
+  font-weight: bold;
+  border: 1px solid $bg-color;
+  @include border-radius(5px);
 
-	&.left-side:before {
-		content: "▼";
-	}
+  &.left-side:before {
+    content: "▼";
+  }
 }
 
 @import "folder/TestScssImport.scss";

@@ -1,72 +1,72 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<Product>Bundle Transformer: Clean-css</Product>
-		<VersionPrefix>1.12.0</VersionPrefix>
-		<TargetFramework>net40</TargetFramework>
-		<OutputType>Library</OutputType>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (https://github.com/jakubpawlowicz/clean-css) version 4.1.11.
+  <PropertyGroup>
+    <Product>Bundle Transformer: Clean-css</Product>
+    <VersionPrefix>1.12.0</VersionPrefix>
+    <TargetFramework>net40</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (https://github.com/jakubpawlowicz/clean-css) version 4.1.11.
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
-		<PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconUrl>
-		<PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Minification;Minifier;Minify;Clean-css</PackageTags>
-		<PackageReleaseNotes>1. JavaScript Engine Switcher was updated to version 3.1.0;
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Minification;Minifier;Minify;Clean-css</PackageTags>
+    <PackageReleaseNotes>1. JavaScript Engine Switcher was updated to version 3.1.0;
 2. Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
-	</PropertyGroup>
+  </PropertyGroup>
 
-	<Import Project="../../build/common.props" />
-	<Import Project="../../build/strong-name-signing.props" />
-	<Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/common.props" />
+  <Import Project="../../build/strong-name-signing.props" />
+  <Import Project="../../build/nuget-metadata.props" />
 
-	<ItemGroup>
-		<Reference Include="System.configuration" Pack="false" />
+  <ItemGroup>
+    <Reference Include="System.configuration" Pack="false" />
 
-		<PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-		<PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
 
-		<ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
-	</ItemGroup>
+    <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<EmbeddedResource Include="Resources/clean-css-combined.min.js" />
-		<EmbeddedResource Include="Resources/cleanCssHelper.min.js" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/clean-css-combined.min.js" />
+    <EmbeddedResource Include="Resources/cleanCssHelper.min.js" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<Content Include="web.config.transform">
-			<PackagePath>content/web.config.transform</PackagePath>
-			<Pack>true</Pack>
-		</Content>
-		<Content Include="readme.txt">
-			<PackagePath>readme.txt</PackagePath>
-			<Pack>true</Pack>
-		</Content>
-		<Content Include="../../Licenses/clean-css-license.txt">
-			<PackagePath>clean-css-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-		<Content Include="../../Licenses/js-engine-switcher-license.txt">
-			<PackagePath>js-engine-switcher-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-		<Content Include="../../Licenses/newtonsoft-json-license.txt">
-			<PackagePath>newtonsoft-json-license.txt</PackagePath>
-			<Pack>true</Pack>
-			<Visible>false</Visible>
-		</Content>
-	</ItemGroup>
+  <ItemGroup>
+    <Content Include="web.config.transform">
+      <PackagePath>content/web.config.transform</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="readme.txt">
+      <PackagePath>readme.txt</PackagePath>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="../../Licenses/clean-css-license.txt">
+      <PackagePath>clean-css-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="../../Licenses/js-engine-switcher-license.txt">
+      <PackagePath>js-engine-switcher-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="../../Licenses/newtonsoft-json-license.txt">
+      <PackagePath>newtonsoft-json-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
 
-	<Target Name="JsMinification" AfterTargets="BeforeBuild">
-		<Exec Command='AjaxMinifier.exe "$(ProjectDir)Resources/clean-css-combined.js" –out "$(ProjectDir)Resources/clean-css-combined.min.js"
+  <Target Name="JsMinification" AfterTargets="BeforeBuild">
+    <Exec Command='AjaxMinifier.exe "$(ProjectDir)Resources/clean-css-combined.js" –out "$(ProjectDir)Resources/clean-css-combined.min.js"
 AjaxMinifier.exe "$(ProjectDir)Resources/cleanCssHelper.js" –out "$(ProjectDir)Resources/cleanCssHelper.min.js"'
-			WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
-			ConsoleToMsBuild="true" />
-	</Target>
+      WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
+      ConsoleToMsBuild="true" />
+  </Target>
 
 </Project>

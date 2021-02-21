@@ -1,21 +1,21 @@
 ﻿<configuration>
-	<configSections>
-		<sectionGroup name="bundleTransformer">
-			<section name="microsoftAjax" type="BundleTransformer.MicrosoftAjax.Configuration.MicrosoftAjaxSettings, BundleTransformer.MicrosoftAjax" />
-		</sectionGroup>
-	</configSections>
-	<bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
-		<core>
-			<css>
-				<minifiers>
-					<add name="MicrosoftAjaxCssMinifier" type="BundleTransformer.MicrosoftAjax.Minifiers.MicrosoftAjaxCssMinifier, BundleTransformer.MicrosoftAjax" />
-				</minifiers>
-			</css>
-			<js>
-				<minifiers>
-					<add name="MicrosoftAjaxJsMinifier" type="BundleTransformer.MicrosoftAjax.Minifiers.MicrosoftAjaxJsMinifier, BundleTransformer.MicrosoftAjax" />
-				</minifiers>
-			</js>
-		</core>
-	</bundleTransformer>
+  <configSections>
+    <sectionGroup name="bundleTransformer">
+      <section name="microsoftAjax" type="BundleTransformer.MicrosoftAjax.Configuration.MicrosoftAjaxSettings, BundleTransformer.MicrosoftAjax" />
+    </sectionGroup>
+  </configSections>
+  <bundleTransformer xmlns="http://tempuri.org/BundleTransformer.Configuration.xsd">
+    <core>
+      <css>
+        <minifiers>
+          <add name="MicrosoftAjaxCssMinifier" type="BundleTransformer.MicrosoftAjax.Minifiers.MicrosoftAjaxCssMinifier, BundleTransformer.MicrosoftAjax" />
+        </minifiers>
+      </css>
+      <js>
+        <minifiers>
+          <add name="MicrosoftAjaxJsMinifier" type="BundleTransformer.MicrosoftAjax.Minifiers.MicrosoftAjaxJsMinifier, BundleTransformer.MicrosoftAjax" />
+        </minifiers>
+      </js>
+    </core>
+  </bundleTransformer>
 </configuration>
