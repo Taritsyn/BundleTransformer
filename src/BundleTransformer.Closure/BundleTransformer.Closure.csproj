@@ -8,15 +8,18 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>BundleTransformer.Closure contains two minifier-adapters for minification of JS code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. `ClosureRemoteJsMinifier` is based on the Google Closure Compiler Service API (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet. `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of `compiler.jar` file.</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconUrl>
-    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;JavaScript;JS;Bundling;Minification;Minifier;Minify;Google;Closure;Compiler</PackageTags>
-    <PackageReleaseNotes>Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
   </PropertyGroup>
 
   <Import Project="../../build/common.props" />
   <Import Project="../../build/strong-name-signing.props" />
-  <Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/nuget-for-dotnet-lib.props" />
+
+  <PropertyGroup>
+    <Description>BundleTransformer.Closure contains two minifier-adapters for minification of JS code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. `ClosureRemoteJsMinifier` is based on the Google Closure Compiler Service API (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet. `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of `compiler.jar` file.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Google;Closure;Compiler</PackageTags>
+    <PackageReleaseNotes>Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
@@ -54,21 +57,22 @@
       <PackagePath>readme.txt</PackagePath>
       <Pack>true</Pack>
     </Content>
-    <Content Include="../../Licenses/closure-compiler-license.txt">
+
+    <None Include="../../Licenses/closure-compiler-license.txt">
       <PackagePath>closure-compiler-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/microsoft-net-http-license.txt">
+    </None>
+    <None Include="../../Licenses/microsoft-net-http-license.txt">
       <PackagePath>microsoft-net-http-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/newtonsoft-json-license.txt">
+    </None>
+    <None Include="../../Licenses/newtonsoft-json-license.txt">
       <PackagePath>newtonsoft-json-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
+    </None>
   </ItemGroup>
 
 </Project>

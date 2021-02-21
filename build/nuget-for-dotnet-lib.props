@@ -1,0 +1,11 @@
+<Project>
+  <Import Project="nuget-common.props" />
+
+  <ItemGroup>
+    <None Include="$(PackageLicenseFullPath)">
+      <PackagePath>$(PackageLicenseFile)</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </None>
+  </ItemGroup>
+</Project>

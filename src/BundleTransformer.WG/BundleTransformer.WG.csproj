@@ -8,14 +8,17 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>BundleTransformer.WG contains one minifier-adapter for minification of CSS code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier (http://webgrease.codeplex.com) version 1.6.0.</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconUrl>
-    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Minification;Minifier;Minify;WebGrease</PackageTags>
   </PropertyGroup>
 
   <Import Project="../../build/common.props" />
   <Import Project="../../build/strong-name-signing.props" />
-  <Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/nuget-for-dotnet-lib.props" />
+
+  <PropertyGroup>
+    <Description>BundleTransformer.WG contains one minifier-adapter for minification of CSS code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier (http://webgrease.codeplex.com) version 1.6.0.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;WebGrease</PackageTags>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
@@ -35,11 +38,12 @@
       <PackagePath>readme.txt</PackagePath>
       <Pack>true</Pack>
     </Content>
-    <Content Include="../../Licenses/webgrease-license.txt">
+
+    <None Include="../../Licenses/webgrease-license.txt">
       <PackagePath>webgrease-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
+    </None>
   </ItemGroup>
 
 </Project>

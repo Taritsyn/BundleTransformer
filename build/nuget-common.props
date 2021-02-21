@@ -1,5 +1,15 @@
 <Project>
   <PropertyGroup>
+    <Title>$(Product)</Title>
+    <Authors>Andrey Taritsyn</Authors>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageCommonTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET</PackageCommonTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseFullPath>../../LICENSE.txt</PackageLicenseFullPath>
+    <PackageProjectUrl>https://github.com/Taritsyn/BundleTransformer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Taritsyn/BundleTransformer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
     <PackageOutputPath>../../nuget</PackageOutputPath>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>

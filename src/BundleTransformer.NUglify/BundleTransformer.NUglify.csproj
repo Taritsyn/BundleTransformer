@@ -8,15 +8,18 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>BundleTransformer.NUglify contains two minifier-adapters: `NUglifyCssMinifier` (for minification of CSS code) and `NUglifyJsMinifier` (for minification of JS code). These adapters perform minification by using the NUglify (https://github.com/trullock/NUglify).</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconUrl>
-    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;NUglify</PackageTags>
-    <PackageReleaseNotes>Added support of the NUglify version 1.13.2.</PackageReleaseNotes>
   </PropertyGroup>
 
   <Import Project="../../build/common.props" />
   <Import Project="../../build/strong-name-signing.props" />
-  <Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/nuget-for-dotnet-lib.props" />
+
+  <PropertyGroup>
+    <Description>BundleTransformer.NUglify contains two minifier-adapters: `NUglifyCssMinifier` (for minification of CSS code) and `NUglifyJsMinifier` (for minification of JS code). These adapters perform minification by using the NUglify (https://github.com/trullock/NUglify).</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;NUglify</PackageTags>
+    <PackageReleaseNotes>Added support of the NUglify version 1.13.2.</PackageReleaseNotes>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
@@ -36,11 +39,12 @@
       <PackagePath>readme.txt</PackagePath>
       <Pack>true</Pack>
     </Content>
-    <Content Include="../../Licenses/nuglify-license.txt">
+
+    <None Include="../../Licenses/nuglify-license.txt">
       <PackagePath>nuglify-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
+    </None>
   </ItemGroup>
 
 </Project>

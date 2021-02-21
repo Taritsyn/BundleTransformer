@@ -8,17 +8,20 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.5 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.2.4.0).
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
-    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
-    <PackageReleaseNotes>Added support of the Autoprefixer version 10.2.4.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <Import Project="../../build/common.props" />
   <Import Project="../../build/strong-name-signing.props" />
-  <Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/nuget-for-dotnet-lib.props" />
+
+  <PropertyGroup>
+    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.5 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.2.4.0).
+
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>$(PackageCommonTags);CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
+    <PackageReleaseNotes>Added support of the Autoprefixer version 10.2.4.0.</PackageReleaseNotes>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
@@ -39,26 +42,27 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
       <PackagePath>readme.txt</PackagePath>
       <Pack>true</Pack>
     </Content>
-    <Content Include="../../Licenses/autoprefixer-license.txt">
+
+    <None Include="../../Licenses/autoprefixer-license.txt">
       <PackagePath>autoprefixer-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/autoprefixer-host-license.txt">
+    </None>
+    <None Include="../../Licenses/autoprefixer-host-license.txt">
       <PackagePath>autoprefixer-host-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/js-engine-switcher-license.txt">
+    </None>
+    <None Include="../../Licenses/js-engine-switcher-license.txt">
       <PackagePath>js-engine-switcher-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/newtonsoft-json-license.txt">
+    </None>
+    <None Include="../../Licenses/newtonsoft-json-license.txt">
       <PackagePath>newtonsoft-json-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
+    </None>
   </ItemGroup>
 
 </Project>

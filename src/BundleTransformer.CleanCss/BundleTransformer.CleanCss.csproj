@@ -8,18 +8,21 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (https://github.com/jakubpawlowicz/clean-css) version 4.1.11.
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
-    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconUrl>
-    <PackageTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET;CSS;Bundling;Minification;Minifier;Minify;Clean-css</PackageTags>
-    <PackageReleaseNotes>1. JavaScript Engine Switcher was updated to version 3.1.0;
-2. Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
   </PropertyGroup>
 
   <Import Project="../../build/common.props" />
   <Import Project="../../build/strong-name-signing.props" />
-  <Import Project="../../build/nuget-metadata.props" />
+  <Import Project="../../build/nuget-for-dotnet-lib.props" />
+
+  <PropertyGroup>
+    <Description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (https://github.com/jakubpawlowicz/clean-css) version 4.1.11.
+
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconUrl>
+    <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;Clean-css</PackageTags>
+    <PackageReleaseNotes>1. JavaScript Engine Switcher was updated to version 3.1.0;
+2. Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
@@ -45,21 +48,22 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
       <PackagePath>readme.txt</PackagePath>
       <Pack>true</Pack>
     </Content>
-    <Content Include="../../Licenses/clean-css-license.txt">
+
+    <None Include="../../Licenses/clean-css-license.txt">
       <PackagePath>clean-css-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/js-engine-switcher-license.txt">
+    </None>
+    <None Include="../../Licenses/js-engine-switcher-license.txt">
       <PackagePath>js-engine-switcher-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
-    <Content Include="../../Licenses/newtonsoft-json-license.txt">
+    </None>
+    <None Include="../../Licenses/newtonsoft-json-license.txt">
       <PackagePath>newtonsoft-json-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
-    </Content>
+    </None>
   </ItemGroup>
 
   <Target Name="JsMinification" AfterTargets="BeforeBuild">

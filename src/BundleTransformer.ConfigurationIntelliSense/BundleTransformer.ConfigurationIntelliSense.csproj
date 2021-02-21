@@ -1,11 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Product>Bundle Transformer: IntelliSense</Product>
+    <VersionPrefix>1.12.25</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
   </PropertyGroup>
 
-  <Import Project="../../build/nuget-common.props" />
+  <Import Project="../../build/common.props" />
+  <Import Project="../../build/nuget-for-content.props" />
+  <Import Project="../../build/initialize-standard-nuspec-properties.targets" />
+
+  <PropertyGroup>
+    <Description>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</Description>
+    <PackageTags>$(PackageCommonTags);Web.config;IntelliSense</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconUrl>
+    <PackageReleaseNotes>Updated definitions for configuration settings of TypeScript translator and NUglify minifiers.</PackageReleaseNotes>
+  </PropertyGroup>
 
 </Project>

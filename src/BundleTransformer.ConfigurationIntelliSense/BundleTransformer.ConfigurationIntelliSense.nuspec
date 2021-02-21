@@ -1,25 +1,11 @@
 ﻿<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>BundleTransformer.ConfigurationIntelliSense</id>
-    <version>1.12.25</version>
-    <title>Bundle Transformer: IntelliSense</title>
-    <authors>Andrey Taritsyn</authors>
-    <owners>Andrey Taritsyn</owners>
-    <license type="file">LICENSE.txt</license>
-    <projectUrl>https://github.com/Taritsyn/BundleTransformer</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</iconUrl>
-    <repository type="git" url="https://github.com/Taritsyn/BundleTransformer" />
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</description>
-    <releaseNotes>Updated definitions for configuration settings of TypeScript translator and NUglify minifiers.</releaseNotes>
-    <copyright>Copyright © 2012-2021 Andrey Taritsyn</copyright>
-    <language>en-US</language>
-    <tags>BundleTransformer Web.config IntelliSense</tags>
+    $CommonMetadataElements$
   </metadata>
   <files>
+    $CommonFileElements$
     <file src="../../samples/BundleTransformer.Sample.AspNet45.Mvc4/BundleTransformer.Configuration.xsd" target="content" />
     <file src="readme.txt" />
-    <file src="../../LICENSE.txt" target="LICENSE.txt" />
   </files>
 </package>
