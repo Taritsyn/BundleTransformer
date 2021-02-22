@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.12.31 - February 22, 2021
+ * In BundleTransformer.Handlebars added support of the Handlebars version 4.7.7
+
 ## v1.12.30 - February 2, 2021
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.2.4.0
  * In BundleTransformer.NUglify added support of the NUglify version 1.13.2
