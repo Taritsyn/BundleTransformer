@@ -74,7 +74,8 @@
 	"registerPartial": function(){},
 	"unregisterPartial": function(){},
 	"registerDecorator": function(){},
-	"unregisterDecorator": function(){}
+	"unregisterDecorator": function(){},
+	"resetLoggedPropertyAccesses": function(){}
 };
 
 var container = {
