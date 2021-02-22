@@ -6,6 +6,7 @@
     <PackageCommonTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET</PackageCommonTags>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageLicenseFullPath>../../LICENSE.txt</PackageLicenseFullPath>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/Taritsyn/BundleTransformer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Taritsyn/BundleTransformer</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

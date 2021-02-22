@@ -14,6 +14,7 @@
     <Description>BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.</Description>
     <PackageTags>$(PackageCommonTags);Web.config;IntelliSense</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconUrl>
+    <PackageIconFullPath>../../images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconFullPath>
     <PackageReleaseNotes>Updated definitions for configuration settings of TypeScript translator and NUglify minifiers.</PackageReleaseNotes>
   </PropertyGroup>
 

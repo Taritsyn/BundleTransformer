@@ -6,7 +6,7 @@
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -16,6 +16,7 @@
   <PropertyGroup>
     <Description>BundleTransformer.Yui contains two minifier-adapters: `YuiCssMinifier` (for minification of CSS code) and `YuiJsMinifier` (for minification of JS code). These adapters perform minification by using the YUI Compressor for .NET (https://github.com/YUICompressor-NET/YUICompressor.NET).</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Yui_Logo_128x128.png</PackageIconUrl>
+    <PackageIconFullPath>../../images/icons/128/BundleTransformer_Yui_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;YUICompressor</PackageTags>
   </PropertyGroup>
 

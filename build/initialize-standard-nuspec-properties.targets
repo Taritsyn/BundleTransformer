@@ -52,7 +52,7 @@
       </_TagsElement>
 
       <_IconUrlElement/>
-      <_IconUrlElement Condition="'$(PackageIcon)' == '' and '$(PackageIconUrl)' != ''">
+      <_IconUrlElement Condition="'$(PackageIconUrl)' != ''">
         <iconUrl>$(PackageIconUrl)</iconUrl>
       </_IconUrlElement>
 

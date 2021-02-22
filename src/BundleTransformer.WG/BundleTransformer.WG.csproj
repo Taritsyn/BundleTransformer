@@ -6,7 +6,7 @@
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>$(NoWarn);CS1591;NU5125</NoWarn>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -17,6 +17,7 @@
   <PropertyGroup>
     <Description>BundleTransformer.WG contains one minifier-adapter for minification of CSS code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier (http://webgrease.codeplex.com) version 1.6.0.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconUrl>
+    <PackageIconFullPath>../../images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;WebGrease</PackageTags>
   </PropertyGroup>
 

@@ -7,5 +7,10 @@
       <Pack>true</Pack>
       <Visible>false</Visible>
     </None>
+    <None Include="$(PackageIconFullPath)">
+      <PackagePath>$(PackageIcon)</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </None>
   </ItemGroup>
 </Project>
