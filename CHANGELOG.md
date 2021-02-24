@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.12.32 - February 24, 2021
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support of the TypeScript version 4.2 RTM (please note: The 4.2 RTM release is also called '4.2.2')
+   * In configuration settings of TypeScript translator was added one new property - `NoPropertyAccessFromIndexSignature` (default `false`)
+ * In BundleTransformer.NUglify added support of the NUglify version 1.13.3
+
 ## v1.12.31 - February 22, 2021
  * In BundleTransformer.Handlebars added support of the Handlebars version 4.7.7
 
