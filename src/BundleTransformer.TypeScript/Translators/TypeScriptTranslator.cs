@@ -211,6 +211,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to require undeclared properties from index signatures to use
+		/// element accesses
+		/// </summary>
+		public bool NoPropertyAccessFromIndexSignature
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not resolve a script references
 		/// </summary>
 		public bool NoResolve
@@ -442,6 +452,7 @@ namespace BundleTransformer.TypeScript.Translators
 			NoImplicitReturns = tsConfig.NoImplicitReturns;
 			NoImplicitThis = tsConfig.NoImplicitThis;
 			NoLib = tsConfig.NoLib;
+			NoPropertyAccessFromIndexSignature = tsConfig.NoPropertyAccessFromIndexSignature;
 			NoResolve = tsConfig.NoResolve;
 			NoStrictGenericChecks = tsConfig.NoStrictGenericChecks;
 			NoUncheckedIndexedAccess = tsConfig.NoUncheckedIndexedAccess;
@@ -605,6 +616,7 @@ namespace BundleTransformer.TypeScript.Translators
 				NoImplicitReturns = NoImplicitReturns,
 				NoImplicitThis = NoImplicitThis,
 				NoLib = NoLib,
+				NoPropertyAccessFromIndexSignature = NoPropertyAccessFromIndexSignature,
 				NoResolve = NoResolve,
 				NoStrictGenericChecks = NoStrictGenericChecks,
 				NoUncheckedIndexedAccess = NoUncheckedIndexedAccess,

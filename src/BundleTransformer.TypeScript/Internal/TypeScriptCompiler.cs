@@ -177,6 +177,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("noImplicitReturns", options.NoImplicitReturns),
 				new JProperty("noImplicitThis", options.NoImplicitThis),
 				new JProperty("noLib", options.NoLib),
+				new JProperty("noPropertyAccessFromIndexSignature", options.NoPropertyAccessFromIndexSignature),
 				new JProperty("noResolve", options.NoResolve),
 				new JProperty("noStrictGenericChecks", options.NoStrictGenericChecks),
 				new JProperty("noUncheckedIndexedAccess", options.NoUncheckedIndexedAccess),

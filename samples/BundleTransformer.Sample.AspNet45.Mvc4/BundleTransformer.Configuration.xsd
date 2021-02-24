@@ -668,6 +668,11 @@
         <xs:documentation>Flag for whether to do not include a default library (`lib.d.ts` or `lib.es6.d.ts`)</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="noPropertyAccessFromIndexSignature" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to require undeclared properties from index signatures to use</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="noResolve" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to do not resolve a script references</xs:documentation>

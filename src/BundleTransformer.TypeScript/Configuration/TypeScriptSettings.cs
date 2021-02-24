@@ -186,6 +186,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to require undeclared properties from index signatures to use
+		/// element accesses
+		/// </summary>
+		[ConfigurationProperty("noPropertyAccessFromIndexSignature", DefaultValue = false)]
+		public bool NoPropertyAccessFromIndexSignature
+		{
+			get { return (bool)this["noPropertyAccessFromIndexSignature"]; }
+			set { this["noPropertyAccessFromIndexSignature"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not resolve a script references
 		/// </summary>
 		[ConfigurationProperty("noResolve", DefaultValue = false)]

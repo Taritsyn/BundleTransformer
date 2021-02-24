@@ -169,6 +169,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to require undeclared properties from index signatures to use
+		/// element accesses
+		/// </summary>
+		public bool NoPropertyAccessFromIndexSignature
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to do not resolve a script references
 		/// </summary>
 		public bool NoResolve
@@ -380,6 +390,7 @@ namespace BundleTransformer.TypeScript.Internal
 			NoImplicitReturns = false;
 			NoImplicitThis = false;
 			NoLib = false;
+			NoPropertyAccessFromIndexSignature = false;
 			NoResolve = false;
 			NoStrictGenericChecks = false;
 			NoUncheckedIndexedAccess = false;
