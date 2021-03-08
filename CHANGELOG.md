@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.12.33 - March 8, 2021
+ * In BundleTransformer.TypeScript added support of the TypeScript version 4.2.3
+
 ## v1.12.32 - February 24, 2021
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.TypeScript:
