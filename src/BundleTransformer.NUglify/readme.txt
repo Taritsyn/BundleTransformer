@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the NUglify version 1.13.3.
+   Added support of the NUglify version 1.13.6.
 
    ====================
    POST-INSTALL ACTIONS
