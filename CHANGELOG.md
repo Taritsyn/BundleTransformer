@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.36 - May 23, 2021
+ * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.5
+ * In BundleTransformer.NUglify added support of the NUglify version 1.13.11
+
 ## v1.12.35 - May 13, 2021
  * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.2.5.0
  * In BundleTransformer.NUglify added support of the NUglify version 1.13.10
