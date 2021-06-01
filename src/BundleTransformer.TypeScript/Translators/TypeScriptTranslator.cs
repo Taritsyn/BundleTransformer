@@ -182,6 +182,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to ensure overriding members in derived classes are marked with an
+		/// <code>override</code> modifier
+		/// </summary>
+		public bool NoImplicitOverride
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report error when not all code paths in function return a value
 		/// </summary>
 		public bool NoImplicitReturns
@@ -382,7 +392,7 @@ namespace BundleTransformer.TypeScript.Translators
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`,
-		/// `EcmaScript2020` or `EcmaScriptNext`
+		/// `EcmaScript2020`, `EcmaScript2021` or `EcmaScriptNext`
 		/// </summary>
 		public TargetMode Target
 		{
@@ -449,6 +459,7 @@ namespace BundleTransformer.TypeScript.Translators
 			NoErrorTruncation = tsConfig.NoErrorTruncation;
 			NoFallthroughCasesInSwitch = tsConfig.NoFallthroughCasesInSwitch;
 			NoImplicitAny = tsConfig.NoImplicitAny;
+			NoImplicitOverride = tsConfig.NoImplicitOverride;
 			NoImplicitReturns = tsConfig.NoImplicitReturns;
 			NoImplicitThis = tsConfig.NoImplicitThis;
 			NoLib = tsConfig.NoLib;
@@ -613,6 +624,7 @@ namespace BundleTransformer.TypeScript.Translators
 				NoErrorTruncation = NoErrorTruncation,
 				NoFallthroughCasesInSwitch = NoFallthroughCasesInSwitch,
 				NoImplicitAny = NoImplicitAny,
+				NoImplicitOverride = NoImplicitOverride,
 				NoImplicitReturns = NoImplicitReturns,
 				NoImplicitThis = NoImplicitThis,
 				NoLib = NoLib,

@@ -174,6 +174,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("noErrorTruncation", options.NoErrorTruncation),
 				new JProperty("noFallthroughCasesInSwitch", options.NoFallthroughCasesInSwitch),
 				new JProperty("noImplicitAny", options.NoImplicitAny),
+				new JProperty("noImplicitOverride", options.NoImplicitOverride),
 				new JProperty("noImplicitReturns", options.NoImplicitReturns),
 				new JProperty("noImplicitThis", options.NoImplicitThis),
 				new JProperty("noLib", options.NoLib),

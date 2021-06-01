@@ -653,6 +653,11 @@
         <xs:documentation>Flag for whether to raise error on expressions and declarations with an implied `any` type</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+	<xs:attribute name="noImplicitOverride" type="Boolean_SchemaType" use="optional" default="false">
+	  <xs:annotation>
+		<xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an `override` modifier</xs:documentation>
+	  </xs:annotation>
+	</xs:attribute>
     <xs:attribute name="noImplicitReturns" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to report error when not all code paths in function return a value</xs:documentation>
@@ -760,7 +765,7 @@
     </xs:attribute>
     <xs:attribute name="target" use="optional" default="EcmaScript3">
       <xs:annotation>
-        <xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`, `EcmaScript2020` or `EcmaScriptNext`</xs:documentation>
+        <xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`, `EcmaScript2020`, `EcmaScript2021` or `EcmaScriptNext`</xs:documentation>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:NMTOKEN">
@@ -773,6 +778,7 @@
           <xs:enumeration value="EcmaScript2018" />
           <xs:enumeration value="EcmaScript2019" />
           <xs:enumeration value="EcmaScript2020" />
+          <xs:enumeration value="EcmaScript2021" />
           <xs:enumeration value="EcmaScriptNext" />
         </xs:restriction>
       </xs:simpleType>

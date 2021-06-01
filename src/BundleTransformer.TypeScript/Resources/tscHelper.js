@@ -40,6 +40,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			noErrorTruncation: false,
 			noFallthroughCasesInSwitch: false,
 			noImplicitAny: false,
+			noImplicitOverride: false,
 			noImplicitReturns: false,
 			noImplicitThis: false,
 			noImplicitUseStrict: false,

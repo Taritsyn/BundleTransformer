@@ -154,6 +154,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to ensure overriding members in derived classes are marked with an
+		/// <code>override</code> modifier
+		/// </summary>
+		[ConfigurationProperty("noImplicitOverride", DefaultValue = false)]
+		public bool NoImplicitOverride
+		{
+			get { return (bool)this["noImplicitOverride"]; }
+			set { this["noImplicitOverride"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to report error when not all code paths in function return a value
 		/// </summary>
 		[ConfigurationProperty("noImplicitReturns", DefaultValue = false)]
@@ -375,7 +386,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// <summary>
 		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
 		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`,
-		/// `EcmaScript2020` or `EcmaScriptNext`
+		/// `EcmaScript2020`, `EcmaScript2021` or `EcmaScriptNext`
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
 		public TargetMode Target

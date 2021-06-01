@@ -14,6 +14,7 @@
 		EcmaScript2018 = 5,
 		EcmaScript2019 = 6,
 		EcmaScript2020 = 7,
+		EcmaScript2021 = 8,
 		EcmaScriptNext = 99
 	}
 }
