@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.12.37 - June 1, 2021
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support of the TypeScript version 4.3 RTM (please note: The 4.3 RTM release is also called '4.3.2')
+   * In configuration settings of TypeScript translator was added one new property - `NoImplicitOverride` (default `false`)
+
 ## v1.12.36 - May 23, 2021
  * In BundleTransformer.SassAndScss added support of the LibSass version 3.6.5
  * In BundleTransformer.NUglify added support of the NUglify version 1.13.11
