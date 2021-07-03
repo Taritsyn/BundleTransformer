@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.38 - July 3, 2021
+ * In BundleTransformer.TypeScript added support of the TypeScript version 4.3.5
+ * In BundleTransformer.NUglify added support of the NUglify version 1.13.12
+
 ## v1.12.37 - June 1, 2021
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.TypeScript:
