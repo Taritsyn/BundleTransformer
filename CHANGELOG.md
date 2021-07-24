@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.13.0 Preview 1 - July 24, 2021
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Sass and SCSS translator
+ * In BundleTransformer.SassAndScss:
+   * Now the [Dart Sass Host](https://github.com/Taritsyn/DartSassHost) library (requires installation and registration of the JS engine) is used instead of the [LibSass Host](https://github.com/Taritsyn/LibSassHost)
+   * In configuration settings of Sass and SCSS translator was added one new property - `JsEngine`
+   * From configuration settings of Sass and SCSS translator was removed two properties: `Precision` and `SourceComments`
+
 ## v1.12.38 - July 3, 2021
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.3.5
  * In BundleTransformer.NUglify added support of the NUglify version 1.13.12
