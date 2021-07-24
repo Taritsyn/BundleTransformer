@@ -1,5 +1,7 @@
 ﻿using System.Configuration;
 
+using BundleTransformer.Core.Configuration;
+
 namespace BundleTransformer.SassAndScss.Configuration
 {
 	/// <summary>
@@ -58,25 +60,12 @@ namespace BundleTransformer.SassAndScss.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a precision for fractional numbers
+		/// Gets a configuration settings of JS engine
 		/// </summary>
-		[ConfigurationProperty("precision", DefaultValue = 5)]
-		[IntegerValidator(MinValue = -1, MaxValue = int.MaxValue, ExcludeRange = false)]
-		public int Precision
+		[ConfigurationProperty("jsEngine")]
+		public JsEngineSettings JsEngine
 		{
-			get { return (int)this["precision"]; }
-			set { this["precision"] = value; }
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to emit comments in the generated CSS
-		/// indicating the corresponding source line
-		/// </summary>
-		[ConfigurationProperty("sourceComments", DefaultValue = false)]
-		public bool SourceComments
-		{
-			get { return (bool)this["sourceComments"]; }
-			set { this["sourceComments"] = value; }
+			get { return (JsEngineSettings)this["jsEngine"]; }
 		}
 	}
 }

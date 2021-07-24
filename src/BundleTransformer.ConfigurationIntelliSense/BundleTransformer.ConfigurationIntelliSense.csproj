@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Product>Bundle Transformer: IntelliSense</Product>
     <VersionPrefix>1.12.37</VersionPrefix>
+    <VersionSuffix>preview1</VersionSuffix>
     <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
 
@@ -15,7 +16,7 @@
     <PackageTags>$(PackageCommonTags);Web.config;IntelliSense</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconFullPath>
-    <PackageReleaseNotes>Updated definitions for configuration settings of TypeScript translator.</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated definitions for configuration settings of Sass and SCSS translator.</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <Product>Bundle Transformer: Sass and SCSS</Product>
     <VersionPrefix>1.12.36</VersionPrefix>
+    <VersionSuffix>preview1</VersionSuffix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -15,16 +16,15 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.SassAndScss contains one translator-adapter - `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to CSS code by using the LibSass Host for .NET (https://github.com/Taritsyn/LibSassHost) version 1.3.3 (supports the LibSass (http://sass-lang.com/libsass) version 3.6.5). Also contains the `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text output of translated Sass or SCSS asset.
+    <Description>BundleTransformer.SassAndScss contains one translator-adapter - `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to CSS code by using the Dart Sass Host for .NET (https://github.com/Taritsyn/DartSassHost) version 1.0.0 Preview 2 (supports the Dart Sass (https://github.com/sass/dart-sass) version 1.35.1). Also contains the `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text output of translated Sass or SCSS asset.
 
-This package does not contain the native implementations of LibSass for Windows. Therefore, you need to choose and install the most appropriate package(s) for your platform. The following packages are available:
-
- * LibSassHost.Native.win-x86
- * LibSassHost.Native.win-x64</Description>
+As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes) or JavaScriptEngineSwitcher.ChakraCore.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of the LibSass version 3.6.5.</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Now the Dart Sass Host library (requires installation and registration of the JS engine) is used instead of the LibSass Host;
+2. In configuration settings of Sass and SCSS translator was added one new property - `JsEngine`;
+3. From configuration settings of Sass and SCSS translator was removed two properties: `Precision` and `SourceComments`.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +32,8 @@ This package does not contain the native implementations of LibSass for Windows.
     <Reference Include="System.Web" Pack="false" />
 
     <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-    <PackageReference Include="LibSassHost" Version="1.3.3" />
+    <PackageReference Include="DartSassHost" Version="1.0.0-preview2" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>

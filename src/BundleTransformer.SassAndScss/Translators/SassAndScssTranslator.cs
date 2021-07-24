@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 
 using AdvancedStringBuilder;
-using LibSassHost;
-using LibSassHost.Helpers;
-using LshIndentType = LibSassHost.IndentType;
-using LshLineFeedType = LibSassHost.LineFeedType;
+using DartSassHost;
+using DartSassHost.Helpers;
+using DshIndentType = DartSassHost.IndentType;
+using DshLineFeedType = DartSassHost.LineFeedType;
+using JavaScriptEngineSwitcher.Core;
 
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
@@ -35,14 +37,14 @@ namespace BundleTransformer.SassAndScss.Translators
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Synchronizer of Sass compiler's initialization
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
-		private static readonly object _initializationSynchronizer = new object();
+		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
-		/// Flag that indicates if the Sass compiler is initialized
+		/// Virtual file manager
 		/// </summary>
-		private static bool _initialized;
+		private readonly VirtualFileManager _virtualFileManager;
 
 		/// <summary>
 		/// Gets or sets a list of include paths
@@ -80,39 +82,27 @@ namespace BundleTransformer.SassAndScss.Translators
 			set;
 		}
 
-		/// <summary>
-		/// Gets or sets a precision for fractional numbers
-		/// </summary>
-		public int Precision
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to emit comments in the generated CSS
-		/// indicating the corresponding source line
-		/// </summary>
-		public bool SourceComments
-		{
-			get;
-			set;
-		}
-
 
 		/// <summary>
 		/// Constructs an instance of Sass and SCSS translator
 		/// </summary>
 		public SassAndScssTranslator()
-			: this(BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
+			: this(null,
+				BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>
 		/// Constructs an instance of Sass and SCSS translator
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="sassAndScssConfig">Configuration settings of Sass and SCSS translator</param>
-		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfig)
+		public SassAndScssTranslator(Func<IJsEngine> createJsEngineInstance,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper, SassAndScssSettings sassAndScssConfig)
 		{
+			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
+
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 			IncludePaths = sassAndScssConfig.IncludePaths
 				.Cast<IncludedPathRegistration>()
@@ -122,55 +112,27 @@ namespace BundleTransformer.SassAndScss.Translators
 			IndentType = sassAndScssConfig.IndentType;
 			IndentWidth = sassAndScssConfig.IndentWidth;
 			LineFeedType = sassAndScssConfig.LineFeedType;
-			Precision = sassAndScssConfig.Precision;
-			SourceComments = sassAndScssConfig.SourceComments;
-		}
 
-
-		/// <summary>
-		/// Sets a virtual file system wrapper
-		/// </summary>
-		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		public static void SetVirtualFileSystemWrapper(IVirtualFileSystemWrapper virtualFileSystemWrapper)
-		{
-			if (virtualFileSystemWrapper == null)
+			if (createJsEngineInstance == null)
 			{
-				throw new ArgumentNullException(
-					nameof(virtualFileSystemWrapper),
-					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(virtualFileSystemWrapper))
-				);
-			}
-
-			IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
-
-			lock (_initializationSynchronizer)
-			{
-				SassCompiler.FileManager = virtualFileManager;
-				_initialized = true;
-			}
-		}
-
-		/// <summary>
-		/// Initializes a Sass compiler
-		/// </summary>
-		private static void Initialize()
-		{
-			if (!_initialized)
-			{
-				lock (_initializationSynchronizer)
+				string jsEngineName = sassAndScssConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
 				{
-					if (!_initialized)
-					{
-						IVirtualFileSystemWrapper virtualFileSystemWrapper =
-							BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper();
-						IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
-
-						SassCompiler.FileManager = virtualFileManager;
-						_initialized = true;
-					}
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"sassAndScss",
+							@"
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
+  * JavaScriptEngineSwitcher.ChakraCore",
+							"MsieJsEngine")
+					);
 				}
+
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateEngine(jsEngineName);
 			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
+
 
 		/// <summary>
 		/// Translates a code of asset written on Sass or SCSS to CSS code
@@ -187,12 +149,13 @@ namespace BundleTransformer.SassAndScss.Translators
 				);
 			}
 
-			Initialize();
-
 			bool enableNativeMinification = NativeMinificationEnabled;
 			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
-			InnerTranslate(asset, options, enableNativeMinification);
+			using (var sassCompiler = new SassCompiler(_createJsEngineInstance, _virtualFileManager, options))
+			{
+				InnerTranslate(asset, sassCompiler, enableNativeMinification);
+			}
 
 			return asset;
 		}
@@ -224,20 +187,21 @@ namespace BundleTransformer.SassAndScss.Translators
 				return assets;
 			}
 
-			Initialize();
-
 			bool enableNativeMinification = NativeMinificationEnabled;
 			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
-			foreach (var asset in assetsToProcessing)
+			using (var sassCompiler = new SassCompiler(_createJsEngineInstance, _virtualFileManager, options))
 			{
-				InnerTranslate(asset, options, enableNativeMinification);
+				foreach (var asset in assetsToProcessing)
+				{
+					InnerTranslate(asset, sassCompiler, enableNativeMinification);
+				}
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, CompilationOptions sassOptions, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, SassCompiler sassCompiler, bool enableNativeMinification)
 		{
 			string assetTypeName = asset.AssetTypeCode == Constants.AssetTypeCode.Sass ? "Sass" : "SCSS";
 			string newContent;
@@ -246,9 +210,12 @@ namespace BundleTransformer.SassAndScss.Translators
 
 			try
 			{
-				CompilationResult result = SassCompiler.Compile(asset.Content, assetUrl, options: sassOptions);
+				CompilationResult result = sassCompiler.Compile(asset.Content, assetUrl);
 				newContent = result.CompiledContent;
-				dependencies = result.IncludedFilePaths;
+				dependencies = result.IncludedFilePaths
+					.Where(p => p != assetUrl)
+					.ToList()
+					;
 			}
 			catch (SassCompilationException e)
 			{
@@ -288,19 +255,17 @@ namespace BundleTransformer.SassAndScss.Translators
 		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)
 		{
 			IList<string> processedIncludePaths = IncludePaths
-					.Select(p => SassCompiler.FileManager.ToAbsolutePath(p))
-					.ToList()
-					;
+				.Select(p => _virtualFileManager.ToAbsoluteVirtualPath(p))
+				.ToList()
+				;
 
 			var options = new CompilationOptions
 			{
 				IncludePaths = processedIncludePaths,
-				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, LshIndentType>(IndentType),
+				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, DshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
-				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, LshLineFeedType>(LineFeedType),
-				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded,
-				Precision = Precision,
-				SourceComments = SourceComments
+				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, DshLineFeedType>(LineFeedType),
+				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded
 			};
 
 			return options;
