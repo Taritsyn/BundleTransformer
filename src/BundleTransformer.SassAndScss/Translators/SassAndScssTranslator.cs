@@ -123,6 +123,7 @@ namespace BundleTransformer.SassAndScss.Translators
 							"sassAndScss",
 							@"
   * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
+  * JavaScriptEngineSwitcher.V8
   * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")
 					);

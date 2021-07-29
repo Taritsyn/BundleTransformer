@@ -14,8 +14,8 @@
    BundleTransformer.SassAndScss contains one translator-adapter -
    `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to
    CSS code by using the Dart Sass Host for .NET
-   (https://github.com/Taritsyn/DartSassHost) version 1.0.0 Preview 2 (supports the
-   Dart Sass (https://github.com/sass/dart-sass) version 1.35.1). Also contains the
+   (https://github.com/Taritsyn/DartSassHost) version 1.0.0 Preview 3 (supports the
+   Dart Sass (https://github.com/sass/dart-sass) version 1.36.0). Also contains the
    `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text
    output of translated Sass or SCSS asset.
 
@@ -25,19 +25,15 @@
    =============
    RELEASE NOTES
    =============
-   1. Now the Dart Sass Host library (requires installation and registration of the
-      JS engine) is used instead of the LibSass Host;
-   2. In configuration settings of Sass and SCSS translator was added one new
-      property - `JsEngine`;
-   3. From configuration settings of Sass and SCSS translator was removed two
-      properties: `Precision` and `SourceComments`.
+   1. Added support of the Dart Sass version 1.36.0;
+   2. Now can use the JavaScriptEngineSwitcher.V8 as a JS engine.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module, you need to install one of the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes) or
-   JavaScriptEngineSwitcher.ChakraCore.
+   NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes),
+   JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
    After package is installed and JS engine is registered
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JS engine (for example, `MsieJsEngine`) to the `name`
