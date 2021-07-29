@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-          README file for Bundle Transformer: Sass and SCSS v1.13.0 Preview 1
+          README file for Bundle Transformer: Sass and SCSS v1.13.0 Preview 2
 
    --------------------------------------------------------------------------------
 

@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.13.0 Preview 2 - July 29, 2021
+ * In BundleTransformer.SassAndScss:
+   * Added support of the Dart Sass version 1.36.0
+   * Now can use the JavaScriptEngineSwitcher.V8 as a JS engine
+
 ## v1.13.0 Preview 1 - July 24, 2021
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Sass and SCSS translator
  * In BundleTransformer.SassAndScss:
