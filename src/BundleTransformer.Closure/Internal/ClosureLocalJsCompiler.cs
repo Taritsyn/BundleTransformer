@@ -532,7 +532,7 @@ namespace BundleTransformer.Closure.Internal
 					break;
 				default:
 					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
-						languageSpec.ToString(), typeof(LanguageSpec)));
+						languageSpec.ToString(), typeof(ExperimentalLanguageSpec)));
 			}
 
 			return code;

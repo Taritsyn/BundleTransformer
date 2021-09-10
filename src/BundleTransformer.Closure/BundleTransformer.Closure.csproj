@@ -19,7 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Google;Closure;Compiler</PackageTags>
-    <PackageReleaseNotes>Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed a error #52 “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on remote plugin”.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

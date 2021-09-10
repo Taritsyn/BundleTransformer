@@ -25,7 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   Json.NET was updated to version 12.0.2.
+   Fixed a error #52 “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on
+   remote plugin”.
 
    ====================
    POST-INSTALL ACTIONS
@@ -39,10 +40,10 @@
    work:
 
    1. On your computer must be installed Java 6 or higher. Latest version of Java
-      can be downloaded at the following link - http://www.java.com/download/.
+      can be downloaded at the following link - https://www.java.com/download/.
    2. You need to download the latest version of the Google Closure Compiler
       Application, which is located on the link -
-      http://dl.google.com/closure-compiler/compiler-latest.zip.
+      https://mvnrepository.com/artifact/com.google.javascript/closure-compiler.
    3. Unzip the downloaded archive and copy the compiler.jar file in some directory
       on disk of your computer.
    4. In `Web.config` file find the `/configuration/bundleTransformer/closure/local`

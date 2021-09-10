@@ -269,6 +269,12 @@ namespace BundleTransformer.Closure.Internal
 				case LanguageSpec.EcmaScript5Strict:
 					code = "ECMASCRIPT5_STRICT";
 					break;
+				case LanguageSpec.EcmaScript6:
+					code = "ECMASCRIPT6";
+					break;
+				case LanguageSpec.EcmaScript6Strict:
+					code = "ECMASCRIPT6_STRICT";
+					break;
 				default:
 					throw new InvalidCastException(string.Format(CoreStrings.Common_EnumValueToCodeConversionFailed,
 						languageSpec.ToString(), typeof(LanguageSpec)));

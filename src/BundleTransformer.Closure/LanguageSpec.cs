@@ -8,6 +8,8 @@
 		None = 0,
 		EcmaScript3,
 		EcmaScript5,
-		EcmaScript5Strict
+		EcmaScript5Strict,
+		EcmaScript6,
+		EcmaScript6Strict
 	}
 }

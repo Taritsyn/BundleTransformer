@@ -1995,6 +1995,8 @@ Not easily human-readable.</xs:documentation>
       <xs:enumeration value="EcmaScript3" />
       <xs:enumeration value="EcmaScript5" />
       <xs:enumeration value="EcmaScript5Strict" />
+      <xs:enumeration value="EcmaScript6" />
+      <xs:enumeration value="EcmaScript6Strict" />
     </xs:restriction>
   </xs:simpleType>
 
