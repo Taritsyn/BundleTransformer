@@ -24,6 +24,16 @@
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a language spec the output should conform to.
+		/// If omitted, defaults to the value of <code>Language</code>.
+		/// </summary>
+		public LanguageSpec LanguageOutput
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the remote JS compilation options
@@ -32,6 +42,7 @@
 		{
 			ExcludeDefaultExterns = false;
 			Language = LanguageSpec.EcmaScript3;
+			LanguageOutput = LanguageSpec.None;
 		}
 	}
 }

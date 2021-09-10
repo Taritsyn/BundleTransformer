@@ -25,8 +25,10 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a error #52 “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on
-   remote plugin”.
+   1. Fixed a error #52 “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on
+      remote plugin”;
+   2. In configuration settings of Closure remote JS minifier was added one new
+      property - `LanguageOutput` (default `None`).
 
    ====================
    POST-INSTALL ACTIONS

@@ -19,7 +19,8 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Google;Closure;Compiler</PackageTags>
-    <PackageReleaseNotes>Fixed a error #52 “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on remote plugin”.</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Fixed a error #52 “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on remote plugin”;
+2. In configuration settings of Closure remote JS minifier was added one new property - `LanguageOutput` (default `None`).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

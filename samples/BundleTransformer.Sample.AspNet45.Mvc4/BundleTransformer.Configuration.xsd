@@ -2033,6 +2033,11 @@ Not easily human-readable.</xs:documentation>
             <xs:documentation>Language spec that input sources conform</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="languageOutput" type="ClosureLanguageSpec_SchemaType" use="optional" default="None">
+          <xs:annotation>
+            <xs:documentation>Language spec the output should conform to. If omitted, defaults to the value of `language`.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

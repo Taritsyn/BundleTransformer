@@ -58,6 +58,16 @@ namespace BundleTransformer.Closure.Minifiers
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a language spec the output should conform to.
+		/// If omitted, defaults to the value of <code>Language</code>.
+		/// </summary>
+		public LanguageSpec LanguageOutput
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of Closure Remote JS minifier
@@ -81,6 +91,7 @@ namespace BundleTransformer.Closure.Minifiers
 			ClosureCompilerServiceApiUrl = remoteJsMinifierConfig.ClosureCompilerServiceApiUrl;
 			ExcludeDefaultExterns = remoteJsMinifierConfig.ExcludeDefaultExterns;
 			Language = remoteJsMinifierConfig.Language;
+			LanguageOutput = remoteJsMinifierConfig.LanguageOutput;
 		}
 
 
@@ -194,7 +205,8 @@ namespace BundleTransformer.Closure.Minifiers
 			var options = new RemoteJsCompilationOptions
 			{
 				ExcludeDefaultExterns = ExcludeDefaultExterns,
-				Language = Language
+				Language = Language,
+				LanguageOutput = LanguageOutput
 			};
 			FillJsCompilationOptions(options);
 

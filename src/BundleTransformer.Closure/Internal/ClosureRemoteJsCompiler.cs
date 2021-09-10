@@ -180,6 +180,9 @@ namespace BundleTransformer.Closure.Internal
 		private static IList<FormItem> ConvertCompilationOptionsToFormItems(RemoteJsCompilationOptions options)
 		{
 			int severity = options.Severity;
+			LanguageSpec languageInput = options.Language;
+			LanguageSpec languageOutput = (options.LanguageOutput != LanguageSpec.None) ?
+				options.LanguageOutput : languageInput;
 
 			var formItems = new List<FormItem>();
 			formItems.Add(new FormItem("output_format", "json"));
@@ -191,9 +194,13 @@ namespace BundleTransformer.Closure.Internal
 			}
 			formItems.Add(new FormItem("compilation_level", ConvertCompilationLevelEnumValueToCode(options.CompilationLevel)));
 			formItems.Add(new FormItem("exclude_default_externs", options.ExcludeDefaultExterns.ToString().ToLowerInvariant()));
-			if (options.Language != LanguageSpec.None)
+			if (languageInput != LanguageSpec.None)
 			{
-				formItems.Add(new FormItem("language", ConvertLanguageSpecEnumValueToCode(options.Language)));
+				formItems.Add(new FormItem("language", ConvertLanguageSpecEnumValueToCode(languageInput)));
+			}
+			if (languageOutput != LanguageSpec.None)
+			{
+				formItems.Add(new FormItem("language_out", ConvertLanguageSpecEnumValueToCode(languageOutput)));
 			}
 			if (options.PrettyPrint)
 			{

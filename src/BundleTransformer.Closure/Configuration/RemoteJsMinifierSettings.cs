@@ -37,5 +37,16 @@ namespace BundleTransformer.Closure.Configuration
 			get { return (LanguageSpec)this["language"]; }
 			set { this["language"] = value; }
 		}
+
+		/// <summary>
+		/// Gets or sets a language spec the output should conform to.
+		/// If omitted, defaults to the value of <code>Language</code>.
+		/// </summary>
+		[ConfigurationProperty("languageOutput", DefaultValue = LanguageSpec.None)]
+		public LanguageSpec LanguageOutput
+		{
+			get { return (LanguageSpec)this["languageOutput"]; }
+			set { this["languageOutput"] = value; }
+		}
 	}
 }
