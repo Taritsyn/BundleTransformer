@@ -89,6 +89,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to interpret optional property types as written, rather than adding
+		/// <c>undefined</c>
+		/// </summary>
+		public bool ExactOptionalPropertyTypes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		public bool ForceConsistentCasingInFileNames
@@ -419,6 +429,16 @@ namespace BundleTransformer.TypeScript.Translators
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to use a type catch clause variables as <c>unknown</c> instead of
+		/// <c>any</c>
+		/// </summary>
+		public bool UseUnknownInCatchVariables
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of TypeScript translator
@@ -445,6 +465,7 @@ namespace BundleTransformer.TypeScript.Translators
 			AllowUnusedLabels = tsConfig.AllowUnusedLabels;
 			AlwaysStrict = tsConfig.AlwaysStrict;
 			DownlevelIteration = tsConfig.DownlevelIteration;
+			ExactOptionalPropertyTypes = tsConfig.ExactOptionalPropertyTypes;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
 			KeyofStringsOnly = tsConfig.KeyofStringsOnly;
 			Libs = tsConfig.Libs
@@ -484,6 +505,7 @@ namespace BundleTransformer.TypeScript.Translators
 			Target = tsConfig.Target;
 			TranspileOnly = tsConfig.TranspileOnly;
 			UseDefineForClassFields = tsConfig.UseDefineForClassFields;
+			UseUnknownInCatchVariables = tsConfig.UseUnknownInCatchVariables;
 
 			if (createJsEngineInstance == null)
 			{
@@ -614,6 +636,7 @@ namespace BundleTransformer.TypeScript.Translators
 				AllowUnusedLabels = AllowUnusedLabels,
 				AlwaysStrict = AlwaysStrict,
 				DownlevelIteration = DownlevelIteration,
+				ExactOptionalPropertyTypes = ExactOptionalPropertyTypes,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
 				KeyofStringsOnly = KeyofStringsOnly,
 				Libs = Libs,
@@ -648,7 +671,8 @@ namespace BundleTransformer.TypeScript.Translators
 				SuppressTypeCheckingErrors = SuppressTypeCheckingErrors,
 				Target = Target,
 				TranspileOnly = TranspileOnly,
-				UseDefineForClassFields = UseDefineForClassFields
+				UseDefineForClassFields = UseDefineForClassFields,
+				UseUnknownInCatchVariables = UseUnknownInCatchVariables
 			};
 
 			return options;

@@ -46,6 +46,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to interpret optional property types as written, rather than adding
+		/// <c>undefined</c>
+		/// </summary>
+		public bool ExactOptionalPropertyTypes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		public bool ForceConsistentCasingInFileNames
@@ -377,6 +387,16 @@ namespace BundleTransformer.TypeScript.Internal
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a flag for whether to use a type catch clause variables as <c>unknown</c> instead of
+		/// <c>any</c>
+		/// </summary>
+		public bool UseUnknownInCatchVariables
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs a instance of the TypeScript compilation options
@@ -387,6 +407,7 @@ namespace BundleTransformer.TypeScript.Internal
 			AllowUnusedLabels = false;
 			AlwaysStrict = false;
 			DownlevelIteration = false;
+			ExactOptionalPropertyTypes = false;
 			ForceConsistentCasingInFileNames = false;
 			KeyofStringsOnly = false;
 			Libs = new List<string>();
@@ -422,6 +443,7 @@ namespace BundleTransformer.TypeScript.Internal
 			Target = TargetMode.EcmaScript3;
 			TranspileOnly = false;
 			UseDefineForClassFields = false;
+			UseUnknownInCatchVariables = false;
 		}
 	}
 }

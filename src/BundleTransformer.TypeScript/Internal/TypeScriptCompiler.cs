@@ -164,6 +164,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("allowUnusedLabels", options.AllowUnusedLabels),
 				new JProperty("alwaysStrict", options.AlwaysStrict),
 				new JProperty("downlevelIteration", options.DownlevelIteration),
+				new JProperty("exactOptionalPropertyTypes", options.ExactOptionalPropertyTypes),
 				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
 				new JProperty("keyofStringsOnly", options.KeyofStringsOnly),
 				new JProperty("lib", options.Libs.Count > 0 ? new JArray(options.Libs) : null),
@@ -198,7 +199,8 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("suppressTypeCheckingErrors", options.SuppressTypeCheckingErrors),
 				new JProperty("target", options.Target),
 				new JProperty("transpileOnly", options.TranspileOnly),
-				new JProperty("useDefineForClassFields", options.UseDefineForClassFields)
+				new JProperty("useDefineForClassFields", options.UseDefineForClassFields),
+				new JProperty("useUnknownInCatchVariables", options.UseUnknownInCatchVariables)
 			);
 
 			return optionsJson;

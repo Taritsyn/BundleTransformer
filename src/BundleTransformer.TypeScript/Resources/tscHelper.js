@@ -17,6 +17,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			declarationMap: false,
 			disableSizeLimit: false,
 			downlevelIteration: false,
+			exactOptionalPropertyTypes: false,
 			emitBOM: false,
 			emitDecoratorMetadata: false,
 			esModuleInterop: false,
@@ -74,7 +75,8 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			suppressTypeCheckingErrors: false,
 			target: 0 /* ES3 */,
 			transpileOnly: false,
-			useDefineForClassFields: false
+			useDefineForClassFields: false,
+			useUnknownInCatchVariables: false
 		},
 		BtSystem
 		;

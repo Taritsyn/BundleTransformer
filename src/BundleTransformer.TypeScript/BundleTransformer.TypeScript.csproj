@@ -23,7 +23,8 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;TypeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of the TypeScript version 4.4 RTM (please note: The 4.4 RTM release is also called '4.4.2').</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Added support of the TypeScript version 4.4 RTM (please note: The 4.4 RTM release is also called '4.4.2');
+2. In configuration settings of TypeScript translator was added two new properties: `ExactOptionalPropertyTypes` (default `false`) or `UseUnknownInCatchVariables` (default `false`).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

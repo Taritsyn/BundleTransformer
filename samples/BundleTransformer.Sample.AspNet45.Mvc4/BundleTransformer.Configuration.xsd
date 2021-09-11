@@ -602,6 +602,11 @@
         <xs:documentation>Flag for whether to provide full support for iterables in `for-of`, spread, and destructuring when targeting 'ES5' or 'ES3'</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="exactOptionalPropertyTypes" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to interpret optional property types as written, rather than adding `undefined`</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to disallow inconsistently-cased references to the same file</xs:documentation>
@@ -653,11 +658,11 @@
         <xs:documentation>Flag for whether to raise error on expressions and declarations with an implied `any` type</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-	<xs:attribute name="noImplicitOverride" type="Boolean_SchemaType" use="optional" default="false">
-	  <xs:annotation>
-		<xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an `override` modifier</xs:documentation>
-	  </xs:annotation>
-	</xs:attribute>
+    <xs:attribute name="noImplicitOverride" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an `override` modifier</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="noImplicitReturns" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to report error when not all code paths in function return a value</xs:documentation>
@@ -791,6 +796,11 @@
     <xs:attribute name="useDefineForClassFields" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to emit class fields with `Define` instead of `Set`.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="useUnknownInCatchVariables" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to use a type catch clause variables as `unknown` instead of `any`.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

@@ -52,6 +52,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to interpret optional property types as written, rather than adding
+		/// <c>undefined</c>
+		/// </summary>
+		[ConfigurationProperty("exactOptionalPropertyTypes", DefaultValue = false)]
+		public bool ExactOptionalPropertyTypes
+		{
+			get { return (bool)this["exactOptionalPropertyTypes"]; }
+			set { this["exactOptionalPropertyTypes"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
 		/// </summary>
 		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = false)]
@@ -414,6 +425,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		{
 			get { return (bool)this["useDefineForClassFields"]; }
 			set { this["useDefineForClassFields"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to use a type catch clause variables as <c>unknown</c> instead of
+		/// <c>any</c>
+		/// </summary>
+		[ConfigurationProperty("useUnknownInCatchVariables", DefaultValue = false)]
+		public bool UseUnknownInCatchVariables
+		{
+			get { return (bool)this["useUnknownInCatchVariables"]; }
+			set { this["useUnknownInCatchVariables"] = value; }
 		}
 
 		/// <summary>

@@ -26,8 +26,11 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the TypeScript version 4.4 RTM (please note: The 4.4 RTM
-   release is also called '4.4.2').
+   1. Added support of the TypeScript version 4.4 RTM (please note: The 4.4 RTM
+      release is also called '4.4.2');
+   2. In configuration settings of TypeScript translator was added two new
+      properties: `ExactOptionalPropertyTypes` (default `false`) or
+      `UseUnknownInCatchVariables` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS
