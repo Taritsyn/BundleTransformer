@@ -584,22 +584,22 @@
     </xs:all>
     <xs:attribute name="allowUnreachableCode" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not report errors on unreachable code</xs:documentation>
+        <xs:documentation>Flag for whether to disable error reporting for unreachable code</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="allowUnusedLabels" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not report errors on unused labels</xs:documentation>
+        <xs:documentation>Flag for whether to disable error reporting for unused labels</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="alwaysStrict" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to parse in strict mode and emit `use strict` for each source file</xs:documentation>
+        <xs:documentation>Flag for whether to ensure `use strict` is always emitted</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="downlevelIteration" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to provide full support for iterables in `for-of`, spread, and destructuring when targeting 'ES5' or 'ES3'</xs:documentation>
+        <xs:documentation>Flag for whether to emit more compliant, but verbose and less performant JavaScript for iteration</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="exactOptionalPropertyTypes" type="Boolean_SchemaType" use="optional" default="false">
@@ -609,17 +609,17 @@
     </xs:attribute>
     <xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to disallow inconsistently-cased references to the same file</xs:documentation>
+        <xs:documentation>Flag for whether to ensure that casing is correct in imports</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="keyofStringsOnly" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to resolve `keyof` to string valued property names only (no numbers or symbols)</xs:documentation>
+        <xs:documentation>Flag for whether to make keyof only return strings instead of string, numbers or symbols. Legacy option.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="newLine" use="optional" default="CrLf">
       <xs:annotation>
-        <xs:documentation>End of line sequence, that used when emitting files: 'CRLF' (dos) or 'LF' (unix)</xs:documentation>
+        <xs:documentation>Newline character for emitting files</xs:documentation>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:NMTOKEN">
@@ -630,67 +630,67 @@
     </xs:attribute>
     <xs:attribute name="noEmit" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not emit outputs</xs:documentation>
+        <xs:documentation>Flag for whether to disable emitting files from a compilation</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noEmitHelpers" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not emit helpers (e.g. `__extends` function)</xs:documentation>
+        <xs:documentation>Flag for whether to disable generating custom helper functions like `__extends` in compiled output</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noEmitOnError" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not emit outputs if any errors were reported</xs:documentation>
+        <xs:documentation>Flag for whether to disable emitting files if any type checking errors are reported</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noErrorTruncation" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not truncate type name in error messages</xs:documentation>
+        <xs:documentation>Flag for whether to disable truncating types in error messages</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noFallthroughCasesInSwitch" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to report errors for fallthrough cases in switch statement</xs:documentation>
+        <xs:documentation>Flag for whether to enable error reporting for fallthrough cases in switch statements</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noImplicitAny" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to raise error on expressions and declarations with an implied `any` type</xs:documentation>
+        <xs:documentation>Flag for whether to enable error reporting for expressions and declarations with an implied `any` type</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noImplicitOverride" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an `override` modifier</xs:documentation>
+        <xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an override modifier</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noImplicitReturns" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to report error when not all code paths in function return a value</xs:documentation>
+        <xs:documentation>Flag for whether to enable error reporting for codepaths that do not explicitly return in a function</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noImplicitThis" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to raise error on `this` expressions with an implied `any` type</xs:documentation>
+        <xs:documentation>Flag for whether to enable error reporting when `this` is given the type `any`</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noLib" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not include a default library (`lib.d.ts` or `lib.es6.d.ts`)</xs:documentation>
+        <xs:documentation>Flag for whether to disable including any library files, including the default `lib.d.ts`</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noPropertyAccessFromIndexSignature" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to require undeclared properties from index signatures to use</xs:documentation>
+        <xs:documentation>Flag for whether to enforce using indexed accessors for keys declared using an indexed type</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noResolve" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not resolve a script references</xs:documentation>
+        <xs:documentation>Flag for whether to disallow `import`s, `require`s or `&lt;reference&gt;`s from expanding the number of files TypeScript should add to a project</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noStrictGenericChecks" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to disable strict checking of generic signatures</xs:documentation>
+        <xs:documentation>Flag for whether to disable strict checking of generic signatures in function types</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noUncheckedIndexedAccess" type="Boolean_SchemaType" use="optional" default="false">
@@ -700,77 +700,77 @@
     </xs:attribute>
     <xs:attribute name="noUnusedLocals" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to report errors on unused locals</xs:documentation>
+        <xs:documentation>Flag for whether to enable error reporting when a local variables aren't read</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="noUnusedParameters" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to report errors on unused parameters</xs:documentation>
+        <xs:documentation>Flag for whether to raise an error when a function parameter isn't read</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="preserveConstEnums" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not erase const enum declarations in generated code</xs:documentation>
+        <xs:documentation>Flag for whether to disable erasing `const enum` declarations in generated code</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="removeComments" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not emit comments to output</xs:documentation>
+        <xs:documentation>Flag for whether to disable emitting comments</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="skipDefaultLibCheck" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to skip a default library checking</xs:documentation>
+        <xs:documentation>Flag for whether to skip type checking `.d.ts` files that are included with TypeScript</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="skipLibCheck" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to skip type checking of declaration files</xs:documentation>
+        <xs:documentation>Flag for whether to skip type checking all `.d.ts` files</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="strictBindCallApply" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to enable strict `bind`, `call` and `apply` methods on functions</xs:documentation>
+        <xs:documentation>Flag for whether to check that the arguments for `bind`, `call`, and `apply` methods match the original function</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="strictNullChecks" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to enable strict null checks</xs:documentation>
+        <xs:documentation>Flag for whether to take into account `null` and `undefined` when type checking</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="strictFunctionTypes" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to enable strict checking of function types</xs:documentation>
+        <xs:documentation>Flag for whether to check to ensure parameters and the return values are subtype-compatible when assigning functions</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="strictPropertyInitialization" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to enable strict checking of property initialization in classes</xs:documentation>
+        <xs:documentation>Flag for whether to check for class properties that are declared but not set in the constructor</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="stripInternal" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to do not emit declarations for code that has an `@internal` annotation</xs:documentation>
+        <xs:documentation>Flag for whether to disable emitting declarations that have `@internal` in their JSDoc comments</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="suppressExcessPropertyErrors" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to suppress excess property checks for object literals</xs:documentation>
+        <xs:documentation>Flag for whether to disable reporting of excess property errors during the creation of object literals</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="suppressImplicitAnyIndexErrors" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to suppress noImplicitAny errors for indexing objects lacking index signatures</xs:documentation>
+        <xs:documentation>Flag for whether to suppress `noImplicitAny` errors when indexing objects that lack index signatures</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="suppressTypeCheckingErrors" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to suppress type checking errors</xs:documentation>
+        <xs:documentation>Flag for whether to suppress type checking errors. Non-standard option.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="target" use="optional" default="EcmaScript3">
       <xs:annotation>
-        <xs:documentation>ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`, `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`, `EcmaScript2020`, `EcmaScript2021` or `EcmaScriptNext`</xs:documentation>
+        <xs:documentation>JavaScript language version for emitted JavaScript and include compatible library declarations</xs:documentation>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:NMTOKEN">
@@ -790,12 +790,12 @@
     </xs:attribute>
     <xs:attribute name="transpileOnly" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to run TypeScript to JS transpilation only (skip other passes)</xs:documentation>
+        <xs:documentation>Flag for whether to run TypeScript to JS transpilation only (skip other passes). Non-standard option.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="useDefineForClassFields" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to emit class fields with `Define` instead of `Set`.</xs:documentation>
+        <xs:documentation>Flag for whether to emit ECMAScript-standard-compliant class fields</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="useUnknownInCatchVariables" type="Boolean_SchemaType" use="optional" default="false">
@@ -807,7 +807,7 @@
 
   <xs:complexType name="LibraryFileRegistrationCollection_SchemaType">
     <xs:annotation>
-      <xs:documentation>Collection of registered library files</xs:documentation>
+      <xs:documentation>Collection of bundled library declaration files that describe the target runtime environment</xs:documentation>
     </xs:annotation>
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="add" type="AddLibraryFileRegistration_SchemaType" />

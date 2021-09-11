@@ -10,7 +10,7 @@ namespace BundleTransformer.TypeScript.Configuration
 	public sealed class TypeScriptSettings : ConfigurationSection
 	{
 		/// <summary>
-		/// Gets or sets a flag for whether to do not report errors on unreachable code
+		/// Gets or sets a flag for whether to disable error reporting for unreachable code
 		/// </summary>
 		[ConfigurationProperty("allowUnreachableCode", DefaultValue = false)]
 		public bool AllowUnreachableCode
@@ -20,7 +20,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not report errors on unused labels
+		/// Gets or sets a flag for whether to disable error reporting for unused labels
 		/// </summary>
 		[ConfigurationProperty("allowUnusedLabels", DefaultValue = false)]
 		public bool AllowUnusedLabels
@@ -30,8 +30,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to parse in strict mode and emit
-		/// <code>use strict</code> for each source file
+		/// Gets or sets a flag for whether to ensure <c>use strict</c> is always emitted
 		/// </summary>
 		[ConfigurationProperty("alwaysStrict", DefaultValue = false)]
 		public bool AlwaysStrict
@@ -41,8 +40,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to provide full support for iterables in <code>for-of</code>,
-		/// spread, and destructuring when targeting 'ES5' or 'ES3'
+		/// Gets or sets a flag for whether to emit more compliant, but verbose and less performant JavaScript for
+		/// iteration
 		/// </summary>
 		[ConfigurationProperty("downlevelIteration", DefaultValue = false)]
 		public bool DownlevelIteration
@@ -63,7 +62,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disallow inconsistently-cased references to the same file
+		/// Gets or sets a flag for whether to ensure that casing is correct in imports
 		/// </summary>
 		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = false)]
 		public bool ForceConsistentCasingInFileNames
@@ -73,8 +72,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to resolve <code>keyof</code> to string valued property names
-		/// only (no numbers or symbols)
+		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
+		/// Legacy option.
 		/// </summary>
 		[ConfigurationProperty("keyofStringsOnly", DefaultValue = false)]
 		public bool KeyofStringsOnly
@@ -84,7 +83,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets a list of library files to be included in the compilation
+		/// Gets a set of bundled library declaration files that describe the target runtime environment
 		/// </summary>
 		[ConfigurationProperty("libs", IsRequired = false)]
 		public LibraryFileRegistrationCollection Libs
@@ -93,8 +92,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a end of line sequence, that used when emitting files:
-		/// 'CRLF' (dos) or 'LF' (unix)
+		/// Gets or sets a newline character for emitting files
 		/// </summary>
 		[ConfigurationProperty("newLine", DefaultValue = NewLineMode.CrLf)]
 		public NewLineMode NewLine
@@ -104,7 +102,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit outputs
+		/// Gets or sets a flag for whether to disable emitting files from a compilation
 		/// </summary>
 		[ConfigurationProperty("noEmit", DefaultValue = false)]
 		public bool NoEmit
@@ -114,7 +112,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit helpers (e.g. <code>__extends</code> function)
+		/// Gets or sets a flag for whether to disable generating custom helper functions like <c>__extends</c> in
+		/// compiled output
 		/// </summary>
 		[ConfigurationProperty("noEmitHelpers", DefaultValue = false)]
 		public bool NoEmitHelpers
@@ -124,7 +123,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit outputs if any errors were reported
+		/// Gets or sets a flag for whether to disable emitting files if any type checking errors are reported
 		/// </summary>
 		[ConfigurationProperty("noEmitOnError", DefaultValue = false)]
 		public bool NoEmitOnError
@@ -134,7 +133,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not truncate type name in error messages
+		/// Gets or sets a flag for whether to disable truncating types in error messages
 		/// </summary>
 		[ConfigurationProperty("noErrorTruncation", DefaultValue = false)]
 		public bool NoErrorTruncation
@@ -144,7 +143,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to report errors for fallthrough cases in switch statement
+		/// Gets or sets a flag for whether to enable error reporting for fallthrough cases in switch statements
 		/// </summary>
 		[ConfigurationProperty("noFallthroughCasesInSwitch", DefaultValue = false)]
 		public bool NoFallthroughCasesInSwitch
@@ -154,8 +153,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to raise error on expressions and declarations
-		/// with an implied <code>any</code> type
+		/// Gets or sets a flag for whether to enable error reporting for expressions and declarations with an implied
+		/// <c>any</c> type
 		/// </summary>
 		[ConfigurationProperty("noImplicitAny", DefaultValue = false)]
 		public bool NoImplicitAny
@@ -165,8 +164,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to ensure overriding members in derived classes are marked with an
-		/// <code>override</code> modifier
+		/// Gets or sets a flag for whether to ensure overriding members in derived classes are marked with an override
+		/// modifier
 		/// </summary>
 		[ConfigurationProperty("noImplicitOverride", DefaultValue = false)]
 		public bool NoImplicitOverride
@@ -176,7 +175,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to report error when not all code paths in function return a value
+		/// Gets or sets a flag for whether to enable error reporting for codepaths that do not explicitly return in a
+		/// function
 		/// </summary>
 		[ConfigurationProperty("noImplicitReturns", DefaultValue = false)]
 		public bool NoImplicitReturns
@@ -186,8 +186,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to raise error on <code>this</code> expressions with
-		/// an implied <code>any</code> type
+		/// Gets or sets a flag for whether to enable error reporting when <c>this</c> is given the type <c>any</c>
 		/// </summary>
 		[ConfigurationProperty("noImplicitThis", DefaultValue = false)]
 		public bool NoImplicitThis
@@ -197,8 +196,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not include a default library (<code>lib.d.ts</code>
-		/// or <code>lib.es6.d.ts</code>)
+		/// Gets or sets a flag for whether to disable including any library files, including the default <c>lib.d.ts</c>
 		/// </summary>
 		[ConfigurationProperty("noLib", DefaultValue = false)]
 		public bool NoLib
@@ -208,8 +206,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to require undeclared properties from index signatures to use
-		/// element accesses
+		/// Gets or sets a flag for whether to enforce using indexed accessors for keys declared using an indexed type
 		/// </summary>
 		[ConfigurationProperty("noPropertyAccessFromIndexSignature", DefaultValue = false)]
 		public bool NoPropertyAccessFromIndexSignature
@@ -219,7 +216,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not resolve a script references
+		/// Gets or sets a flag for whether to disallow <c>import</c>s, <c>require</c>s or <c>&lt;reference&gt;</c>s
+		/// from expanding the number of files TypeScript should add to a project
 		/// </summary>
 		[ConfigurationProperty("noResolve", DefaultValue = false)]
 		public bool NoResolve
@@ -229,8 +227,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable strict checking of generic signatures
-		/// in function types
+		/// Gets or sets a flag for whether to disable strict checking of generic signatures in function types
 		/// </summary>
 		[ConfigurationProperty("noStrictGenericChecks", DefaultValue = false)]
 		public bool NoStrictGenericChecks
@@ -240,8 +237,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to include <code>undefined</code> in index signature
-		/// results
+		/// Gets or sets a flag for whether to include <c>undefined</c> in index signature results
 		/// </summary>
 		[ConfigurationProperty("noUncheckedIndexedAccess", DefaultValue = false)]
 		public bool NoUncheckedIndexedAccess
@@ -251,7 +247,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to report errors on unused locals
+		/// Gets or sets a flag for whether to enable error reporting when a local variables aren't read
 		/// </summary>
 		[ConfigurationProperty("noUnusedLocals", DefaultValue = false)]
 		public bool NoUnusedLocals
@@ -261,7 +257,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to report errors on unused parameters
+		/// Gets or sets a flag for whether to raise an error when a function parameter isn't read
 		/// </summary>
 		[ConfigurationProperty("noUnusedParameters", DefaultValue = false)]
 		public bool NoUnusedParameters
@@ -271,7 +267,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not erase const enum declarations in generated code
+		/// Gets or sets a flag for whether to disable erasing <c>const enum</c> declarations in generated code
 		/// </summary>
 		[ConfigurationProperty("preserveConstEnums", DefaultValue = false)]
 		public bool PreserveConstEnums
@@ -281,7 +277,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit comments to output
+		/// Gets or sets a flag for whether to disable emitting comments
 		/// </summary>
 		[ConfigurationProperty("removeComments", DefaultValue = false)]
 		public bool RemoveComments
@@ -291,7 +287,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to skip a default library checking
+		/// Gets or sets a flag for whether to skip type checking <c>.d.ts</c> files that are included with TypeScript
 		/// </summary>
 		[ConfigurationProperty("skipDefaultLibCheck", DefaultValue = false)]
 		public bool SkipDefaultLibCheck
@@ -301,7 +297,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to skip type checking of declaration files
+		/// Gets or sets a flag for whether to skip type checking all <c>.d.ts</c> files
 		/// </summary>
 		[ConfigurationProperty("skipLibCheck", DefaultValue = false)]
 		public bool SkipLibCheck
@@ -311,8 +307,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable strict <code>bind</code>, <code>call</code>
-		/// and <code>apply</code> methods on functions
+		/// Gets or sets a flag for whether to check that the arguments for <c>bind</c>, <c>call</c>, and <c>apply</c>
+		/// methods match the original function
 		/// </summary>
 		[ConfigurationProperty("strictBindCallApply", DefaultValue = false)]
 		public bool StrictBindCallApply
@@ -322,7 +318,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable strict null checks
+		/// Gets or sets a flag for whether to take into account <c>null</c> and <c>undefined</c> when type checking
 		/// </summary>
 		[ConfigurationProperty("strictNullChecks", DefaultValue = false)]
 		public bool StrictNullChecks
@@ -332,7 +328,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable strict checking of function types
+		/// Gets or sets a flag for whether to check to ensure parameters and the return values are subtype-compatible
+		/// when assigning functions
 		/// </summary>
 		[ConfigurationProperty("strictFunctionTypes", DefaultValue = false)]
 		public bool StrictFunctionTypes
@@ -342,8 +339,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable strict checking of property
-		/// initialization in classes
+		/// Gets or sets a flag for whether to check for class properties that are declared but not set in the
+		/// constructor
 		/// </summary>
 		[ConfigurationProperty("strictPropertyInitialization", DefaultValue = false)]
 		public bool StrictPropertyInitialization
@@ -353,8 +350,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to do not emit declarations for code that has an
-		/// <code>@internal</code> annotation
+		/// Gets or sets a flag for whether to disable emitting declarations that have <c>@internal</c> in their JSDoc
+		/// comments
 		/// </summary>
 		[ConfigurationProperty("stripInternal", DefaultValue = false)]
 		public bool StripInternal
@@ -364,7 +361,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to suppress excess property checks for object literals
+		/// Gets or sets a flag for whether to disable reporting of excess property errors during the creation of
+		/// object literals
 		/// </summary>
 		[ConfigurationProperty("suppressExcessPropertyErrors", DefaultValue = false)]
 		public bool SuppressExcessPropertyErrors
@@ -374,8 +372,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to suppress noImplicitAny errors for indexing objects lacking
-		/// index signatures
+		/// Gets or sets a flag for whether to suppress <see cref="NoImplicitAny"/> errors when indexing objects that
+		/// lack index signatures
 		/// </summary>
 		[ConfigurationProperty("suppressImplicitAnyIndexErrors", DefaultValue = false)]
 		public bool SuppressImplicitAnyIndexErrors
@@ -385,7 +383,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to suppress type checking errors
+		/// Gets or sets a flag for whether to suppress type checking errors.
+		/// Non-standard option.
 		/// </summary>
 		[ConfigurationProperty("suppressTypeCheckingErrors", DefaultValue = false)]
 		public bool SuppressTypeCheckingErrors
@@ -395,9 +394,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a ECMAScript target version: `EcmaScript3` (default), `EcmaScript5`,
-		/// `EcmaScript2015`, `EcmaScript2016`, `EcmaScript2017`, `EcmaScript2018`, `EcmaScript2019`,
-		/// `EcmaScript2020`, `EcmaScript2021` or `EcmaScriptNext`
+		/// Gets or sets a JavaScript language version for emitted JavaScript and include compatible library
+		/// declarations
 		/// </summary>
 		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
 		public TargetMode Target
@@ -407,8 +405,8 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to run TypeScript to JS transpilation
-		/// only (skip other passes)
+		/// Gets or sets a flag for whether to run TypeScript to JS transpilation only (skip other passes).
+		/// Non-standard option.
 		/// </summary>
 		[ConfigurationProperty("transpileOnly", DefaultValue = false)]
 		public bool TranspileOnly
@@ -418,7 +416,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to emit class fields with <code>Define</code> instead of <code>Set</code>
+		/// Gets or sets a flag for whether to emit ECMAScript-standard-compliant class fields
 		/// </summary>
 		[ConfigurationProperty("useDefineForClassFields", DefaultValue = false)]
 		public bool UseDefineForClassFields
