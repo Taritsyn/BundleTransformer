@@ -1,6 +1,17 @@
 Change log
 ==========
 
+## v1.12.39 - September 11, 2021
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator and Closure remote JS minifier
+ * In BundleTransformer.TypeScript:
+   * Added support of the TypeScript version 4.4 RTM (please note: The 4.4 RTM release is also called '4.4.2')
+   * In configuration settings of TypeScript translator was added two new properties: `ExactOptionalPropertyTypes` (default `false`) or `UseUnknownInCatchVariables` (default `false`)
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.3.4.0
+ * In BundleTransformer.Closure:
+   * Fixed a [error #52](https://github.com/Taritsyn/BundleTransformer/issues/52) “Closure doesn't support ECMASCRIPT6/ECMASCRIPT6_STRICT on remote plugin”
+   * In configuration settings of Closure remote JS minifier was added one new property - `LanguageOutput` (default `None`)
+ * In BundleTransformer.NUglify added support of the NUglify version 1.16.0
+
 ## v1.12.38 - July 3, 2021
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.3.5
  * In BundleTransformer.NUglify added support of the NUglify version 1.13.12
