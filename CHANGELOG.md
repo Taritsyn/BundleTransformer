@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.40 - September 24, 2021
+ * In BundleTransformer.CoffeeScript added support of the CoffeeScript version 2.6.0
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.3.5.0
+
 ## v1.12.39 - September 11, 2021
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator and Closure remote JS minifier
  * In BundleTransformer.TypeScript:
