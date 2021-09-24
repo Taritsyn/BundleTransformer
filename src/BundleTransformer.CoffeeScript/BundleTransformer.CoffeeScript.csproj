@@ -15,13 +15,13 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.CoffeeScript contains one translator-adapter - `CoffeeScriptTranslator` (supports the CoffeeScript (http://coffeescript.org) version 2.5.1). This adapter makes translation of CoffeeScript code to JS code. Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated CoffeeScript asset.
+    <Description>BundleTransformer.CoffeeScript contains one translator-adapter - `CoffeeScriptTranslator` (supports the CoffeeScript (http://coffeescript.org) version 2.6.0). This adapter makes translation of CoffeeScript code to JS code. Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated CoffeeScript asset.
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;CoffeeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of CoffeeScript version 2.5.1.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support of CoffeeScript version 2.6.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
