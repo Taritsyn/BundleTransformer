@@ -15,20 +15,20 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.14 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.3.7.0).
+    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.15 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.4.0.0).
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
-    <PackageReleaseNotes>Added support of the Autoprefixer version 10.3.7.0.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support of the Autoprefixer version 10.4.0.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
 
     <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-    <PackageReference Include="AutoprefixerHost" Version="3.0.14" />
+    <PackageReference Include="AutoprefixerHost" Version="3.0.15" />
     <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.1.0" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
