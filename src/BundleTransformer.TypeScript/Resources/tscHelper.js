@@ -181,7 +181,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		};
 
 		BtSystem.prototype.directoryExists = function() {
-			throw new Error(formatString(ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED, 'directoryExists'));
+			return true;
 		};
 
 		BtSystem.prototype.createDirectory = function() {
