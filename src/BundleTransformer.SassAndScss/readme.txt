@@ -14,8 +14,8 @@
    BundleTransformer.SassAndScss contains one translator-adapter -
    `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to
    CSS code by using the Dart Sass Host for .NET
-   (https://github.com/Taritsyn/DartSassHost) version 1.0.0 Preview 3 (supports the
-   Dart Sass (https://github.com/sass/dart-sass) version 1.36.0). Also contains the
+   (https://github.com/Taritsyn/DartSassHost) version 1.0.0 Preview 7 (supports the
+   Dart Sass (https://github.com/sass/dart-sass) version 1.43.4). Also contains the
    `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text
    output of translated Sass or SCSS asset.
 
@@ -25,8 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support of the Dart Sass version 1.36.0;
-   2. Now can use the JavaScriptEngineSwitcher.V8 as a JS engine.
+   Added support of the Dart Sass version 1.43.4.
 
    ====================
    POST-INSTALL ACTIONS
