@@ -10,7 +10,7 @@ namespace BundleTransformer.SassAndScss.Internal
 	/// <summary>
 	/// Virtual file manager
 	/// </summary>
-	internal sealed class VirtualFileManager : IFileManager
+	public sealed class VirtualFileManager : IFileManager
 	{
 		/// <summary>
 		/// Virtual file system wrapper

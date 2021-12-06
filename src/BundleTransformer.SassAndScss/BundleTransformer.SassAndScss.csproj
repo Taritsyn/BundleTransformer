@@ -22,7 +22,8 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of the Dart Sass version 1.43.4.</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Added support of the Dart Sass version 1.43.4;
+2. `VirtualFileManager` class was made public.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

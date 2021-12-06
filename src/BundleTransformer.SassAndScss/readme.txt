@@ -25,7 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Dart Sass version 1.43.4.
+   1. Added support of the Dart Sass version 1.43.4;
+   2. `VirtualFileManager` class was made public.
 
    ====================
    POST-INSTALL ACTIONS
