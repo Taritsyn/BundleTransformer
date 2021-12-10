@@ -539,6 +539,20 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
+    <xs:attribute name="severity" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation>Severity level of errors:
+ 0 - only error messages;
+ 1 - only error messages and warnings except deprecations;
+ 2 - only error messages and all warnings.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:int">
+          <xs:minInclusive value="0" />
+          <xs:maxInclusive value="2" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
   </xs:complexType>
   <!-- /Sass and SCSS settings -->
 
@@ -638,11 +652,11 @@
         <xs:documentation>Flag for whether to raise error on expressions and declarations with an implied `any` type</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-	<xs:attribute name="noImplicitOverride" type="Boolean_SchemaType" use="optional" default="false">
-	  <xs:annotation>
-		<xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an `override` modifier</xs:documentation>
-	  </xs:annotation>
-	</xs:attribute>
+    <xs:attribute name="noImplicitOverride" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to ensure overriding members in derived classes are marked with an `override` modifier</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="noImplicitReturns" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to report error when not all code paths in function return a value</xs:documentation>

@@ -23,7 +23,8 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
     <PackageReleaseNotes>1. Added support of the Dart Sass version 1.43.4;
-2. `VirtualFileManager` class was made public.</PackageReleaseNotes>
+2. `VirtualFileManager` class was made public;
+3. In configuration settings of Sass and SCSS translator was added one new property - `Severity` (default `0`).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -57,6 +58,22 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
       <Pack>true</Pack>
       <Visible>false</Visible>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources/Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources/Strings.ru-ru.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+
+    <Compile Update="Resources/Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

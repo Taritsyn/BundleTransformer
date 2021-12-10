@@ -26,7 +26,9 @@
    RELEASE NOTES
    =============
    1. Added support of the Dart Sass version 1.43.4;
-   2. `VirtualFileManager` class was made public.
+   2. `VirtualFileManager` class was made public;
+   3. In configuration settings of Sass and SCSS translator was added one new
+      property - `Severity` (default `0`).
 
    ====================
    POST-INSTALL ACTIONS

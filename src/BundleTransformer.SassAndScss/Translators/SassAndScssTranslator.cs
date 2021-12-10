@@ -14,13 +14,13 @@ using JavaScriptEngineSwitcher.Core;
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
-using BundleTransformer.Core.Resources;
 using BundleTransformer.Core.Translators;
 using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.SassAndScss.Configuration;
 using BundleTransformer.SassAndScss.Internal;
+using BundleTransformer.SassAndScss.Resources;
 using BtIndentType = BundleTransformer.SassAndScss.IndentType;
 using BtLineFeedType = BundleTransformer.SassAndScss.LineFeedType;
 
@@ -82,6 +82,18 @@ namespace BundleTransformer.SassAndScss.Translators
 			set;
 		}
 
+		/// <summary>
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings except deprecations;
+		///		2 - only error messages and all warnings.
+		/// </summary>
+		public int Severity
+		{
+			get;
+			set;
+		}
+
 
 		/// <summary>
 		/// Constructs an instance of Sass and SCSS translator
@@ -112,6 +124,7 @@ namespace BundleTransformer.SassAndScss.Translators
 			IndentType = sassAndScssConfig.IndentType;
 			IndentWidth = sassAndScssConfig.IndentWidth;
 			LineFeedType = sassAndScssConfig.LineFeedType;
+			Severity = sassAndScssConfig.Severity;
 
 			if (createJsEngineInstance == null)
 			{
@@ -146,16 +159,17 @@ namespace BundleTransformer.SassAndScss.Translators
 			{
 				throw new ArgumentNullException(
 					nameof(asset),
-					string.Format(Strings.Common_ArgumentIsNull, nameof(asset))
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(asset))
 				);
 			}
 
 			bool enableNativeMinification = NativeMinificationEnabled;
+			int severity = Severity;
 			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
 			using (var sassCompiler = new SassCompiler(_createJsEngineInstance, _virtualFileManager, options))
 			{
-				InnerTranslate(asset, sassCompiler, enableNativeMinification);
+				InnerTranslate(asset, sassCompiler, severity, enableNativeMinification);
 			}
 
 			return asset;
@@ -172,7 +186,7 @@ namespace BundleTransformer.SassAndScss.Translators
 			{
 				throw new ArgumentNullException(
 					nameof(assets),
-					string.Format(Strings.Common_ArgumentIsNull, nameof(assets))
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(assets))
 				);
 			}
 
@@ -189,20 +203,22 @@ namespace BundleTransformer.SassAndScss.Translators
 			}
 
 			bool enableNativeMinification = NativeMinificationEnabled;
+			int severity = Severity;
 			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
 			using (var sassCompiler = new SassCompiler(_createJsEngineInstance, _virtualFileManager, options))
 			{
 				foreach (var asset in assetsToProcessing)
 				{
-					InnerTranslate(asset, sassCompiler, enableNativeMinification);
+					InnerTranslate(asset, sassCompiler, severity, enableNativeMinification);
 				}
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, SassCompiler sassCompiler, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, SassCompiler sassCompiler, int severity,
+			bool enableNativeMinification)
 		{
 			string assetTypeName = asset.AssetTypeCode == Constants.AssetTypeCode.Sass ? "Sass" : "SCSS";
 			string newContent;
@@ -217,19 +233,31 @@ namespace BundleTransformer.SassAndScss.Translators
 					.Where(p => p != assetUrl)
 					.ToList()
 					;
+
+				if (severity > 0)
+				{
+					IList<ProblemInfo> warnings = result.Warnings;
+					if (severity == 1)
+					{
+						warnings = warnings
+							.Where(w => !w.IsDeprecation)
+							.ToList()
+							;
+					}
+
+					if (warnings.Count > 0)
+					{
+						string warningMessage = GenerateDetailedWarningMessage(warnings[0]);
+
+						throw new AssetTranslationException(
+							string.Format(CoreStrings.Translators_TranslationSyntaxError,
+								assetTypeName, OUTPUT_CODE_TYPE, assetUrl, warningMessage));
+					}
+				}
 			}
 			catch (SassCompilationException e)
 			{
-				string errorDetails = SassErrorHelpers.GenerateErrorDetails(e, true);
-
-				var stringBuilderPool = StringBuilderPool.Shared;
-				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
-				errorMessageBuilder.AppendLine(e.Message);
-				errorMessageBuilder.AppendLine();
-				errorMessageBuilder.Append(errorDetails);
-
-				string errorMessage = errorMessageBuilder.ToString();
-				stringBuilderPool.Return(errorMessageBuilder);
+				string errorMessage = GenerateDetailedErrorMessage(e);
 
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
@@ -266,10 +294,111 @@ namespace BundleTransformer.SassAndScss.Translators
 				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, DshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
 				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, DshLineFeedType>(LineFeedType),
-				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded
+				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded,
+				WarningLevel = ConvertSeverityToWarningLevel(Severity)
 			};
 
 			return options;
+		}
+
+		/// <summary>
+		/// Converts a severity level of errors to the warning level
+		/// </summary>
+		/// <param name="severity">Severity level of errors</param>
+		/// <returns>Warning level</returns>
+		private static WarningLevel ConvertSeverityToWarningLevel(int severity)
+		{
+			WarningLevel warningLevel;
+
+			switch (severity)
+			{
+				case 0:
+					warningLevel = WarningLevel.Quiet;
+					break;
+				case 1:
+					warningLevel = WarningLevel.Default;
+					break;
+				case 2:
+					warningLevel = WarningLevel.Verbose;
+					break;
+				default:
+					throw new NotSupportedException();
+			}
+
+			return warningLevel;
+		}
+
+		/// <summary>
+		/// Generates a detailed error message
+		/// </summary>
+		/// <param name="error">Error details</param>
+		/// <returns>Detailed error message</returns>
+		private static string GenerateDetailedErrorMessage(SassCompilationException error)
+		{
+			string type = error.Status == 1 ? "syntax error" : "error";
+
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder messageBuilder = stringBuilderPool.Rent();
+
+			WriteDetailedMessage(messageBuilder, error.Message, type, error.Description, error.File,
+				error.LineNumber, error.ColumnNumber, error.SourceFragment, error.CallStack);
+
+			string detailedMessage = messageBuilder.ToString();
+			stringBuilderPool.Return(messageBuilder);
+
+			return detailedMessage;
+		}
+
+		/// <summary>
+		/// Generates a detailed warning message
+		/// </summary>
+		/// <param name="warning">Warning details</param>
+		/// <returns>Detailed warning message</returns>
+		private static string GenerateDetailedWarningMessage(ProblemInfo warning)
+		{
+			string type = warning.IsDeprecation ? "deprecation warning" : "warning";
+
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder messageBuilder = stringBuilderPool.Rent();
+
+			WriteDetailedMessage(messageBuilder, warning.Message, type, warning.Description, warning.File,
+				warning.LineNumber, warning.ColumnNumber, warning.SourceFragment, warning.CallStack);
+
+			string detailedMessage = messageBuilder.ToString();
+			stringBuilderPool.Return(messageBuilder);
+
+			return detailedMessage;
+		}
+
+		private static void WriteDetailedMessage(StringBuilder buffer, string message, string type, string description,
+			string filePath, int lineNumber, int columnNumber, string sourceFragment, string callStack)
+		{
+			buffer.AppendLine(message);
+			buffer.AppendLine();
+			buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType, type);
+			buffer.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_Description, description);
+			if (!string.IsNullOrWhiteSpace(filePath))
+			{
+				buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
+			}
+			if (lineNumber > 0)
+			{
+				buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber, lineNumber);
+			}
+			if (columnNumber > 0)
+			{
+				buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber, columnNumber);
+			}
+			if (!string.IsNullOrWhiteSpace(sourceFragment))
+			{
+				buffer.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					CoreStrings.ErrorDetails_SourceError, sourceFragment);
+			}
+			if (!string.IsNullOrWhiteSpace(callStack))
+			{
+				buffer.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					Strings.ErrorDetails_StackTrace, callStack);
+			}
 		}
 	}
 }
