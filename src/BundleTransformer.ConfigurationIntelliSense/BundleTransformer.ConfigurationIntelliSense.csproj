@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Product>Bundle Transformer: IntelliSense</Product>
     <VersionPrefix>1.13.0</VersionPrefix>
-    <VersionSuffix>preview1</VersionSuffix>
+    <VersionSuffix>preview3</VersionSuffix>
     <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
 

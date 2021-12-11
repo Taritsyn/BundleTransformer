@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.13.0 Preview 3 - December 11, 2021
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Sass and SCSS translator
+ * In BundleTransformer.SassAndScss:
+   * Added support of the Dart Sass version 1.43.4
+   * `VirtualFileManager` class was made public
+   * In configuration settings of Sass and SCSS translator was added one new property - `Severity` (default `0`)
+
 ## v1.13.0 Preview 2 - July 29, 2021
  * In BundleTransformer.SassAndScss:
    * Added support of the Dart Sass version 1.36.0
