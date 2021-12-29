@@ -25,8 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. JavaScript Engine Switcher was updated to version 3.1.0;
-   2. Json.NET was updated to version 12.0.2.
+   Fixed a concurrency errors that occur during initialization.
 
    ====================
    POST-INSTALL ACTIONS

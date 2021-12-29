@@ -74,9 +74,14 @@ namespace BundleTransformer.Less.Internal
 		private readonly string _optionsString;
 
 		/// <summary>
+		/// Synchronizer of compiler initialization
+		/// </summary>
+		private readonly object _initializationSynchronizer = new object();
+
+		/// <summary>
 		/// Flag that compiler is initialized
 		/// </summary>
-		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -106,8 +111,18 @@ namespace BundleTransformer.Less.Internal
 		/// </summary>
 		private void Initialize()
 		{
-			if (_initializedFlag.Set())
+			if (_initialized)
 			{
+				return;
+			}
+
+			lock (_initializationSynchronizer)
+			{
+				if (_initialized)
+				{
+					return;
+				}
+
 				_jsEngine.EmbedHostObject(LESS_ENVIRONMENT_VARIABLE_NAME, LessEnvironment.Instance);
 				_jsEngine.EmbedHostObject(VIRTUAL_FILE_MANAGER_VARIABLE_NAME, _virtualFileManager);
 
@@ -115,6 +130,8 @@ namespace BundleTransformer.Less.Internal
 
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESS_LIBRARY_FILE_NAME, assembly);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + LESSC_HELPER_FILE_NAME, assembly);
+
+				_initialized = true;
 			}
 		}
 
