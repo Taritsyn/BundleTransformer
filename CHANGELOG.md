@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.44 - December 29, 2021
+ * In modules based on JS engines fixed a concurrency errors that occur during initialization
+ * In BundleTransformer.NUglify added support of the NUglify version 1.17.3
+
 ## v1.12.43 - November 18, 2021
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.5 RTM (please note: The 4.5 RTM release is also called '4.5.2')
 
