@@ -21,7 +21,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Packer_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Packer_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Dean;Edwards;Packer</PackageTags>
-    <PackageReleaseNotes>JavaScript Engine Switcher was updated to version 3.1.0.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed a concurrency errors that occur during initialization.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -26,8 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the TypeScript version 4.5 RTM (please note: The 4.5 RTM
-   release is also called '4.5.2').
+   Fixed a concurrency errors that occur during initialization.
 
    ====================
    POST-INSTALL ACTIONS

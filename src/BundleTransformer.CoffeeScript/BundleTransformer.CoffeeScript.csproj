@@ -21,7 +21,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;CoffeeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of CoffeeScript version 2.6.1.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed a concurrency errors that occur during initialization.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

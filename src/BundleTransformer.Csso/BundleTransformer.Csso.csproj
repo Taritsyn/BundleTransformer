@@ -21,8 +21,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Csso_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Csso_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;Optimizer;Sergey;Kryzhanovsky;CSSO</PackageTags>
-    <PackageReleaseNotes>1. JavaScript Engine Switcher was updated to version 3.1.0;
-2. Json.NET was updated to version 12.0.2.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed a concurrency errors that occur during initialization.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

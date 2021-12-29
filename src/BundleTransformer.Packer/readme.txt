@@ -21,7 +21,7 @@
    =============
    RELEASE NOTES
    =============
-   JavaScript Engine Switcher was updated to version 3.1.0.
+   Fixed a concurrency errors that occur during initialization.
 
    ====================
    POST-INSTALL ACTIONS

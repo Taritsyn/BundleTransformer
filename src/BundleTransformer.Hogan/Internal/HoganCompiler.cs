@@ -56,9 +56,14 @@ namespace BundleTransformer.Hogan.Internal
 		private readonly string _optionsString;
 
 		/// <summary>
+		/// Synchronizer of compiler initialization
+		/// </summary>
+		private readonly object _initializationSynchronizer = new object();
+
+		/// <summary>
 		/// Flag that compiler is initialized
 		/// </summary>
-		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -84,12 +89,24 @@ namespace BundleTransformer.Hogan.Internal
 		/// </summary>
 		private void Initialize()
 		{
-			if (_initializedFlag.Set())
+			if (_initialized)
 			{
+				return;
+			}
+
+			lock (_initializationSynchronizer)
+			{
+				if (_initialized)
+				{
+					return;
+				}
+
 				Assembly assembly = GetType().Assembly;
 
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + HOGAN_LIBRARY_FILE_NAME, assembly);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + HOGAN_HELPER_FILE_NAME, assembly);
+
+				_initialized = true;
 			}
 		}
 

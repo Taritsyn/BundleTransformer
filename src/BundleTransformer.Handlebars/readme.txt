@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the Handlebars version 4.7.7.
+   Fixed a concurrency errors that occur during initialization.
 
    ====================
    POST-INSTALL ACTIONS

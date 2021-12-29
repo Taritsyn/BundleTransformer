@@ -41,9 +41,14 @@ namespace BundleTransformer.Packer.Internal
 		private readonly PackingOptions _options;
 
 		/// <summary>
+		/// Synchronizer of JS packer initialization
+		/// </summary>
+		private readonly object _initializationSynchronizer = new object();
+
+		/// <summary>
 		/// Flag that JS packer is initialized
 		/// </summary>
-		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -68,8 +73,18 @@ namespace BundleTransformer.Packer.Internal
 		/// </summary>
 		private void Initialize()
 		{
-			if (_initializedFlag.Set())
+			if (_initialized)
 			{
+				return;
+			}
+
+			lock (_initializationSynchronizer)
+			{
+				if (_initialized)
+				{
+					return;
+				}
+
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + PACKER_LIBRARY_FILE_NAME, GetType().Assembly);
 				_jsEngine.Execute(
 					string.Format(@"var {0} = function(code, base62Encode, shrinkVariables) {{
@@ -77,6 +92,8 @@ namespace BundleTransformer.Packer.Internal
 
 	return packer.pack(code, base62Encode, shrinkVariables);
 }}", PACKING_FUNCTION_NAME));
+
+				_initialized = true;
 			}
 		}
 

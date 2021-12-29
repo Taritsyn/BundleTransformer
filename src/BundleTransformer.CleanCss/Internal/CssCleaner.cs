@@ -55,9 +55,14 @@ namespace BundleTransformer.CleanCss.Internal
 		private readonly string _optionsString;
 
 		/// <summary>
+		/// Synchronizer of CSS cleaner initialization
+		/// </summary>
+		private readonly object _initializationSynchronizer = new object();
+
+		/// <summary>
 		/// Flag that CSS cleaner is initialized
 		/// </summary>
-		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -83,12 +88,24 @@ namespace BundleTransformer.CleanCss.Internal
 		/// </summary>
 		private void Initialize()
 		{
-			if (_initializedFlag.Set())
+			if (_initialized)
 			{
+				return;
+			}
+
+			lock (_initializationSynchronizer)
+			{
+				if (_initialized)
+				{
+					return;
+				}
+
 				Assembly assembly = GetType().Assembly;
 
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_LIBRARY_FILE_NAME, assembly);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CLEAN_CSS_HELPER_FILE_NAME, assembly);
+
+				_initialized = true;
 			}
 		}
 

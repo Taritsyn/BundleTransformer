@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CoffeeScript version 2.6.1.
+   Fixed a concurrency errors that occur during initialization.
 
    ====================
    POST-INSTALL ACTIONS

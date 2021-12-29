@@ -97,9 +97,14 @@ namespace BundleTransformer.UglifyJs.Internal
 				@"\[[\w \-+.:,;/?&=%~#$@()\[\]{}]*:(?<lineNumber>\d+),\s*(?<columnNumber>\d+)\]$");
 
 		/// <summary>
+		/// Synchronizer of JS uglifier initialization
+		/// </summary>
+		private readonly object _initializationSynchronizer = new object();
+
+		/// <summary>
 		/// Flag that JS uglifier is initialized
 		/// </summary>
-		private InterlockedStatedFlag _initializedFlag = new InterlockedStatedFlag();
+		private bool _initialized;
 
 		/// <summary>
 		/// Flag that object is destroyed
@@ -125,12 +130,24 @@ namespace BundleTransformer.UglifyJs.Internal
 		/// </summary>
 		private void Initialize()
 		{
-			if (_initializedFlag.Set())
+			if (_initialized)
 			{
+				return;
+			}
+
+			lock (_initializationSynchronizer)
+			{
+				if (_initialized)
+				{
+					return;
+				}
+
 				Assembly assembly = GetType().Assembly;
 
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_LIBRARY_FILE_NAME, assembly);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + UGLIFY_JS_HELPER_FILE_NAME, assembly);
+
+				_initialized = true;
 			}
 		}
 
