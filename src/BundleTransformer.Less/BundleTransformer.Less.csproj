@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.Less contains one translator-adapter - `LessTranslator` (supports the LESS (http://lesscss.org) version 3.9.0). This adapter makes translation of LESS code to CSS code. Also contains the `LessAssetHandler` debugging HTTP handler, which is responsible for text output of translated LESS asset.
+    <Description>BundleTransformer.Less contains one translator-adapter - `LessTranslator` (supports the LESS (https://lesscss.org) version 3.9.0). This adapter makes translation of LESS code to CSS code. Also contains the `LessAssetHandler` debugging HTTP handler, which is responsible for text output of translated LESS asset.
 
 BundleTransformer.Less does not support loading of plugins.
 

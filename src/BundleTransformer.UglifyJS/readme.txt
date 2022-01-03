@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2021 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2022 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.UglifyJs contains one minifier-adapter for minification of
    JS code - `UglifyJsMinifier`. `UglifyJsMinifier` is based on the Mihai Bazon's
-   UglifyJS (https://github.com/mishoo/UglifyJS2) version 2.8.29.
+   UglifyJS (https://github.com/mishoo/UglifyJS) version 2.8.29.
 
    As a JS engine is used the JavaScript Engine Switcher library
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher).

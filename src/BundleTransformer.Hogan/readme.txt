@@ -5,14 +5,14 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2021 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2022 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.Hogan contains one translator-adapter - `HoganTranslator`
-   (supports the Hogan (http://twitter.github.io/hogan.js) version 3.0.2). This
+   (supports the Hogan (https://twitter.github.io/hogan.js) version 3.0.2). This
    adapter makes translation of Mustache templates to JS code. Also contains the
    `HoganAssetHandler` debugging HTTP handler, which is responsible for text output
    of translated Mustache asset.

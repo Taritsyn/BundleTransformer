@@ -5,14 +5,14 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2021 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2022 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.CoffeeScript contains one translator-adapter -
-   `CoffeeScriptTranslator` (supports the CoffeeScript (http://coffeescript.org)
+   `CoffeeScriptTranslator` (supports the CoffeeScript (https://coffeescript.org)
    version 2.6.1). This adapter makes translation of CoffeeScript code to JS code.
    Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated CoffeeScript asset.

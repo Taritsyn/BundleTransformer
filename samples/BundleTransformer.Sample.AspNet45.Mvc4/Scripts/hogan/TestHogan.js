@@ -21,7 +21,7 @@
 			* @type {String}
 			* @expose
 			*/
-			url: 'http://twitter.github.io/hogan.js/',
+			url: 'https://twitter.github.io/hogan.js/',
 
 			/**
 			* Flag for whether to open URL in a new window

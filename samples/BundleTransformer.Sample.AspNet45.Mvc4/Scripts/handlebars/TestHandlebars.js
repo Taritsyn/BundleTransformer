@@ -21,7 +21,7 @@
 			* @type {String}
 			* @expose
 			*/
-			url: 'http://handlebarsjs.com/',
+			url: 'https://handlebarsjs.com/',
 
 			/**
 			* Flag for whether to open URL in a new window

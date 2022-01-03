@@ -5,14 +5,14 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2021 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2022 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
    DESCRIPTION
    ===========
    BundleTransformer.Handlebars contains one translator-adapter -
-   `HandlebarsTranslator` (supports the Handlebars (http://handlebarsjs.com)
+   `HandlebarsTranslator` (supports the Handlebars (https://handlebarsjs.com)
    version 4.7.7). This adapter makes translation of Handlebars templates to JS
    code. Also contains the `HandlebarsAssetHandler` debugging HTTP handler, which
    is responsible for text output of translated Handlebars asset.

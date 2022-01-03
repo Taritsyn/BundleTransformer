@@ -5,7 +5,7 @@
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2021 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2022 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.WG contains one minifier-adapter for minification of CSS code -
    `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier
-   (http://webgrease.codeplex.com) version 1.6.0.
+   (https://www.nuget.org/packages/WebGrease) version 1.6.0.
 
    ====================
    POST-INSTALL ACTIONS

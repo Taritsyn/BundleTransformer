@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: TypeScript</Product>
-    <VersionPrefix>1.12.44</VersionPrefix>
+    <VersionPrefix>1.12.45</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (http://www.typescriptlang.org) version 4.5.4). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
+    <Description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org) version 4.5.4). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
 
 BundleTransformer.TypeScript does not support external modules (CommonJS, AMD, SystemJS, UMD and ES6 modules).
 
