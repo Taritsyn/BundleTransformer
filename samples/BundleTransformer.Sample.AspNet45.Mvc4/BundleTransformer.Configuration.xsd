@@ -784,6 +784,7 @@
           <xs:enumeration value="EcmaScript2019" />
           <xs:enumeration value="EcmaScript2020" />
           <xs:enumeration value="EcmaScript2021" />
+          <xs:enumeration value="EcmaScript2022" />
           <xs:enumeration value="EcmaScriptNext" />
         </xs:restriction>
       </xs:simpleType>
