@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.CoffeeScript contains one translator-adapter -
    `CoffeeScriptTranslator` (supports the CoffeeScript (https://coffeescript.org)
-   version 2.6.1). This adapter makes translation of CoffeeScript code to JS code.
+   version 2.7.0). This adapter makes translation of CoffeeScript code to JS code.
    Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated CoffeeScript asset.
 
@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a concurrency errors that occur during initialization.
+   Added support of CoffeeScript version 2.7.0.
 
    ====================
    POST-INSTALL ACTIONS
