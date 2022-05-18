@@ -28,11 +28,11 @@ namespace BundleTransformer.Sample.AspNet45.Mvc4
 				"~/Content/Site.css",
 				"~/Content/BundleTransformer.css",
 				"~/AlternativeContent/css/TestCssComponentsPaths.css",
-				"~/Content/themes/base/jquery.ui.core.css",
-				"~/Content/themes/base/jquery.ui.theme.css",
-				"~/Content/themes/base/jquery.ui.resizable.css",
-				"~/Content/themes/base/jquery.ui.button.css",
-				"~/Content/themes/base/jquery.ui.dialog.css",
+				"~/Content/themes/base/core.css",
+				"~/Content/themes/base/theme.css",
+				"~/Content/themes/base/resizable.css",
+				"~/Content/themes/base/button.css",
+				"~/Content/themes/base/dialog.css",
 				"~/Content/TestTranslators.css",
 				"~/Content/less/TestLess.less",
 				"~/AlternativeContent/less/LessIcons.less",
@@ -42,12 +42,12 @@ namespace BundleTransformer.Sample.AspNet45.Mvc4
 			bundles.Add(commonStylesBundle);
 
 			var modernizrBundle = new CustomScriptBundle("~/Bundles/Modernizr");
-			modernizrBundle.Include("~/Scripts/modernizr-2.*");
+			modernizrBundle.Include("~/Scripts/modernizr-3.*");
 			modernizrBundle.Orderer = nullOrderer;
 			bundles.Add(modernizrBundle);
 
 			var jQueryBundle = new CustomScriptBundle("~/Bundles/Jquery",
-				"http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.1.min.js");
+				"https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.6.0.min.js");
 			jQueryBundle.Include("~/Scripts/jquery-{version}.js");
 			jQueryBundle.Orderer = nullOrderer;
 			jQueryBundle.CdnFallbackExpression = "window.jquery";
