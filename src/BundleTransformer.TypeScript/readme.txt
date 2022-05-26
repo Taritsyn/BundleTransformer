@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains one translator-adapter -
    `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org)
-   version 4.6.3). This adapter makes translation of TypeScript code to JS code.
+   version 4.7 RTM). This adapter makes translation of TypeScript code to JS code.
    Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated TypeScript asset.
 
@@ -26,7 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the TypeScript version 4.6.3.
+   Added support of the TypeScript version 4.7 RTM (please note: The 4.7 RTM
+   release is also called '4.7.2').
 
    ====================
    POST-INSTALL ACTIONS

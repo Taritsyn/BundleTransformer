@@ -237,7 +237,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to include <c>undefined</c> in index signature results
+		/// Gets or sets a flag for whether to add <c>undefined</c> to a type when accessed using an index
 		/// </summary>
 		[ConfigurationProperty("noUncheckedIndexedAccess", DefaultValue = false)]
 		public bool NoUncheckedIndexedAccess
@@ -247,7 +247,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to enable error reporting when a local variables aren't read
+		/// Gets or sets a flag for whether to enable error reporting when local variables aren't read
 		/// </summary>
 		[ConfigurationProperty("noUnusedLocals", DefaultValue = false)]
 		public bool NoUnusedLocals
@@ -426,7 +426,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to use a type catch clause variables as <c>unknown</c> instead of
+		/// Gets or sets a flag for whether to use a default catch clause variables as <c>unknown</c> instead of
 		/// <c>any</c>
 		/// </summary>
 		[ConfigurationProperty("useUnknownInCatchVariables", DefaultValue = false)]

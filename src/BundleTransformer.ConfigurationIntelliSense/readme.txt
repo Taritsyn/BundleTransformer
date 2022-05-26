@@ -18,8 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of TypeScript translator and
-   Closure remote JS minifier.
+   Updated definitions for configuration settings of TypeScript translator.
 
    =============
    DOCUMENTATION

@@ -243,7 +243,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			newLine = ts.getNewLineCharacter(options, function () { return system.newLine; })
 			;
 
-		function getSourceFile(fileName, languageVersion, onError) {
+		function getSourceFile(fileName, languageVersionOrOptions, onError) {
 			var text;
 
 			try {
@@ -258,7 +258,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			}
 
 			return (typeof text !== 'undefined') ?
-				ts.createSourceFile(fileName, text, languageVersion, false) : undefined;
+				ts.createSourceFile(fileName, text, languageVersionOrOptions, false) : undefined;
 		}
 
 		function getDefaultLibLocation() {
