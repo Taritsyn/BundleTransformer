@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.12.49 - May 26, 2022
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript added support of the TypeScript version 4.7 RTM (please note: The 4.7 RTM release is also called '4.7.2')
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.4.7.0
+
 ## v1.12.48 - April 25, 2022
  * In BundleTransformer.CoffeeScript added support of the CoffeeScript version 2.7.0
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.6.3
