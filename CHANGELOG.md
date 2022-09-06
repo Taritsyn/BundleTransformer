@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.12.51 - September 6, 2022
+ * In BundleTransformer.TypeScript added support of the TypeScript version 4.8 RTM (please note: The 4.8 RTM release is also called '4.8.2')
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.4.8.0
+
 ## v1.12.50 - July 23, 2022
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.7.4
  * In BundleTransformer.NUglify added support of the NUglify version 1.20.2
