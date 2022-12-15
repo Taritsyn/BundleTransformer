@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.12.55 - December 15, 2022
+ * In BundleTransformer.NUglify added support of the NUglify version 1.20.4
+
 ## v1.12.54 - December 10, 2022
  * In BundleTransformer.TypeScript added support of the TypeScript version 4.9.4
  * In BundleTransformer.NUglify added support of the NUglify version 1.20.3
