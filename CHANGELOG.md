@@ -1,6 +1,16 @@
 Change log
 ==========
 
+## v1.13.0 - December 18, 2022
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Sass and SCSS translator
+ * In BundleTransformer.SassAndScss:
+   * Now the [Dart Sass Host](https://github.com/Taritsyn/DartSassHost) library (requires installation and registration of the JS engine) is used instead of the [LibSass Host](https://github.com/Taritsyn/LibSassHost)
+   * In configuration settings of Sass and SCSS translator was added one new property - `JsEngine`
+   * From configuration settings of Sass and SCSS translator was removed two properties: `Precision` and `SourceComments`
+   * In configuration settings of Sass and SCSS translator was added one new property - `Severity` (default `0`)
+   * `VirtualFileManager` class was made public
+   * Conversion of the application-relative paths (starts with `~/`) to an absolute virtual paths is no longer supported in the `url()` functions if its value contains an interpolation and unquoted (for example, `url(#{$icons-path}/computer.png)`). For normal working, such values should be quoted (for example, `url("#{$icons-path}/computer.png")` or `url('#{$icons-path}/computer.png')`).
+
 ## v1.12.55 - December 15, 2022
  * In BundleTransformer.NUglify added support of the NUglify version 1.20.4
 

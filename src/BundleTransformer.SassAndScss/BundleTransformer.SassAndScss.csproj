@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Sass and SCSS</Product>
-    <VersionPrefix>1.12.36</VersionPrefix>
+    <VersionPrefix>1.13.0</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -66,13 +66,13 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
       <Pack>true</Pack>
     </Content>
 
-    <None Include="../../Licenses/libsass-license.txt">
-      <PackagePath>libsass-license.txt</PackagePath>
+    <None Include="../../Licenses/dart-sass-license.txt">
+      <PackagePath>dart-sass-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
     </None>
-    <None Include="../../Licenses/libsass-host-license.txt">
-      <PackagePath>libsass-host-license.txt</PackagePath>
+    <None Include="../../Licenses/dart-sass-host-license.txt">
+      <PackagePath>dart-sass-host-license.txt</PackagePath>
       <Pack>true</Pack>
       <Visible>false</Visible>
     </None>
