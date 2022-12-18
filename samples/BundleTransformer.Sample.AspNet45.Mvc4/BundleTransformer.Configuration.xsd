@@ -497,6 +497,7 @@
     </xs:annotation>
     <xs:all>
       <xs:element name="includePaths" type="IncludedPathRegistrationCollection_SchemaType" minOccurs="0" maxOccurs="1" />
+      <xs:element name="jsEngine" type="JsEngineSettings_SchemaType" minOccurs="0" maxOccurs="1" />
     </xs:all>
     <xs:attribute name="useNativeMinification" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
@@ -538,21 +539,21 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="precision" use="optional" default="5">
+    <xs:attribute name="severity" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation>Precision for fractional numbers</xs:documentation>
+        <xs:documentation>
+          Severity level of errors:
+          0 - only error messages;
+          1 - only error messages and warnings except deprecations;
+          2 - only error messages and all warnings.
+        </xs:documentation>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:int">
-          <xs:minInclusive value="-1" />
-          <xs:maxInclusive value="2147483647" />
+          <xs:minInclusive value="0" />
+          <xs:maxInclusive value="2" />
         </xs:restriction>
       </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="sourceComments" type="Boolean_SchemaType" use="optional" default="false">
-      <xs:annotation>
-        <xs:documentation>Flag for whether to emit comments in the generated CSS indicating the corresponding source line</xs:documentation>
-      </xs:annotation>
     </xs:attribute>
   </xs:complexType>
   <!-- /Sass and SCSS settings -->

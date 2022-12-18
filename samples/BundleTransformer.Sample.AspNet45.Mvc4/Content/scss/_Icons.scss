@@ -13,7 +13,7 @@
 .icon-equalizer
 {
   display: inline;
-  background-image: url(#{$alternative-icons-path}equalizer.png) !important;
+  background-image: url("#{$alternative-icons-path}equalizer.png") !important;
 }
 
 .icon-film

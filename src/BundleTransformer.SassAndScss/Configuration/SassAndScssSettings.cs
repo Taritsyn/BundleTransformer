@@ -1,5 +1,7 @@
 ﻿using System.Configuration;
 
+using BundleTransformer.Core.Configuration;
+
 namespace BundleTransformer.SassAndScss.Configuration
 {
 	/// <summary>
@@ -58,25 +60,26 @@ namespace BundleTransformer.SassAndScss.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a precision for fractional numbers
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings except deprecations;
+		///		2 - only error messages and all warnings.
 		/// </summary>
-		[ConfigurationProperty("precision", DefaultValue = 5)]
-		[IntegerValidator(MinValue = -1, MaxValue = int.MaxValue, ExcludeRange = false)]
-		public int Precision
+		[ConfigurationProperty("severity", DefaultValue = 0)]
+		[IntegerValidator(MinValue = 0, MaxValue = 2, ExcludeRange = false)]
+		public int Severity
 		{
-			get { return (int)this["precision"]; }
-			set { this["precision"] = value; }
+			get { return (int)this["severity"]; }
+			set { this["severity"] = value; }
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to emit comments in the generated CSS
-		/// indicating the corresponding source line
+		/// Gets a configuration settings of JS engine
 		/// </summary>
-		[ConfigurationProperty("sourceComments", DefaultValue = false)]
-		public bool SourceComments
+		[ConfigurationProperty("jsEngine")]
+		public JsEngineSettings JsEngine
 		{
-			get { return (bool)this["sourceComments"]; }
-			set { this["sourceComments"] = value; }
+			get { return (JsEngineSettings)this["jsEngine"]; }
 		}
 	}
 }

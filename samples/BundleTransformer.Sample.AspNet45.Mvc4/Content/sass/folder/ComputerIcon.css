@@ -1,5 +1,5 @@
 ﻿.icon-computer
 {
   display: inline;
-  background-image: url("#{$icons-path}computer.png") !important;
+  background-image: url("/Content/images/icons/computer.png") !important;
 }

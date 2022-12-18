@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 
 using AdvancedStringBuilder;
-using LibSassHost;
-using LibSassHost.Helpers;
-using LshIndentType = LibSassHost.IndentType;
-using LshLineFeedType = LibSassHost.LineFeedType;
+using DartSassHost;
+using DartSassHost.Helpers;
+using DshIndentType = DartSassHost.IndentType;
+using DshLineFeedType = DartSassHost.LineFeedType;
+using JavaScriptEngineSwitcher.Core;
 
 using BundleTransformer.Core;
 using BundleTransformer.Core.Assets;
 using BundleTransformer.Core.FileSystem;
-using BundleTransformer.Core.Resources;
 using BundleTransformer.Core.Translators;
 using BundleTransformer.Core.Utilities;
 using CoreStrings = BundleTransformer.Core.Resources.Strings;
 
 using BundleTransformer.SassAndScss.Configuration;
 using BundleTransformer.SassAndScss.Internal;
+using BundleTransformer.SassAndScss.Resources;
 using BtIndentType = BundleTransformer.SassAndScss.IndentType;
 using BtLineFeedType = BundleTransformer.SassAndScss.LineFeedType;
 
@@ -35,14 +37,14 @@ namespace BundleTransformer.SassAndScss.Translators
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
-		/// Synchronizer of Sass compiler's initialization
+		/// Delegate that creates an instance of JS engine
 		/// </summary>
-		private static readonly object _initializationSynchronizer = new object();
+		private readonly Func<IJsEngine> _createJsEngineInstance;
 
 		/// <summary>
-		/// Flag that indicates if the Sass compiler is initialized
+		/// Virtual file manager
 		/// </summary>
-		private static bool _initialized;
+		private readonly VirtualFileManager _virtualFileManager;
 
 		/// <summary>
 		/// Gets or sets a list of include paths
@@ -81,19 +83,12 @@ namespace BundleTransformer.SassAndScss.Translators
 		}
 
 		/// <summary>
-		/// Gets or sets a precision for fractional numbers
+		/// Gets or sets a severity level of errors:
+		///		0 - only error messages;
+		///		1 - only error messages and warnings except deprecations;
+		///		2 - only error messages and all warnings.
 		/// </summary>
-		public int Precision
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to emit comments in the generated CSS
-		/// indicating the corresponding source line
-		/// </summary>
-		public bool SourceComments
+		public int Severity
 		{
 			get;
 			set;
@@ -104,15 +99,22 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// Constructs an instance of Sass and SCSS translator
 		/// </summary>
 		public SassAndScssTranslator()
-			: this(BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
+			: this(null,
+				BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper(),
+				BundleTransformerContext.Current.Configuration.GetSassAndScssSettings())
 		{ }
 
 		/// <summary>
 		/// Constructs an instance of Sass and SCSS translator
 		/// </summary>
+		/// <param name="createJsEngineInstance">Delegate that creates an instance of JS engine</param>
+		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
 		/// <param name="sassAndScssConfig">Configuration settings of Sass and SCSS translator</param>
-		public SassAndScssTranslator(SassAndScssSettings sassAndScssConfig)
+		public SassAndScssTranslator(Func<IJsEngine> createJsEngineInstance,
+			IVirtualFileSystemWrapper virtualFileSystemWrapper, SassAndScssSettings sassAndScssConfig)
 		{
+			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
+
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
 			IncludePaths = sassAndScssConfig.IncludePaths
 				.Cast<IncludedPathRegistration>()
@@ -122,55 +124,29 @@ namespace BundleTransformer.SassAndScss.Translators
 			IndentType = sassAndScssConfig.IndentType;
 			IndentWidth = sassAndScssConfig.IndentWidth;
 			LineFeedType = sassAndScssConfig.LineFeedType;
-			Precision = sassAndScssConfig.Precision;
-			SourceComments = sassAndScssConfig.SourceComments;
-		}
+			Severity = sassAndScssConfig.Severity;
 
-
-		/// <summary>
-		/// Sets a virtual file system wrapper
-		/// </summary>
-		/// <param name="virtualFileSystemWrapper">Virtual file system wrapper</param>
-		public static void SetVirtualFileSystemWrapper(IVirtualFileSystemWrapper virtualFileSystemWrapper)
-		{
-			if (virtualFileSystemWrapper == null)
+			if (createJsEngineInstance == null)
 			{
-				throw new ArgumentNullException(
-					nameof(virtualFileSystemWrapper),
-					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(virtualFileSystemWrapper))
-				);
-			}
-
-			IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
-
-			lock (_initializationSynchronizer)
-			{
-				SassCompiler.FileManager = virtualFileManager;
-				_initialized = true;
-			}
-		}
-
-		/// <summary>
-		/// Initializes a Sass compiler
-		/// </summary>
-		private static void Initialize()
-		{
-			if (!_initialized)
-			{
-				lock (_initializationSynchronizer)
+				string jsEngineName = sassAndScssConfig.JsEngine.Name;
+				if (string.IsNullOrWhiteSpace(jsEngineName))
 				{
-					if (!_initialized)
-					{
-						IVirtualFileSystemWrapper virtualFileSystemWrapper =
-							BundleTransformerContext.Current.FileSystem.GetVirtualFileSystemWrapper();
-						IFileManager virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
-
-						SassCompiler.FileManager = virtualFileManager;
-						_initialized = true;
-					}
+					throw new ConfigurationErrorsException(
+						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
+							"sassAndScss",
+							@"
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT mode)
+  * JavaScriptEngineSwitcher.V8
+  * JavaScriptEngineSwitcher.ChakraCore",
+							"MsieJsEngine")
+					);
 				}
+
+				createJsEngineInstance = () => JsEngineSwitcher.Current.CreateEngine(jsEngineName);
 			}
+			_createJsEngineInstance = createJsEngineInstance;
 		}
+
 
 		/// <summary>
 		/// Translates a code of asset written on Sass or SCSS to CSS code
@@ -183,16 +159,18 @@ namespace BundleTransformer.SassAndScss.Translators
 			{
 				throw new ArgumentNullException(
 					nameof(asset),
-					string.Format(Strings.Common_ArgumentIsNull, nameof(asset))
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(asset))
 				);
 			}
 
-			Initialize();
-
 			bool enableNativeMinification = NativeMinificationEnabled;
+			int severity = Severity;
 			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
-			InnerTranslate(asset, options, enableNativeMinification);
+			using (var sassCompiler = new SassCompiler(_createJsEngineInstance, _virtualFileManager, options))
+			{
+				InnerTranslate(asset, sassCompiler, severity, enableNativeMinification);
+			}
 
 			return asset;
 		}
@@ -208,7 +186,7 @@ namespace BundleTransformer.SassAndScss.Translators
 			{
 				throw new ArgumentNullException(
 					nameof(assets),
-					string.Format(Strings.Common_ArgumentIsNull, nameof(assets))
+					string.Format(CoreStrings.Common_ArgumentIsNull, nameof(assets))
 				);
 			}
 
@@ -224,20 +202,23 @@ namespace BundleTransformer.SassAndScss.Translators
 				return assets;
 			}
 
-			Initialize();
-
 			bool enableNativeMinification = NativeMinificationEnabled;
+			int severity = Severity;
 			CompilationOptions options = CreateCompilationOptions(enableNativeMinification);
 
-			foreach (var asset in assetsToProcessing)
+			using (var sassCompiler = new SassCompiler(_createJsEngineInstance, _virtualFileManager, options))
 			{
-				InnerTranslate(asset, options, enableNativeMinification);
+				foreach (var asset in assetsToProcessing)
+				{
+					InnerTranslate(asset, sassCompiler, severity, enableNativeMinification);
+				}
 			}
 
 			return assets;
 		}
 
-		private void InnerTranslate(IAsset asset, CompilationOptions sassOptions, bool enableNativeMinification)
+		private void InnerTranslate(IAsset asset, SassCompiler sassCompiler, int severity,
+			bool enableNativeMinification)
 		{
 			string assetTypeName = asset.AssetTypeCode == Constants.AssetTypeCode.Sass ? "Sass" : "SCSS";
 			string newContent;
@@ -246,22 +227,37 @@ namespace BundleTransformer.SassAndScss.Translators
 
 			try
 			{
-				CompilationResult result = SassCompiler.Compile(asset.Content, assetUrl, options: sassOptions);
+				CompilationResult result = sassCompiler.Compile(asset.Content, assetUrl);
 				newContent = result.CompiledContent;
-				dependencies = result.IncludedFilePaths;
+				dependencies = result.IncludedFilePaths
+					.Where(p => p != assetUrl)
+					.ToList()
+					;
+
+				if (severity > 0)
+				{
+					IList<ProblemInfo> warnings = result.Warnings;
+					if (severity == 1)
+					{
+						warnings = warnings
+							.Where(w => !w.IsDeprecation)
+							.ToList()
+							;
+					}
+
+					if (warnings.Count > 0)
+					{
+						string warningMessage = GenerateDetailedWarningMessage(warnings[0]);
+
+						throw new AssetTranslationException(
+							string.Format(CoreStrings.Translators_TranslationSyntaxError,
+								assetTypeName, OUTPUT_CODE_TYPE, assetUrl, warningMessage));
+					}
+				}
 			}
 			catch (SassCompilationException e)
 			{
-				string errorDetails = SassErrorHelpers.GenerateErrorDetails(e, true);
-
-				var stringBuilderPool = StringBuilderPool.Shared;
-				StringBuilder errorMessageBuilder = stringBuilderPool.Rent();
-				errorMessageBuilder.AppendLine(e.Message);
-				errorMessageBuilder.AppendLine();
-				errorMessageBuilder.Append(errorDetails);
-
-				string errorMessage = errorMessageBuilder.ToString();
-				stringBuilderPool.Return(errorMessageBuilder);
+				string errorMessage = GenerateDetailedErrorMessage(e);
 
 				throw new AssetTranslationException(
 					string.Format(CoreStrings.Translators_TranslationSyntaxError,
@@ -288,22 +284,121 @@ namespace BundleTransformer.SassAndScss.Translators
 		private CompilationOptions CreateCompilationOptions(bool enableNativeMinification)
 		{
 			IList<string> processedIncludePaths = IncludePaths
-					.Select(p => SassCompiler.FileManager.ToAbsolutePath(p))
-					.ToList()
-					;
+				.Select(p => _virtualFileManager.ToAbsoluteVirtualPath(p))
+				.ToList()
+				;
 
 			var options = new CompilationOptions
 			{
 				IncludePaths = processedIncludePaths,
-				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, LshIndentType>(IndentType),
+				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, DshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
-				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, LshLineFeedType>(LineFeedType),
+				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, DshLineFeedType>(LineFeedType),
 				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded,
-				Precision = Precision,
-				SourceComments = SourceComments
+				WarningLevel = ConvertSeverityToWarningLevel(Severity)
 			};
 
 			return options;
+		}
+
+		/// <summary>
+		/// Converts a severity level of errors to the warning level
+		/// </summary>
+		/// <param name="severity">Severity level of errors</param>
+		/// <returns>Warning level</returns>
+		private static WarningLevel ConvertSeverityToWarningLevel(int severity)
+		{
+			WarningLevel warningLevel;
+
+			switch (severity)
+			{
+				case 0:
+					warningLevel = WarningLevel.Quiet;
+					break;
+				case 1:
+					warningLevel = WarningLevel.Default;
+					break;
+				case 2:
+					warningLevel = WarningLevel.Verbose;
+					break;
+				default:
+					throw new NotSupportedException();
+			}
+
+			return warningLevel;
+		}
+
+		/// <summary>
+		/// Generates a detailed error message
+		/// </summary>
+		/// <param name="error">Error details</param>
+		/// <returns>Detailed error message</returns>
+		private static string GenerateDetailedErrorMessage(SassCompilationException error)
+		{
+			string type = error.Status == 1 ? "syntax error" : "error";
+
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder messageBuilder = stringBuilderPool.Rent();
+
+			WriteDetailedMessage(messageBuilder, error.Message, type, error.Description, error.File,
+				error.LineNumber, error.ColumnNumber, error.SourceFragment, error.CallStack);
+
+			string detailedMessage = messageBuilder.ToString();
+			stringBuilderPool.Return(messageBuilder);
+
+			return detailedMessage;
+		}
+
+		/// <summary>
+		/// Generates a detailed warning message
+		/// </summary>
+		/// <param name="warning">Warning details</param>
+		/// <returns>Detailed warning message</returns>
+		private static string GenerateDetailedWarningMessage(ProblemInfo warning)
+		{
+			string type = warning.IsDeprecation ? "deprecation warning" : "warning";
+
+			var stringBuilderPool = StringBuilderPool.Shared;
+			StringBuilder messageBuilder = stringBuilderPool.Rent();
+
+			WriteDetailedMessage(messageBuilder, warning.Message, type, warning.Description, warning.File,
+				warning.LineNumber, warning.ColumnNumber, warning.SourceFragment, warning.CallStack);
+
+			string detailedMessage = messageBuilder.ToString();
+			stringBuilderPool.Return(messageBuilder);
+
+			return detailedMessage;
+		}
+
+		private static void WriteDetailedMessage(StringBuilder buffer, string message, string type, string description,
+			string filePath, int lineNumber, int columnNumber, string sourceFragment, string callStack)
+		{
+			buffer.AppendLine(message);
+			buffer.AppendLine();
+			buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ErrorType, type);
+			buffer.AppendFormatLine("{0}: {1}", Strings.ErrorDetails_Description, description);
+			if (!string.IsNullOrWhiteSpace(filePath))
+			{
+				buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_File, filePath);
+			}
+			if (lineNumber > 0)
+			{
+				buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_LineNumber, lineNumber);
+			}
+			if (columnNumber > 0)
+			{
+				buffer.AppendFormatLine("{0}: {1}", CoreStrings.ErrorDetails_ColumnNumber, columnNumber);
+			}
+			if (!string.IsNullOrWhiteSpace(sourceFragment))
+			{
+				buffer.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					CoreStrings.ErrorDetails_SourceError, sourceFragment);
+			}
+			if (!string.IsNullOrWhiteSpace(callStack))
+			{
+				buffer.AppendFormatLine("{1}:{0}{0}{2}", Environment.NewLine,
+					Strings.ErrorDetails_StackTrace, callStack);
+			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: Sass and SCSS v1.12.36
+              README file for Bundle Transformer: Sass and SCSS v1.12.36
 
    --------------------------------------------------------------------------------
 
@@ -13,27 +13,46 @@
    ===========
    BundleTransformer.SassAndScss contains one translator-adapter -
    `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to
-   CSS code by using the LibSass Host for .NET 
-   (https://github.com/Taritsyn/LibSassHost) version 1.3.3 (supports the LibSass
-   (https://sass-lang.com/libsass) version 3.6.5). Also contains the
+   CSS code by using the Dart Sass Host for .NET
+   (https://github.com/Taritsyn/DartSassHost) version 1.0.0 (supports the Dart Sass
+   (https://github.com/sass/dart-sass) version 1.56.1). Also contains the
    `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text
    output of translated Sass or SCSS asset.
 
-   This package does not contain the native implementations of LibSass for Windows.
-   Therefore, you need to choose and install the most appropriate package(s) for
-   your platform. The following packages are available:
-
-    * LibSassHost.Native.win-x86
-    * LibSassHost.Native.win-x64
+   As a JS engine is used the JavaScript Engine Switcher library
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher).
 
    =============
    RELEASE NOTES
    =============
-   Added support of the LibSass version 3.6.5.
+   1. Now the Dart Sass Host library (requires installation and registration of the
+      JS engine) is used instead of the LibSass Host;
+   2. In configuration settings of Sass and SCSS translator was added one new
+      property - `JsEngine`;
+   3. From configuration settings of Sass and SCSS translator was removed two
+      properties: `Precision` and `SourceComments`;
+   4. In configuration settings of Sass and SCSS translator was added one new
+      property - `Severity` (default `0`);
+   5. `VirtualFileManager` class was made public;
+   6. Conversion of the application-relative paths (starts with `~/`) to an
+      absolute virtual paths is no longer supported in the `url()` functions if its
+      value contains an interpolation and unquoted (for example,
+      `url(#{$icons-path}/computer.png)`). For normal working, such values should
+      be quoted (for example, `url("#{$icons-path}/computer.png")` or
+      `url('#{$icons-path}/computer.png')`).
 
    ====================
    POST-INSTALL ACTIONS
    ====================
+   For correct working of this module, you need to install one of the following
+   NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT
+   mode), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.
+   After package is installed and JS engine is registered
+   (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
+   need set a name of JS engine (for example, `MsieJsEngine`) to the `name`
+   attribute of `/configuration/bundleTransformer/sassAndScss/jsEngine`
+   configuration element in the `Web.config` file.
+
    To use a debugging HTTP handlers in the IIS Classic mode, you need add to the
    `/configuration/system.web/httpHandlers` element of the `Web.config` file a
    following code:
