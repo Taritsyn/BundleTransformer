@@ -14,8 +14,8 @@
    BundleTransformer.SassAndScss contains one translator-adapter -
    `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to
    CSS code by using the Dart Sass Host for .NET
-   (https://github.com/Taritsyn/DartSassHost) version 1.0.0 (supports the Dart Sass
-   (https://github.com/sass/dart-sass) version 1.56.1). Also contains the
+   (https://github.com/Taritsyn/DartSassHost) version 1.0.1 (supports the Dart Sass
+   (https://github.com/sass/dart-sass) version 1.57.1). Also contains the
    `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text
    output of translated Sass or SCSS asset.
 
@@ -25,21 +25,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Now the Dart Sass Host library (requires installation and registration of the
-      JS engine) is used instead of the LibSass Host;
-   2. In configuration settings of Sass and SCSS translator was added one new
-      property - `JsEngine`;
-   3. From configuration settings of Sass and SCSS translator was removed two
-      properties: `Precision` and `SourceComments`;
-   4. In configuration settings of Sass and SCSS translator was added one new
-      property - `Severity` (default `0`);
-   5. `VirtualFileManager` class was made public;
-   6. Conversion of the application-relative paths (starts with `~/`) to an
-      absolute virtual paths is no longer supported in the `url()` functions if its
-      value contains an interpolation and unquoted (for example,
-      `url(#{$icons-path}/computer.png)`). For normal working, such values should
-      be quoted (for example, `url("#{$icons-path}/computer.png")` or
-      `url('#{$icons-path}/computer.png')`).
+   Added support of the Dart Sass version 1.57.1.
 
    ====================
    POST-INSTALL ACTIONS
