@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.13.1 - December 27, 2022
+ * In BundleTransformer.SassAndScss added support of the Dart Sass version 1.57.1
+
 ## v1.13.0 - December 18, 2022
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of Sass and SCSS translator
  * In BundleTransformer.SassAndScss:
