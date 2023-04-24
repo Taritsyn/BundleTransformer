@@ -1,82 +1,52 @@
 /*global ts, VirtualFileManager */
-var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
+var typeScriptHelper = (function (virtualFileManager, undefined) {
 	'use strict';
 
 	var exports = {},
+		globals = typeof globalThis !== "undefined" ? globalThis :
+			typeof global !== "undefined" ? global :
+				typeof self !== "undefined" ? self :
+					Function('return this')(),
 		defaultOptions = {
+			allowArbitraryExtensions: false,
+			allowImportingTsExtensions: false,
 			allowJs: false,
 			allowSyntheticDefaultImports: false,
 			allowUmdGlobalAccess: false,
-			allowUnreachableCode: false,
-			allowUnusedLabels: false,
-			alwaysStrict: false,
 			baseUrl: '',
 			charset: '',
 			composite: false,
+			customConditions: null,
 			declarationDir: '',
 			declarationMap: false,
 			disableSizeLimit: false,
-			downlevelIteration: false,
-			exactOptionalPropertyTypes: false,
 			emitBOM: false,
 			emitDecoratorMetadata: false,
 			esModuleInterop: false,
 			experimentalDecorators: false,
 			explainFiles: false,
-			forceConsistentCasingInFileNames: false,
 			importHelpers: false,
 			inlineSourceMap: false,
 			inlineSources: false,
 			jsxFactory: false,
 			jsxFragmentFactory: '',
 			jsxImportSource: '',
-			keyofStringsOnly: false,
-			lib: null,
 			mapRoot: '',
-			module: ts.ModuleKind.None,
-			newLine: 0 /* CrLf */,
-			noEmit: false,
-			noEmitHelpers: false,
-			noEmitOnError: false,
-			noErrorTruncation: false,
-			noFallthroughCasesInSwitch: false,
-			noImplicitAny: false,
-			noImplicitOverride: false,
-			noImplicitReturns: false,
-			noImplicitThis: false,
+			module: 0 /* None */,
+			moduleResolution: 1 /* Classic */,
 			noImplicitUseStrict: false,
-			noLib: false,
-			noPropertyAccessFromIndexSignature: false,
-			noResolve: false,
-			noStrictGenericChecks: false,
-			noUncheckedIndexedAccess: false,
-			noUnusedLocals: false,
-			noUnusedParameters: false,
 			out: '',
 			outDir: '',
-			preserveConstEnums: false,
 			preserveSymlinks: false,
 			reactNamespace: '',
-			removeComments: false,
 			resolveJsonModule: false,
+			resolvePackageJsonExports: false,
+			resolvePackageJsonImports: false,
 			rootDir: '',
 			isolatedModules: false,
 			sourceMap: false,
 			sourceRoot: '',
-			skipDefaultLibCheck: false,
-			skipLibCheck: false,
-			strictBindCallApply: false,
-			strictNullChecks: false,
-			strictFunctionTypes: false,
-			strictPropertyInitialization: false,
-			stripInternal: false,
-			suppressExcessPropertyErrors: false,
-			suppressImplicitAnyIndexErrors: false,
-			suppressTypeCheckingErrors: false,
-			target: 0 /* ES3 */,
-			transpileOnly: false,
-			useDefineForClassFields: false,
-			useUnknownInCatchVariables: false
+			verbatimModuleSyntax: false
 		},
 		BtSystem
 		;
@@ -116,7 +86,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 	//#region BtSystem class
 	BtSystem = (function () {
-		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = 'Method \'ts.sys.{0}\' is not implemented.';
+		var ERROR_MSG_PATTERN_METHOD_NOT_SUPPORTED = 'Method \'sys.{0}\' is not implemented.';
 
 		function BtSystem(defaultLibFileName) {
 			this.args = [];
@@ -236,11 +206,11 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 	//#region createBtCompilerHostWorker function
 	function createBtCompilerHostWorker(options, setParentNodes, system) {
 		if (system === void 0){
-			system = ts.sys;
+			system = globals.sys;
 		}
 
 		var compilerHost,
-			newLine = ts.getNewLineCharacter(options, function () { return system.newLine; })
+			newLine = globals.getNewLineCharacter(options, function () { return system.newLine; })
 			;
 
 		function getSourceFile(fileName, languageVersionOrOptions, onError) {
@@ -258,7 +228,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			}
 
 			return (typeof text !== 'undefined') ?
-				ts.createSourceFile(fileName, text, languageVersionOrOptions, false) : undefined;
+				globals.createSourceFile(fileName, text, languageVersionOrOptions, false) : undefined;
 		}
 
 		function getDefaultLibLocation() {
@@ -266,7 +236,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		}
 
 		function getDefaultLibFileName(options) {
-			return ts.getDefaultLibFileName(options);
+			return globals.getDefaultLibFileName(options);
 		}
 
 		function writeFile(fileName, data, writeByteOrderMark, onError) {
@@ -345,7 +315,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			allowTypeCheckingErrors = !options.suppressTypeCheckingErrors
 			;
 
-		program = ts.createProgram(fileNames, options, compilerHost);
+		program = globals.createProgram(fileNames, options, compilerHost);
 
 		diagnostics = program.getSyntacticDiagnostics();
 		if (diagnostics.length === 0) {
@@ -361,7 +331,7 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 		var emitOutput = program.emit();
 		if (allowTypeCheckingErrors) {
 			diagnostics = diagnostics.concat(emitOutput.diagnostics);
-			diagnostics = ts.sortAndDeduplicateDiagnostics(diagnostics);
+			diagnostics = globals.sortAndDeduplicateDiagnostics(diagnostics);
 		}
 
 		return {
@@ -387,12 +357,12 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 
 		for (diagnosticIndex = 0; diagnosticIndex < diagnosticCount; diagnosticIndex++) {
 			diagnostic = diagnostics[diagnosticIndex];
-			message = ts.flattenDiagnosticMessageText(diagnostic.messageText, ts.sys.newLine);
+			message = globals.flattenDiagnosticMessageText(diagnostic.messageText, globals.sys.newLine);
 			file = diagnostic.file;
 
 			if (file) {
 				fileName = file.fileName;
-				location = ts.getLineAndCharacterOfPosition(file, diagnostic.start);
+				location = globals.getLineAndCharacterOfPosition(file, diagnostic.start);
 				lineNumber = location.line + 1;
 				columnNumber = location.character + 1;
 			}
@@ -430,26 +400,26 @@ var typeScriptHelper = (function (ts, virtualFileManager, undefined) {
 			compilationOptions.noResolve = true;
 			compilationOptions.suppressTypeCheckingErrors = true;
 		}
-		defaultLibFileName = ts.getDefaultLibFileName(compilationOptions);
+		defaultLibFileName = globals.getDefaultLibFileName(compilationOptions);
 
 		// Compile code
-		ts.sys = new BtSystem(defaultLibFileName);
-		defaultCompilerHost = createBtCompilerHostWorker(compilationOptions, null, ts.sys);
+		globals.sys = new BtSystem(defaultLibFileName);
+		defaultCompilerHost = createBtCompilerHostWorker(compilationOptions, null, globals.sys);
 
 		compilationErrors = innerCompile([inputFilePath], compilationOptions, defaultCompilerHost).errors || [];
 		if (compilationErrors.length === 0) {
-			result.compiledCode = ts.sys.readFile(outputFilePath);
-			result.includedFilePaths = ts.sys.getIncludedFilePaths();
+			result.compiledCode = globals.sys.readFile(outputFilePath);
+			result.includedFilePaths = globals.sys.getIncludedFilePaths();
 		}
 		else {
 			result.errors = getErrorsFromDiagnostics(compilationErrors);
 		}
 
-		ts.sys.dispose();
-		ts.sys = null;
+		globals.sys.dispose();
+		globals.sys = null;
 
 		return JSON.stringify(result);
 	};
 
 	return exports;
-}(ts, VirtualFileManager));
+}(VirtualFileManager));

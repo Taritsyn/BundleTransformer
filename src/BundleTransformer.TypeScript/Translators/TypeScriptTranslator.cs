@@ -107,6 +107,15 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a version number of TypeScript for which deprecation warnings should be ignored
+		/// </summary>
+		public string IgnoreDeprecations
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
 		/// Legacy option.
 		/// </summary>
@@ -465,6 +474,7 @@ namespace BundleTransformer.TypeScript.Translators
 			DownlevelIteration = tsConfig.DownlevelIteration;
 			ExactOptionalPropertyTypes = tsConfig.ExactOptionalPropertyTypes;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
+			IgnoreDeprecations = tsConfig.IgnoreDeprecations;
 			KeyofStringsOnly = tsConfig.KeyofStringsOnly;
 			Libs = tsConfig.Libs
 				.Cast<LibraryFileRegistration>()
@@ -636,6 +646,7 @@ namespace BundleTransformer.TypeScript.Translators
 				DownlevelIteration = DownlevelIteration,
 				ExactOptionalPropertyTypes = ExactOptionalPropertyTypes,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
+				IgnoreDeprecations = IgnoreDeprecations,
 				KeyofStringsOnly = KeyofStringsOnly,
 				Libs = Libs,
 				NewLine = NewLine,

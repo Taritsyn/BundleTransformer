@@ -1,0 +1,16 @@
+{
+  "compact": false,
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "10",
+          "firefox": "4",
+          "ie": "9",
+        },
+        "useBuiltIns": false
+      }
+    ]
+  ]
+}

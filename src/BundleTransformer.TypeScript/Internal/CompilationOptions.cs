@@ -64,6 +64,15 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a version number of TypeScript for which deprecation warnings should be ignored
+		/// </summary>
+		public string IgnoreDeprecations
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
 		/// Legacy option.
 		/// </summary>
@@ -406,7 +415,8 @@ namespace BundleTransformer.TypeScript.Internal
 			AlwaysStrict = false;
 			DownlevelIteration = false;
 			ExactOptionalPropertyTypes = false;
-			ForceConsistentCasingInFileNames = false;
+			ForceConsistentCasingInFileNames = true;
+			IgnoreDeprecations = string.Empty;
 			KeyofStringsOnly = false;
 			Libs = new List<string>();
 			NewLine = NewLineMode.CrLf;
@@ -438,7 +448,7 @@ namespace BundleTransformer.TypeScript.Internal
 			SuppressExcessPropertyErrors = false;
 			SuppressImplicitAnyIndexErrors = false;
 			SuppressTypeCheckingErrors = false;
-			Target = TargetMode.EcmaScript3;
+			Target = TargetMode.EcmaScript5;
 			TranspileOnly = false;
 			UseDefineForClassFields = false;
 			UseUnknownInCatchVariables = false;

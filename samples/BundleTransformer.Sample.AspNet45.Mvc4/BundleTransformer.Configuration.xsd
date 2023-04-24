@@ -608,9 +608,14 @@
         <xs:documentation>Flag for whether to interpret optional property types as written, rather than adding `undefined`</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="false">
+    <xs:attribute name="forceConsistentCasingInFileNames" type="Boolean_SchemaType" use="optional" default="true">
       <xs:annotation>
         <xs:documentation>Flag for whether to ensure that casing is correct in imports</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="ignoreDeprecations" type="xs:string" use="optional" default="">
+      <xs:annotation>
+        <xs:documentation>Version number of TypeScript for which deprecation warnings should be ignored</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="keyofStringsOnly" type="Boolean_SchemaType" use="optional" default="false">
@@ -769,7 +774,7 @@
         <xs:documentation>Flag for whether to suppress type checking errors. Non-standard option.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="target" use="optional" default="EcmaScript3">
+    <xs:attribute name="target" use="optional" default="EcmaScript5">
       <xs:annotation>
         <xs:documentation>JavaScript language version for emitted JavaScript and include compatible library declarations</xs:documentation>
       </xs:annotation>

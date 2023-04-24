@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org) version 4.9.4). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
+    <Description>BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org) version 5.0.4). This adapter makes translation of TypeScript code to JS code. Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
 
 BundleTransformer.TypeScript does not support external modules (CommonJS, AMD, SystemJS, UMD and ES6 modules).
 
@@ -23,7 +23,8 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;TypeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of the TypeScript version 4.9.4.</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Added support of the TypeScript version 5.0.4;
+2. In configuration settings of TypeScript translator was changed the default values of two properties: `ForceConsistentCasingInFileNames` (from `false` to `true`) and `Target` (from `EcmaScript3` to `EcmaScript5`), and added one new property - `IgnoreDeprecations` (default empty string).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,6 +39,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources/es6-polyfills.min.js" />
     <EmbeddedResource Include="Resources/tscHelper.min.js" />
     <EmbeddedResource Include="Resources/typescript-combined.min.js" />
     <EmbeddedResource Include="Resources/DefaultLibraries/*.d.ts" />
@@ -58,6 +60,11 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
       <Pack>true</Pack>
       <Visible>false</Visible>
     </None>
+    <None Include="../../Licenses/core-js-license.txt">
+      <PackagePath>core-js-license.txt</PackagePath>
+      <Pack>true</Pack>
+      <Visible>false</Visible>
+    </None>
     <None Include="../../Licenses/js-engine-switcher-license.txt">
       <PackagePath>js-engine-switcher-license.txt</PackagePath>
       <Pack>true</Pack>
@@ -70,11 +77,10 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     </None>
   </ItemGroup>
 
-  <Target Name="JsMinification" AfterTargets="BeforeBuild">
-    <Exec Command='AjaxMinifier.exe "$(ProjectDir)Resources/typescript-combined.js" –out "$(ProjectDir)Resources/typescript-combined.min.js"
-AjaxMinifier.exe "$(ProjectDir)Resources/tscHelper.js" –out "$(ProjectDir)Resources/tscHelper.min.js'
-      WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
-      ConsoleToMsBuild="true" />
+  <Target Name="EnsureJsFilesBuilded" BeforeTargets="BeforeBuild">
+    <Error
+      Condition=" !Exists('./Resources/es6-polyfills.min.js') Or !Exists('./Resources/typescript-combined.min.js') Or !Exists('./Resources/tscHelper.min.js') "
+      Text="You need to build JS files. To do this, run a `build-js.cmd` script in the `./src/BundleTransformer.TypeScript` directory." />
   </Target>
 
 </Project>

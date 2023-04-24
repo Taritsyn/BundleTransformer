@@ -1,0 +1,18 @@
+{
+  "name": "bundletransformer.typescript",
+  "version": "1.12.54",
+  "devDependencies": {
+    "@babel/cli": "7.21.0",
+    "@babel/core": "7.21.4",
+    "@babel/preset-env": "7.21.4",
+    "uglify-js": "3.16.1"
+  },
+  "scripts": {
+    "transpile-typescript-combined-es6": "babel --out-file ./Resources/typescript-combined.js --config-file ./.babelrc ./Resources/typescript-combined.es6",
+    "minify-es6-polyfills-js": "uglifyjs ./Resources/es6-polyfills.js --output ./Resources/es6-polyfills.min.js --config-file ./.uglifyjsrc",
+    "minify-typescript-combined-js": "uglifyjs ./Resources/typescript-combined.js --output ./Resources/typescript-combined.min.js --config-file ./.uglifyjsrc",
+    "minify-tsc-helper-js": "uglifyjs ./Resources/tscHelper.js --output ./Resources/tscHelper.min.js --config-file ./.uglifyjsrc",
+    "transpile-es6": "npm run -s transpile-typescript-combined-es6",
+    "minify-js": "npm run -s minify-es6-polyfills-js && npm run -s minify-typescript-combined-js && npm run -s minify-tsc-helper-js"
+  }
+}

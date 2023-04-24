@@ -64,11 +64,21 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// <summary>
 		/// Gets or sets a flag for whether to ensure that casing is correct in imports
 		/// </summary>
-		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = false)]
+		[ConfigurationProperty("forceConsistentCasingInFileNames", DefaultValue = true)]
 		public bool ForceConsistentCasingInFileNames
 		{
 			get { return (bool)this["forceConsistentCasingInFileNames"]; }
 			set { this["forceConsistentCasingInFileNames"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a version number of TypeScript for which deprecation warnings should be ignored
+		/// </summary>
+		[ConfigurationProperty("ignoreDeprecations", DefaultValue = "")]
+		public string IgnoreDeprecations
+		{
+			get { return (string)this["ignoreDeprecations"]; }
+			set { this["ignoreDeprecations"] = value; }
 		}
 
 		/// <summary>
@@ -397,7 +407,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a JavaScript language version for emitted JavaScript and include compatible library
 		/// declarations
 		/// </summary>
-		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript3)]
+		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript5)]
 		public TargetMode Target
 		{
 			get { return (TargetMode)this["target"]; }

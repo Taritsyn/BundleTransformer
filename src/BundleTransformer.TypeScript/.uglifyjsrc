@@ -1,0 +1,11 @@
+{
+  "compress": {
+    "hoist_funs": true,
+    "hoist_vars": true,
+    "passes": 2
+  },
+  "mangle": {},
+  "output": {
+    "comments": "/^!/"
+  }
+}

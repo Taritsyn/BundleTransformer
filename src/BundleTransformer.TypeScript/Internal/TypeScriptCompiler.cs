@@ -22,6 +22,11 @@ namespace BundleTransformer.TypeScript.Internal
 	internal sealed class TypeScriptCompiler : IDisposable
 	{
 		/// <summary>
+		/// Name of file, which contains a ECMAScript 6+ polyfills
+		/// </summary>
+		private const string ES6_POLYFILLS_FILE_NAME = "es6-polyfills.min.js";
+
+		/// <summary>
 		/// Name of file, which contains a TypeScript library
 		/// </summary>
 		private const string TYPESCRIPT_LIBRARY_FILE_NAME = "typescript-combined.min.js";
@@ -109,6 +114,7 @@ namespace BundleTransformer.TypeScript.Internal
 
 				Assembly assembly = GetType().Assembly;
 
+				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(ES6_POLYFILLS_FILE_NAME), assembly);
 				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(TYPESCRIPT_LIBRARY_FILE_NAME), assembly);
 				_jsEngine.ExecuteResource(ResourceHelpers.GetResourceName(TSC_HELPER_FILE_NAME), assembly);
 
@@ -184,6 +190,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("exactOptionalPropertyTypes", options.ExactOptionalPropertyTypes),
 				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
 				new JProperty("keyofStringsOnly", options.KeyofStringsOnly),
+				new JProperty("ignoreDeprecations", options.IgnoreDeprecations),
 				new JProperty("lib", options.Libs.Count > 0 ? new JArray(options.Libs) : null),
 				new JProperty("newLine", options.NewLine),
 				new JProperty("noEmit", options.NoEmit),
