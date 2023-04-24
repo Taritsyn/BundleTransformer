@@ -524,7 +524,7 @@ namespace BundleTransformer.TypeScript.Translators
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"typeScript",
 							@"
-  * JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT mode)
+  * JavaScriptEngineSwitcher.Msie
   * JavaScriptEngineSwitcher.V8
   * JavaScriptEngineSwitcher.ChakraCore",
 							"MsieJsEngine")

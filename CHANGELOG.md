@@ -1,6 +1,17 @@
 Change log
 ==========
 
+## v1.13.4 - April 24, 2023
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support of the TypeScript version 5.0.4
+   * In configuration settings of TypeScript translator was changed the default values of two properties: `ForceConsistentCasingInFileNames` (from `false` to `true`) and `Target` (from `EcmaScript3` to `EcmaScript5`), and added one new property - `IgnoreDeprecations` (default empty string)
+ * In BundleTransformer.Autoprefixer added support of the Autoprefixer version 10.4.14.0
+ * In BundleTransformer.NUglify added support of the NUglify version 1.20.6
+
+## v1.13.3 - March 9, 2023
+ * In BundleTransformer.SassAndScss added support of the Dart Sass version 1.58.3
+
 ## v1.13.2 - January 27, 2023
  * In BundleTransformer.Autoprefixer was updated the Autoprefixer Host to version 3.0.27
  * In BundleTransformer.NUglify added support of the NUglify version 1.20.5
