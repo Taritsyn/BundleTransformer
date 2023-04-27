@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.13.5 - April 27, 2023
+ * In BundleTransformer.SassAndScss added support of the Dart Sass version 1.62.0
+
 ## v1.13.4 - April 24, 2023
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of TypeScript translator
  * In BundleTransformer.TypeScript:
