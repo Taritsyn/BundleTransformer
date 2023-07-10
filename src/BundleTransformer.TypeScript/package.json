@@ -2,9 +2,9 @@
   "name": "bundletransformer.typescript",
   "version": "1.13.6",
   "devDependencies": {
-    "@babel/cli": "7.21.5",
-    "@babel/core": "7.22.1",
-    "@babel/preset-env": "7.22.4",
+    "@babel/cli": "7.22.6",
+    "@babel/core": "7.22.8",
+    "@babel/preset-env": "7.22.7",
     "uglify-js": "3.16.1"
   },
   "scripts": {
