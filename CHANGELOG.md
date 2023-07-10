@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.13.8 - July 10, 2023
+ * In BundleTransformer.TypeScript added support of the TypeScript version 5.1.6
+ * In BundleTransformer.Autoprefixer was updated the Autoprefixer Host to version 3.0.29
+
 ## v1.13.7 - June 15, 2023
  * In BundleTransformer.SassAndScss added support of the Dart Sass version 1.63.3
 
