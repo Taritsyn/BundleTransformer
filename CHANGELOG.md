@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.13.10 - August 11, 2023
+ * In BundleTransformer.Handlebars added support for the Handlebars version 4.7.8
+
 ## v1.13.9 - July 27, 2023
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.64.1
 
