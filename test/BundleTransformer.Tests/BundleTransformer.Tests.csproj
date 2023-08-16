@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Tests</Product>
-    <VersionPrefix>1.13.10</VersionPrefix>
+    <VersionPrefix>1.13.11</VersionPrefix>
     <TargetFramework>net452</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

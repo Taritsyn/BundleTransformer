@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.13.11 - August 16, 2023
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.15.0
+
 ## v1.13.10 - August 11, 2023
  * In BundleTransformer.Handlebars added support for the Handlebars version 4.7.8
 
