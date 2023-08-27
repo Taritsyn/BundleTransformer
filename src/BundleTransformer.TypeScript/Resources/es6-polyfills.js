@@ -14,9 +14,9 @@
   };
 
   // optional / simple context binding
-  var aFunction$4 = _aFunction;
+  var aFunction$6 = _aFunction;
   var _ctx = function (fn, that, length) {
-    aFunction$4(fn);
+    aFunction$6(fn);
     if (that === undefined) return fn;
     switch (length) {
       case 1: return function (a) {
@@ -61,9 +61,9 @@
     return typeof it === 'object' ? it !== null : typeof it === 'function';
   };
 
-  var isObject$f = _isObject;
+  var isObject$h = _isObject;
   var _anObject = function (it) {
-    if (!isObject$f(it)) throw TypeError(it + ' is not an object!');
+    if (!isObject$h(it)) throw TypeError(it + ' is not an object!');
     return it;
   };
 
@@ -80,10 +80,10 @@
     return Object.defineProperty({}, 'a', { get: function () { return 7; } }).a != 7;
   });
 
-  var isObject$e = _isObject;
+  var isObject$g = _isObject;
   var document$2 = _global.exports.document;
   // typeof document.createElement is 'object' in old IE
-  var is = isObject$e(document$2) && isObject$e(document$2.createElement);
+  var is = isObject$g(document$2) && isObject$g(document$2.createElement);
   var _domCreate = function (it) {
     return is ? document$2.createElement(it) : {};
   };
@@ -93,27 +93,27 @@
   });
 
   // 7.1.1 ToPrimitive(input [, PreferredType])
-  var isObject$d = _isObject;
+  var isObject$f = _isObject;
   // instead of the ES6 spec version, we didn't implement @@toPrimitive case
   // and the second argument - flag - preferred type is a string
   var _toPrimitive = function (it, S) {
-    if (!isObject$d(it)) return it;
+    if (!isObject$f(it)) return it;
     var fn, val;
-    if (S && typeof (fn = it.toString) == 'function' && !isObject$d(val = fn.call(it))) return val;
-    if (typeof (fn = it.valueOf) == 'function' && !isObject$d(val = fn.call(it))) return val;
-    if (!S && typeof (fn = it.toString) == 'function' && !isObject$d(val = fn.call(it))) return val;
+    if (S && typeof (fn = it.toString) == 'function' && !isObject$f(val = fn.call(it))) return val;
+    if (typeof (fn = it.valueOf) == 'function' && !isObject$f(val = fn.call(it))) return val;
+    if (!S && typeof (fn = it.toString) == 'function' && !isObject$f(val = fn.call(it))) return val;
     throw TypeError("Can't convert object to primitive value");
   };
 
-  var anObject$f = _anObject;
+  var anObject$g = _anObject;
   var IE8_DOM_DEFINE$1 = _ie8DomDefine;
   var toPrimitive$4 = _toPrimitive;
   var dP$8 = Object.defineProperty;
 
   _objectDp.f = _descriptors ? Object.defineProperty : function defineProperty(O, P, Attributes) {
-    anObject$f(O);
+    anObject$g(O);
     P = toPrimitive$4(P, true);
-    anObject$f(Attributes);
+    anObject$g(Attributes);
     if (IE8_DOM_DEFINE$1) try {
       return dP$8(O, P, Attributes);
     } catch (e) { /* empty */ }
@@ -211,12 +211,12 @@
   var ctx$7 = _ctx;
   var PROTOTYPE$3 = 'prototype';
 
-  var $export$q = function (type, name, source) {
-    var IS_FORCED = type & $export$q.F;
-    var IS_GLOBAL = type & $export$q.G;
-    var IS_STATIC = type & $export$q.S;
-    var IS_PROTO = type & $export$q.P;
-    var IS_BIND = type & $export$q.B;
+  var $export$r = function (type, name, source) {
+    var IS_FORCED = type & $export$r.F;
+    var IS_GLOBAL = type & $export$r.G;
+    var IS_STATIC = type & $export$r.S;
+    var IS_PROTO = type & $export$r.P;
+    var IS_BIND = type & $export$r.B;
     var target = IS_GLOBAL ? global$c : IS_STATIC ? global$c[name] || (global$c[name] = {}) : (global$c[name] || {})[PROTOTYPE$3];
     var exports = IS_GLOBAL ? core$2 : core$2[name] || (core$2[name] = {});
     var expProto = exports[PROTOTYPE$3] || (exports[PROTOTYPE$3] = {});
@@ -230,7 +230,7 @@
       // bind timers to global for call from export context
       exp = IS_BIND && own ? ctx$7(out, global$c) : IS_PROTO && typeof out == 'function' ? ctx$7(Function.call, out) : out;
       // extend global
-      if (target) redefine$6(target, key, out, type & $export$q.U);
+      if (target) redefine$6(target, key, out, type & $export$r.U);
       // export
       if (exports[key] != out) hide$4(exports, key, exp);
       if (IS_PROTO && expProto[key] != out) expProto[key] = out;
@@ -238,15 +238,15 @@
   };
   global$c.core = core$2;
   // type bitmap
-  $export$q.F = 1;   // forced
-  $export$q.G = 2;   // global
-  $export$q.S = 4;   // static
-  $export$q.P = 8;   // proto
-  $export$q.B = 16;  // bind
-  $export$q.W = 32;  // wrap
-  $export$q.U = 64;  // safe
-  $export$q.R = 128; // real proto method for `library`
-  var _export = $export$q;
+  $export$r.F = 1;   // forced
+  $export$r.G = 2;   // global
+  $export$r.S = 4;   // static
+  $export$r.P = 8;   // proto
+  $export$r.B = 16;  // bind
+  $export$r.W = 32;  // wrap
+  $export$r.U = 64;  // safe
+  $export$r.R = 128; // real proto method for `library`
+  var _export = $export$r;
 
   // 7.2.1 RequireObjectCoercible(argument)
   var _defined = function (it) {
@@ -261,14 +261,14 @@
   };
 
   // call something on iterator step with safe closing on error
-  var anObject$e = _anObject;
+  var anObject$f = _anObject;
   var _iterCall = function (iterator, fn, value, entries) {
     try {
-      return entries ? fn(anObject$e(value)[0], value[1]) : fn(value);
+      return entries ? fn(anObject$f(value)[0], value[1]) : fn(value);
     // 7.4.6 IteratorClose(iterator, completion)
     } catch (e) {
       var ret = iterator['return'];
-      if (ret !== undefined) anObject$e(ret.call(iterator));
+      if (ret !== undefined) anObject$f(ret.call(iterator));
       throw e;
     }
   };
@@ -391,7 +391,7 @@
   }
 
   var ctx$6 = _ctx;
-  var $export$p = _export;
+  var $export$q = _export;
   var toObject$9 = _toObject;
   var call$1 = _iterCall;
   var isArrayIter$2 = _isArrayIter;
@@ -399,7 +399,7 @@
   var createProperty$1 = _createProperty;
   var getIterFn$2 = core_getIteratorMethod;
 
-  $export$p($export$p.S + $export$p.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
+  $export$q($export$q.S + $export$q.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
     // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
     from: function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
       var O = toObject$9(arrayLike);
@@ -463,14 +463,14 @@
   };
 
   // most Object methods by ES6 should accept primitives
-  var $export$o = _export;
+  var $export$p = _export;
   var core = require_core();
-  var fails$7 = _fails;
+  var fails$8 = _fails;
   var _objectSap = function (KEY, exec) {
     var fn = (core.Object || {})[KEY] || Object[KEY];
     var exp = {};
     exp[KEY] = exec(fn);
-    $export$o($export$o.S + $export$o.F * fails$7(function () { fn(1); }), 'Object', exp);
+    $export$p($export$p.S + $export$p.F * fails$8(function () { fn(1); }), 'Object', exp);
   };
 
   // 19.1.2.9 Object.getPrototypeOf(O)
@@ -494,7 +494,7 @@
   var ctx$5 = _ctx;
   var call = _iterCall;
   var isArrayIter$1 = _isArrayIter;
-  var anObject$d = _anObject;
+  var anObject$e = _anObject;
   var toLength$9 = _toLength;
   var getIterFn$1 = core_getIteratorMethod;
   var BREAK = {};
@@ -507,7 +507,7 @@
     if (typeof iterFn != 'function') throw TypeError(iterable + ' is not iterable!');
     // fast case for arrays with default iterator
     if (isArrayIter$1(iterFn)) for (length = toLength$9(iterable.length); length > index; index++) {
-      result = entries ? f(anObject$d(step = iterable[index])[0], step[1]) : f(iterable[index]);
+      result = entries ? f(anObject$e(step = iterable[index])[0], step[1]) : f(iterable[index]);
       if (result === BREAK || result === RETURN) return result;
     } else for (iterator = iterFn.call(iterable); !(step = iterator.next()).done;) {
       result = call(iterator, f, step.value, entries);
@@ -518,13 +518,13 @@
   exports$1.RETURN = RETURN;
 
   // 7.3.20 SpeciesConstructor(O, defaultConstructor)
-  var anObject$c = _anObject;
-  var aFunction$3 = _aFunction;
+  var anObject$d = _anObject;
+  var aFunction$5 = _aFunction;
   var SPECIES$2 = _wks.exports('species');
   var _speciesConstructor = function (O, D) {
-    var C = anObject$c(O).constructor;
+    var C = anObject$d(O).constructor;
     var S;
-    return C === undefined || (S = anObject$c(C)[SPECIES$2]) == undefined ? D : aFunction$3(S);
+    return C === undefined || (S = anObject$d(C)[SPECIES$2]) == undefined ? D : aFunction$5(S);
   };
 
   // fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -548,7 +548,7 @@
   var _html = document$1 && document$1.documentElement;
 
   var ctx$4 = _ctx;
-  var invoke = _invoke;
+  var invoke$1 = _invoke;
   var html$1 = _html;
   var cel = _domCreate;
   var global$a = _global.exports;
@@ -581,7 +581,7 @@
       while (arguments.length > i) args.push(arguments[i++]);
       queue[++counter] = function () {
         // eslint-disable-next-line no-new-func
-        invoke(typeof fn == 'function' ? fn : Function(fn), args);
+        invoke$1(typeof fn == 'function' ? fn : Function(fn), args);
       };
       defer(counter);
       return counter;
@@ -705,7 +705,7 @@
   var _newPromiseCapability = {};
 
   // 25.4.1.5 NewPromiseCapability(C)
-  var aFunction$2 = _aFunction;
+  var aFunction$4 = _aFunction;
 
   function PromiseCapability(C) {
     var resolve, reject;
@@ -714,8 +714,8 @@
       resolve = $$resolve;
       reject = $$reject;
     });
-    this.resolve = aFunction$2(resolve);
-    this.reject = aFunction$2(reject);
+    this.resolve = aFunction$4(resolve);
+    this.reject = aFunction$4(reject);
   }
 
   _newPromiseCapability.f = function (C) {
@@ -735,13 +735,13 @@
 
   var _userAgent = navigator && navigator.userAgent || '';
 
-  var anObject$b = _anObject;
-  var isObject$c = _isObject;
+  var anObject$c = _anObject;
+  var isObject$e = _isObject;
   var newPromiseCapability$1 = _newPromiseCapability;
 
   var _promiseResolve = function (C, x) {
-    anObject$b(C);
-    if (isObject$c(x) && x.constructor === C) return x;
+    anObject$c(C);
+    if (isObject$e(x) && x.constructor === C) return x;
     var promiseCapability = newPromiseCapability$1.f(C);
     var resolve = promiseCapability.resolve;
     resolve(x);
@@ -794,9 +794,9 @@
   var global$7 = _global.exports;
   var ctx$3 = _ctx;
   var classof$3 = _classof;
-  var $export$n = _export;
-  var isObject$b = _isObject;
-  var aFunction$1 = _aFunction;
+  var $export$o = _export;
+  var isObject$d = _isObject;
+  var aFunction$3 = _aFunction;
   var anInstance$4 = _anInstance;
   var forOf$3 = _forOf.exports;
   var speciesConstructor$3 = _speciesConstructor;
@@ -838,7 +838,7 @@
   // helpers
   var isThenable = function (it) {
     var then;
-    return isObject$b(it) && typeof (then = it.then) == 'function' ? then : false;
+    return isObject$d(it) && typeof (then = it.then) == 'function' ? then : false;
   };
   var notify = function (promise, isReject) {
     if (promise._n) return;
@@ -962,7 +962,7 @@
     // 25.4.3.1 Promise(executor)
     $Promise = function Promise(executor) {
       anInstance$4(this, $Promise, PROMISE, '_h');
-      aFunction$1(executor);
+      aFunction$3(executor);
       Internal.call(this);
       try {
         executor(ctx$3($resolve, this, 1), ctx$3($reject, this, 1));
@@ -1010,13 +1010,13 @@
     };
   }
 
-  $export$n($export$n.G + $export$n.W + $export$n.F * !USE_NATIVE$1, { Promise: $Promise });
+  $export$o($export$o.G + $export$o.W + $export$o.F * !USE_NATIVE$1, { Promise: $Promise });
   _setToStringTag($Promise, PROMISE);
   require_setSpecies()(PROMISE);
   Wrapper = require_core()[PROMISE];
 
   // statics
-  $export$n($export$n.S + $export$n.F * !USE_NATIVE$1, PROMISE, {
+  $export$o($export$o.S + $export$o.F * !USE_NATIVE$1, PROMISE, {
     // 25.4.4.5 Promise.reject(r)
     reject: function reject(r) {
       var capability = newPromiseCapability(this);
@@ -1025,13 +1025,13 @@
       return capability.promise;
     }
   });
-  $export$n($export$n.S + $export$n.F * (!USE_NATIVE$1), PROMISE, {
+  $export$o($export$o.S + $export$o.F * (!USE_NATIVE$1), PROMISE, {
     // 25.4.4.6 Promise.resolve(x)
     resolve: function resolve(x) {
       return promiseResolve(this, x);
     }
   });
-  $export$n($export$n.S + $export$n.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
+  $export$o($export$o.S + $export$o.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
     $Promise.all(iter)['catch'](empty);
   })), PROMISE, {
     // 25.4.4.1 Promise.all(iterable)
@@ -1202,22 +1202,22 @@
   // all object keys, includes non-enumerable and symbols
   var gOPN$5 = _objectGopn;
   var gOPS$2 = _objectGops;
-  var anObject$a = _anObject;
+  var anObject$b = _anObject;
   var Reflect = _global.exports.Reflect;
   var _ownKeys = Reflect && Reflect.ownKeys || function ownKeys(it) {
-    var keys = gOPN$5.f(anObject$a(it));
+    var keys = gOPN$5.f(anObject$b(it));
     var getSymbols = gOPS$2.f;
     return getSymbols ? keys.concat(getSymbols(it)) : keys;
   };
 
   // https://github.com/tc39/proposal-object-getownpropertydescriptors
-  var $export$m = _export;
+  var $export$n = _export;
   var ownKeys = _ownKeys;
   var toIObject$4 = _toIobject;
   var gOPD$3 = _objectGopd;
   var createProperty = _createProperty;
 
-  $export$m($export$m.S, 'Object', {
+  $export$n($export$n.S, 'Object', {
     getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
       var O = toIObject$4(object);
       var getDesc = gOPD$3.f;
@@ -1236,7 +1236,7 @@
   var _meta = {exports: {}};
 
   var META$1 = _uid('meta');
-  var isObject$a = _isObject;
+  var isObject$c = _isObject;
   var has$3 = _has;
   var setDesc = _objectDp.f;
   var id$1 = 0;
@@ -1254,7 +1254,7 @@
   };
   var fastKey$1 = function (it, create) {
     // return primitive with prefix
-    if (!isObject$a(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+    if (!isObject$c(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
     if (!has$3(it, META$1)) {
       // can't set metadata to uncaught frozen object
       if (!isExtensible$1(it)) return 'F';
@@ -1290,12 +1290,12 @@
   };
 
   // 19.1.2.5 Object.freeze(O)
-  var isObject$9 = _isObject;
+  var isObject$b = _isObject;
   var meta$2 = _meta.exports.onFreeze;
 
   _objectSap('freeze', function ($freeze) {
     return function freeze(it) {
-      return $freeze && isObject$9(it) ? $freeze(meta$2(it)) : it;
+      return $freeze && isObject$b(it) ? $freeze(meta$2(it)) : it;
     };
   });
 
@@ -1308,11 +1308,11 @@
   };
 
   var dP$6 = _objectDp;
-  var anObject$9 = _anObject;
+  var anObject$a = _anObject;
   var getKeys$4 = _objectKeys;
 
   var _objectDps = _descriptors ? Object.defineProperties : function defineProperties(O, Properties) {
-    anObject$9(O);
+    anObject$a(O);
     var keys = getKeys$4(Properties);
     var length = keys.length;
     var i = 0;
@@ -1322,7 +1322,7 @@
   };
 
   // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-  var anObject$8 = _anObject;
+  var anObject$9 = _anObject;
   var dPs = _objectDps;
   var enumBugKeys = _enumBugKeys;
   var IE_PROTO = _sharedKey('IE_PROTO');
@@ -1354,7 +1354,7 @@
   var _objectCreate = Object.create || function create(O, Properties) {
     var result;
     if (O !== null) {
-      Empty[PROTOTYPE$2] = anObject$8(O);
+      Empty[PROTOTYPE$2] = anObject$9(O);
       result = new Empty();
       Empty[PROTOTYPE$2] = null;
       // add "__proto__" for Object.getPrototypeOf polyfill
@@ -1362,6 +1362,79 @@
     } else result = createDict();
     return Properties === undefined ? result : dPs(result, Properties);
   };
+
+  var aFunction$2 = _aFunction;
+  var isObject$a = _isObject;
+  var invoke = _invoke;
+  var arraySlice$2 = [].slice;
+  var factories = {};
+
+  var construct = function (F, len, args) {
+    if (!(len in factories)) {
+      for (var n = [], i = 0; i < len; i++) n[i] = 'a[' + i + ']';
+      // eslint-disable-next-line no-new-func
+      factories[len] = Function('F,a', 'return new F(' + n.join(',') + ')');
+    } return factories[len](F, args);
+  };
+
+  var _bind = Function.bind || function bind(that /* , ...args */) {
+    var fn = aFunction$2(this);
+    var partArgs = arraySlice$2.call(arguments, 1);
+    var bound = function (/* args... */) {
+      var args = partArgs.concat(arraySlice$2.call(arguments));
+      return this instanceof bound ? construct(fn, args.length, args) : invoke(fn, args, that);
+    };
+    if (isObject$a(fn.prototype)) bound.prototype = fn.prototype;
+    return bound;
+  };
+
+  // 26.1.2 Reflect.construct(target, argumentsList [, newTarget])
+  var $export$m = _export;
+  var create$3 = _objectCreate;
+  var aFunction$1 = _aFunction;
+  var anObject$8 = _anObject;
+  var isObject$9 = _isObject;
+  var fails$7 = _fails;
+  var bind = _bind;
+  var rConstruct = (_global.exports.Reflect || {}).construct;
+
+  // MS Edge supports only 2 arguments and argumentsList argument is optional
+  // FF Nightly sets third argument as `new.target`, but does not create `this` from it
+  var NEW_TARGET_BUG = fails$7(function () {
+    function F() { /* empty */ }
+    return !(rConstruct(function () { /* empty */ }, [], F) instanceof F);
+  });
+  var ARGS_BUG = !fails$7(function () {
+    rConstruct(function () { /* empty */ });
+  });
+
+  $export$m($export$m.S + $export$m.F * (NEW_TARGET_BUG || ARGS_BUG), 'Reflect', {
+    construct: function construct(Target, args /* , newTarget */) {
+      aFunction$1(Target);
+      anObject$8(args);
+      var newTarget = arguments.length < 3 ? Target : aFunction$1(arguments[2]);
+      if (ARGS_BUG && !NEW_TARGET_BUG) return rConstruct(Target, args, newTarget);
+      if (Target == newTarget) {
+        // w/o altered newTarget, optimization for 0-4 arguments
+        switch (args.length) {
+          case 0: return new Target();
+          case 1: return new Target(args[0]);
+          case 2: return new Target(args[0], args[1]);
+          case 3: return new Target(args[0], args[1], args[2]);
+          case 4: return new Target(args[0], args[1], args[2], args[3]);
+        }
+        // w/o altered newTarget, lot of arguments case
+        var $args = [null];
+        $args.push.apply($args, args);
+        return new (bind.apply(Target, $args))();
+      }
+      // with altered newTarget, not support built-in constructors
+      var proto = newTarget.prototype;
+      var instance = create$3(isObject$9(proto) ? proto : Object.prototype);
+      var result = Function.apply.call(Target, instance, args);
+      return isObject$9(result) ? result : instance;
+    }
+  });
 
   var create$2 = _objectCreate;
   var descriptor = _propertyDesc;
