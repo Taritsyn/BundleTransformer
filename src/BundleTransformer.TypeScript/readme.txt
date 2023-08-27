@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.13.8
+                README file for Bundle Transformer: TypeScript v1.13.12
 
    --------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the TypeScript version 5.2 RTM (please note: The 5.2 RTM
+   Added support for the TypeScript version 5.2 RTM (please note: The 5.2 RTM
    release is also called '5.2.2').
 
    ====================

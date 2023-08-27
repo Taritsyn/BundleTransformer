@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: TypeScript</Product>
-    <VersionPrefix>1.13.8</VersionPrefix>
+    <VersionPrefix>1.13.12</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -23,7 +23,7 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;TypeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of the TypeScript version 5.2 RTM (please note: The 5.2 RTM release is also called '5.2.2').</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the TypeScript version 5.2 RTM (please note: The 5.2 RTM release is also called '5.2.2').</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
