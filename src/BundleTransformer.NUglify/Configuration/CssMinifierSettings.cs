@@ -8,6 +8,16 @@ namespace BundleTransformer.NUglify.Configuration
 	public sealed class CssMinifierSettings : MinifierSettingsBase
 	{
 		/// <summary>
+		/// Gets or sets a value indicating whether to abbreviate hex colors to #rgb(a) format
+		/// </summary>
+		[ConfigurationProperty("abbreviateHexColor", DefaultValue = true)]
+		public bool AbbreviateHexColor
+		{
+			get { return (bool)this["abbreviateHexColor"]; }
+			set { this["abbreviateHexColor"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a <see cref="CssColor"/> setting
 		/// </summary>
 		[ConfigurationProperty("colorNames", DefaultValue = CssColor.Hex)]

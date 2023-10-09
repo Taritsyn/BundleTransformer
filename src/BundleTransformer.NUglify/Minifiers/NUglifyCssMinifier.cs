@@ -45,6 +45,21 @@ namespace BundleTransformer.NUglify.Minifiers
 		private readonly CssSettings _cssParserConfiguration;
 
 		/// <summary>
+		/// Gets or sets a value indicating whether to abbreviate hex colors to #rgb(a) format
+		/// </summary>
+		public bool AbbreviateHexColor
+		{
+			get
+			{
+				return _cssParserConfiguration.AbbreviateHexColor;
+			}
+			set
+			{
+				_cssParserConfiguration.AbbreviateHexColor = value;
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets whether embedded ASP.NET blocks (<code>&lt;% %gt;</code>)
 		/// should be recognized and output as is
 		/// </summary>
@@ -303,6 +318,7 @@ namespace BundleTransformer.NUglify.Minifiers
 
 			CssMinifierSettings cssMinifierConfig = nuglifyConfig.CssMinifier;
 			MapCommonSettings(this, cssMinifierConfig);
+			AbbreviateHexColor = cssMinifierConfig.AbbreviateHexColor;
 			ColorNames = cssMinifierConfig.ColorNames;
 			CommentMode = cssMinifierConfig.CommentMode;
 			DecodeEscapes = cssMinifierConfig.DecodeEscapes;
