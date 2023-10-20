@@ -1,6 +1,13 @@
 Change log
 ==========
 
+## v1.13.14 - October 20, 2023
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the NUglify CSS minifier
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.69.3
+ * In BundleTransformer.NUglify:
+   * Added support for the NUglify version 1.21.0
+   * In configuration settings of CSS minifier was added one new property - `AbbreviateHexColor` (default `true`)
+
 ## v1.13.13 - September 27, 2023
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.68.0
  * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.16.0
