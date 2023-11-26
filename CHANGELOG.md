@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.13.15 - November 26, 2023
+ * In BundleTransformer.TypeScript added support of the TypeScript version 5.3 RTM (please note: The 5.3 RTM release is also called '5.3.2')
+
 ## v1.13.14 - October 20, 2023
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the NUglify CSS minifier
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.69.3
