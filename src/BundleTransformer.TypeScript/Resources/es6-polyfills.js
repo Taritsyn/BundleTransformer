@@ -211,12 +211,12 @@
   var ctx$7 = _ctx;
   var PROTOTYPE$3 = 'prototype';
 
-  var $export$r = function (type, name, source) {
-    var IS_FORCED = type & $export$r.F;
-    var IS_GLOBAL = type & $export$r.G;
-    var IS_STATIC = type & $export$r.S;
-    var IS_PROTO = type & $export$r.P;
-    var IS_BIND = type & $export$r.B;
+  var $export$s = function (type, name, source) {
+    var IS_FORCED = type & $export$s.F;
+    var IS_GLOBAL = type & $export$s.G;
+    var IS_STATIC = type & $export$s.S;
+    var IS_PROTO = type & $export$s.P;
+    var IS_BIND = type & $export$s.B;
     var target = IS_GLOBAL ? global$c : IS_STATIC ? global$c[name] || (global$c[name] = {}) : (global$c[name] || {})[PROTOTYPE$3];
     var exports = IS_GLOBAL ? core$2 : core$2[name] || (core$2[name] = {});
     var expProto = exports[PROTOTYPE$3] || (exports[PROTOTYPE$3] = {});
@@ -230,7 +230,7 @@
       // bind timers to global for call from export context
       exp = IS_BIND && own ? ctx$7(out, global$c) : IS_PROTO && typeof out == 'function' ? ctx$7(Function.call, out) : out;
       // extend global
-      if (target) redefine$6(target, key, out, type & $export$r.U);
+      if (target) redefine$6(target, key, out, type & $export$s.U);
       // export
       if (exports[key] != out) hide$4(exports, key, exp);
       if (IS_PROTO && expProto[key] != out) expProto[key] = out;
@@ -238,15 +238,15 @@
   };
   global$c.core = core$2;
   // type bitmap
-  $export$r.F = 1;   // forced
-  $export$r.G = 2;   // global
-  $export$r.S = 4;   // static
-  $export$r.P = 8;   // proto
-  $export$r.B = 16;  // bind
-  $export$r.W = 32;  // wrap
-  $export$r.U = 64;  // safe
-  $export$r.R = 128; // real proto method for `library`
-  var _export = $export$r;
+  $export$s.F = 1;   // forced
+  $export$s.G = 2;   // global
+  $export$s.S = 4;   // static
+  $export$s.P = 8;   // proto
+  $export$s.B = 16;  // bind
+  $export$s.W = 32;  // wrap
+  $export$s.U = 64;  // safe
+  $export$s.R = 128; // real proto method for `library`
+  var _export = $export$s;
 
   // 7.2.1 RequireObjectCoercible(argument)
   var _defined = function (it) {
@@ -255,9 +255,9 @@
   };
 
   // 7.1.13 ToObject(argument)
-  var defined$5 = _defined;
+  var defined$6 = _defined;
   var _toObject = function (it) {
-    return Object(defined$5(it));
+    return Object(defined$6(it));
   };
 
   // call something on iterator step with safe closing on error
@@ -391,15 +391,15 @@
   }
 
   var ctx$6 = _ctx;
-  var $export$q = _export;
+  var $export$r = _export;
   var toObject$9 = _toObject;
   var call$1 = _iterCall;
   var isArrayIter$2 = _isArrayIter;
-  var toLength$a = _toLength;
+  var toLength$b = _toLength;
   var createProperty$1 = _createProperty;
   var getIterFn$2 = core_getIteratorMethod;
 
-  $export$q($export$q.S + $export$q.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
+  $export$r($export$r.S + $export$r.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
     // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
     from: function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
       var O = toObject$9(arrayLike);
@@ -417,7 +417,7 @@
           createProperty$1(result, index, mapping ? call$1(iterator, mapfn, [step.value, index], true) : step.value);
         }
       } else {
-        length = toLength$a(O.length);
+        length = toLength$b(O.length);
         for (result = new C(length); length > index; index++) {
           createProperty$1(result, index, mapping ? mapfn(O[index], index) : O[index]);
         }
@@ -463,14 +463,14 @@
   };
 
   // most Object methods by ES6 should accept primitives
-  var $export$p = _export;
+  var $export$q = _export;
   var core = require_core();
   var fails$8 = _fails;
   var _objectSap = function (KEY, exec) {
     var fn = (core.Object || {})[KEY] || Object[KEY];
     var exp = {};
     exp[KEY] = exec(fn);
-    $export$p($export$p.S + $export$p.F * fails$8(function () { fn(1); }), 'Object', exp);
+    $export$q($export$q.S + $export$q.F * fails$8(function () { fn(1); }), 'Object', exp);
   };
 
   // 19.1.2.9 Object.getPrototypeOf(O)
@@ -495,7 +495,7 @@
   var call = _iterCall;
   var isArrayIter$1 = _isArrayIter;
   var anObject$e = _anObject;
-  var toLength$9 = _toLength;
+  var toLength$a = _toLength;
   var getIterFn$1 = core_getIteratorMethod;
   var BREAK = {};
   var RETURN = {};
@@ -506,7 +506,7 @@
     var length, step, iterator, result;
     if (typeof iterFn != 'function') throw TypeError(iterable + ' is not iterable!');
     // fast case for arrays with default iterator
-    if (isArrayIter$1(iterFn)) for (length = toLength$9(iterable.length); length > index; index++) {
+    if (isArrayIter$1(iterFn)) for (length = toLength$a(iterable.length); length > index; index++) {
       result = entries ? f(anObject$e(step = iterable[index])[0], step[1]) : f(iterable[index]);
       if (result === BREAK || result === RETURN) return result;
     } else for (iterator = iterFn.call(iterable); !(step = iterator.next()).done;) {
@@ -794,7 +794,7 @@
   var global$7 = _global.exports;
   var ctx$3 = _ctx;
   var classof$3 = _classof;
-  var $export$o = _export;
+  var $export$p = _export;
   var isObject$d = _isObject;
   var aFunction$3 = _aFunction;
   var anInstance$4 = _anInstance;
@@ -804,7 +804,7 @@
   var microtask = _microtask();
   var newPromiseCapabilityModule = _newPromiseCapability;
   var perform = _perform;
-  var userAgent = _userAgent;
+  var userAgent$1 = _userAgent;
   var promiseResolve = _promiseResolve;
   var PROMISE = 'Promise';
   var TypeError$2 = global$7.TypeError;
@@ -831,7 +831,7 @@
         // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
         // we can't detect it synchronously, so just check versions
         && v8.indexOf('6.6') !== 0
-        && userAgent.indexOf('Chrome/66') === -1;
+        && userAgent$1.indexOf('Chrome/66') === -1;
     } catch (e) { /* empty */ }
   }();
 
@@ -1010,13 +1010,13 @@
     };
   }
 
-  $export$o($export$o.G + $export$o.W + $export$o.F * !USE_NATIVE$1, { Promise: $Promise });
+  $export$p($export$p.G + $export$p.W + $export$p.F * !USE_NATIVE$1, { Promise: $Promise });
   _setToStringTag($Promise, PROMISE);
   require_setSpecies()(PROMISE);
   Wrapper = require_core()[PROMISE];
 
   // statics
-  $export$o($export$o.S + $export$o.F * !USE_NATIVE$1, PROMISE, {
+  $export$p($export$p.S + $export$p.F * !USE_NATIVE$1, PROMISE, {
     // 25.4.4.5 Promise.reject(r)
     reject: function reject(r) {
       var capability = newPromiseCapability(this);
@@ -1025,13 +1025,13 @@
       return capability.promise;
     }
   });
-  $export$o($export$o.S + $export$o.F * (!USE_NATIVE$1), PROMISE, {
+  $export$p($export$p.S + $export$p.F * (!USE_NATIVE$1), PROMISE, {
     // 25.4.4.6 Promise.resolve(x)
     resolve: function resolve(x) {
       return promiseResolve(this, x);
     }
   });
-  $export$o($export$o.S + $export$o.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
+  $export$p($export$p.S + $export$p.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
     $Promise.all(iter)['catch'](empty);
   })), PROMISE, {
     // 25.4.4.1 Promise.all(iterable)
@@ -1085,9 +1085,9 @@
 
   // to indexed object, toObject with fallback for non-array-like ES3 strings
   var IObject$2 = _iobject;
-  var defined$4 = _defined;
+  var defined$5 = _defined;
   var _toIobject = function (it) {
-    return IObject$2(defined$4(it));
+    return IObject$2(defined$5(it));
   };
 
   var _objectGopd = {};
@@ -1143,12 +1143,12 @@
   // false -> Array#indexOf
   // true  -> Array#includes
   var toIObject$6 = _toIobject;
-  var toLength$8 = _toLength;
+  var toLength$9 = _toLength;
   var toAbsoluteIndex$3 = _toAbsoluteIndex;
   var _arrayIncludes = function (IS_INCLUDES) {
     return function ($this, el, fromIndex) {
       var O = toIObject$6($this);
-      var length = toLength$8(O.length);
+      var length = toLength$9(O.length);
       var index = toAbsoluteIndex$3(fromIndex, length);
       var value;
       // Array#includes uses SameValueZero equality algorithm
@@ -1211,13 +1211,13 @@
   };
 
   // https://github.com/tc39/proposal-object-getownpropertydescriptors
-  var $export$n = _export;
+  var $export$o = _export;
   var ownKeys = _ownKeys;
   var toIObject$4 = _toIobject;
   var gOPD$3 = _objectGopd;
   var createProperty = _createProperty;
 
-  $export$n($export$n.S, 'Object', {
+  $export$o($export$o.S, 'Object', {
     getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
       var O = toIObject$4(object);
       var getDesc = gOPD$3.f;
@@ -1389,7 +1389,7 @@
   };
 
   // 26.1.2 Reflect.construct(target, argumentsList [, newTarget])
-  var $export$m = _export;
+  var $export$n = _export;
   var create$3 = _objectCreate;
   var aFunction$1 = _aFunction;
   var anObject$8 = _anObject;
@@ -1408,7 +1408,7 @@
     rConstruct(function () { /* empty */ });
   });
 
-  $export$m($export$m.S + $export$m.F * (NEW_TARGET_BUG || ARGS_BUG), 'Reflect', {
+  $export$n($export$n.S + $export$n.F * (NEW_TARGET_BUG || ARGS_BUG), 'Reflect', {
     construct: function construct(Target, args /* , newTarget */) {
       aFunction$1(Target);
       anObject$8(args);
@@ -1449,7 +1449,7 @@
     setToStringTag$3(Constructor, NAME + ' Iterator');
   };
 
-  var $export$l = _export;
+  var $export$m = _export;
   var redefine$5 = _redefine.exports;
   var hide$3 = _hide;
   var Iterators$3 = _iterators;
@@ -1512,7 +1512,7 @@
       };
       if (FORCED) for (key in methods) {
         if (!(key in proto)) redefine$5(proto, key, methods[key]);
-      } else $export$l($export$l.P + $export$l.F * (BUGGY || VALUES_BUG), NAME, methods);
+      } else $export$m($export$m.P + $export$m.F * (BUGGY || VALUES_BUG), NAME, methods);
     }
     return methods;
   };
@@ -1716,7 +1716,7 @@
   };
 
   var global$6 = _global.exports;
-  var $export$k = _export;
+  var $export$l = _export;
   var redefine$4 = _redefine.exports;
   var redefineAll$2 = require_redefineAll();
   var meta$1 = _meta.exports;
@@ -1793,7 +1793,7 @@
     setToStringTag$1(C, NAME);
 
     O[NAME] = C;
-    $export$k($export$k.G + $export$k.W + $export$k.F * (C != Base), O);
+    $export$l($export$l.G + $export$l.W + $export$l.F * (C != Base), O);
 
     if (!IS_WEAK) common.setStrong(C, NAME, IS_MAP);
 
@@ -1820,12 +1820,12 @@
   }, strong$1, true);
 
   var toInteger$2 = _toInteger;
-  var defined$3 = _defined;
+  var defined$4 = _defined;
   // true  -> String#at
   // false -> String#codePointAt
   var _stringAt = function (TO_STRING) {
     return function (that, pos) {
-      var s = String(defined$3(that));
+      var s = String(defined$4(that));
       var i = toInteger$2(pos);
       var l = s.length;
       var a, b;
@@ -1965,25 +1965,25 @@
     }
   }
 
-  var $export$j = _export;
+  var $export$k = _export;
   var html = _html;
   var cof$3 = _cof;
   var toAbsoluteIndex$2 = _toAbsoluteIndex;
-  var toLength$7 = _toLength;
+  var toLength$8 = _toLength;
   var arraySlice$1 = [].slice;
 
   // fallback for not array-like ES3 strings and DOM objects
-  $export$j($export$j.P + $export$j.F * _fails(function () {
+  $export$k($export$k.P + $export$k.F * _fails(function () {
     if (html) arraySlice$1.call(html);
   }), 'Array', {
     slice: function slice(begin, end) {
-      var len = toLength$7(this.length);
+      var len = toLength$8(this.length);
       var klass = cof$3(this);
       end = end === undefined ? len : end;
       if (klass == 'Array') return arraySlice$1.call(this, begin, end);
       var start = toAbsoluteIndex$2(begin, len);
       var upTo = toAbsoluteIndex$2(end, len);
-      var size = toLength$7(upTo - start);
+      var size = toLength$8(upTo - start);
       var cloned = new Array(size);
       var i = 0;
       for (; i < size; i++) cloned[i] = klass == 'String'
@@ -2033,7 +2033,7 @@
   var ctx$1 = _ctx;
   var IObject$1 = _iobject;
   var toObject$6 = _toObject;
-  var toLength$6 = _toLength;
+  var toLength$7 = _toLength;
   var asc = _arraySpeciesCreate;
   var _arrayMethods = function (TYPE, $create) {
     var IS_MAP = TYPE == 1;
@@ -2047,7 +2047,7 @@
       var O = toObject$6($this);
       var self = IObject$1(O);
       var f = ctx$1(callbackfn, that, 3);
-      var length = toLength$6(self.length);
+      var length = toLength$7(self.length);
       var index = 0;
       var result = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
       var val, res;
@@ -2085,24 +2085,24 @@
   	return _strictMethod;
   }
 
-  var $export$i = _export;
+  var $export$j = _export;
   var $map$1 = _arrayMethods(1);
 
-  $export$i($export$i.P + $export$i.F * !require_strictMethod()([].map, true), 'Array', {
+  $export$j($export$j.P + $export$j.F * !require_strictMethod()([].map, true), 'Array', {
     // 22.1.3.15 / 15.4.4.19 Array.prototype.map(callbackfn [, thisArg])
     map: function map(callbackfn /* , thisArg */) {
       return $map$1(this, callbackfn, arguments[1]);
     }
   });
 
-  var $export$h = _export;
+  var $export$i = _export;
   var aFunction = _aFunction;
   var toObject$5 = _toObject;
   var fails$5 = _fails;
   var $sort = [].sort;
   var test = [1, 2, 3];
 
-  $export$h($export$h.P + $export$h.F * (fails$5(function () {
+  $export$i($export$i.P + $export$i.F * (fails$5(function () {
     // IE8-
     test.sort(undefined);
   }) || !fails$5(function () {
@@ -2152,9 +2152,9 @@
   }
 
   // 22.1.3.3 Array.prototype.copyWithin(target, start, end = this.length)
-  var $export$g = _export;
+  var $export$h = _export;
 
-  $export$g($export$g.P, 'Array', { copyWithin: require_arrayCopyWithin() });
+  $export$h($export$h.P, 'Array', { copyWithin: require_arrayCopyWithin() });
 
   _addToUnscopables('copyWithin');
 
@@ -2268,7 +2268,7 @@
   var redefine$2 = _redefine.exports;
   var hide$1 = _hide;
   var fails$4 = _fails;
-  var defined$2 = _defined;
+  var defined$3 = _defined;
   var wks$2 = _wks.exports;
   var regexpExec$1 = _regexpExec;
 
@@ -2329,7 +2329,7 @@
     ) {
       var nativeRegExpMethod = /./[SYMBOL];
       var fns = exec(
-        defined$2,
+        defined$3,
         SYMBOL,
         ''[KEY],
         function maybeCallNative(nativeMethod, regexp, str, arg2, forceStringMethod) {
@@ -2362,7 +2362,7 @@
 
   var anObject$6 = _anObject;
   var toObject$4 = _toObject;
-  var toLength$5 = _toLength;
+  var toLength$6 = _toLength;
   var toInteger$1 = _toInteger;
   var advanceStringIndex$2 = _advanceStringIndex;
   var regExpExec$2 = _regexpExecAbstract;
@@ -2410,7 +2410,7 @@
           results.push(result);
           if (!global) break;
           var matchStr = String(result[0]);
-          if (matchStr === '') rx.lastIndex = advanceStringIndex$2(S, toLength$5(rx.lastIndex), fullUnicode);
+          if (matchStr === '') rx.lastIndex = advanceStringIndex$2(S, toLength$6(rx.lastIndex), fullUnicode);
         }
         var accumulatedResult = '';
         var nextSourcePosition = 0;
@@ -2477,81 +2477,6 @@
     }
   });
 
-  var _stringRepeat;
-  var hasRequired_stringRepeat;
-
-  function require_stringRepeat () {
-  	if (hasRequired_stringRepeat) return _stringRepeat;
-  	hasRequired_stringRepeat = 1;
-  	var toInteger = _toInteger;
-  	var defined = _defined;
-
-  	_stringRepeat = function repeat(count) {
-  	  var str = String(defined(this));
-  	  var res = '';
-  	  var n = toInteger(count);
-  	  if (n < 0 || n == Infinity) throw RangeError("Count can't be negative");
-  	  for (;n > 0; (n >>>= 1) && (str += str)) if (n & 1) res += str;
-  	  return res;
-  	};
-  	return _stringRepeat;
-  }
-
-  var $export$f = _export;
-
-  $export$f($export$f.P, 'String', {
-    // 21.1.3.13 String.prototype.repeat(count)
-    repeat: require_stringRepeat()
-  });
-
-  var _stringWs = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
-    '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
-
-  var $export$e = _export;
-  var defined$1 = _defined;
-  var fails$3 = _fails;
-  var spaces = _stringWs;
-  var space = '[' + spaces + ']';
-  var non = '\u200b\u0085';
-  var ltrim = RegExp('^' + space + space + '*');
-  var rtrim = RegExp(space + space + '*$');
-
-  var exporter = function (KEY, exec, ALIAS) {
-    var exp = {};
-    var FORCE = fails$3(function () {
-      return !!spaces[KEY]() || non[KEY]() != non;
-    });
-    var fn = exp[KEY] = FORCE ? exec(trim) : spaces[KEY];
-    if (ALIAS) exp[ALIAS] = fn;
-    $export$e($export$e.P + $export$e.F * FORCE, 'String', exp);
-  };
-
-  // 1 -> String#trimLeft
-  // 2 -> String#trimRight
-  // 3 -> String#trim
-  var trim = exporter.trim = function (string, TYPE) {
-    string = String(defined$1(string));
-    if (TYPE & 1) string = string.replace(ltrim, '');
-    if (TYPE & 2) string = string.replace(rtrim, '');
-    return string;
-  };
-
-  var _stringTrim = exporter;
-
-  // https://github.com/sebmarkbage/ecmascript-string-left-right-trim
-  _stringTrim('trimRight', function ($trim) {
-    return function trimRight() {
-      return $trim(this, 2);
-    };
-  }, 'trimEnd');
-
-  // https://github.com/sebmarkbage/ecmascript-string-left-right-trim
-  _stringTrim('trimLeft', function ($trim) {
-    return function trimLeft() {
-      return $trim(this, 1);
-    };
-  }, 'trimStart');
-
   var dP$4 = _objectDp.f;
   var FProto = Function.prototype;
   var nameRE = /^\s*function ([^ (]*)/;
@@ -2613,8 +2538,8 @@
   }
 
   // 19.1.3.19 Object.setPrototypeOf(O, proto)
-  var $export$d = _export;
-  $export$d($export$d.S, 'Object', { setPrototypeOf: require_setProto().set });
+  var $export$g = _export;
+  $export$g($export$g.S, 'Object', { setPrototypeOf: require_setProto().set });
 
   // 19.1.2.1 Object.assign(target, source, ...)
   var DESCRIPTORS$2 = _descriptors;
@@ -2812,10 +2737,10 @@
   var anObject$3 = _anObject;
   var speciesConstructor$1 = _speciesConstructor;
   var advanceStringIndex$1 = _advanceStringIndex;
-  var toLength$4 = _toLength;
+  var toLength$5 = _toLength;
   var callRegExpExec = _regexpExecAbstract;
   var regexpExec = _regexpExec;
-  var fails$2 = _fails;
+  var fails$3 = _fails;
   var $min = Math.min;
   var $push = [].push;
   var $SPLIT = 'split';
@@ -2824,7 +2749,7 @@
   var MAX_UINT32 = 0xffffffff;
 
   // babel-minify transpiles RegExp('x', 'y') -> /x/y and it causes SyntaxError
-  var SUPPORTS_Y = !fails$2(function () { RegExp(MAX_UINT32, 'y'); });
+  var SUPPORTS_Y = !fails$3(function () { RegExp(MAX_UINT32, 'y'); });
 
   // @@split logic
   _fixReWks('split', 2, function (defined, SPLIT, $split, maybeCallNative) {
@@ -2922,7 +2847,7 @@
           var e;
           if (
             z === null ||
-            (e = $min(toLength$4(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p
+            (e = $min(toLength$5(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p
           ) {
             q = advanceStringIndex$1(S, q, unicodeMatching);
           } else {
@@ -2978,11 +2903,91 @@
   }
 
   // 22.1.3.6 Array.prototype.fill(value, start = 0, end = this.length)
-  var $export$c = _export;
+  var $export$f = _export;
 
-  $export$c($export$c.P, 'Array', { fill: require_arrayFill() });
+  $export$f($export$f.P, 'Array', { fill: require_arrayFill() });
 
   _addToUnscopables('fill');
+
+  var _stringRepeat;
+  var hasRequired_stringRepeat;
+
+  function require_stringRepeat () {
+  	if (hasRequired_stringRepeat) return _stringRepeat;
+  	hasRequired_stringRepeat = 1;
+  	var toInteger = _toInteger;
+  	var defined = _defined;
+
+  	_stringRepeat = function repeat(count) {
+  	  var str = String(defined(this));
+  	  var res = '';
+  	  var n = toInteger(count);
+  	  if (n < 0 || n == Infinity) throw RangeError("Count can't be negative");
+  	  for (;n > 0; (n >>>= 1) && (str += str)) if (n & 1) res += str;
+  	  return res;
+  	};
+  	return _stringRepeat;
+  }
+
+  var $export$e = _export;
+
+  $export$e($export$e.P, 'String', {
+    // 21.1.3.13 String.prototype.repeat(count)
+    repeat: require_stringRepeat()
+  });
+
+  // helper for String#{startsWith, endsWith, includes}
+  var isRegExp$1 = _isRegexp;
+  var defined$2 = _defined;
+
+  var _stringContext = function (that, searchString, NAME) {
+    if (isRegExp$1(searchString)) throw TypeError('String#' + NAME + " doesn't accept regex!");
+    return String(defined$2(that));
+  };
+
+  var _failsIsRegexp;
+  var hasRequired_failsIsRegexp;
+
+  function require_failsIsRegexp () {
+  	if (hasRequired_failsIsRegexp) return _failsIsRegexp;
+  	hasRequired_failsIsRegexp = 1;
+  	var MATCH = _wks.exports('match');
+  	_failsIsRegexp = function (KEY) {
+  	  var re = /./;
+  	  try {
+  	    '/./'[KEY](re);
+  	  } catch (e) {
+  	    try {
+  	      re[MATCH] = false;
+  	      return !'/./'[KEY](re);
+  	    } catch (f) { /* empty */ }
+  	  } return true;
+  	};
+  	return _failsIsRegexp;
+  }
+
+  var $export$d = _export;
+  var context$2 = _stringContext;
+  var INCLUDES = 'includes';
+
+  $export$d($export$d.P + $export$d.F * require_failsIsRegexp()(INCLUDES), 'String', {
+    includes: function includes(searchString /* , position = 0 */) {
+      return !!~context$2(this, searchString, INCLUDES)
+        .indexOf(searchString, arguments.length > 1 ? arguments[1] : undefined);
+    }
+  });
+
+  // https://github.com/tc39/Array.prototype.includes
+  var $export$c = _export;
+  var $includes = _arrayIncludes(true);
+
+  $export$c($export$c.P, 'Array', {
+    includes: function includes(el /* , fromIndex = 0 */) {
+      return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
+    }
+  });
+
+  _addToUnscopables('includes');
 
   var DESCRIPTORS$1 = _descriptors;
   var getKeys$1 = _objectKeys;
@@ -3016,22 +3021,94 @@
     }
   });
 
+  // https://github.com/tc39/proposal-string-pad-start-end
+  var toLength$4 = _toLength;
+  var repeat = require_stringRepeat();
+  var defined$1 = _defined;
+
+  var _stringPad = function (that, maxLength, fillString, left) {
+    var S = String(defined$1(that));
+    var stringLength = S.length;
+    var fillStr = fillString === undefined ? ' ' : String(fillString);
+    var intMaxLength = toLength$4(maxLength);
+    if (intMaxLength <= stringLength || fillStr == '') return S;
+    var fillLen = intMaxLength - stringLength;
+    var stringFiller = repeat.call(fillStr, Math.ceil(fillLen / fillStr.length));
+    if (stringFiller.length > fillLen) stringFiller = stringFiller.slice(0, fillLen);
+    return left ? stringFiller + S : S + stringFiller;
+  };
+
+  // https://github.com/tc39/proposal-string-pad-start-end
   var $export$a = _export;
+  var $pad = _stringPad;
+  var userAgent = _userAgent;
+
+  // https://github.com/zloirock/core-js/issues/280
+  var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
+
+  $export$a($export$a.P + $export$a.F * WEBKIT_BUG, 'String', {
+    padStart: function padStart(maxLength /* , fillString = ' ' */) {
+      return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, true);
+    }
+  });
+
+  var _stringWs = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
+    '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+
+  var $export$9 = _export;
+  var defined = _defined;
+  var fails$2 = _fails;
+  var spaces = _stringWs;
+  var space = '[' + spaces + ']';
+  var non = '\u200b\u0085';
+  var ltrim = RegExp('^' + space + space + '*');
+  var rtrim = RegExp(space + space + '*$');
+
+  var exporter = function (KEY, exec, ALIAS) {
+    var exp = {};
+    var FORCE = fails$2(function () {
+      return !!spaces[KEY]() || non[KEY]() != non;
+    });
+    var fn = exp[KEY] = FORCE ? exec(trim) : spaces[KEY];
+    if (ALIAS) exp[ALIAS] = fn;
+    $export$9($export$9.P + $export$9.F * FORCE, 'String', exp);
+  };
+
+  // 1 -> String#trimLeft
+  // 2 -> String#trimRight
+  // 3 -> String#trim
+  var trim = exporter.trim = function (string, TYPE) {
+    string = String(defined(string));
+    if (TYPE & 1) string = string.replace(ltrim, '');
+    if (TYPE & 2) string = string.replace(rtrim, '');
+    return string;
+  };
+
+  var _stringTrim = exporter;
+
+  // https://github.com/sebmarkbage/ecmascript-string-left-right-trim
+  _stringTrim('trimLeft', function ($trim) {
+    return function trimLeft() {
+      return $trim(this, 1);
+    };
+  }, 'trimStart');
+
+  var $export$8 = _export;
   var $at = _stringAt(false);
-  $export$a($export$a.P, 'String', {
+  $export$8($export$8.P, 'String', {
     // 21.1.3.3 String.prototype.codePointAt(pos)
     codePointAt: function codePointAt(pos) {
       return $at(this, pos);
     }
   });
 
-  var $export$9 = _export;
+  var $export$7 = _export;
   var toAbsoluteIndex$1 = _toAbsoluteIndex;
   var fromCharCode = String.fromCharCode;
   var $fromCodePoint = String.fromCodePoint;
 
   // length should be 1, old FF problem
-  $export$9($export$9.S + $export$9.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
+  $export$7($export$7.S + $export$7.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
     // 21.1.2.2 String.fromCodePoint(...codePoints)
     fromCodePoint: function fromCodePoint(x) { // eslint-disable-line no-unused-vars
       var res = [];
@@ -3049,55 +3126,25 @@
     }
   });
 
-  var $export$8 = _export;
+  var $export$6 = _export;
   var $filter = _arrayMethods(2);
 
-  $export$8($export$8.P + $export$8.F * !require_strictMethod()([].filter, true), 'Array', {
+  $export$6($export$6.P + $export$6.F * !require_strictMethod()([].filter, true), 'Array', {
     // 22.1.3.7 / 15.4.4.20 Array.prototype.filter(callbackfn [, thisArg])
     filter: function filter(callbackfn /* , thisArg */) {
       return $filter(this, callbackfn, arguments[1]);
     }
   });
 
-  // helper for String#{startsWith, endsWith, includes}
-  var isRegExp$1 = _isRegexp;
-  var defined = _defined;
-
-  var _stringContext = function (that, searchString, NAME) {
-    if (isRegExp$1(searchString)) throw TypeError('String#' + NAME + " doesn't accept regex!");
-    return String(defined(that));
-  };
-
-  var _failsIsRegexp;
-  var hasRequired_failsIsRegexp;
-
-  function require_failsIsRegexp () {
-  	if (hasRequired_failsIsRegexp) return _failsIsRegexp;
-  	hasRequired_failsIsRegexp = 1;
-  	var MATCH = _wks.exports('match');
-  	_failsIsRegexp = function (KEY) {
-  	  var re = /./;
-  	  try {
-  	    '/./'[KEY](re);
-  	  } catch (e) {
-  	    try {
-  	      re[MATCH] = false;
-  	      return !'/./'[KEY](re);
-  	    } catch (f) { /* empty */ }
-  	  } return true;
-  	};
-  	return _failsIsRegexp;
-  }
-
-  var $export$7 = _export;
+  var $export$5 = _export;
   var toLength$3 = _toLength;
-  var context$2 = _stringContext;
+  var context$1 = _stringContext;
   var STARTS_WITH = 'startsWith';
   var $startsWith = ''[STARTS_WITH];
 
-  $export$7($export$7.P + $export$7.F * require_failsIsRegexp()(STARTS_WITH), 'String', {
+  $export$5($export$5.P + $export$5.F * require_failsIsRegexp()(STARTS_WITH), 'String', {
     startsWith: function startsWith(searchString /* , position = 0 */) {
-      var that = context$2(this, searchString, STARTS_WITH);
+      var that = context$1(this, searchString, STARTS_WITH);
       var index = toLength$3(Math.min(arguments.length > 1 ? arguments[1] : undefined, that.length));
       var search = String(searchString);
       return $startsWith
@@ -3107,13 +3154,13 @@
   });
 
   // 22.1.3.8 Array.prototype.find(predicate, thisArg = undefined)
-  var $export$6 = _export;
+  var $export$4 = _export;
   var $find$1 = _arrayMethods(5);
   var KEY$1 = 'find';
   var forced$1 = true;
   // Shouldn't skip holes
   if (KEY$1 in []) Array(1)[KEY$1](function () { forced$1 = false; });
-  $export$6($export$6.P + $export$6.F * forced$1, 'Array', {
+  $export$4($export$4.P + $export$4.F * forced$1, 'Array', {
     find: function find(callbackfn /* , that = undefined */) {
       return $find$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
@@ -3561,7 +3608,7 @@
     var LIBRARY = _library;
     var global$2 = _global.exports;
     var fails$1 = _fails;
-    var $export$5 = _export;
+    var $export$3 = _export;
     var $typed = require_typed();
     var $buffer = require_typedBuffer();
     var ctx = _ctx;
@@ -3850,7 +3897,7 @@
       $DP$1.f = $setDesc;
     }
 
-    $export$5($export$5.S + $export$5.F * !ALL_CONSTRUCTORS, 'Object', {
+    $export$3($export$3.S + $export$3.F * !ALL_CONSTRUCTORS, 'Object', {
       getOwnPropertyDescriptor: $getDesc,
       defineProperty: $setDesc
     });
@@ -3999,34 +4046,34 @@
 
       O[NAME] = TypedArray;
 
-      $export$5($export$5.G + $export$5.W + $export$5.F * (TypedArray != Base), O);
+      $export$3($export$3.G + $export$3.W + $export$3.F * (TypedArray != Base), O);
 
-      $export$5($export$5.S, NAME, {
+      $export$3($export$3.S, NAME, {
         BYTES_PER_ELEMENT: BYTES
       });
 
-      $export$5($export$5.S + $export$5.F * fails$1(function () { Base.of.call(TypedArray, 1); }), NAME, {
+      $export$3($export$3.S + $export$3.F * fails$1(function () { Base.of.call(TypedArray, 1); }), NAME, {
         from: $from,
         of: $of
       });
 
       if (!(BYTES_PER_ELEMENT in TypedArrayPrototype)) hide(TypedArrayPrototype, BYTES_PER_ELEMENT, BYTES);
 
-      $export$5($export$5.P, NAME, proto$1);
+      $export$3($export$3.P, NAME, proto$1);
 
       setSpecies(NAME);
 
-      $export$5($export$5.P + $export$5.F * FORCED_SET, NAME, { set: $set });
+      $export$3($export$3.P + $export$3.F * FORCED_SET, NAME, { set: $set });
 
-      $export$5($export$5.P + $export$5.F * !CORRECT_ITER_NAME, NAME, $iterators);
+      $export$3($export$3.P + $export$3.F * !CORRECT_ITER_NAME, NAME, $iterators);
 
       if (!LIBRARY && TypedArrayPrototype.toString != arrayToString) TypedArrayPrototype.toString = arrayToString;
 
-      $export$5($export$5.P + $export$5.F * fails$1(function () {
+      $export$3($export$3.P + $export$3.F * fails$1(function () {
         new TypedArray(1).slice();
       }), NAME, { slice: $slice });
 
-      $export$5($export$5.P + $export$5.F * (fails$1(function () {
+      $export$3($export$3.P + $export$3.F * (fails$1(function () {
         return [1, 2].toLocaleString() != new TypedArray([1, 2]).toLocaleString();
       }) || !fails$1(function () {
         TypedArrayPrototype.toLocaleString.call([1, 2]);
@@ -4043,29 +4090,36 @@
     };
   });
 
+  // https://github.com/sebmarkbage/ecmascript-string-left-right-trim
+  _stringTrim('trimRight', function ($trim) {
+    return function trimRight() {
+      return $trim(this, 2);
+    };
+  }, 'trimEnd');
+
   // 22.1.3.9 Array.prototype.findIndex(predicate, thisArg = undefined)
-  var $export$4 = _export;
+  var $export$2 = _export;
   var $find = _arrayMethods(6);
   var KEY = 'findIndex';
   var forced = true;
   // Shouldn't skip holes
   if (KEY in []) Array(1)[KEY](function () { forced = false; });
-  $export$4($export$4.P + $export$4.F * forced, 'Array', {
+  $export$2($export$2.P + $export$2.F * forced, 'Array', {
     findIndex: function findIndex(callbackfn /* , that = undefined */) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
   _addToUnscopables(KEY);
 
-  var $export$3 = _export;
+  var $export$1 = _export;
   var toLength = _toLength;
-  var context$1 = _stringContext;
+  var context = _stringContext;
   var ENDS_WITH = 'endsWith';
   var $endsWith = ''[ENDS_WITH];
 
-  $export$3($export$3.P + $export$3.F * require_failsIsRegexp()(ENDS_WITH), 'String', {
+  $export$1($export$1.P + $export$1.F * require_failsIsRegexp()(ENDS_WITH), 'String', {
     endsWith: function endsWith(searchString /* , endPosition = @length */) {
-      var that = context$1(this, searchString, ENDS_WITH);
+      var that = context(this, searchString, ENDS_WITH);
       var endPosition = arguments.length > 1 ? arguments[1] : undefined;
       var len = toLength(that.length);
       var end = endPosition === undefined ? len : Math.min(toLength(endPosition), len);
@@ -4075,29 +4129,6 @@
         : that.slice(end - search.length, end) === search;
     }
   });
-
-  var $export$2 = _export;
-  var context = _stringContext;
-  var INCLUDES = 'includes';
-
-  $export$2($export$2.P + $export$2.F * require_failsIsRegexp()(INCLUDES), 'String', {
-    includes: function includes(searchString /* , position = 0 */) {
-      return !!~context(this, searchString, INCLUDES)
-        .indexOf(searchString, arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
-
-  // https://github.com/tc39/Array.prototype.includes
-  var $export$1 = _export;
-  var $includes = _arrayIncludes(true);
-
-  $export$1($export$1.P, 'Array', {
-    includes: function includes(el /* , fromIndex = 0 */) {
-      return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
-
-  _addToUnscopables('includes');
 
   var global$1 = _global.exports;
   var has$1 = _has;
