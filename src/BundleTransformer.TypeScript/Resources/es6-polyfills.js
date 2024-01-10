@@ -174,7 +174,7 @@
 
   var global$d = _global.exports;
   var hide$5 = _hide;
-  var has$8 = _has;
+  var has$7 = _has;
   var SRC = _uid('src');
   var $toString$2 = _functionToString;
   var TO_STRING$2 = 'toString';
@@ -186,9 +186,9 @@
 
   (_redefine.exports = function (O, key, val, safe) {
     var isFunction = typeof val == 'function';
-    if (isFunction) has$8(val, 'name') || hide$5(val, 'name', key);
+    if (isFunction) has$7(val, 'name') || hide$5(val, 'name', key);
     if (O[key] === val) return;
-    if (isFunction) has$8(val, SRC) || hide$5(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
+    if (isFunction) has$7(val, SRC) || hide$5(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
     if (O === global$d) {
       O[key] = val;
     } else if (!safe) {
@@ -328,7 +328,7 @@
 
   // getting tag from 19.1.3.6 Object.prototype.toString()
   var cof$5 = _cof;
-  var TAG$2 = _wks.exports('toStringTag');
+  var TAG$1 = _wks.exports('toStringTag');
   // ES3 wrong here
   var ARG = cof$5(function () { return arguments; }()) == 'Arguments';
 
@@ -343,7 +343,7 @@
     var O, T, B;
     return it === undefined ? 'Undefined' : it === null ? 'Null'
       // @@toStringTag case
-      : typeof (T = tryGet(O = Object(it), TAG$2)) == 'string' ? T
+      : typeof (T = tryGet(O = Object(it), TAG$1)) == 'string' ? T
       // builtinTag case
       : ARG ? cof$5(O)
       // ES3 arguments fallback
@@ -449,14 +449,14 @@
   };
 
   // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
-  var has$7 = _has;
+  var has$6 = _has;
   var toObject$8 = _toObject;
   var IE_PROTO$2 = _sharedKey('IE_PROTO');
   var ObjectProto$1 = Object.prototype;
 
   var _objectGpo = Object.getPrototypeOf || function (O) {
     O = toObject$8(O);
-    if (has$7(O, IE_PROTO$2)) return O[IE_PROTO$2];
+    if (has$6(O, IE_PROTO$2)) return O[IE_PROTO$2];
     if (typeof O.constructor == 'function' && O instanceof O.constructor) {
       return O.constructor.prototype;
     } return O instanceof Object ? ObjectProto$1 : null;
@@ -762,13 +762,21 @@
   	return _redefineAll;
   }
 
-  var def = _objectDp.f;
-  var has$6 = _has;
-  var TAG$1 = _wks.exports('toStringTag');
+  var _setToStringTag;
+  var hasRequired_setToStringTag;
 
-  var _setToStringTag = function (it, tag, stat) {
-    if (it && !has$6(it = stat ? it : it.prototype, TAG$1)) def(it, TAG$1, { configurable: true, value: tag });
-  };
+  function require_setToStringTag () {
+  	if (hasRequired_setToStringTag) return _setToStringTag;
+  	hasRequired_setToStringTag = 1;
+  	var def = _objectDp.f;
+  	var has = _has;
+  	var TAG = _wks.exports('toStringTag');
+
+  	_setToStringTag = function (it, tag, stat) {
+  	  if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, { configurable: true, value: tag });
+  	};
+  	return _setToStringTag;
+  }
 
   var _setSpecies;
   var hasRequired_setSpecies;
@@ -1011,7 +1019,7 @@
   }
 
   $export$p($export$p.G + $export$p.W + $export$p.F * !USE_NATIVE$1, { Promise: $Promise });
-  _setToStringTag($Promise, PROMISE);
+  require_setToStringTag()($Promise, PROMISE);
   require_setSpecies()(PROMISE);
   Wrapper = require_core()[PROMISE];
 
@@ -1438,7 +1446,7 @@
 
   var create$2 = _objectCreate;
   var descriptor = _propertyDesc;
-  var setToStringTag$3 = _setToStringTag;
+  var setToStringTag$3 = require_setToStringTag();
   var IteratorPrototype = {};
 
   // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
@@ -1454,7 +1462,7 @@
   var hide$3 = _hide;
   var Iterators$3 = _iterators;
   var $iterCreate = _iterCreate;
-  var setToStringTag$2 = _setToStringTag;
+  var setToStringTag$2 = require_setToStringTag();
   var getPrototypeOf$1 = _objectGpo;
   var ITERATOR$2 = _wks.exports('iterator');
   var BUGGY = !([].keys && 'next' in [].keys()); // Safari has buggy iterators w/o `next`
@@ -1725,7 +1733,7 @@
   var isObject$6 = _isObject;
   var fails$6 = _fails;
   var $iterDetect$1 = require_iterDetect();
-  var setToStringTag$1 = _setToStringTag;
+  var setToStringTag$1 = require_setToStringTag();
   var inheritIfRequired$2 = _inheritIfRequired;
 
   var _collection = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
@@ -3339,7 +3347,7 @@
   		var gOPN = _objectGopn.f;
   		var dP = _objectDp.f;
   		var arrayFill = require_arrayFill();
-  		var setToStringTag = _setToStringTag;
+  		var setToStringTag = require_setToStringTag();
   		var ARRAY_BUFFER = 'ArrayBuffer';
   		var DATA_VIEW = 'DataView';
   		var PROTOTYPE = 'prototype';
@@ -4246,7 +4254,7 @@
   var META = _meta.exports.KEY;
   var $fails = _fails;
   var shared = _shared.exports;
-  var setToStringTag = _setToStringTag;
+  var setToStringTag = require_setToStringTag();
   var uid = _uid;
   var wks = _wks.exports;
   var wksExt = _wksExt;

@@ -3,15 +3,15 @@
   "version": "1.13.12",
   "devDependencies": {
     "@babel/cli": "7.23.4",
-    "@babel/core": "7.23.3",
-    "@babel/preset-env": "7.23.3",
-    "uglify-js": "3.16.1"
+    "@babel/core": "7.23.7",
+    "@babel/preset-env": "7.23.8",
+    "terser": "5.26.0"
   },
   "scripts": {
     "transpile-typescript-combined-es6": "babel --out-file ./Resources/typescript-combined.js --config-file ./.babelrc ./Resources/typescript-combined.es6",
-    "minify-es6-polyfills-js": "uglifyjs ./Resources/es6-polyfills.js --output ./Resources/es6-polyfills.min.js --config-file ./.uglifyjsrc",
-    "minify-typescript-combined-js": "uglifyjs ./Resources/typescript-combined.js --output ./Resources/typescript-combined.min.js --config-file ./.uglifyjsrc",
-    "minify-tsc-helper-js": "uglifyjs ./Resources/tscHelper.js --output ./Resources/tscHelper.min.js --config-file ./.uglifyjsrc",
+    "minify-es6-polyfills-js": "terser ./Resources/es6-polyfills.js --output ./Resources/es6-polyfills.min.js --config-file ./.tersersrc",
+    "minify-typescript-combined-js": "terser ./Resources/typescript-combined.js --output ./Resources/typescript-combined.min.js --config-file ./.tersersrc",
+    "minify-tsc-helper-js": "terser ./Resources/tscHelper.js --output ./Resources/tscHelper.min.js --config-file ./.tersersrc",
     "transpile-es6": "npm run -s transpile-typescript-combined-es6",
     "minify-js": "npm run -s minify-es6-polyfills-js && npm run -s minify-typescript-combined-js && npm run -s minify-tsc-helper-js"
   }

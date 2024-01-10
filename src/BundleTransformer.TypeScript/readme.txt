@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains one translator-adapter -
    `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org)
-   version 5.3 RTM). This adapter makes translation of TypeScript code to JS code.
+   version 5.3.3). This adapter makes translation of TypeScript code to JS code.
    Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated TypeScript asset.
 
@@ -26,15 +26,19 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the TypeScript version 5.3 RTM (please note: The 5.3 RTM
-   release is also called '5.3.2').
+   Added support for the TypeScript version 5.3.3.
 
    ====================
    POST-INSTALL ACTIONS
    ====================
    For correct working of this module, you need to install one of the following
-   NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or
-   JavaScriptEngineSwitcher.ChakraCore.
+   NuGet packages:
+
+    * JavaScriptEngineSwitcher.ChakraCore
+    * JavaScriptEngineSwitcher.Jint
+    * JavaScriptEngineSwitcher.Msie
+    * JavaScriptEngineSwitcher.V8
+
    After package is installed and JS engine is registered
    (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines),
    need set a name of JS engine (for example, `MsieJsEngine`) to the `name`

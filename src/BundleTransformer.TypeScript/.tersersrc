@@ -1,5 +1,6 @@
 {
   "compress": {
+    "ecma": 5,
     "hoist_funs": true,
     "hoist_vars": true,
     "passes": 2
