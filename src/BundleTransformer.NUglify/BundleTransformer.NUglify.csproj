@@ -19,15 +19,14 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;NUglify</PackageTags>
-    <PackageReleaseNotes>1. Added support for the NUglify version 1.21.0;
-2. In configuration settings of CSS minifier was added one new property - `AbbreviateHexColor` (default `true`).</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the NUglify version 1.21.2.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
 
     <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-    <PackageReference Include="NUglify" Version="1.21.0" />
+    <PackageReference Include="NUglify" Version="1.21.2" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
