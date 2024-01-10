@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Tests</Product>
-    <VersionPrefix>1.13.15</VersionPrefix>
-    <TargetFramework>net452</TargetFramework>
+    <VersionPrefix>1.13.16</VersionPrefix>
+    <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);xUnit2013</NoWarn>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -16,11 +17,11 @@
     <Reference Include="System.Web" Pack="false" />
 
     <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.21.0" />
-    <PackageReference Include="JavaScriptEngineSwitcher.Msie" Version="3.21.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
-    <PackageReference Include="Moq" Version="4.17.2" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Msie" Version="3.23.7" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="xunit" Version="2.6.5" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6" />
 
     <ProjectReference Include="../../src/BundleTransformer.Autoprefixer/BundleTransformer.Autoprefixer.csproj" />
     <ProjectReference Include="../../src/BundleTransformer.CoffeeScript/BundleTransformer.CoffeeScript.csproj" />

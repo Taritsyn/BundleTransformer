@@ -135,9 +135,10 @@ namespace BundleTransformer.SassAndScss.Translators
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"sassAndScss",
 							@"
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
   * JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT mode)
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

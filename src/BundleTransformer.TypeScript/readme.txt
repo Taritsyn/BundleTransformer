@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.13.15
+                README file for Bundle Transformer: TypeScript v1.13.16
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2023 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2024 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

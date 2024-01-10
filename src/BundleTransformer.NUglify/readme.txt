@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-                  README file for Bundle Transformer: NUglify v1.13.14
+                  README file for Bundle Transformer: NUglify v1.13.16
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2023 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2024 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
