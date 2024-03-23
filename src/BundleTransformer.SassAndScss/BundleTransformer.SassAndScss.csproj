@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.SassAndScss contains one translator-adapter - `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to CSS code by using the Dart Sass Host for .NET (https://github.com/Taritsyn/DartSassHost) version 1.0.11 (supports the Dart Sass (https://github.com/sass/dart-sass) version 1.70.0). Also contains the `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text output of translated Sass or SCSS asset.
+    <Description>BundleTransformer.SassAndScss contains one translator-adapter - `SassAndScssTranslator`. This adapter makes translation of Sass and SCSS code to CSS code by using the Dart Sass Host for .NET (https://github.com/Taritsyn/DartSassHost) version 1.0.12 (supports the Dart Sass (https://github.com/sass/dart-sass) version 1.72.0). Also contains the `SassAndScssAssetHandler` debugging HTTP handler, which is responsible for text output of translated Sass or SCSS asset.
 
 As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages:
 
@@ -28,15 +28,14 @@ After installing the packages, you will need to register the default JS engine (
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support for the Dart Sass version 1.70.0.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the Dart Sass version 1.72.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
     <Reference Include="System.Web" Pack="false" />
 
-    <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
-    <PackageReference Include="DartSassHost" Version="1.0.11" />
+    <PackageReference Include="DartSassHost" Version="1.0.12" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
