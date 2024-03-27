@@ -174,7 +174,7 @@
 
   var global$d = _global.exports;
   var hide$5 = _hide;
-  var has$7 = _has;
+  var has$8 = _has;
   var SRC = _uid('src');
   var $toString$2 = _functionToString;
   var TO_STRING$2 = 'toString';
@@ -186,9 +186,9 @@
 
   (_redefine.exports = function (O, key, val, safe) {
     var isFunction = typeof val == 'function';
-    if (isFunction) has$7(val, 'name') || hide$5(val, 'name', key);
+    if (isFunction) has$8(val, 'name') || hide$5(val, 'name', key);
     if (O[key] === val) return;
-    if (isFunction) has$7(val, SRC) || hide$5(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
+    if (isFunction) has$8(val, SRC) || hide$5(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
     if (O === global$d) {
       O[key] = val;
     } else if (!safe) {
@@ -211,12 +211,12 @@
   var ctx$7 = _ctx;
   var PROTOTYPE$3 = 'prototype';
 
-  var $export$s = function (type, name, source) {
-    var IS_FORCED = type & $export$s.F;
-    var IS_GLOBAL = type & $export$s.G;
-    var IS_STATIC = type & $export$s.S;
-    var IS_PROTO = type & $export$s.P;
-    var IS_BIND = type & $export$s.B;
+  var $export$t = function (type, name, source) {
+    var IS_FORCED = type & $export$t.F;
+    var IS_GLOBAL = type & $export$t.G;
+    var IS_STATIC = type & $export$t.S;
+    var IS_PROTO = type & $export$t.P;
+    var IS_BIND = type & $export$t.B;
     var target = IS_GLOBAL ? global$c : IS_STATIC ? global$c[name] || (global$c[name] = {}) : (global$c[name] || {})[PROTOTYPE$3];
     var exports = IS_GLOBAL ? core$2 : core$2[name] || (core$2[name] = {});
     var expProto = exports[PROTOTYPE$3] || (exports[PROTOTYPE$3] = {});
@@ -230,7 +230,7 @@
       // bind timers to global for call from export context
       exp = IS_BIND && own ? ctx$7(out, global$c) : IS_PROTO && typeof out == 'function' ? ctx$7(Function.call, out) : out;
       // extend global
-      if (target) redefine$6(target, key, out, type & $export$s.U);
+      if (target) redefine$6(target, key, out, type & $export$t.U);
       // export
       if (exports[key] != out) hide$4(exports, key, exp);
       if (IS_PROTO && expProto[key] != out) expProto[key] = out;
@@ -238,15 +238,15 @@
   };
   global$c.core = core$2;
   // type bitmap
-  $export$s.F = 1;   // forced
-  $export$s.G = 2;   // global
-  $export$s.S = 4;   // static
-  $export$s.P = 8;   // proto
-  $export$s.B = 16;  // bind
-  $export$s.W = 32;  // wrap
-  $export$s.U = 64;  // safe
-  $export$s.R = 128; // real proto method for `library`
-  var _export = $export$s;
+  $export$t.F = 1;   // forced
+  $export$t.G = 2;   // global
+  $export$t.S = 4;   // static
+  $export$t.P = 8;   // proto
+  $export$t.B = 16;  // bind
+  $export$t.W = 32;  // wrap
+  $export$t.U = 64;  // safe
+  $export$t.R = 128; // real proto method for `library`
+  var _export = $export$t;
 
   // 7.2.1 RequireObjectCoercible(argument)
   var _defined = function (it) {
@@ -328,7 +328,7 @@
 
   // getting tag from 19.1.3.6 Object.prototype.toString()
   var cof$5 = _cof;
-  var TAG$1 = _wks.exports('toStringTag');
+  var TAG$2 = _wks.exports('toStringTag');
   // ES3 wrong here
   var ARG = cof$5(function () { return arguments; }()) == 'Arguments';
 
@@ -343,7 +343,7 @@
     var O, T, B;
     return it === undefined ? 'Undefined' : it === null ? 'Null'
       // @@toStringTag case
-      : typeof (T = tryGet(O = Object(it), TAG$1)) == 'string' ? T
+      : typeof (T = tryGet(O = Object(it), TAG$2)) == 'string' ? T
       // builtinTag case
       : ARG ? cof$5(O)
       // ES3 arguments fallback
@@ -391,7 +391,7 @@
   }
 
   var ctx$6 = _ctx;
-  var $export$r = _export;
+  var $export$s = _export;
   var toObject$9 = _toObject;
   var call$1 = _iterCall;
   var isArrayIter$2 = _isArrayIter;
@@ -399,7 +399,7 @@
   var createProperty$1 = _createProperty;
   var getIterFn$2 = core_getIteratorMethod;
 
-  $export$r($export$r.S + $export$r.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
+  $export$s($export$s.S + $export$s.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
     // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
     from: function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
       var O = toObject$9(arrayLike);
@@ -449,28 +449,28 @@
   };
 
   // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
-  var has$6 = _has;
+  var has$7 = _has;
   var toObject$8 = _toObject;
   var IE_PROTO$2 = _sharedKey('IE_PROTO');
   var ObjectProto$1 = Object.prototype;
 
   var _objectGpo = Object.getPrototypeOf || function (O) {
     O = toObject$8(O);
-    if (has$6(O, IE_PROTO$2)) return O[IE_PROTO$2];
+    if (has$7(O, IE_PROTO$2)) return O[IE_PROTO$2];
     if (typeof O.constructor == 'function' && O instanceof O.constructor) {
       return O.constructor.prototype;
     } return O instanceof Object ? ObjectProto$1 : null;
   };
 
   // most Object methods by ES6 should accept primitives
-  var $export$q = _export;
+  var $export$r = _export;
   var core = require_core();
   var fails$8 = _fails;
   var _objectSap = function (KEY, exec) {
     var fn = (core.Object || {})[KEY] || Object[KEY];
     var exp = {};
     exp[KEY] = exec(fn);
-    $export$q($export$q.S + $export$q.F * fails$8(function () { fn(1); }), 'Object', exp);
+    $export$r($export$r.S + $export$r.F * fails$8(function () { fn(1); }), 'Object', exp);
   };
 
   // 19.1.2.9 Object.getPrototypeOf(O)
@@ -762,21 +762,13 @@
   	return _redefineAll;
   }
 
-  var _setToStringTag;
-  var hasRequired_setToStringTag;
+  var def = _objectDp.f;
+  var has$6 = _has;
+  var TAG$1 = _wks.exports('toStringTag');
 
-  function require_setToStringTag () {
-  	if (hasRequired_setToStringTag) return _setToStringTag;
-  	hasRequired_setToStringTag = 1;
-  	var def = _objectDp.f;
-  	var has = _has;
-  	var TAG = _wks.exports('toStringTag');
-
-  	_setToStringTag = function (it, tag, stat) {
-  	  if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, { configurable: true, value: tag });
-  	};
-  	return _setToStringTag;
-  }
+  var _setToStringTag = function (it, tag, stat) {
+    if (it && !has$6(it = stat ? it : it.prototype, TAG$1)) def(it, TAG$1, { configurable: true, value: tag });
+  };
 
   var _setSpecies;
   var hasRequired_setSpecies;
@@ -802,7 +794,7 @@
   var global$7 = _global.exports;
   var ctx$3 = _ctx;
   var classof$3 = _classof;
-  var $export$p = _export;
+  var $export$q = _export;
   var isObject$d = _isObject;
   var aFunction$3 = _aFunction;
   var anInstance$4 = _anInstance;
@@ -1018,13 +1010,13 @@
     };
   }
 
-  $export$p($export$p.G + $export$p.W + $export$p.F * !USE_NATIVE$1, { Promise: $Promise });
-  require_setToStringTag()($Promise, PROMISE);
+  $export$q($export$q.G + $export$q.W + $export$q.F * !USE_NATIVE$1, { Promise: $Promise });
+  _setToStringTag($Promise, PROMISE);
   require_setSpecies()(PROMISE);
   Wrapper = require_core()[PROMISE];
 
   // statics
-  $export$p($export$p.S + $export$p.F * !USE_NATIVE$1, PROMISE, {
+  $export$q($export$q.S + $export$q.F * !USE_NATIVE$1, PROMISE, {
     // 25.4.4.5 Promise.reject(r)
     reject: function reject(r) {
       var capability = newPromiseCapability(this);
@@ -1033,13 +1025,13 @@
       return capability.promise;
     }
   });
-  $export$p($export$p.S + $export$p.F * (!USE_NATIVE$1), PROMISE, {
+  $export$q($export$q.S + $export$q.F * (!USE_NATIVE$1), PROMISE, {
     // 25.4.4.6 Promise.resolve(x)
     resolve: function resolve(x) {
       return promiseResolve(this, x);
     }
   });
-  $export$p($export$p.S + $export$p.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
+  $export$q($export$q.S + $export$q.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
     $Promise.all(iter)['catch'](empty);
   })), PROMISE, {
     // 25.4.4.1 Promise.all(iterable)
@@ -1219,13 +1211,13 @@
   };
 
   // https://github.com/tc39/proposal-object-getownpropertydescriptors
-  var $export$o = _export;
+  var $export$p = _export;
   var ownKeys = _ownKeys;
   var toIObject$4 = _toIobject;
   var gOPD$3 = _objectGopd;
   var createProperty = _createProperty;
 
-  $export$o($export$o.S, 'Object', {
+  $export$p($export$p.S, 'Object', {
     getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
       var O = toIObject$4(object);
       var getDesc = gOPD$3.f;
@@ -1397,7 +1389,7 @@
   };
 
   // 26.1.2 Reflect.construct(target, argumentsList [, newTarget])
-  var $export$n = _export;
+  var $export$o = _export;
   var create$3 = _objectCreate;
   var aFunction$1 = _aFunction;
   var anObject$8 = _anObject;
@@ -1416,7 +1408,7 @@
     rConstruct(function () { /* empty */ });
   });
 
-  $export$n($export$n.S + $export$n.F * (NEW_TARGET_BUG || ARGS_BUG), 'Reflect', {
+  $export$o($export$o.S + $export$o.F * (NEW_TARGET_BUG || ARGS_BUG), 'Reflect', {
     construct: function construct(Target, args /* , newTarget */) {
       aFunction$1(Target);
       anObject$8(args);
@@ -1446,7 +1438,7 @@
 
   var create$2 = _objectCreate;
   var descriptor = _propertyDesc;
-  var setToStringTag$3 = require_setToStringTag();
+  var setToStringTag$3 = _setToStringTag;
   var IteratorPrototype = {};
 
   // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
@@ -1457,12 +1449,12 @@
     setToStringTag$3(Constructor, NAME + ' Iterator');
   };
 
-  var $export$m = _export;
+  var $export$n = _export;
   var redefine$5 = _redefine.exports;
   var hide$3 = _hide;
   var Iterators$3 = _iterators;
   var $iterCreate = _iterCreate;
-  var setToStringTag$2 = require_setToStringTag();
+  var setToStringTag$2 = _setToStringTag;
   var getPrototypeOf$1 = _objectGpo;
   var ITERATOR$2 = _wks.exports('iterator');
   var BUGGY = !([].keys && 'next' in [].keys()); // Safari has buggy iterators w/o `next`
@@ -1520,7 +1512,7 @@
       };
       if (FORCED) for (key in methods) {
         if (!(key in proto)) redefine$5(proto, key, methods[key]);
-      } else $export$m($export$m.P + $export$m.F * (BUGGY || VALUES_BUG), NAME, methods);
+      } else $export$n($export$n.P + $export$n.F * (BUGGY || VALUES_BUG), NAME, methods);
     }
     return methods;
   };
@@ -1724,7 +1716,7 @@
   };
 
   var global$6 = _global.exports;
-  var $export$l = _export;
+  var $export$m = _export;
   var redefine$4 = _redefine.exports;
   var redefineAll$2 = require_redefineAll();
   var meta$1 = _meta.exports;
@@ -1733,7 +1725,7 @@
   var isObject$6 = _isObject;
   var fails$6 = _fails;
   var $iterDetect$1 = require_iterDetect();
-  var setToStringTag$1 = require_setToStringTag();
+  var setToStringTag$1 = _setToStringTag;
   var inheritIfRequired$2 = _inheritIfRequired;
 
   var _collection = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
@@ -1801,7 +1793,7 @@
     setToStringTag$1(C, NAME);
 
     O[NAME] = C;
-    $export$l($export$l.G + $export$l.W + $export$l.F * (C != Base), O);
+    $export$m($export$m.G + $export$m.W + $export$m.F * (C != Base), O);
 
     if (!IS_WEAK) common.setStrong(C, NAME, IS_MAP);
 
@@ -1973,7 +1965,7 @@
     }
   }
 
-  var $export$k = _export;
+  var $export$l = _export;
   var html = _html;
   var cof$3 = _cof;
   var toAbsoluteIndex$2 = _toAbsoluteIndex;
@@ -1981,7 +1973,7 @@
   var arraySlice$1 = [].slice;
 
   // fallback for not array-like ES3 strings and DOM objects
-  $export$k($export$k.P + $export$k.F * _fails(function () {
+  $export$l($export$l.P + $export$l.F * _fails(function () {
     if (html) arraySlice$1.call(html);
   }), 'Array', {
     slice: function slice(begin, end) {
@@ -2093,24 +2085,24 @@
   	return _strictMethod;
   }
 
-  var $export$j = _export;
+  var $export$k = _export;
   var $map$1 = _arrayMethods(1);
 
-  $export$j($export$j.P + $export$j.F * !require_strictMethod()([].map, true), 'Array', {
+  $export$k($export$k.P + $export$k.F * !require_strictMethod()([].map, true), 'Array', {
     // 22.1.3.15 / 15.4.4.19 Array.prototype.map(callbackfn [, thisArg])
     map: function map(callbackfn /* , thisArg */) {
       return $map$1(this, callbackfn, arguments[1]);
     }
   });
 
-  var $export$i = _export;
+  var $export$j = _export;
   var aFunction = _aFunction;
   var toObject$5 = _toObject;
   var fails$5 = _fails;
   var $sort = [].sort;
   var test = [1, 2, 3];
 
-  $export$i($export$i.P + $export$i.F * (fails$5(function () {
+  $export$j($export$j.P + $export$j.F * (fails$5(function () {
     // IE8-
     test.sort(undefined);
   }) || !fails$5(function () {
@@ -2160,9 +2152,9 @@
   }
 
   // 22.1.3.3 Array.prototype.copyWithin(target, start, end = this.length)
-  var $export$h = _export;
+  var $export$i = _export;
 
-  $export$h($export$h.P, 'Array', { copyWithin: require_arrayCopyWithin() });
+  $export$i($export$i.P, 'Array', { copyWithin: require_arrayCopyWithin() });
 
   _addToUnscopables('copyWithin');
 
@@ -2546,8 +2538,8 @@
   }
 
   // 19.1.3.19 Object.setPrototypeOf(O, proto)
-  var $export$g = _export;
-  $export$g($export$g.S, 'Object', { setPrototypeOf: require_setProto().set });
+  var $export$h = _export;
+  $export$h($export$h.S, 'Object', { setPrototypeOf: require_setProto().set });
 
   // 19.1.2.1 Object.assign(target, source, ...)
   var DESCRIPTORS$2 = _descriptors;
@@ -2911,9 +2903,9 @@
   }
 
   // 22.1.3.6 Array.prototype.fill(value, start = 0, end = this.length)
-  var $export$f = _export;
+  var $export$g = _export;
 
-  $export$f($export$f.P, 'Array', { fill: require_arrayFill() });
+  $export$g($export$g.P, 'Array', { fill: require_arrayFill() });
 
   _addToUnscopables('fill');
 
@@ -2937,9 +2929,9 @@
   	return _stringRepeat;
   }
 
-  var $export$e = _export;
+  var $export$f = _export;
 
-  $export$e($export$e.P, 'String', {
+  $export$f($export$f.P, 'String', {
     // 21.1.3.13 String.prototype.repeat(count)
     repeat: require_stringRepeat()
   });
@@ -2974,11 +2966,11 @@
   	return _failsIsRegexp;
   }
 
-  var $export$d = _export;
+  var $export$e = _export;
   var context$2 = _stringContext;
   var INCLUDES = 'includes';
 
-  $export$d($export$d.P + $export$d.F * require_failsIsRegexp()(INCLUDES), 'String', {
+  $export$e($export$e.P + $export$e.F * require_failsIsRegexp()(INCLUDES), 'String', {
     includes: function includes(searchString /* , position = 0 */) {
       return !!~context$2(this, searchString, INCLUDES)
         .indexOf(searchString, arguments.length > 1 ? arguments[1] : undefined);
@@ -2986,10 +2978,10 @@
   });
 
   // https://github.com/tc39/Array.prototype.includes
-  var $export$c = _export;
+  var $export$d = _export;
   var $includes = _arrayIncludes(true);
 
-  $export$c($export$c.P, 'Array', {
+  $export$d($export$d.P, 'Array', {
     includes: function includes(el /* , fromIndex = 0 */) {
       return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
     }
@@ -3020,10 +3012,10 @@
   };
 
   // https://github.com/tc39/proposal-object-values-entries
-  var $export$b = _export;
+  var $export$c = _export;
   var $entries = _objectToArray(true);
 
-  $export$b($export$b.S, 'Object', {
+  $export$c($export$c.S, 'Object', {
     entries: function entries(it) {
       return $entries(it);
     }
@@ -3047,14 +3039,14 @@
   };
 
   // https://github.com/tc39/proposal-string-pad-start-end
-  var $export$a = _export;
+  var $export$b = _export;
   var $pad = _stringPad;
   var userAgent = _userAgent;
 
   // https://github.com/zloirock/core-js/issues/280
   var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
 
-  $export$a($export$a.P + $export$a.F * WEBKIT_BUG, 'String', {
+  $export$b($export$b.P + $export$b.F * WEBKIT_BUG, 'String', {
     padStart: function padStart(maxLength /* , fillString = ' ' */) {
       return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, true);
     }
@@ -3063,7 +3055,7 @@
   var _stringWs = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
     '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
 
-  var $export$9 = _export;
+  var $export$a = _export;
   var defined = _defined;
   var fails$2 = _fails;
   var spaces = _stringWs;
@@ -3079,7 +3071,7 @@
     });
     var fn = exp[KEY] = FORCE ? exec(trim) : spaces[KEY];
     if (ALIAS) exp[ALIAS] = fn;
-    $export$9($export$9.P + $export$9.F * FORCE, 'String', exp);
+    $export$a($export$a.P + $export$a.F * FORCE, 'String', exp);
   };
 
   // 1 -> String#trimLeft
@@ -3101,22 +3093,22 @@
     };
   }, 'trimStart');
 
-  var $export$8 = _export;
+  var $export$9 = _export;
   var $at = _stringAt(false);
-  $export$8($export$8.P, 'String', {
+  $export$9($export$9.P, 'String', {
     // 21.1.3.3 String.prototype.codePointAt(pos)
     codePointAt: function codePointAt(pos) {
       return $at(this, pos);
     }
   });
 
-  var $export$7 = _export;
+  var $export$8 = _export;
   var toAbsoluteIndex$1 = _toAbsoluteIndex;
   var fromCharCode = String.fromCharCode;
   var $fromCodePoint = String.fromCodePoint;
 
   // length should be 1, old FF problem
-  $export$7($export$7.S + $export$7.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
+  $export$8($export$8.S + $export$8.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
     // 21.1.2.2 String.fromCodePoint(...codePoints)
     fromCodePoint: function fromCodePoint(x) { // eslint-disable-line no-unused-vars
       var res = [];
@@ -3134,23 +3126,23 @@
     }
   });
 
-  var $export$6 = _export;
+  var $export$7 = _export;
   var $filter = _arrayMethods(2);
 
-  $export$6($export$6.P + $export$6.F * !require_strictMethod()([].filter, true), 'Array', {
+  $export$7($export$7.P + $export$7.F * !require_strictMethod()([].filter, true), 'Array', {
     // 22.1.3.7 / 15.4.4.20 Array.prototype.filter(callbackfn [, thisArg])
     filter: function filter(callbackfn /* , thisArg */) {
       return $filter(this, callbackfn, arguments[1]);
     }
   });
 
-  var $export$5 = _export;
+  var $export$6 = _export;
   var toLength$3 = _toLength;
   var context$1 = _stringContext;
   var STARTS_WITH = 'startsWith';
   var $startsWith = ''[STARTS_WITH];
 
-  $export$5($export$5.P + $export$5.F * require_failsIsRegexp()(STARTS_WITH), 'String', {
+  $export$6($export$6.P + $export$6.F * require_failsIsRegexp()(STARTS_WITH), 'String', {
     startsWith: function startsWith(searchString /* , position = 0 */) {
       var that = context$1(this, searchString, STARTS_WITH);
       var index = toLength$3(Math.min(arguments.length > 1 ? arguments[1] : undefined, that.length));
@@ -3162,13 +3154,13 @@
   });
 
   // 22.1.3.8 Array.prototype.find(predicate, thisArg = undefined)
-  var $export$4 = _export;
+  var $export$5 = _export;
   var $find$1 = _arrayMethods(5);
   var KEY$1 = 'find';
   var forced$1 = true;
   // Shouldn't skip holes
   if (KEY$1 in []) Array(1)[KEY$1](function () { forced$1 = false; });
-  $export$4($export$4.P + $export$4.F * forced$1, 'Array', {
+  $export$5($export$5.P + $export$5.F * forced$1, 'Array', {
     find: function find(callbackfn /* , that = undefined */) {
       return $find$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
@@ -3347,7 +3339,7 @@
   		var gOPN = _objectGopn.f;
   		var dP = _objectDp.f;
   		var arrayFill = require_arrayFill();
-  		var setToStringTag = require_setToStringTag();
+  		var setToStringTag = _setToStringTag;
   		var ARRAY_BUFFER = 'ArrayBuffer';
   		var DATA_VIEW = 'DataView';
   		var PROTOTYPE = 'prototype';
@@ -3616,7 +3608,7 @@
     var LIBRARY = _library;
     var global$2 = _global.exports;
     var fails$1 = _fails;
-    var $export$3 = _export;
+    var $export$4 = _export;
     var $typed = require_typed();
     var $buffer = require_typedBuffer();
     var ctx = _ctx;
@@ -3905,7 +3897,7 @@
       $DP$1.f = $setDesc;
     }
 
-    $export$3($export$3.S + $export$3.F * !ALL_CONSTRUCTORS, 'Object', {
+    $export$4($export$4.S + $export$4.F * !ALL_CONSTRUCTORS, 'Object', {
       getOwnPropertyDescriptor: $getDesc,
       defineProperty: $setDesc
     });
@@ -4054,34 +4046,34 @@
 
       O[NAME] = TypedArray;
 
-      $export$3($export$3.G + $export$3.W + $export$3.F * (TypedArray != Base), O);
+      $export$4($export$4.G + $export$4.W + $export$4.F * (TypedArray != Base), O);
 
-      $export$3($export$3.S, NAME, {
+      $export$4($export$4.S, NAME, {
         BYTES_PER_ELEMENT: BYTES
       });
 
-      $export$3($export$3.S + $export$3.F * fails$1(function () { Base.of.call(TypedArray, 1); }), NAME, {
+      $export$4($export$4.S + $export$4.F * fails$1(function () { Base.of.call(TypedArray, 1); }), NAME, {
         from: $from,
         of: $of
       });
 
       if (!(BYTES_PER_ELEMENT in TypedArrayPrototype)) hide(TypedArrayPrototype, BYTES_PER_ELEMENT, BYTES);
 
-      $export$3($export$3.P, NAME, proto$1);
+      $export$4($export$4.P, NAME, proto$1);
 
       setSpecies(NAME);
 
-      $export$3($export$3.P + $export$3.F * FORCED_SET, NAME, { set: $set });
+      $export$4($export$4.P + $export$4.F * FORCED_SET, NAME, { set: $set });
 
-      $export$3($export$3.P + $export$3.F * !CORRECT_ITER_NAME, NAME, $iterators);
+      $export$4($export$4.P + $export$4.F * !CORRECT_ITER_NAME, NAME, $iterators);
 
       if (!LIBRARY && TypedArrayPrototype.toString != arrayToString) TypedArrayPrototype.toString = arrayToString;
 
-      $export$3($export$3.P + $export$3.F * fails$1(function () {
+      $export$4($export$4.P + $export$4.F * fails$1(function () {
         new TypedArray(1).slice();
       }), NAME, { slice: $slice });
 
-      $export$3($export$3.P + $export$3.F * (fails$1(function () {
+      $export$4($export$4.P + $export$4.F * (fails$1(function () {
         return [1, 2].toLocaleString() != new TypedArray([1, 2]).toLocaleString();
       }) || !fails$1(function () {
         TypedArrayPrototype.toLocaleString.call([1, 2]);
@@ -4106,26 +4098,26 @@
   }, 'trimEnd');
 
   // 22.1.3.9 Array.prototype.findIndex(predicate, thisArg = undefined)
-  var $export$2 = _export;
+  var $export$3 = _export;
   var $find = _arrayMethods(6);
   var KEY = 'findIndex';
   var forced = true;
   // Shouldn't skip holes
   if (KEY in []) Array(1)[KEY](function () { forced = false; });
-  $export$2($export$2.P + $export$2.F * forced, 'Array', {
+  $export$3($export$3.P + $export$3.F * forced, 'Array', {
     findIndex: function findIndex(callbackfn /* , that = undefined */) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
   _addToUnscopables(KEY);
 
-  var $export$1 = _export;
+  var $export$2 = _export;
   var toLength = _toLength;
   var context = _stringContext;
   var ENDS_WITH = 'endsWith';
   var $endsWith = ''[ENDS_WITH];
 
-  $export$1($export$1.P + $export$1.F * require_failsIsRegexp()(ENDS_WITH), 'String', {
+  $export$2($export$2.P + $export$2.F * require_failsIsRegexp()(ENDS_WITH), 'String', {
     endsWith: function endsWith(searchString /* , endPosition = @length */) {
       var that = context(this, searchString, ENDS_WITH);
       var endPosition = arguments.length > 1 ? arguments[1] : undefined;
@@ -4249,12 +4241,12 @@
   var global = _global.exports;
   var has = _has;
   var DESCRIPTORS = _descriptors;
-  var $export = _export;
+  var $export$1 = _export;
   var redefine = _redefine.exports;
   var META = _meta.exports.KEY;
   var $fails = _fails;
   var shared = _shared.exports;
-  var setToStringTag = require_setToStringTag();
+  var setToStringTag = _setToStringTag;
   var uid = _uid;
   var wks = _wks.exports;
   var wksExt = _wksExt;
@@ -4408,7 +4400,7 @@
     };
   }
 
-  $export($export.G + $export.W + $export.F * !USE_NATIVE, { Symbol: $Symbol });
+  $export$1($export$1.G + $export$1.W + $export$1.F * !USE_NATIVE, { Symbol: $Symbol });
 
   for (var es6Symbols = (
     // 19.4.2.2, 19.4.2.3, 19.4.2.4, 19.4.2.6, 19.4.2.8, 19.4.2.9, 19.4.2.10, 19.4.2.11, 19.4.2.12, 19.4.2.13, 19.4.2.14
@@ -4417,7 +4409,7 @@
 
   for (var wellKnownSymbols = $keys(wks.store), k = 0; wellKnownSymbols.length > k;) wksDefine(wellKnownSymbols[k++]);
 
-  $export($export.S + $export.F * !USE_NATIVE, 'Symbol', {
+  $export$1($export$1.S + $export$1.F * !USE_NATIVE, 'Symbol', {
     // 19.4.2.1 Symbol.for(key)
     'for': function (key) {
       return has(SymbolRegistry, key += '')
@@ -4433,7 +4425,7 @@
     useSimple: function () { setter = false; }
   });
 
-  $export($export.S + $export.F * !USE_NATIVE, 'Object', {
+  $export$1($export$1.S + $export$1.F * !USE_NATIVE, 'Object', {
     // 19.1.2.2 Object.create(O [, Properties])
     create: $create,
     // 19.1.2.4 Object.defineProperty(O, P, Attributes)
@@ -4452,14 +4444,14 @@
   // https://bugs.chromium.org/p/v8/issues/detail?id=3443
   var FAILS_ON_PRIMITIVES = $fails(function () { $GOPS.f(1); });
 
-  $export($export.S + $export.F * FAILS_ON_PRIMITIVES, 'Object', {
+  $export$1($export$1.S + $export$1.F * FAILS_ON_PRIMITIVES, 'Object', {
     getOwnPropertySymbols: function getOwnPropertySymbols(it) {
       return $GOPS.f(toObject(it));
     }
   });
 
   // 24.3.2 JSON.stringify(value [, replacer [, space]])
-  $JSON && $export($export.S + $export.F * (!USE_NATIVE || $fails(function () {
+  $JSON && $export$1($export$1.S + $export$1.F * (!USE_NATIVE || $fails(function () {
     var S = $Symbol();
     // MS Edge converts symbol values to JSON as {}
     // WebKit converts symbol values to JSON as null
@@ -4490,6 +4482,11 @@
   setToStringTag(Math, 'Math', true);
   // 24.3.3 JSON[@@toStringTag]
   setToStringTag(global.JSON, 'JSON', true);
+
+  // 20.1.2.6 Number.MAX_SAFE_INTEGER
+  var $export = _export;
+
+  $export($export.S, 'Number', { MAX_SAFE_INTEGER: 0x1fffffffffffff });
 
   // 7.2.9 SameValue(x, y)
   var _sameValue = Object.is || function is(x, y) {
