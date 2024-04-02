@@ -5,6 +5,7 @@
 # Node.js tools
 bower_components/
 node_modules/
+package-lock.json
 
 # NUnit test results
 TestResult.xml
@@ -15,6 +16,7 @@ TestResult.xml
 # User-specific files
 .vs/
 .vscode/
+.idea/
 *.sln.docstates
 *.suo
 *.user
@@ -57,6 +59,7 @@ PublishProfiles/
 # NuGet Packages
 packages/
 *.nupkg
+*.snupkg
 
 # Others
 .build/
@@ -75,3 +78,8 @@ _UpgradeReport_Files/
 Backup*/
 UpgradeLog.htm
 UpgradeLog*.XML
+
+# Current project-specific folders and files
+nuget/
+samples/BundleTransformer.Sample.AspNet45.Mvc4/App_Data/BundleTransformer/
+**/Resources/*.min.js
