@@ -33,6 +33,16 @@
         <title>$(Title)</title>
       </_TitleElement>
 
+      <_ReadmeElement/>
+      <_ReadmeElement Condition="'$(PackageReadmeFile)' != ''">
+        <readme>$(PackageReadmeFile)</readme>
+      </_ReadmeElement>
+
+      <_ReadmeFileElement/>
+      <_ReadmeFileElement Condition="'$(PackageReadmeFile)' != ''">
+        <file src="$(PackageReadmeFullPath)" target="$(PackageReadmeFile)" />
+      </_ReadmeFileElement>
+
       <_LicenseElement/>
       <_LicenseElement Condition="'$(PackageLicenseExpression)' != ''">
         <license type="expression">$(PackageLicenseExpression)</license>
@@ -42,8 +52,11 @@
       </_LicenseElement>
 
       <_LicenseFileElement/>
-      <_LicenseFileElement Condition="'$(PackageLicenseFile)' != ''">
+      <_LicenseFileElement Condition="'$(PackageLicenseFullPath)' != '' and '$(PackageLicenseFile)' != ''">
         <file src="$(PackageLicenseFullPath)" target="$(PackageLicenseFile)" />
+      </_LicenseFileElement>
+      <_LicenseFileElement Condition="'$(PackageLicenseFullPath)' != '' and '$(PackageLicenseFile)' == ''">
+        <file src="$(PackageLicenseFullPath)" target="/" />
       </_LicenseFileElement>
 
       <_TagsElement/>
@@ -88,27 +101,30 @@
 
       <_CommonMetadataElements>
         <id>$(PackageId)</id>
-        $(_TitleElement)
-        <description>$(PackageDescription)</description>
         <version>$(PackageVersion)</version>
+        $(_TitleElement)
         <authors>$(Authors)</authors>
-        <requireLicenseAcceptance>$(PackageRequireLicenseAcceptance)</requireLicenseAcceptance>
-        $(_TagsElement)
         $(_LicenseElement)
+        <requireLicenseAcceptance>$(PackageRequireLicenseAcceptance)</requireLicenseAcceptance>
         $(_IconElement)
-        $(_IconUrlElement)
-        $(_ReleaseNotesElement)
+        $(_ReadmeElement)
         <projectUrl>$(PackageProjectUrl)</projectUrl>
+        $(_IconUrlElement)
+        <description>$(PackageDescription)</description>
+        $(_ReleaseNotesElement)
         <copyright>$(Copyright)</copyright>
+        $(_TagsElement)
+        <repository type="$(RepositoryType)" url="$(RepositoryUrl)" commit="$(RepositoryCommit)" />
         $(_DevelopmentDependencyElement)
         $(_ServiceableElement)
-        <repository type="$(RepositoryType)" url="$(RepositoryUrl)" commit="$(RepositoryCommit)" />
         $(_NeutralLanguageElement)
       </_CommonMetadataElements>
 
       <_CommonFileElements>
+        $(CommonFileElements)
         $(_IconFileElement)
         $(_LicenseFileElement)
+        $(_ReadmeFileElement)
       </_CommonFileElements>
     </PropertyGroup>
 

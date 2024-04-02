@@ -2,9 +2,8 @@
   <PropertyGroup>
     <Title>$(Product)</Title>
     <Authors>Andrey Taritsyn</Authors>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageCommonTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET</PackageCommonTags>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageLicenseFullPath>../../LICENSE.txt</PackageLicenseFullPath>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/Taritsyn/BundleTransformer</PackageProjectUrl>

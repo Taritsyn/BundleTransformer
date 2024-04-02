@@ -2,15 +2,7 @@
   <Import Project="nuget-common.props" />
 
   <ItemGroup>
-    <None Include="$(PackageLicenseFullPath)">
-      <PackagePath>$(PackageLicenseFile)</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="$(PackageIconFullPath)">
-      <PackagePath>$(PackageIcon)</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="$(PackageLicenseFullPath)" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="$(PackageIconFullPath)" PackagePath="$(PackageIcon)" Pack="true" Visible="false" />
   </ItemGroup>
 </Project>
