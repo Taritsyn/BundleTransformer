@@ -15,9 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.Handlebars contains one translator-adapter - `HandlebarsTranslator` (supports the Handlebars (https://handlebarsjs.com) version 4.7.8). This adapter makes translation of Handlebars templates to JS code. Also contains the `HandlebarsAssetHandler` debugging HTTP handler, which is responsible for text output of translated Handlebars asset.
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+    <Description>BundleTransformer.Handlebars contains one translator-adapter - `HandlebarsTranslator` (supports the Handlebars). This adapter makes translation of Handlebars templates to JS code. Also contains the `HandlebarsAssetHandler` debugging HTTP handler, which is responsible for text output of translated Handlebars asset.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Handlebars_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Handlebars_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Handlebars;Translation;Translator;Compilation;Compiler</PackageTags>
@@ -54,30 +52,9 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/handlebars-license.txt">
-      <PackagePath>handlebars-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/js-engine-switcher-license.txt">
-      <PackagePath>js-engine-switcher-license.txtjs-engine-switcher-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/newtonsoft-json-license.txt">
-      <PackagePath>newtonsoft-json-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/handlebars-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/js-engine-switcher-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
   <Target Name="JsMinification" AfterTargets="BeforeBuild">

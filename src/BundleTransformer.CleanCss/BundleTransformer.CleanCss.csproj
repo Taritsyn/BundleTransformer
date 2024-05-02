@@ -15,9 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css (https://github.com/clean-css/clean-css) version 4.1.11.
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+    <Description>BundleTransformer.CleanCss contains one minifier-adapter for minification of CSS code - `CleanCssMinifier`. `CleanCssMinifier` is based on the Clean-css.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;Clean-css</PackageTags>
@@ -39,30 +37,9 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/clean-css-license.txt">
-      <PackagePath>clean-css-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/js-engine-switcher-license.txt">
-      <PackagePath>js-engine-switcher-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/newtonsoft-json-license.txt">
-      <PackagePath>newtonsoft-json-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/clean-css-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/js-engine-switcher-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
   <Target Name="JsMinification" AfterTargets="BeforeBuild">

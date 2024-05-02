@@ -1,0 +1,3 @@
+BundleTransformer.Closure contains two minifier-adapters for minification of JS code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`.
+`ClosureRemoteJsMinifier` is based on the [Google Closure Compiler Service API](https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet.
+`ClosureLocalJsMinifier` is based on the [Google Closure Compiler Application](https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of `compiler.jar` file.

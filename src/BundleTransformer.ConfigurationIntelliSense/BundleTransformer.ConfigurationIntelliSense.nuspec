@@ -6,6 +6,5 @@
   <files>
     $CommonFileElements$
     <file src="../../samples/BundleTransformer.Sample.AspNet45.Mvc4/BundleTransformer.Configuration.xsd" target="content" />
-    <file src="readme.txt" />
   </files>
 </package>

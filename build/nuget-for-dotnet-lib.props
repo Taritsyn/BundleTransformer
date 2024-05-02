@@ -4,5 +4,9 @@
   <ItemGroup>
     <None Include="$(PackageLicenseFullPath)" PackagePath="/" Pack="true" Visible="false" />
     <None Include="$(PackageIconFullPath)" PackagePath="$(PackageIcon)" Pack="true" Visible="false" />
+
+    <Content Include="web.config.transform" PackagePath="content/web.config.transform" Pack="true" />
+    <Content Include="$(PackageReadmeFullPath)" PackagePath="$(PackageReadmeFile)" Pack="true" />
+    <Content Include="readme.txt" PackagePath="/" Pack="true" />
   </ItemGroup>
 </Project>

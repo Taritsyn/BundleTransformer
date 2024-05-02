@@ -1,0 +1,1 @@
+BundleTransformer.ConfigurationIntelliSense adds a IntelliSense support during editing of the `bundleTransformer` configuration section in the `Web.config` file.

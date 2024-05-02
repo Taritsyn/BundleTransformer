@@ -1,0 +1,2 @@
+BundleTransformer.Yui contains two minifier-adapters: `YuiCssMinifier` (for minification of CSS code) and `YuiJsMinifier` (for minification of JS code).
+These adapters perform minification by using the [YUI Compressor for .NET](https://github.com/YUICompressor-NET/YUICompressor.NET).

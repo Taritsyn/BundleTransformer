@@ -15,11 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>Bundle Transformer - a modular extension for the System.Web.Optimization (also known as the Microsoft ASP.NET Web Optimization Framework). `StyleTransformer` and `ScriptTransformer` classes, included in the core of Bundle Transformer and implement the `IBundleTransform` interface. They are intended to replace the standard classes: `CssMinify` and `JsMinify`.
-
-The main differences of the `StyleTransformer` and `ScriptTransformer` classes from a standard implementations: ability to exclude unnecessary assets when adding assets from a directory, does not produce the re-minification of pre-minified assets, support automatic transformation of relative paths to absolute in CSS code (by using the `UrlRewritingCssPostProcessor`), etc. These classes do not produce the minification of code in runtime, but this feature can be added by installing of minifier-modules (now available modules based on Microsoft Ajax Minifier, YUI Compressor for .NET, NUglify, Google Closure Compiler, Douglas Crockford's JSMin, Dean Edwards' Packer, Mihai Bazon's UglifyJS, Sergey Kryzhanovsky's CSSO (CSS Optimizer), WebGrease and Clean-css). In addition, you can also install translator-modules, that implement the translation of code on intermediate languages (LESS, Sass, SCSS, CoffeeScript, TypeScript, Mustache (by using Hogan) and Handlebars). Apart from this, in the Bundle Transformer there is a third type of modules - postprocessors. Postprocessors runs after translators and before minifiers. Now available following postprocessors: URL rewriting CSS postprocessor (included in core) and postprocessor-module based on the Andrey Sitnik's Autoprefixer.
-
-This extension will help your web applications successfully pass a most part of the tests in Google PageSpeed.</Description>
+    <Description>Bundle Transformer - a modular extension for the System.Web.Optimization (also known as the Microsoft ASP.NET Web Optimization Framework). `StyleTransformer` and `ScriptTransformer` classes, included in the core of Bundle Transformer and implement the `IBundleTransform` interface. They are intended to replace the standard classes: `CssMinify` and `JsMinify`.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Core_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Core_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Performance;Optimization;YSlow;Speed;Pre-minified;Combine;Compression</PackageTags>
@@ -53,20 +49,7 @@ This extension will help your web applications successfully pass a most part of 
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/microsoft-aspnet-web-optimization-license.txt">
-      <PackagePath>microsoft-aspnet-web-optimization-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/microsoft-aspnet-web-optimization-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
 </Project>

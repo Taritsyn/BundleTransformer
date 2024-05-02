@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.MicrosoftAjax contains two minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS code) and `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform minification by using the Microsoft Ajax Minifier (https://www.nuget.org/packages/AjaxMin).</Description>
+    <Description>BundleTransformer.MicrosoftAjax contains two minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS code) and `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform minification by using the Microsoft Ajax Minifier.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_MicrosoftAjax_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_MicrosoftAjax_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;Microsoft;AjaxMin</PackageTags>
@@ -30,20 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/microsoft-ajax-minifier-license.txt">
-      <PackagePath>microsoft-ajax-minifier-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/microsoft-ajax-minifier-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
   <Target Name="AddPackageAliases" BeforeTargets="ResolveReferences" Outputs="%(PackageReference.Identity)">

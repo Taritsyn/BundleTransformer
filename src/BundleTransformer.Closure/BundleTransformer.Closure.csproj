@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.Closure contains two minifier-adapters for minification of JS code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. `ClosureRemoteJsMinifier` is based on the Google Closure Compiler Service API (https://developers.google.com/closure/compiler/docs/gettingstarted_api) and requires a permanent connection to the Internet. `ClosureLocalJsMinifier` is based on the Google Closure Compiler Application (https://developers.google.com/closure/compiler/docs/gettingstarted_app) and for their work requires the latest version of `compiler.jar` file.</Description>
+    <Description>BundleTransformer.Closure contains two minifier-adapters for minification of JS code: `ClosureRemoteJsMinifier` and `ClosureLocalJsMinifier`. These adapters perform minification by using the Google Closure Compiler.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Closure_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Google;Closure;Compiler</PackageTags>
@@ -50,30 +50,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/closure-compiler-license.txt">
-      <PackagePath>closure-compiler-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/microsoft-net-http-license.txt">
-      <PackagePath>microsoft-net-http-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/newtonsoft-json-license.txt">
-      <PackagePath>newtonsoft-json-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/closure-compiler-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/microsoft-net-http-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
 </Project>

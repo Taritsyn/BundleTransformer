@@ -2,6 +2,8 @@
   <PropertyGroup>
     <Title>$(Product)</Title>
     <Authors>Andrey Taritsyn</Authors>
+    <PackageReadmeFile>PACKAGE-DESCRIPTION.md</PackageReadmeFile>
+    <PackageReadmeFullPath>$(PackageReadmeFile)</PackageReadmeFullPath>
     <PackageCommonTags>BundleTransformer;System.Web.Optimization;IBundleTransform;ASP.NET</PackageCommonTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageLicenseFullPath>../../LICENSE.txt</PackageLicenseFullPath>
@@ -11,6 +13,6 @@
     <RepositoryType>git</RepositoryType>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageOutputPath>../../nuget</PackageOutputPath>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild Condition=" '$(Configuration)' == 'Release' ">true</GeneratePackageOnBuild>
   </PropertyGroup>
 </Project>

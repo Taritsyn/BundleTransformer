@@ -15,7 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.WG contains one minifier-adapter for minification of CSS code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier (https://www.nuget.org/packages/WebGrease) version 1.6.0.</Description>
+    <Description>BundleTransformer.WG contains one minifier-adapter for minification of CSS code - `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;WebGrease</PackageTags>
@@ -30,20 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/webgrease-license.txt">
-      <PackagePath>webgrease-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/webgrease-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
 </Project>

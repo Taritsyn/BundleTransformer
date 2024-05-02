@@ -15,16 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET (https://github.com/Taritsyn/AutoprefixerHost) version 3.0.35 (supports the Andrey Sitnik's Autoprefixer (https://github.com/postcss/autoprefixer) version 10.4.19.0).
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages:
-
- * JavaScriptEngineSwitcher.ChakraCore
- * JavaScriptEngineSwitcher.Jint
- * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
- * JavaScriptEngineSwitcher.V8
-
-After installing the packages, you will need to register the default JS engine (https://github.com/Taritsyn/JavaScriptEngineSwitcher/wiki/Registration-of-JS-engines).</Description>
+    <Description>BundleTransformer.Autoprefixer contains one postprocessor-adapter for postprocessing of CSS code - `AutoprefixCssPostProcessor`. This adapter makes actualization of vendor prefixes in CSS code by using the Autoprefixer Host for .NET.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
@@ -40,35 +31,10 @@ After installing the packages, you will need to register the default JS engine (
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/autoprefixer-license.txt">
-      <PackagePath>autoprefixer-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/autoprefixer-host-license.txt">
-      <PackagePath>autoprefixer-host-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/js-engine-switcher-license.txt">
-      <PackagePath>js-engine-switcher-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/newtonsoft-json-license.txt">
-      <PackagePath>newtonsoft-json-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/autoprefixer-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/autoprefixer-host-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/js-engine-switcher-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
 </Project>

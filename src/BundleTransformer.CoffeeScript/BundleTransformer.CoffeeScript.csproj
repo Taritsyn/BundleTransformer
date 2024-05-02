@@ -15,9 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.CoffeeScript contains one translator-adapter - `CoffeeScriptTranslator` (supports the CoffeeScript (https://coffeescript.org) version 2.7.0). This adapter makes translation of CoffeeScript code to JS code. Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated CoffeeScript asset.
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie, JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+    <Description>BundleTransformer.CoffeeScript contains one translator-adapter - `CoffeeScriptTranslator`. This adapter makes translation of CoffeeScript code to JS code. Also contains the `CoffeeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated CoffeeScript asset.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;CoffeeScript;Translation;Translator;Compilation;Compiler</PackageTags>
@@ -40,30 +38,9 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/coffeescript-license.txt">
-      <PackagePath>coffeescript-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/js-engine-switcher-license.txt">
-      <PackagePath>js-engine-switcher-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/newtonsoft-json-license.txt">
-      <PackagePath>newtonsoft-json-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/coffeescript-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/js-engine-switcher-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
   <Target Name="NodePackageInstallation" AfterTargets="BeforeBuild">

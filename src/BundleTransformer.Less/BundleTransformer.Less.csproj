@@ -15,11 +15,7 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.Less contains one translator-adapter - `LessTranslator` (supports the LESS (https://lesscss.org) version 3.9.0). This adapter makes translation of LESS code to CSS code. Also contains the `LessAssetHandler` debugging HTTP handler, which is responsible for text output of translated LESS asset.
-
-BundleTransformer.Less does not support loading of plugins.
-
-As a JS engine is used the JavaScript Engine Switcher library (https://github.com/Taritsyn/JavaScriptEngineSwitcher). For correct working of this module, you need to install one of the following NuGet packages: JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes), JavaScriptEngineSwitcher.V8 or JavaScriptEngineSwitcher.ChakraCore.</Description>
+    <Description>BundleTransformer.Less contains one translator-adapter - `LessTranslator`. This adapter makes translation of LESS code to CSS code. Also contains the `LessAssetHandler` debugging HTTP handler, which is responsible for text output of translated LESS asset.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Less_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Less_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;LESS;Translation;Translator;Compilation;Compiler</PackageTags>
@@ -56,35 +52,10 @@ As a JS engine is used the JavaScript Engine Switcher library (https://github.co
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="web.config.transform">
-      <PackagePath>content/web.config.transform</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="readme.txt">
-      <PackagePath>readme.txt</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-
-    <None Include="../../Licenses/less-license.txt">
-      <PackagePath>less-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/clone-license.txt">
-      <PackagePath>clone-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/js-engine-switcher-license.txt">
-      <PackagePath>js-engine-switcher-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
-    <None Include="../../Licenses/newtonsoft-json-license.txt">
-      <PackagePath>newtonsoft-json-license.txt</PackagePath>
-      <Pack>true</Pack>
-      <Visible>false</Visible>
-    </None>
+    <None Include="../../Licenses/less-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/clone-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/js-engine-switcher-license.txt" PackagePath="/" Pack="true" Visible="false" />
+    <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
   <Target Name="JsMinification" AfterTargets="BeforeBuild">
