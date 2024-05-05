@@ -47,7 +47,7 @@ namespace BundleTransformer.Sample.AspNet45.Mvc4
 			bundles.Add(modernizrBundle);
 
 			var jQueryBundle = new CustomScriptBundle("~/Bundles/Jquery",
-				"https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.6.0.min.js");
+				"https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.1.min.js");
 			jQueryBundle.Include("~/Scripts/jquery-{version}.js");
 			jQueryBundle.Orderer = nullOrderer;
 			jQueryBundle.CdnFallbackExpression = "window.jquery";

@@ -28,7 +28,7 @@
     <Reference Include="System.configuration" Pack="false" />
     <Reference Include="System.Web" Pack="false" />
 
-    <PackageReference Include="AdvancedStringBuilder" Version="0.1.0" />
+    <PackageReference Include="AdvancedStringBuilder" Version="0.1.1" />
     <PackageReference Include="Microsoft.AspNet.Web.Optimization" Version="1.1.3" />
   </ItemGroup>
 
