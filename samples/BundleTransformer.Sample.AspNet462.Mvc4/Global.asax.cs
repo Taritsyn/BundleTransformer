@@ -5,7 +5,7 @@ using System.Web.Routing;
 
 using JavaScriptEngineSwitcher.Core;
 
-namespace BundleTransformer.Sample.AspNet45.Mvc4
+namespace BundleTransformer.Sample.AspNet462.Mvc4
 {
 	public class MvcApplication : HttpApplication
 	{

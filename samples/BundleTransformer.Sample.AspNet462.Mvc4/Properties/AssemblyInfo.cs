@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("BundleTransformer.Sample.AspNet45.Mvc4")]
+[assembly: AssemblyTitle("BundleTransformer.Sample.AspNet462.Mvc4")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
