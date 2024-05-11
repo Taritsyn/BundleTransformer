@@ -32,7 +32,8 @@
    NuGet packages:
 
     * JavaScriptEngineSwitcher.ChakraCore
-    * JavaScriptEngineSwitcher.Msie
+    * JavaScriptEngineSwitcher.Jint
+    * JavaScriptEngineSwitcher.Msie (only in the Chakra modes)
     * JavaScriptEngineSwitcher.V8
 
    After package is installed and JS engine is registered

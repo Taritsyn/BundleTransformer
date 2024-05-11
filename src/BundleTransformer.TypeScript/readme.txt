@@ -36,7 +36,7 @@
 
     * JavaScriptEngineSwitcher.ChakraCore
     * JavaScriptEngineSwitcher.Jint
-    * JavaScriptEngineSwitcher.Msie
+    * JavaScriptEngineSwitcher.Msie (only in the Chakra modes)
     * JavaScriptEngineSwitcher.V8
 
    After package is installed and JS engine is registered

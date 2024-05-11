@@ -196,9 +196,10 @@ namespace BundleTransformer.CleanCss.Minifiers
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"clean",
 							@"
-  * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra modes)
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

@@ -81,9 +81,10 @@ namespace BundleTransformer.CoffeeScript.Translators
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"coffeeScript",
 							@"
-  * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra modes)
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

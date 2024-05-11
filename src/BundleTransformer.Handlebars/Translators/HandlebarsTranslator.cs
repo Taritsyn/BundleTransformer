@@ -128,9 +128,10 @@ namespace BundleTransformer.Handlebars.Translators
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"handlebars",
 							@"
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
   * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

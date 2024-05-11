@@ -32,6 +32,7 @@
    NuGet packages:
 
     * JavaScriptEngineSwitcher.ChakraCore
+    * JavaScriptEngineSwitcher.Jint
     * JavaScriptEngineSwitcher.Msie
     * JavaScriptEngineSwitcher.V8
 

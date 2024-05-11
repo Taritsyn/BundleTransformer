@@ -112,9 +112,10 @@ namespace BundleTransformer.Hogan.Translators
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"hogan",
 							@"
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
   * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

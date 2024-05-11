@@ -526,7 +526,7 @@ namespace BundleTransformer.TypeScript.Translators
 							@"
   * JavaScriptEngineSwitcher.ChakraCore
   * JavaScriptEngineSwitcher.Jint
-  * JavaScriptEngineSwitcher.Msie
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra modes)
   * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);

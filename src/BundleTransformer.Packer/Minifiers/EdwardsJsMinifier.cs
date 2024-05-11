@@ -82,9 +82,10 @@ namespace BundleTransformer.Packer.Minifiers
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"packer",
 							@"
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
   * JavaScriptEngineSwitcher.Msie
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}

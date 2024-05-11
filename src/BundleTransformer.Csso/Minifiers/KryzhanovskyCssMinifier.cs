@@ -92,9 +92,10 @@ namespace BundleTransformer.Csso.Minifiers
 						string.Format(CoreStrings.Configuration_JsEngineNotSpecified,
 							"csso",
 							@"
-  * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
-  * JavaScriptEngineSwitcher.V8
-  * JavaScriptEngineSwitcher.ChakraCore",
+  * JavaScriptEngineSwitcher.ChakraCore
+  * JavaScriptEngineSwitcher.Jint
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra modes)
+  * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
 				}
