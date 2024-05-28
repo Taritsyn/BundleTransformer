@@ -16,11 +16,6 @@
    file.
 
    =============
-   RELEASE NOTES
-   =============
-   Updated definitions for configuration settings of the NUglify CSS minifier.
-
-   =============
    DOCUMENTATION
    =============
    See documentation on GitHub - https://github.com/Taritsyn/BundleTransformer/wiki

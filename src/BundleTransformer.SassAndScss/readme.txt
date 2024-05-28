@@ -25,7 +25,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the Dart Sass version 1.72.0.
+   1. Added support for the Dart Sass version 1.72.0;
+   2. Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

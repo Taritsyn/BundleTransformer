@@ -1,6 +1,12 @@
 <Project>
   <Import Project="nuget-common.props" />
 
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="$(PackageLicenseFullPath)" PackagePath="/" Pack="true" Visible="false" />
     <None Include="$(PackageIconFullPath)" PackagePath="$(PackageIcon)" Pack="true" Visible="false" />

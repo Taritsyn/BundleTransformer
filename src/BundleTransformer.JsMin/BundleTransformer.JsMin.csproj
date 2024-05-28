@@ -19,7 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Douglas;Crockford;JSMin</PackageTags>
-    <PackageReleaseNotes>Added support of the JSMin version of October 30, 2019.</PackageReleaseNotes>
+    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

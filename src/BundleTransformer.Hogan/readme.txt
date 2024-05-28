@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Fixed a concurrency errors that occur during initialization.
+   Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

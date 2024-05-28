@@ -15,6 +15,11 @@
    `WgCssMinifier`. `WgCssMinifier` is based on the WebGrease Semantic CSS minifier
    (https://www.nuget.org/packages/WebGrease) version 1.6.0.
 
+   =============
+   RELEASE NOTES
+   =============
+   Enabled a SourceLink.
+
    ====================
    POST-INSTALL ACTIONS
    ====================

@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of CoffeeScript version 2.7.0.
+   Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

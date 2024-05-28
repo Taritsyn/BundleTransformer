@@ -19,6 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_WG_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;WebGrease</PackageTags>
+    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

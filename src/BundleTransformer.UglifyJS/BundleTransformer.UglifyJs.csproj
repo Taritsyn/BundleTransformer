@@ -19,7 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_UglifyJs_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_UglifyJs_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;UglifyJS</PackageTags>
-    <PackageReleaseNotes>Fixed a concurrency errors that occur during initialization.</PackageReleaseNotes>
+    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

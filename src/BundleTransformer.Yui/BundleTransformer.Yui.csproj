@@ -18,6 +18,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Yui_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Yui_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;YUICompressor</PackageTags>
+    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

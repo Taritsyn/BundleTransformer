@@ -26,7 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the TypeScript version 5.4.5.
+   1. Added support for the TypeScript version 5.4.5;
+   2. Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

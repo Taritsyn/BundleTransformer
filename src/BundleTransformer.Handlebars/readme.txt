@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the Handlebars version 4.7.8.
+   Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

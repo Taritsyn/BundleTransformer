@@ -24,7 +24,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the Autoprefixer version 10.4.19.0.
+   1. Added support for the Autoprefixer version 10.4.19.0;
+   2. Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

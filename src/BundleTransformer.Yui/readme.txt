@@ -16,6 +16,11 @@
    These adapters perform minification by using the YUI Compressor for .NET
    (https://github.com/YUICompressor-NET/YUICompressor.NET).
 
+   =============
+   RELEASE NOTES
+   =============
+   Enabled a SourceLink.
+
    ====================
    POST-INSTALL ACTIONS
    ====================

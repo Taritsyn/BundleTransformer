@@ -19,7 +19,8 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the NUglify version 1.21.7.
+   1. Added support for the NUglify version 1.21.7;
+   2. Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS

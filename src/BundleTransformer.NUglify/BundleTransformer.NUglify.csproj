@@ -19,7 +19,8 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;NUglify</PackageTags>
-    <PackageReleaseNotes>Added support for the NUglify version 1.21.7.</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Added support for the NUglify version 1.21.7;
+2. Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

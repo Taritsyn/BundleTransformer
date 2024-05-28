@@ -19,7 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CleanCss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Minification;Minifier;Minify;Clean-css</PackageTags>
-    <PackageReleaseNotes>Fixed a concurrency errors that occur during initialization.</PackageReleaseNotes>
+    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

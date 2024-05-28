@@ -17,6 +17,11 @@
    minification by using the Microsoft Ajax Minifier
    (https://github.com/microsoft/ajaxmin).
 
+   =============
+   RELEASE NOTES
+   =============
+   Enabled a SourceLink.
+
    ====================
    POST-INSTALL ACTIONS
    ====================

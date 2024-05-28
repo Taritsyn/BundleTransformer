@@ -19,7 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;CoffeeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Added support of CoffeeScript version 2.7.0.</PackageReleaseNotes>
+    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -19,7 +19,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support of the JSMin version of October 30, 2019.
+   Enabled a SourceLink.
 
    ====================
    POST-INSTALL ACTIONS
