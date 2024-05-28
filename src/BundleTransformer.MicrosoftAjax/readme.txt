@@ -15,7 +15,7 @@
    `MicrosoftAjaxCssMinifier` (for minification of CSS code) and
    `MicrosoftAjaxJsMinifier` (for minification of JS code). These adapters perform
    minification by using the Microsoft Ajax Minifier
-   (https://www.nuget.org/packages/AjaxMin).
+   (https://github.com/microsoft/ajaxmin).
 
    ====================
    POST-INSTALL ACTIONS

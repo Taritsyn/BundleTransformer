@@ -44,7 +44,7 @@ CODE
         text-decoration: none;
     }
 
-    A.twitter, A.linkedin
+    A.x, A.linkedin
     {
         display: block;
         float: left;
@@ -54,9 +54,9 @@ CODE
         width: 16px;
     }
 
-    A.twitter
+    A.x
     {
-        background: url("../Images/twitter.png") no-repeat;
+        background: url("../Images/x.png") no-repeat;
     }
 
   A.linkedin

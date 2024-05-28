@@ -1,2 +1,2 @@
 BundleTransformer.MicrosoftAjax contains two minifier-adapters: `MicrosoftAjaxCssMinifier` (for minification of CSS code) and `MicrosoftAjaxJsMinifier` (for minification of JS code).
-These adapters perform minification by using the [Microsoft Ajax Minifier](https://www.nuget.org/packages/AjaxMin).
+These adapters perform minification by using the [Microsoft Ajax Minifier](https://github.com/microsoft/ajaxmin).
