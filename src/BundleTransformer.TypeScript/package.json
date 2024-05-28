@@ -2,10 +2,10 @@
   "name": "bundletransformer.typescript",
   "version": "1.13.12",
   "devDependencies": {
-    "@babel/cli": "7.24.1",
-    "@babel/core": "7.24.3",
-    "@babel/preset-env": "7.24.3",
-    "terser": "5.30.0"
+    "@babel/cli": "7.24.6",
+    "@babel/core": "7.24.6",
+    "@babel/preset-env": "7.24.6",
+    "terser": "5.31.0"
   },
   "scripts": {
     "transpile-typescript-combined-es6": "babel --out-file ./Resources/typescript-combined.js --config-file ./.babelrc ./Resources/typescript-combined.es6",
