@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Core</Product>
-    <VersionPrefix>1.10.0</VersionPrefix>
+    <VersionPrefix>1.14.0</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

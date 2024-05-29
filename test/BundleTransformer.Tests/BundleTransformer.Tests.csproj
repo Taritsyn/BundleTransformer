@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Tests</Product>
-    <VersionPrefix>1.13.16</VersionPrefix>
+    <VersionPrefix>1.14.0</VersionPrefix>
     <TargetFramework>net462</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -18,10 +18,10 @@
 
     <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.24.1" />
     <PackageReference Include="JavaScriptEngineSwitcher.Msie" Version="3.24.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
-    <PackageReference Include="xunit" Version="2.8.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0" />
+    <PackageReference Include="xunit" Version="2.8.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1" />
 
     <ProjectReference Include="../../src/BundleTransformer.Autoprefixer/BundleTransformer.Autoprefixer.csproj" />
     <ProjectReference Include="../../src/BundleTransformer.CoffeeScript/BundleTransformer.CoffeeScript.csproj" />

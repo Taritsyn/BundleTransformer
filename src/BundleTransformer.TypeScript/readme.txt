@@ -1,7 +1,7 @@
 
 
    --------------------------------------------------------------------------------
-                README file for Bundle Transformer: TypeScript v1.13.16
+                README file for Bundle Transformer: TypeScript v1.14.0
 
    --------------------------------------------------------------------------------
 

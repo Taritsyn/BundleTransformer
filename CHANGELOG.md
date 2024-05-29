@@ -1,6 +1,14 @@
 Change log
 ==========
 
+## v1.14.0 - May 29, 2024
+ * Enabled a SourceLink in NuGet packages
+ * Minor improvements in metadata of NuGet packages
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.72.0
+ * In BundleTransformer.TypeScript added support for the TypeScript version 5.4.5
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.19.0
+ * In BundleTransformer.NUglify added support for the NUglify version 1.21.7
+
 ## v1.13.16 - January 10, 2024
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.69.7
  * In BundleTransformer.TypeScript added support for the TypeScript version 5.3.3
