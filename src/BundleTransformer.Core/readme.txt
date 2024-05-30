@@ -41,7 +41,8 @@
    =============
    RELEASE NOTES
    =============
-   Enabled a SourceLink.
+   Fixed a error that occurred when rewriting URLs that reference SVG patterns.
+   Special thanks to Adrian Kuegel and Henning D.
 
    ====================
    POST-INSTALL ACTIONS

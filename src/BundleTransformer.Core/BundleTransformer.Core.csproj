@@ -19,7 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Core_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Core_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Performance;Optimization;YSlow;Speed;Pre-minified;Combine;Compression</PackageTags>
-    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixed a error that occurred when rewriting URLs that reference SVG patterns. Special thanks to Adrian Kuegel and Henning D.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

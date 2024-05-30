@@ -49,6 +49,17 @@ namespace BundleTransformer.Core.Helpers
 		}
 
 		/// <summary>
+		/// Determines whether the beginning of this url matches the hash mark
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <returns>Result of check (true - is starts with the hash mark;
+		/// false - is not starts with the hash mark)</returns>
+		public static bool StartsWithHashMark(string url)
+		{
+			return url.StartsWith("#", StringComparison.Ordinal);
+		}
+
+		/// <summary>
 		/// Converts a back slashes to forward slashes
 		/// </summary>
 		/// <param name="url">URL with back slashes</param>
