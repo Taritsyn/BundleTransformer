@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.14.1 - May 30, 2024
+ * Fixed a error that occurred when rewriting URLs that reference SVG patterns. Special thanks to [Adrian Kuegel](https://github.com/akuegel) and [Henning D.](https://github.com/henningit)
+
 ## v1.14.0 - May 29, 2024
  * Enabled a SourceLink in NuGet packages
  * Minor improvements in metadata of NuGet packages
