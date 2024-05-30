@@ -269,7 +269,7 @@ namespace BundleTransformer.Core.PostProcessors
 		private string ProcessUrlRule(string parentAssetUrl, string assetUrl, string quote)
 		{
 			string processedAssetUrl = assetUrl;
-			if (!UrlHelpers.StartsWithProtocol(assetUrl) && !UrlHelpers.StartsWithDataUriScheme(assetUrl))
+			if (assetUrl[0] != '#' && !UrlHelpers.StartsWithProtocol(assetUrl) && !UrlHelpers.StartsWithDataUriScheme(assetUrl))
 			{
 				processedAssetUrl = _relativePathResolver.ResolveRelativePath(parentAssetUrl, assetUrl);
 			}
