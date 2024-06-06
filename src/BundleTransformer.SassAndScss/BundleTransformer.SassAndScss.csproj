@@ -19,15 +19,14 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>1. Added support for the Dart Sass version 1.72.0;
-2. Enabled a SourceLink.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the Dart Sass version 1.77.4.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
     <Reference Include="System.Web" Pack="false" />
 
-    <PackageReference Include="DartSassHost" Version="1.0.12" />
+    <PackageReference Include="DartSassHost" Version="1.0.13" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
