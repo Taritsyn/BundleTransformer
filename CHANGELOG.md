@@ -1,6 +1,9 @@
 Change log
 ==========
 
+## v1.14.2 - June 6, 2024
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.77.4
+
 ## v1.14.1 - May 30, 2024
  * Fixed a error that occurred when rewriting URLs that reference SVG patterns. Special thanks to [Adrian Kuegel](https://github.com/akuegel) and [Henning D.](https://github.com/henningit)
 
