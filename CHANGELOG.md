@@ -1,6 +1,16 @@
 Change log
 ==========
 
+## v1.15.0 - August 14, 2024
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
+ * In BundleTransformer.TypeScript:
+   * Added support for the TypeScript version 5.5.4
+   * In configuration settings of the TypeScript translator:
+     * Become obsolete four properties: `KeyofStringsOnly`, `NoStrictGenericChecks`, `SuppressExcessPropertyErrors` and `SuppressImplicitAnyIndexErrors`, and also the `EcmaScript3` value of the `Target` property
+     * Added one new property - `NoCheck` (default `false`)
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.20.0
+ * In BundleTransformer.NUglify added support for the NUglify version 1.21.9
+
 ## v1.14.2 - June 6, 2024
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.77.4
 
