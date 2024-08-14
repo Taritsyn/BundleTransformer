@@ -119,6 +119,7 @@ namespace BundleTransformer.TypeScript.Translators
 		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
 		/// Legacy option.
 		/// </summary>
+		[Obsolete]
 		public bool KeyofStringsOnly
 		{
 			get;
@@ -138,6 +139,16 @@ namespace BundleTransformer.TypeScript.Translators
 		/// Gets or sets a newline character for emitting files
 		/// </summary>
 		public NewLineMode NewLine
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full type checking (only critical parse and emit errors will be
+		/// reported)
+		/// </summary>
+		public bool NoCheck
 		{
 			get;
 			set;
@@ -259,6 +270,7 @@ namespace BundleTransformer.TypeScript.Translators
 		/// <summary>
 		/// Gets or sets a flag for whether to disable strict checking of generic signatures in function types
 		/// </summary>
+		[Obsolete]
 		public bool NoStrictGenericChecks
 		{
 			get;
@@ -381,6 +393,7 @@ namespace BundleTransformer.TypeScript.Translators
 		/// Gets or sets a flag for whether to disable reporting of excess property errors during the creation of
 		/// object literals
 		/// </summary>
+		[Obsolete]
 		public bool SuppressExcessPropertyErrors
 		{
 			get;
@@ -391,6 +404,7 @@ namespace BundleTransformer.TypeScript.Translators
 		/// Gets or sets a flag for whether to suppress <see cref="NoImplicitAny"/> errors when indexing objects that
 		/// lack index signatures
 		/// </summary>
+		[Obsolete]
 		public bool SuppressImplicitAnyIndexErrors
 		{
 			get;
@@ -475,13 +489,16 @@ namespace BundleTransformer.TypeScript.Translators
 			ExactOptionalPropertyTypes = tsConfig.ExactOptionalPropertyTypes;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
 			IgnoreDeprecations = tsConfig.IgnoreDeprecations;
+			#pragma warning disable CS0612
 			KeyofStringsOnly = tsConfig.KeyofStringsOnly;
+			#pragma warning restore CS0612
 			Libs = tsConfig.Libs
 				.Cast<LibraryFileRegistration>()
 				.Select(l => l.LibraryFileName)
 				.ToList()
 				;
 			NewLine = tsConfig.NewLine;
+			NoCheck = tsConfig.NoCheck;
 			NoEmit = tsConfig.NoEmit;
 			NoEmitHelpers = tsConfig.NoEmitHelpers;
 			NoEmitOnError = tsConfig.NoEmitOnError;
@@ -494,7 +511,9 @@ namespace BundleTransformer.TypeScript.Translators
 			NoLib = tsConfig.NoLib;
 			NoPropertyAccessFromIndexSignature = tsConfig.NoPropertyAccessFromIndexSignature;
 			NoResolve = tsConfig.NoResolve;
+			#pragma warning disable CS0612
 			NoStrictGenericChecks = tsConfig.NoStrictGenericChecks;
+			#pragma warning restore CS0612
 			NoUncheckedIndexedAccess = tsConfig.NoUncheckedIndexedAccess;
 			NoUnusedLocals = tsConfig.NoUnusedLocals;
 			NoUnusedParameters = tsConfig.NoUnusedParameters;
@@ -507,8 +526,10 @@ namespace BundleTransformer.TypeScript.Translators
 			StrictFunctionTypes = tsConfig.StrictFunctionTypes;
 			StrictPropertyInitialization = tsConfig.StrictPropertyInitialization;
 			StripInternal = tsConfig.StripInternal;
+			#pragma warning disable CS0612
 			SuppressExcessPropertyErrors = tsConfig.SuppressExcessPropertyErrors;
 			SuppressImplicitAnyIndexErrors = tsConfig.SuppressImplicitAnyIndexErrors;
+			#pragma warning restore CS0612
 			SuppressTypeCheckingErrors = tsConfig.SuppressTypeCheckingErrors;
 			Target = tsConfig.Target;
 			TranspileOnly = tsConfig.TranspileOnly;
@@ -648,9 +669,12 @@ namespace BundleTransformer.TypeScript.Translators
 				ExactOptionalPropertyTypes = ExactOptionalPropertyTypes,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
 				IgnoreDeprecations = IgnoreDeprecations,
+				#pragma warning disable CS0612
 				KeyofStringsOnly = KeyofStringsOnly,
+				#pragma warning restore CS0612
 				Libs = Libs,
 				NewLine = NewLine,
+				NoCheck = NoCheck,
 				NoEmit = NoEmit,
 				NoEmitHelpers = NoEmitHelpers,
 				NoEmitOnError = NoEmitOnError,
@@ -663,7 +687,9 @@ namespace BundleTransformer.TypeScript.Translators
 				NoLib = NoLib,
 				NoPropertyAccessFromIndexSignature = NoPropertyAccessFromIndexSignature,
 				NoResolve = NoResolve,
+				#pragma warning disable CS0612
 				NoStrictGenericChecks = NoStrictGenericChecks,
+				#pragma warning restore CS0612
 				NoUncheckedIndexedAccess = NoUncheckedIndexedAccess,
 				NoUnusedLocals = NoUnusedLocals,
 				NoUnusedParameters = NoUnusedParameters,
@@ -676,8 +702,10 @@ namespace BundleTransformer.TypeScript.Translators
 				StrictFunctionTypes = StrictFunctionTypes,
 				StrictPropertyInitialization = StrictPropertyInitialization,
 				StripInternal = StripInternal,
+				#pragma warning disable CS0612
 				SuppressExcessPropertyErrors = SuppressExcessPropertyErrors,
 				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
+				#pragma warning restore CS0612
 				SuppressTypeCheckingErrors = SuppressTypeCheckingErrors,
 				Target = Target,
 				TranspileOnly = TranspileOnly,

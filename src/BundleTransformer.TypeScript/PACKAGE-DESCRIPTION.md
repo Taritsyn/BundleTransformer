@@ -1,4 +1,4 @@
-BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the [TypeScript](https://www.typescriptlang.org) version 5.4.5).
+BundleTransformer.TypeScript contains one translator-adapter - `TypeScriptTranslator` (supports the [TypeScript](https://www.typescriptlang.org) version 5.5.4).
 This adapter makes translation of TypeScript code to JS code.
 Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is responsible for text output of translated TypeScript asset.
 

@@ -19,8 +19,10 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;TypeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>1. Added support for the TypeScript version 5.4.5;
-2. Enabled a SourceLink.</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Added support for the TypeScript version 5.5.4;
+2. In configuration settings of the TypeScript translator:
+	2.1. Become obsolete four properties: `KeyofStringsOnly`, `NoStrictGenericChecks`, `SuppressExcessPropertyErrors` and `SuppressImplicitAnyIndexErrors`, and also the `EcmaScript3` value of the `Target` property;
+	2.2. Added one new property - `NoCheck` (default `false`).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

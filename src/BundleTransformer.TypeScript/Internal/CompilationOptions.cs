@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace BundleTransformer.TypeScript.Internal
 {
@@ -76,6 +77,7 @@ namespace BundleTransformer.TypeScript.Internal
 		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
 		/// Legacy option.
 		/// </summary>
+		[Obsolete]
 		public bool KeyofStringsOnly
 		{
 			get;
@@ -95,6 +97,16 @@ namespace BundleTransformer.TypeScript.Internal
 		/// Gets or sets a newline character for emitting files
 		/// </summary>
 		public NewLineMode NewLine
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full type checking (only critical parse and emit errors will be
+		/// reported)
+		/// </summary>
+		public bool NoCheck
 		{
 			get;
 			set;
@@ -217,6 +229,7 @@ namespace BundleTransformer.TypeScript.Internal
 		/// <summary>
 		/// Gets or sets a flag for whether to disable strict checking of generic signatures in function types
 		/// </summary>
+		[Obsolete]
 		public bool NoStrictGenericChecks
 		{
 			get;
@@ -339,6 +352,7 @@ namespace BundleTransformer.TypeScript.Internal
 		/// Gets or sets a flag for whether to disable reporting of excess property errors during the creation of
 		/// object literals
 		/// </summary>
+		[Obsolete]
 		public bool SuppressExcessPropertyErrors
 		{
 			get;
@@ -349,6 +363,7 @@ namespace BundleTransformer.TypeScript.Internal
 		/// Gets or sets a flag for whether to suppress <see cref="NoImplicitAny"/> errors when indexing objects that
 		/// lack index signatures
 		/// </summary>
+		[Obsolete]
 		public bool SuppressImplicitAnyIndexErrors
 		{
 			get;
@@ -417,9 +432,12 @@ namespace BundleTransformer.TypeScript.Internal
 			ExactOptionalPropertyTypes = false;
 			ForceConsistentCasingInFileNames = true;
 			IgnoreDeprecations = string.Empty;
+			#pragma warning disable CS0612
 			KeyofStringsOnly = false;
+			#pragma warning restore CS0612
 			Libs = new List<string>();
 			NewLine = NewLineMode.CrLf;
+			NoCheck = false;
 			NoEmit = false;
 			NoEmitHelpers = false;
 			NoEmitOnError = false;
@@ -432,7 +450,9 @@ namespace BundleTransformer.TypeScript.Internal
 			NoLib = false;
 			NoPropertyAccessFromIndexSignature = false;
 			NoResolve = false;
+			#pragma warning disable CS0612
 			NoStrictGenericChecks = false;
+			#pragma warning restore CS0612
 			NoUncheckedIndexedAccess = false;
 			NoUnusedLocals = false;
 			NoUnusedParameters = false;
@@ -445,8 +465,10 @@ namespace BundleTransformer.TypeScript.Internal
 			StrictFunctionTypes = false;
 			StrictPropertyInitialization = false;
 			StripInternal = false;
+			#pragma warning disable CS0612
 			SuppressExcessPropertyErrors = false;
 			SuppressImplicitAnyIndexErrors = false;
+			#pragma warning restore CS0612
 			SuppressTypeCheckingErrors = false;
 			Target = TargetMode.EcmaScript5;
 			TranspileOnly = false;

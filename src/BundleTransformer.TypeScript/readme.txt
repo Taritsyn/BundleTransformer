@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains one translator-adapter -
    `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org)
-   version 5.4.5). This adapter makes translation of TypeScript code to JS code.
+   version 5.5.4). This adapter makes translation of TypeScript code to JS code.
    Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated TypeScript asset.
 
@@ -26,8 +26,13 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support for the TypeScript version 5.4.5;
-   2. Enabled a SourceLink.
+   1. Added support for the TypeScript version 5.5.4;
+   2. In configuration settings of the TypeScript translator:
+     2.1. Become obsolete four properties: `KeyofStringsOnly`,
+     `NoStrictGenericChecks`, `SuppressExcessPropertyErrors` and
+     `SuppressImplicitAnyIndexErrors`, and also the `EcmaScript3` value of the
+     `Target` property;
+     2.2. Added one new property - `NoCheck` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

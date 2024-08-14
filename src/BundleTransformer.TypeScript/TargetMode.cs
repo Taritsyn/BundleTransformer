@@ -1,10 +1,13 @@
-﻿namespace BundleTransformer.TypeScript
+﻿using System;
+
+namespace BundleTransformer.TypeScript
 {
 	/// <summary>
 	/// Target mode
 	/// </summary>
 	public enum TargetMode
 	{
+		[Obsolete]
 		EcmaScript3 = 0,
 		EcmaScript5 = 1,
 		EcmaScript6 = 2,
@@ -16,6 +19,7 @@
 		EcmaScript2020 = 7,
 		EcmaScript2021 = 8,
 		EcmaScript2022 = 9,
+		EcmaScript2023 = 10,
 		EcmaScriptNext = 99
 	}
 }

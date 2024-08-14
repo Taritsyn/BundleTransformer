@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 
 using BundleTransformer.Core.Configuration;
 
@@ -85,6 +86,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
 		/// Legacy option.
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("keyofStringsOnly", DefaultValue = false)]
 		public bool KeyofStringsOnly
 		{
@@ -109,6 +111,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		{
 			get { return (NewLineMode)this["newLine"]; }
 			set { this["newLine"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to disable full type checking (only critical parse and emit errors will be
+		/// reported)
+		/// </summary>
+		[ConfigurationProperty("noCheck", DefaultValue = false)]
+		public bool NoCheck
+		{
+			get { return (bool)this["noCheck"]; }
+			set { this["noCheck"] = value; }
 		}
 
 		/// <summary>
@@ -239,6 +252,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// <summary>
 		/// Gets or sets a flag for whether to disable strict checking of generic signatures in function types
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("noStrictGenericChecks", DefaultValue = false)]
 		public bool NoStrictGenericChecks
 		{
@@ -374,6 +388,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to disable reporting of excess property errors during the creation of
 		/// object literals
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("suppressExcessPropertyErrors", DefaultValue = false)]
 		public bool SuppressExcessPropertyErrors
 		{
@@ -385,6 +400,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to suppress <see cref="NoImplicitAny"/> errors when indexing objects that
 		/// lack index signatures
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("suppressImplicitAnyIndexErrors", DefaultValue = false)]
 		public bool SuppressImplicitAnyIndexErrors
 		{
