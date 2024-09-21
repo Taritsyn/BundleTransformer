@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.15.1 - September 21, 2024
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
+ * In BundleTransformer.TypeScript:
+     * Added support for the TypeScript version 5.6 RTM (please note: The 5.6 RTM release is also called '5.6.2')
+     * In configuration settings of the TypeScript translator was added one new property - `StrictBuiltinIteratorReturn` (default `false`)
+
 ## v1.15.0 - August 14, 2024
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
  * In BundleTransformer.TypeScript:
