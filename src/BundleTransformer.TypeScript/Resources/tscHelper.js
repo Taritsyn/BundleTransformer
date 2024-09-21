@@ -31,6 +31,7 @@ var typeScriptHelper = (function (virtualFileManager, undefined) {
 			mapRoot: '',
 			module: 0 /* None */,
 			moduleResolution: 1 /* Classic */,
+			noUncheckedSideEffectImports: false,
 			outDir: '',
 			preserveSymlinks: false,
 			reactNamespace: '',

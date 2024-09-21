@@ -734,14 +734,19 @@
         <xs:documentation>Flag for whether to check that the arguments for `bind`, `call`, and `apply` methods match the original function</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="strictNullChecks" type="Boolean_SchemaType" use="optional" default="false">
+    <xs:attribute name="strictBuiltinIteratorReturn" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation>Flag for whether to take into account `null` and `undefined` when type checking</xs:documentation>
+        <xs:documentation>Flag for whether to instantiate built-in iterators with a `TReturn` type of `undefined` instead of `any`</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="strictFunctionTypes" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to check to ensure parameters and the return values are subtype-compatible when assigning functions</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="strictNullChecks" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to take into account `null` and `undefined` when type checking</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="strictPropertyInitialization" type="Boolean_SchemaType" use="optional" default="false">

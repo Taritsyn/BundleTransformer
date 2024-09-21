@@ -342,13 +342,14 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to take into account <c>null</c> and <c>undefined</c> when type checking
+		/// Gets or sets a flag for whether to instantiate built-in iterators with a <c>TReturn</c> type of <c>undefined</c>
+		/// instead of <c>any</c>
 		/// </summary>
-		[ConfigurationProperty("strictNullChecks", DefaultValue = false)]
-		public bool StrictNullChecks
+		[ConfigurationProperty("strictBuiltinIteratorReturn", DefaultValue = false)]
+		public bool StrictBuiltinIteratorReturn
 		{
-			get { return (bool)this["strictNullChecks"]; }
-			set { this["strictNullChecks"] = value; }
+			get { return (bool)this["strictBuiltinIteratorReturn"]; }
+			set { this["strictBuiltinIteratorReturn"] = value; }
 		}
 
 		/// <summary>
@@ -360,6 +361,16 @@ namespace BundleTransformer.TypeScript.Configuration
 		{
 			get { return (bool)this["strictFunctionTypes"]; }
 			set { this["strictFunctionTypes"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to take into account <c>null</c> and <c>undefined</c> when type checking
+		/// </summary>
+		[ConfigurationProperty("strictNullChecks", DefaultValue = false)]
+		public bool StrictNullChecks
+		{
+			get { return (bool)this["strictNullChecks"]; }
+			set { this["strictNullChecks"] = value; }
 		}
 
 		/// <summary>

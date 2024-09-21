@@ -310,9 +310,10 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to take into account <c>null</c> and <c>undefined</c> when type checking
+		/// Gets or sets a flag for whether to instantiate built-in iterators with a <c>TReturn</c> type of <c>undefined</c>
+		/// instead of <c>any</c>
 		/// </summary>
-		public bool StrictNullChecks
+		public bool StrictBuiltinIteratorReturn
 		{
 			get;
 			set;
@@ -323,6 +324,15 @@ namespace BundleTransformer.TypeScript.Internal
 		/// when assigning functions
 		/// </summary>
 		public bool StrictFunctionTypes
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to take into account <c>null</c> and <c>undefined</c> when type checking
+		/// </summary>
+		public bool StrictNullChecks
 		{
 			get;
 			set;
@@ -461,8 +471,9 @@ namespace BundleTransformer.TypeScript.Internal
 			SkipDefaultLibCheck = false;
 			SkipLibCheck = false;
 			StrictBindCallApply = false;
-			StrictNullChecks = false;
+			StrictBuiltinIteratorReturn = false;
 			StrictFunctionTypes = false;
+			StrictNullChecks = false;
 			StrictPropertyInitialization = false;
 			StripInternal = false;
 			#pragma warning disable CS0612
