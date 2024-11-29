@@ -19,8 +19,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_TypeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;TypeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>1. Added support for the TypeScript version 5.6 RTM (please note: The 5.6 RTM release is also called '5.6.2');
-2. In configuration settings of the TypeScript translator was added one new property - `StrictBuiltinIteratorReturn` (default `false`).</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the TypeScript version 5.7 RTM (please note: The 5.7 RTM release is also called '5.7.2').</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

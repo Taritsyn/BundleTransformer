@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains one translator-adapter -
    `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org)
-   version 5.6 RTM). This adapter makes translation of TypeScript code to JS code.
+   version 5.7 RTM). This adapter makes translation of TypeScript code to JS code.
    Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated TypeScript asset.
 
@@ -26,10 +26,8 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support for the TypeScript version 5.6 RTM (please note: The 5.6 RTM
-      release is also called '5.6.2');
-   2. In configuration settings of the TypeScript translator was added one new
-      property - `StrictBuiltinIteratorReturn` (default `false`).
+   Added support for the TypeScript version 5.7 RTM (please note: The 5.7 RTM
+   release is also called '5.7.2').
 
    ====================
    POST-INSTALL ACTIONS
