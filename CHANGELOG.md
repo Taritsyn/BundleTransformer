@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.15.2 - December 2, 2024
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
+ * In BundleTransformer.TypeScript added support for the TypeScript version 5.7 RTM (please note: The 5.7 RTM release is also called '5.7.2')
+ * In BundleTransformer.NUglify added support for the NUglify version 1.21.10
+
 ## v1.15.1 - September 21, 2024
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
  * In BundleTransformer.TypeScript:
