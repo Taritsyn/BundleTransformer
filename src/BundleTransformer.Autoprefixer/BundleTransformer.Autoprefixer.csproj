@@ -19,13 +19,13 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_Autoprefixer_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Postprocessing;Postprocessor;Autoprefixer</PackageTags>
-    <PackageReleaseNotes>Added support for the Autoprefixer version 10.4.20.0.</PackageReleaseNotes>
+    <PackageReleaseNotes>Autoprefixer Host was updated to version 3.1.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
 
-    <PackageReference Include="AutoprefixerHost" Version="3.0.36" />
+    <PackageReference Include="AutoprefixerHost" Version="3.1.0" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
