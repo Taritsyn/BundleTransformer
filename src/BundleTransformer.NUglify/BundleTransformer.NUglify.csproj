@@ -19,13 +19,13 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_NUglify_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;JavaScript;JS;Bundling;Minification;Minifier;Minify;Obfuscation;NUglify</PackageTags>
-    <PackageReleaseNotes>Added support for the NUglify version 1.21.11.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the NUglify version 1.21.12.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
 
-    <PackageReference Include="NUglify" Version="1.21.11" />
+    <PackageReference Include="NUglify" Version="1.21.12" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
