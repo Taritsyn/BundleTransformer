@@ -18,7 +18,7 @@
    =============
    RELEASE NOTES
    =============
-   Updated definitions for configuration settings of the TypeScript translator.
+   Updated definitions for configuration settings of the Sass and SCSS translator.
 
    =============
    DOCUMENTATION

@@ -15,7 +15,7 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_ConfigurationIntelliSense_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);Web.config;IntelliSense</PackageTags>
-    <PackageReleaseNotes>Updated definitions for configuration settings of the TypeScript translator.</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated definitions for configuration settings of the Sass and SCSS translator.</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>

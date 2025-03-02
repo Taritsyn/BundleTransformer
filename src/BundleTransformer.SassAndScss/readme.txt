@@ -25,7 +25,11 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the Dart Sass version 1.83.4.
+   1. Added support for the Dart Sass version 1.83.4;
+   2. In configuration settings of the Sass and SCSS translator was added four new
+      properties - `FatalDeprecations` (default empty string), `FutureDeprecations`
+     (default empty string), `QuietDependencies` (default `false`) and
+     `SilenceDeprecations` (default empty string).
 
    ====================
    POST-INSTALL ACTIONS

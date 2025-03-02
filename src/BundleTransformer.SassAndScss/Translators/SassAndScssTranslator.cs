@@ -6,7 +6,6 @@ using System.Text;
 
 using AdvancedStringBuilder;
 using DartSassHost;
-using DartSassHost.Helpers;
 using DshIndentType = DartSassHost.IndentType;
 using DshLineFeedType = DartSassHost.LineFeedType;
 using JavaScriptEngineSwitcher.Core;
@@ -37,6 +36,11 @@ namespace BundleTransformer.SassAndScss.Translators
 		const string OUTPUT_CODE_TYPE = "CSS";
 
 		/// <summary>
+		/// End part of repetitive deprecation warnings description
+		/// </summary>
+		const string REPETITIVE_DEPRECATIONS_DESCRIPTION_END_PART = " repetitive deprecation warnings omitted.";
+
+		/// <summary>
 		/// Delegate that creates an instance of JS engine
 		/// </summary>
 		private readonly Func<IJsEngine> _createJsEngineInstance;
@@ -45,6 +49,24 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// Virtual file manager
 		/// </summary>
 		private readonly VirtualFileManager _virtualFileManager;
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of deprecations to treat as fatal
+		/// </summary>
+		public string FatalDeprecations
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of future deprecations to opt into early
+		/// </summary>
+		public string FutureDeprecations
+		{
+			get;
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets a list of include paths
@@ -77,6 +99,25 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// Gets or sets a line feed type
 		/// </summary>
 		public BtLineFeedType LineFeedType
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to silence compiler warnings from stylesheets loaded by using the
+		/// <see cref="IncludePaths"/> property
+		/// </summary>
+		public bool QuietDependencies
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of active deprecations to ignore
+		/// </summary>
+		public string SilenceDeprecations
 		{
 			get;
 			set;
@@ -116,6 +157,8 @@ namespace BundleTransformer.SassAndScss.Translators
 			_virtualFileManager = new VirtualFileManager(virtualFileSystemWrapper);
 
 			UseNativeMinification = sassAndScssConfig.UseNativeMinification;
+			FatalDeprecations = sassAndScssConfig.FatalDeprecations;
+			FutureDeprecations = sassAndScssConfig.FutureDeprecations;
 			IncludePaths = sassAndScssConfig.IncludePaths
 				.Cast<IncludedPathRegistration>()
 				.Select(p => p.Path)
@@ -124,6 +167,8 @@ namespace BundleTransformer.SassAndScss.Translators
 			IndentType = sassAndScssConfig.IndentType;
 			IndentWidth = sassAndScssConfig.IndentWidth;
 			LineFeedType = sassAndScssConfig.LineFeedType;
+			QuietDependencies = sassAndScssConfig.QuietDependencies;
+			SilenceDeprecations = sassAndScssConfig.SilenceDeprecations;
 			Severity = sassAndScssConfig.Severity;
 
 			if (createJsEngineInstance == null)
@@ -241,7 +286,8 @@ namespace BundleTransformer.SassAndScss.Translators
 					if (severity == 1)
 					{
 						warnings = warnings
-							.Where(w => !w.IsDeprecation)
+							.Where(w => !w.IsDeprecation
+								&& !w.Description.EndsWith(REPETITIVE_DEPRECATIONS_DESCRIPTION_END_PART))
 							.ToList()
 							;
 					}
@@ -291,15 +337,32 @@ namespace BundleTransformer.SassAndScss.Translators
 
 			var options = new CompilationOptions
 			{
+				FatalDeprecations = ParseDeprecations(FatalDeprecations),
+				FutureDeprecations = ParseDeprecations(FutureDeprecations),
 				IncludePaths = processedIncludePaths,
 				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, DshIndentType>(IndentType),
 				IndentWidth = IndentWidth,
 				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, DshLineFeedType>(LineFeedType),
 				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded,
+				QuietDependencies = QuietDependencies,
+				SilenceDeprecations = ParseDeprecations(SilenceDeprecations),
 				WarningLevel = ConvertSeverityToWarningLevel(Severity)
 			};
 
 			return options;
+		}
+
+		/// <summary>
+		/// Parses a string representation of the deprecation list
+		/// </summary>
+		/// <param name="deprecationsString">String representation of the deprecation list</param>
+		/// <returns>List of deprecations</returns>
+		private static IList<string> ParseDeprecations(string deprecationsString)
+		{
+			string[] deprecations = Utils.ConvertToStringCollection(deprecationsString, ',',
+				trimItemValues: true, removeEmptyItems: true);
+
+			return deprecations.ToList();
 		}
 
 		/// <summary>

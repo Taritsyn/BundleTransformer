@@ -20,6 +20,26 @@ namespace BundleTransformer.SassAndScss.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a comma-separated list of deprecations to treat as fatal
+		/// </summary>
+		[ConfigurationProperty("fatalDeprecations", DefaultValue = "")]
+		public string FatalDeprecations
+		{
+			get { return (string)this["fatalDeprecations"]; }
+			set { this["fatalDeprecations"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of future deprecations to opt into early
+		/// </summary>
+		[ConfigurationProperty("futureDeprecations", DefaultValue = "")]
+		public string FutureDeprecations
+		{
+			get { return (string)this["futureDeprecations"]; }
+			set { this["futureDeprecations"] = value; }
+		}
+
+		/// <summary>
 		/// Gets a list of include paths
 		/// </summary>
 		[ConfigurationProperty("includePaths", IsRequired = false)]
@@ -57,6 +77,27 @@ namespace BundleTransformer.SassAndScss.Configuration
 		{
 			get { return (LineFeedType)this["lineFeedType"]; }
 			set { this["lineFeedType"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a flag for whether to silence compiler warnings from stylesheets loaded by using the
+		/// <see cref="IncludePaths"/> property
+		/// </summary>
+		[ConfigurationProperty("quietDependencies", DefaultValue = false)]
+		public bool QuietDependencies
+		{
+			get { return (bool)this["quietDependencies"]; }
+			set { this["quietDependencies"] = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a comma-separated list of active deprecations to ignore
+		/// </summary>
+		[ConfigurationProperty("silenceDeprecations", DefaultValue = "")]
+		public string SilenceDeprecations
+		{
+			get { return (string)this["silenceDeprecations"]; }
+			set { this["silenceDeprecations"] = value; }
 		}
 
 		/// <summary>
