@@ -2989,6 +2989,23 @@
 
   _addToUnscopables('includes');
 
+  var $export$d = _export;
+  var toLength$4 = _toLength;
+  var context$1 = _stringContext;
+  var STARTS_WITH = 'startsWith';
+  var $startsWith = ''[STARTS_WITH];
+
+  $export$d($export$d.P + $export$d.F * require_failsIsRegexp()(STARTS_WITH), 'String', {
+    startsWith: function startsWith(searchString /* , position = 0 */) {
+      var that = context$1(this, searchString, STARTS_WITH);
+      var index = toLength$4(Math.min(arguments.length > 1 ? arguments[1] : undefined, that.length));
+      var search = String(searchString);
+      return $startsWith
+        ? $startsWith.call(that, search, index)
+        : that.slice(index, index + search.length) === search;
+    }
+  });
+
   var DESCRIPTORS$1 = _descriptors;
   var getKeys$1 = _objectKeys;
   var toIObject$2 = _toIobject;
@@ -3012,17 +3029,17 @@
   };
 
   // https://github.com/tc39/proposal-object-values-entries
-  var $export$d = _export;
+  var $export$c = _export;
   var $entries = _objectToArray(true);
 
-  $export$d($export$d.S, 'Object', {
+  $export$c($export$c.S, 'Object', {
     entries: function entries(it) {
       return $entries(it);
     }
   });
 
   // https://github.com/tc39/proposal-string-pad-start-end
-  var toLength$4 = _toLength;
+  var toLength$3 = _toLength;
   var repeat = require_stringRepeat();
   var defined$1 = _defined;
 
@@ -3030,7 +3047,7 @@
     var S = String(defined$1(that));
     var stringLength = S.length;
     var fillStr = fillString === undefined ? ' ' : String(fillString);
-    var intMaxLength = toLength$4(maxLength);
+    var intMaxLength = toLength$3(maxLength);
     if (intMaxLength <= stringLength || fillStr == '') return S;
     var fillLen = intMaxLength - stringLength;
     var stringFiller = repeat.call(fillStr, Math.ceil(fillLen / fillStr.length));
@@ -3039,14 +3056,14 @@
   };
 
   // https://github.com/tc39/proposal-string-pad-start-end
-  var $export$c = _export;
+  var $export$b = _export;
   var $pad = _stringPad;
   var userAgent = _userAgent;
 
   // https://github.com/zloirock/core-js/issues/280
   var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
 
-  $export$c($export$c.P + $export$c.F * WEBKIT_BUG, 'String', {
+  $export$b($export$b.P + $export$b.F * WEBKIT_BUG, 'String', {
     padStart: function padStart(maxLength /* , fillString = ' ' */) {
       return $pad(this, maxLength, arguments.length > 1 ? arguments[1] : undefined, true);
     }
@@ -3055,7 +3072,7 @@
   var _stringWs = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
     '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
 
-  var $export$b = _export;
+  var $export$a = _export;
   var defined = _defined;
   var fails$2 = _fails;
   var spaces = _stringWs;
@@ -3071,7 +3088,7 @@
     });
     var fn = exp[KEY] = FORCE ? exec(trim) : spaces[KEY];
     if (ALIAS) exp[ALIAS] = fn;
-    $export$b($export$b.P + $export$b.F * FORCE, 'String', exp);
+    $export$a($export$a.P + $export$a.F * FORCE, 'String', exp);
   };
 
   // 1 -> String#trimLeft
@@ -3096,10 +3113,10 @@
     return $parseInt$1(string, (radix >>> 0) || (hex.test(string) ? 16 : 10));
   } : $parseInt$1;
 
-  var $export$a = _export;
+  var $export$9 = _export;
   var $parseInt = _parseInt;
   // 20.1.2.13 Number.parseInt(string, radix)
-  $export$a($export$a.S + $export$a.F * (Number.parseInt != $parseInt), 'Number', { parseInt: $parseInt });
+  $export$9($export$9.S + $export$9.F * (Number.parseInt != $parseInt), 'Number', { parseInt: $parseInt });
 
   var global$3 = _global.exports;
   var has$2 = _has;
@@ -3177,22 +3194,22 @@
     };
   }, 'trimStart');
 
-  var $export$9 = _export;
+  var $export$8 = _export;
   var $at = _stringAt(false);
-  $export$9($export$9.P, 'String', {
+  $export$8($export$8.P, 'String', {
     // 21.1.3.3 String.prototype.codePointAt(pos)
     codePointAt: function codePointAt(pos) {
       return $at(this, pos);
     }
   });
 
-  var $export$8 = _export;
+  var $export$7 = _export;
   var toAbsoluteIndex$1 = _toAbsoluteIndex;
   var fromCharCode = String.fromCharCode;
   var $fromCodePoint = String.fromCodePoint;
 
   // length should be 1, old FF problem
-  $export$8($export$8.S + $export$8.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
+  $export$7($export$7.S + $export$7.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
     // 21.1.2.2 String.fromCodePoint(...codePoints)
     fromCodePoint: function fromCodePoint(x) { // eslint-disable-line no-unused-vars
       var res = [];
@@ -3210,30 +3227,13 @@
     }
   });
 
-  var $export$7 = _export;
+  var $export$6 = _export;
   var $filter = _arrayMethods(2);
 
-  $export$7($export$7.P + $export$7.F * !require_strictMethod()([].filter, true), 'Array', {
+  $export$6($export$6.P + $export$6.F * !require_strictMethod()([].filter, true), 'Array', {
     // 22.1.3.7 / 15.4.4.20 Array.prototype.filter(callbackfn [, thisArg])
     filter: function filter(callbackfn /* , thisArg */) {
       return $filter(this, callbackfn, arguments[1]);
-    }
-  });
-
-  var $export$6 = _export;
-  var toLength$3 = _toLength;
-  var context$1 = _stringContext;
-  var STARTS_WITH = 'startsWith';
-  var $startsWith = ''[STARTS_WITH];
-
-  $export$6($export$6.P + $export$6.F * require_failsIsRegexp()(STARTS_WITH), 'String', {
-    startsWith: function startsWith(searchString /* , position = 0 */) {
-      var that = context$1(this, searchString, STARTS_WITH);
-      var index = toLength$3(Math.min(arguments.length > 1 ? arguments[1] : undefined, that.length));
-      var search = String(searchString);
-      return $startsWith
-        ? $startsWith.call(that, search, index)
-        : that.slice(index, index + search.length) === search;
     }
   });
 

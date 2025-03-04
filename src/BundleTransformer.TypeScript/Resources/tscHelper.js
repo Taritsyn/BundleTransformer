@@ -28,6 +28,7 @@ var typeScriptHelper = (function (virtualFileManager, undefined) {
 			jsxFactory: false,
 			jsxFragmentFactory: '',
 			jsxImportSource: '',
+			libReplacement: false,
 			mapRoot: '',
 			module: 0 /* None */,
 			moduleResolution: 1 /* Classic */,
