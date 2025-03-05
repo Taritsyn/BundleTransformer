@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: IntelliSense</Product>
-    <VersionPrefix>1.15.2</VersionPrefix>
+    <VersionPrefix>1.15.3</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
   </PropertyGroup>
 

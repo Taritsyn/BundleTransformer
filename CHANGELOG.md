@@ -1,6 +1,15 @@
 Change log
 ==========
 
+## v1.15.3 - March 5, 2025
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the Sass and SCSS translator
+ * In BundleTransformer.SassAndScss:
+     * Added support for the Dart Sass version 1.83.4
+     * In configuration settings of the Sass and SCSS translator was added four new properties: `FatalDeprecations` (default empty string), `FutureDeprecations` (default empty string), `QuietDependencies` (default `false`) and `SilenceDeprecations` (default empty string)
+ * In BundleTransformer.TypeScript added support for the TypeScript version 5.8 RTM (please note: The 5.8 RTM release is also called '5.8.2')
+ * In BundleTransformer.Autoprefixer was updated the Autoprefixer Host to version 3.1.0
+ * In BundleTransformer.NUglify added support for the NUglify version 1.21.13
+
 ## v1.15.2 - December 2, 2024
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
  * In BundleTransformer.TypeScript added support for the TypeScript version 5.7 RTM (please note: The 5.7 RTM release is also called '5.7.2')

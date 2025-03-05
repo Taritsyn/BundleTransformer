@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-               README file for Bundle Transformer: Autoprefixer v1.15.0
+               README file for Bundle Transformer: Autoprefixer v1.15.3
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2024 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2025 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========

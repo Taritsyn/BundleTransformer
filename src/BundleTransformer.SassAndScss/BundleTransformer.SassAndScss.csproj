@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Sass and SCSS</Product>
-    <VersionPrefix>1.14.2</VersionPrefix>
+    <VersionPrefix>1.15.3</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -20,7 +20,7 @@
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
     <PackageReleaseNotes>1. Added support for the Dart Sass version 1.83.4;
-2. In configuration settings of the Sass and SCSS translator was added four new properties - `FatalDeprecations` (default empty string), `FutureDeprecations` (default empty string), `QuietDependencies` (default `false`) and `SilenceDeprecations` (default empty string).</PackageReleaseNotes>
+2. In configuration settings of the Sass and SCSS translator was added four new properties: `FatalDeprecations` (default empty string), `FutureDeprecations` (default empty string), `QuietDependencies` (default `false`) and `SilenceDeprecations` (default empty string).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

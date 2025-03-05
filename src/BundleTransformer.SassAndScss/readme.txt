@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-              README file for Bundle Transformer: Sass and SCSS v1.14.2
+              README file for Bundle Transformer: Sass and SCSS v1.15.3
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2024 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2025 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
@@ -27,7 +27,7 @@
    =============
    1. Added support for the Dart Sass version 1.83.4;
    2. In configuration settings of the Sass and SCSS translator was added four new
-      properties - `FatalDeprecations` (default empty string), `FutureDeprecations`
+      properties: `FatalDeprecations` (default empty string), `FutureDeprecations`
      (default empty string), `QuietDependencies` (default `false`) and
      `SilenceDeprecations` (default empty string).
 
