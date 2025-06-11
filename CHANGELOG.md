@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.15.4 - June 11, 2025
+ * In BundleTransformer.TypeScript added support for the TypeScript version 5.8.3
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.21.0
+ * In BundleTransformer.NUglify added support for the NUglify version 1.21.15
+
 ## v1.15.3 - March 5, 2025
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the Sass and SCSS translator
  * In BundleTransformer.SassAndScss:
