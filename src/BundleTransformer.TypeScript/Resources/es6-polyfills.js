@@ -14,9 +14,9 @@
   };
 
   // optional / simple context binding
-  var aFunction$6 = _aFunction;
+  var aFunction$4 = _aFunction;
   var _ctx = function (fn, that, length) {
-    aFunction$6(fn);
+    aFunction$4(fn);
     if (that === undefined) return fn;
     switch (length) {
       case 1: return function (a) {
@@ -37,23 +37,16 @@
   var _global = {exports: {}};
 
   // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-  var global$f = _global.exports = typeof window != 'undefined' && window.Math == Math
+  var global$c = _global.exports = typeof window != 'undefined' && window.Math == Math
     ? window : typeof self != 'undefined' && self.Math == Math ? self
     // eslint-disable-next-line no-new-func
     : Function('return this')();
-  if (typeof __g == 'number') __g = global$f; // eslint-disable-line no-undef
+  if (typeof __g == 'number') __g = global$c; // eslint-disable-line no-undef
 
   var _core = {exports: {}};
 
-  var hasRequired_core;
-
-  function require_core () {
-  	if (hasRequired_core) return _core.exports;
-  	hasRequired_core = 1;
-  	var core = _core.exports = { version: '2.6.12' };
-  	if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
-  	return _core.exports;
-  }
+  var core$4 = _core.exports = { version: '2.6.12' };
+  if (typeof __e == 'number') __e = core$4; // eslint-disable-line no-undef
 
   var _objectDp = {};
 
@@ -61,9 +54,9 @@
     return typeof it === 'object' ? it !== null : typeof it === 'function';
   };
 
-  var isObject$h = _isObject;
+  var isObject$e = _isObject;
   var _anObject = function (it) {
-    if (!isObject$h(it)) throw TypeError(it + ' is not an object!');
+    if (!isObject$e(it)) throw TypeError(it + ' is not an object!');
     return it;
   };
 
@@ -80,40 +73,48 @@
     return Object.defineProperty({}, 'a', { get: function () { return 7; } }).a != 7;
   });
 
-  var isObject$g = _isObject;
-  var document$2 = _global.exports.document;
-  // typeof document.createElement is 'object' in old IE
-  var is = isObject$g(document$2) && isObject$g(document$2.createElement);
-  var _domCreate = function (it) {
-    return is ? document$2.createElement(it) : {};
-  };
+  var _domCreate;
+  var hasRequired_domCreate;
+
+  function require_domCreate () {
+  	if (hasRequired_domCreate) return _domCreate;
+  	hasRequired_domCreate = 1;
+  	var isObject = _isObject;
+  	var document = _global.exports.document;
+  	// typeof document.createElement is 'object' in old IE
+  	var is = isObject(document) && isObject(document.createElement);
+  	_domCreate = function (it) {
+  	  return is ? document.createElement(it) : {};
+  	};
+  	return _domCreate;
+  }
 
   var _ie8DomDefine = !_descriptors && !_fails(function () {
-    return Object.defineProperty(_domCreate('div'), 'a', { get: function () { return 7; } }).a != 7;
+    return Object.defineProperty(require_domCreate()('div'), 'a', { get: function () { return 7; } }).a != 7;
   });
 
   // 7.1.1 ToPrimitive(input [, PreferredType])
-  var isObject$f = _isObject;
+  var isObject$d = _isObject;
   // instead of the ES6 spec version, we didn't implement @@toPrimitive case
   // and the second argument - flag - preferred type is a string
   var _toPrimitive = function (it, S) {
-    if (!isObject$f(it)) return it;
+    if (!isObject$d(it)) return it;
     var fn, val;
-    if (S && typeof (fn = it.toString) == 'function' && !isObject$f(val = fn.call(it))) return val;
-    if (typeof (fn = it.valueOf) == 'function' && !isObject$f(val = fn.call(it))) return val;
-    if (!S && typeof (fn = it.toString) == 'function' && !isObject$f(val = fn.call(it))) return val;
+    if (S && typeof (fn = it.toString) == 'function' && !isObject$d(val = fn.call(it))) return val;
+    if (typeof (fn = it.valueOf) == 'function' && !isObject$d(val = fn.call(it))) return val;
+    if (!S && typeof (fn = it.toString) == 'function' && !isObject$d(val = fn.call(it))) return val;
     throw TypeError("Can't convert object to primitive value");
   };
 
-  var anObject$g = _anObject;
+  var anObject$f = _anObject;
   var IE8_DOM_DEFINE$1 = _ie8DomDefine;
   var toPrimitive$4 = _toPrimitive;
   var dP$8 = Object.defineProperty;
 
   _objectDp.f = _descriptors ? Object.defineProperty : function defineProperty(O, P, Attributes) {
-    anObject$g(O);
+    anObject$f(O);
     P = toPrimitive$4(P, true);
-    anObject$g(Attributes);
+    anObject$f(Attributes);
     if (IE8_DOM_DEFINE$1) try {
       return dP$8(O, P, Attributes);
     } catch (e) { /* empty */ }
@@ -155,24 +156,32 @@
 
   var _shared = {exports: {}};
 
-  var _library = false;
+  var _library;
+  var hasRequired_library;
 
-  var core$3 = require_core();
-  var global$e = _global.exports;
+  function require_library () {
+  	if (hasRequired_library) return _library;
+  	hasRequired_library = 1;
+  	_library = false;
+  	return _library;
+  }
+
+  var core$3 = _core.exports;
+  var global$b = _global.exports;
   var SHARED = '__core-js_shared__';
-  var store$1 = global$e[SHARED] || (global$e[SHARED] = {});
+  var store$1 = global$b[SHARED] || (global$b[SHARED] = {});
 
   (_shared.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
     version: core$3.version,
-    mode: 'global',
+    mode: require_library() ? 'pure' : 'global',
     copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
   });
 
   var _functionToString = _shared.exports('native-function-to-string', Function.toString);
 
-  var global$d = _global.exports;
+  var global$a = _global.exports;
   var hide$5 = _hide;
   var has$8 = _has;
   var SRC = _uid('src');
@@ -180,7 +189,7 @@
   var TO_STRING$2 = 'toString';
   var TPL = ('' + $toString$2).split(TO_STRING$2);
 
-  require_core().inspectSource = function (it) {
+  _core.exports.inspectSource = function (it) {
     return $toString$2.call(it);
   };
 
@@ -189,7 +198,7 @@
     if (isFunction) has$8(val, 'name') || hide$5(val, 'name', key);
     if (O[key] === val) return;
     if (isFunction) has$8(val, SRC) || hide$5(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
-    if (O === global$d) {
+    if (O === global$a) {
       O[key] = val;
     } else if (!safe) {
       delete O[key];
@@ -204,20 +213,20 @@
     return typeof this == 'function' && this[SRC] || $toString$2.call(this);
   });
 
-  var global$c = _global.exports;
-  var core$2 = require_core();
+  var global$9 = _global.exports;
+  var core$2 = _core.exports;
   var hide$4 = _hide;
-  var redefine$6 = _redefine.exports;
-  var ctx$7 = _ctx;
+  var redefine$7 = _redefine.exports;
+  var ctx$5 = _ctx;
   var PROTOTYPE$3 = 'prototype';
 
-  var $export$u = function (type, name, source) {
-    var IS_FORCED = type & $export$u.F;
-    var IS_GLOBAL = type & $export$u.G;
-    var IS_STATIC = type & $export$u.S;
-    var IS_PROTO = type & $export$u.P;
-    var IS_BIND = type & $export$u.B;
-    var target = IS_GLOBAL ? global$c : IS_STATIC ? global$c[name] || (global$c[name] = {}) : (global$c[name] || {})[PROTOTYPE$3];
+  var $export$t = function (type, name, source) {
+    var IS_FORCED = type & $export$t.F;
+    var IS_GLOBAL = type & $export$t.G;
+    var IS_STATIC = type & $export$t.S;
+    var IS_PROTO = type & $export$t.P;
+    var IS_BIND = type & $export$t.B;
+    var target = IS_GLOBAL ? global$9 : IS_STATIC ? global$9[name] || (global$9[name] = {}) : (global$9[name] || {})[PROTOTYPE$3];
     var exports = IS_GLOBAL ? core$2 : core$2[name] || (core$2[name] = {});
     var expProto = exports[PROTOTYPE$3] || (exports[PROTOTYPE$3] = {});
     var key, own, out, exp;
@@ -228,25 +237,25 @@
       // export native or passed
       out = (own ? target : source)[key];
       // bind timers to global for call from export context
-      exp = IS_BIND && own ? ctx$7(out, global$c) : IS_PROTO && typeof out == 'function' ? ctx$7(Function.call, out) : out;
+      exp = IS_BIND && own ? ctx$5(out, global$9) : IS_PROTO && typeof out == 'function' ? ctx$5(Function.call, out) : out;
       // extend global
-      if (target) redefine$6(target, key, out, type & $export$u.U);
+      if (target) redefine$7(target, key, out, type & $export$t.U);
       // export
       if (exports[key] != out) hide$4(exports, key, exp);
       if (IS_PROTO && expProto[key] != out) expProto[key] = out;
     }
   };
-  global$c.core = core$2;
+  global$9.core = core$2;
   // type bitmap
-  $export$u.F = 1;   // forced
-  $export$u.G = 2;   // global
-  $export$u.S = 4;   // static
-  $export$u.P = 8;   // proto
-  $export$u.B = 16;  // bind
-  $export$u.W = 32;  // wrap
-  $export$u.U = 64;  // safe
-  $export$u.R = 128; // real proto method for `library`
-  var _export = $export$u;
+  $export$t.F = 1;   // forced
+  $export$t.G = 2;   // global
+  $export$t.S = 4;   // static
+  $export$t.P = 8;   // proto
+  $export$t.B = 16;  // bind
+  $export$t.W = 32;  // wrap
+  $export$t.U = 64;  // safe
+  $export$t.R = 128; // real proto method for `library`
+  var _export = $export$t;
 
   // 7.2.1 RequireObjectCoercible(argument)
   var _defined = function (it) {
@@ -261,14 +270,14 @@
   };
 
   // call something on iterator step with safe closing on error
-  var anObject$f = _anObject;
+  var anObject$e = _anObject;
   var _iterCall = function (iterator, fn, value, entries) {
     try {
-      return entries ? fn(anObject$f(value)[0], value[1]) : fn(value);
+      return entries ? fn(anObject$e(value)[0], value[1]) : fn(value);
     // 7.4.6 IteratorClose(iterator, completion)
     } catch (e) {
       var ret = iterator['return'];
-      if (ret !== undefined) anObject$f(ret.call(iterator));
+      if (ret !== undefined) anObject$e(ret.call(iterator));
       throw e;
     }
   };
@@ -350,13 +359,13 @@
       : (B = cof$5(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
   };
 
-  var classof$4 = _classof;
+  var classof$3 = _classof;
   var ITERATOR$3 = _wks.exports('iterator');
   var Iterators$4 = _iterators;
-  var core_getIteratorMethod = require_core().getIteratorMethod = function (it) {
+  var core_getIteratorMethod = _core.exports.getIteratorMethod = function (it) {
     if (it != undefined) return it[ITERATOR$3]
       || it['@@iterator']
-      || Iterators$4[classof$4(it)];
+      || Iterators$4[classof$3(it)];
   };
 
   var _iterDetect;
@@ -390,8 +399,8 @@
   	return _iterDetect;
   }
 
-  var ctx$6 = _ctx;
-  var $export$t = _export;
+  var ctx$4 = _ctx;
+  var $export$s = _export;
   var toObject$9 = _toObject;
   var call$1 = _iterCall;
   var isArrayIter$2 = _isArrayIter;
@@ -399,7 +408,7 @@
   var createProperty$1 = _createProperty;
   var getIterFn$2 = core_getIteratorMethod;
 
-  $export$t($export$t.S + $export$t.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
+  $export$s($export$s.S + $export$s.F * !require_iterDetect()(function (iter) { Array.from(iter); }), 'Array', {
     // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
     from: function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
       var O = toObject$9(arrayLike);
@@ -410,7 +419,7 @@
       var index = 0;
       var iterFn = getIterFn$2(O);
       var length, result, step, iterator;
-      if (mapping) mapfn = ctx$6(mapfn, aLen > 2 ? arguments[2] : undefined, 2);
+      if (mapping) mapfn = ctx$4(mapfn, aLen > 2 ? arguments[2] : undefined, 2);
       // if object isn't iterable or it's array with default iterator - use simple case
       if (iterFn != undefined && !(C == Array && isArrayIter$2(iterFn))) {
         for (iterator = iterFn.call(O), result = new C(); !(step = iterator.next()).done; index++) {
@@ -426,21 +435,6 @@
       return result;
     }
   });
-
-  var _wksExt = {};
-
-  _wksExt.f = _wks.exports;
-
-  var global$b = _global.exports;
-  var core$1 = require_core();
-  var wksExt$1 = _wksExt;
-  var defineProperty = _objectDp.f;
-  var _wksDefine = function (name) {
-    var $Symbol = core$1.Symbol || (core$1.Symbol = global$b.Symbol || {});
-    if (name.charAt(0) != '_' && !(name in $Symbol)) defineProperty($Symbol, name, { value: wksExt$1.f(name) });
-  };
-
-  _wksDefine('asyncIterator');
 
   var shared$1 = _shared.exports('keys');
   var uid$2 = _uid;
@@ -463,14 +457,14 @@
   };
 
   // most Object methods by ES6 should accept primitives
-  var $export$s = _export;
-  var core = require_core();
+  var $export$r = _export;
+  var core$1 = _core.exports;
   var fails$8 = _fails;
   var _objectSap = function (KEY, exec) {
-    var fn = (core.Object || {})[KEY] || Object[KEY];
+    var fn = (core$1.Object || {})[KEY] || Object[KEY];
     var exp = {};
     exp[KEY] = exec(fn);
-    $export$s($export$s.S + $export$s.F * fails$8(function () { fn(1); }), 'Object', exp);
+    $export$r($export$r.S + $export$r.F * fails$8(function () { fn(1); }), 'Object', exp);
   };
 
   // 19.1.2.9 Object.getPrototypeOf(O)
@@ -481,599 +475,6 @@
     return function getPrototypeOf(it) {
       return $getPrototypeOf(toObject$7(it));
     };
-  });
-
-  var _anInstance = function (it, Constructor, name, forbiddenField) {
-    if (!(it instanceof Constructor) || (forbiddenField !== undefined && forbiddenField in it)) {
-      throw TypeError(name + ': incorrect invocation!');
-    } return it;
-  };
-
-  var _forOf = {exports: {}};
-
-  var ctx$5 = _ctx;
-  var call = _iterCall;
-  var isArrayIter$1 = _isArrayIter;
-  var anObject$e = _anObject;
-  var toLength$a = _toLength;
-  var getIterFn$1 = core_getIteratorMethod;
-  var BREAK = {};
-  var RETURN = {};
-  var exports$1 = _forOf.exports = function (iterable, entries, fn, that, ITERATOR) {
-    var iterFn = ITERATOR ? function () { return iterable; } : getIterFn$1(iterable);
-    var f = ctx$5(fn, that, entries ? 2 : 1);
-    var index = 0;
-    var length, step, iterator, result;
-    if (typeof iterFn != 'function') throw TypeError(iterable + ' is not iterable!');
-    // fast case for arrays with default iterator
-    if (isArrayIter$1(iterFn)) for (length = toLength$a(iterable.length); length > index; index++) {
-      result = entries ? f(anObject$e(step = iterable[index])[0], step[1]) : f(iterable[index]);
-      if (result === BREAK || result === RETURN) return result;
-    } else for (iterator = iterFn.call(iterable); !(step = iterator.next()).done;) {
-      result = call(iterator, f, step.value, entries);
-      if (result === BREAK || result === RETURN) return result;
-    }
-  };
-  exports$1.BREAK = BREAK;
-  exports$1.RETURN = RETURN;
-
-  // 7.3.20 SpeciesConstructor(O, defaultConstructor)
-  var anObject$d = _anObject;
-  var aFunction$5 = _aFunction;
-  var SPECIES$2 = _wks.exports('species');
-  var _speciesConstructor = function (O, D) {
-    var C = anObject$d(O).constructor;
-    var S;
-    return C === undefined || (S = anObject$d(C)[SPECIES$2]) == undefined ? D : aFunction$5(S);
-  };
-
-  // fast apply, http://jsperf.lnkit.com/fast-apply/5
-  var _invoke = function (fn, args, that) {
-    var un = that === undefined;
-    switch (args.length) {
-      case 0: return un ? fn()
-                        : fn.call(that);
-      case 1: return un ? fn(args[0])
-                        : fn.call(that, args[0]);
-      case 2: return un ? fn(args[0], args[1])
-                        : fn.call(that, args[0], args[1]);
-      case 3: return un ? fn(args[0], args[1], args[2])
-                        : fn.call(that, args[0], args[1], args[2]);
-      case 4: return un ? fn(args[0], args[1], args[2], args[3])
-                        : fn.call(that, args[0], args[1], args[2], args[3]);
-    } return fn.apply(that, args);
-  };
-
-  var document$1 = _global.exports.document;
-  var _html = document$1 && document$1.documentElement;
-
-  var ctx$4 = _ctx;
-  var invoke$1 = _invoke;
-  var html$1 = _html;
-  var cel = _domCreate;
-  var global$a = _global.exports;
-  var process$2 = global$a.process;
-  var setTask = global$a.setImmediate;
-  var clearTask = global$a.clearImmediate;
-  var MessageChannel = global$a.MessageChannel;
-  var Dispatch = global$a.Dispatch;
-  var counter = 0;
-  var queue = {};
-  var ONREADYSTATECHANGE = 'onreadystatechange';
-  var defer, channel, port;
-  var run = function () {
-    var id = +this;
-    // eslint-disable-next-line no-prototype-builtins
-    if (queue.hasOwnProperty(id)) {
-      var fn = queue[id];
-      delete queue[id];
-      fn();
-    }
-  };
-  var listener = function (event) {
-    run.call(event.data);
-  };
-  // Node.js 0.9+ & IE10+ has setImmediate, otherwise:
-  if (!setTask || !clearTask) {
-    setTask = function setImmediate(fn) {
-      var args = [];
-      var i = 1;
-      while (arguments.length > i) args.push(arguments[i++]);
-      queue[++counter] = function () {
-        // eslint-disable-next-line no-new-func
-        invoke$1(typeof fn == 'function' ? fn : Function(fn), args);
-      };
-      defer(counter);
-      return counter;
-    };
-    clearTask = function clearImmediate(id) {
-      delete queue[id];
-    };
-    // Node.js 0.8-
-    if (_cof(process$2) == 'process') {
-      defer = function (id) {
-        process$2.nextTick(ctx$4(run, id, 1));
-      };
-    // Sphere (JS game engine) Dispatch API
-    } else if (Dispatch && Dispatch.now) {
-      defer = function (id) {
-        Dispatch.now(ctx$4(run, id, 1));
-      };
-    // Browsers with MessageChannel, includes WebWorkers
-    } else if (MessageChannel) {
-      channel = new MessageChannel();
-      port = channel.port2;
-      channel.port1.onmessage = listener;
-      defer = ctx$4(port.postMessage, port, 1);
-    // Browsers with postMessage, skip WebWorkers
-    // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
-    } else if (global$a.addEventListener && typeof postMessage == 'function' && !global$a.importScripts) {
-      defer = function (id) {
-        global$a.postMessage(id + '', '*');
-      };
-      global$a.addEventListener('message', listener, false);
-    // IE8-
-    } else if (ONREADYSTATECHANGE in cel('script')) {
-      defer = function (id) {
-        html$1.appendChild(cel('script'))[ONREADYSTATECHANGE] = function () {
-          html$1.removeChild(this);
-          run.call(id);
-        };
-      };
-    // Rest old browsers
-    } else {
-      defer = function (id) {
-        setTimeout(ctx$4(run, id, 1), 0);
-      };
-    }
-  }
-  var _task = {
-    set: setTask,
-    clear: clearTask
-  };
-
-  var global$9 = _global.exports;
-  var macrotask = _task.set;
-  var Observer = global$9.MutationObserver || global$9.WebKitMutationObserver;
-  var process$1 = global$9.process;
-  var Promise$1 = global$9.Promise;
-  var isNode$1 = _cof(process$1) == 'process';
-
-  var _microtask = function () {
-    var head, last, notify;
-
-    var flush = function () {
-      var parent, fn;
-      if (isNode$1 && (parent = process$1.domain)) parent.exit();
-      while (head) {
-        fn = head.fn;
-        head = head.next;
-        try {
-          fn();
-        } catch (e) {
-          if (head) notify();
-          else last = undefined;
-          throw e;
-        }
-      } last = undefined;
-      if (parent) parent.enter();
-    };
-
-    // Node.js
-    if (isNode$1) {
-      notify = function () {
-        process$1.nextTick(flush);
-      };
-    // browsers with MutationObserver, except iOS Safari - https://github.com/zloirock/core-js/issues/339
-    } else if (Observer && !(global$9.navigator && global$9.navigator.standalone)) {
-      var toggle = true;
-      var node = document.createTextNode('');
-      new Observer(flush).observe(node, { characterData: true }); // eslint-disable-line no-new
-      notify = function () {
-        node.data = toggle = !toggle;
-      };
-    // environments with maybe non-completely correct, but existent Promise
-    } else if (Promise$1 && Promise$1.resolve) {
-      // Promise.resolve without an argument throws an error in LG WebOS 2
-      var promise = Promise$1.resolve(undefined);
-      notify = function () {
-        promise.then(flush);
-      };
-    // for other environments - macrotask based on:
-    // - setImmediate
-    // - MessageChannel
-    // - window.postMessag
-    // - onreadystatechange
-    // - setTimeout
-    } else {
-      notify = function () {
-        // strange IE + webpack dev server bug - use .call(global)
-        macrotask.call(global$9, flush);
-      };
-    }
-
-    return function (fn) {
-      var task = { fn: fn, next: undefined };
-      if (last) last.next = task;
-      if (!head) {
-        head = task;
-        notify();
-      } last = task;
-    };
-  };
-
-  var _newPromiseCapability = {};
-
-  // 25.4.1.5 NewPromiseCapability(C)
-  var aFunction$4 = _aFunction;
-
-  function PromiseCapability(C) {
-    var resolve, reject;
-    this.promise = new C(function ($$resolve, $$reject) {
-      if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
-      resolve = $$resolve;
-      reject = $$reject;
-    });
-    this.resolve = aFunction$4(resolve);
-    this.reject = aFunction$4(reject);
-  }
-
-  _newPromiseCapability.f = function (C) {
-    return new PromiseCapability(C);
-  };
-
-  var _perform = function (exec) {
-    try {
-      return { e: false, v: exec() };
-    } catch (e) {
-      return { e: true, v: e };
-    }
-  };
-
-  var global$8 = _global.exports;
-  var navigator = global$8.navigator;
-
-  var _userAgent = navigator && navigator.userAgent || '';
-
-  var anObject$c = _anObject;
-  var isObject$e = _isObject;
-  var newPromiseCapability$1 = _newPromiseCapability;
-
-  var _promiseResolve = function (C, x) {
-    anObject$c(C);
-    if (isObject$e(x) && x.constructor === C) return x;
-    var promiseCapability = newPromiseCapability$1.f(C);
-    var resolve = promiseCapability.resolve;
-    resolve(x);
-    return promiseCapability.promise;
-  };
-
-  var _redefineAll;
-  var hasRequired_redefineAll;
-
-  function require_redefineAll () {
-  	if (hasRequired_redefineAll) return _redefineAll;
-  	hasRequired_redefineAll = 1;
-  	var redefine = _redefine.exports;
-  	_redefineAll = function (target, src, safe) {
-  	  for (var key in src) redefine(target, key, src[key], safe);
-  	  return target;
-  	};
-  	return _redefineAll;
-  }
-
-  var def = _objectDp.f;
-  var has$6 = _has;
-  var TAG$1 = _wks.exports('toStringTag');
-
-  var _setToStringTag = function (it, tag, stat) {
-    if (it && !has$6(it = stat ? it : it.prototype, TAG$1)) def(it, TAG$1, { configurable: true, value: tag });
-  };
-
-  var _setSpecies;
-  var hasRequired_setSpecies;
-
-  function require_setSpecies () {
-  	if (hasRequired_setSpecies) return _setSpecies;
-  	hasRequired_setSpecies = 1;
-  	var global = _global.exports;
-  	var dP = _objectDp;
-  	var DESCRIPTORS = _descriptors;
-  	var SPECIES = _wks.exports('species');
-
-  	_setSpecies = function (KEY) {
-  	  var C = global[KEY];
-  	  if (DESCRIPTORS && C && !C[SPECIES]) dP.f(C, SPECIES, {
-  	    configurable: true,
-  	    get: function () { return this; }
-  	  });
-  	};
-  	return _setSpecies;
-  }
-
-  var global$7 = _global.exports;
-  var ctx$3 = _ctx;
-  var classof$3 = _classof;
-  var $export$r = _export;
-  var isObject$d = _isObject;
-  var aFunction$3 = _aFunction;
-  var anInstance$4 = _anInstance;
-  var forOf$3 = _forOf.exports;
-  var speciesConstructor$3 = _speciesConstructor;
-  var task = _task.set;
-  var microtask = _microtask();
-  var newPromiseCapabilityModule = _newPromiseCapability;
-  var perform = _perform;
-  var userAgent$1 = _userAgent;
-  var promiseResolve = _promiseResolve;
-  var PROMISE = 'Promise';
-  var TypeError$2 = global$7.TypeError;
-  var process = global$7.process;
-  var versions = process && process.versions;
-  var v8 = versions && versions.v8 || '';
-  var $Promise = global$7[PROMISE];
-  var isNode = classof$3(process) == 'process';
-  var empty = function () { /* empty */ };
-  var Internal, newGenericPromiseCapability, OwnPromiseCapability, Wrapper;
-  var newPromiseCapability = newGenericPromiseCapability = newPromiseCapabilityModule.f;
-
-  var USE_NATIVE$1 = !!function () {
-    try {
-      // correct subclassing with @@species support
-      var promise = $Promise.resolve(1);
-      var FakePromise = (promise.constructor = {})[_wks.exports('species')] = function (exec) {
-        exec(empty, empty);
-      };
-      // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-      return (isNode || typeof PromiseRejectionEvent == 'function')
-        && promise.then(empty) instanceof FakePromise
-        // v8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
-        // we can't detect it synchronously, so just check versions
-        && v8.indexOf('6.6') !== 0
-        && userAgent$1.indexOf('Chrome/66') === -1;
-    } catch (e) { /* empty */ }
-  }();
-
-  // helpers
-  var isThenable = function (it) {
-    var then;
-    return isObject$d(it) && typeof (then = it.then) == 'function' ? then : false;
-  };
-  var notify = function (promise, isReject) {
-    if (promise._n) return;
-    promise._n = true;
-    var chain = promise._c;
-    microtask(function () {
-      var value = promise._v;
-      var ok = promise._s == 1;
-      var i = 0;
-      var run = function (reaction) {
-        var handler = ok ? reaction.ok : reaction.fail;
-        var resolve = reaction.resolve;
-        var reject = reaction.reject;
-        var domain = reaction.domain;
-        var result, then, exited;
-        try {
-          if (handler) {
-            if (!ok) {
-              if (promise._h == 2) onHandleUnhandled(promise);
-              promise._h = 1;
-            }
-            if (handler === true) result = value;
-            else {
-              if (domain) domain.enter();
-              result = handler(value); // may throw
-              if (domain) {
-                domain.exit();
-                exited = true;
-              }
-            }
-            if (result === reaction.promise) {
-              reject(TypeError$2('Promise-chain cycle'));
-            } else if (then = isThenable(result)) {
-              then.call(result, resolve, reject);
-            } else resolve(result);
-          } else reject(value);
-        } catch (e) {
-          if (domain && !exited) domain.exit();
-          reject(e);
-        }
-      };
-      while (chain.length > i) run(chain[i++]); // variable length - can't use forEach
-      promise._c = [];
-      promise._n = false;
-      if (isReject && !promise._h) onUnhandled(promise);
-    });
-  };
-  var onUnhandled = function (promise) {
-    task.call(global$7, function () {
-      var value = promise._v;
-      var unhandled = isUnhandled(promise);
-      var result, handler, console;
-      if (unhandled) {
-        result = perform(function () {
-          if (isNode) {
-            process.emit('unhandledRejection', value, promise);
-          } else if (handler = global$7.onunhandledrejection) {
-            handler({ promise: promise, reason: value });
-          } else if ((console = global$7.console) && console.error) {
-            console.error('Unhandled promise rejection', value);
-          }
-        });
-        // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
-        promise._h = isNode || isUnhandled(promise) ? 2 : 1;
-      } promise._a = undefined;
-      if (unhandled && result.e) throw result.v;
-    });
-  };
-  var isUnhandled = function (promise) {
-    return promise._h !== 1 && (promise._a || promise._c).length === 0;
-  };
-  var onHandleUnhandled = function (promise) {
-    task.call(global$7, function () {
-      var handler;
-      if (isNode) {
-        process.emit('rejectionHandled', promise);
-      } else if (handler = global$7.onrejectionhandled) {
-        handler({ promise: promise, reason: promise._v });
-      }
-    });
-  };
-  var $reject = function (value) {
-    var promise = this;
-    if (promise._d) return;
-    promise._d = true;
-    promise = promise._w || promise; // unwrap
-    promise._v = value;
-    promise._s = 2;
-    if (!promise._a) promise._a = promise._c.slice();
-    notify(promise, true);
-  };
-  var $resolve = function (value) {
-    var promise = this;
-    var then;
-    if (promise._d) return;
-    promise._d = true;
-    promise = promise._w || promise; // unwrap
-    try {
-      if (promise === value) throw TypeError$2("Promise can't be resolved itself");
-      if (then = isThenable(value)) {
-        microtask(function () {
-          var wrapper = { _w: promise, _d: false }; // wrap
-          try {
-            then.call(value, ctx$3($resolve, wrapper, 1), ctx$3($reject, wrapper, 1));
-          } catch (e) {
-            $reject.call(wrapper, e);
-          }
-        });
-      } else {
-        promise._v = value;
-        promise._s = 1;
-        notify(promise, false);
-      }
-    } catch (e) {
-      $reject.call({ _w: promise, _d: false }, e); // wrap
-    }
-  };
-
-  // constructor polyfill
-  if (!USE_NATIVE$1) {
-    // 25.4.3.1 Promise(executor)
-    $Promise = function Promise(executor) {
-      anInstance$4(this, $Promise, PROMISE, '_h');
-      aFunction$3(executor);
-      Internal.call(this);
-      try {
-        executor(ctx$3($resolve, this, 1), ctx$3($reject, this, 1));
-      } catch (err) {
-        $reject.call(this, err);
-      }
-    };
-    // eslint-disable-next-line no-unused-vars
-    Internal = function Promise(executor) {
-      this._c = [];             // <- awaiting reactions
-      this._a = undefined;      // <- checked in isUnhandled reactions
-      this._s = 0;              // <- state
-      this._d = false;          // <- done
-      this._v = undefined;      // <- value
-      this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
-      this._n = false;          // <- notify
-    };
-    Internal.prototype = require_redefineAll()($Promise.prototype, {
-      // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
-      then: function then(onFulfilled, onRejected) {
-        var reaction = newPromiseCapability(speciesConstructor$3(this, $Promise));
-        reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
-        reaction.fail = typeof onRejected == 'function' && onRejected;
-        reaction.domain = isNode ? process.domain : undefined;
-        this._c.push(reaction);
-        if (this._a) this._a.push(reaction);
-        if (this._s) notify(this, false);
-        return reaction.promise;
-      },
-      // 25.4.5.1 Promise.prototype.catch(onRejected)
-      'catch': function (onRejected) {
-        return this.then(undefined, onRejected);
-      }
-    });
-    OwnPromiseCapability = function () {
-      var promise = new Internal();
-      this.promise = promise;
-      this.resolve = ctx$3($resolve, promise, 1);
-      this.reject = ctx$3($reject, promise, 1);
-    };
-    newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
-      return C === $Promise || C === Wrapper
-        ? new OwnPromiseCapability(C)
-        : newGenericPromiseCapability(C);
-    };
-  }
-
-  $export$r($export$r.G + $export$r.W + $export$r.F * !USE_NATIVE$1, { Promise: $Promise });
-  _setToStringTag($Promise, PROMISE);
-  require_setSpecies()(PROMISE);
-  Wrapper = require_core()[PROMISE];
-
-  // statics
-  $export$r($export$r.S + $export$r.F * !USE_NATIVE$1, PROMISE, {
-    // 25.4.4.5 Promise.reject(r)
-    reject: function reject(r) {
-      var capability = newPromiseCapability(this);
-      var $$reject = capability.reject;
-      $$reject(r);
-      return capability.promise;
-    }
-  });
-  $export$r($export$r.S + $export$r.F * (!USE_NATIVE$1), PROMISE, {
-    // 25.4.4.6 Promise.resolve(x)
-    resolve: function resolve(x) {
-      return promiseResolve(this, x);
-    }
-  });
-  $export$r($export$r.S + $export$r.F * !(USE_NATIVE$1 && require_iterDetect()(function (iter) {
-    $Promise.all(iter)['catch'](empty);
-  })), PROMISE, {
-    // 25.4.4.1 Promise.all(iterable)
-    all: function all(iterable) {
-      var C = this;
-      var capability = newPromiseCapability(C);
-      var resolve = capability.resolve;
-      var reject = capability.reject;
-      var result = perform(function () {
-        var values = [];
-        var index = 0;
-        var remaining = 1;
-        forOf$3(iterable, false, function (promise) {
-          var $index = index++;
-          var alreadyCalled = false;
-          values.push(undefined);
-          remaining++;
-          C.resolve(promise).then(function (value) {
-            if (alreadyCalled) return;
-            alreadyCalled = true;
-            values[$index] = value;
-            --remaining || resolve(values);
-          }, reject);
-        });
-        --remaining || resolve(values);
-      });
-      if (result.e) reject(result.v);
-      return capability.promise;
-    },
-    // 25.4.4.4 Promise.race(iterable)
-    race: function race(iterable) {
-      var C = this;
-      var capability = newPromiseCapability(C);
-      var reject = capability.reject;
-      var result = perform(function () {
-        forOf$3(iterable, false, function (promise) {
-          C.resolve(promise).then(capability.resolve, reject);
-        });
-      });
-      if (result.e) reject(result.v);
-      return capability.promise;
-    }
   });
 
   // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -1107,7 +508,7 @@
   var createDesc$1 = _propertyDesc;
   var toIObject$8 = _toIobject;
   var toPrimitive$3 = _toPrimitive;
-  var has$5 = _has;
+  var has$6 = _has;
   var IE8_DOM_DEFINE = _ie8DomDefine;
   var gOPD$4 = Object.getOwnPropertyDescriptor;
 
@@ -1117,7 +518,7 @@
     if (IE8_DOM_DEFINE) try {
       return gOPD$4(O, P);
     } catch (e) { /* empty */ }
-    if (has$5(O, P)) return createDesc$1(!pIE$2.f.call(O, P), O[P]);
+    if (has$6(O, P)) return createDesc$1(!pIE$2.f.call(O, P), O[P]);
   };
 
   // 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
@@ -1143,12 +544,12 @@
   // false -> Array#indexOf
   // true  -> Array#includes
   var toIObject$6 = _toIobject;
-  var toLength$9 = _toLength;
+  var toLength$a = _toLength;
   var toAbsoluteIndex$3 = _toAbsoluteIndex;
   var _arrayIncludes = function (IS_INCLUDES) {
     return function ($this, el, fromIndex) {
       var O = toIObject$6($this);
-      var length = toLength$9(O.length);
+      var length = toLength$a(O.length);
       var index = toAbsoluteIndex$3(fromIndex, length);
       var value;
       // Array#includes uses SameValueZero equality algorithm
@@ -1164,7 +565,7 @@
     };
   };
 
-  var has$4 = _has;
+  var has$5 = _has;
   var toIObject$5 = _toIobject;
   var arrayIndexOf$1 = _arrayIncludes(false);
   var IE_PROTO$1 = _sharedKey('IE_PROTO');
@@ -1174,9 +575,9 @@
     var i = 0;
     var result = [];
     var key;
-    for (key in O) if (key != IE_PROTO$1) has$4(O, key) && result.push(key);
+    for (key in O) if (key != IE_PROTO$1) has$5(O, key) && result.push(key);
     // Don't enum bug & hidden keys
-    while (names.length > i) if (has$4(O, key = names[i++])) {
+    while (names.length > i) if (has$5(O, key = names[i++])) {
       ~arrayIndexOf$1(result, key) || result.push(key);
     }
     return result;
@@ -1202,10 +603,10 @@
   // all object keys, includes non-enumerable and symbols
   var gOPN$5 = _objectGopn;
   var gOPS$2 = _objectGops;
-  var anObject$b = _anObject;
+  var anObject$d = _anObject;
   var Reflect = _global.exports.Reflect;
   var _ownKeys = Reflect && Reflect.ownKeys || function ownKeys(it) {
-    var keys = gOPN$5.f(anObject$b(it));
+    var keys = gOPN$5.f(anObject$d(it));
     var getSymbols = gOPS$2.f;
     return getSymbols ? keys.concat(getSymbols(it)) : keys;
   };
@@ -1237,7 +638,7 @@
 
   var META$1 = _uid('meta');
   var isObject$c = _isObject;
-  var has$3 = _has;
+  var has$4 = _has;
   var setDesc = _objectDp.f;
   var id$1 = 0;
   var isExtensible$1 = Object.isExtensible || function () {
@@ -1255,7 +656,7 @@
   var fastKey$1 = function (it, create) {
     // return primitive with prefix
     if (!isObject$c(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-    if (!has$3(it, META$1)) {
+    if (!has$4(it, META$1)) {
       // can't set metadata to uncaught frozen object
       if (!isExtensible$1(it)) return 'F';
       // not necessary to add metadata
@@ -1266,7 +667,7 @@
     } return it[META$1].i;
   };
   var getWeak$2 = function (it, create) {
-    if (!has$3(it, META$1)) {
+    if (!has$4(it, META$1)) {
       // can't set metadata to uncaught frozen object
       if (!isExtensible$1(it)) return true;
       // not necessary to add metadata
@@ -1278,7 +679,7 @@
   };
   // add metadata on freeze-family methods calling
   var onFreeze = function (it) {
-    if (FREEZE && meta$3.NEED && isExtensible$1(it) && !has$3(it, META$1)) setMeta(it);
+    if (FREEZE && meta$3.NEED && isExtensible$1(it) && !has$4(it, META$1)) setMeta(it);
     return it;
   };
   var meta$3 = _meta.exports = {
@@ -1308,11 +709,11 @@
   };
 
   var dP$6 = _objectDp;
-  var anObject$a = _anObject;
+  var anObject$c = _anObject;
   var getKeys$4 = _objectKeys;
 
   var _objectDps = _descriptors ? Object.defineProperties : function defineProperties(O, Properties) {
-    anObject$a(O);
+    anObject$c(O);
     var keys = getKeys$4(Properties);
     var length = keys.length;
     var i = 0;
@@ -1321,8 +722,11 @@
     return O;
   };
 
+  var document = _global.exports.document;
+  var _html = document && document.documentElement;
+
   // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-  var anObject$9 = _anObject;
+  var anObject$b = _anObject;
   var dPs = _objectDps;
   var enumBugKeys = _enumBugKeys;
   var IE_PROTO = _sharedKey('IE_PROTO');
@@ -1332,7 +736,7 @@
   // Create object with fake `null` prototype: use iframe Object with cleared prototype
   var createDict = function () {
     // Thrash, waste and sodomy: IE GC bug
-    var iframe = _domCreate('iframe');
+    var iframe = require_domCreate()('iframe');
     var i = enumBugKeys.length;
     var lt = '<';
     var gt = '>';
@@ -1354,7 +758,7 @@
   var _objectCreate = Object.create || function create(O, Properties) {
     var result;
     if (O !== null) {
-      Empty[PROTOTYPE$2] = anObject$9(O);
+      Empty[PROTOTYPE$2] = anObject$b(O);
       result = new Empty();
       Empty[PROTOTYPE$2] = null;
       // add "__proto__" for Object.getPrototypeOf polyfill
@@ -1363,7 +767,24 @@
     return Properties === undefined ? result : dPs(result, Properties);
   };
 
-  var aFunction$2 = _aFunction;
+  // fast apply, http://jsperf.lnkit.com/fast-apply/5
+  var _invoke = function (fn, args, that) {
+    var un = that === undefined;
+    switch (args.length) {
+      case 0: return un ? fn()
+                        : fn.call(that);
+      case 1: return un ? fn(args[0])
+                        : fn.call(that, args[0]);
+      case 2: return un ? fn(args[0], args[1])
+                        : fn.call(that, args[0], args[1]);
+      case 3: return un ? fn(args[0], args[1], args[2])
+                        : fn.call(that, args[0], args[1], args[2]);
+      case 4: return un ? fn(args[0], args[1], args[2], args[3])
+                        : fn.call(that, args[0], args[1], args[2], args[3]);
+    } return fn.apply(that, args);
+  };
+
+  var aFunction$3 = _aFunction;
   var isObject$a = _isObject;
   var invoke = _invoke;
   var arraySlice$2 = [].slice;
@@ -1378,7 +799,7 @@
   };
 
   var _bind = Function.bind || function bind(that /* , ...args */) {
-    var fn = aFunction$2(this);
+    var fn = aFunction$3(this);
     var partArgs = arraySlice$2.call(arguments, 1);
     var bound = function (/* args... */) {
       var args = partArgs.concat(arraySlice$2.call(arguments));
@@ -1391,8 +812,8 @@
   // 26.1.2 Reflect.construct(target, argumentsList [, newTarget])
   var $export$p = _export;
   var create$3 = _objectCreate;
-  var aFunction$1 = _aFunction;
-  var anObject$8 = _anObject;
+  var aFunction$2 = _aFunction;
+  var anObject$a = _anObject;
   var isObject$9 = _isObject;
   var fails$7 = _fails;
   var bind = _bind;
@@ -1410,9 +831,9 @@
 
   $export$p($export$p.S + $export$p.F * (NEW_TARGET_BUG || ARGS_BUG), 'Reflect', {
     construct: function construct(Target, args /* , newTarget */) {
-      aFunction$1(Target);
-      anObject$8(args);
-      var newTarget = arguments.length < 3 ? Target : aFunction$1(arguments[2]);
+      aFunction$2(Target);
+      anObject$a(args);
+      var newTarget = arguments.length < 3 ? Target : aFunction$2(arguments[2]);
       if (ARGS_BUG && !NEW_TARGET_BUG) return rConstruct(Target, args, newTarget);
       if (Target == newTarget) {
         // w/o altered newTarget, optimization for 0-4 arguments
@@ -1436,6 +857,54 @@
     }
   });
 
+  var redefine$6 = _redefine.exports;
+  var _redefineAll = function (target, src, safe) {
+    for (var key in src) redefine$6(target, key, src[key], safe);
+    return target;
+  };
+
+  var _anInstance = function (it, Constructor, name, forbiddenField) {
+    if (!(it instanceof Constructor) || (forbiddenField !== undefined && forbiddenField in it)) {
+      throw TypeError(name + ': incorrect invocation!');
+    } return it;
+  };
+
+  var _forOf = {exports: {}};
+
+  var ctx$3 = _ctx;
+  var call = _iterCall;
+  var isArrayIter$1 = _isArrayIter;
+  var anObject$9 = _anObject;
+  var toLength$9 = _toLength;
+  var getIterFn$1 = core_getIteratorMethod;
+  var BREAK = {};
+  var RETURN = {};
+  var exports$1 = _forOf.exports = function (iterable, entries, fn, that, ITERATOR) {
+    var iterFn = ITERATOR ? function () { return iterable; } : getIterFn$1(iterable);
+    var f = ctx$3(fn, that, entries ? 2 : 1);
+    var index = 0;
+    var length, step, iterator, result;
+    if (typeof iterFn != 'function') throw TypeError(iterable + ' is not iterable!');
+    // fast case for arrays with default iterator
+    if (isArrayIter$1(iterFn)) for (length = toLength$9(iterable.length); length > index; index++) {
+      result = entries ? f(anObject$9(step = iterable[index])[0], step[1]) : f(iterable[index]);
+      if (result === BREAK || result === RETURN) return result;
+    } else for (iterator = iterFn.call(iterable); !(step = iterator.next()).done;) {
+      result = call(iterator, f, step.value, entries);
+      if (result === BREAK || result === RETURN) return result;
+    }
+  };
+  exports$1.BREAK = BREAK;
+  exports$1.RETURN = RETURN;
+
+  var def = _objectDp.f;
+  var has$3 = _has;
+  var TAG$1 = _wks.exports('toStringTag');
+
+  var _setToStringTag = function (it, tag, stat) {
+    if (it && !has$3(it = stat ? it : it.prototype, TAG$1)) def(it, TAG$1, { configurable: true, value: tag });
+  };
+
   var create$2 = _objectCreate;
   var descriptor = _propertyDesc;
   var setToStringTag$3 = _setToStringTag;
@@ -1449,6 +918,7 @@
     setToStringTag$3(Constructor, NAME + ' Iterator');
   };
 
+  var LIBRARY$2 = require_library();
   var $export$o = _export;
   var redefine$5 = _redefine.exports;
   var hide$3 = _hide;
@@ -1489,7 +959,7 @@
         // Set @@toStringTag to native iterators
         setToStringTag$2(IteratorPrototype, TAG, true);
         // fix for some old engines
-        if (typeof IteratorPrototype[ITERATOR$2] != 'function') hide$3(IteratorPrototype, ITERATOR$2, returnThis);
+        if (!LIBRARY$2 && typeof IteratorPrototype[ITERATOR$2] != 'function') hide$3(IteratorPrototype, ITERATOR$2, returnThis);
       }
     }
     // fix Array#{values, @@iterator}.name in V8 / FF
@@ -1498,7 +968,7 @@
       $default = function values() { return $native.call(this); };
     }
     // Define iterator
-    if ((BUGGY || VALUES_BUG || !proto[ITERATOR$2])) {
+    if ((!LIBRARY$2 || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR$2])) {
       hide$3(proto, ITERATOR$2, $default);
     }
     // Plug for library
@@ -1521,6 +991,27 @@
     return { value: value, done: !!done };
   };
 
+  var _setSpecies;
+  var hasRequired_setSpecies;
+
+  function require_setSpecies () {
+  	if (hasRequired_setSpecies) return _setSpecies;
+  	hasRequired_setSpecies = 1;
+  	var global = _global.exports;
+  	var dP = _objectDp;
+  	var DESCRIPTORS = _descriptors;
+  	var SPECIES = _wks.exports('species');
+
+  	_setSpecies = function (KEY) {
+  	  var C = global[KEY];
+  	  if (DESCRIPTORS && C && !C[SPECIES]) dP.f(C, SPECIES, {
+  	    configurable: true,
+  	    get: function () { return this; }
+  	  });
+  	};
+  	return _setSpecies;
+  }
+
   var isObject$8 = _isObject;
   var _validateCollection = function (it, TYPE) {
     if (!isObject$8(it) || it._t !== TYPE) throw TypeError('Incompatible receiver, ' + TYPE + ' required!');
@@ -1529,7 +1020,7 @@
 
   var dP$5 = _objectDp.f;
   var create$1 = _objectCreate;
-  var redefineAll$3 = require_redefineAll();
+  var redefineAll$3 = _redefineAll;
   var ctx$2 = _ctx;
   var anInstance$3 = _anInstance;
   var forOf$2 = _forOf.exports;
@@ -1715,10 +1206,10 @@
     } return that;
   };
 
-  var global$6 = _global.exports;
+  var global$8 = _global.exports;
   var $export$n = _export;
   var redefine$4 = _redefine.exports;
-  var redefineAll$2 = require_redefineAll();
+  var redefineAll$2 = _redefineAll;
   var meta$1 = _meta.exports;
   var forOf$1 = _forOf.exports;
   var anInstance$2 = _anInstance;
@@ -1729,7 +1220,7 @@
   var inheritIfRequired$2 = _inheritIfRequired;
 
   var _collection = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
-    var Base = global$6[NAME];
+    var Base = global$8[NAME];
     var C = Base;
     var ADDER = IS_MAP ? 'set' : 'add';
     var proto = C && C.prototype;
@@ -1909,7 +1400,7 @@
   var $iterators$1 = es6_array_iterator;
   var getKeys$3 = _objectKeys;
   var redefine$3 = _redefine.exports;
-  var global$5 = _global.exports;
+  var global$7 = _global.exports;
   var hide$2 = _hide;
   var Iterators$1 = _iterators;
   var wks$3 = _wks.exports;
@@ -1954,7 +1445,7 @@
   for (var collections = getKeys$3(DOMIterables), i$1 = 0; i$1 < collections.length; i$1++) {
     var NAME$1 = collections[i$1];
     var explicit = DOMIterables[NAME$1];
-    var Collection = global$5[NAME$1];
+    var Collection = global$7[NAME$1];
     var proto$3 = Collection && Collection.prototype;
     var key$1;
     if (proto$3) {
@@ -2001,7 +1492,7 @@
 
   var isObject$5 = _isObject;
   var isArray$1 = _isArray;
-  var SPECIES$1 = _wks.exports('species');
+  var SPECIES$2 = _wks.exports('species');
 
   var _arraySpeciesConstructor = function (original) {
     var C;
@@ -2010,7 +1501,7 @@
       // cross-realm fallback
       if (typeof C == 'function' && (C === Array || isArray$1(C.prototype))) C = undefined;
       if (isObject$5(C)) {
-        C = C[SPECIES$1];
+        C = C[SPECIES$2];
         if (C === null) C = undefined;
       }
     } return C === undefined ? Array : C;
@@ -2096,7 +1587,7 @@
   });
 
   var $export$k = _export;
-  var aFunction = _aFunction;
+  var aFunction$1 = _aFunction;
   var toObject$5 = _toObject;
   var fails$5 = _fails;
   var $sort = [].sort;
@@ -2114,7 +1605,7 @@
     sort: function sort(comparefn) {
       return comparefn === undefined
         ? $sort.call(toObject$5(this))
-        : $sort.call(toObject$5(this), aFunction(comparefn));
+        : $sort.call(toObject$5(this), aFunction$1(comparefn));
     }
   });
 
@@ -2187,9 +1678,9 @@
   };
 
   // 21.2.5.3 get RegExp.prototype.flags
-  var anObject$7 = _anObject;
+  var anObject$8 = _anObject;
   var _flags = function () {
-    var that = anObject$7(this);
+    var that = anObject$8(this);
     var result = '';
     if (that.global) result += 'g';
     if (that.ignoreCase) result += 'i';
@@ -2272,7 +1763,7 @@
   var wks$2 = _wks.exports;
   var regexpExec$1 = _regexpExec;
 
-  var SPECIES = wks$2('species');
+  var SPECIES$1 = wks$2('species');
 
   var REPLACE_SUPPORTS_NAMED_GROUPS = !fails$4(function () {
     // #replace needs built-in support for named groups.
@@ -2315,7 +1806,7 @@
         // RegExp[@@split] doesn't call the regex's exec method, but first creates
         // a new one. We need to return the patched regex when creating the new one.
         re.constructor = {};
-        re.constructor[SPECIES] = function () { return re; };
+        re.constructor[SPECIES$1] = function () { return re; };
       }
       re[SYMBOL]('');
       return !execCalled;
@@ -2360,7 +1851,7 @@
     }
   };
 
-  var anObject$6 = _anObject;
+  var anObject$7 = _anObject;
   var toObject$4 = _toObject;
   var toLength$6 = _toLength;
   var toInteger$1 = _toInteger;
@@ -2394,7 +1885,7 @@
         var res = maybeCallNative($replace, regexp, this, replaceValue);
         if (res.done) return res.value;
 
-        var rx = anObject$6(regexp);
+        var rx = anObject$7(regexp);
         var S = String(this);
         var functionalReplace = typeof replaceValue === 'function';
         if (!functionalReplace) replaceValue = String(replaceValue);
@@ -2513,7 +2004,7 @@
     });
   }
 
-  var anObject$5 = _anObject;
+  var anObject$6 = _anObject;
   var $flags$1 = _flags;
   var DESCRIPTORS$3 = _descriptors;
   var TO_STRING = 'toString';
@@ -2526,7 +2017,7 @@
   // 21.2.5.14 RegExp.prototype.toString()
   if (_fails(function () { return $toString.call({ source: 'a', flags: 'b' }) != '/a/b'; })) {
     define(function toString() {
-      var R = anObject$5(this);
+      var R = anObject$6(this);
       return '/'.concat(R.source, '/',
         'flags' in R ? R.flags : !DESCRIPTORS$3 && R instanceof RegExp ? $flags$1.call(R) : undefined);
     });
@@ -2579,9 +2070,9 @@
     } return T;
   } : $assign;
 
-  var redefineAll$1 = require_redefineAll();
+  var redefineAll$1 = _redefineAll;
   var getWeak$1 = _meta.exports.getWeak;
-  var anObject$4 = _anObject;
+  var anObject$5 = _anObject;
   var isObject$4 = _isObject;
   var anInstance$1 = _anInstance;
   var forOf = _forOf.exports;
@@ -2656,7 +2147,7 @@
       return C;
     },
     def: function (that, key, value) {
-      var data = getWeak$1(anObject$4(key), true);
+      var data = getWeak$1(anObject$5(key), true);
       if (data === true) uncaughtFrozenStore$1(that).set(key, value);
       else data[that._i] = value;
       return that;
@@ -2664,7 +2155,7 @@
     ufstore: uncaughtFrozenStore$1
   };
 
-  var global$4 = _global.exports;
+  var global$6 = _global.exports;
   var each = _arrayMethods(0);
   var redefine$1 = _redefine.exports;
   var meta = _meta.exports;
@@ -2673,7 +2164,7 @@
   var isObject$3 = _isObject;
   var validate$3 = _validateCollection;
   var NATIVE_WEAK_MAP = _validateCollection;
-  var IS_IE11 = !global$4.ActiveXObject && 'ActiveXObject' in global$4;
+  var IS_IE11 = !global$6.ActiveXObject && 'ActiveXObject' in global$6;
   var WEAK_MAP = 'WeakMap';
   var getWeak = meta.getWeak;
   var isExtensible = Object.isExtensible;
@@ -2731,6 +2222,16 @@
   var _isRegexp = function (it) {
     var isRegExp;
     return isObject$2(it) && ((isRegExp = it[MATCH]) !== undefined ? !!isRegExp : cof$1(it) == 'RegExp');
+  };
+
+  // 7.3.20 SpeciesConstructor(O, defaultConstructor)
+  var anObject$4 = _anObject;
+  var aFunction = _aFunction;
+  var SPECIES = _wks.exports('species');
+  var _speciesConstructor = function (O, D) {
+    var C = anObject$4(O).constructor;
+    var S;
+    return C === undefined || (S = anObject$4(C)[SPECIES]) == undefined ? D : aFunction(S);
   };
 
   var isRegExp$2 = _isRegexp;
@@ -3055,6 +2556,11 @@
     return left ? stringFiller + S : S + stringFiller;
   };
 
+  var global$5 = _global.exports;
+  var navigator = global$5.navigator;
+
+  var _userAgent = navigator && navigator.userAgent || '';
+
   // https://github.com/tc39/proposal-string-pad-start-end
   var $export$b = _export;
   var $pad = _stringPad;
@@ -3118,7 +2624,7 @@
   // 20.1.2.13 Number.parseInt(string, radix)
   $export$9($export$9.S + $export$9.F * (Number.parseInt != $parseInt), 'Number', { parseInt: $parseInt });
 
-  var global$3 = _global.exports;
+  var global$4 = _global.exports;
   var has$2 = _has;
   var cof = _cof;
   var inheritIfRequired$1 = _inheritIfRequired;
@@ -3129,7 +2635,7 @@
   var dP$3 = _objectDp.f;
   var $trim = _stringTrim.trim;
   var NUMBER = 'Number';
-  var $Number = global$3[NUMBER];
+  var $Number = global$4[NUMBER];
   var Base$1 = $Number;
   var proto$2 = $Number.prototype;
   // Opera ~12 has broken Object#toString
@@ -3184,7 +2690,7 @@
     }
     $Number.prototype = proto$2;
     proto$2.constructor = $Number;
-    _redefine.exports(global$3, NUMBER, $Number);
+    _redefine.exports(global$4, NUMBER, $Number);
   }
 
   // https://github.com/sebmarkbage/ecmascript-string-left-right-trim
@@ -3261,13 +2767,13 @@
     };
   });
 
-  var global$2 = _global.exports;
+  var global$3 = _global.exports;
   var inheritIfRequired = _inheritIfRequired;
   var dP$2 = _objectDp.f;
   var gOPN$3 = _objectGopn.f;
   var isRegExp = _isRegexp;
   var $flags = _flags;
-  var $RegExp = global$2.RegExp;
+  var $RegExp = global$3.RegExp;
   var Base = $RegExp;
   var proto$1 = $RegExp.prototype;
   var re1 = /a/g;
@@ -3300,7 +2806,7 @@
     for (var keys = gOPN$3(Base), i = 0; keys.length > i;) proxy(keys[i++]);
     proto$1.constructor = $RegExp;
     $RegExp.prototype = proto$1;
-    _redefine.exports(global$2, 'RegExp', $RegExp);
+    _redefine.exports(global$3, 'RegExp', $RegExp);
   }
 
   require_setSpecies()('RegExp');
@@ -3412,9 +2918,10 @@
   	(function (exports) {
   		var global = _global.exports;
   		var DESCRIPTORS = _descriptors;
+  		var LIBRARY = require_library();
   		var $typed = require_typed();
   		var hide = _hide;
-  		var redefineAll = require_redefineAll();
+  		var redefineAll = _redefineAll;
   		var fails = _fails;
   		var anInstance = _anInstance;
   		var toInteger = _toInteger;
@@ -3663,7 +3170,7 @@
   		    for (var keys = gOPN(BaseBuffer), j = 0, key; keys.length > j;) {
   		      if (!((key = keys[j++]) in $ArrayBuffer)) hide($ArrayBuffer, key, BaseBuffer[key]);
   		    }
-  		    ArrayBufferProto.constructor = $ArrayBuffer;
+  		    if (!LIBRARY) ArrayBufferProto.constructor = $ArrayBuffer;
   		  }
   		  // iOS Safari 7.x bug
   		  var view = new $DataView(new $ArrayBuffer(2));
@@ -3689,8 +3196,8 @@
   }
 
   if (_descriptors) {
-    var LIBRARY = _library;
-    var global$1 = _global.exports;
+    var LIBRARY$1 = require_library();
+    var global$2 = _global.exports;
     var fails = _fails;
     var $export$4 = _export;
     var $typed = require_typed();
@@ -3699,7 +3206,7 @@
     var anInstance = _anInstance;
     var propertyDesc = _propertyDesc;
     var hide = _hide;
-    var redefineAll = require_redefineAll();
+    var redefineAll = _redefineAll;
     var toInteger = _toInteger;
     var toLength$1 = _toLength;
     var toIndex = require_toIndex();
@@ -3729,9 +3236,9 @@
     var $GOPD$1 = _objectGopd;
     var dP$1 = $DP$1.f;
     var gOPD$1 = $GOPD$1.f;
-    var RangeError$1 = global$1.RangeError;
-    var TypeError$1 = global$1.TypeError;
-    var Uint8Array = global$1.Uint8Array;
+    var RangeError$1 = global$2.RangeError;
+    var TypeError$1 = global$2.TypeError;
+    var Uint8Array = global$2.Uint8Array;
     var ARRAY_BUFFER = 'ArrayBuffer';
     var SHARED_BUFFER = 'Shared' + ARRAY_BUFFER;
     var BYTES_PER_ELEMENT = 'BYTES_PER_ELEMENT';
@@ -4016,7 +3523,7 @@
       var NAME = KEY + (CLAMPED ? 'Clamped' : '') + 'Array';
       var GETTER = 'get' + KEY;
       var SETTER = 'set' + KEY;
-      var TypedArray = global$1[NAME];
+      var TypedArray = global$2[NAME];
       var Base = TypedArray || {};
       var TAC = TypedArray && getPrototypeOf(TypedArray);
       var FORCED = !TypedArray || !$typed.ABV;
@@ -4111,7 +3618,7 @@
           if (!(key in TypedArray)) hide(TypedArray, key, Base[key]);
         });
         TypedArray[PROTOTYPE$1] = TypedArrayPrototype;
-        if (!LIBRARY) TypedArrayPrototype.constructor = TypedArray;
+        if (!LIBRARY$1) TypedArrayPrototype.constructor = TypedArray;
       }
       var $nativeIterator = TypedArrayPrototype[ITERATOR];
       var CORRECT_ITER_NAME = !!$nativeIterator
@@ -4151,7 +3658,7 @@
 
       $export$4($export$4.P + $export$4.F * !CORRECT_ITER_NAME, NAME, $iterators);
 
-      if (!LIBRARY && TypedArrayPrototype.toString != arrayToString) TypedArrayPrototype.toString = arrayToString;
+      if (!LIBRARY$1 && TypedArrayPrototype.toString != arrayToString) TypedArrayPrototype.toString = arrayToString;
 
       $export$4($export$4.P + $export$4.F * fails(function () {
         new TypedArray(1).slice();
@@ -4164,7 +3671,7 @@
       })), NAME, { toLocaleString: $toLocaleString });
 
       Iterators[NAME] = CORRECT_ITER_NAME ? $nativeIterator : $iterator;
-      if (!LIBRARY && !CORRECT_ITER_NAME) hide(TypedArrayPrototype, ITERATOR, $iterator);
+      if (!LIBRARY$1 && !CORRECT_ITER_NAME) hide(TypedArrayPrototype, ITERATOR, $iterator);
     };
   } else _typedArray.exports = function () { /* empty */ };
 
@@ -4227,6 +3734,20 @@
         : that.slice(end - search.length, end) === search;
     }
   });
+
+  var _wksExt = {};
+
+  _wksExt.f = _wks.exports;
+
+  var global$1 = _global.exports;
+  var core = _core.exports;
+  var LIBRARY = require_library();
+  var wksExt$1 = _wksExt;
+  var defineProperty = _objectDp.f;
+  var _wksDefine = function (name) {
+    var $Symbol = core.Symbol || (core.Symbol = LIBRARY ? {} : global$1.Symbol || {});
+    if (name.charAt(0) != '_' && !(name in $Symbol)) defineProperty($Symbol, name, { value: wksExt$1.f(name) });
+  };
 
   // all enumerable object keys, includes symbols
   var getKeys = _objectKeys;
@@ -4420,7 +3941,7 @@
     require_objectPie().f = $propertyIsEnumerable;
     $GOPS.f = $getOwnPropertySymbols;
 
-    if (DESCRIPTORS && !_library) {
+    if (DESCRIPTORS && !require_library()) {
       redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
     }
 
