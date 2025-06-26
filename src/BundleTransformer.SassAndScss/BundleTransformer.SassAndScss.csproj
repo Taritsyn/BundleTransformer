@@ -19,15 +19,14 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_SassAndScss_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);CSS;Bundling;Sass;SCSS;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>1. Added support for the Dart Sass version 1.83.4;
-2. In configuration settings of the Sass and SCSS translator was added four new properties: `FatalDeprecations` (default empty string), `FutureDeprecations` (default empty string), `QuietDependencies` (default `false`) and `SilenceDeprecations` (default empty string).</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the Dart Sass version 1.89.2.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
     <Reference Include="System.Web" Pack="false" />
 
-    <PackageReference Include="DartSassHost" Version="1.1.0" />
+    <PackageReference Include="DartSassHost" Version="1.1.1" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
