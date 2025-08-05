@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: Sass and SCSS</Product>
-    <VersionPrefix>1.15.3</VersionPrefix>
+    <VersionPrefix>1.15.5</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

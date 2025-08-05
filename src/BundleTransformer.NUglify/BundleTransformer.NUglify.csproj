@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: NUglify</Product>
-    <VersionPrefix>1.15.4</VersionPrefix>
+    <VersionPrefix>1.15.5</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
