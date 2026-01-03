@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Product>Bundle Transformer: TypeScript</Product>
-    <VersionPrefix>1.15.5</VersionPrefix>
+    <VersionPrefix>1.15.6</VersionPrefix>
     <TargetFramework>net40</TargetFramework>
     <OutputType>Library</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -27,7 +27,7 @@
     <Reference Include="System.Web" Pack="false" />
 
     <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.24.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>

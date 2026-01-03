@@ -1,6 +1,6 @@
 {
   "name": "bundletransformer.typescript",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "devDependencies": {
     "@babel/cli": "7.28.3",
     "@babel/core": "7.28.5",
