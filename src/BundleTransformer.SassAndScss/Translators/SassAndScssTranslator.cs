@@ -6,8 +6,6 @@ using System.Text;
 
 using AdvancedStringBuilder;
 using DartSassHost;
-using DshIndentType = DartSassHost.IndentType;
-using DshLineFeedType = DartSassHost.LineFeedType;
 using JavaScriptEngineSwitcher.Core;
 
 using BundleTransformer.Core;
@@ -80,6 +78,7 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// <summary>
 		/// Gets or sets a indent type
 		/// </summary>
+		[Obsolete]
 		public BtIndentType IndentType
 		{
 			get;
@@ -89,6 +88,7 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// <summary>
 		/// Gets or sets a number of spaces or tabs to be used for indentation
 		/// </summary>
+		[Obsolete]
 		public int IndentWidth
 		{
 			get;
@@ -98,6 +98,7 @@ namespace BundleTransformer.SassAndScss.Translators
 		/// <summary>
 		/// Gets or sets a line feed type
 		/// </summary>
+		[Obsolete]
 		public BtLineFeedType LineFeedType
 		{
 			get;
@@ -164,9 +165,11 @@ namespace BundleTransformer.SassAndScss.Translators
 				.Select(p => p.Path)
 				.ToList()
 				;
+			#pragma warning disable CS0612
 			IndentType = sassAndScssConfig.IndentType;
 			IndentWidth = sassAndScssConfig.IndentWidth;
 			LineFeedType = sassAndScssConfig.LineFeedType;
+			#pragma warning restore CS0612
 			QuietDependencies = sassAndScssConfig.QuietDependencies;
 			SilenceDeprecations = sassAndScssConfig.SilenceDeprecations;
 			Severity = sassAndScssConfig.Severity;
@@ -340,9 +343,6 @@ namespace BundleTransformer.SassAndScss.Translators
 				FatalDeprecations = ParseDeprecations(FatalDeprecations),
 				FutureDeprecations = ParseDeprecations(FutureDeprecations),
 				IncludePaths = processedIncludePaths,
-				IndentType = Utils.GetEnumFromOtherEnum<BtIndentType, DshIndentType>(IndentType),
-				IndentWidth = IndentWidth,
-				LineFeedType = Utils.GetEnumFromOtherEnum<BtLineFeedType, DshLineFeedType>(LineFeedType),
 				OutputStyle = enableNativeMinification ? OutputStyle.Compressed : OutputStyle.Expanded,
 				QuietDependencies = QuietDependencies,
 				SilenceDeprecations = ParseDeprecations(SilenceDeprecations),

@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 
 using BundleTransformer.Core.Configuration;
 
@@ -51,6 +52,7 @@ namespace BundleTransformer.SassAndScss.Configuration
 		/// <summary>
 		/// Gets or sets a indent type
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("indentType", DefaultValue = IndentType.Space)]
 		public IndentType IndentType
 		{
@@ -61,6 +63,7 @@ namespace BundleTransformer.SassAndScss.Configuration
 		/// <summary>
 		/// Gets or sets a number of spaces or tabs to be used for indentation
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("indentWidth", DefaultValue = 2)]
 		[IntegerValidator(MinValue = 0, MaxValue = int.MaxValue, ExcludeRange = false)]
 		public int IndentWidth
@@ -72,6 +75,7 @@ namespace BundleTransformer.SassAndScss.Configuration
 		/// <summary>
 		/// Gets or sets a line feed type
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("lineFeedType", DefaultValue = LineFeedType.CrLf)]
 		public LineFeedType LineFeedType
 		{

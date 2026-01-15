@@ -1,8 +1,11 @@
-﻿namespace BundleTransformer.SassAndScss
+﻿using System;
+
+namespace BundleTransformer.SassAndScss
 {
 	/// <summary>
 	/// Line feed types
 	/// </summary>
+	[Obsolete]
 	public enum LineFeedType
 	{
 		Cr,

@@ -517,41 +517,6 @@ If a version is provided, then all deprecations that were active in that compile
 Future deprecations, whose IDs have been passed here, will be treated as active by the compiler, emitting warnings as necessary.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="indentType" use="optional" default="Space">
-      <xs:annotation>
-        <xs:documentation>Indent type</xs:documentation>
-      </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:NMTOKEN">
-          <xs:enumeration value="Space" />
-          <xs:enumeration value="Tab" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="indentWidth" use="optional" default="2">
-      <xs:annotation>
-        <xs:documentation>Number of spaces or tabs to be used for indentation</xs:documentation>
-      </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:int">
-          <xs:minInclusive value="0" />
-          <xs:maxInclusive value="2147483647" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="lineFeedType" use="optional" default="CrLf">
-      <xs:annotation>
-        <xs:documentation>Line feed type</xs:documentation>
-      </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:NMTOKEN">
-          <xs:enumeration value="Cr" />
-          <xs:enumeration value="CrLf" />
-          <xs:enumeration value="Lf" />
-          <xs:enumeration value="LfCr" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
     <xs:attribute name="quietDependencies" type="Boolean_SchemaType" use="optional" default="false">
       <xs:annotation>
         <xs:documentation>Flag for whether to silence compiler warnings from stylesheets loaded by using the `includePaths` property</xs:documentation>
