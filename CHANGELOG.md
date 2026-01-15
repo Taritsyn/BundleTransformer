@@ -1,6 +1,12 @@
 Change log
 ==========
 
+## v1.16.0 - January 15, 2026
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the Sass and SCSS translator
+ * In BundleTransformer.SassAndScss:
+     * Added support for the Dart Sass version 1.97.2
+     * In configuration settings of the Sass and SCSS translator become obsolete three properties: `IndentType`, `IndentWidth` and `LineFeedType`
+
 ## v1.15.6 - January 3, 2026
  * In BundleTransformer.TypeScript added support for the TypeScript version 5.9.3
  * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.23.0

@@ -1,11 +1,11 @@
 
 
    --------------------------------------------------------------------------------
-              README file for Bundle Transformer: Sass and SCSS v1.15.5
+              README file for Bundle Transformer: Sass and SCSS v1.16.0
 
    --------------------------------------------------------------------------------
 
-           Copyright (c) 2012-2025 Andrey Taritsyn - http://www.taritsyn.ru
+           Copyright (c) 2012-2026 Andrey Taritsyn - http://www.taritsyn.ru
 
 
    ===========
