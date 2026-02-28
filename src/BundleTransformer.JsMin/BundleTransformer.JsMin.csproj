@@ -15,15 +15,15 @@
   <Import Project="../../build/nuget-for-dotnet-lib.props" />
 
   <PropertyGroup>
-    <Description>BundleTransformer.JsMin contains one minifier-adapter for minification of JS code - `CrockfordJsMinifier`. `CrockfordJsMinifier` is based on the C# port of Douglas Crockford's JSMin.</Description>
+    <Description>BundleTransformer.JsMin contains one minifier-adapter - `CrockfordJsMinifier`. This adapter performs minification of JS code by using the JSMin for .NET.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_JsMin_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;Minification;Minifier;Minify;Douglas;Crockford;JSMin</PackageTags>
-    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the JSMin version of February 25, 2026.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DouglasCrockford.JsMin" Version="2.1.0" />
+    <PackageReference Include="DouglasCrockford.JsMin" Version="2.2.0" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>

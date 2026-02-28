@@ -1,2 +1,2 @@
-BundleTransformer.JsMin contains one minifier-adapter for minification of JS code - `CrockfordJsMinifier`.
-`CrockfordJsMinifier` is based on the C# port of Douglas Crockford's [JSMin](https://github.com/douglascrockford/JSMin) version of October 30, 2019.
+BundleTransformer.JsMin contains one minifier-adapter - `CrockfordJsMinifier`.
+This adapter performs minification of JS code by using the [JSMin for .NET](https://github.com/Taritsyn/JSMin.NET) version 2.2.0 (supports the Douglas Crockford's [JSMin](https://github.com/douglascrockford/JSMin) version of February 25, 2026).
