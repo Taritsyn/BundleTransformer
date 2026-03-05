@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.16.1 - March 5, 2026
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.97.3
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.27.0
+ * In BundleTransformer.JsMin added support for the JSMin version of February 25, 2026
+
 ## v1.16.0 - January 15, 2026
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the Sass and SCSS translator
  * In BundleTransformer.SassAndScss:
