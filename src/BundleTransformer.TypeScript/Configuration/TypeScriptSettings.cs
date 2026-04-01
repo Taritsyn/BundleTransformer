@@ -33,7 +33,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// <summary>
 		/// Gets or sets a flag for whether to ensure <c>use strict</c> is always emitted
 		/// </summary>
-		[ConfigurationProperty("alwaysStrict", DefaultValue = false)]
+		[ConfigurationProperty("alwaysStrict", DefaultValue = true)]
 		public bool AlwaysStrict
 		{
 			get { return (bool)this["alwaysStrict"]; }
@@ -44,6 +44,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to emit more compliant, but verbose and less performant JavaScript for
 		/// iteration
 		/// </summary>
+		[Obsolete]
 		[ConfigurationProperty("downlevelIteration", DefaultValue = false)]
 		public bool DownlevelIteration
 		{
@@ -179,7 +180,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to enable error reporting for expressions and declarations with an implied
 		/// <c>any</c> type
 		/// </summary>
-		[ConfigurationProperty("noImplicitAny", DefaultValue = false)]
+		[ConfigurationProperty("noImplicitAny", DefaultValue = true)]
 		public bool NoImplicitAny
 		{
 			get { return (bool)this["noImplicitAny"]; }
@@ -211,7 +212,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// <summary>
 		/// Gets or sets a flag for whether to enable error reporting when <c>this</c> is given the type <c>any</c>
 		/// </summary>
-		[ConfigurationProperty("noImplicitThis", DefaultValue = false)]
+		[ConfigurationProperty("noImplicitThis", DefaultValue = true)]
 		public bool NoImplicitThis
 		{
 			get { return (bool)this["noImplicitThis"]; }
@@ -334,7 +335,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to check that the arguments for <c>bind</c>, <c>call</c>, and <c>apply</c>
 		/// methods match the original function
 		/// </summary>
-		[ConfigurationProperty("strictBindCallApply", DefaultValue = false)]
+		[ConfigurationProperty("strictBindCallApply", DefaultValue = true)]
 		public bool StrictBindCallApply
 		{
 			get { return (bool)this["strictBindCallApply"]; }
@@ -345,7 +346,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to instantiate built-in iterators with a <c>TReturn</c> type of <c>undefined</c>
 		/// instead of <c>any</c>
 		/// </summary>
-		[ConfigurationProperty("strictBuiltinIteratorReturn", DefaultValue = false)]
+		[ConfigurationProperty("strictBuiltinIteratorReturn", DefaultValue = true)]
 		public bool StrictBuiltinIteratorReturn
 		{
 			get { return (bool)this["strictBuiltinIteratorReturn"]; }
@@ -356,7 +357,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to check to ensure parameters and the return values are subtype-compatible
 		/// when assigning functions
 		/// </summary>
-		[ConfigurationProperty("strictFunctionTypes", DefaultValue = false)]
+		[ConfigurationProperty("strictFunctionTypes", DefaultValue = true)]
 		public bool StrictFunctionTypes
 		{
 			get { return (bool)this["strictFunctionTypes"]; }
@@ -366,7 +367,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// <summary>
 		/// Gets or sets a flag for whether to take into account <c>null</c> and <c>undefined</c> when type checking
 		/// </summary>
-		[ConfigurationProperty("strictNullChecks", DefaultValue = false)]
+		[ConfigurationProperty("strictNullChecks", DefaultValue = true)]
 		public bool StrictNullChecks
 		{
 			get { return (bool)this["strictNullChecks"]; }
@@ -377,7 +378,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to check for class properties that are declared but not set in the
 		/// constructor
 		/// </summary>
-		[ConfigurationProperty("strictPropertyInitialization", DefaultValue = false)]
+		[ConfigurationProperty("strictPropertyInitialization", DefaultValue = true)]
 		public bool StrictPropertyInitialization
 		{
 			get { return (bool)this["strictPropertyInitialization"]; }
@@ -434,7 +435,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a JavaScript language version for emitted JavaScript and include compatible library
 		/// declarations
 		/// </summary>
-		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript5)]
+		[ConfigurationProperty("target", DefaultValue = TargetMode.EcmaScript2015)]
 		public TargetMode Target
 		{
 			get { return (TargetMode)this["target"]; }
@@ -466,7 +467,7 @@ namespace BundleTransformer.TypeScript.Configuration
 		/// Gets or sets a flag for whether to use a default catch clause variables as <c>unknown</c> instead of
 		/// <c>any</c>
 		/// </summary>
-		[ConfigurationProperty("useUnknownInCatchVariables", DefaultValue = false)]
+		[ConfigurationProperty("useUnknownInCatchVariables", DefaultValue = true)]
 		public bool UseUnknownInCatchVariables
 		{
 			get { return (bool)this["useUnknownInCatchVariables"]; }

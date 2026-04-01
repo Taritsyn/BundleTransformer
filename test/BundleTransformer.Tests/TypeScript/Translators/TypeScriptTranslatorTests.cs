@@ -45,7 +45,7 @@ namespace BundleTransformer.Tests.TypeScript.Translators
 				.Setup(fs => fs.GetFileTextContent(testTypeScriptTsAssetVirtualPath))
 				.Returns(@"/// <reference path=""ColoredTranslatorBadge.ts"" />
 
-module TranslatorBadges {
+namespace TranslatorBadges {
 	var TS_BADGE_TEXT: string = ""TypeScript"";
 	var TS_BADGE_COLOR: string = ""#0074C1"";
 
@@ -103,7 +103,7 @@ TranslatorBadges.createTsTranslatorBadge();")
 				.Returns(@"/// <reference path=""jquery.d.ts"" />
 /// <reference path=""ITranslatorBadge.d.ts"" />
 
-module TranslatorBadges {
+namespace TranslatorBadges {
 	export class TranslatorBadge implements ITranslatorBadge {
 		$badgeElem: JQuery;
 		$linkElem: JQuery;
@@ -168,7 +168,7 @@ interface IColoredTranslatorBadge extends ITranslatorBadge {
 /// <reference path=""./IColoredTranslatorBadge.d.ts"" />
 /// <reference path=""TranslatorBadge.ts"" />
 
-module TranslatorBadges {
+namespace TranslatorBadges {
 	export class ColoredTranslatorBadge
 		extends TranslatorBadge
 	{

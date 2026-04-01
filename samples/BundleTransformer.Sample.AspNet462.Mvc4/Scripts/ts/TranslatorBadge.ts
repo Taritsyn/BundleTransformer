@@ -2,7 +2,7 @@
 /// <reference path="./ITranslatorBadge.d.ts" />
 
 /** @namespace */
-module TranslatorBadges {
+namespace TranslatorBadges {
 	/**
 	* Creates badge for translator
 	*

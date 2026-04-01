@@ -186,7 +186,6 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("allowUnreachableCode", options.AllowUnreachableCode),
 				new JProperty("allowUnusedLabels", options.AllowUnusedLabels),
 				new JProperty("alwaysStrict", options.AlwaysStrict),
-				new JProperty("downlevelIteration", options.DownlevelIteration),
 				new JProperty("exactOptionalPropertyTypes", options.ExactOptionalPropertyTypes),
 				new JProperty("forceConsistentCasingInFileNames", options.ForceConsistentCasingInFileNames),
 				new JProperty("ignoreDeprecations", options.IgnoreDeprecations),

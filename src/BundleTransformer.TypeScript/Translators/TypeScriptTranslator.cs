@@ -81,6 +81,7 @@ namespace BundleTransformer.TypeScript.Translators
 		/// Gets or sets a flag for whether to emit more compliant, but verbose and less performant JavaScript for
 		/// iteration
 		/// </summary>
+		[Obsolete]
 		public bool DownlevelIteration
 		{
 			get;
@@ -495,7 +496,9 @@ namespace BundleTransformer.TypeScript.Translators
 			AllowUnreachableCode = tsConfig.AllowUnreachableCode;
 			AllowUnusedLabels = tsConfig.AllowUnusedLabels;
 			AlwaysStrict = tsConfig.AlwaysStrict;
+			#pragma warning disable CS0612
 			DownlevelIteration = tsConfig.DownlevelIteration;
+			#pragma warning restore CS0612
 			ExactOptionalPropertyTypes = tsConfig.ExactOptionalPropertyTypes;
 			ForceConsistentCasingInFileNames = tsConfig.ForceConsistentCasingInFileNames;
 			IgnoreDeprecations = tsConfig.IgnoreDeprecations;
@@ -676,13 +679,9 @@ namespace BundleTransformer.TypeScript.Translators
 				AllowUnreachableCode = AllowUnreachableCode,
 				AllowUnusedLabels = AllowUnusedLabels,
 				AlwaysStrict = AlwaysStrict,
-				DownlevelIteration = DownlevelIteration,
 				ExactOptionalPropertyTypes = ExactOptionalPropertyTypes,
 				ForceConsistentCasingInFileNames = ForceConsistentCasingInFileNames,
 				IgnoreDeprecations = IgnoreDeprecations,
-				#pragma warning disable CS0612
-				KeyofStringsOnly = KeyofStringsOnly,
-				#pragma warning restore CS0612
 				Libs = Libs,
 				NewLine = NewLine,
 				NoCheck = NoCheck,
@@ -698,9 +697,6 @@ namespace BundleTransformer.TypeScript.Translators
 				NoLib = NoLib,
 				NoPropertyAccessFromIndexSignature = NoPropertyAccessFromIndexSignature,
 				NoResolve = NoResolve,
-				#pragma warning disable CS0612
-				NoStrictGenericChecks = NoStrictGenericChecks,
-				#pragma warning restore CS0612
 				NoUncheckedIndexedAccess = NoUncheckedIndexedAccess,
 				NoUnusedLocals = NoUnusedLocals,
 				NoUnusedParameters = NoUnusedParameters,
@@ -714,10 +710,6 @@ namespace BundleTransformer.TypeScript.Translators
 				StrictNullChecks = StrictNullChecks,
 				StrictPropertyInitialization = StrictPropertyInitialization,
 				StripInternal = StripInternal,
-				#pragma warning disable CS0612
-				SuppressExcessPropertyErrors = SuppressExcessPropertyErrors,
-				SuppressImplicitAnyIndexErrors = SuppressImplicitAnyIndexErrors,
-				#pragma warning restore CS0612
 				SuppressTypeCheckingErrors = SuppressTypeCheckingErrors,
 				Target = Target,
 				TranspileOnly = TranspileOnly,

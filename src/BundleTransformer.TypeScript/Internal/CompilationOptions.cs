@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace BundleTransformer.TypeScript.Internal
 {
@@ -36,16 +35,6 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to emit more compliant, but verbose and less performant JavaScript for
-		/// iteration
-		/// </summary>
-		public bool DownlevelIteration
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to interpret optional property types as written, rather than adding
 		/// <c>undefined</c>
 		/// </summary>
@@ -68,17 +57,6 @@ namespace BundleTransformer.TypeScript.Internal
 		/// Gets or sets a version number of TypeScript for which deprecation warnings should be ignored
 		/// </summary>
 		public string IgnoreDeprecations
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to make keyof only return strings instead of string, numbers or symbols.
-		/// Legacy option.
-		/// </summary>
-		[Obsolete]
-		public bool KeyofStringsOnly
 		{
 			get;
 			set;
@@ -227,16 +205,6 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable strict checking of generic signatures in function types
-		/// </summary>
-		[Obsolete]
-		public bool NoStrictGenericChecks
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to add <c>undefined</c> to a type when accessed using an index
 		/// </summary>
 		public bool NoUncheckedIndexedAccess
@@ -359,28 +327,6 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
-		/// Gets or sets a flag for whether to disable reporting of excess property errors during the creation of
-		/// object literals
-		/// </summary>
-		[Obsolete]
-		public bool SuppressExcessPropertyErrors
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets a flag for whether to suppress <see cref="NoImplicitAny"/> errors when indexing objects that
-		/// lack index signatures
-		/// </summary>
-		[Obsolete]
-		public bool SuppressImplicitAnyIndexErrors
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// Gets or sets a flag for whether to suppress type checking errors.
 		/// Non-standard option.
 		/// </summary>
@@ -437,14 +383,10 @@ namespace BundleTransformer.TypeScript.Internal
 		{
 			AllowUnreachableCode = false;
 			AllowUnusedLabels = false;
-			AlwaysStrict = false;
-			DownlevelIteration = false;
+			AlwaysStrict = true;
 			ExactOptionalPropertyTypes = false;
 			ForceConsistentCasingInFileNames = true;
 			IgnoreDeprecations = string.Empty;
-			#pragma warning disable CS0612
-			KeyofStringsOnly = false;
-			#pragma warning restore CS0612
 			Libs = new List<string>();
 			NewLine = NewLineMode.CrLf;
 			NoCheck = false;
@@ -453,16 +395,13 @@ namespace BundleTransformer.TypeScript.Internal
 			NoEmitOnError = false;
 			NoErrorTruncation = false;
 			NoFallthroughCasesInSwitch = false;
-			NoImplicitAny = false;
+			NoImplicitAny = true;
 			NoImplicitOverride = false;
 			NoImplicitReturns = false;
-			NoImplicitThis = false;
+			NoImplicitThis = true;
 			NoLib = false;
 			NoPropertyAccessFromIndexSignature = false;
 			NoResolve = false;
-			#pragma warning disable CS0612
-			NoStrictGenericChecks = false;
-			#pragma warning restore CS0612
 			NoUncheckedIndexedAccess = false;
 			NoUnusedLocals = false;
 			NoUnusedParameters = false;
@@ -470,21 +409,17 @@ namespace BundleTransformer.TypeScript.Internal
 			RemoveComments = false;
 			SkipDefaultLibCheck = false;
 			SkipLibCheck = false;
-			StrictBindCallApply = false;
-			StrictBuiltinIteratorReturn = false;
-			StrictFunctionTypes = false;
-			StrictNullChecks = false;
-			StrictPropertyInitialization = false;
+			StrictBindCallApply = true;
+			StrictBuiltinIteratorReturn = true;
+			StrictFunctionTypes = true;
+			StrictNullChecks = true;
+			StrictPropertyInitialization = true;
 			StripInternal = false;
-			#pragma warning disable CS0612
-			SuppressExcessPropertyErrors = false;
-			SuppressImplicitAnyIndexErrors = false;
-			#pragma warning restore CS0612
 			SuppressTypeCheckingErrors = false;
-			Target = TargetMode.EcmaScript5;
+			Target = TargetMode.EcmaScript2015;
 			TranspileOnly = false;
 			UseDefineForClassFields = false;
-			UseUnknownInCatchVariables = false;
+			UseUnknownInCatchVariables = true;
 		}
 	}
 }

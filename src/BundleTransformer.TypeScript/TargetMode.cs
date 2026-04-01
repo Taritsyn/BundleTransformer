@@ -9,6 +9,7 @@ namespace BundleTransformer.TypeScript
 	{
 		[Obsolete]
 		EcmaScript3 = 0,
+		[Obsolete]
 		EcmaScript5 = 1,
 		EcmaScript6 = 2,
 		EcmaScript2015 = 2,

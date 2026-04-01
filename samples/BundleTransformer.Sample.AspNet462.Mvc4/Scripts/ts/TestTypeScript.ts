@@ -1,7 +1,7 @@
 /// <reference path="./ColoredTranslatorBadge.ts" />
 
 /** @namespace */
-module TranslatorBadges {
+namespace TranslatorBadges {
 	var TS_BADGE_TEXT: string = "TypeScript";
 	var TS_BADGE_COLOR: string = "#0074C1";
 

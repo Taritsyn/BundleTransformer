@@ -3,26 +3,26 @@
 /// <reference path="./TranslatorBadge.ts" />
 
 /** @namespace */
-module TranslatorBadges {
+namespace TranslatorBadges {
 	/**
 	* Creates colored badge for translator
 	*
 	* @class
 	* @export
 	*/
-    export class ColoredTranslatorBadge
-        extends TranslatorBadge
-        implements IColoredTranslatorBadge
-    {
+	export class ColoredTranslatorBadge
+		extends TranslatorBadge
+		implements IColoredTranslatorBadge
+	{
 		/**
 		* Gets a text color of badge
 		*
 		* @returns {String} - Text color of badge
 		* @expose
 		*/
-        public getTextColor(): string {
-            return this.$linkElem.css("color");
-        }
+		public getTextColor(): string {
+			return this.$linkElem.css("color");
+		}
 
 		/**
 		* Sets a text color of badge
@@ -31,9 +31,9 @@ module TranslatorBadges {
 		* @returns {void}
 		* @expose
 		*/
-        public setTextColor(color: string): void {
-            this.$linkElem.css("color", color);
-        }
+		public setTextColor(color: string): void {
+			this.$linkElem.css("color", color);
+		}
 
 		/**
 		* Gets a border color of badge
@@ -41,9 +41,9 @@ module TranslatorBadges {
 		* @returns {String} - Border color of badge
 		* @expose
 		*/
-        public getBorderColor(): string {
-            return this.$badgeElem.css("border-color");
-        }
+		public getBorderColor(): string {
+			return this.$badgeElem.css("border-color");
+		}
 
 		/**
 		* Sets a border color of badge
@@ -52,8 +52,8 @@ module TranslatorBadges {
 		* @returns {void}
 		* @expose
 		*/
-        public setBorderColor(color: string): void {
-            this.$badgeElem.css("border-color", color);
-        }
-    }
+		public setBorderColor(color: string): void {
+			this.$badgeElem.css("border-color", color);
+		}
+	}
 }
