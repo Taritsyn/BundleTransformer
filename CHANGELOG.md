@@ -1,6 +1,17 @@
 Change log
 ==========
 
+## v1.17.0 - April 3, 2026
+ * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.98.0
+ * In BundleTransformer.TypeScript:
+   * Added support for the TypeScript version 6.0 RTM
+   * In configuration settings of the TypeScript translator:
+     * Become obsolete the `DownlevelIteration` property and the `EcmaScript5` value of the `Target` property
+     * Changed the default values of nine properties from `false` to `true`: `AlwaysStrict`, `NoImplicitAny`, `NoImplicitThis`, `StrictBindCallApply`, `StrictBuiltinIteratorReturn`, `StrictFunctionTypes`, `StrictNullChecks`, `StrictPropertyInitialization` and `UseUnknownInCatchVariables`
+     * Changed the default value of the `Target` property from `EcmaScript5` to `EcmaScript2015`
+     * Added one new property - `StableTypeOrdering` (default `false`)
+
 ## v1.16.1 - March 5, 2026
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.97.3
  * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.4.27.0
