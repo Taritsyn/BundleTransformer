@@ -342,6 +342,16 @@ namespace BundleTransformer.TypeScript.Translators
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to ensure types are ordered stably and deterministically across
+		/// compilations
+		/// </summary>
+		public bool StableTypeOrdering
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to check that the arguments for <c>bind</c>, <c>call</c>, and <c>apply</c>
 		/// methods match the original function
 		/// </summary>
@@ -534,6 +544,7 @@ namespace BundleTransformer.TypeScript.Translators
 			RemoveComments = tsConfig.RemoveComments;
 			SkipDefaultLibCheck = tsConfig.SkipDefaultLibCheck;
 			SkipLibCheck = tsConfig.SkipLibCheck;
+			StableTypeOrdering = tsConfig.StableTypeOrdering;
 			StrictBindCallApply = tsConfig.StrictBindCallApply;
 			StrictBuiltinIteratorReturn = tsConfig.StrictBuiltinIteratorReturn;
 			StrictFunctionTypes = tsConfig.StrictFunctionTypes;
@@ -704,6 +715,7 @@ namespace BundleTransformer.TypeScript.Translators
 				RemoveComments = RemoveComments,
 				SkipDefaultLibCheck = SkipDefaultLibCheck,
 				SkipLibCheck = SkipLibCheck,
+				StableTypeOrdering = StableTypeOrdering,
 				StrictBindCallApply = StrictBindCallApply,
 				StrictBuiltinIteratorReturn = StrictBuiltinIteratorReturn,
 				StrictFunctionTypes = StrictFunctionTypes,

@@ -23,7 +23,8 @@
 2. In configuration settings of the TypeScript translator:
 	2.1. Become obsolete the `DownlevelIteration` property and the `EcmaScript5` value of the `Target` property;
 	2.2. Changed the default values of nine properties from `false` to `true`: `AlwaysStrict`, `NoImplicitAny`, `NoImplicitThis`, `StrictBindCallApply`, `StrictBuiltinIteratorReturn`, `StrictFunctionTypes`, `StrictNullChecks`, `StrictPropertyInitialization` and `UseUnknownInCatchVariables`;
-	2.3. Changed the default value of the `Target` property from `EcmaScript5` to `EcmaScript2015`.</PackageReleaseNotes>
+	2.3. Changed the default value of the `Target` property from `EcmaScript5` to `EcmaScript2015`;
+	2.4. Added one new property - `StableTypeOrdering` (default `false`).</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

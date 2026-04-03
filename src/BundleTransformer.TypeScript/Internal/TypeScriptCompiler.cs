@@ -211,6 +211,7 @@ namespace BundleTransformer.TypeScript.Internal
 				new JProperty("removeComments", options.RemoveComments),
 				new JProperty("skipDefaultLibCheck", options.SkipDefaultLibCheck),
 				new JProperty("skipLibCheck", options.SkipLibCheck),
+				new JProperty("stableTypeOrdering", options.StableTypeOrdering),
 				new JProperty("strictBindCallApply", options.StrictBindCallApply),
 				new JProperty("strictBuiltinIteratorReturn", options.StrictBuiltinIteratorReturn),
 				new JProperty("strictFunctionTypes", options.StrictFunctionTypes),

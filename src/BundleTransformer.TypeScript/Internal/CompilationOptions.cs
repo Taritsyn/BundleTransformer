@@ -268,6 +268,16 @@ namespace BundleTransformer.TypeScript.Internal
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to ensure types are ordered stably and deterministically across
+		/// compilations
+		/// </summary>
+		public bool StableTypeOrdering
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to check that the arguments for <c>bind</c>, <c>call</c>, and <c>apply</c>
 		/// methods match the original function
 		/// </summary>
@@ -409,6 +419,7 @@ namespace BundleTransformer.TypeScript.Internal
 			RemoveComments = false;
 			SkipDefaultLibCheck = false;
 			SkipLibCheck = false;
+			StableTypeOrdering = false;
 			StrictBindCallApply = true;
 			StrictBuiltinIteratorReturn = true;
 			StrictFunctionTypes = true;

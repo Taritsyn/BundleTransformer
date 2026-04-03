@@ -332,6 +332,17 @@ namespace BundleTransformer.TypeScript.Configuration
 		}
 
 		/// <summary>
+		/// Gets or sets a flag for whether to ensure types are ordered stably and deterministically across
+		/// compilations
+		/// </summary>
+		[ConfigurationProperty("stableTypeOrdering", DefaultValue = false)]
+		public bool StableTypeOrdering
+		{
+			get { return (bool)this["stableTypeOrdering"]; }
+			set { this["stableTypeOrdering"] = value; }
+		}
+
+		/// <summary>
 		/// Gets or sets a flag for whether to check that the arguments for <c>bind</c>, <c>call</c>, and <c>apply</c>
 		/// methods match the original function
 		/// </summary>

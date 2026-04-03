@@ -36,7 +36,8 @@
            `StrictBuiltinIteratorReturn`, `StrictFunctionTypes`, `StrictNullChecks`,
            `StrictPropertyInitialization` and `UseUnknownInCatchVariables`;
       2.3. Changed the default value of the `Target` property from `EcmaScript5` to
-           `EcmaScript2015`.
+           `EcmaScript2015`;
+      2.4. Added one new property - `StableTypeOrdering` (default `false`).
 
    ====================
    POST-INSTALL ACTIONS

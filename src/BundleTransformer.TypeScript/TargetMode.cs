@@ -22,6 +22,7 @@ namespace BundleTransformer.TypeScript
 		EcmaScript2022 = 9,
 		EcmaScript2023 = 10,
 		EcmaScript2024 = 11,
+		EcmaScript2025 = 12,
 		EcmaScriptNext = 99
 	}
 }

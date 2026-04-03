@@ -713,6 +713,11 @@ If a deprecation warning of any provided ID is encountered during compilation, t
         <xs:documentation>Flag for whether to skip type checking all `.d.ts` files</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="stableTypeOrdering" type="Boolean_SchemaType" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>Flag for whether to ensure types are ordered stably and deterministically across</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="strictBindCallApply" type="Boolean_SchemaType" use="optional" default="true">
       <xs:annotation>
         <xs:documentation>Flag for whether to check that the arguments for `bind`, `call`, and `apply` methods match the original function</xs:documentation>
@@ -765,6 +770,7 @@ If a deprecation warning of any provided ID is encountered during compilation, t
           <xs:enumeration value="EcmaScript2022" />
           <xs:enumeration value="EcmaScript2023" />
           <xs:enumeration value="EcmaScript2024" />
+          <xs:enumeration value="EcmaScript2025" />
           <xs:enumeration value="EcmaScriptNext" />
         </xs:restriction>
       </xs:simpleType>
