@@ -1,6 +1,10 @@
 Change log
 ==========
 
+## v1.17.1 - April 9, 2026
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.99.0
+ * In BundleTransformer.Handlebars added support for the Handlebars version 4.7.9
+
 ## v1.17.0 - April 3, 2026
  * In BundleTransformer.ConfigurationIntelliSense updated definitions for configuration settings of the TypeScript translator
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.98.0
