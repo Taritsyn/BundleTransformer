@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.TypeScript contains one translator-adapter -
    `TypeScriptTranslator` (supports the TypeScript (https://www.typescriptlang.org)
-   version 6.0 RTM). This adapter makes translation of TypeScript code to JS code.
+   version 6.0.3). This adapter makes translation of TypeScript code to JS code.
    Also contains the `TypeScriptAssetHandler` debugging HTTP handler, which is
    responsible for text output of translated TypeScript asset.
 
@@ -26,18 +26,7 @@
    =============
    RELEASE NOTES
    =============
-   1. Added support for the TypeScript version 6.0 RTM (please note: The 6.0 RTM
-      release is also called '6.0.2');
-   2. In configuration settings of the TypeScript translator:
-      2.1. Become obsolete the `DownlevelIteration` property and the `EcmaScript5`
-           value of the `Target` property;
-      2.2. Changed the default values of nine properties from `false` to `true`:
-           `AlwaysStrict`, `NoImplicitAny`, `NoImplicitThis`, `StrictBindCallApply`,
-           `StrictBuiltinIteratorReturn`, `StrictFunctionTypes`, `StrictNullChecks`,
-           `StrictPropertyInitialization` and `UseUnknownInCatchVariables`;
-      2.3. Changed the default value of the `Target` property from `EcmaScript5` to
-           `EcmaScript2015`;
-      2.4. Added one new property - `StableTypeOrdering` (default `false`).
+   Added support for the TypeScript version 6.0.3.
 
    ====================
    POST-INSTALL ACTIONS
