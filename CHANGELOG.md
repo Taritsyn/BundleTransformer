@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.17.2 - April 21, 2026
+ * In BundleTransformer.SassAndScss was updated the Dart Sass Host to version 2.0.5
+ * In BundleTransformer.TypeScript added support for the TypeScript version 6.0.3
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.5.0
+
 ## v1.17.1 - April 9, 2026
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.99.0
  * In BundleTransformer.Handlebars added support for the Handlebars version 4.7.9
