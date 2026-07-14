@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.17.3 - July 14, 2026
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.100.0
+ * In BundleTransformer.Autoprefixer added support for the Autoprefixer version 10.5.2
+ * In BundleTransformer.NUglify added support for the NUglify version 1.22.0
+
 ## v1.17.2 - April 21, 2026
  * In BundleTransformer.SassAndScss was updated the Dart Sass Host to version 2.0.5
  * In BundleTransformer.TypeScript added support for the TypeScript version 6.0.3
@@ -510,7 +515,7 @@ Change log
  * In BundleTransformer.Autoprefixer added support of Autoprefixer version 9.2
 
 ## v1.9.213 - October 2, 2018
- * Added module based on the [NUglify](https://github.com/trullock/NUglify)
+ * Added module based on the [NUglify](https://github.com/jbest84/NUglify)
  * In BundleTransformer.Core optimized a memory usage
  * In BundleTransformer.ConfigurationIntelliSense:
    * Added a definitions for configuration settings of NUglify minifiers
