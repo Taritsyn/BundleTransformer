@@ -13,7 +13,7 @@
    ===========
    BundleTransformer.Handlebars contains one translator-adapter -
    `HandlebarsTranslator` (supports the Handlebars (https://handlebarsjs.com)
-   version 4.7.9). This adapter makes translation of Handlebars templates to JS
+   version 4.7.10). This adapter makes translation of Handlebars templates to JS
    code. Also contains the `HandlebarsAssetHandler` debugging HTTP handler, which
    is responsible for text output of translated Handlebars asset.
 
@@ -23,7 +23,7 @@
    =============
    RELEASE NOTES
    =============
-   Added support for the Handlebars version 4.7.9.
+   Added support for the Handlebars version 4.7.10.
 
    ====================
    POST-INSTALL ACTIONS
