@@ -1,6 +1,11 @@
 Change log
 ==========
 
+## v1.17.9 - October 19, 2026
+ * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.105.1
+ * In BundleTransformer.Handlebars added support for the Handlebars version 4.7.10
+ * In BundleTransformer.NUglify added support for the NUglify version 1.23.4
+
 ## v1.17.8 - September 29, 2026
  * In BundleTransformer.SassAndScss added support for the Dart Sass version 1.105.0
  * In BundleTransformer.NUglify added support for the NUglify version 1.23.3
