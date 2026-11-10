@@ -1,42 +1,5 @@
 /*!
- * Object.assign polyfill
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
- */
-if (!Object.hasOwnProperty('assign')) {
-	Object.assign = function (target) {
-		var result,
-			argIndex,
-			argCount,
-			nextSource,
-			propName,
-			methodName = 'Object.assign'
-			;
-
-		if (typeof target === 'undefined' || target === null) {
-			throw new TypeError(methodName + ': argument is not an Object.');
-		}
-
-		result = Object(target);
-		argCount = arguments.length;
-
-		for (argIndex = 1; argIndex < argCount; argIndex++) {
-			nextSource = arguments[argIndex];
-
-			if (typeof nextSource !== 'undefined' && nextSource !== null) {
-				for (propName in nextSource) {
-					if (Object.prototype.hasOwnProperty.call(nextSource, propName)) {
-						result[propName] = nextSource[propName];
-					}
-				}
-			}
-		}
-
-		return result;
-	};
-}
-
-/*!
- * CoffeeScript Compiler v2.7.0
+ * CoffeeScript Compiler v2.7.1
  * http://coffeescript.org
  *
  * Copyright 2009-2018 Jeremy Ashkenas
@@ -150,17 +113,7 @@ var CoffeeScript = (function(){
 		// Return a flattened version of an array.
 		// Handy for getting a list of `children` from the nodes.
 		exports.flatten = flatten = function(array) {
-			var element, flattened, i, len1;
-			flattened = [];
-			for (i = 0, len1 = array.length; i < len1; i++) {
-				element = array[i];
-				if ('[object Array]' === Object.prototype.toString.call(element)) {
-					flattened = flattened.concat(flatten(element));
-				} else {
-					flattened.push(element);
-				}
-			}
-			return flattened;
+			return array.flat(2e308);
 		};
 
 		// Delete a key from an object, returning the value. Useful when a node is
@@ -2026,11 +1979,6 @@ var CoffeeScript = (function(){
 							offset: 1
 						});
 						break;
-					case !/^(?!0x).*E/.test(number):
-						this.error(`exponential notation in '${number}' must be indicated with a lowercase 'e'`, {
-							offset: number.indexOf('E')
-						});
-						break;
 					case !/^0\d*[89]/.test(number):
 						this.error(`decimal literal '${number}' must not be prefixed with '0'`, {
 							length: lexedLength
@@ -3520,7 +3468,7 @@ var CoffeeScript = (function(){
 		// Is this an attribute with a value?
 	}(?:\\s*:\\s*${JSX_IDENTIFIER_PART})?)([^\\S]*=(?!=))?`);
 
-		NUMBER = /^0b[01](?:_?[01])*n?|^0o[0-7](?:_?[0-7])*n?|^0x[\da-f](?:_?[\da-f])*n?|^\d+n|^(?:\d(?:_?\d)*)?\.?(?:\d(?:_?\d)*)+(?:e[+-]?(?:\d(?:_?\d)*)+)?/i; // binary
+		NUMBER = /^0b[01](?:_?[01])*n?|^0o[0-7](?:_?[0-7])*n?|^0x[\da-f](?:_?[\da-f])*n?|^\d+(?:_\d+)*n|^(?:\d+(?:_\d+)*)?\.?\d+(?:_\d+)*(?:e[+-]?\d+(?:_\d+)*)?/i; // binary
 		// octal
 		// hex
 		// decimal bigint
@@ -13365,7 +13313,7 @@ var CoffeeScript = (function(){
 						}));
 					} else {
 						svar = this.source.compile(o, LEVEL_LIST);
-						if ((name || this.own) && !(this.source.unwrap() instanceof IdentifierLiteral)) {
+						if ((name || this.own) && !this.from && !(this.source.unwrap() instanceof IdentifierLiteral)) {
 							defPart += `${this.tab}${ref = scope.freeVariable('ref')} = ${svar};\n`;
 							svar = ref;
 						}
@@ -13965,7 +13913,7 @@ var CoffeeScript = (function(){
 		// Tabs are two spaces for pretty printing.
 		TAB = '  ';
 
-		SIMPLENUM = /^[+-]?\d+$/;
+		SIMPLENUM = /^[+-]?\d+(?:_\d+)*$/;
 
 		SIMPLE_STRING_OMIT = /\s*\n\s*/g;
 
@@ -14436,7 +14384,7 @@ var CoffeeScript = (function(){
 		*/
 
 		// The current CoffeeScript version number.
-		exports.VERSION = /*BT- packageJson.version*/'2.7.0';
+		exports.VERSION = /*BT- packageJson.version*/'2.7.1';
 
 		/*BT-
 		exports.FILE_EXTENSIONS = FILE_EXTENSIONS = ['.coffee', '.litcoffee', '.coffee.md'];
@@ -14828,7 +14776,7 @@ var CoffeeScript = (function(){
 
 		checkShebangLine = function(file, input) {
 			var args, firstLine, ref, rest;
-			firstLine = input.split(/$/m)[0];
+			firstLine = input.split(/$/m, 1)[0];
 			rest = firstLine != null ? firstLine.match(/^#!\s*([^\s]+\s*)(.*)/) : void 0;
 			args = rest != null ? (ref = rest[2]) != null ? ref.split(/\s/).filter(function(s) {
 				return s !== '';

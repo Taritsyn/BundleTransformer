@@ -19,20 +19,21 @@
     <PackageIconUrl>https://raw.githubusercontent.com/Taritsyn/BundleTransformer/master/images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconUrl>
     <PackageIconFullPath>../../images/icons/128/BundleTransformer_CoffeeScript_Logo_128x128.png</PackageIconFullPath>
     <PackageTags>$(PackageCommonTags);JavaScript;JS;Bundling;CoffeeScript;Translation;Translator;Compilation;Compiler</PackageTags>
-    <PackageReleaseNotes>Enabled a SourceLink.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added support for the CoffeeScript version 2.7.1.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.configuration" Pack="false" />
     <Reference Include="System.Web" Pack="false" />
 
-    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.24.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.31.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 
     <ProjectReference Include="../BundleTransformer.Core/BundleTransformer.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources/es6-polyfills.min.js" />
     <EmbeddedResource Include="Resources/coffeescript-combined.min.js" />
     <EmbeddedResource Include="Resources/cscHelper.min.js" />
   </ItemGroup>
@@ -43,24 +44,10 @@
     <None Include="../../Licenses/newtonsoft-json-license.txt" PackagePath="/" Pack="true" Visible="false" />
   </ItemGroup>
 
-  <Target Name="NodePackageInstallation" AfterTargets="BeforeBuild">
-    <Exec Command='npm install'
-      WorkingDirectory="$(ProjectDir)"
-      ConsoleToMsBuild="true" />
-  </Target>
-
-  <Target Name="Es6Translation" AfterTargets="NodePackageInstallation">
-    <Exec Command='node.exe babel-cli/bin/babel.js --out-file "$(ProjectDir)Resources/coffeescript-combined.js" --presets es2015 --compact false "$(ProjectDir)Resources/coffeescript-combined.es6"'
-      WorkingDirectory="$(ProjectDir)node_modules/"
-      ConsoleToMsBuild="true" />
-  </Target>
-
-  <Target Name="JsMinification" AfterTargets="Es6Translation">
-    <Exec
-      Command='AjaxMinifier.exe "$(ProjectDir)Resources/coffeescript-combined.js" –out "$(ProjectDir)Resources/coffeescript-combined.min.js"
-AjaxMinifier.exe "$(ProjectDir)Resources/cscHelper.js" –out "$(ProjectDir)Resources/cscHelper.min.js"'
-      WorkingDirectory="$(ProjectDir)../../tools/Microsoft Ajax Minifier/"
-      ConsoleToMsBuild="true" />
+  <Target Name="EnsureJsFilesBuilded" BeforeTargets="BeforeBuild">
+    <Error
+      Condition=" !Exists('./Resources/es6-polyfills.min.js') Or !Exists('./Resources/coffeescript-combined.min.js') Or !Exists('./Resources/cscHelper.min.js') "
+      Text="You need to build JS files. To do this, run a `build-js.cmd` script in the `./src/BundleTransformer.CoffeeScript` directory." />
   </Target>
 
 </Project>

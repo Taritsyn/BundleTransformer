@@ -34,8 +34,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources/es6-polyfills.min.js" />
-    <EmbeddedResource Include="Resources/tscHelper.min.js" />
     <EmbeddedResource Include="Resources/typescript-combined.min.js" />
+    <EmbeddedResource Include="Resources/tscHelper.min.js" />
     <EmbeddedResource Include="Resources/DefaultLibraries/*.d.ts" />
   </ItemGroup>
 

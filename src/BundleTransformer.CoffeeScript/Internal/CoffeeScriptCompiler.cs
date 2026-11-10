@@ -26,6 +26,11 @@ namespace BundleTransformer.CoffeeScript.Internal
 		private const string RESOURCES_NAMESPACE = "BundleTransformer.CoffeeScript.Resources";
 
 		/// <summary>
+		/// Name of file, which contains a ECMAScript 6+ polyfills
+		/// </summary>
+		private const string ES6_POLYFILLS_FILE_NAME = "es6-polyfills.min.js";
+
+		/// <summary>
 		/// Name of file, which contains a CoffeeScript library
 		/// </summary>
 		private const string COFFEESCRIPT_LIBRARY_FILE_NAME = "coffeescript-combined.min.js";
@@ -103,6 +108,7 @@ namespace BundleTransformer.CoffeeScript.Internal
 
 				Assembly assembly = GetType().Assembly;
 
+				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + ES6_POLYFILLS_FILE_NAME, assembly);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + COFFEESCRIPT_LIBRARY_FILE_NAME, assembly);
 				_jsEngine.ExecuteResource(RESOURCES_NAMESPACE + "." + CSC_HELPER_FILE_NAME, assembly);
 

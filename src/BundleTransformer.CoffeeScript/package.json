@@ -2,7 +2,17 @@
   "name": "bundletransformer.coffeescript",
   "version": "1.14.0",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1"
+    "@babel/cli": "7.29.7",
+    "@babel/core": "7.29.13",
+    "@babel/preset-env": "7.29.7",
+    "terser": "5.51.2"
+  },
+  "scripts": {
+    "transpile-coffeescript-combined-es6": "babel --out-file ./Resources/coffeescript-combined.js --config-file ./.babelrc ./Resources/coffeescript-combined.es6",
+    "minify-es6-polyfills-js": "terser ./Resources/es6-polyfills.js --output ./Resources/es6-polyfills.min.js --config-file ./.tersersrc",
+    "minify-coffeescript-combined-js": "terser ./Resources/coffeescript-combined.js --output ./Resources/coffeescript-combined.min.js --config-file ./.tersersrc",
+    "minify-csc-helper-js": "terser ./Resources/cscHelper.js --output ./Resources/cscHelper.min.js --config-file ./.tersersrc",
+    "transpile-es6": "npm run -s transpile-coffeescript-combined-es6",
+    "minify-js": "npm run -s minify-es6-polyfills-js && npm run -s minify-coffeescript-combined-js && npm run -s minify-csc-helper-js"
   }
 }
