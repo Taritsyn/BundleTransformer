@@ -1,6 +1,6 @@
 {
   "name": "bundletransformer.coffeescript",
-  "version": "1.14.0",
+  "version": "1.17.10",
   "devDependencies": {
     "@babel/cli": "7.29.7",
     "@babel/core": "7.29.13",
