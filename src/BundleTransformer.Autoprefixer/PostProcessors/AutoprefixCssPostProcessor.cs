@@ -182,7 +182,7 @@ namespace BundleTransformer.Autoprefixer.PostProcessors
 							@"
   * JavaScriptEngineSwitcher.ChakraCore
   * JavaScriptEngineSwitcher.Jint
-  * JavaScriptEngineSwitcher.Msie (only in the Chakra JsRT modes)
+  * JavaScriptEngineSwitcher.Msie (only in the Chakra “Edge” JsRT mode)
   * JavaScriptEngineSwitcher.V8",
 							"MsieJsEngine")
 					);
